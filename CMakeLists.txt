@@ -27,7 +27,7 @@ include_directories(src)
 
 # others
 add_external(spdlog ${spdlog_version})
-add_external(docopt ${docopt_version})
+#add_external(docopt ${docopt_version})
 #SET(JSON_BuildTests OFF CACHE BOOL "Build the unit tests when BUILD_TESTING is enabled.")
 OPTION(JSON_BuildTests "Build the unit tests when BUILD_TESTING is enabled.")
 add_external(json ${json_version})
@@ -81,5 +81,6 @@ install(TARGETS rd51 EXPORT DESTINATION bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
 add_executable(test_plugin Test/src/test_plugin.cpp)
-target_link_libraries(test_plugin boardreader eventbuilder utilities pthread rt)
+target_link_libraries(test_plugin PUBLIC pthread rt utilities boardreader eventbuilder)
 install(TARGETS test_plugin EXPORT DESTINATION bin)
+

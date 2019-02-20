@@ -5,6 +5,8 @@
 
 // #include <atomic>
 
+#include "utilities/configuration.hpp"
+
 class BaseClass
 {
   public:
@@ -16,8 +18,9 @@ class BaseClass
 
     virtual void runner() = 0;
 
-  private:
+  protected:
     // std::atomic<bool> m_run;
+    daq::utilities::ProcessConfiguration& m_config = daq::utilities::ProcessConfiguration::instance();
 };
 
 #endif /* BASECLASS_HPP_ */

@@ -16,7 +16,8 @@ extern "C" void destroy_object(BoardReader *object)
 BoardReader::BoardReader()
 {
     m_run = false;
-    INFO("BoardReader::BoardReader()");
+    m_config.load("blabla");
+    INFO("BoardReader::BoardReader() with config: " << m_config.dump() );
 }
 
 BoardReader::~BoardReader()

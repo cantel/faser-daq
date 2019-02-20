@@ -2,9 +2,25 @@ import zmq
 import msgpack
 import supervisord
 
-sd = supervisord.supervisord('rd51')
+host = 'rd51'
+group = 'rd51'
+name = 'daq'
+exe = '/usr/local/bin/srs.py'
 
-print(sd.getAllProcessInfo())
+sd = supervisord.supervisord(host, group)
+
+info = sd.getAllProcessInfo()
+if len(info) == 0:
+    print('Add', sd.addProgramToGroup(name, exe))
+
+for i in info:
+    if i['statename'] == 'RUNNING':
+        print('Stop', sd.stopProcess(name))
+        print('State', sd.getProcessState(name)['statename'])
+        print('Remove',sd.removeProcessFromGroup(name))
+    elif i['statename'] == 'STOPPED':
+        print('Start', sd.startProcess(name))
+        print('State', sd.getProcessState(name)['statename'])
 
 exit(0)
 

@@ -5,9 +5,9 @@
 
 #include <iostream>
 
-#include "core/BaseClass.hpp"
+#include "core/DAQProcess.hpp"
 
-class EventBuilder : public BaseClass
+class EventBuilder : public DAQProcess
 {
   public:
     EventBuilder();

@@ -1,16 +1,16 @@
 // enrico.gamberini@cern.ch
 
-#ifndef BASECLASS_HPP_
-#define BASECLASS_HPP_
+#ifndef DAQPROCESS_HPP_
+#define DAQPROCESS_HPP_
 
 // #include <atomic>
 
 #include "utilities/configuration.hpp"
 
-class BaseClass
+class DAQProcess
 {
   public:
-    virtual ~BaseClass(){};
+    virtual ~DAQProcess(){};
 
     /* use virtual otherwise linker will try to perform static linkage */
     virtual void start() = 0;
@@ -23,4 +23,4 @@ class BaseClass
     daq::utilities::ProcessConfiguration& m_config = daq::utilities::ProcessConfiguration::instance();
 };
 
-#endif /* BASECLASS_HPP_ */
+#endif /* DAQPROCESS_HPP_ */

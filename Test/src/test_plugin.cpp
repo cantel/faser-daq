@@ -26,16 +26,16 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    BaseClass *(*create)();
-    void (*destroy)(BaseClass *);
+    DAQProcess *(*create)(std::string name);
+    void (*destroy)(DAQProcess *);
 
-    create = (BaseClass * (*)()) dlsym(handle, "create_object");
-    destroy = (void (*)(BaseClass *))dlsym(handle, "destroy_object");
+    create = (DAQProcess * (*)(std::string name)) dlsym(handle, "create_object");
+    destroy = (void (*)(DAQProcess *))dlsym(handle, "destroy_object");
 
-    BaseClass *bc = (BaseClass *)create();
+    DAQProcess *dp = (DAQProcess *)create("name");
 
-    bc->start();
-    std::this_thread::sleep_for(std::chrono::seconds(10));
-    bc->stop();
-    destroy(bc);
+    dp->start();
+    std::this_thread::sleep_for(std::chrono::seconds(2));
+    dp->stop();
+    destroy(dp);
 }

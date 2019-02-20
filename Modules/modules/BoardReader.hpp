@@ -4,15 +4,16 @@
 #define BOARDREADER_HPP_
 
 #include <iostream>
+#include <string>
 #include <atomic>
-#include "core/BaseClass.hpp"
+#include "core/DAQProcess.hpp"
 
-class BoardReader : public BaseClass
+class BoardReader : public DAQProcess
 {
     std::atomic<bool> m_run;
 
   public:
-    BoardReader();
+    BoardReader(std::string name);
     ~BoardReader();
     void start();
     void stop();

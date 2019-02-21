@@ -21,27 +21,20 @@ class ProcessConfiguration
 {
 
 public:
-  struct Values
-  {
-    bool a;
-    bool b;
-    bool c;
-    bool d;
-  };
-
   static ProcessConfiguration& instance();
 
-  void load(const std::string& jsonStr);
-  std::string dump();
+  void clear(){ m_config.clear(); }
+  std::string dump() { return m_config.dump(); }
+  void load(const std::string& jsonStr) { m_config = nlohmann::json::parse(jsonStr); }
 
   template <typename T> void set(const std::string& key, const T& value) { m_config[key] = value; } 
   template <typename T> T get(const std::string& key) { return m_config[key]; }
 
 private:
-  static std::unique_ptr<ProcessConfiguration> m_instance;
-  nlohmann::json m_config;
-
   ProcessConfiguration() {}
+  static std::unique_ptr<ProcessConfiguration> m_instance;
+
+  nlohmann::json m_config;
 
 };
 
@@ -50,3 +43,4 @@ private:
 
 
 #endif
+

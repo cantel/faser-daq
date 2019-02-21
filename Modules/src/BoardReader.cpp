@@ -17,13 +17,14 @@ BoardReader::BoardReader(std::string name)
 {
     INFO("Passed " << name << " with constructor");
     m_run = false;
-    m_config.load("blabla");
+    m_config.load("{ \"happy\": true, \"pi\": 3.141, \"foo\": \"bar\" }");
     INFO("BoardReader::BoardReader() with config: " << m_config.dump() );
 }
 
 BoardReader::~BoardReader()
 {
-    INFO("BoardReader::~BoardReader()");
+    INFO("BoardReader::~BoardReader() ... clearing config: " << m_config.dump() );
+    m_config.clear();
 }
 
 void BoardReader::start()

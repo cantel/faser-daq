@@ -22,9 +22,8 @@ class ProcessConfiguration : public Singleton<ProcessConfiguration>
 {
 
 public:
-  ProcessConfiguration(m_token) { INFO("ProcessConfiguration constructed."); }
+  ProcessConfiguration() { INFO("ProcessConfiguration constructed."); }
   ~ProcessConfiguration() { INFO("ProcessConfiguration destructed."); }
-  //static ProcessConfiguration& instance();
 
   void clear(){ m_config.clear(); }
   std::string dump() { return m_config.dump(); }
@@ -34,8 +33,6 @@ public:
   template <typename T> T get(const std::string& key) { return m_config[key]; }
 
 private:
-//  static std::unique_ptr<ProcessConfiguration> m_instance;
-
   nlohmann::json m_config;
 
 };

@@ -10,18 +10,22 @@
 
 using namespace daq::core;
 
-ConnectionManager::ConnectionManager(m_token)
+
+//template <typename TValue, typename TPred>
+//BinarySearchTree<TValue, TPred>::BinarySearchTree() 
+
+/*
+template <class ST>
+ConnectionManager<ST>::ConnectionManager(m_token)
 {
   
 }
-
-ConnectionManager::~ConnectionManager() {
-/*
-  if (m_verbose) { 
-    DAQLogger::LogInfo("ConnectionManager::~ConnectionManager")
-      << "NIOH terminate ongoing... Stopping communication with FELIX."; 
-  }  
 */
-}
 
+/*
+template <class ST>
+ConnectionManager<ST>::~ConnectionManager() {
+
+}
+*/
 

@@ -11,7 +11,7 @@ main(int argc, char** argv)
   WARNING("Ugh!" << 12345 << "bof bof" << '\n');
 
   INFO("Testing ConnectionManager.hpp");
-  daq::core::ConnectionManager& cm = daq::core::ConnectionManager::instance();
+  daq::core::ConnectionManager<int>& cm = daq::core::ConnectionManager<int>::instance();
   
 
   ERROR("About to die...");

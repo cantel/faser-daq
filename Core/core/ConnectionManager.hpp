@@ -29,38 +29,28 @@ namespace core{
  * Date: November 2017
 */
 
-class ConnectionManager : public daq::utilities::Singleton<ConnectionManager>
+template <class ST>
+class ConnectionManager : public daq::utilities::Singleton<ConnectionManager<ST> >
 {
 public:
 
+  // 
+  ConnectionManager<ST>() { }
+  ~ConnectionManager<ST>() { } 
+
   // Functionalities
-
-  // Enable a channel/elink (prepare queue-socket pairs and map it.)
   bool addChannel(uint64_t chn, uint16_t tag, std::string host, uint16_t port, size_t queueSize, bool zerocopy) { return false; }
-
   bool addChannel(const std::string& connectionStr, size_t queueSize) { return false; }
   bool connect(uint64_t chn, uint16_t tag) { return false; } // Connect/subscriber to given channel.
   bool disconnect(uint64_t chn, uint16_t tag) { return false; } // Disconnect/unsubscriber from a given channel.
   void start() {} // Starts the subscri threads.
   void stopSubscribers() {}  // Stops the subscriber threads.
-
   bool busy() { return false; } // are processor threads busy
   void startProcessors() {}  // Start data processor threads when available.
   void stopProcessors() {}  // Stops data processors threads when available.
-
-  // Queue utils if needed
   size_t getNumOfChannels() { return m_activeChannels; } // Get the number of active channels.
 
-  // Singleton mode
-  //ConnectionManager(std::string contextStr, std::string felixHost, 
-  //             uint16_t felixTXPort, uint16_t felixRXPort,
-  //             size_t queueSize, bool verbose); 
-  ConnectionManager(m_token);
-  ConnectionManager();
-  ~ConnectionManager();
-
 private:
-
 //  netio::context * m_context; // context
 //  std::thread m_netio_bg_thread; 
 //  std::map<uint64_t, netio::subscribe_socket*> m_sub_sockets; // subscribe sockets.
@@ -75,6 +65,9 @@ private:
 //#else 
 //  std::map<uint64_t, UniqueFrameQueue> m_pcqs;
 //#endif
+
+  // Socket vector
+  std::vector<ST> m_sockets;
 
   // Threads
   std::vector<std::thread> m_socketHandlers;

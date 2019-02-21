@@ -17,7 +17,6 @@ public:
 
 
 protected:
-    struct m_token {};
     Singleton() {}
 };
 
@@ -25,7 +24,7 @@ protected:
 template<typename T>
 T& Singleton<T>::instance()
 {
-    static const std::unique_ptr<T> instance{new T{m_token{}}};
+    static const std::unique_ptr<T> instance{ };
     return *instance;
 }
 

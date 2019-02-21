@@ -28,12 +28,17 @@ BoardReader::~BoardReader()
 
 void BoardReader::start()
 {
-    INFO("BoardReader::start");
+    INFO("BoardReader::start, changing config...");
+    std::string key("bla");
+    m_config.set(key, 42);
 }
 
 void BoardReader::stop()
 {
-    INFO("BoardReader::stop");
+    INFO("BoardReader::stop, fetching config...");
+    std::string key("bla");
+    int v = m_config.get<int>(key);
+    INFO("  -> value: " << v);
 }
 
 void BoardReader::runner()

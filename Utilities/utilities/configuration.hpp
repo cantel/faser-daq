@@ -30,34 +30,21 @@ public:
   };
 
   static ProcessConfiguration& instance();
-//  void clear();
-
-//  void parse_args(int argc, char** argv);
-//  const Values& values();
-
-  //nlohmann::json toJson(std::vector<std::string> path, std::vector<std::string> query);
 
   void load(const std::string& jsonStr);
-
-  template <class T>
-  void set(const std::string& key, const T& value); 
-
   std::string dump();
 
+  template <typename T> void set(const std::string& key, const T& value) { m_config[key] = value; } 
+  template <typename T> T get(const std::string& key) { return m_config[key]; }
 
 private:
   static std::unique_ptr<ProcessConfiguration> m_instance;
-//  Values m_values;
   nlohmann::json m_config;
 
   ProcessConfiguration() {}
 
-
-
-  //std::map<std::string, docopt::value> load_file(std::istream& in);
-  //void store_file(std::ostream& out, std::map<std::string, docopt::value>& args, std::map<std::string, docopt::value>& defaults);
-  //void set_members(std::map<std::string, docopt::value>& args);
 };
+
 }
 }
 

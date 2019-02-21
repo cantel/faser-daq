@@ -52,10 +52,17 @@ std::string daq::utilities::ProcessConfiguration::dump(){
   return m_config["foo"];
 } 
 
-template <class T>
+/*
+template <typename T>
 void daq::utilities::ProcessConfiguration::set(const std::string& key, const T& value) {
   m_config[key] = value;
 }
+
+template <typename T>
+T daq::utilities::ProcessConfiguration::get(const std::string& key) {
+  return m_config[key];
+}
+*/
 
 //void daq::utilities::ProcessConfiguration::clear() {
 //    m_values = Values();

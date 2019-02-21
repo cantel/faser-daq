@@ -30,8 +30,8 @@
 #include <new>
 #include <iostream>
 
-#include "utilities/Align.h"
-#include "utilities/Logging.hh"
+#include "utilities/Align.hpp"
+#include "utilities/Logging.hpp"
 
 namespace folly {
 

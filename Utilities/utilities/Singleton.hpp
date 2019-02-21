@@ -9,8 +9,12 @@ class Singleton {
 public:
     static T& instance();
 
-    Singleton(const Singleton&) = delete;
-    Singleton& operator= (const Singleton) = delete;
+    // Prevent copying and moving.
+    Singleton(Singleton const&) = delete;             // Copy construct
+    Singleton(Singleton&&) = delete;                  // Move construct
+    Singleton& operator=(Singleton const&) = delete;  // Copy assign
+    Singleton& operator=(Singleton &&) = delete;      // Move assign
+
 
 protected:
     struct m_token {};

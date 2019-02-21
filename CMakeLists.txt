@@ -44,7 +44,10 @@ INCLUDE_DIRECTORIES("Utilities/")
 FILE(GLOB_RECURSE UTILITIES_SOURCES "Utilities/src/*.cpp")
 ADD_LIBRARY(utilities SHARED ${UTILITIES_SOURCES})
 
+PROJECT(Core)
 INCLUDE_DIRECTORIES("Core/")
+FILE(GLOB_RECURSE CORE_SOURCES "Core/src/*.cpp")
+ADD_LIBRARY(core SHARED ${CORE_SOURCES})
 
 PROJECT(Modules)
 INCLUDE_DIRECTORIES("Modules/")
@@ -87,7 +90,7 @@ install(TARGETS test_plugin EXPORT DESTINATION bin)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
 add_executable(test_logging Test/src/test_logging.cpp)
-target_link_libraries(test_logging PUBLIC pthread rt utilities)
+target_link_libraries(test_logging PUBLIC pthread rt utilities core)
 install(TARGETS test_logging EXPORT DESTINATION bin)
 
 

@@ -9,6 +9,7 @@
 #include "modules/BoardReader.hpp"
 #include "modules/EventBuilder.hpp"
 #include "utilities/Logging.hpp"
+#include "core/ConnectionManager.hpp"
 
 int main(int argc, char **argv)
 {

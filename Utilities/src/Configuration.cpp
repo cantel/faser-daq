@@ -6,7 +6,7 @@
 #warning RS -> Version handling of config should be added.
 //#include "version.h"
 
-#include "utilities/configuration.hpp"
+#include "utilities/Configuration.hpp"
 
 using namespace daq::utilities;
 using namespace nlohmann;

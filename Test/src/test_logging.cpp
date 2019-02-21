@@ -1,4 +1,4 @@
-#include "utilities/logging.hpp"
+#include "utilities/Logging.hpp"
 
 int
 main(int argc, char** argv)

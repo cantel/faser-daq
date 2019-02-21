@@ -1,7 +1,7 @@
 // enrico.gamberini@cern.ch
 
 #include "modules/EventBuilder.hpp"
-#include "utilities/logging.hpp"
+#include "utilities/Logging.hpp"
 
 extern "C" EventBuilder *create_object()
 {

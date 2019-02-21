@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <atomic>
+
 #include "core/DAQProcess.hpp"
 
 class BoardReader : public DAQProcess

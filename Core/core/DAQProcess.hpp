@@ -5,7 +5,7 @@
 
 // #include <atomic>
 
-#include "utilities/configuration.hpp"
+#include "utilities/Configuration.hpp"
 
 class DAQProcess
 {

@@ -1,7 +1,7 @@
 // enrico.gamberini@cern.ch
 
 #include "modules/BoardReader.hpp"
-#include "utilities/logging.hpp"
+#include "utilities/Logging.hpp"
 
 extern "C" BoardReader *create_object(std::string name)
 {

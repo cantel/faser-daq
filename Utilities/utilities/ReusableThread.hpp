@@ -8,7 +8,7 @@
 
 
 /********************************
- * reusable_thread
+ * ReusableThread
  * Author: Roland.Sipos@cern.ch
  * Copied from: 
  *   // https://codereview.stackexchange.com/questions/134214/reuseable-c11-thread
@@ -21,15 +21,15 @@ namespace utilities
 {
 
 
-class reusable_thread
+class ReusableThread
 {
 public:
-  reusable_thread(unsigned int threadID)
+  ReusableThread(unsigned int threadID)
     : m_thread_id(threadID), m_thread_pause(true), m_thread_quit(false),
-      m_thread(&reusable_thread::thread_worker, this)
+      m_thread(&ReusableThread::thread_worker, this)
   { }
 
-  ~reusable_thread()
+  ~ReusableThread()
   {
     m_thread_quit = true;
     m_cv.notify_all();

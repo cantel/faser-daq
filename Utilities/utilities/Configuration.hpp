@@ -10,7 +10,7 @@
 
 #include "json.hpp"
 
-#include "utilities/logging.hpp"
+#include "utilities/Logging.hpp"
 
 namespace daq
 {

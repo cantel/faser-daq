@@ -21,6 +21,7 @@ TBA
 
 ## Software compilation
 
+    source cmake_daq/bin/setup.sh
     git submodule init
     git submodule update
     mkdir build

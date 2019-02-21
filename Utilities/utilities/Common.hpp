@@ -1,11 +1,62 @@
-#ifndef UTILITIES_HH_
-#define UTILITIES_HH_
+#ifndef DAQ_UTILITIES_COMMON_HPP_
+#define DAQ_UTILITIES_COMMON_HPP_
 
 #include <pthread.h>
+#include <time.h>
+
+#include "utilities/Types.hpp"
 
 namespace daq {
 namespace utilities {
 
+/*
+ * Constants
+ * */
+class Constant {
+public:
+  // Constants
+  static const u_long Kilo = 1024;
+  static const u_long Mega = 1024 * Kilo;
+  static const u_long Giga = 1024 * Mega;
+};
+
+
+/* RateLimiter usage:
+ *
+ *  auto limit = RateLimiter();
+ *  timestamp_t period_ts = cfg.period * us;
+ *  timestamp_t max_overshoot_ts = cfg.max_overshoot * ms;
+ *  timestamp_t duration_ts = cfg.duration * s;
+ *
+ *  if (now > deadline + max_overshoot_ts) {
+ *   deadline = now + period_ts;
+ *  } else {
+ *    while (now < deadline) {
+ *      now = limit.gettime();
+ *    }
+ *    now = limit.gettime();
+ *    deadline += period_ts;
+ *  }
+ *
+ */
+class RateLimiter
+{
+public:
+  RateLimiter()
+  {
+  }
+  timestamp_t gettime()
+  {
+    ::timespec ts;
+    ::clock_gettime(CLOCK_MONOTONIC, &ts);
+    return timestamp_t(ts.tv_sec) * s + timestamp_t(ts.tv_nsec) * ns;
+  }
+};
+
+
+/*
+ * setThreadName
+ * */
 inline void setThreadName(std::thread& thread, const char* name, uint32_t tid)
 {
     char tname[16];
@@ -14,8 +65,33 @@ inline void setThreadName(std::thread& thread, const char* name, uint32_t tid)
     pthread_setname_np(handle, tname);
 }
 
+/*
+ * getTime
+ * */
+inline timestamp_t getTime()
+{
+  ::timespec ts;
+  ::clock_gettime(CLOCK_MONOTONIC,&ts);
+  return timestamp_t(ts.tv_sec) * s + timestamp_t(ts.tv_nsec) * ns;
+}
+
+/*
+ * getExecutablePath
+ * */
+inline std::string getExecutablePath()
+{
+  char exePath[PATH_MAX];
+  ssize_t len = ::readlink("/proc/self/exe", exePath, sizeof(exePath));
+  if (len == -1 || len == sizeof(exePath))
+    len = 0;
+  exePath[len] = '\0';
+  return std::string(exePath);
+}
+
+
 }
 }
+
 
 #endif
 

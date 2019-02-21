@@ -11,17 +11,20 @@
 #include "json.hpp"
 
 #include "utilities/Logging.hpp"
+#include "utilities/Singleton.hpp"
 
 namespace daq
 {
 namespace utilities
 {
 
-class ProcessConfiguration
+class ProcessConfiguration : public Singleton<ProcessConfiguration>
 {
 
 public:
-  static ProcessConfiguration& instance();
+  ProcessConfiguration(m_token) { INFO("ProcessConfiguration constructed."); }
+  ~ProcessConfiguration() { INFO("ProcessConfiguration destructed."); }
+  //static ProcessConfiguration& instance();
 
   void clear(){ m_config.clear(); }
   std::string dump() { return m_config.dump(); }
@@ -31,8 +34,7 @@ public:
   template <typename T> T get(const std::string& key) { return m_config[key]; }
 
 private:
-  ProcessConfiguration() {}
-  static std::unique_ptr<ProcessConfiguration> m_instance;
+//  static std::unique_ptr<ProcessConfiguration> m_instance;
 
   nlohmann::json m_config;
 

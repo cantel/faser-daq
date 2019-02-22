@@ -14,7 +14,7 @@ class BoardReader : public DAQProcess
     std::atomic<bool> m_run;
 
   public:
-    BoardReader(std::string name);
+    BoardReader(std::string name, int num);
     ~BoardReader();
     void start();
     void stop();

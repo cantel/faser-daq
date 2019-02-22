@@ -1,7 +1,11 @@
 // enrico.gamberini@cern.ch
 
 #include "modules/BoardReader.hpp"
+#include "utilities/Common.hpp"
 #include "utilities/Logging.hpp"
+
+#define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
+#define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
 
 extern "C" BoardReader *create_object(std::string name, int num)
 {
@@ -15,28 +19,28 @@ extern "C" void destroy_object(BoardReader *object)
 
 BoardReader::BoardReader(std::string name, int num)
 {
-    INFO("Passed " << name << " " << num << " with constructor");
+    INFO(__METHOD_NAME__ << " Passed " << name << " " << num << " with constructor");
     m_run = false;
     m_config.load("{ \"happy\": true, \"pi\": 3.141, \"foo\": \"bar\" }");
-    INFO("BoardReader::BoardReader() with config: " << m_config.dump() );
+    INFO(__METHOD_NAME__ << " With config: " << m_config.dump() );
 }
 
 BoardReader::~BoardReader()
 {
-    INFO("BoardReader::~BoardReader() ... clearing config: " << m_config.dump() );
+    INFO(__METHOD_NAME__ << " Clearing config: " << m_config.dump() );
     m_config.clear();
 }
 
 void BoardReader::start()
 {
-    INFO("BoardReader::start, changing config...");
+    INFO(__METHOD_NAME__ << " Changing config...");
     std::string key("bla");
     m_config.set(key, 42);
 }
 
 void BoardReader::stop()
 {
-    INFO("BoardReader::stop, fetching config...");
+    INFO(__METHOD_NAME__ << " Fetching config...");
     std::string key("bla");
     int v = m_config.get<int>(key);
     INFO("  -> value: " << v);
@@ -46,6 +50,7 @@ void BoardReader::runner()
 {
     while (m_run)
     {
-        INFO("BoardReader::runner");
+        INFO(__METHOD_NAME__ << " Running...");
     }
 }
+

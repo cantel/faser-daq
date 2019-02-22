@@ -3,9 +3,9 @@
 #include "modules/BoardReader.hpp"
 #include "utilities/Logging.hpp"
 
-extern "C" BoardReader *create_object(std::string name)
+extern "C" BoardReader *create_object(std::string name, int num)
 {
-    return new BoardReader(name);
+    return new BoardReader(name, num);
 }
 
 extern "C" void destroy_object(BoardReader *object)
@@ -13,9 +13,9 @@ extern "C" void destroy_object(BoardReader *object)
     delete object;
 }
 
-BoardReader::BoardReader(std::string name)
+BoardReader::BoardReader(std::string name, int num)
 {
-    INFO("Passed " << name << " with constructor");
+    INFO("Passed " << name << " " << num << " with constructor");
     m_run = false;
     m_config.load("{ \"happy\": true, \"pi\": 3.141, \"foo\": \"bar\" }");
     INFO("BoardReader::BoardReader() with config: " << m_config.dump() );

@@ -27,13 +27,16 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    DAQProcess *(*create)(std::string name);
+    DAQProcess *(*create)(...);
     void (*destroy)(DAQProcess *);
 
-    create = (DAQProcess * (*)(std::string name)) dlsym(handle, "create_object");
+    create = (DAQProcess * (*)(...)) dlsym(handle, "create_object");
     destroy = (void (*)(DAQProcess *))dlsym(handle, "destroy_object");
 
-    DAQProcess *dp = (DAQProcess *)create("name");
+    std::string name = "hello";
+    int num = 42;
+    
+    DAQProcess *dp = (DAQProcess *)create(name, num);
 
     dp->start();
     std::this_thread::sleep_for(std::chrono::seconds(2));

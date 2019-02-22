@@ -24,7 +24,7 @@ protected:
 template<typename T>
 T& Singleton<T>::instance()
 {
-    static const std::unique_ptr<T> instance{ };
+    static const std::unique_ptr<T> instance{ new T{} };
     return *instance;
 }
 

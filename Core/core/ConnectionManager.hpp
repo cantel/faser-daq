@@ -29,14 +29,14 @@ namespace core{
  * Date: November 2017
 */
 
-template <class ST>
-class ConnectionManager : public daq::utilities::Singleton<ConnectionManager<ST> >
+template <class CT, class ST>
+class ConnectionManager : public daq::utilities::Singleton<ConnectionManager<CT, ST> >
 {
 public:
 
   // 
-  ConnectionManager<ST>() { }
-  ~ConnectionManager<ST>() { } 
+  ConnectionManager<CT, ST>() { }
+  ~ConnectionManager<CT, ST>() { } 
 
   // Functionalities
   bool addChannel(uint64_t chn, uint16_t tag, std::string host, uint16_t port, size_t queueSize, bool zerocopy) { return false; }
@@ -66,8 +66,9 @@ private:
 //  std::map<uint64_t, UniqueFrameQueue> m_pcqs;
 //#endif
 
-  // Socket vector
-  std::vector<ST> m_sockets;
+  // Network library handling
+  std::map<uint64_t, std::unique_ptr<CT> > m_contexts; // context descriptors
+  std::map<uint64_t, std::unique_ptr<ST> > m_sockets;  // sockets.
 
   // Threads
   std::vector<std::thread> m_socketHandlers;

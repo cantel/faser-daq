@@ -8,22 +8,21 @@
 #include <stdexcept>
 #include <string>
 
-#include "json.hpp"
-
+#include "utilities/json.hpp"
 #include "utilities/Logging.hpp"
 #include "utilities/Singleton.hpp"
 
 namespace daq
 {
-namespace utilities
+namespace core
 {
 
-class ProcessConfiguration : public Singleton<ProcessConfiguration>
+class Configuration : public daq::utilities::Singleton<Configuration>
 {
 
 public:
-  ProcessConfiguration() { INFO("ProcessConfiguration constructed."); }
-  ~ProcessConfiguration() { INFO("ProcessConfiguration destructed."); }
+  Configuration() { }
+  ~Configuration() { }
 
   void clear(){ m_config.clear(); }
   std::string dump() { return m_config.dump(); }
@@ -39,7 +38,6 @@ private:
 
 }
 }
-
 
 #endif
 

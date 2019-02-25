@@ -5,7 +5,9 @@
 
 // #include <atomic>
 
-#include "utilities/Configuration.hpp"
+#include "zmq.hpp"
+#include "core/Configuration.hpp"
+#include "core/ConnectionManager.hpp"
 
 class DAQProcess
 {
@@ -20,7 +22,11 @@ class DAQProcess
 
   protected:
     // std::atomic<bool> m_run;
-    daq::utilities::ProcessConfiguration& m_config = daq::utilities::ProcessConfiguration::instance();
+    daq::core::Configuration& m_config = daq::core::Configuration::instance();
+
+    // ZMQ ConnectionManager
+    daq::core::ConnectionManager<zmq::context_t, zmq::socket_t>& m_connections = 
+      daq::core::ConnectionManager<zmq::context_t, zmq::socket_t>::instance(); 
 };
 
 #endif /* DAQPROCESS_HPP_ */

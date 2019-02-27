@@ -14,24 +14,17 @@
 using namespace daq::core;
 using namespace std::chrono_literals;
 
-
-
-//template <typename TValue, typename TPred>
-//BinarySearchTree<TValue, TPred>::BinarySearchTree() 
-
-/*
-template <class ST>
-ConnectionManager<ST>::ConnectionManager(m_token)
-{
-  
+bool Core::setupCommandPath(){
+  INFO(" BINDING COMMAND SOCKET...");
+  std::string connStr(m_protocol + "://" + m_address + std::to_string(m_port));
+  m_connections.setupCommandConnection(1, connStr);
 }
-*/
 
-/*
-template <class ST>
-ConnectionManager<ST>::~ConnectionManager() {
-
+bool Core::loadPlugin(const std::string& pluginName) {
+  m_plugin.load(pluginName);
 }
-*/
 
+bool Core::spawnCommandHandler(){
+  return false;
+}
  

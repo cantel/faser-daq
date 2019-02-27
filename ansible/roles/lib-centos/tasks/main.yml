@@ -9,8 +9,10 @@
     - cereal-devel
     - boost-devel
     - spdlog
-    - glibc-devel.i686
-    - libicu-devel #For unicode in boost compilation
+    - cppzmq-devel
+    - glibc-devel
+    #maybe not useful
     - glog-devel
     - libpcap-devel
     - bzip2
+    - libicu-devel #For unicode in boost compilation

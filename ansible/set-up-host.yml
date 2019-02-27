@@ -7,3 +7,4 @@
     - { role: lib-centos, when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' }
     - twiddler
     - devel
+    - cvmfs

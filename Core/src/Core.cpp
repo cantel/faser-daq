@@ -15,8 +15,8 @@ using namespace daq::core;
 using namespace std::chrono_literals;
 
 bool Core::setupCommandPath(){
-  INFO(" BINDING COMMAND SOCKET...");
-  std::string connStr(m_protocol + "://" + m_address + std::to_string(m_port));
+  std::string connStr(m_protocol + "://" + m_address + ":" + std::to_string(m_port));
+  INFO(" BINDING COMMAND SOCKET : " << connStr);
   m_connections.setupCommandConnection(1, connStr);
 }
 

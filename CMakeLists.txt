@@ -54,11 +54,11 @@ PROJECT(Modules)
 INCLUDE_DIRECTORIES("Modules/")
 FILE(GLOB_RECURSE BOARDREADER_SOURCES "Modules/src/BoardReader.cpp")
 ADD_LIBRARY(boardreader SHARED ${BOARDREADER_SOURCES})
-target_link_libraries(boardreader PUBLIC utilities zmq)
+target_link_libraries(boardreader PUBLIC core utilities zmq)
 
 FILE(GLOB_RECURSE EVENTBUILDER_SOURCES "Modules/src/EventBuilder.cpp")
 ADD_LIBRARY(eventbuilder SHARED ${EVENTBUILDER_SOURCES})
-target_link_libraries(eventbuilder PUBLIC utilities zmq)
+target_link_libraries(eventbuilder PUBLIC core utilities zmq)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)

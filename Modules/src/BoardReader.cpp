@@ -42,6 +42,14 @@ void BoardReader::start()
     std::string key("bla");
     m_config.set(key, 42);
     
+
+    INFO(__METHOD_NAME__ << " BINDING COMMAND SOCKET...");
+    std::string connStr("tcp://localhost:5557");
+    m_connections.setupCmdConnection(1, connStr);
+     
+
+    std::this_thread::sleep_for(60s);
+
     daq::utilities::Timer<std::chrono::milliseconds> msTimer;
     INFO(__METHOD_NAME__ << " Sleeping a bit with Timer...");
     msTimer.reset();

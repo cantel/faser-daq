@@ -14,6 +14,8 @@
 #include <mutex>
 #include <algorithm>
 
+#include "zmq.hpp"
+
 //#define MSGQ
 //#define QACHECK
 //#define REORD_DEBUG
@@ -29,16 +31,17 @@ namespace core{
  * Date: November 2017
 */
 
-template <class CT, class ST>
-class ConnectionManager : public daq::utilities::Singleton<ConnectionManager<CT, ST> >
+//template <class CT, class ST>
+class ConnectionManager : public daq::utilities::Singleton<ConnectionManager>
 {
 public:
 
   // 
-  ConnectionManager<CT, ST>() { }
-  ~ConnectionManager<CT, ST>() { } 
+  ConnectionManager() : m_is_cmd_setup{false}, m_stop_handlers{false} { }
+  ~ConnectionManager() { m_stop_handlers = true; m_cmd_handler.join(); } 
 
   // Functionalities
+  bool setupCmdConnection(uint8_t cid, const std::string& connStr);
   bool addChannel(uint64_t chn, uint16_t tag, std::string host, uint16_t port, size_t queueSize, bool zerocopy) { return false; }
   bool addChannel(const std::string& connectionStr, size_t queueSize) { return false; }
   bool connect(uint64_t chn, uint16_t tag) { return false; } // Connect/subscriber to given channel.
@@ -67,8 +70,13 @@ private:
 //#endif
 
   // Network library handling
-  std::map<uint64_t, std::unique_ptr<CT> > m_contexts; // context descriptors
-  std::map<uint64_t, std::unique_ptr<ST> > m_sockets;  // sockets.
+  std::thread m_cmd_handler;
+  std::unique_ptr<zmq::context_t> m_cmd_context;
+  std::unique_ptr<zmq::socket_t> m_cmd_socket;
+  std::atomic<bool> m_is_cmd_setup;
+
+  std::map<uint64_t, std::unique_ptr<zmq::context_t> > m_contexts; // context descriptors
+  std::map<uint64_t, std::unique_ptr<zmq::socket_t> > m_sockets;  // sockets.
 
   // Threads
   std::vector<std::thread> m_socketHandlers;

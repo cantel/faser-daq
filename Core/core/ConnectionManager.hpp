@@ -5,6 +5,8 @@
 #include "utilities/ProducerConsumerQueue.hpp"
 #include "utilities/ReusableThread.hpp"
 
+#include "core/Command.hpp"
+
 //#include "zmq.hpp"
 //#include "netio/netio.hpp"
 
@@ -38,11 +40,15 @@ class ConnectionManager : public daq::utilities::Singleton<ConnectionManager>
 public:
 
   // 
-  ConnectionManager() : m_is_cmd_setup{false}, m_stop_handlers{false} { }
+  ConnectionManager() 
+    : m_is_cmd_setup{false}, m_stop_handlers{false} 
+  { }
   ~ConnectionManager() { m_stop_handlers = true; m_cmd_handler.join(); } 
 
   // Functionalities
   bool setupCmdConnection(uint8_t cid, std::string connStr);
+  
+
   bool addChannel(uint64_t chn, uint16_t tag, std::string host, uint16_t port, size_t queueSize, bool zerocopy) { return false; }
   bool addChannel(const std::string& connectionStr, size_t queueSize) { return false; }
   bool connect(uint64_t chn, uint16_t tag) { return false; } // Connect/subscriber to given channel.

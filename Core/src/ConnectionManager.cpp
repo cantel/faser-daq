@@ -5,7 +5,8 @@
 
 #include <ctime>
 #include <iomanip>
-#include <pthread.h>
+#include <thread>
+#include <chrono>
 
 #define REORD_DEBUG
 #define QATCOMP_DEBUG
@@ -14,7 +15,7 @@
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
 
 using namespace daq::core;
-
+using namespace std::chrono_literals;
 
 bool ConnectionManager::setupCmdConnection(uint8_t cid, std::string connStr) {
   if (m_is_cmd_setup){
@@ -26,20 +27,23 @@ bool ConnectionManager::setupCmdConnection(uint8_t cid, std::string connStr) {
   m_cmd_socket->bind(connStr);
   INFO(__METHOD_NAME__ << " Connected to connStr" << connStr);
   m_cmd_handler = std::thread([&](){
+    zmq::message_t cmd;
     while(!m_stop_handlers){
-      zmq::message_t cmd;
-      INFO(m_className << " CMD_THREAD: Going for RECV poll...");
-      m_cmd_socket->recv(&cmd);
-      std::string cmdmsg(static_cast<char*>(cmd.data()), cmd.size());
-      INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsg);
+      //INFO(m_className << " CMD_THREAD: Going for RECV poll...");
+      if ((m_cmd_socket->recv(&cmd, ZMQ_DONTWAIT)) == true) {
+        std::string cmdmsg(static_cast<char*>(cmd.data()), cmd.size());
+        INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsg);
 
-      // RS -> TODO: Handle CMDs! 
-      //    Deserialization by a library, or queue in commands to be handled.
-      //    The DAQProcess should have a thread that checks for unhandled commands in queue.
-      //    Or we have the command handler right here... 
-      //       -> e.g.: m_cmd_handler->process(cmd);
+        // RS -> TODO: Handle CMDs! 
+        //    Deserialization by a library, or queue in commands to be handled.
+        //    The DAQProcess should have a thread that checks for unhandled commands in queue.
+        //    Or we have the command handler right here... 
+        //       -> e.g.: m_cmd_handler->process(cmd);
 
-      s_send( *(m_cmd_socket.get()), "OK" ); 
+        s_send( *(m_cmd_socket.get()), "OK" ); 
+      }
+      //INFO(m_className << " Sleeping a second...");
+      std::this_thread::sleep_for(1s); 
     }
   });
   utilities::setThreadName(m_cmd_handler, "cmd", 0);

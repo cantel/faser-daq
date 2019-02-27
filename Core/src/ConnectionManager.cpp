@@ -2,6 +2,7 @@
 #include "utilities/Common.hpp"
 
 #include "core/ConnectionManager.hpp"
+#include "core/Command.hpp"
 
 #include <ctime>
 #include <iomanip>
@@ -19,20 +20,27 @@ using namespace std::chrono_literals;
 
 bool ConnectionManager::setupCmdConnection(uint8_t cid, std::string connStr) {
   if (m_is_cmd_setup){
-    INFO(__METHOD_NAME__ << " Command socket is already open... Won't do anything.");
+    INFO(__METHOD_NAME__ << " Command is already online... Won't do anything.");
     return false;
   }
   m_cmd_context = std::make_unique<zmq::context_t>(cid);
   m_cmd_socket = std::make_unique<zmq::socket_t>(*(m_cmd_context.get()), ZMQ_REP);
   m_cmd_socket->bind(connStr);
-  INFO(__METHOD_NAME__ << " Connected to connStr" << connStr);
+  INFO(__METHOD_NAME__ << " Command is connected on: " << connStr);
   m_cmd_handler = std::thread([&](){
-    zmq::message_t cmd;
+    Command &cmd = Command::instance();
+    zmq::message_t cmdMsg;
     while(!m_stop_handlers){
       //INFO(m_className << " CMD_THREAD: Going for RECV poll...");
-      if ((m_cmd_socket->recv(&cmd, ZMQ_DONTWAIT)) == true) {
-        std::string cmdmsg(static_cast<char*>(cmd.data()), cmd.size());
-        INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsg);
+      if ((m_cmd_socket->recv(&cmdMsg, ZMQ_DONTWAIT)) == true) {
+        std::string cmdmsgStr(static_cast<char*>(cmdMsg.data()), cmdMsg.size());
+        INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsgStr);
+        
+        cmd.setMessage(cmdmsgStr);
+        while(!cmd.getHandled()){
+        INFO(m_className << " CMD_THREAD: ... waiting signal for handled message...");
+          std::this_thread::sleep_for(1s); 
+        }
 
         // RS -> TODO: Handle CMDs! 
         //    Deserialization by a library, or queue in commands to be handled.
@@ -40,9 +48,9 @@ bool ConnectionManager::setupCmdConnection(uint8_t cid, std::string connStr) {
         //    Or we have the command handler right here... 
         //       -> e.g.: m_cmd_handler->process(cmd);
 
-        s_send( *(m_cmd_socket.get()), "OK" ); 
+        s_send( *(m_cmd_socket.get()), cmd.getResponse() ); 
       }
-      //INFO(m_className << " Sleeping a second...");
+      INFO(m_className << " Sleeping a second...");
       std::this_thread::sleep_for(1s); 
     }
   });

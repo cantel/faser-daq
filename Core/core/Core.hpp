@@ -5,6 +5,8 @@
 #include "core/Configuration.hpp"
 #include "core/ConnectionManager.hpp"
 
+#include <atomic>
+
 class Core
 {
   public:
@@ -23,10 +25,15 @@ class Core
     int m_port;
     std::string m_protocol;
 
+    std::thread m_cmdHandler;
+
     // ZMQ ConnectionManager
     daq::core::ConnectionManager &m_connections = daq::core::ConnectionManager::instance();
+    // Command exchange
+    daq::core::Command &m_command = daq::core::Command::instance();
     // JSON Configuration map
     daq::core::Configuration &m_config = daq::core::Configuration::instance();
 };
 
 #endif
+

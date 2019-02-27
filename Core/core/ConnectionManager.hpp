@@ -15,6 +15,7 @@
 #include <algorithm>
 
 #include "zmq.hpp"
+#include "utilities/zhelpers.hpp"
 
 //#define MSGQ
 //#define QACHECK
@@ -41,7 +42,7 @@ public:
   ~ConnectionManager() { m_stop_handlers = true; m_cmd_handler.join(); } 
 
   // Functionalities
-  bool setupCmdConnection(uint8_t cid, const std::string& connStr);
+  bool setupCmdConnection(uint8_t cid, std::string connStr);
   bool addChannel(uint64_t chn, uint16_t tag, std::string host, uint16_t port, size_t queueSize, bool zerocopy) { return false; }
   bool addChannel(const std::string& connectionStr, size_t queueSize) { return false; }
   bool connect(uint64_t chn, uint16_t tag) { return false; } // Connect/subscriber to given channel.
@@ -54,9 +55,7 @@ public:
   size_t getNumOfChannels() { return m_activeChannels; } // Get the number of active channels.
 
 private:
-//  netio::context * m_context; // context
-//  std::thread m_netio_bg_thread; 
-//  std::map<uint64_t, netio::subscribe_socket*> m_sub_sockets; // subscribe sockets.
+  const std::string m_className = "ConnectionManager";
   size_t m_activeChannels;
 
   //Configuration:

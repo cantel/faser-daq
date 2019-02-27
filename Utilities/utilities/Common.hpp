@@ -74,7 +74,6 @@ class Timer
     std::chrono::time_point<clock_> beg_;
 };
 
-
 /*
  * setThreadName
  * */
@@ -84,6 +83,17 @@ inline void setThreadName(std::thread& thread, const char* name, uint32_t tid)
     snprintf(tname, 16, "daq-%s-%d", name, tid);
     auto handle = thread.native_handle();
     pthread_setname_np(handle, tname);
+}
+
+/*
+ * getThreadName
+ * */
+inline void getThreadName(std::thread& thread, const char* name)
+{
+    char tname[16];
+    //snprintf(tname, 16, "daq-%s-%d", name, tid);
+    auto handle = thread.native_handle();
+    //pthread_getname_np(handle, tname);
 }
 
 /*

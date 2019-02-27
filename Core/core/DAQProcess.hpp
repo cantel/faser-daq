@@ -5,12 +5,23 @@
 
 // #include <atomic>
 
+#include "utilities/Logging.hpp"
+#include "utilities/Common.hpp"
 #include "core/Configuration.hpp"
 #include "core/ConnectionManager.hpp"
+
+#define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
+#define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
 
 class DAQProcess
 {
   public:
+    DAQProcess() { 
+      INFO(__METHOD_NAME__ << " BINDING COMMAND SOCKET...");
+      std::string connStr("tcp://188.185.65.114:5557");
+      m_connections.setupCmdConnection(1, connStr);
+    };
+
     virtual ~DAQProcess(){};
 
     /* use virtual otherwise linker will try to perform static linkage */
@@ -20,11 +31,11 @@ class DAQProcess
     virtual void runner() = 0;
 
   protected:
-    // std::atomic<bool> m_run;
-    daq::core::Configuration& m_config = daq::core::Configuration::instance();
-
     // ZMQ ConnectionManager
     daq::core::ConnectionManager& m_connections = daq::core::ConnectionManager::instance(); 
+    // JSON Configuration map
+    daq::core::Configuration& m_config = daq::core::Configuration::instance();
+
 };
 
 #endif /* DAQPROCESS_HPP_ */

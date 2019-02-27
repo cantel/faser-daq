@@ -13,8 +13,11 @@ with open('config.json') as f:
 
 print(data)
 
+arg = "complete"
 if len(sys.argv) == 1:
-    print("Available: remove supervisor complete")
+    print("Available: 'remove' 'supervisor'. Going for complete service")
+else:
+    arg = sys.argv[1]
 
 for p in data:
     sd = supervisord.supervisord(p['host'], group)
@@ -27,7 +30,7 @@ for p in data:
             print('State', sd.getProcessState(i['name'])['statename'])
         print('Remove', sd.removeProcessFromGroup(i['name']))
 
-if sys.argv[1] == "remove":
+if arg == "remove":
     exit(0)
 
 for p in data:
@@ -36,7 +39,7 @@ for p in data:
     print("Add", sd.addProgramToGroup(p['name'], exe+" "+p['name'], dir) )
 
 
-if sys.argv[1] == "supervisor":
+if arg == "supervisor":
     exit(0)
 
 context = zmq.Context()

@@ -42,13 +42,15 @@ for p in data:
 if arg == "supervisor":
     exit(0)
 
-context = zmq.Context()
-socket = context.socket(zmq.REQ)
-socket.connect("tcp://rd51:5557")
-s = json.dumps(data)
-print(s)
-socket.send_string(s)
-print("sent")
+for p in data:
+    context = zmq.Context()
+    socket = context.socket(zmq.REQ)
+    socket.connect("tcp://rd51:5557")
+    p['command']='configure'
+    s = json.dumps(p)
+    print(s)
+    socket.send_string(s)
+    print("sent")
 
-reply = socket.recv()
-print(reply)
+    reply = socket.recv()
+    print(reply)

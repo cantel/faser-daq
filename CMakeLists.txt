@@ -76,12 +76,6 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
 FILE(GLOB_RECURSE RD51_LIBS lib/*.a)
 
-add_executable(rd51 src/main.cpp)
-target_link_libraries(rd51 utilities pthread rt)
-
-
-install(TARGETS rd51 EXPORT DESTINATION bin)
-
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
 add_executable(test_plugin Test/src/test_plugin.cpp)

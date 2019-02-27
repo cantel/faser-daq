@@ -6,7 +6,7 @@ import json
 
 group = 'rd51'
 dir = '/home/engamber/workspace/daq/build/bin'
-exe = '/home/engamber/workspace/daq/build/bin/test_plugin'
+exe = '/home/engamber/workspace/daq/build/bin/main_core'
 
 with open('config.json') as f:
     data = json.load(f)
@@ -36,7 +36,7 @@ if arg == "remove":
 for p in data:
     sd = supervisord.supervisord(p['host'], group)
 
-    print("Add", sd.addProgramToGroup(p['name'], exe+" "+p['name'], dir) )
+    print("Add", sd.addProgramToGroup(p['name'], exe+" "+str(p['port']), dir) )
 
 
 if arg == "supervisor":
@@ -45,7 +45,7 @@ if arg == "supervisor":
 for p in data:
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
-    socket.connect("tcp://localhost:5558")
+    socket.connect("tcp://"+p['host']+":"+str(p['port']))
     p['command']='configure'
     s = json.dumps(p)
     print(s)

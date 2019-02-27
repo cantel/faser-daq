@@ -1,12 +1,20 @@
 [
     {
-        "name": "boardreader",
+        "name": "daq01",
         "host": "rd51",
-        "command_port": 6000
+        "port": 6000,
+        "type": "boardreader",
+        "settings": 
+        {
+            "some_int": 42,
+            "some_string": "test"
+        }
+
     },
     {
-        "name": "eventbuilder",
+        "name": "daq02",
+        "type": "eventbuilder",
         "host": "rd51",
-        "command_port": 6001
+        "port": 6001
     }
 ]

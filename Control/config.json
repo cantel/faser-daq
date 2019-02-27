@@ -1,0 +1,12 @@
+[
+    {
+        "name": "boardreader",
+        "host": "rd51",
+        "command_port": 6000
+    },
+    {
+        "name": "eventbuilder",
+        "host": "rd51",
+        "command_port": 6001
+    }
+]

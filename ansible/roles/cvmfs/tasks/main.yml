@@ -1,0 +1,37 @@
+#Marco Boretto <marco.boretto@cern.ch> 2017 
+---
+
+#Cvmfs
+#https://cernvm.cern.ch/portal/filesystem/quickstart
+
+- name: Install packages cvmfs
+  yum:
+    name: cvmfs, cvmfs-config-default
+    state: present
+  notify:
+    - restart cvmfs
+
+- name: Copy the common env file
+  copy:
+    src: etc/cvmfs/default.local
+    dest: /etc/cvmfs/default.local
+  notify:
+    - restart cvmfs
+
+- name: Config cvmfs
+  shell: cvmfs_config setup
+  notify:
+    - restart cvmfs
+
+- name: Cvmfs setup
+  shell: cvmfs_config setup
+  notify:
+    - restart cvmfs
+
+## This is useful for checking that everything is working
+#- name: Cvmfs probe
+#  shell: cvmfs_config probe
+#  ignore_errors: yes
+#  notify:
+#    - restart cvmfs
+

@@ -18,7 +18,7 @@ class DAQProcess
   public:
     DAQProcess() { 
       INFO(__METHOD_NAME__ << " BINDING COMMAND SOCKET...");
-      std::string connStr("tcp://188.185.65.114:5557");
+      std::string connStr("tcp://*:5557");
       m_connections.setupCmdConnection(1, connStr);
     };
 

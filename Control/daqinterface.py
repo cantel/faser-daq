@@ -45,7 +45,7 @@ if arg == "supervisor":
 for p in data:
     context = zmq.Context()
     socket = context.socket(zmq.REQ)
-    socket.connect("tcp://rd51:5557")
+    socket.connect("tcp://localhost:5558")
     p['command']='configure'
     s = json.dumps(p)
     print(s)

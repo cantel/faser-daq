@@ -18,8 +18,14 @@ class supervisord:
     def getProcessState(self, name):
         return self.server.supervisor.getProcessInfo(self.group+":"+name)
 
-    def addProgramToGroup(self, name, exe):
-        return self.server.twiddler.addProgramToGroup(self.group, name, {'command': exe})
+    def addProgramToGroup(self, name, exe, dir):
+        settings = {
+            'command': exe,
+            'directory': dir,
+            'autorestart': 'false',
+            'environment': "LD_LIBRARY_PATH=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib64"
+            }
+        return self.server.twiddler.addProgramToGroup(self.group, name, settings)
 
     def removeProcessFromGroup(self, name):
         return self.server.twiddler.removeProcessFromGroup(self.group, name)

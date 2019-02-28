@@ -1,9 +1,16 @@
 cmake_minimum_required(VERSION 3.4.3)
 
+project(rd51 VERSION 0.0.1
+                  DESCRIPTION "Data acquisition framework"
+                  LANGUAGES CXX)
+
+
+
+
 set(PACKAGE rd51core)
 set(PACKAGE_VERSION 0.0.1)
 
-set (CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_FLAGS -DGIT_DESCRIBE="`cd ${CMAKE_CURRENT_SOURCE_DIR}; git describe --tags --always --dirty`")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -O3 -g -pedantic")
 
@@ -26,39 +33,48 @@ include_directories(src)
 #link_directories(${ZEROMQ_DIR}/lib)
 
 # others
-add_external(spdlog ${spdlog_version})
+add_external(spdlog ${spdlog_version}) # A spd log version is installed along with CentOS but is too old
 #add_external(docopt ${docopt_version})
-#SET(JSON_BuildTests OFF CACHE BOOL "Build the unit tests when BUILD_TESTING is enabled.")
-OPTION(JSON_BuildTests "Build the unit tests when BUILD_TESTING is enabled.")
+#set(JSON_BuildTests OFF CACHE BOOL "Build the unit tests when BUILD_TESTING is enabled.")
+option(JSON_BuildTests "Build the unit tests when BUILD_TESTING is enabled.")
 add_external(json ${json_version})
 #add_external(cereal ${cereal_version})
 #add_external(evpp   ${evpp_version})
 
-SET(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-SET(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #library
-PROJECT(Utilities)
-INCLUDE_DIRECTORIES("Utilities/")
-FILE(GLOB_RECURSE UTILITIES_SOURCES "Utilities/src/*.cpp")
-ADD_LIBRARY(utilities SHARED ${UTILITIES_SOURCES})
+#project(Utilities)
+#include_directories("Utilities/")
+#file(GLOB_RECURSE UTILITIES_SOURCES "Utilities/src/*.cpp")
+#add_library(utilities SHARED ${UTILITIES_SOURCES})
 
-PROJECT(Core)
-INCLUDE_DIRECTORIES("Core/")
-FILE(GLOB_RECURSE CORE_SOURCES "Core/src/*.cpp")
-ADD_LIBRARY(core SHARED ${CORE_SOURCES})
-target_link_libraries(core PUBLIC zmq)
+add_subdirectory(src/Utilities)
+add_subdirectory(src/Core)
+add_subdirectory(src/Modules)
 
-PROJECT(Modules)
-INCLUDE_DIRECTORIES("Modules/")
-FILE(GLOB_RECURSE BOARDREADER_SOURCES "Modules/src/BoardReader.cpp")
-ADD_LIBRARY(boardreader SHARED ${BOARDREADER_SOURCES})
-target_link_libraries(boardreader PUBLIC core utilities zmq)
 
-FILE(GLOB_RECURSE EVENTBUILDER_SOURCES "Modules/src/EventBuilder.cpp")
-ADD_LIBRARY(eventbuilder SHARED ${EVENTBUILDER_SOURCES})
-target_link_libraries(eventbuilder PUBLIC core utilities zmq)
+
+#project(Core)
+#include_directories("Core/")
+#include_directories("Cotiesre/")
+
+#file(GLOB_RECURSE CORE_SOURCES "Core/src/*.cpp")
+#add_library(core SHARED ${CORE_SOURCES})
+
+#target_link_libraries(core PUBLIC zmq)
+
+#project(Modules)
+#include_directories("Modules/")
+#file(GLOB_RECURSE BOARDREADER_SOURCES "Modules/src/BoardReader.cpp")
+#add_library(boardreader SHARED ${BOARDREADER_SOURCES})
+#target_link_libraries(boardreader PUBLIC core utilities zmq)
+#
+#file(GLOB_RECURSE EVENTBUILDER_SOURCES "Modules/src/EventBuilder.cpp")
+#add_library(eventbuilder SHARED ${EVENTBUILDER_SOURCES})
+#target_link_libraries(eventbuilder PUBLIC core utilities zmq)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
@@ -76,11 +92,9 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
 FILE(GLOB_RECURSE RD51_LIBS lib/*.a)
 
-add_executable(rd51 src/main.cpp)
-target_link_libraries(rd51 utilities pthread rt)
-
-
-install(TARGETS rd51 EXPORT DESTINATION bin)
+#add_executable(rd51 src/main.cpp)
+#target_link_libraries(rd51 utilities pthread rt)
+#install(TARGETS rd51 EXPORT DESTINATION bin)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
@@ -92,7 +106,7 @@ add_executable(test_logging Test/src/test_logging.cpp)
 target_link_libraries(test_logging PUBLIC pthread rt utilities core)
 install(TARGETS test_logging EXPORT DESTINATION bin)
 
-add_executable(main_core Core/src/main_core.cpp)
+add_executable(main_core src/Core/main_core.cpp)
 target_link_libraries(main_core PUBLIC pthread rt utilities core)
 install(TARGETS main_core EXPORT DESTINATION bin)
 

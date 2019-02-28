@@ -1,0 +1,12 @@
+cmake_minimum_required(VERSION 3.4.3)
+
+#library
+project(Core VERSION 0.0.1
+                  DESCRIPTION "Data acquisition framework"
+                  LANGUAGES CXX)
+
+include_directories("../../include")
+file(GLOB_RECURSE UTILITIES_SOURCES "*.cpp")
+add_library(core SHARED ${UTILITIES_SOURCES})
+
+target_link_libraries(core PUBLIC utilities modules zmq)

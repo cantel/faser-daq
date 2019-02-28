@@ -13,7 +13,7 @@ if(NOT AUTOLOAD_INCLUDED)
   # extra functions
   #
   function(add_external name version)
-    MESSAGE( STATUS "    External- " ${VENDOR_DIR} "/" ${name} " - " ${version})
+    message( STATUS "    External- " ${VENDOR_DIR} "/" ${name} " - " ${version})
     if(${ARGC} EQUAL 3)
       set(bintag ${ARGV2})
       #include_directories(${VENDOR_DIR}/${name}/${bintag}/include)
@@ -28,7 +28,7 @@ if(NOT AUTOLOAD_INCLUDED)
   endfunction(add_external)
 
   function(library_version name version)
-    MESSAGE( STATUS "    Library " ${VENDOR_DIR} "/" ${name} " - " ${version})
+    message( STATUS "    Library " ${VENDOR_DIR} "/" ${name} " - " ${version})
   endfunction(library_version)
 
   #

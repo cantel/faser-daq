@@ -1,7 +1,7 @@
 [
     {
         "name": "daq01",
-        "host": "rd51",
+        "host": "rd51pro",
         "port": 6000,
         "type": "boardreader",
         "settings": 
@@ -14,7 +14,7 @@
     {
         "name": "daq02",
         "type": "eventbuilder",
-        "host": "rd51",
+        "host": "rd51pro",
         "port": 6001
     }
 ]

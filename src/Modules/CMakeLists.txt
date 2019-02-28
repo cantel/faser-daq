@@ -6,11 +6,10 @@ project(Modules VERSION 0.0.1
                   LANGUAGES CXX)
 
 include_directories("../../include")
-#file(GLOB_RECURSE UTILITIES_SOURCES "*.cpp")
 file(GLOB_RECURSE UTILITIES_SOURCES "BoardReader.cpp")
-add_library(modules SHARED ${UTILITIES_SOURCES})
+add_library(boardreader SHARED ${UTILITIES_SOURCES})
 
-target_link_libraries(modules PUBLIC utilities zmq)
+target_link_libraries(boardreader PUBLIC utilities zmq)
 
 
 include_directories("../../include")

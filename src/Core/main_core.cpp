@@ -14,8 +14,11 @@ int main(int argc, char **argv) {
     }
     int port = atoi(argv[1]);
     INFO("Port " << port);
-    Core c(port, "", "");
+    daq::core::Core c(port, "tcp", "*");
 
+    c.setupCommandPath();
+    c.spawnCommandHandler();
+    c.loadPlugin("boardreader");
 
     std::this_thread::sleep_for(60s);
 

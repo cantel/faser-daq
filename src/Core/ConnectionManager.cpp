@@ -18,7 +18,7 @@
 using namespace daq::core;
 using namespace std::chrono_literals;
 
-bool ConnectionManager::setupCmdConnection(uint8_t cid, std::string connStr) {
+bool ConnectionManager::setupCommandConnection(uint8_t cid, std::string connStr) {
   if (m_is_cmd_setup){
     INFO(__METHOD_NAME__ << " Command is already online... Won't do anything.");
     return false;

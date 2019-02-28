@@ -4,11 +4,17 @@ project(rd51 VERSION 0.0.1
                   DESCRIPTION "Data acquisition framework"
                   LANGUAGES CXX)
 
-
-
-
 set(PACKAGE rd51core)
 set(PACKAGE_VERSION 0.0.1)
+
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+    message(FATAL_ERROR "GCC version must be at least 4.8!")
+  endif()
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -qopt-prefetch -unroll-aggressive -march=native -mtune=native")
+endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 set(CMAKE_CXX_FLAGS -DGIT_DESCRIBE="`cd ${CMAKE_CURRENT_SOURCE_DIR}; git describe --tags --always --dirty`")
@@ -34,10 +40,13 @@ include_directories(src)
 
 # others
 add_external(spdlog ${spdlog_version}) # A spd log version is installed along with CentOS but is too old
+
 #add_external(docopt ${docopt_version})
+
 #set(JSON_BuildTests OFF CACHE BOOL "Build the unit tests when BUILD_TESTING is enabled.")
 option(JSON_BuildTests "Build the unit tests when BUILD_TESTING is enabled.")
 add_external(json ${json_version})
+
 #add_external(cereal ${cereal_version})
 #add_external(evpp   ${evpp_version})
 
@@ -45,68 +54,25 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-#library
-#project(Utilities)
-#include_directories("Utilities/")
-#file(GLOB_RECURSE UTILITIES_SOURCES "Utilities/src/*.cpp")
-#add_library(utilities SHARED ${UTILITIES_SOURCES})
-
 add_subdirectory(src/Utilities)
 add_subdirectory(src/Core)
 add_subdirectory(src/Modules)
 
-
-
-#project(Core)
-#include_directories("Core/")
-#include_directories("Cotiesre/")
-
-#file(GLOB_RECURSE CORE_SOURCES "Core/src/*.cpp")
-#add_library(core SHARED ${CORE_SOURCES})
-
-#target_link_libraries(core PUBLIC zmq)
-
-#project(Modules)
-#include_directories("Modules/")
-#file(GLOB_RECURSE BOARDREADER_SOURCES "Modules/src/BoardReader.cpp")
-#add_library(boardreader SHARED ${BOARDREADER_SOURCES})
-#target_link_libraries(boardreader PUBLIC core utilities zmq)
-#
-#file(GLOB_RECURSE EVENTBUILDER_SOURCES "Modules/src/EventBuilder.cpp")
-#add_library(eventbuilder SHARED ${EVENTBUILDER_SOURCES})
-#target_link_libraries(eventbuilder PUBLIC core utilities zmq)
-
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
-  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
-    message(FATAL_ERROR "GCC version must be at least 4.8!")
-  endif()
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -qopt-prefetch -unroll-aggressive -march=native -mtune=native")
-endif()
-
 # Get rid of auto_ptr warnings from yaml-cpp
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 
-#set(SOURCES src/card_queue_source.cpp src/configuration.cpp src/pipeline.cpp src/random_queue_source.cpp src/ttc_generator_queue_source.cpp src/statistics.cpp src/toflx.cpp src/block_source.cpp src/trace.cpp src/busythread.cpp src/poor_mans_statistics.cpp)
-
 FILE(GLOB_RECURSE RD51_LIBS lib/*.a)
 
-#add_executable(rd51 src/main.cpp)
-#target_link_libraries(rd51 utilities pthread rt)
-#install(TARGETS rd51 EXPORT DESTINATION bin)
-
+include_directories("include")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
-add_executable(test_plugin Test/src/test_plugin.cpp)
+add_executable(test_plugin test/src/test_plugin.cpp)
+
+
+
 target_link_libraries(test_plugin PUBLIC pthread rt utilities boardreader eventbuilder)
 install(TARGETS test_plugin EXPORT DESTINATION bin)
 
-add_executable(test_logging Test/src/test_logging.cpp)
+add_executable(test_logging test/src/test_logging.cpp)
 target_link_libraries(test_logging PUBLIC pthread rt utilities core)
 install(TARGETS test_logging EXPORT DESTINATION bin)
-
-add_executable(main_core src/Core/main_core.cpp)
-target_link_libraries(main_core PUBLIC pthread rt utilities core)
-install(TARGETS main_core EXPORT DESTINATION bin)
-

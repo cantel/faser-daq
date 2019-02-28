@@ -8,22 +8,19 @@
 
 #include <atomic>
 
+namespace daq{
+namespace core{
+
 class Core
 {
   public:
     Core(int port, std::string protocol, std::string address)
-        : m_port{port}, m_protocol{protocol}, m_address(address)
-    {
-        INFO(" BINDING COMMAND SOCKET...");
-        std::string connStr("tcp://*:" + std::to_string(m_port));
-        m_connections.setupCmdConnection(1, connStr);
-
-        // eg: example use
-        m_plugin.load("boardreader");
-
-    };
-
+        : m_port{port}, m_protocol{protocol}, m_address(address) {};
     ~Core(){};
+
+    bool setupCommandPath();
+    bool spawnCommandHandler();
+    bool loadPlugin(const std::string& pluginName);
 
   private:
     std::string m_address;
@@ -41,6 +38,9 @@ class Core
     // Plugin manager
     daq::core::PluginManager &m_plugin = daq::core::PluginManager::instance();
 };
+
+}
+}
 
 #endif
 

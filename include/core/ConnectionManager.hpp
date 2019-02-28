@@ -46,7 +46,7 @@ public:
   ~ConnectionManager() { m_stop_handlers = true; m_cmd_handler.join(); } 
 
   // Functionalities
-  bool setupCmdConnection(uint8_t cid, std::string connStr);
+  bool setupCommandConnection(uint8_t cid, std::string connStr);
   
 
   bool addChannel(uint64_t chn, uint16_t tag, std::string host, uint16_t port, size_t queueSize, bool zerocopy) { return false; }

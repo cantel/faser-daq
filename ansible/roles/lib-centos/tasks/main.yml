@@ -8,7 +8,7 @@
     libraries:
     - cereal-devel
     - boost-devel
-    - spdlog
+    - spdlog-devel
     - cppzmq-devel
     - glibc-devel
     #maybe not useful

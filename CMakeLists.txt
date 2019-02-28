@@ -17,12 +17,18 @@ elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Intel")
 endif()
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
-set(CMAKE_CXX_FLAGS -DGIT_DESCRIBE="`cd ${CMAKE_CURRENT_SOURCE_DIR}; git describe --tags --always --dirty`")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -O3 -g -pedantic")
 
 include(AUTOLOAD)
 
-include_directories(src)
+set(CMAKE_CXX_FLAGS -DGIT_DESCRIBE="`cd ${CMAKE_CURRENT_SOURCE_DIR}; git describe --tags --always --dirty`")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -O3 -g -pedantic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
+
+set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 #find_package(TBB ${tbb_version} EXACT REQUIRED)
 #include_directories(${TBB_INCLUDE_DIRS})
@@ -50,29 +56,7 @@ add_external(json ${json_version})
 #add_external(cereal ${cereal_version})
 #add_external(evpp   ${evpp_version})
 
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 add_subdirectory(src/Utilities)
 add_subdirectory(src/Core)
 add_subdirectory(src/Modules)
-
-# Get rid of auto_ptr warnings from yaml-cpp
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
-
-FILE(GLOB_RECURSE RD51_LIBS lib/*.a)
-
-include_directories("include")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
-set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
-add_executable(test_plugin test/src/test_plugin.cpp)
-
-
-
-target_link_libraries(test_plugin PUBLIC pthread rt utilities boardreader eventbuilder)
-install(TARGETS test_plugin EXPORT DESTINATION bin)
-
-add_executable(test_logging test/src/test_logging.cpp)
-target_link_libraries(test_logging PUBLIC pthread rt utilities core)
-install(TARGETS test_logging EXPORT DESTINATION bin)
+add_subdirectory(test)

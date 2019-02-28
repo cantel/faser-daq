@@ -1,33 +1,37 @@
-# rd51-daq
+# RD51-daq
 
-DAQ fwk for RD51
-
-## Getting Started
-
-TBA
+DAQ framework for RD51
 
 # Install the rd51 framework
-
-## Set up your host and install supervisord
-
-### Install ansible on CentOS7
+### Run ansible-playbook to configure your CentOS7 host
+The playbook will set up your host with the system libraries and will install supervisord
 
     sudo yum install -y ansible
-
-### Run ansible-playbook to configure your host
-
     cd ansible/
-    ansible-playbook set-up-host.yml  --ask-become-pass
+    ansible-playbook set-up-host.yml --ask-become-pass
 
 ## Software compilation
 
-    source cmake_daq/bin/setup.sh
+    source cmake/setup-cvmfs.sh
     git submodule init
     git submodule update
     mkdir build
     cd build
     cmake3 ../
     make
+
+You can also do incremental compilation like:
+
+    make utilities
+    make core
+
+### Running
+
+TBA
+
+```
+pwd
+```
 
 ## How to add a submodule
 ### Cereal
@@ -67,15 +71,4 @@ TBA
     cd ../
     git add
     git commit
-
-
-
-### Running
-
-TBA
-
-```
-pwd
-```
-
 

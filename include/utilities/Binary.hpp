@@ -14,6 +14,7 @@
 namespace daq
 {
 namespace utilities
+{
 
   class Binary
   {

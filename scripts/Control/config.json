@@ -16,5 +16,11 @@
         "type": "eventbuilder",
         "host": "rd51pro",
         "port": 6001
+    },
+    {
+        "name": "daq03",
+        "type": "filedatalogger",
+        "host": "rd51pro",
+        "port": 6002
     }
 ]

@@ -14,3 +14,8 @@ target_link_libraries(boardreader PUBLIC utilities zmq)
 file(GLOB_RECURSE BOARDREADER_SOURCES "EventBuilder.cpp")
 add_library(eventbuilder SHARED ${BOARDREADER_SOURCES})
 target_link_libraries(eventbuilder PUBLIC core utilities zmq)
+
+file(GLOB_RECURSE BOARDREADER_SOURCES "FileDataLogger.cpp")
+add_library(filedatalogger SHARED ${BOARDREADER_SOURCES})
+target_link_libraries(filedatalogger PUBLIC core utilities zmq)
+

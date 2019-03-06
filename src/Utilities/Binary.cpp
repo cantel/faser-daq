@@ -2,6 +2,7 @@
 #include <cstring>
 #include "utilities/Binary.hpp"
 #include "utilities/Logging.hpp"
+#include "utilities/Common.hpp"
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)

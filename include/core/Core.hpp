@@ -20,7 +20,7 @@ class Core
 
     bool setupCommandPath();
     bool setupCommandHandler();
-    bool loadPlugin(const std::string& pluginName);
+    // bool loadPlugin(const std::string& pluginName);
 
   private:
     std::string m_address;

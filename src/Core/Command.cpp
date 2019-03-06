@@ -1,7 +1,8 @@
 #include "utilities/Logging.hpp"
 #include "utilities/Common.hpp"
-
+#include "core/Configuration.hpp"
 #include "core/Command.hpp"
+#include "core/PluginManager.hpp"
 
 #include <ctime>
 #include <iomanip>
@@ -14,25 +15,49 @@
 using namespace daq::core;
 using namespace std::chrono_literals;
 
-
 bool daq::core::Command::startCommandHandler()
 {
   //m_commandHandler = std::make_unique<daq::utilities::ReusableThread>(10);
   unsigned tid = 1;
-  m_commandFunctors.push_back( 
-    [&, tid]{
-      INFO("CommandThread  ->>> Should handle message: " << m_message);
-      setResponse("Booooo");
-      setHandled(true);
-    }
-  );
-  
+  m_commandFunctors.push_back(
+      [&, tid] {
+        INFO("CommandThread  ->>> Should handle message: " << m_message);
+        executeCommand();
+        setResponse("Booooo");
+        setHandled(true);
+      });
+}
+
+bool daq::core::Command::executeCommand()
+{
+  Configuration &cfg = Configuration::instance();
+  cfg.load(m_message);
+  INFO("Loaded configuration");
+  auto command = cfg.get<std::string>("command");
+  INFO("Get command: " << command );
+  daq::core::PluginManager &m_plugin = daq::core::PluginManager::instance();
+  if(command == "configure")
+  {
+    auto type = cfg.get<std::string>("type");
+    INFO("Loading type: " << type);
+    m_plugin.load(type);
+  }
+  else if(command == "start")
+  {
+    m_plugin.start();
+  }
+  else if(command == "stop")
+  {
+    m_plugin.stop();
+  }
+
 }
 
 bool daq::core::Command::handleCommand()
 {
   m_commandHandler->set_work(m_commandFunctors[0]);
-  while (busy()){
+  while (busy())
+  {
     std::this_thread::sleep_for(500ms);
   }
   return true;
@@ -40,14 +65,12 @@ bool daq::core::Command::handleCommand()
 
 bool daq::core::Command::busy()
 {
-  bool busy = (m_commandHandler->get_readiness()==false) ? true : false;
+  bool busy = (m_commandHandler->get_readiness() == false) ? true : false;
   return busy;
 }
 
 //template <typename TValue, typename TPred>
-//BinarySearchTree<TValue, TPred>::BinarySearchTree() 
-
-
+//BinarySearchTree<TValue, TPred>::BinarySearchTree()
 
 /*
 template <class ST>
@@ -63,5 +86,3 @@ ConnectionManager<ST>::~ConnectionManager() {
 
 }
 */
-
- 

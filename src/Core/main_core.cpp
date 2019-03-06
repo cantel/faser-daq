@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
 
     c.setupCommandPath();
     c.setupCommandHandler();
-    c.loadPlugin("boardreader");
+    // c.loadPlugin("boardreader");
 
     std::this_thread::sleep_for(60s);
 

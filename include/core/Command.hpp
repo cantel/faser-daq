@@ -21,6 +21,7 @@ class Command : public daq::utilities::Singleton<Command>
 //    bool getHandled() { return m_handled; }
 
     bool startCommandHandler();
+    bool executeCommand();
     bool handleCommand();
 
     bool getHandled() { return m_handled; }

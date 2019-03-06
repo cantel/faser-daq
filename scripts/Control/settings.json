@@ -1,5 +1,5 @@
 {
     "group": "rd51",
-    "build_dir": "/home/engamber/daq/build/bin",
-    "exe": "/home/engamber/daq/build/bin/main_core"
+    "build_dir": "/put/your/own",
+    "exe": "/put/your/own/main_core"
 }

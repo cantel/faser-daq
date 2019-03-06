@@ -43,6 +43,7 @@ bool daq::core::Command::executeCommand(std::string& response)
     INFO("Loading type: " << type);
     m_plugin.load(type);
     response = "Success";
+    m_plugin.setState("ready");
   }
   else if(command == "start")
   {

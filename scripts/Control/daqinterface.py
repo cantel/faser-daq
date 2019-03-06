@@ -2,13 +2,15 @@
 
 import sys
 import zmq
-import msgpack
 import supervisord
 import json
 
-group = 'rd51'
-dir = '/home/engamber/workspace/daq/build/bin'
-exe = '/home/engamber/workspace/daq/build/bin/main_core'
+with open('settings.json') as f:
+    settings = json.load(f)
+
+group = settings['group']
+dir = settings['build_dir']
+exe = settings['exe']
 
 with open('config.json') as f:
     data = json.load(f)

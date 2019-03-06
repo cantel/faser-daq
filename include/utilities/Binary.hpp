@@ -27,6 +27,8 @@ namespace utilities
     /// Constructor initializing a BLOB with initialSize bytes
     explicit Binary( long initialSizeInBytes );
 
+    explicit Binary( const void* data, long size );
+
     /// Destructor. Frees internally allocated memory
     ~Binary();
 
@@ -50,6 +52,8 @@ namespace utilities
 
     /// Returns the starting address of the BLOB
     void* startingAddress();
+
+    const void* data() const;
 
     /// Current size of the blob
     long size() const;

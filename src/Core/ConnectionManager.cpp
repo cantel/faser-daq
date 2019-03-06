@@ -34,23 +34,15 @@ bool ConnectionManager::setupCommandConnection(uint8_t cid, std::string connStr)
       //INFO(m_className << " CMD_THREAD: Going for RECV poll...");
       if ((m_cmd_socket->recv(&cmdMsg, ZMQ_DONTWAIT)) == true) {
         std::string cmdmsgStr(static_cast<char*>(cmdMsg.data()), cmdMsg.size());
-        INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsgStr);
-        
+        //INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsgStr);
         cmd.setMessage(cmdmsgStr);
         while(!cmd.handleCommand()){
-          INFO(m_className << " CMD_THREAD: ... waiting signal for handled message...");
+          //INFO(m_className << " CMD_THREAD: ... waiting signal for handled message...");
           std::this_thread::sleep_for(1s); 
         }
-
-        // RS -> TODO: Handle CMDs! 
-        //    Deserialization by a library, or queue in commands to be handled.
-        //    The DAQProcess should have a thread that checks for unhandled commands in queue.
-        //    Or we have the command handler right here... 
-        //       -> e.g.: m_cmd_handler->process(cmd);
-
         s_send( *(m_cmd_socket.get()), cmd.getResponse() ); 
       }
-      INFO(m_className << " Sleeping a second...");
+      //INFO(m_className << " Sleeping a second...");
       std::this_thread::sleep_for(1s); 
     }
   });

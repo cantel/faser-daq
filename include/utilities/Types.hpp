@@ -18,6 +18,8 @@ static const timestamp_t us = 1000 * ns;
 static const timestamp_t ms = 1000 * us;
 static const timestamp_t s  = 1000 * ms;
 
+typedef enum { UNKNOWN=0, BINARY, INMEMORY, CASSANDRA, REST } EBackendType;
+
 }
 }
 

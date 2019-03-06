@@ -1,6 +1,16 @@
 #ifndef DAQ_UTILITIES_SINGLETON_HPP_
 #define DAQ_UTILITIES_SINGLETON_HPP_
 
+/*
+ * Types
+ * Author: Roland.Sipos@cern.ch
+ * Description: 
+ *   Singleton template from CodeReviews
+ *   https://codereview.stackexchange.com/questions/173929/modern-c-singleton-template
+ * Date: March 2019
+*/
+
+
 namespace daq{
 namespace utilities{
 

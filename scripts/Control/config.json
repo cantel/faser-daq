@@ -22,5 +22,12 @@
         "type": "filedatalogger",
         "host": "rd51pro",
         "port": 6002
+    },
+    {
+        "name": "daq04",
+        "type": "cassandradatalogger",
+        "host": "rd51pro",
+        "port": 6003
     }
 ]
+

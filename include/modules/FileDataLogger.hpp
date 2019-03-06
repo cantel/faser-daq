@@ -1,5 +1,5 @@
-#ifndef NEWMODULE_H_
-#define NEWMODULE_H_
+#ifndef DAQ_MODULES_FILEDATALOGGER_HPP_
+#define DAQ_MODULES_FILEDATALOGGER_HPP_
 
 #include <iostream>
 
@@ -23,4 +23,4 @@ class FileDataLogger : public DAQProcess, public DataLogger
 
 };
 
-#endif /* NEWMODULE_H_ */
+#endif /* DAQ_MODULES_FILEDATALOGGER_HPP_ */

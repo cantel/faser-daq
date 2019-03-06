@@ -19,3 +19,7 @@ file(GLOB_RECURSE BOARDREADER_SOURCES "FileDataLogger.cpp")
 add_library(filedatalogger SHARED ${BOARDREADER_SOURCES})
 target_link_libraries(filedatalogger PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE BOARDREADER_SOURCES "CassandraDataLogger.cpp")
+add_library(cassandradatalogger SHARED ${BOARDREADER_SOURCES})
+target_link_libraries(cassandradatalogger PUBLIC core utilities zmq)
+

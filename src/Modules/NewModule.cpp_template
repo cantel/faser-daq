@@ -1,0 +1,37 @@
+#include "modules/NewModule.hpp_template"
+#include "utilities/Logging.hpp"
+
+extern "C" NewModule *create_object()
+{
+    return new NewModule;
+}
+
+extern "C" void destroy_object(NewModule *object)
+{
+    delete object;
+}
+
+NewModule::NewModule()
+{
+    INFO("NewModule::NewModule");
+}
+
+NewModule::~NewModule()
+{
+    INFO("NewModule::~NewModule");
+}
+
+void NewModule::start()
+{
+    INFO("NewModule::start");
+}
+
+void NewModule::stop()
+{
+    INFO("NewModule::stop");
+}
+
+void NewModule::runner()
+{
+    
+}

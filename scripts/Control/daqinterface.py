@@ -18,6 +18,9 @@ with open('config.json') as f:
 arg = "complete"
 if len(sys.argv) == 1:
     print("Available: 'remove' 'supervisor' 'jzonmq'. Going for complete service")
+elif sys.argv[1] == '-h':
+    print("Default complete service. Available options: 'remove' 'supervisor' 'jzonmq'")
+    exit(0)
 else:
     arg = sys.argv[1]
 

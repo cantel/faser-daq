@@ -11,7 +11,7 @@ namespace core{
 class Command : public daq::utilities::Singleton<Command>
 {
   public:
-    Command() : m_handled(false), m_message{""}, m_response{""}
+    Command() : m_should_stop{false}, m_handled(false), m_message{""}, m_response{""}
     {
       m_commandHandler = std::make_unique<daq::utilities::ReusableThread>(10);
     }
@@ -30,11 +30,11 @@ class Command : public daq::utilities::Singleton<Command>
     void setMessage(std::string message) { m_message = message; }
     std::string getResponse() { return m_response; }
     void setResponse(std::string response) { m_response = response; }
-    
+    bool getShouldStop() { return m_should_stop; }
 
   private:
     bool busy();
- 
+    bool m_should_stop;
     bool m_handled;
     std::string m_message;
     std::string m_response;

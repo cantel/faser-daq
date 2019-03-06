@@ -18,9 +18,11 @@ int main(int argc, char **argv) {
 
     c.setupCommandPath();
     c.setupCommandHandler();
-    // c.loadPlugin("boardreader");
 
-    std::this_thread::sleep_for(60s);
+    while(!c.getShouldStop())
+    {
+        std::this_thread::sleep_for(1s);
+    }
 
     return 0;
 }

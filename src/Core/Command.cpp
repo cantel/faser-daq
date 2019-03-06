@@ -57,6 +57,10 @@ bool daq::core::Command::executeCommand(std::string& response)
     response = "Success";
     m_plugin.setState("ready");
   }
+  else if(command == "shutdown")
+  {
+    m_should_stop = true;
+  }
   else if(command == "status")
   {
     response = m_plugin.getState();

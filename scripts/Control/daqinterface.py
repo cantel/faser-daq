@@ -61,6 +61,12 @@ def stopCommand():
         print(s)
         handleRequest(p['host'], p['port'], s)
 
+def shutdownCommand():
+    for p in data:
+        p['command']='shutdown'
+        s = json.dumps(p)
+        print(s)
+        handleRequest(p['host'], p['port'], s)
 
 def configureProcesses():
     for p in data:
@@ -112,9 +118,11 @@ thread = statusCheck()
 thread.start()
 
 while(True):
-    text = input("prompt")
+    text = input("")
     print(text)
     if text == "start":
         startCommand()
     elif text == "stop":
         stopCommand()
+    elif text == "shutdown":
+        shutdownCommand()

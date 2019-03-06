@@ -15,19 +15,22 @@ class Core
 {
   public:
     Core(int port, std::string protocol, std::string address)
-        : m_port{port}, m_protocol{protocol}, m_address(address) {};
+        : m_port{port}, m_protocol{protocol}, m_address{address}, m_should_stop{false} {};
     ~Core(){};
 
     bool setupCommandPath();
     bool setupCommandHandler();
     // bool loadPlugin(const std::string& pluginName);
+    bool getShouldStop() {return m_should_stop;};
 
   private:
-    std::string m_address;
     int m_port;
     std::string m_protocol;
+    std::string m_address;
 
     std::thread m_cmdHandler;
+
+    std::atomic<bool> m_should_stop;
 
     // ZMQ ConnectionManager
     daq::core::ConnectionManager &m_connections = daq::core::ConnectionManager::instance();

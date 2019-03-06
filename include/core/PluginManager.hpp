@@ -27,6 +27,7 @@ class PluginManager : public daq::utilities::Singleton<PluginManager>
     bool load(std::string name);
     void start() { m_dp->start(); };
     void stop() { m_dp->stop(); };
+    std::string getState() { return m_dp->getState(); }
 };
 
 }

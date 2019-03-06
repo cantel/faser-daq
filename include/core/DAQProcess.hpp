@@ -3,8 +3,6 @@
 #ifndef DAQPROCESS_HPP_
 #define DAQPROCESS_HPP_
 
-// #include <atomic>
-
 #include "utilities/Logging.hpp"
 #include "utilities/Common.hpp"
 #include "core/Configuration.hpp"
@@ -16,19 +14,17 @@
 class DAQProcess
 {
   public:
-    DAQProcess() { 
-      //INFO(__METHOD_NAME__ << " BINDING COMMAND SOCKET...");
-      //std::string connStr("tcp://*:5557");
-      //m_connections.setupCommandConnection(1, connStr);
-    };
+    DAQProcess() { m_state = "ready"; };
 
     virtual ~DAQProcess(){};
 
     /* use virtual otherwise linker will try to perform static linkage */
-    virtual void start() = 0;
-    virtual void stop() = 0;
+    virtual void start() { m_state = "running"; };
+    virtual void stop() { m_state = "ready"; };
 
     virtual void runner() = 0;
+
+    std::string getState() { return m_state; }
 
   protected:
     // ZMQ ConnectionManager
@@ -36,6 +32,7 @@ class DAQProcess
     // JSON Configuration map
     daq::core::Configuration& m_config = daq::core::Configuration::instance();
 
+    std::string m_state;
 };
 
 #endif /* DAQPROCESS_HPP_ */

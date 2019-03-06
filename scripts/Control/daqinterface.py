@@ -4,6 +4,54 @@ import sys
 import zmq
 import supervisord
 import json
+from time import sleep
+
+context = zmq.Context()
+
+def removeProcesses():
+    for p in data:
+        sd = supervisord.supervisord(p['host'], group)
+
+        info = sd.getAllProcessInfo()
+        for i in info:
+            print(i)
+            if i['statename'] == 'RUNNING':
+                print('Stop', sd.stopProcess(i['name']))
+                print('State', sd.getProcessState(i['name'])['statename'])
+            print('Remove', sd.removeProcessFromGroup(i['name']))
+
+def addProcesses():
+    for p in data:
+        sd = supervisord.supervisord(p['host'], group)
+
+        print("Add", sd.addProgramToGroup(p['name'], exe+" "+str(p['port']), dir) )
+
+
+def handleRequest(host, port, request):
+    socket = context.socket(zmq.REQ)
+    socket.RCVTIMEO = 3000
+    socket.connect("tcp://"+host+":"+str(port))
+    socket.send_string(request)
+    try:
+        reply = socket.recv()
+        print(reply)
+        return reply
+    except:
+        print("Timeout occurred")
+
+def checkStatus():
+    for p in data:
+        p['command']='status'
+        s = json.dumps(p)
+        print(s)
+        handleRequest(p['host'], p['port'], s)
+
+def configureProcesses():
+    for p in data:
+        p['command']='configure'
+        s = json.dumps(p)
+        print(s)
+        handleRequest(p['host'], p['port'], s)
 
 with open('settings.json') as f:
     settings = json.load(f)
@@ -25,40 +73,14 @@ else:
     arg = sys.argv[1]
 
 if arg == "remove" or arg == 'complete':
-    for p in data:
-        sd = supervisord.supervisord(p['host'], group)
-
-        info = sd.getAllProcessInfo()
-        for i in info:
-            print(i)
-            if i['statename'] == 'RUNNING':
-                print('Stop', sd.stopProcess(i['name']))
-                print('State', sd.getProcessState(i['name'])['statename'])
-            print('Remove', sd.removeProcessFromGroup(i['name']))
+    removeProcesses()
 
 if arg == 'supervisor' or arg == 'complete':
-    for p in data:
-        sd = supervisord.supervisord(p['host'], group)
-
-        print("Add", sd.addProgramToGroup(p['name'], exe+" "+str(p['port']), dir) )
-
+    addProcesses()
 
 if arg == 'jzonmq' or arg == 'complete':
-    context = zmq.Context()
-    for p in data:
-        socket = context.socket(zmq.REQ)
-        socket.RCVTIMEO = 3000
-        socket.connect("tcp://"+p['host']+":"+str(p['port']))
-        p['command']='configure'
-        s = json.dumps(p)
-        print(s)
-        socket.send_string(s)
-        print("sent")
+    configureProcesses()
 
-        try:
-            reply = socket.recv()
-            print(reply)
-        except:
-            print("Timeout occurred")
-
-
+while(True):
+    checkStatus()
+    sleep(1)

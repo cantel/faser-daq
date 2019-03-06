@@ -26,27 +26,19 @@ BoardReader::BoardReader(std::string name, int num)
 {
     INFO(__METHOD_NAME__ << " Passed " << name << " " << num << " with constructor");
     m_run = false;
-    // m_config.load("{ \"happy\": true, \"pi\": 3.141, \"foo\": \"bar\" }");
     INFO(__METHOD_NAME__ << " With config: " << m_config.dump() );
+    INFO("getState: " << this->getState() );
 }
 
 BoardReader::~BoardReader()
 {
-    // INFO(__METHOD_NAME__ << " Clearing config: " << m_config.dump() );
-    // m_config.clear();
+    INFO(__METHOD_NAME__);
 }
 
 void BoardReader::start()
 {
-    // INFO(__METHOD_NAME__ << " Changing config...");
-    // std::string key("bla");
-    // m_config.set(key, 42);
-    
-
-    //INFO(__METHOD_NAME__ << " BINDING COMMAND SOCKET...");
-    //std::string connStr("tcp://188.185.65.114:5557");
-    //m_connections.setupCmdConnection(1, connStr);
-     
+    INFO(__METHOD_NAME__);
+    INFO("getState: " << this->getState() );
 
     std::this_thread::sleep_for(60s);
 
@@ -59,10 +51,8 @@ void BoardReader::start()
 
 void BoardReader::stop()
 {
-    // INFO(__METHOD_NAME__ << " Fetching config...");
-    // std::string key("bla");
-    // int v = m_config.get<int>(key);
-    // INFO("  -> value: " << v);
+    INFO(__METHOD_NAME__);
+    INFO("getState: " << this->getState() );
 }
 
 void BoardReader::runner()

@@ -1,0 +1,26 @@
+
+- name: Start service cassandra, if not started
+  service:
+    name: cassandra
+    state: started
+
+- name: Stop service cassandra, if started
+  service:
+    name: cassandra
+    state: stopped
+
+- name: Restart service cassandra, in all cases
+  service:
+    name: cassandra
+    state: restarted
+
+- name: Reload service cassandra, in all cases
+  service:
+    name: cassandra
+    state: reloaded
+
+- name: Enable service cassandra, and not touch the state
+  service:
+    name: cassandra
+    enabled: yes
+

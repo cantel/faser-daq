@@ -22,13 +22,14 @@ bool daq::core::Command::startCommandHandler()
   m_commandFunctors.push_back(
       [&, tid] {
         INFO("CommandThread  ->>> Should handle message: " << m_message);
-        executeCommand();
-        setResponse("Booooo");
+        std::string response;
+        executeCommand(response);
+        setResponse(response);
         setHandled(true);
       });
 }
 
-bool daq::core::Command::executeCommand()
+bool daq::core::Command::executeCommand(std::string& response)
 {
   Configuration &cfg = Configuration::instance();
   cfg.load(m_message);
@@ -41,16 +42,22 @@ bool daq::core::Command::executeCommand()
     auto type = cfg.get<std::string>("type");
     INFO("Loading type: " << type);
     m_plugin.load(type);
+    response = "Success";
   }
   else if(command == "start")
   {
     m_plugin.start();
+    response = "Success";
   }
   else if(command == "stop")
   {
     m_plugin.stop();
+    response = "Success";
   }
-
+  else if(command == "status")
+  {
+    response = m_plugin.getState();
+  }
 }
 
 bool daq::core::Command::handleCommand()

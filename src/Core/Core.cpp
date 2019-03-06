@@ -24,7 +24,8 @@ bool Core::loadPlugin(const std::string& pluginName) {
   m_plugin.load(pluginName);
 }
 
-bool Core::spawnCommandHandler(){
-  return false;
+bool Core::setupCommandHandler(){
+  m_command.startCommandHandler();
+  return true;
 }
  

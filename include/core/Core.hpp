@@ -19,7 +19,7 @@ class Core
     ~Core(){};
 
     bool setupCommandPath();
-    bool spawnCommandHandler();
+    bool setupCommandHandler();
     bool loadPlugin(const std::string& pluginName);
 
   private:

@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     daq::core::Core c(port, "tcp", "*");
 
     c.setupCommandPath();
-    c.spawnCommandHandler();
+    c.setupCommandHandler();
     c.loadPlugin("boardreader");
 
     std::this_thread::sleep_for(60s);

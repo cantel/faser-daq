@@ -3,6 +3,7 @@
 
 #include "utilities/Logging.hpp"
 #include "utilities/Singleton.hpp"
+#include "utilities/ReusableThread.hpp"
 
 namespace daq{
 namespace core{
@@ -10,11 +11,17 @@ namespace core{
 class Command : public daq::utilities::Singleton<Command>
 {
   public:
-    Command() : m_handled(false), m_message{""}, m_response{""} {}
+    Command() : m_handled(false), m_message{""}, m_response{""}
+    {
+      m_commandHandler = std::make_unique<daq::utilities::ReusableThread>(10);
+    }
     ~Command(){}
 
 //    std::string getResponse() { return m_response; }
 //    bool getHandled() { return m_handled; }
+
+    bool startCommandHandler();
+    bool handleCommand();
 
     bool getHandled() { return m_handled; }
     void setHandled(bool handled) { m_handled = handled; }
@@ -24,10 +31,16 @@ class Command : public daq::utilities::Singleton<Command>
     void setResponse(std::string response) { m_response = response; }
     
 
-  private:  
+  private:
+    bool busy();
+ 
     bool m_handled;
     std::string m_message;
     std::string m_response;
+ 
+    // Command handler
+    std::unique_ptr<daq::utilities::ReusableThread> m_commandHandler;
+    std::vector<std::function<void()>> m_commandFunctors;
 
 };
 

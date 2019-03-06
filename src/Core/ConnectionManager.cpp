@@ -37,8 +37,8 @@ bool ConnectionManager::setupCommandConnection(uint8_t cid, std::string connStr)
         INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsgStr);
         
         cmd.setMessage(cmdmsgStr);
-        while(!cmd.getHandled()){
-        INFO(m_className << " CMD_THREAD: ... waiting signal for handled message...");
+        while(!cmd.handleCommand()){
+          INFO(m_className << " CMD_THREAD: ... waiting signal for handled message...");
           std::this_thread::sleep_for(1s); 
         }
 

@@ -1,0 +1,7 @@
+---
+- hosts: localhost
+  remote_user: "{{ lookup('env','LOGNAME') }}"
+  become: yes
+  become_method: sudo
+  roles:
+    - cassandra

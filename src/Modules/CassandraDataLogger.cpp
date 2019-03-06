@@ -1,6 +1,7 @@
 #include "modules/CassandraDataLogger.hpp"
 #include "utilities/Logging.hpp"
 #include "utilities/Common.hpp"
+#include "utilities/ChunkedStorage.hpp"
 
 #include <cassandra.h>
 

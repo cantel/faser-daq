@@ -48,11 +48,13 @@ bool daq::core::Command::executeCommand(std::string& response)
   {
     m_plugin.start();
     response = "Success";
+    m_plugin.setState("running");
   }
   else if(command == "stop")
   {
     m_plugin.stop();
     response = "Success";
+    m_plugin.setState("ready");
   }
   else if(command == "status")
   {

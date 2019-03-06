@@ -36,7 +36,6 @@ BoardReader::~BoardReader()
 
 void BoardReader::start()
 {
-    m_state = "running";
     INFO(__METHOD_NAME__ << " getState: " << getState() );
 
     m_run = true;
@@ -53,7 +52,6 @@ void BoardReader::start()
 void BoardReader::stop()
 {
     m_run = false;
-    m_state = "ready";
     INFO(__METHOD_NAME__ << " getState: " << this->getState() );
 }
 

@@ -25,7 +25,8 @@ class DAQProcess
     virtual void runner() = 0;
 
     std::string getState() { return m_state; }
-
+    void setState(std::string state) { m_state = state; }
+    
   protected:
     // ZMQ ConnectionManager
     daq::core::ConnectionManager& m_connections = daq::core::ConnectionManager::instance(); 

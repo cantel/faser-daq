@@ -12,6 +12,7 @@
 class BoardReader : public DAQProcess
 {
     std::atomic<bool> m_run;
+    std::unique_ptr<std::thread> m_runner_thread;
 
   public:
     BoardReader(std::string name, int num);

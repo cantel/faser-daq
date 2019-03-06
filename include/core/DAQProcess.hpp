@@ -14,13 +14,13 @@
 class DAQProcess
 {
   public:
-    DAQProcess() { m_state = "ready"; };
+    DAQProcess() {};
 
     virtual ~DAQProcess(){};
 
     /* use virtual otherwise linker will try to perform static linkage */
-    virtual void start() { m_state = "running"; };
-    virtual void stop() { m_state = "ready"; };
+    virtual void start() = 0;
+    virtual void stop() = 0;
 
     virtual void runner() = 0;
 

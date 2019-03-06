@@ -30,7 +30,7 @@ bool PluginManager::load(std::string name)
     void *handle = dlopen(pluginName.c_str(), RTLD_LAZY);
     if (handle == 0)
     {
-        ERROR("Plugin name not valid");
+        ERROR("Plugin not loaded!");
         return false;
     }
 

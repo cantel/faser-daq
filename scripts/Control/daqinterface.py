@@ -5,6 +5,7 @@ import zmq
 import supervisord
 import json
 from time import sleep
+import threading
 
 context = zmq.Context()
 
@@ -46,12 +47,38 @@ def checkStatus():
         print(s)
         handleRequest(p['host'], p['port'], s)
 
+def startCommand():
+    for p in data:
+        p['command']='start'
+        s = json.dumps(p)
+        print(s)
+        handleRequest(p['host'], p['port'], s)
+
+def stopCommand():
+    for p in data:
+        p['command']='stop'
+        s = json.dumps(p)
+        print(s)
+        handleRequest(p['host'], p['port'], s)
+
+
 def configureProcesses():
     for p in data:
         p['command']='configure'
         s = json.dumps(p)
         print(s)
         handleRequest(p['host'], p['port'], s)
+
+
+class statusCheck (threading.Thread):
+    def __init__(self):
+        threading.Thread.__init__(self)
+    def run(self):
+        print ("Starting statusCheck")
+        while(True):
+            checkStatus()
+            sleep(2)
+        print ("Exiting " + self.name)
 
 with open('settings.json') as f:
     settings = json.load(f)
@@ -81,6 +108,13 @@ if arg == 'supervisor' or arg == 'complete':
 if arg == 'jzonmq' or arg == 'complete':
     configureProcesses()
 
+thread = statusCheck()
+thread.start()
+
 while(True):
-    checkStatus()
-    sleep(1)
+    text = input("prompt")
+    print(text)
+    if text == "start":
+        startCommand()
+    elif text == "stop":
+        stopCommand()

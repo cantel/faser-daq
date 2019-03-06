@@ -78,7 +78,7 @@ namespace daq {
       } 
 
       /* Create a cond::Binary from the memory buffer: 1 memcpy involved. */
-      cond::Binary cB( static_cast<const void*>(chunk.memory), chunk.size );
+      daq::utilities::Binary cB( static_cast<const void*>(chunk.memory), chunk.size );
       payload = cB;
 
       /* cleanup curl stuff */ 

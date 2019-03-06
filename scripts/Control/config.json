@@ -27,7 +27,8 @@
         "name": "daq04",
         "type": "cassandradatalogger",
         "host": "rd51pro",
-        "port": 6003
+        "port": 6003,
+        "ring": "127.0.0.1"
     }
 ]
 

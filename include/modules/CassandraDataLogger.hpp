@@ -6,6 +6,8 @@
 #include "core/DAQProcess.hpp"
 #include "core/DataLogger.hpp"
 
+#include <cassandra.h>
+
 class CassandraDataLogger : public DAQProcess, public DataLogger
 {
   public:
@@ -20,6 +22,12 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
     void write();
     void read();
     void shutdown();
+
+  private:
+    const std::string getErrorStr( CassFuture*& future );
+
+    CassCluster* m_cluster;
+    CassSession* m_session;
 
 };
 

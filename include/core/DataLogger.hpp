@@ -19,9 +19,6 @@ class DataLogger
     virtual void read() = 0;
     virtual void shutdown() = 0;
 
-  protected:
-    daq::core::Configuration& m_config = daq::core::Configuration::instance();
-
 };
 
 #endif /* DAQPROCESS_HPP_ */

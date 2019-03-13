@@ -72,17 +72,15 @@ bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, const std::stri
   uint8_t ioT = 1;
   m_contexts[chn] = std::make_unique<zmq::context_t>(ioT);
   m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_PAIR);
+  m_pcqs[chn] = std::make_unique<MessageQueue>(queueSize);
+  m_directions[chn] = dir;
   if ( dir == EDirection::SERVER ) {
-    m_directions[chn] = dir;
     m_sockets[chn]->bind(connStr.c_str());
-//    addSendHandler(chn); // this goes to start.
-    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] bind:" << connStr);
+    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] bind: " << connStr);
   } else if ( dir == EDirection::CLIENT ) {
-    m_directions[chn] = dir;
     m_sockets[chn]->connect(connStr.c_str());
-    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] connect:" << connStr);
+    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] connect: " << connStr);
   }
-  m_pcqs[chn] = std::make_unique<MessageQueue>(queueSize);  
   return true;
 }
 

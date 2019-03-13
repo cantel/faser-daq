@@ -93,7 +93,9 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn)
     while(!m_stop_handlers){
       zmq::message_t msg;
       if ((m_sockets[chn]->recv(&msg, ZMQ_DONTWAIT)) == true) {
-        m_pcqs[chn]->write( std::move(msg) );
+        INFO("WOOOOF WOOOF  RECEIVED SOMETHING!");
+        m_pcqs[chn]->write( msg );
+        INFO("    -> wrote to queue");
       }
       INFO(m_className << " No messages for some time... sleeping a second...");
       std::this_thread::sleep_for(1s);

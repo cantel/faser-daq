@@ -88,7 +88,7 @@ bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, const std::stri
 
 bool ConnectionManager::addReceiveHandler(uint64_t chn)
 {
-  INFO(__METHOD_NAME__ << " SendHandler for channel [" << chn << "] starting...");
+  INFO(__METHOD_NAME__ << " [SERVER] ReceiveHandler for channel [" << chn << "] starting...");
   m_handlers[chn] = std::thread([&](){
     while(!m_stop_handlers){
       zmq::message_t msg;
@@ -107,7 +107,7 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn)
 
 bool ConnectionManager::addSendHandler(uint64_t chn)
 {
-  INFO(__METHOD_NAME__ << " ReceiveHandler for channel [" << chn << "] starting..."); 
+  INFO(__METHOD_NAME__ << " [CLIENT] SendHandler for channel [" << chn << "] starting..."); 
   m_handlers[chn] = std::thread([&](){
     while(!m_stop_handlers){
       zmq::message_t msg;

@@ -1,0 +1,67 @@
+[
+    {
+        "name": "boardreader01",
+        "host": "localhost",
+        "port": 5555,
+        "type": "boardreader",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+        "connections": {
+            "destinations": {
+                    "1": {
+                        "chid": 1,
+                        "host": "localhost",
+                        "port": 8101
+                    }
+                    
+            }
+        }
+    },
+    {
+        "name": "boardreader02",
+        "host": "localhost",
+        "port": 5556,
+        "type": "boardreader",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+        "connections": {
+            "destinations": {
+                    "1": {
+                        "chid": 1,
+                        "host": "localhost",
+                        "port": 8102
+                    }
+                    
+            }
+        }
+    },
+    {
+        "name": "eventbuilder01",
+        "host": "localhost",
+        "port": 5557,
+        "type": "eventbuilder",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+        "connections": {
+            "sources": {
+                    "1": {
+                        "chid": 1,
+                        "host": "*",
+                        "port": 8101
+                    },
+                    "2": {
+                        "chid": 2,
+                        "host": "*",
+                        "port": 8102
+                    }
+                    
+            }
+        }
+    }
+]

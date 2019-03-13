@@ -2,7 +2,6 @@
 
 #include "modules/BoardReader.hpp"
 
-#include <thread>
 #include <chrono>
 
 // #include <stdlib.h>
@@ -38,7 +37,6 @@ extern "C" void destroy_object(BoardReader *object)
 BoardReader::BoardReader(std::string name, int num)
 {
     INFO(__METHOD_NAME__ << " Passed " << name << " " << num << " with constructor");
-    m_run = false;
     INFO(__METHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState() );
 }
 
@@ -51,13 +49,11 @@ void BoardReader::start()
 {
     INFO(__METHOD_NAME__ << " getState: " << getState() );
 
-    m_run = true;
     m_runner_thread = std::make_unique<std::thread>(&BoardReader::runner, this);
 }
 
 void BoardReader::stop()
 {
-    m_run = false;
     INFO(__METHOD_NAME__ << " getState: " << this->getState() );
 }
 
@@ -68,9 +64,9 @@ void BoardReader::runner()
     microseconds timestamp;
     auto& cm = daq::core::ConnectionManager::instance();
 
+    INFO(__METHOD_NAME__ << " Running...");
     while (m_run)
     {
-        INFO(__METHOD_NAME__ << " Running...");
         cm.putStr(1, "blyat");
     
         timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
@@ -87,7 +83,7 @@ void BoardReader::runner()
         // ready to be sent to EB
 
         sequence_number++;
-        std::this_thread::sleep_for(500ms);
+        std::this_thread::sleep_for(10ms);
     }
     INFO(__METHOD_NAME__ << " Runner stopped");
 }

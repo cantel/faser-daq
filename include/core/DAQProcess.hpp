@@ -25,7 +25,15 @@ class DAQProcess
     virtual void runner() = 0;
 
     std::string getState() { return m_state; }
-    void setState(std::string state) { m_state = state; }
+    void setState(std::string state) {
+       m_state = state;
+       if(m_state == "running") {
+         m_run = true;
+       }
+       else if(m_state == "ready") {
+         m_run = false;
+       }
+     }
     
   protected:
     // ZMQ ConnectionManager
@@ -34,6 +42,8 @@ class DAQProcess
     daq::core::Configuration& m_config = daq::core::Configuration::instance();
 
     std::string m_state;
+    std::atomic<bool> m_run;
+    std::unique_ptr<std::thread> m_runner_thread;
 };
 
 #endif /* DAQPROCESS_HPP_ */

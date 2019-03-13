@@ -62,7 +62,8 @@ public:
   bool addChannel(uint64_t chn, EDirection dir, const std::string& connStr, size_t queueSize); 
 
   // Getter/Putter for channels:
-  daq::utilities::Binary get(uint64_t chn);
+//  daq::utilities::Binary get(uint64_t chn);
+  bool get(uint64_t chn, daq::utilities::Binary& bin);
   void put(uint64_t chn, utilities::Binary& msgBin);
   void putStr(uint64_t chn, const std::string & string);
   std::string getStr(uint64_t chn);

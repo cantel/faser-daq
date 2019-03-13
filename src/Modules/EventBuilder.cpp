@@ -52,7 +52,7 @@ void EventBuilder::runner()
         INFO(__METHOD_NAME__ << " Running...");
         std::this_thread::sleep_for(500ms);
         INFO("Received on channel 1 " << cm.getStr(1));
-        // INFO("Received on channel 2 " << cm.getStr(2));
+        INFO("Received on channel 2 " << cm.getStr(2));
     }
     INFO(__METHOD_NAME__ << " Runner stopped");
 }

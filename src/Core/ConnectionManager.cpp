@@ -96,7 +96,7 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn)
         m_pcqs[chn]->write( std::move(msg) );
         INFO("    -> wrote to queue");
       }
-      INFO(m_className << " No messages for some time... sleeping a second...");
+      // INFO(m_className << " No messages for some time... sleeping a second...");
       INFO("SERVER -> queue population: " << m_pcqs[chn]->sizeGuess());
       std::this_thread::sleep_for(100ms);
     }
@@ -111,7 +111,9 @@ bool ConnectionManager::addSendHandler(uint64_t chn)
   m_handlers[chn] = std::thread([&, chn](){
     while(!m_stop_handlers){
       zmq::message_t msg;
-      INFO("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
+      if(m_pcqs[chn]->sizeGuess() != 0) {
+        INFO("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
+      }
       if ( m_pcqs[chn]->read(msg) ) {
         //s_send( *(m_sockets[chn].get()), msg );
         m_sockets[chn]->send( msg );
@@ -145,8 +147,9 @@ void ConnectionManager::putStr(uint64_t chn, const std::string & string)
 
 std::string ConnectionManager::getStr(uint64_t chn) 
 {
-  std::string s;
-  memcpy((void*)s.data(), m_pcqs[chn]->frontPtr()->data(), m_pcqs[chn]->frontPtr()->size());
+  std::string s = std::string(static_cast<char*>(m_pcqs[chn]->frontPtr()->data()), m_pcqs[chn]->frontPtr()->size());
+  // memcpy(s.data(), m_pcqs[chn]->frontPtr()->data(), m_pcqs[chn]->frontPtr()->size());
+
   m_pcqs[chn]->popFront();
   return s;
 }

@@ -46,6 +46,11 @@ void FileDataLogger::write()
 
 }
 
+bool FileDataLogger::write(uint64_t keyId, daq::utilities::Binary& payload)
+{
+
+}
+
 void FileDataLogger::read()
 {
 

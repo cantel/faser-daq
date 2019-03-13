@@ -19,6 +19,7 @@ class DataLogger
     virtual void setup() = 0;
     virtual void write() = 0;
     virtual void read() = 0;
+    virtual bool write(uint64_t keyId, daq::utilities::Binary& payload) = 0;
     virtual void shutdown() = 0;
 
   protected:

@@ -5,6 +5,7 @@
 
 #include "core/DAQProcess.hpp"
 #include "core/DataLogger.hpp"
+#include "utilities/Binary.hpp"
 
 class FileDataLogger : public DAQProcess, public DataLogger
 {
@@ -19,6 +20,7 @@ class FileDataLogger : public DAQProcess, public DataLogger
     void setup();
     void write();
     void read();
+    bool write(uint64_t keyId, daq::utilities::Binary& payload);
     void shutdown();
 
 };

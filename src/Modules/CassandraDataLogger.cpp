@@ -117,7 +117,7 @@ bool CassandraDataLogger::executeQuery( const std::string& queryStr ) {
 
 bool CassandraDataLogger::columnFamilyExists( const std::string& columnFamilyName  ) {
   bool found = false;  
-  const CassPrepared* prepared = NULL;
+  const CassPrepared* prepared = nullptr;
   //std::string qStr = "SELECT columnfamily_name FROM system.SCHEMA_COLUMNFAMILIES WHERE keyspace_name=? AND columnfamily_name=?";
   std::string qStr = Q_CF_EXISTS;
   if (prepareQuery(qStr, &prepared)) {
@@ -125,7 +125,7 @@ bool CassandraDataLogger::columnFamilyExists( const std::string& columnFamilyNam
     cass_statement_bind_string( statement, 0, M_KEYSPACE_NAME.c_str() );
     cass_statement_bind_string( statement, 1, columnFamilyName.c_str() );
 
-    const CassResult* result = NULL;
+    const CassResult* result = nullptr;
     if (executeStatement(statement, &result)){
       CassIterator* iterator = cass_iterator_from_result( result ); 
       found = ( cass_iterator_next(iterator) ) ? true : false;
@@ -177,14 +177,14 @@ bool CassandraDataLogger::create()
   }
   std::stringstream qss;
   qss << "CREATE TABLE " << M_KEYSPACE_NAME << "." << M_CF_NAME
-      << " (" << M_COLUMN_HASH    << " text, "
+      << " (" << M_COLUMN_KEY     << " bigint, "
               << M_COLUMN_TYPE    << " text, "
               << M_COLUMN_SINFO   << " blob, "
               << M_COLUMN_VERSION << " text, "
               << M_COLUMN_TIME    << " bigint, "
               << M_COLUMN_SIZE    << " bigint, "
               << M_COLUMN_DATA    << " blob, " 
-      << " PRIMARY KEY (" << M_COLUMN_HASH << "));";
+      << " PRIMARY KEY (" << M_COLUMN_KEY << "));";
   executeQuery( qss.str() );
   m_chunkProvider.create();
 }
@@ -241,10 +241,41 @@ void CassandraDataLogger::write()
 
 }
 
+
 void CassandraDataLogger::read()
 {
 
 }
+
+bool CassandraDataLogger::write(uint64_t keyId, daq::utilities::Binary& payload)
+{
+  daqutils::Binary sinfoData(0);
+  bool success = false;
+  const CassPrepared* prepared = nullptr; 
+  if ( prepareQuery(Q_INSERT, &prepared) ) {
+    CassStatement* statement = cass_prepared_bind( prepared );
+    cass_statement_bind_int64( statement, 0, keyId );
+    cass_statement_bind_string( statement, 1, "event" );
+    cass_statement_bind_string( statement, 3, "dummy" );
+    cass_statement_bind_int64( statement, 4, 0L );
+    cass_statement_bind_bytes( statement, 2, static_cast<const unsigned char*>(sinfoData.data()), sinfoData.size() );
+#ifndef USE_CHUNKS
+    cass_statement_bind_bytes( statement, 6, static_cast<const unsigned char*>(payload.data()), payload.size() );
+#else
+    //cond::Binary dummyPayload = cond::Binary(); 
+    //cass_statement_bind_bytes( statement, 6, reinterpret_cast<const unsigned char*>(dummyPayload.data()), dummyPayload.size() ); 
+    //ObjectMetadata meta = ChunkedStorage::newWriter(m_chunkSP, payloadHash, payloadData).call();
+#endif
+    cass_statement_bind_int64( statement, 5, payload.size() ); 
+    success = executeStatement(statement);
+    cass_statement_free( statement );
+    success = true;
+  }
+  cass_prepared_free( prepared );
+  return success;
+}
+
+
 
 void CassandraDataLogger::shutdown()
 {

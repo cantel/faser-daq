@@ -78,6 +78,7 @@ bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, const std::stri
 //    addSendHandler(chn); // this goes to start.
     INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] bind:" << connStr);
   } else if ( dir == EDirection::CLIENT ) {
+    m_directions[chn] = dir;
     m_sockets[chn]->connect(connStr.c_str());
     INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] connect:" << connStr);
   }
@@ -98,8 +99,8 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn)
         INFO("    -> wrote to queue");
       }
       INFO(m_className << " No messages for some time... sleeping a second...");
-      INFO("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
-      std::this_thread::sleep_for(1s);
+      INFO("SERVER -> queue population: " << m_pcqs[chn]->sizeGuess());
+      std::this_thread::sleep_for(100ms);
     }
     INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
   });
@@ -142,6 +143,14 @@ void ConnectionManager::putStr(uint64_t chn, const std::string & string)
   zmq::message_t message(string.size());
   memcpy(message.data(), string.data(), string.size());
   m_pcqs[chn]->write( std::move(message) );
+}
+
+std::string ConnectionManager::getStr(uint64_t chn) 
+{
+  std::string s;
+  memcpy((void*)s.data(), m_pcqs[chn]->frontPtr()->data(), m_pcqs[chn]->frontPtr()->size());
+  m_pcqs[chn]->popFront();
+  return s;
 }
 
 bool ConnectionManager::start() 

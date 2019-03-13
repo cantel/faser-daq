@@ -65,6 +65,7 @@ public:
   daq::utilities::Binary get(uint64_t chn);
   void put(uint64_t chn, utilities::Binary& msgBin);
   void putStr(uint64_t chn, const std::string & string);
+  std::string getStr(uint64_t chn);
 
   // Start/stop socket processors
   bool start();

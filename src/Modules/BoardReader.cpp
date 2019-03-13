@@ -1,9 +1,6 @@
 // enrico.gamberini@cern.ch
 
 #include "modules/BoardReader.hpp"
-#include "utilities/Common.hpp"
-#include "utilities/Logging.hpp"
-#include "core/ConnectionManager.hpp"
 
 #include <thread>
 #include <chrono>
@@ -56,13 +53,6 @@ void BoardReader::start()
 
     m_run = true;
     m_runner_thread = std::make_unique<std::thread>(&BoardReader::runner, this);
-    // std::this_thread::sleep_for(60s);
-
-    // daq::utilities::Timer<std::chrono::milliseconds> msTimer;
-    // INFO(__METHOD_NAME__ << " Sleeping a bit with Timer...");
-    // msTimer.reset();
-    // std::this_thread::sleep_for(2s);
-    // INFO(__METHOD_NAME__ << " Elapsed time: " << msTimer.elapsed() << " ms");
 }
 
 void BoardReader::stop()

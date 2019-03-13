@@ -47,25 +47,22 @@ bool daq::core::Command::executeCommand(std::string& response)
 
     auto j = cfg.getConfig();
     auto srcs = j["connections"]["sources"];
+    INFO("sources empty " << srcs.empty());
     for (auto& it : srcs)
     {
       INFO("key" << it);
       
       cm.addChannel(it["chid"], ConnectionManager::EDirection::SERVER, 0, it["host"], it["port"], 100, false);
-      // INFO(it["host"] << "\n" );
-      // INFO(it["port"] << "\n" );
     }
-    INFO("Is sources empty " << srcs.empty());
+    
 
     auto dests = j["connections"]["destinations"];
-    INFO("dests " << dests);
+    INFO("destinations empty " << dests.empty());
     for (auto& it : dests)
     {
       INFO("key" << it);
       
       cm.addChannel(it["chid"], ConnectionManager::EDirection::CLIENT, 0, it["host"], it["port"], 100, false);
-      // INFO(it["host"] << "\n" );
-      // INFO(it["port"] << "\n" );
     }
   
     

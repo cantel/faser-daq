@@ -11,16 +11,7 @@
 #LCG_BASE=${LCG_BASE:=/afs/cern.ch/sw/lcg}
 export LCG_BASE=${LCG_BASE:=/cvmfs/sft.cern.ch/lcg}
 export LCG_VERSION=93
-export LCG_QT_VERSION=${LCG_VERSION}
-export QT5_VERSION=5.9.2
 export LIBXKBCOMMON_VERSION=0.7.1
-
-# use older version for QT5
-export LCG_QT_VERSION=87
-export QT5_VERSION=5.6.0
-
-# The standard location for TDAQ (if needed)
-export TDAQ_BASE=${TDAQ_BASE:=/cvmfs/atlas.cern.ch/repo/sw/tdaq}
 
 # The location and version of CMake to use
 CMAKE_BASE=${CMAKE_BASE:=${LCG_BASE}/contrib/CMake}
@@ -99,6 +90,7 @@ case "${BINARY_TAG}" in
         export CMAKE_COMPILER=gcc7
         export BOOST_VERSION=1_66
         export PYTHON_VERSION=2.7.13
+        echoo ${CONTRIB_BASE}/gcc/7/${CMAKE_ARCH}/setup.sh
         source ${CONTRIB_BASE}/gcc/7/${CMAKE_ARCH}/setup.sh
         ;;
     *-*-icc180-*)
@@ -120,18 +112,13 @@ case "${BINARY_TAG}" in
         ;;
 esac
 
+echo ${CONTRIB_BASE}/gcc/7/${CMAKE_ARCH}/setup.sh
+
 # Setup jinja and pyyaml for wuppercodegen
 export PYTHONPATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))/../../external/jinja/2.8:${PYTHONPATH}
 export PYTHONPATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))/../../external/pyyaml/3.12:${PYTHONPATH}
 export PYTHONPATH=$(dirname $(readlink -f ${BASH_SOURCE[0]}))/../../external/markupsafe/0.23:${PYTHONPATH}
 export PATH=${LCG_BASE}/releases/LCG_${LCG_VERSION}/Python/${PYTHON_VERSION}/${BINARY_TAG}/bin:${PATH}
-
-# fix from FLX-272, QT setup, no keyboard activity
-export QT_XKB_CONFIG_ROOT=/usr/share/X11/xkb
-export QT5_DIR=${LCG_BASE}/releases/LCG_${LCG_QT_VERSION}/qt5/${QT5_VERSION}/${BINARY_TAG}
-export QT_QPA_PLATFORM_PLUGIN_PATH=${QT5_DIR}/plugins/platforms
-export LD_LIBRARY_PATH=${QT5_DIR}/lib:${LD_LIBRARY_PATH}
-export LD_LIBRARY_PATH=${LCG_BASE}/releases/LCG_${LCG_QT_VERSION}/libxkbcommon/${LIBXKBCOMMON_VERSION}/${BINARY_TAG}/lib:${LD_LIBRARY_PATH}
 
 # Setup CMAKE_PREFIX_PATH to find LCG
 # export CMAKE_PREFIX_PATH=${CMAKE_PROJECT_PATH}:$(dirname $(dirname $(dirname $(readlink -f ${BASH_SOURCE[0]}))))/cmaketools:$(dirname $(dirname $(readlink -f ${BASH_SOURCE[0]})))/cmake:${LCG_BASE}/releases

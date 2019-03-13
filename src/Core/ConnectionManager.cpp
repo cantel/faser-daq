@@ -1,5 +1,6 @@
 #include "utilities/Logging.hpp"
 #include "utilities/Common.hpp"
+#include "utilities/Binary.hpp"
 
 #include "core/ConnectionManager.hpp"
 #include "core/Command.hpp"
@@ -17,6 +18,7 @@
 
 using namespace daq::core;
 using namespace std::chrono_literals;
+
 
 bool ConnectionManager::setupCommandConnection(uint8_t ioT, std::string connStr) {
   if (m_is_cmd_setup){
@@ -117,7 +119,26 @@ bool ConnectionManager::addSendHandler(uint64_t chn)
   return true;
 }
 
+daq::utilities::Binary ConnectionManager::get(uint64_t chn)
+{
+  utilities::Binary msgBin( m_pcqs[chn]->frontPtr()->data(), m_pcqs[chn]->frontPtr()->size() );
+  m_pcqs[chn]->popFront();
+  return msgBin;
+}
 
+void ConnectionManager::put(uint64_t chn, utilities::Binary& msgBin)
+{
+  zmq::message_t message(msgBin.size());
+  memcpy(message.data(), msgBin.data(), msgBin.size());
+  m_pcqs[chn]->write( std::move(message) );
+}
+
+void ConnectionManager::putStr(uint64_t chn, const std::string & string) 
+{
+  zmq::message_t message(string.size());
+  memcpy(message.data(), string.data(), string.size());
+  m_pcqs[chn]->write( std::move(message) );
+}
 
 bool ConnectionManager::start() 
 {
@@ -145,10 +166,11 @@ bool ConnectionManager::stop()
 {
   m_stop_handlers.store( true );
   std::this_thread::sleep_for(1s);
-  //for ( auto const& tIt : m_handlers ) {
-  //  tIt.second.join(); 
-  //}
+  for ( auto& tIt : m_handlers ) {
+    tIt.second.join(); 
+  }
   m_handlers.clear();
 }
+
 
 

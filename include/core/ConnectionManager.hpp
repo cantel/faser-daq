@@ -4,6 +4,7 @@
 #include "utilities/Singleton.hpp"
 #include "utilities/ProducerConsumerQueue.hpp"
 #include "utilities/ReusableThread.hpp"
+#include "utilities/Binary.hpp"
 
 #include "core/Command.hpp"
 
@@ -59,6 +60,11 @@ public:
   // Add a channel (sockets and queues)
   bool addChannel(uint64_t chn, EDirection dir, uint16_t tag, std::string host, uint16_t port, size_t queueSize, bool zerocopy);
   bool addChannel(uint64_t chn, EDirection dir, const std::string& connStr, size_t queueSize); 
+
+  // Getter/Putter for channels:
+  daq::utilities::Binary get(uint64_t chn);
+  void put(uint64_t chn, utilities::Binary& msgBin);
+  void putStr(uint64_t chn, const std::string & string);
 
   // Start/stop socket processors
   bool start();

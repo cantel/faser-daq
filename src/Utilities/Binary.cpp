@@ -31,6 +31,7 @@ Binary::Binary( const void* data, long size )
 {
   if ( m_size<0 )
     ERROR(__METHOD_NAME__  << " Cannot copy a Binary with a negative size!");
+  m_data = ::malloc( m_size ); // Fix Coverity NEGATIVE_RETURNS
   ::memcpy( startingAddress(), data, size );
 }
 

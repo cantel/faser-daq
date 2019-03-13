@@ -32,7 +32,7 @@ bool ConnectionManager::setupCommandConnection(uint8_t ioT, std::string connStr)
   m_cmd_handler = std::thread([&](){
     Command &cmd = Command::instance();
     zmq::message_t cmdMsg;
-    while(!m_stop_handlers){
+    while(!m_stop_cmd_handler){
       //INFO(m_className << " CMD_THREAD: Going for RECV poll...");
       if ((m_cmd_socket->recv(&cmdMsg, ZMQ_DONTWAIT)) == true) {
         std::string cmdmsgStr(static_cast<char*>(cmdMsg.data()), cmdMsg.size());

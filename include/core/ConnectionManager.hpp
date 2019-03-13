@@ -41,9 +41,9 @@ public:
 
   // 
   ConnectionManager() 
-    : m_is_cmd_setup{false}, m_stop_handlers{false} 
+    : m_is_cmd_setup{false}, m_stop_cmd_handler{false}, m_stop_handlers{false} 
   { }
-  ~ConnectionManager() { m_stop_handlers = true; m_cmd_handler.join(); } 
+  ~ConnectionManager() { m_stop_handlers = true; m_stop_cmd_handler = true; m_cmd_handler.join(); } 
 
   // Custom types
   typedef folly::ProducerConsumerQueue<zmq::message_t> MessageQueue;
@@ -111,6 +111,7 @@ private:
   std::map<uint64_t, std::function<void()>> m_functors;
 
   // Thread control
+  std::atomic<bool> m_stop_cmd_handler;
   std::atomic<bool> m_stop_handlers;
   std::atomic<bool> m_stop_processors;
   std::atomic<bool> m_cpu_lock; 

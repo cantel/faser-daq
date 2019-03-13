@@ -209,11 +209,15 @@ void CassandraDataLogger::stop()
 void CassandraDataLogger::runner()
 {
   auto &cm = daq::core::ConnectionManager::instance();
+  uint64_t incr = 0;
   while (m_run)
   {
     INFO(__METHOD_NAME__ << " Running...");
     std::this_thread::sleep_for(500ms);
-    INFO("Received on channel 1 " << cm.getStr(1));
+    incr++;
+    daqutils::Binary pl(cm.get(1));
+    write( incr, pl );
+    INFO("Wrote data from channel 1...");
   }
   INFO(__METHOD_NAME__ << " Runner stopped");    
 }

@@ -23,7 +23,7 @@ class supervisord:
             'command': exe,
             'directory': dir,
             'autorestart': 'false',
-            'environment': "LD_LIBRARY_PATH=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib64"
+            'environment': "LD_LIBRARY_PATH=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib:/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib64:/cvmfs/sft.cern.ch/lcg/releases/binutils/2.28-a983d/x86_64-centos7/lib"
             }
         return self.server.twiddler.addProgramToGroup(self.group, name, settings)
 

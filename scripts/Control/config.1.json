@@ -60,8 +60,36 @@
                         "host": "*",
                         "port": 8102
                     }
-                    
+            },
+            "destinations":{
+                "1":{
+                    "chid": 3,
+                    "host": "rd51pro",
+                    "port": 8103
+                }
             }
         }
+    },
+    {
+        "name": "datalogger01",
+        "host": "rd51pro",
+        "port": 6003,
+        "type": "cassandradatalogger",
+        "ring": "127.0.0.1",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+        "connections": {
+            "sources": {
+                    "1": {
+                        "chid": 1,
+                        "host": "*",
+                        "port": 8103
+                    }
+
+            }
+        }
+            
     }
 ]

@@ -7,9 +7,17 @@
 #include "core/DataLogger.hpp"
 
 #include "utilities/ChunkedStorage.hpp"
+#include "utilities/Binary.hpp"
 
 #include <cassandra.h>
 
+/*
+ * CassandraDataLogger
+ * Author: Roland.Sipos@cern.ch
+ * Description: Data logger with Cassandra persistency layer
+ *   Heavily relies on the CondDB payload chunked storage.
+ * Date: November 2017
+*/
 class CassandraDataLogger : public DAQProcess, public DataLogger
 {
 
@@ -20,8 +28,8 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
       }     
 
       virtual ~CassandraChunkedStorageProvider() { };
-      bool exists() { return false; }
-      void create() {  }
+      bool exists();
+      void create();
       const size_t writeChunk(const std::string& objectName, int chunkId, const std::pair<const void*, size_t>& data, int ttl) const { return 0; }
       bool readChunk(const std::string& objectName, int chunkId, size_t split, void*& blobPtr) const { return false; };
       const int getDefaultChunkSize() { return 0; }
@@ -40,6 +48,9 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
     CassandraDataLogger();
     ~CassandraDataLogger();
 
+    const std::string KEYSPACE_NAME = "rd51daq";
+    
+
     void start();
     void stop();
     void runner();
@@ -51,6 +62,12 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
 
   private:
     const std::string getErrorStr( CassFuture*& future );
+    void readIntoBinary( daq::utilities::Binary& binary, const CassValue* const & value );
+    bool prepareQuery( const std::string& qStr, const CassPrepared** prepared );
+    bool executeStatement( CassStatement*& statement );
+    bool executeStatement( CassStatement*& statement, const CassResult** result );
+    bool executeQuery( const std::string& queryStr );
+    bool columnFamilyExists( const std::string& cfName ); 
 
     CassandraChunkedStorageProvider m_chunkProvider;
 

@@ -147,10 +147,11 @@ void ConnectionManager::putStr(uint64_t chn, const std::string & string)
 
 std::string ConnectionManager::getStr(uint64_t chn) 
 {
-  std::string s = std::string(static_cast<char*>(m_pcqs[chn]->frontPtr()->data()), m_pcqs[chn]->frontPtr()->size());
-  // memcpy(s.data(), m_pcqs[chn]->frontPtr()->data(), m_pcqs[chn]->frontPtr()->size());
-
-  m_pcqs[chn]->popFront();
+  std::string s("");
+  if(m_pcqs[chn]->sizeGuess() != 0) {
+    s = std::string(static_cast<char*>(m_pcqs[chn]->frontPtr()->data()), m_pcqs[chn]->frontPtr()->size());
+    m_pcqs[chn]->popFront();
+  }
   return s;
 }
 

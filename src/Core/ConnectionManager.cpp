@@ -98,6 +98,7 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn)
         INFO("    -> wrote to queue");
       }
       INFO(m_className << " No messages for some time... sleeping a second...");
+      INFO("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
       std::this_thread::sleep_for(1s);
     }
     INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
@@ -111,7 +112,8 @@ bool ConnectionManager::addSendHandler(uint64_t chn)
   m_handlers[chn] = std::thread([&, chn](){
     while(!m_stop_handlers){
       zmq::message_t msg;
-      if (m_pcqs[chn]->read(msg)) {
+      INFO("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
+      if ( m_pcqs[chn]->read(msg) ) {
         //s_send( *(m_sockets[chn].get()), msg );
         m_sockets[chn]->send( msg );
       }

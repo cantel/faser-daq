@@ -3,6 +3,7 @@
 #include "modules/BoardReader.hpp"
 #include "utilities/Common.hpp"
 #include "utilities/Logging.hpp"
+#include "core/ConnectionManager.hpp"
 
 #include <thread>
 #include <chrono>
@@ -75,14 +76,17 @@ void BoardReader::runner()
     const unsigned source_id = 1;
     unsigned sequence_number = 0;
     microseconds timestamp;
+    auto& cm = daq::core::ConnectionManager::instance();
 
     while (m_run)
     {
         INFO(__METHOD_NAME__ << " Running...");
+        cm.putStr(1, "blyat");
+    
         timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
         const unsigned payload_size = rand() % 1000 + 1;
-        INFO(__METHOD_NAME__ << " sequence number " << sequence_number
-            << "  >>  timestamp " << timestamp.count() << "  >>  payload size " << payload_size );
+        // INFO(__METHOD_NAME__ << " sequence number " << sequence_number
+        //     << "  >>  timestamp " << timestamp.count() << "  >>  payload size " << payload_size );
 
         data_t * data = (data_t *) malloc(sizeof(data_t) + sizeof(char)*payload_size);
         data->header.payload_size = payload_size;

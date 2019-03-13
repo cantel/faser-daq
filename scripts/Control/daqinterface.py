@@ -93,17 +93,17 @@ group = settings['group']
 dir = settings['build_dir']
 exe = settings['exe']
 
-with open('config.json') as f:
-    data = json.load(f)
-
 arg = "complete"
-if len(sys.argv) == 1:
-    print("Available: 'remove' 'supervisor' 'jzonmq'. Going for complete service")
-elif sys.argv[1] == '-h':
-    print("Default complete service. Available options: 'remove' 'supervisor' 'jzonmq'")
+if len(sys.argv) == 1 or sys.argv[1] == '-h':
+    print("First argument must be a .json configuration file. Available options: 'remove' 'supervisor' 'jzonmq' 'complete'")
     exit(0)
 else:
-    arg = sys.argv[1]
+    arg = sys.argv[2]
+
+with open(sys.argv[1]) as f:
+    data = json.load(f)
+
+
 
 if arg == "remove" or arg == 'complete':
     removeProcesses()

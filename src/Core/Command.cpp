@@ -3,6 +3,7 @@
 #include "core/Configuration.hpp"
 #include "core/Command.hpp"
 #include "core/PluginManager.hpp"
+#include "core/ConnectionManager.hpp"
 
 #include <ctime>
 #include <iomanip>
@@ -36,24 +37,58 @@ bool daq::core::Command::executeCommand(std::string& response)
   INFO("Loaded configuration");
   auto command = cfg.get<std::string>("command");
   INFO("Get command: " << command );
-  daq::core::PluginManager &m_plugin = daq::core::PluginManager::instance();
+  auto &m_plugin = daq::core::PluginManager::instance();
+  auto& cm = daq::core::ConnectionManager::instance();
+
   if(command == "configure")
   {
     auto type = cfg.get<std::string>("type");
     INFO("Loading type: " << type);
+
+    auto j = cfg.getConfig();
+    auto srcs = j["connections"]["sources"];
+    for (auto& it : srcs)
+    {
+      INFO("key" << it);
+      
+      cm.addChannel(it["chid"], ConnectionManager::EDirection::SERVER, 0, it["host"], it["port"], 100, false);
+      // INFO(it["host"] << "\n" );
+      // INFO(it["port"] << "\n" );
+    }
+    INFO("Is sources empty " << srcs.empty());
+
+    auto dests = j["connections"]["destinations"];
+    INFO("dests " << dests);
+    for (auto& it : dests)
+    {
+      INFO("key" << it);
+      
+      cm.addChannel(it["chid"], ConnectionManager::EDirection::CLIENT, 0, it["host"], it["port"], 100, false);
+      // INFO(it["host"] << "\n" );
+      // INFO(it["port"] << "\n" );
+    }
+  
+    
     m_plugin.load(type);
     response = "Success";
     m_plugin.setState("ready");
   }
   else if(command == "start")
   {
+    cm.start();
+
     m_plugin.start();
     response = "Success";
     m_plugin.setState("running");
+
+    INFO("Started connection manager");
   }
   else if(command == "stop")
   {
     m_plugin.stop();
+
+    cm.stop();
+
     response = "Success";
     m_plugin.setState("ready");
   }

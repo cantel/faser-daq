@@ -18,12 +18,12 @@
 using namespace daq::core;
 using namespace std::chrono_literals;
 
-bool ConnectionManager::setupCommandConnection(uint8_t cid, std::string connStr) {
+bool ConnectionManager::setupCommandConnection(uint8_t ioT, std::string connStr) {
   if (m_is_cmd_setup){
     INFO(__METHOD_NAME__ << " Command is already online... Won't do anything.");
     return false;
   }
-  m_cmd_context = std::make_unique<zmq::context_t>(cid);
+  m_cmd_context = std::make_unique<zmq::context_t>(ioT);
   m_cmd_socket = std::make_unique<zmq::socket_t>(*(m_cmd_context.get()), ZMQ_REP);
   m_cmd_socket->bind(connStr);
   INFO(__METHOD_NAME__ << " Command is connected on: " << connStr);
@@ -51,22 +51,104 @@ bool ConnectionManager::setupCommandConnection(uint8_t cid, std::string connStr)
   return true; 
 }
 
-//template <typename TValue, typename TPred>
-//BinarySearchTree<TValue, TPred>::BinarySearchTree() 
 
-/*
-template <class ST>
-ConnectionManager<ST>::ConnectionManager(m_token)
+bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, uint16_t tag, std::string host, 
+                                   uint16_t port, size_t queueSize, bool zerocopy)
 {
-  
+  std::ostringstream connStr;
+  connStr << "tcp://" << host << ":" << port;
+  return addChannel(chn, dir, connStr.str(), queueSize);
 }
-*/
 
-/*
-template <class ST>
-ConnectionManager<ST>::~ConnectionManager() {
-
+bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, const std::string& connStr, size_t queueSize)
+{
+  if ( m_sockets.find(chn) != m_sockets.end() ){
+    INFO(__METHOD_NAME__ << " Socket for channel already exists... Won't add this channel again.");
+    return false;
+  }
+#warning RS -> ZMQ connection handling exceptions should be catched.
+  uint8_t ioT = 1;
+  m_contexts[chn] = std::make_unique<zmq::context_t>(ioT);
+  m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_PAIR);
+  if ( dir == EDirection::SERVER ) {
+    m_directions[chn] = dir;
+    m_sockets[chn]->bind(connStr.c_str());
+//    addSendHandler(chn); // this goes to start.
+    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] bind:" << connStr);
+  } else if ( dir == EDirection::CLIENT ) {
+    m_sockets[chn]->connect(connStr.c_str());
+    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] connect:" << connStr);
+  }
+  m_pcqs[chn] = std::make_unique<MessageQueue>(queueSize);  
+  return true;
 }
-*/
 
- 
+
+bool ConnectionManager::addReceiveHandler(uint64_t chn)
+{
+  INFO(__METHOD_NAME__ << " SendHandler for channel [" << chn << "] starting...");
+  m_handlers[chn] = std::thread([&](){
+    while(!m_stop_handlers){
+      zmq::message_t msg;
+      if ((m_sockets[chn]->recv(&msg, ZMQ_DONTWAIT)) == true) {
+        m_pcqs[chn]->write( std::move(msg) );
+      }
+      INFO(m_className << " No messages for some time... sleeping a second...");
+      std::this_thread::sleep_for(1s);
+    }
+    INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
+  });
+  return true;
+}
+
+bool ConnectionManager::addSendHandler(uint64_t chn)
+{
+  INFO(__METHOD_NAME__ << " ReceiveHandler for channel [" << chn << "] starting..."); 
+  m_handlers[chn] = std::thread([&](){
+    while(!m_stop_handlers){
+      zmq::message_t msg;
+      if (m_pcqs[chn]->read(msg)) {
+        //s_send( *(m_sockets[chn].get()), msg );
+        m_sockets[chn]->send( msg );
+      }
+    }
+    INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
+  });
+  return true;
+}
+
+
+
+bool ConnectionManager::start() 
+{
+  m_stop_handlers.store( false );
+  for( auto const& dirIt : m_directions )  //([first: chn, second:dir])
+  {
+    switch(dirIt.second){
+      case SERVER:
+        addSendHandler(dirIt.first);
+        break;
+      case CLIENT:
+        addReceiveHandler(dirIt.first);
+        break;
+      case PUBLISHER:
+        ERROR(__METHOD_NAME__ << " PUBLISHING requested but it's not implemented!");
+        break;
+      case SUBSCRIBER:
+        ERROR(__METHOD_NAME__ << " SUBSCRIBE requested but it's not implemented!");
+        break;
+    }
+  }
+}
+
+bool ConnectionManager::stop()
+{
+  m_stop_handlers.store( true );
+  std::this_thread::sleep_for(1s);
+  //for ( auto const& tIt : m_handlers ) {
+  //  tIt.second.join(); 
+  //}
+  m_handlers.clear();
+}
+
+

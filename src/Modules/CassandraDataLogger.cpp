@@ -3,12 +3,14 @@
 #include "utilities/Common.hpp"
 #include "utilities/ChunkedStorage.hpp"
 
+#include <chrono>
 #include <sstream>
 #include <cassandra.h>
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
 
+using namespace std::chrono_literals;
 namespace daqutils = daq::utilities;
 
 extern "C" CassandraDataLogger *create_object()
@@ -193,17 +195,27 @@ bool CassandraDataLogger::create()
 
 void CassandraDataLogger::start()
 {
-    INFO("CassandraDataLogger::start");
+  INFO(__METHOD_NAME__ << " getState: " << getState() );
+  m_run = true;
+  m_runner_thread = std::make_unique<std::thread>(&CassandraDataLogger::runner, this);
 }
 
 void CassandraDataLogger::stop()
 {
-    INFO("CassandraDataLogger::stop");
+  m_run = false;
+  INFO(__METHOD_NAME__ << " getState: " << this->getState() );
 }
 
 void CassandraDataLogger::runner()
 {
-    
+  auto &cm = daq::core::ConnectionManager::instance();
+  while (m_run)
+  {
+    INFO(__METHOD_NAME__ << " Running...");
+    std::this_thread::sleep_for(500ms);
+    INFO("Received on channel 1 " << cm.getStr(1));
+  }
+  INFO(__METHOD_NAME__ << " Runner stopped");    
 }
 
 void CassandraDataLogger::setup() 

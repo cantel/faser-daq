@@ -146,10 +146,10 @@ bool ConnectionManager::start()
   for( auto const& dirIt : m_directions )  //([first: chn, second:dir])
   {
     switch(dirIt.second){
-      case SERVER:
+      case CLIENT:
         addSendHandler(dirIt.first);
         break;
-      case CLIENT:
+      case SERVER:
         addReceiveHandler(dirIt.first);
         break;
       case PUBLISHER:

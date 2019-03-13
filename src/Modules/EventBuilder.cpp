@@ -21,7 +21,6 @@ extern "C" void destroy_object(EventBuilder *object)
 
 EventBuilder::EventBuilder()
 {
-    m_run = false;
     INFO(__METHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState() );
 }
 
@@ -34,25 +33,29 @@ void EventBuilder::start()
 {
     INFO(__METHOD_NAME__ << " getState: " << getState() );
 
-    m_run = true;
     m_runner_thread = std::make_unique<std::thread>(&EventBuilder::runner, this);
 }
 
 void EventBuilder::stop()
 {
-    m_run = false;
     INFO(__METHOD_NAME__ << " getState: " << this->getState() );
 }
 
 void EventBuilder::runner()
 {
     auto &cm = daq::core::ConnectionManager::instance();
+    
+    INFO(__METHOD_NAME__ << " Running...");
     while (m_run)
     {
-        INFO(__METHOD_NAME__ << " Running...");
-        std::this_thread::sleep_for(500ms);
-        INFO("Received on channel 1 " << cm.getStr(1));
-        INFO("Received on channel 2 " << cm.getStr(2));
+        std::string s1{cm.getStr(1)};
+        std::string s2{cm.getStr(2)};
+        if(s1 != "") {
+            INFO("Received on channel 1 " << s1);
+        }
+        if(s2 != "") {
+            INFO("Received on channel 2 " << s2);
+        }
     }
     INFO(__METHOD_NAME__ << " Runner stopped");
 }

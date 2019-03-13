@@ -1,8 +1,6 @@
 #ifndef NEWMODULE_H_
 #define NEWMODULE_H_
 
-#include <iostream>
-
 #include "core/DAQProcess.hpp"
 
 class NewModule : public DAQProcess

@@ -89,12 +89,12 @@ bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, const std::stri
 bool ConnectionManager::addReceiveHandler(uint64_t chn)
 {
   INFO(__METHOD_NAME__ << " [SERVER] ReceiveHandler for channel [" << chn << "] starting...");
-  m_handlers[chn] = std::thread([&](){
+  m_handlers[chn] = std::thread([&, chn](){
     while(!m_stop_handlers){
       zmq::message_t msg;
       if ((m_sockets[chn]->recv(&msg, ZMQ_DONTWAIT)) == true) {
         INFO("WOOOOF WOOOF  RECEIVED SOMETHING!");
-        m_pcqs[chn]->write( msg );
+        m_pcqs[chn]->write( std::move(msg) );
         INFO("    -> wrote to queue");
       }
       INFO(m_className << " No messages for some time... sleeping a second...");
@@ -108,7 +108,7 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn)
 bool ConnectionManager::addSendHandler(uint64_t chn)
 {
   INFO(__METHOD_NAME__ << " [CLIENT] SendHandler for channel [" << chn << "] starting..."); 
-  m_handlers[chn] = std::thread([&](){
+  m_handlers[chn] = std::thread([&, chn](){
     while(!m_stop_handlers){
       zmq::message_t msg;
       if (m_pcqs[chn]->read(msg)) {

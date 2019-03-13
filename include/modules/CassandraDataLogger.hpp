@@ -28,8 +28,8 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
       }     
 
       virtual ~CassandraChunkedStorageProvider() { };
-      bool exists();
-      void create();
+      bool exists(){ return true; }
+      void create(){};
       const size_t writeChunk(const std::string& objectName, int chunkId, const std::pair<const void*, size_t>& data, int ttl) const { return 0; }
       bool readChunk(const std::string& objectName, int chunkId, size_t split, void*& blobPtr) const { return false; };
       const int getDefaultChunkSize() { return 0; }
@@ -48,9 +48,6 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
     CassandraDataLogger();
     ~CassandraDataLogger();
 
-    const std::string KEYSPACE_NAME = "rd51daq";
-    
-
     void start();
     void stop();
     void runner();
@@ -61,6 +58,22 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
     void shutdown();
 
   private:
+
+// RS -> ALL THIS SHOULD BE NICELY HIDDEN BEHIND A SESSION LAYER.
+    const std::string M_KEYSPACE_NAME = "rd51daq";
+    const std::string M_CF_NAME = "payload";
+    const std::string M_COLUMNFAMILY  = "hash, type, s_info, version, time, size, data";
+    const std::string M_COLUMN_HASH    = "hash";
+    const std::string M_COLUMN_TYPE    = "type";
+    const std::string M_COLUMN_SINFO   = "s_info";
+    const std::string M_COLUMN_VERSION = "version";
+    const std::string M_COLUMN_TIME    = "time";
+    const std::string M_COLUMN_SIZE    = "size";
+    const std::string M_COLUMN_DATA    = "data";
+
+    const std::string Q_SAY_HI = "SELECT key,bootstrapped,broadcast_address,cluster_name,cql_version,data_center FROM system.local";   
+    const std::string Q_CF_EXISTS = "SELECT table_name from system_schema.tables WHERE keyspace_name=? AND table_name=?";
+
     const std::string getErrorStr( CassFuture*& future );
     void readIntoBinary( daq::utilities::Binary& binary, const CassValue* const & value );
     bool prepareQuery( const std::string& qStr, const CassPrepared** prepared );
@@ -68,6 +81,9 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
     bool executeStatement( CassStatement*& statement, const CassResult** result );
     bool executeQuery( const std::string& queryStr );
     bool columnFamilyExists( const std::string& cfName ); 
+
+    bool exists();
+    bool create();
 
     CassandraChunkedStorageProvider m_chunkProvider;
 

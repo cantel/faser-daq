@@ -124,11 +124,15 @@ bool ConnectionManager::addSendHandler(uint64_t chn)
   return true;
 }
 
-daq::utilities::Binary ConnectionManager::get(uint64_t chn)
+bool ConnectionManager::get(uint64_t chn, daq::utilities::Binary& bin)
 {
-  utilities::Binary msgBin( m_pcqs[chn]->frontPtr()->data(), m_pcqs[chn]->frontPtr()->size() );
-  m_pcqs[chn]->popFront();
-  return msgBin;
+  if (m_pcqs[chn]->sizeGuess() != 0 ){
+    utilities::Binary msgBin( m_pcqs[chn]->frontPtr()->data(), m_pcqs[chn]->frontPtr()->size() );
+    m_pcqs[chn]->popFront();
+    bin = msgBin;
+    return true;
+  }
+  return false;
 }
 
 void ConnectionManager::put(uint64_t chn, utilities::Binary& msgBin)

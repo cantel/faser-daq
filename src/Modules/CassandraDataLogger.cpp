@@ -215,7 +215,10 @@ void CassandraDataLogger::runner()
     INFO(__METHOD_NAME__ << " Running...");
     std::this_thread::sleep_for(500ms);
     incr++;
-    daqutils::Binary pl(cm.get(1));
+    daqutils::Binary pl(0);
+    while ( !cm.get(1, std::ref(pl)) ) {
+      std::this_thread::sleep_for(50ms);
+    } 
     write( incr, pl );
     INFO("Wrote data from channel 1...");
   }

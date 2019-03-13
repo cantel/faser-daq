@@ -3,6 +3,7 @@
 #include "utilities/Common.hpp"
 #include "utilities/ChunkedStorage.hpp"
 
+#include <sstream>
 #include <cassandra.h>
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
@@ -117,10 +118,11 @@ bool CassandraDataLogger::executeQuery( const std::string& queryStr ) {
 bool CassandraDataLogger::columnFamilyExists( const std::string& columnFamilyName  ) {
   bool found = false;  
   const CassPrepared* prepared = NULL;
-  std::string qStr = "SELECT columnfamily_name FROM system.SCHEMA_COLUMNFAMILIES WHERE keyspace_name=? AND columnfamily_name=?";
+  //std::string qStr = "SELECT columnfamily_name FROM system.SCHEMA_COLUMNFAMILIES WHERE keyspace_name=? AND columnfamily_name=?";
+  std::string qStr = Q_CF_EXISTS;
   if (prepareQuery(qStr, &prepared)) {
     CassStatement* statement = cass_prepared_bind( prepared );
-    cass_statement_bind_string( statement, 0, KEYSPACE_NAME.c_str() );
+    cass_statement_bind_string( statement, 0, M_KEYSPACE_NAME.c_str() );
     cass_statement_bind_string( statement, 1, columnFamilyName.c_str() );
 
     const CassResult* result = NULL;
@@ -136,9 +138,55 @@ bool CassandraDataLogger::columnFamilyExists( const std::string& columnFamilyNam
   return found;
 } 
 
-bool CassandraDataLogger::CassandraChunkedStorageProvider::exists()
+bool CassandraDataLogger::exists()
 {
- return false;  
+  return columnFamilyExists( M_CF_NAME ) && m_chunkProvider.exists();
+}
+
+bool CassandraDataLogger::create()
+{
+/*
+  std::stringstream qssChunk;
+  qssChunk << "CREATE TABLE " << KEYSPACE_NAME<< "." << M_NAME
+           << " (" << M_COLUMN_COMPKEY   << " text, "  
+                   << M_COLUMN_DATA      << " blob, "
+                   << M_COLUMN_OBJSIZE   << " bigint, "
+                   << M_COLUMN_CHSIZE    << " bigint, "
+                   << M_COLUMN_CHCOUNT   << " int, "
+                   << M_COLUMN_EXP       << " int, "	
+                   << M_COLUMN_ATTR      << " text, "
+           << " PRIMARY KEY (" << M_COLUMN_COMPKEY << "));";
+  m_cs->executeQuery( qssChunk.str() );
+
+  std::stringstream qssChunkMeta;
+  qssChunkMeta << "CREATE TABLE conddb." << M_META_NAME
+               << " (" << M_META_COLUMN_OBJNAME << " text, "
+                       << M_COLUMN_OBJSIZE      << " bigint, "
+                       << M_COLUMN_CHSIZE       << " bigint, "
+                       << M_COLUMN_CHCOUNT      << " int, "
+                       << M_META_COLUMN_TTL     << " bigint, "
+                       << M_META_COLUMN_PPATH   << " text, "
+                       << M_META_COLUMN_ATTR    << " text, "
+               << " PRIMARY KEY (" << M_META_COLUMN_OBJNAME << "));";
+  m_cs->executeQuery( qssChunkMeta.str() );
+*/
+
+  if( exists() ){
+    WARNING(__METHOD_NAME__ << " ColumnFamily exists! Won't recreate payload CF.");
+    return false;
+  }
+  std::stringstream qss;
+  qss << "CREATE TABLE " << M_KEYSPACE_NAME << "." << M_CF_NAME
+      << " (" << M_COLUMN_HASH    << " text, "
+              << M_COLUMN_TYPE    << " text, "
+              << M_COLUMN_SINFO   << " blob, "
+              << M_COLUMN_VERSION << " text, "
+              << M_COLUMN_TIME    << " bigint, "
+              << M_COLUMN_SIZE    << " bigint, "
+              << M_COLUMN_DATA    << " blob, " 
+      << " PRIMARY KEY (" << M_COLUMN_HASH << "));";
+  executeQuery( qss.str() );
+  m_chunkProvider.create();
 }
 
 #warning RS -> YOU NEED TO INTRODUCE A PROPER SESSION LAYER BETWEEN STORAGE AND DAQ!
@@ -176,7 +224,14 @@ void CassandraDataLogger::setup()
       << " CassError:" << getErrorStr(future));
   } else {
     INFO(__METHOD_NAME__ << " *wink wink* ");
-  } 
+  }
+  INFO(__METHOD_NAME__ << " Checking PAYLOAD ColumnFamily existence...");
+  if ( exists() ){
+    INFO(__METHOD_NAME__ << "   -> CF is up.");
+  } else {
+    bool done = create();
+    INFO(__METHOD_NAME__ << "   -> CF created -> " << done);
+  }
   cass_future_free( future );
   
 }

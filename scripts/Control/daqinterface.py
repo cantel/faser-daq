@@ -82,8 +82,8 @@ class statusCheck (threading.Thread):
     def run(self):
         print ("Starting statusCheck")
         while(True):
+            sleep(3)
             checkStatus()
-            sleep(2)
         print ("Exiting " + self.name)
 
 with open('settings.json') as f:

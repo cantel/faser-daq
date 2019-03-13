@@ -1,7 +1,7 @@
 [
     {
         "name": "boardreader01",
-        "host": "localhost",
+        "host": "rd51pro",
         "port": 5555,
         "type": "boardreader",
         "settings": {
@@ -21,7 +21,7 @@
     },
     {
         "name": "boardreader02",
-        "host": "localhost",
+        "host": "rd51pro",
         "port": 5556,
         "type": "boardreader",
         "settings": {
@@ -41,7 +41,7 @@
     },
     {
         "name": "eventbuilder01",
-        "host": "localhost",
+        "host": "rd51pro",
         "port": 5557,
         "type": "eventbuilder",
         "settings": {
@@ -64,7 +64,7 @@
             "destinations":{
                 "1":{
                     "chid": 3,
-                    "host": "rd51pro",
+                    "host": "localhost",
                     "port": 8103
                 }
             }

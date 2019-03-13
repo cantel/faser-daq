@@ -4,12 +4,28 @@
         "host": "rd51pro",
         "port": 6000,
         "type": "boardreader",
-        "settings": 
-        {
+        "settings": {
             "some_int": 42,
             "some_string": "test"
+        },
+        "connections": {
+            "destinations": {
+                "1": {
+                    "host": "localhost",
+                    "port": 8099
+                },
+                "2": {
+                    "host": "localhost",
+                    "port": 8120
+                }
+            },
+            "sources": {
+                "1": {
+                    "host": "remote",
+                    "port": 8974
+                }
+            }
         }
-
     },
     {
         "name": "daq02",
@@ -31,4 +47,3 @@
         "ring": "127.0.0.1"
     }
 ]
-

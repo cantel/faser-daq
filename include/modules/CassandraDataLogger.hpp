@@ -11,6 +11,10 @@
 
 #include <cassandra.h>
 
+
+//#define HASH_MODE
+#define EVID_MODE
+
 /*
  * CassandraDataLogger
  * Author: Roland.Sipos@cern.ch
@@ -66,6 +70,7 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
 // RS -> ALL THIS SHOULD BE NICELY HIDDEN BEHIND A SESSION LAYER.
     const std::string M_KEYSPACE_NAME = "rd51daq";
     const std::string M_CF_NAME = "payload";
+
     const std::string M_COLUMNFAMILY  = "pkey, type, s_info, version, time, size, data";
     const std::string M_COLUMN_KEY     = "pkey";
     const std::string M_COLUMN_TYPE    = "type";

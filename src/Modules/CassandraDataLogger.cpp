@@ -1,6 +1,8 @@
 #include "modules/CassandraDataLogger.hpp"
 #include "utilities/Logging.hpp"
 #include "utilities/Common.hpp"
+#include "utilities/Binary.hpp"
+#include "utilities/Hash.hpp"
 #include "utilities/ChunkedStorage.hpp"
 
 #include <chrono>
@@ -178,9 +180,14 @@ bool CassandraDataLogger::create()
     return false;
   }
   std::stringstream qss;
-  qss << "CREATE TABLE " << M_KEYSPACE_NAME << "." << M_CF_NAME
-      << " (" << M_COLUMN_KEY     << " bigint, "
-              << M_COLUMN_TYPE    << " text, "
+  qss << "CREATE TABLE " << M_KEYSPACE_NAME << "." << M_CF_NAME;
+#ifdef EVID_MODE
+  qss << " (" << M_COLUMN_KEY     << " bigint, ";
+#endif
+#ifdef HASH_MODE
+  qss << " (" << M_COLUMN_KEY     << " text, ";
+#endif
+          qss << M_COLUMN_TYPE    << " text, "
               << M_COLUMN_SINFO   << " blob, "
               << M_COLUMN_VERSION << " text, "
               << M_COLUMN_TIME    << " bigint, "
@@ -273,7 +280,13 @@ bool CassandraDataLogger::write(uint64_t keyId, daq::utilities::Binary& payload)
   const CassPrepared* prepared = nullptr; 
   if ( prepareQuery(Q_INSERT, &prepared) ) {
     CassStatement* statement = cass_prepared_bind( prepared );
+#ifdef EVID_MODE
     cass_statement_bind_int64( statement, 0, keyId );
+#endif
+#ifdef HASH_MODE
+    daq::persistency::Hash payloadHash = daq::persistency::makeHash( "eventType", payload );
+    cass_statement_bind_string( statement, 0, payloadHash.c_str() );
+#endif
     cass_statement_bind_string( statement, 1, "event" );
     cass_statement_bind_string( statement, 3, "dummy" );
     cass_statement_bind_int64( statement, 4, 0L );

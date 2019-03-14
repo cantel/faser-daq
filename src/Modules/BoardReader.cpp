@@ -83,7 +83,7 @@ void BoardReader::runner()
         // ready to be sent to EB
 
         sequence_number++;
-        std::this_thread::sleep_for(100ms);
+        std::this_thread::sleep_for(10ms);
     }
     INFO(__METHOD_NAME__ << " Runner stopped");
 }

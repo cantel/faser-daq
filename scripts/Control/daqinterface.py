@@ -11,6 +11,7 @@ context = zmq.Context()
 
 exit = False
 
+
 def removeProcesses():
     for p in data:
         sd = supervisord.supervisord(p['host'], group)
@@ -23,11 +24,13 @@ def removeProcesses():
                 print('State', sd.getProcessState(i['name'])['statename'])
             print('Remove', sd.removeProcessFromGroup(i['name']))
 
+
 def addProcesses():
     for p in data:
         sd = supervisord.supervisord(p['host'], group)
 
-        print("Add", sd.addProgramToGroup(p['name'], exe+" "+str(p['port']), dir) )
+        print("Add", sd.addProgramToGroup(
+            p['name'], exe+" "+str(p['port']), dir))
 
 
 def handleRequest(host, port, request):
@@ -43,56 +46,83 @@ def handleRequest(host, port, request):
     except:
         print("Timeout occurred")
         return ""
-    
 
-def checkStatus():
-    for idx, p in enumerate(data):
-        p['command']='status'
-        s = json.dumps(p)
+
+class configureProcess (threading.Thread):
+    def __init__(self, p):
+        threading.Thread.__init__(self)
+        self.p = p
+
+    def run(self):
+        self.p['command'] = 'configure'
+        s = json.dumps(self.p)
         # print(s)
-        new_status = handleRequest(p['host'], p['port'], s)
-        if new_status != status[idx] and new_status != "":
-            print(p['name'],"in status", new_status)
-            status[idx] = new_status
+        rv = handleRequest(self.p['host'], self.p['port'], s)
+        if rv != b'Success':
+            print("Error", self.p['name'], rv)
 
-def startCommand():
-    for p in data:
-        p['command']='start'
-        s = json.dumps(p)
-        # print(s)
-        handleRequest(p['host'], p['port'], s)
 
-def stopCommand():
-    for p in data:
-        p['command']='stop'
-        s = json.dumps(p)
-        # print(s)
-        handleRequest(p['host'], p['port'], s)
+class startProcess (threading.Thread):
+    def __init__(self, p):
+        threading.Thread.__init__(self)
+        self.p = p
 
-def shutdownCommand():
-    for p in data:
-        p['command']='shutdown'
-        s = json.dumps(p)
-        # print(s)
-        handleRequest(p['host'], p['port'], s)
+    def run(self):
+        self.p['command'] = 'start'
+        s = json.dumps(self.p)
+        rv = handleRequest(self.p['host'], self.p['port'], s)
+        if rv != b'Success':
+            print("Error", self.p['name'], rv)
 
-def configureProcesses():
-    for p in data:
-        p['command']='configure'
-        s = json.dumps(p)
-        print(s)
-        handleRequest(p['host'], p['port'], s)
+class stopProcess (threading.Thread):
+    def __init__(self, p):
+        threading.Thread.__init__(self)
+        self.p = p
 
+    def run(self):
+        self.p['command'] = 'stop'
+        s = json.dumps(self.p)
+        rv = handleRequest(self.p['host'], self.p['port'], s)
+        if rv != b'Success':
+            print("Error", self.p['name'], rv)
+
+
+class shutdownProcess (threading.Thread):
+    def __init__(self, p):
+        threading.Thread.__init__(self)
+        self.p = p
+
+    def run(self):
+        self.p['command'] = 'shutdown'
+        s = json.dumps(self.p)
+        rv = handleRequest(self.p['host'], self.p['port'], s)
+        if rv != b'Success':
+            print("Error", self.p['name'], rv)
 
 class statusCheck (threading.Thread):
-    def __init__(self):
+    def __init__(self, p):
         threading.Thread.__init__(self)
+        self.p = p
+
     def run(self):
-        print ("Starting statusCheck")
+        self.p['command'] = 'status'
+        s = json.dumps(self.p)
+        status = ""
         while(not exit):
-            sleep(1)
-            checkStatus()
-        print ("Exiting thread")
+            sleep(0.5)
+            new_status = handleRequest(self.p['host'], self.p['port'], s)
+            if new_status != status and new_status != "":
+                print(self.p['name'], "in status", new_status)
+                status = new_status
+
+def spawnJoin(list, func):
+    threads = []
+    for p in list:
+        t = func(p)
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
 
 with open('settings.json') as f:
     settings = json.load(f)
@@ -104,8 +134,8 @@ exe = settings['exe']
 
 arg = "complete"
 if len(sys.argv) == 1 or sys.argv[1] == '-h':
-    print("First argument must be a .json configuration file. Available options: 'remove' 'supervisor' 'jzonmq' 'complete'")
-    sys.exit()
+    print("First argument must be a .json configuration file. Available options: 'remove' 'supervisor' 'configure' 'complete'")
+    quit()
 else:
     arg = sys.argv[2]
 
@@ -113,30 +143,41 @@ with open(sys.argv[1]) as f:
     data = json.load(f)
 f.close()
 
-status = ["" for p in data]
-
 if arg == "remove" or arg == 'complete':
     removeProcesses()
 
 if arg == 'supervisor' or arg == 'complete':
     addProcesses()
 
-if arg == 'jzonmq' or arg == 'complete':
-    configureProcesses()
+if arg == 'configure' or arg == 'complete':
+    threads = []
+    for p in data:
+        t = configureProcess(p)
+        t.start()
+        threads.append(t)
+    for t in threads:
+        t.join()
 
-thread = statusCheck()
-thread.start()
+#spawn status check threads
+threads = []
+for p in data:
+    t = statusCheck(p)
+    t.start()
+    threads.append(t)
 
 while(not exit):
-    text = input("")
+    text = input("start | stop | down\n")
     print("Executing", text)
+    command_threads = []
     if text == "start":
-        startCommand()
+        spawnJoin(data,startProcess)
     elif text == "stop":
-        stopCommand()
-    elif text == "shutdown":
-        shutdownCommand()
+        spawnJoin(data,stopProcess)
+    elif text == "down":
+        spawnJoin(data,shutdownProcess)
         exit = True
 
-thread.join()
-sys.exit()
+for t in threads:
+    t.join()
+
+quit()

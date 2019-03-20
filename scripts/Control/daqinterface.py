@@ -9,6 +9,8 @@ import threading
 
 context = zmq.Context()
 
+exit = False
+
 def removeProcesses():
     for p in data:
         sd = supervisord.supervisord(p['host'], group)
@@ -30,6 +32,7 @@ def addProcesses():
 
 def handleRequest(host, port, request):
     socket = context.socket(zmq.REQ)
+    socket.setsockopt(zmq.LINGER, 0)
     socket.RCVTIMEO = 3000
     socket.connect("tcp://"+host+":"+str(port))
     socket.send_string(request)
@@ -39,6 +42,7 @@ def handleRequest(host, port, request):
         return reply
     except:
         print("Timeout occurred")
+    
 
 def checkStatus():
     for p in data:
@@ -81,13 +85,14 @@ class statusCheck (threading.Thread):
         threading.Thread.__init__(self)
     def run(self):
         print ("Starting statusCheck")
-        while(True):
+        while(not exit):
             sleep(3)
             checkStatus()
-        print ("Exiting " + self.name)
+        print ("Exiting thread")
 
 with open('settings.json') as f:
     settings = json.load(f)
+f.close()
 
 group = settings['group']
 dir = settings['build_dir']
@@ -96,13 +101,13 @@ exe = settings['exe']
 arg = "complete"
 if len(sys.argv) == 1 or sys.argv[1] == '-h':
     print("First argument must be a .json configuration file. Available options: 'remove' 'supervisor' 'jzonmq' 'complete'")
-    exit(0)
+    sys.exit()
 else:
     arg = sys.argv[2]
 
 with open(sys.argv[1]) as f:
     data = json.load(f)
-
+f.close()
 
 
 if arg == "remove" or arg == 'complete':
@@ -117,12 +122,16 @@ if arg == 'jzonmq' or arg == 'complete':
 thread = statusCheck()
 thread.start()
 
-while(True):
+while(not exit):
     text = input("")
-    print(text)
+    print("Executing", text)
     if text == "start":
         startCommand()
     elif text == "stop":
         stopCommand()
     elif text == "shutdown":
         shutdownCommand()
+        exit = True
+
+thread.join()
+sys.exit()

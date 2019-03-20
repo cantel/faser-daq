@@ -33,43 +33,47 @@ def addProcesses():
 def handleRequest(host, port, request):
     socket = context.socket(zmq.REQ)
     socket.setsockopt(zmq.LINGER, 0)
-    socket.RCVTIMEO = 3000
+    socket.RCVTIMEO = 2000
     socket.connect("tcp://"+host+":"+str(port))
     socket.send_string(request)
     try:
         reply = socket.recv()
-        print(reply)
+        # print(reply)
         return reply
     except:
         print("Timeout occurred")
+        return ""
     
 
 def checkStatus():
-    for p in data:
+    for idx, p in enumerate(data):
         p['command']='status'
         s = json.dumps(p)
-        print(s)
-        handleRequest(p['host'], p['port'], s)
+        # print(s)
+        new_status = handleRequest(p['host'], p['port'], s)
+        if new_status != status[idx] and new_status != "":
+            print(p['name'],"in status", new_status)
+            status[idx] = new_status
 
 def startCommand():
     for p in data:
         p['command']='start'
         s = json.dumps(p)
-        print(s)
+        # print(s)
         handleRequest(p['host'], p['port'], s)
 
 def stopCommand():
     for p in data:
         p['command']='stop'
         s = json.dumps(p)
-        print(s)
+        # print(s)
         handleRequest(p['host'], p['port'], s)
 
 def shutdownCommand():
     for p in data:
         p['command']='shutdown'
         s = json.dumps(p)
-        print(s)
+        # print(s)
         handleRequest(p['host'], p['port'], s)
 
 def configureProcesses():
@@ -86,7 +90,7 @@ class statusCheck (threading.Thread):
     def run(self):
         print ("Starting statusCheck")
         while(not exit):
-            sleep(3)
+            sleep(1)
             checkStatus()
         print ("Exiting thread")
 
@@ -109,6 +113,7 @@ with open(sys.argv[1]) as f:
     data = json.load(f)
 f.close()
 
+status = ["" for p in data]
 
 if arg == "remove" or arg == 'complete':
     removeProcesses()

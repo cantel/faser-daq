@@ -1,8 +1,8 @@
-# RD51-daq
+# daq
 
-DAQ framework for RD51
+DAQ framework for generic application
 
-# Install the rd51 framework
+# Install the daq framework
 ### Run ansible-playbook to configure your CentOS7 host
 The playbook will set up your host with the system libraries and will install supervisord
 

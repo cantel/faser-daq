@@ -104,7 +104,7 @@ bool daq::core::Command::handleCommand()
   m_commandHandler->set_work(m_commandFunctors[0]);
   while (busy())
   {
-    std::this_thread::sleep_for(500ms);
+    std::this_thread::sleep_for(100ms);
   }
   return true;
 }

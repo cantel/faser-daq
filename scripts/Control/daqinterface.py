@@ -20,7 +20,10 @@ def removeProcesses():
         for i in info:
             print(i)
             if i['statename'] == 'RUNNING':
-                print('Stop', sd.stopProcess(i['name']))
+                try:
+                    print('Stop', sd.stopProcess(i['name']))
+                except:
+                    print("Exception: cannot stop process",i['name'])
                 print('State', sd.getProcessState(i['name'])['statename'])
             print('Remove', sd.removeProcessFromGroup(i['name']))
 
@@ -133,8 +136,8 @@ dir = settings['build_dir']
 exe = settings['exe']
 
 arg = "complete"
-if len(sys.argv) == 1 or sys.argv[1] == '-h':
-    print("First argument must be a .json configuration file. Available options: 'remove' 'supervisor' 'configure' 'complete'")
+if len(sys.argv) <= 2 or sys.argv[len(sys.argv)-1] == '-h':
+    print("First argument must be a .json configuration file. Available second arguments: 'remove' 'add' 'configure' 'complete'")
     quit()
 else:
     arg = sys.argv[2]
@@ -143,11 +146,14 @@ with open(sys.argv[1]) as f:
     data = json.load(f)
 f.close()
 
-if arg == "remove" or arg == 'complete':
+if arg == "remove":
     removeProcesses()
+    quit()
 
-if arg == 'supervisor' or arg == 'complete':
+if arg == 'add' or arg == 'complete':
     addProcesses()
+    if arg == 'add':
+        quit()
 
 if arg == 'configure' or arg == 'complete':
     threads = []
@@ -157,6 +163,8 @@ if arg == 'configure' or arg == 'complete':
         threads.append(t)
     for t in threads:
         t.join()
+    if arg == 'configure':
+        quit()
 
 #spawn status check threads
 threads = []
@@ -175,6 +183,7 @@ while(not exit):
         spawnJoin(data,stopProcess)
     elif text == "down":
         spawnJoin(data,shutdownProcess)
+        removeProcesses()
         exit = True
 
 for t in threads:

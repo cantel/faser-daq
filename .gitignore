@@ -6,3 +6,5 @@ build
 daq.code-workspace
 .vscode
 *pyc
+html
+latex

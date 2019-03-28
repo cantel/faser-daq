@@ -1,6 +1,8 @@
+/// \cond
 #include <cstdlib>
 #include <chrono>
 #include <thread>
+/// \endcond
 
 #include "core/Core.hpp"
 

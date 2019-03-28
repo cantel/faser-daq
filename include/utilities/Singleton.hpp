@@ -10,6 +10,9 @@
  * Date: March 2019
 */
 
+/// \cond
+#include <memory>
+/// \endcond
 
 namespace daq{
 namespace utilities{
@@ -30,7 +33,6 @@ protected:
     Singleton() {}
 };
 
-#include <memory>
 template<typename T>
 T& Singleton<T>::instance()
 {

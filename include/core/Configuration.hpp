@@ -1,12 +1,14 @@
 #ifndef DAQ_UTILITIES_CONFIGURATION_HPP
 #define DAQ_UTILITIES_CONFIGURATION_HPP
 
+/// \cond
 #include <unordered_map>
 #include <vector>
 #include <istream>
 #include <ostream>
 #include <stdexcept>
 #include <string>
+/// \endcond
 
 #include "utilities/json.hpp"
 #include "utilities/Logging.hpp"

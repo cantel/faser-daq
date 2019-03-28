@@ -2,9 +2,9 @@
 
 #include "modules/BoardReader.hpp"
 
+/// \cond
 #include <chrono>
-
-// #include <stdlib.h>
+/// \endcond
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)

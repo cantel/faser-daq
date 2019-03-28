@@ -3,9 +3,12 @@
 #ifndef DAQ_CORE_PLUGINMANAGER_HPP
 #define DAQ_CORE_PLUGINMANAGER_HPP
 
+/// \cond
 #include <dlfcn.h>
 #include <string>
-#include "modules/BoardReader.hpp"
+/// \endcond
+
+#include "core/DAQProcess.hpp"
 #include "utilities/Logging.hpp"
 
 namespace daq

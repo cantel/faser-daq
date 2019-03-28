@@ -5,10 +5,12 @@
 #include "core/ConnectionManager.hpp"
 #include "core/Command.hpp"
 
+/// \cond
 #include <ctime>
 #include <iomanip>
 #include <thread>
 #include <chrono>
+/// \endcond
 
 #define REORD_DEBUG
 #define QATCOMP_DEBUG

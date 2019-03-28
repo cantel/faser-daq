@@ -1,8 +1,10 @@
 #ifndef DAQ_UTILITIES_COMMON_HPP_
 #define DAQ_UTILITIES_COMMON_HPP_
 
+/// \cond
 #include <pthread.h>
 #include <time.h>
+/// \endcond
 
 #include "utilities/Types.hpp"
 

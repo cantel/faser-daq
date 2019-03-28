@@ -3,7 +3,9 @@
 #ifndef BOARDREADER_HPP_
 #define BOARDREADER_HPP_
 
+/// \cond
 #include <string>
+/// \endcond
 
 #include "core/DAQProcess.hpp"
 

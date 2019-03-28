@@ -19,6 +19,7 @@
 
 #pragma once
 
+/// \cond
 #include <cxxabi.h>
 #include <atomic>
 #include <cassert>
@@ -29,6 +30,7 @@
 #include <utility>
 #include <new>
 #include <iostream>
+/// \endcond
 
 #include "utilities/Align.hpp"
 #include "utilities/Logging.hpp"

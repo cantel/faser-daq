@@ -1,11 +1,12 @@
 #ifndef DAQ_UTILITIES_REUSABLE_THREAD_HH_
 #define DAQ_UTILITIES_REUSABLE_THREAD_HH_
 
+/// \cond
 #include <thread>
 #include <atomic>
 #include <mutex>
 #include <condition_variable>
-
+/// \endcond
 
 /********************************
  * ReusableThread

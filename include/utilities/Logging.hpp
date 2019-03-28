@@ -1,10 +1,10 @@
 #ifndef DAQ_UTILITIES_LOGGING_H
 #define DAQ_UTILITIES_LOGGING_H
 
+/// \cond
 #include <memory>
 #include <sstream>
-
-//#include "utilities/Common.hpp"
+/// \endcond
 
 #include "spdlog/spdlog.h"
 #include "spdlog/sinks/stdout_sinks.h"

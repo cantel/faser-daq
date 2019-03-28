@@ -4,10 +4,12 @@
 #include "core/PluginManager.hpp"
 #include "core/Command.hpp"
 
+/// \cond
 #include <ctime>
 #include <iomanip>
 #include <thread>
 #include <chrono>
+/// \endcond
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)

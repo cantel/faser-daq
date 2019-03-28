@@ -5,6 +5,7 @@
 
 #include <zmq.hpp> // https://github.com/zeromq/cppzmq
 
+/// \cond
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -21,6 +22,7 @@
 #   include <sys/time.h>
 #   include <unistd.h>
 #endif
+/// \endcond
 
 //  Bring Windows MSVC up to C99 scratch
 #if (defined (WIN32))

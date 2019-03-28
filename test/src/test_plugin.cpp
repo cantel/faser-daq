@@ -1,10 +1,12 @@
 // enrico.gamberini@cern.ch
 
+/// \cond
 #include <dlfcn.h>
 #include <iostream>
 #include <string>
 #include <chrono>
 #include <thread>
+/// \endcond
 
 #include "modules/BoardReader.hpp"
 #include "modules/EventBuilder.hpp"

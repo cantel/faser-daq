@@ -5,20 +5,17 @@
 #include "utilities/ProducerConsumerQueue.hpp"
 #include "utilities/ReusableThread.hpp"
 #include "utilities/Binary.hpp"
+#include "utilities/zhelpers.hpp"
 
 #include "core/Command.hpp"
 
-//#include "zmq.hpp"
-//#include "netio/netio.hpp"
-
+/// \cond
 #include <map>
 #include <memory>
 #include <thread>
 #include <mutex>
 #include <algorithm>
-
-#include "zmq.hpp"
-#include "utilities/zhelpers.hpp"
+/// \endcond
 
 
 #define MSGQ

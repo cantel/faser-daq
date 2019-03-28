@@ -5,8 +5,9 @@
 #include "core/Configuration.hpp"
 #include "core/ConnectionManager.hpp"
 #include "core/PluginManager.hpp"
-
+/// \cond
 #include <atomic>
+/// \endcond
 
 namespace daq{
 namespace core{

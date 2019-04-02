@@ -63,6 +63,7 @@
 
           "connections": {
             "type": "object",
+            "title": "Connections",
             "properties": {
               "sources": { 
                 "type": "array", 

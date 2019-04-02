@@ -6,9 +6,7 @@
     "foo",
     "components"
   ],
-
   "properties": {
-
     "version": {
       "type": "integer",
       "description": "Configuration version",
@@ -59,21 +57,37 @@
             "properties": {
               "some_int":    { "type": "integer" },
               "some_string": { "type": "string" }
-            }
+            },
+            "required": ["some_int", "some_string"]
           },
 
           "connections": {
             "type": "object",
-            "title": "Connections",
             "properties": {
-              "sources": { "type": "array", "properties":{"chid":"integer", "host":"string", "port":"integer"} },
-              "destinations": { "type": "array", "properties":{"chid":"integer", "host":"string", "port":"integer"} }
-            }
+              "sources": { 
+                "type": "array", 
+                "format": "table",
+                "title": "Sources",
+                "uniqueItems": true,
+                "items": {
+                  "type": "object", "properties":{"chid": {"type":"integer"}, "host":{"type":"string"}, "port":{"type":"integer"}}, "required": ["chid", "host", "port"]
+                }
+              },
+              "destinations": { 
+                "type": "array", 
+                "format": "table",
+                "title": "Destinations",
+                "uniqueItems": true,
+                "items": {
+                  "type": "object", "properties":{"chid": {"type":"integer"}, "host":{"type":"string"}, "port":{"type":"integer"}}, "required": ["chid", "host", "port"]
+                }
+              }
+            },
+            "required": ["sources", "destinations"]
           }
         }
       }
     }
   }
 }
-
 

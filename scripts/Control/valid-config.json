@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "foo": "bar",
+  "components": [
+    {
+      "name": "boardreader01",
+      "host": "rd51pro",
+      "port": 5555,
+      "type": "boardreader",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test"
+      },
+      "connections": {
+        "sources": [],
+        "destinations": [
+          {
+            "chid": 1,
+            "host": "localhost",
+            "port": 8101
+          }
+        ]
+      }
+    },
+    {
+      "name": "boardreader02",
+      "host": "rd51pro",
+      "port": 5556,
+      "type": "boardreader",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test"
+      },
+      "connections": {
+        "sources": [],
+        "destinations": [
+          {
+            "chid": 1,
+            "host": "localhost",
+            "port": 8102
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventbuilder01",
+      "host": "rd51pro",
+      "port": 5557,
+      "type": "eventbuilder",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test"
+      },
+      "connections": {
+        "sources": [
+          {
+            "chid": 1,
+            "host": "*",
+            "port": 8101
+          },
+          {
+            "chid": 2,
+            "host": "*",
+            "port": 8102
+          }
+        ],
+        "destinations": [
+          {
+            "chid": 3,
+            "host": "localhost",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "datalogger01",
+      "host": "rd51pro",
+      "port": 6003,
+      "type": "cassandradatalogger",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test",
+        "ring": "127.0.0.1"
+      },
+      "connections": {
+        "sources": [
+          {
+            "chid": 1,
+            "host": "*",
+            "port": 8103
+          }
+        ],
+        "destinations": []
+      }
+    }
+  ]
+}
+

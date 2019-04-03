@@ -1,0 +1,40 @@
+#
+# Filename: roles/web-deps/tasks/main.yml
+# Author  : Roland Sipos - rsipos@cern.ch
+#
+---
+
+- name: Install gunicorn
+  command: pip3 install gunicorn
+
+- name: Install gevent
+  command: pip3 install gevent
+
+- name: Install redis client
+  command: pip3 install redis
+
+- name: Install flask
+  command: pip3 install Flask
+
+- name: Install flask-redis
+  command: pip3 install Flask-Redis
+
+- name: Install flask-caching
+  command: pip3 install Flask-Caching
+
+- name: Install flask-restful
+  command: pip3 install Flask-Restful
+
+- name: Install apispec
+  command: pip3 install apispec
+
+- name: Install marshmallow
+  command: pip3 install marshmallow
+
+- name: Install webargs
+  command: pip3 install webargs
+
+- name: Install flask-apispec
+  command: pip3 install flask-apispec
+
+

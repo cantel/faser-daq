@@ -1,0 +1,25 @@
+#Roland Sipos <roland.siposo@cern.ch> 2018
+---
+
+- name: install the latest version of redis from the cernonly
+  yum:
+    name: redis
+    state: present
+
+- name: Copy redis config file
+  copy:
+    src: redis.conf
+    dest: /etc/redis.conf
+
+- name: Check if redis-server is running
+  tags: redis-server
+  shell: ps auwx | grep "redis-server" | grep -v grep
+  ignore_errors: yes
+  changed_when: false
+  register: service_redis_status
+
+- name: Start redis-server
+  tags: redis-server
+  command: redis-server /etc/redis.conf --daemonize yes
+  when: service_redis_status.rc == 1
+

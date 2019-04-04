@@ -8,6 +8,8 @@ The playbook will set up your host with the system libraries and will install su
 
     sudo yum install -y ansible
     cd ansible/
+    source daq-ansible.sh
+    cd playbooks/
     ansible-playbook set-up-host.yml --ask-become-pass
 
 ## Software compilation

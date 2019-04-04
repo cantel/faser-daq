@@ -4,7 +4,7 @@
 #include <thread>
 /// \endcond
 
-#include "core/Core.hpp"
+#include "Core/Core.hpp"
 
 using namespace std::chrono_literals;
 

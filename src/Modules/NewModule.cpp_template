@@ -1,4 +1,4 @@
-#include "modules/NewModule.hpp_template"
+#include "Modules/NewModule.hpp_template"
 
 extern "C" NewModule *create_object()
 {

@@ -11,7 +11,7 @@
 // Created:     June 2015
 //
 
-#include "utilities/Binary.hpp"
+#include "Utilities/Binary.hpp"
 
 #include <iostream>
 #include <curl/curl.h>

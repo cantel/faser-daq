@@ -8,10 +8,10 @@
 #include <thread>
 /// \endcond
 
-#include "modules/BoardReader.hpp"
-#include "modules/EventBuilder.hpp"
-#include "utilities/Logging.hpp"
-#include "core/ConnectionManager.hpp"
+#include "Modules/BoardReader.hpp"
+#include "Modules/EventBuilder.hpp"
+#include "Utilities/Logging.hpp"
+#include "Core/ConnectionManager.hpp"
 
 int main(int argc, char **argv)
 {

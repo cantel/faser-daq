@@ -10,9 +10,9 @@
 #include <string>
 /// \endcond
 
-#include "utilities/json.hpp"
-#include "utilities/Logging.hpp"
-#include "utilities/Singleton.hpp"
+#include "Utilities/json.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Singleton.hpp"
 
 namespace daq
 {

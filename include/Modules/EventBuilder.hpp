@@ -3,7 +3,7 @@
 #ifndef EVENTBUILDER_H_
 #define EVENTBUILDER_H_
 
-#include "core/DAQProcess.hpp"
+#include "Core/DAQProcess.hpp"
 
 class EventBuilder : public DAQProcess
 {

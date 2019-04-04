@@ -1,8 +1,8 @@
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
 
-#include "core/PluginManager.hpp"
-#include "core/Command.hpp"
+#include "Core/PluginManager.hpp"
+#include "Core/Command.hpp"
 
 /// \cond
 #include <ctime>

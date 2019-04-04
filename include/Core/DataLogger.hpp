@@ -1,14 +1,21 @@
 #ifndef DAQ_CORE_DATALOGGER_HPP_
 #define DAQ_CORE_DATALOGGER_HPP_
 
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
-#include "utilities/DataStore.hpp"
-#include "core/Configuration.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
+#include "Utilities/DataStore.hpp"
+#include "Core/Configuration.hpp"
 
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
+
+/*
+* ConnectionManager
+* Author: Roland.Sipos@cern.ch
+* Description: DataLogger interface with generic datastore
+* Date: March 2019
+*/
 
 class DataLogger
 {

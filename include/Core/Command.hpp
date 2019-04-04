@@ -1,9 +1,9 @@
 #ifndef COMMAND_HPP_
 #define COMMAND_HPP_
 
-#include "utilities/Logging.hpp"
-#include "utilities/Singleton.hpp"
-#include "utilities/ReusableThread.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Singleton.hpp"
+#include "Utilities/ReusableThread.hpp"
 
 namespace daq{
 namespace core{

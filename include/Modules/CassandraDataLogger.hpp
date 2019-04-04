@@ -3,11 +3,11 @@
 
 #include <iostream>
 
-#include "core/DAQProcess.hpp"
-#include "core/DataLogger.hpp"
+#include "Core/DAQProcess.hpp"
+#include "Core/DataLogger.hpp"
 
-#include "utilities/ChunkedStorage.hpp"
-#include "utilities/Binary.hpp"
+#include "Utilities/ChunkedStorage.hpp"
+#include "Utilities/Binary.hpp"
 
 #include <cassandra.h>
 

@@ -1,13 +1,13 @@
 #ifndef DAQ_CORE_CONNECTION_MANAGER_HH_
 #define DAQ_CORE_CONNECTION_MANAGER_HH_
 
-#include "utilities/Singleton.hpp"
-#include "utilities/ProducerConsumerQueue.hpp"
-#include "utilities/ReusableThread.hpp"
-#include "utilities/Binary.hpp"
-#include "utilities/zhelpers.hpp"
+#include "Utilities/Singleton.hpp"
+#include "Utilities/ProducerConsumerQueue.hpp"
+#include "Utilities/ReusableThread.hpp"
+#include "Utilities/Binary.hpp"
+#include "Utilities/zhelpers.hpp"
 
-#include "core/Command.hpp"
+#include "Core/Command.hpp"
 
 /// \cond
 #include <map>

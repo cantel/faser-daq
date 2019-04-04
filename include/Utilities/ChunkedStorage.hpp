@@ -12,9 +12,9 @@
 // Created:     June 2015
 //
 
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
-#include "utilities/Binary.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
+#include "Utilities/Binary.hpp"
 
 #include <string>
 #include <utility>

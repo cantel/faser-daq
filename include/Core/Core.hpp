@@ -1,10 +1,10 @@
 #ifndef DAQ_CORE_CORE_HPP_
 #define DAQ_CORE_CORE_HPP_
 
-#include "utilities/Logging.hpp"
-#include "core/Configuration.hpp"
-#include "core/ConnectionManager.hpp"
-#include "core/PluginManager.hpp"
+#include "Utilities/Logging.hpp"
+#include "Core/Configuration.hpp"
+#include "Core/ConnectionManager.hpp"
+#include "Core/PluginManager.hpp"
 /// \cond
 #include <atomic>
 /// \endcond

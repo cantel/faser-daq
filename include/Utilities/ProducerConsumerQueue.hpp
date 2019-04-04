@@ -32,8 +32,8 @@
 #include <iostream>
 /// \endcond
 
-#include "utilities/Align.hpp"
-#include "utilities/Logging.hpp"
+#include "Utilities/Align.hpp"
+#include "Utilities/Logging.hpp"
 
 namespace folly {
 

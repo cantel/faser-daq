@@ -1,9 +1,9 @@
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
-#include "utilities/Binary.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
+#include "Utilities/Binary.hpp"
 
-#include "core/ConnectionManager.hpp"
-#include "core/Command.hpp"
+#include "Core/ConnectionManager.hpp"
+#include "Core/Command.hpp"
 
 /// \cond
 #include <ctime>

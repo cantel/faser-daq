@@ -6,7 +6,7 @@
 #include <time.h>
 /// \endcond
 
-#include "utilities/Types.hpp"
+#include "Utilities/Types.hpp"
 
 namespace daq {
 namespace utilities {

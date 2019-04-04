@@ -1,9 +1,9 @@
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
-#include "core/Configuration.hpp"
-#include "core/Command.hpp"
-#include "core/PluginManager.hpp"
-#include "core/ConnectionManager.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
+#include "Core/Configuration.hpp"
+#include "Core/Command.hpp"
+#include "Core/PluginManager.hpp"
+#include "Core/ConnectionManager.hpp"
 
 /// \cond
 #include <ctime>

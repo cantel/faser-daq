@@ -3,10 +3,10 @@
 #ifndef DAQPROCESS_HPP_
 #define DAQPROCESS_HPP_
 
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
-#include "core/Configuration.hpp"
-#include "core/ConnectionManager.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
+#include "Core/Configuration.hpp"
+#include "Core/ConnectionManager.hpp"
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)

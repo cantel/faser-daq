@@ -1,6 +1,6 @@
 // enrico.gamberini@cern.ch
 
-#include "modules/EventBuilder.hpp"
+#include "Modules/EventBuilder.hpp"
 
 /// \cond
 #include <chrono>

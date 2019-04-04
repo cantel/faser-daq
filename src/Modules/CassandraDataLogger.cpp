@@ -1,9 +1,9 @@
-#include "modules/CassandraDataLogger.hpp"
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
-#include "utilities/Binary.hpp"
-#include "utilities/Hash.hpp"
-#include "utilities/ChunkedStorage.hpp"
+#include "Modules/CassandraDataLogger.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
+#include "Utilities/Binary.hpp"
+#include "Utilities/Hash.hpp"
+#include "Utilities/ChunkedStorage.hpp"
 
 #include <chrono>
 #include <sstream>

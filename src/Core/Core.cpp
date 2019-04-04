@@ -1,7 +1,7 @@
-#include "utilities/Logging.hpp"
-#include "utilities/Common.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Common.hpp"
 
-#include "core/Core.hpp"
+#include "Core/Core.hpp"
 
 /// \cond
 #include <ctime>

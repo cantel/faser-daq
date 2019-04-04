@@ -1,6 +1,6 @@
 // enrico.gamberini@cern.ch
 
-#include "modules/BoardReader.hpp"
+#include "Modules/BoardReader.hpp"
 
 /// \cond
 #include <chrono>

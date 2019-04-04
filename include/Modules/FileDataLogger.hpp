@@ -3,9 +3,9 @@
 
 #include <iostream>
 
-#include "core/DAQProcess.hpp"
-#include "core/DataLogger.hpp"
-#include "utilities/Binary.hpp"
+#include "Core/DAQProcess.hpp"
+#include "Core/DataLogger.hpp"
+#include "Utilities/Binary.hpp"
 
 class FileDataLogger : public DAQProcess, public DataLogger
 {

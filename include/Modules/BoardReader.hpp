@@ -7,7 +7,7 @@
 #include <string>
 /// \endcond
 
-#include "core/DAQProcess.hpp"
+#include "Core/DAQProcess.hpp"
 
 class BoardReader : public DAQProcess
 {

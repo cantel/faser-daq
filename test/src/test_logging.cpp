@@ -1,5 +1,5 @@
-#include "utilities/Logging.hpp"
-#include "core/ConnectionManager.hpp"
+#include "Utilities/Logging.hpp"
+#include "Core/ConnectionManager.hpp"
 
 using namespace daq;
 

@@ -1,5 +1,5 @@
-#include "modules/FileDataLogger.hpp"
-#include "utilities/Logging.hpp"
+#include "Modules/FileDataLogger.hpp"
+#include "Utilities/Logging.hpp"
 
 extern "C" FileDataLogger *create_object()
 {

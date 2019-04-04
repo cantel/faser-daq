@@ -8,8 +8,8 @@
 #include <string>
 /// \endcond
 
-#include "core/DAQProcess.hpp"
-#include "utilities/Logging.hpp"
+#include "Core/DAQProcess.hpp"
+#include "Utilities/Logging.hpp"
 
 namespace daq
 {

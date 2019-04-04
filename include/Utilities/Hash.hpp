@@ -1,8 +1,8 @@
 #ifndef DAQ_UTILITIES_HASH_h
 #define DAQ_UTILITIES_HASH_h
 
-#include "utilities/Logging.hpp"
-#include "utilities/Binary.hpp"
+#include "Utilities/Logging.hpp"
+#include "Utilities/Binary.hpp"
 
 #include <openssl/sha.h>
 

@@ -288,7 +288,11 @@ namespace daq {
     public:
       ObjectDeleter(const std::shared_ptr<ChunkedStorageProvider>& provider, const std::string& objectName) : m_csp(provider), m_objectName(objectName) {}
       ~ObjectDeleter(){};
-      const ObjectMetadata call() const { ERROR("Attempt to delete chunk! It's forbidden..."); }
+      const ObjectMetadata call() const { 
+        ERROR("Attempt to delete chunk! It's forbidden..."); 
+        daq::persistency::ObjectMetadata attributes;
+        return attributes;
+      }
     };
 
     class ObjectDirectoryLister {
@@ -298,7 +302,11 @@ namespace daq {
     public:
       ObjectDirectoryLister(const std::shared_ptr<ChunkedStorageProvider>& provider, const std::string& path) : m_csp(provider), m_path(path) {}
       ~ObjectDirectoryLister(){};
-      const ObjectMetadata call() const { ERROR("The Directory lister feature is not supported yet..."); }
+      const ObjectMetadata call() const { 
+        ERROR("The Directory lister feature is not supported yet..."); 
+        daq::persistency::ObjectMetadata attributes;
+        return attributes;
+      }
     };
 
 

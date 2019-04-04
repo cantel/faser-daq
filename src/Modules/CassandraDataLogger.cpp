@@ -196,6 +196,7 @@ bool CassandraDataLogger::create()
       << " PRIMARY KEY (" << M_COLUMN_KEY << "));";
   executeQuery( qss.str() );
   m_chunkProvider.create();
+  return true;
 }
 
 #warning RS -> YOU NEED TO INTRODUCE A PROPER SESSION LAYER BETWEEN STORAGE AND DAQ!
@@ -239,7 +240,7 @@ void CassandraDataLogger::setup()
 
   INFO(__METHOD_NAME__ << " -> connecting to ring: " << clusterStr);
   cass_cluster_set_write_bytes_high_water_mark(m_cluster, 10485760); // Write bytes water mark set to 10MByte
-
+ 
   cass_cluster_set_contact_points( m_cluster, clusterStr.c_str() );
   cass_cluster_set_token_aware_routing(m_cluster, cass_true);
 

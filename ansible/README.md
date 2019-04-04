@@ -9,7 +9,7 @@
 ### Run ansible-playbook to configure your host
 
     cd ansible/
-    ansible-playbook set-up-host.yml  --ask-become-pass 
-
-    
+    source daq-ansible.sh
+    cd playbooks/
+    ansible-playbook set-up-host.yml  --ask-become-pass
 

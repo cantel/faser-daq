@@ -11,5 +11,7 @@
     cd ansible/
     source daq-ansible.sh
     cd playbooks/
-    ansible-playbook set-up-host.yml  --ask-become-pass
+    ansible-playbook set-up-host.yml --ask-become-pass
 
+### For development packages and tools, run the following
+    ansible-playbook development-tools.yml --ask-become-pass   

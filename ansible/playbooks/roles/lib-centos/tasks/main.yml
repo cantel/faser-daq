@@ -16,3 +16,5 @@
     - libpcap-devel
     - bzip2
     - libicu-devel #For unicode in boost compilation
+    - libuv-devel
+    - openssl-devel

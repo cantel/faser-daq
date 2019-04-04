@@ -1,0 +1,8 @@
+---
+- hosts: localhost
+  remote_user: "{{ lookup('env','LOGNAME') }}"
+  become: yes
+  become_method: sudo
+  roles:
+    - { role: devel, when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux' }
+

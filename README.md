@@ -44,7 +44,7 @@ pwd
     git checkout v1.2.2
     git add
     git commit
-¬
+
 ###Spdlog
 
     git submodule add https://github.com/gabime/spdlog.git vendor/spdlog --single branch
@@ -74,3 +74,10 @@ pwd
     git add
     git commit
 
+### Cassandra C++ driver
+
+    git submodule add https://github.com/datastax/cpp-driver.git vendor/cassandra-driver --single branch
+    cd ../
+    git add .
+    cd vendor/cassandra-driver
+    git checkout 2.11.0

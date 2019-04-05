@@ -25,7 +25,10 @@ def removeProcesses():
                 except:
                     print("Exception: cannot stop process",i['name'])
                 print('State', sd.getProcessState(i['name'])['statename'])
-            print('Remove', sd.removeProcessFromGroup(i['name']))
+            try:
+                print('Remove', sd.removeProcessFromGroup(i['name']))
+            except:
+                print("Exception: cannot remove process",i['name'])
 
 
 def addProcesses():

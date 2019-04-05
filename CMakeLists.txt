@@ -7,6 +7,23 @@ project(rd51 VERSION 0.0.1
 set(PACKAGE rd51core)
 set(PACKAGE_VERSION 0.0.1)
 
+option(BUILD_DOC "Build documentation" ON)
+
+find_package(Doxygen)
+if (DOXYGEN_FOUND)
+  set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+  set(DOXYGEN_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+  configure_file(${DOXYGEN_IN} ${DOXYGEN_OUT} @ONLY)
+  message("Doxygen build started")
+  add_custom_target( doc_doxygen ALL
+    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYGEN_OUT}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+    COMMENT "Generating API documentation with Doxygen"
+    VERBATIM )
+else (DOXYGEN_FOUND)
+  message("Doxygen need to be installed to generate the doxygen documentation")
+endif (DOXYGEN_FOUND)
+
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
     message(FATAL_ERROR "GCC version must be at least 4.8!")
@@ -55,6 +72,8 @@ add_external(json ${json_version})
 
 #add_external(cereal ${cereal_version})
 #add_external(evpp   ${evpp_version})
+
+#add_external(cassandra-driver ${cassandra-driver_version})
 
 add_subdirectory(src/Utilities)
 add_subdirectory(src/Core)

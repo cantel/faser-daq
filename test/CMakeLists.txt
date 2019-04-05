@@ -14,3 +14,8 @@ install(TARGETS test_plugin EXPORT DESTINATION bin)
 add_executable(test_logging src/test_logging.cpp)
 target_link_libraries(test_logging PUBLIC pthread rt utilities core)
 install(TARGETS test_logging EXPORT DESTINATION bin)
+
+
+add_executable(test_json src/test_json.cpp)
+target_link_libraries(test_json PUBLIC pthread rt utilities core)
+install(TARGETS test_json EXPORT DESTINATION bin)

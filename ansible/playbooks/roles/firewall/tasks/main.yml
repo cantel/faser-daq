@@ -1,0 +1,5 @@
+- name: Install firewall
+  yum:
+    name: firewalld
+
+

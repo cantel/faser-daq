@@ -14,6 +14,22 @@
     name: cassandra
     state: latest 
 
+- name: clone cassandra driver
+  git:
+    repo: 'https://github.com/datastax/cpp-driver.git'
+    dest: /opt/cassandra-driver
+    version: 2.11.0
+- file:
+    path: /opt/cassandra-driver/build
+    state: directory
+- name: run cmake3
+  cmake: 
+    source_dir: /opt/cassandra-driver
+    binary_dir: /opt/cassandra-driver/build
+    target: install
+    build_type: Release
+    executable: /usr/bin/cmake3
+
 # COPY CONFIG FOR CASSANDRA SHOULD COME HERE.
 #- name: Copy cassandra conf file
 #  copy:

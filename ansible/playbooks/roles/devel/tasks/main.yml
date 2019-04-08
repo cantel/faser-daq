@@ -11,6 +11,7 @@
     - wget
     - cmake3
     - mlocate
+    - graphviz
 
 - name: Updatedb
   shell: updatedb

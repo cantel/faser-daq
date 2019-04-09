@@ -1,12 +1,12 @@
-[submodule "vendor/cereal"]
-	path = vendor/cereal
-	url = https://github.com/USCiLab/cereal.git
+#[submodule "vendor/cereal"]
+#	path = vendor/cereal
+#	url = https://github.com/USCiLab/cereal.git
 [submodule "vendor/spdlog"]
 	path = vendor/spdlog
 	url = https://github.com/gabime/spdlog.git
-[submodule "vendor/docopt"]
-	path = vendor/docopt
-	url = https://github.com/docopt/docopt.cpp.git
+#[submodule "vendor/docopt"]
+#	path = vendor/docopt
+#	url = https://github.com/docopt/docopt.cpp.git
 [submodule "vendor/json"]
 	path = vendor/json
 	url = https://github.com/nlohmann/json.git

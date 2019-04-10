@@ -5,16 +5,15 @@
 
 #include "Core/DAQProcess.hpp"
 
-class EventBuilder : public DAQProcess
-{
-  public:
-    EventBuilder();
-    ~EventBuilder();
+class EventBuilder : public DAQProcess {
+ public:
+  EventBuilder();
+  ~EventBuilder();
 
-    void start();
-    void stop();
+  void start();
+  void stop();
 
-    void runner();
+  void runner();
 };
 
 #endif /* EVENTBUILDER_H_ */

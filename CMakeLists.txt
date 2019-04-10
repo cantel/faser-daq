@@ -7,8 +7,6 @@ project(rd51 VERSION 0.0.1
 set(PACKAGE rd51core)
 set(PACKAGE_VERSION 0.0.1)
 
-option(BUILD_DOC "Build documentation" ON)
-
 find_package(Doxygen)
 if (DOXYGEN_FOUND)
   set(DOXYGEN_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)

@@ -20,13 +20,15 @@ using namespace std::chrono_literals;
 bool daq::core::Command::startCommandHandler() {
   // m_commandHandler = std::make_unique<daq::utilities::ReusableThread>(10);
   unsigned tid = 1;
+  bool rv = false;
   m_commandFunctors.push_back([&, tid] {
     INFO("CommandThread  ->>> Should handle message: " << m_message);
     std::string response;
-    executeCommand(response);
+    rv = executeCommand(response);
     setResponse(response);
     setHandled(true);
   });
+  return rv;
 }
 
 bool daq::core::Command::executeCommand(std::string& response) {
@@ -82,9 +84,11 @@ bool daq::core::Command::executeCommand(std::string& response) {
     m_plugin.setState("ready");
   } else if (command == "shutdown") {
     m_should_stop = true;
+    response = "Success";
   } else if (command == "status") {
     response = m_plugin.getState();
   }
+  return false;  // TODO put some meaning or return void
 }
 
 bool daq::core::Command::handleCommand() {

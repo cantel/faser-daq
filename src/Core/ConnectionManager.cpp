@@ -170,6 +170,7 @@ bool ConnectionManager::start() {
         break;
     }
   }
+  return false;  // TODO put some meaning or return void
 }
 
 bool ConnectionManager::stop() {
@@ -179,4 +180,5 @@ bool ConnectionManager::stop() {
     tIt.second.join();
   }
   m_handlers.clear();
+  return false;  // TODO put some meaning or return void
 }

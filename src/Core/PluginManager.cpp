@@ -28,6 +28,7 @@ bool PluginManager::load(std::string name) {
   m_destroy = (void (*)(DAQProcess *))dlsym(handle, "destroy_object");
 
   m_dp = (DAQProcess *)m_create();
+  return true;
 }
 
 PluginManager::~PluginManager() { m_destroy(m_dp); }

@@ -29,6 +29,7 @@ void NewModule::start()
 void NewModule::stop()
 {
     INFO("NewModule::stop");
+    m_runner_thread->join();
 }
 
 void NewModule::runner()

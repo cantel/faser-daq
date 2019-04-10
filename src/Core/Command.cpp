@@ -81,9 +81,8 @@ bool daq::core::Command::executeCommand(std::string& response)
     m_plugin.setState("running");
 
     INFO("Started connection manager");
-  }
-  else if(command == "stop")
-  {
+  } else if (command == "stop") {
+    m_plugin.setState("ready");
     m_plugin.stop();
 
     cm.stop();

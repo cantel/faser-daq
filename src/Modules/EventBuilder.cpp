@@ -41,6 +41,8 @@ void EventBuilder::start()
 void EventBuilder::stop()
 {
     INFO(__METHOD_NAME__ << " getState: " << this->getState() );
+
+    m_runner_thread->join();
 }
 
 void EventBuilder::runner()

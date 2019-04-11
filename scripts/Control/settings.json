@@ -1,5 +1,6 @@
 {
     "group": "rd51",
-    "build_dir": "/put/your/own",
-    "exe": "/put/your/own/main_core"
+    "build_dir": "/daq/build/bin",
+    "exe": "/daq/build/bin/main_core",
+    "env": "LD_LIBRARY_PATH=/usr/local/lib64/:/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib:/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib64:/cvmfs/sft.cern.ch/lcg/releases/binutils/2.28-a983d/x86_64-centos7/lib"
 }

@@ -52,9 +52,6 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
     CassandraDataLogger();
     ~CassandraDataLogger();
 
-    std::atomic<bool> m_run;
-    std::unique_ptr<std::thread> m_runner_thread;
-
     void start();
     void stop();
     void runner();
@@ -99,6 +96,7 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
 
     CassCluster* m_cluster;
     CassSession* m_session;
+
 
 };
 

@@ -31,7 +31,6 @@ def removeProcesses():
 
 
 def addProcesses():
-  env = "LD_LIBRARY_PATH=/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib:/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib64:/cvmfs/sft.cern.ch/lcg/releases/binutils/2.28-a983d/x86_64-centos7/lib"
   for p in data:
     sd = supervisord.supervisord(p['host'], group)
     print("Add", sd.addProgramToGroup(
@@ -140,6 +139,7 @@ f.close()
 group = settings['group']
 dir = settings['build_dir']
 exe = settings['exe']
+env = settings['env']
 
 arg = "complete"
 if len(sys.argv) <= 2 or sys.argv[len(sys.argv)-1] == '-h':

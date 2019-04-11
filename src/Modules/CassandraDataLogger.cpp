@@ -201,17 +201,13 @@ bool CassandraDataLogger::create()
 
 #warning RS -> YOU NEED TO INTRODUCE A PROPER SESSION LAYER BETWEEN STORAGE AND DAQ!
 
-void CassandraDataLogger::start()
-{
-  INFO(__METHOD_NAME__ << " getState: " << getState() );
-  m_run = true;
+void CassandraDataLogger::start() {
+  INFO(__METHOD_NAME__ << " getState: " << getState());
   m_runner_thread = std::make_unique<std::thread>(&CassandraDataLogger::runner, this);
 }
 
-void CassandraDataLogger::stop()
-{
-  m_run = false;
-  INFO(__METHOD_NAME__ << " getState: " << this->getState() );
+void CassandraDataLogger::stop() {
+  INFO(__METHOD_NAME__ << " getState: " << this->getState());
   m_runner_thread->join();
 }
 

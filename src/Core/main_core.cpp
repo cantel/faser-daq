@@ -23,7 +23,7 @@ int main(int argc, char **argv) {
 
     while(!c.getShouldStop())
     {
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(100ms);
     }
 
     return 0;

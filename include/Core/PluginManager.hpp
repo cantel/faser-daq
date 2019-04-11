@@ -22,6 +22,7 @@ class PluginManager : public daq::utilities::Singleton<PluginManager>
     DAQProcess *(*m_create)(...);
     void (*m_destroy)(DAQProcess *);
     DAQProcess *m_dp;
+    void *m_handle;
 
   public:
     PluginManager();

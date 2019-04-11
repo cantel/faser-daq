@@ -188,12 +188,10 @@ bool CassandraDataLogger::create() {
 
 void CassandraDataLogger::start() {
   INFO(__METHOD_NAME__ << " getState: " << getState());
-  m_run = true;
   m_runner_thread = std::make_unique<std::thread>(&CassandraDataLogger::runner, this);
 }
 
 void CassandraDataLogger::stop() {
-  m_run = false;
   INFO(__METHOD_NAME__ << " getState: " << this->getState());
   m_runner_thread->join();
 }

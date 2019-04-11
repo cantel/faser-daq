@@ -18,9 +18,10 @@ int main(int argc, char **argv) {
   c.setupCommandPath();
   c.setupCommandHandler();
 
-  while (!c.getShouldStop()) {
-    std::this_thread::sleep_for(1s);
-  }
+    while(!c.getShouldStop())
+    {
+        std::this_thread::sleep_for(100ms);
+    }
 
   return 0;
 }

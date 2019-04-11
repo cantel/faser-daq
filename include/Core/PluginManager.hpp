@@ -10,24 +10,30 @@
 
 #include "Core/DAQProcess.hpp"
 
-namespace daq {
-namespace core {
+#include "Utilities/Logging.hpp"
 
-class PluginManager : public daq::utilities::Singleton<PluginManager> {
- private:
-  DAQProcess *(*m_create)(...);
-  void (*m_destroy)(DAQProcess *);
-  DAQProcess *m_dp;
+namespace daq
+{
+namespace core
+{
 
- public:
-  PluginManager();
-  ~PluginManager();
+class PluginManager : public daq::utilities::Singleton<PluginManager>
+{
+  private:
+    DAQProcess *(*m_create)(...);
+    void (*m_destroy)(DAQProcess *);
+    DAQProcess *m_dp;
+    void *m_handle;
 
-  bool load(std::string name);
-  void start() { m_dp->start(); };
-  void stop() { m_dp->stop(); };
-  std::string getState() { return m_dp->getState(); }
-  void setState(std::string state) { m_dp->setState(state); }
+  public:
+    PluginManager();
+    ~PluginManager();
+
+    bool load(std::string name);
+    void start() { m_dp->start(); };
+    void stop() { m_dp->stop(); };
+    std::string getState() { return m_dp->getState(); }
+    void setState(std::string state) { m_dp->setState(state); }
 };
 
 }  // namespace core

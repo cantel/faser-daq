@@ -63,10 +63,21 @@ bool daq::core::Command::executeCommand(std::string& response) {
                     100, false);
     }
 
-    m_plugin.load(type);
-    response = "Success";
-    m_plugin.setState("ready");
-  } else if (command == "start") {
+  
+    
+    bool rv = m_plugin.load(type);
+    if(rv == true) {
+      response = "Success";
+      m_plugin.setState("ready");
+    }
+    else {
+      response = "Failure";
+      ERROR("Shutting down...");
+      m_should_stop = true;
+    }
+  }
+  else if(command == "start")
+  {
     cm.start();
 
     m_plugin.start();

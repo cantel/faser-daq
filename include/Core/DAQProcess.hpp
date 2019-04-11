@@ -14,7 +14,7 @@
 class DAQProcess
 {
   public:
-    DAQProcess() {};
+    DAQProcess() : m_state{""} {};
 
     virtual ~DAQProcess(){};
 

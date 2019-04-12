@@ -16,6 +16,13 @@ using namespace std::chrono_literals;
 
 PluginManager::PluginManager() : m_create{}, m_destroy{}, m_dp{} {}
 
+PluginManager::~PluginManager() {
+  if (m_handle != 0)
+  {
+    m_destroy(m_dp);
+  }
+}
+
 bool PluginManager::load(std::string name)
 {
     std::string pluginName = "lib" + name + ".so";
@@ -33,32 +40,4 @@ bool PluginManager::load(std::string name)
     return true;
 }
 
-PluginManager::~PluginManager()
-{
-  if(m_handle != 0)
-  {
-    m_destroy(m_dp);
-  }
-}
 
-
-//template <typename TValue, typename TPred>
-//BinarySearchTree<TValue, TPred>::BinarySearchTree() 
-
-/*
-template <class ST>
-ConnectionManager<ST>::ConnectionManager(m_token)
-{
-  
-}
-*/
-
-/*
-template <class ST>
-ConnectionManager<ST>::~ConnectionManager() {
-
-  m_dp = (DAQProcess *)m_create();
-  return true;
-}
-
-PluginManager::~PluginManager() { m_destroy(m_dp); }

@@ -26,6 +26,13 @@ PluginManager::PluginManager()
 {
 }
 
+PluginManager::~PluginManager() {
+  if (m_handle != 0)
+  {
+    m_destroy(m_dp);
+  }
+}
+
 bool PluginManager::load(std::string name)
 {
     std::string pluginName = "lib" + name + ".so";
@@ -43,31 +50,3 @@ bool PluginManager::load(std::string name)
     return true;
 }
 
-PluginManager::~PluginManager()
-{
-  if(m_handle != 0)
-  {
-    m_destroy(m_dp);
-  }
-}
-
-
-//template <typename TValue, typename TPred>
-//BinarySearchTree<TValue, TPred>::BinarySearchTree() 
-
-/*
-template <class ST>
-ConnectionManager<ST>::ConnectionManager(m_token)
-{
-  
-}
-*/
-
-/*
-template <class ST>
-ConnectionManager<ST>::~ConnectionManager() {
-
-}
-*/
-
- 

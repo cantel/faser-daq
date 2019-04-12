@@ -23,14 +23,12 @@ int main(int argc, char **argv) {
 
   std::unique_lock<std::mutex> lk(*mtx);
 
-  while (!c.getShouldStop()) {
-    cv->wait(lk, [&] {
-      INFO("Checking condition " << c.getShouldStop());
-      return c.getShouldStop();
-    });
-    lk.unlock();
-    INFO("Condition met!");
-  }
+  cv->wait(lk, [&] {
+    INFO("Checking condition " << c.getShouldStop());
+    return c.getShouldStop();
+  });
+  lk.unlock();
+  INFO("Condition met!");
 
   return 0;
 }

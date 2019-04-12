@@ -29,6 +29,8 @@ class Command : public daq::utilities::Singleton<Command> {
   std::string getResponse() { return m_response; }
   void setResponse(std::string response) { m_response = response; }
   bool getShouldStop() { return m_should_stop; }
+  std::mutex* getMutex() { return &m_mtx; }
+  std::condition_variable* getCondVar() { return &m_cv; }
 
  private:
   bool busy();
@@ -36,6 +38,8 @@ class Command : public daq::utilities::Singleton<Command> {
   bool m_handled;
   std::string m_message;
   std::string m_response;
+  std::mutex m_mtx;
+  std::condition_variable m_cv;
 
   // Command handler
   std::unique_ptr<daq::utilities::ReusableThread> m_commandHandler;

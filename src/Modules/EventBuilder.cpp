@@ -54,10 +54,10 @@ void EventBuilder::runner() {
         i++;
       }
     }
-    // if (packed != "") {
-    //   INFO("Sending mega string " << packed);
-    //   cm.putStr(3, packed);
-    // }
+    if (packed != "") {
+      INFO("Sending mega string " << packed);
+      cm.putStr(3, packed);
+    }
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

@@ -18,10 +18,19 @@ int main(int argc, char **argv) {
   c.setupCommandPath();
   c.setupCommandHandler();
 
-    while(!c.getShouldStop())
-    {
-        std::this_thread::sleep_for(100ms);
-    }
+  std::mutex *mtx = c.getMutex();
+  std::condition_variable *cv = c.getCondVar();
+
+  std::unique_lock<std::mutex> lk(*mtx);
+
+  while (!c.getShouldStop()) {
+    cv->wait(lk, [&] {
+      INFO("Checking condition " << c.getShouldStop());
+      return c.getShouldStop();
+    });
+    lk.unlock();
+    INFO("Condition met!");
+  }
 
   return 0;
 }

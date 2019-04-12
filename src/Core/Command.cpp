@@ -73,7 +73,9 @@ bool daq::core::Command::executeCommand(std::string& response) {
     else {
       response = "Failure";
       ERROR("Shutting down...");
+      std::lock_guard<std::mutex> lk(m_mtx);
       m_should_stop = true;
+      m_cv.notify_one();
     }
   }
   else if(command == "start")
@@ -94,7 +96,9 @@ bool daq::core::Command::executeCommand(std::string& response) {
     response = "Success";
     m_plugin.setState("ready");
   } else if (command == "shutdown") {
+    std::lock_guard<std::mutex> lk(m_mtx);
     m_should_stop = true;
+    m_cv.notify_one();
     response = "Success";
   } else if (command == "status") {
     response = m_plugin.getState();

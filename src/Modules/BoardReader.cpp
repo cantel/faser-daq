@@ -74,6 +74,7 @@ void BoardReader::runner() {
 
     sequence_number++;
     std::this_thread::sleep_for(10ms);
+    delete data;
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
 
   cv->wait(lk, [&] { return c.getShouldStop(); });
   lk.unlock();
+  std::this_thread::sleep_for(100ms);  // allow time for command handler to stop
 
   return 0;
 }

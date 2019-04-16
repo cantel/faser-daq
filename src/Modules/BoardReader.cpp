@@ -59,20 +59,20 @@ void BoardReader::runner() {
   while (m_run) {
     cm.putStr(1, "blyat");
 
-    timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
-    const unsigned payload_size = rand() % 1000 + 1;
+    // timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
+    // const unsigned payload_size = rand() % 1000 + 1;
     // INFO(__METHOD_NAME__ << " sequence number " << sequence_number
     //     << "  >>  timestamp " << timestamp.count() << "  >>  payload size " << payload_size );
 
-    std::unique_ptr<data_t> data((data_t*)malloc(sizeof(data_t) + sizeof(char) * payload_size));
-    data->header.payload_size = payload_size;
-    data->header.seq_number = sequence_number;
-    data->header.source_id = source_id;
-    data->header.timestamp = timestamp.count();
-    memset(data->payload, 'F', payload_size);
+    // std::unique_ptr<data_t> data((data_t*)malloc(sizeof(data_t) + sizeof(char) * payload_size));
+    // data->header.payload_size = payload_size;
+    // data->header.seq_number = sequence_number;
+    // data->header.source_id = source_id;
+    // data->header.timestamp = timestamp.count();
+    // memset(data->payload, 'F', payload_size);
     // ready to be sent to EB
 
-    sequence_number++;
+    // sequence_number++;
     std::this_thread::sleep_for(10ms);
   }
   INFO(__METHOD_NAME__ << " Runner stopped");

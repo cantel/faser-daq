@@ -64,7 +64,7 @@ void BoardReader::runner() {
     // INFO(__METHOD_NAME__ << " sequence number " << sequence_number
     //     << "  >>  timestamp " << timestamp.count() << "  >>  payload size " << payload_size );
 
-    data_t *data = (data_t *)malloc(sizeof(data_t) + sizeof(char) * payload_size);
+    std::unique_ptr<data_t> data((data_t*)malloc(sizeof(data_t) + sizeof(char) * payload_size));
     data->header.payload_size = payload_size;
     data->header.seq_number = sequence_number;
     data->header.source_id = source_id;
@@ -74,7 +74,6 @@ void BoardReader::runner() {
 
     sequence_number++;
     std::this_thread::sleep_for(10ms);
-    delete data;
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

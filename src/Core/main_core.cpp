@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
   daq::core::Core c(port, "tcp", "*");
 
   c.setupCommandPath();
-  c.setupCommandHandler();
+  c.startCommandHandler();
 
   std::mutex *mtx = c.getMutex();
   std::condition_variable *cv = c.getCondVar();

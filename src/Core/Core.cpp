@@ -18,7 +18,7 @@ bool Core::setupCommandPath() {
   return rv;
 }
 
-bool Core::setupCommandHandler() {
+bool Core::startCommandHandler() {
   m_command.startCommandHandler();
   return true;
 }

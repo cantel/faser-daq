@@ -1,15 +1,12 @@
-#include "Utilities/Logging.hpp"
-#include "Utilities/Common.hpp"
-
-#include "Core/PluginManager.hpp"
-#include "Core/Command.hpp"
-
 /// \cond
+#include <chrono>
 #include <ctime>
 #include <iomanip>
 #include <thread>
-#include <chrono>
 /// \endcond
+
+#include "Core/Command.hpp"
+#include "Core/PluginManager.hpp"
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
@@ -17,14 +14,7 @@
 using namespace daq::core;
 using namespace std::chrono_literals;
 
-
-
-PluginManager::PluginManager()
-    : m_create{},
-      m_destroy{},
-      m_dp{}
-{
-}
+PluginManager::PluginManager() : m_create{}, m_destroy{}, m_dp{} {}
 
 PluginManager::~PluginManager() {
   if (m_handle != 0)
@@ -49,4 +39,5 @@ bool PluginManager::load(std::string name)
     m_dp = (DAQProcess *)m_create();
     return true;
 }
+
 

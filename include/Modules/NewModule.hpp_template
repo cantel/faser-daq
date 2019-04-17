@@ -3,16 +3,15 @@
 
 #include "Core/DAQProcess.hpp"
 
-class NewModule : public DAQProcess
-{
-  public:
-    NewModule();
-    ~NewModule();
+class NewModule : public DAQProcess {
+ public:
+  NewModule();
+  ~NewModule();
 
-    void start();
-    void stop();
+  void start();
+  void stop();
 
-    void runner();
+  void runner();
 };
 
 #endif /* NEWMODULE_H_ */

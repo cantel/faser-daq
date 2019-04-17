@@ -1,7 +1,5 @@
 /// \cond
 #include <cstdlib>
-#include <chrono>
-#include <thread>
 /// \endcond
 
 #include "Core/Core.hpp"
@@ -9,23 +7,25 @@
 using namespace std::chrono_literals;
 
 int main(int argc, char **argv) {
-    if (argc == 1)
-    {
-        ERROR("No command port provided!");
-        return 1;
-    }
-    int port = atoi(argv[1]);
-    INFO("Port " << port);
-    daq::core::Core c(port, "tcp", "*");
+  if (argc == 1) {
+    ERROR("No command port provided!");
+    return 1;
+  }
+  int port = atoi(argv[1]);
+  INFO("Port " << port);
+  daq::core::Core c(port, "tcp", "*");
 
-    c.setupCommandPath();
-    c.setupCommandHandler();
+  c.setupCommandPath();
+  c.startCommandHandler();
 
-    while(!c.getShouldStop())
-    {
-        std::this_thread::sleep_for(100ms);
-    }
+  std::mutex *mtx = c.getMutex();
+  std::condition_variable *cv = c.getCondVar();
 
-    return 0;
+  std::unique_lock<std::mutex> lk(*mtx);
+
+  cv->wait(lk, [&] { return c.getShouldStop(); });
+  lk.unlock();
+  std::this_thread::sleep_for(100ms);  // allow time for command handler to stop
+
+  return 0;
 }
-

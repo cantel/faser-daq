@@ -1,15 +1,15 @@
 #ifndef DAQ_MODULES_CASSANDRADATALOGGER_HPP_
 #define DAQ_MODULES_CASSANDRADATALOGGER_HPP_
 
+/// \cond
 #include <iostream>
+#include <cassandra.h>
+/// \endcond
 
 #include "Core/DAQProcess.hpp"
 #include "Core/DataLogger.hpp"
-
-#include "Utilities/ChunkedStorage.hpp"
 #include "Utilities/Binary.hpp"
-
-#include <cassandra.h>
+#include "Utilities/ChunkedStorage.hpp"
 
 
 //#define HASH_MODE
@@ -21,32 +21,37 @@
  * Description: Data logger with Cassandra persistency layer
  *   Heavily relies on the CondDB payload chunked storage.
  * Date: November 2017
-*/
-class CassandraDataLogger : public DAQProcess, public DataLogger
-{
-
-  class CassandraChunkedStorageProvider : public daq::persistency::ChunkedStorageProvider { 
-    public:
-      explicit CassandraChunkedStorageProvider(...) {
+ */
+class CassandraDataLogger : public DAQProcess, public DataLogger {
+  class CassandraChunkedStorageProvider : public daq::persistency::ChunkedStorageProvider {
+   public:
+    explicit CassandraChunkedStorageProvider(...) {
       // Any init?
-      }     
+    }
 
-      virtual ~CassandraChunkedStorageProvider() { };
-      bool exists(){ return true; }
-      void create(){};
-      const size_t writeChunk(const std::string& objectName, int chunkId, const std::pair<const void*, size_t>& data, int ttl) const { return 0; }
-      bool readChunk(const std::string& objectName, int chunkId, size_t split, void*& blobPtr) const { return false; };
-      const int getDefaultChunkSize() { return 0; }
-      void deleteObject(const std::string& objectName, int chunkCount) const { }
-      void writeMetadata(const std::string& objectName, const daq::persistency::ObjectMetadata& attr) const { }
-      const daq::persistency::ObjectMetadata readMetadata(const std::string& objectName) const { 
-        daq::persistency::ObjectMetadata attributes;
-        return attributes;
-      } 
+    virtual ~CassandraChunkedStorageProvider(){};
+    bool exists() { return true; }
+    void create(){};
+    const size_t writeChunk(const std::string& objectName, int chunkId,
+                            const std::pair<const void*, size_t>& data, int ttl) const {
+      return 0;
+    }
+    bool readChunk(const std::string& objectName, int chunkId, size_t split, void*& blobPtr) const {
+      return false;
+    };
+    const int getDefaultChunkSize() { return 0; }
+    void deleteObject(const std::string& objectName, int chunkCount) const {}
+    void writeMetadata(const std::string& objectName,
+                       const daq::persistency::ObjectMetadata& attr) const {}
+    const daq::persistency::ObjectMetadata readMetadata(const std::string& objectName) const {
+      daq::persistency::ObjectMetadata attributes;
+      return attributes;
+    }
 
-    private:
-      const std::string M_NAME = "chunk";
+   private:
+    const std::string M_NAME = "chunk";
   };
+
 
   public:
     CassandraDataLogger();
@@ -101,4 +106,3 @@ class CassandraDataLogger : public DAQProcess, public DataLogger
 };
 
 #endif /* DAQ_MODULES_CASSANDRADATALOGGER_HPP_ */
-

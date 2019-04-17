@@ -9,15 +9,14 @@
 
 #include "Core/DAQProcess.hpp"
 
-class BoardReader : public DAQProcess
-{
-  public:
-    BoardReader(std::string name, int num);
-    ~BoardReader();
-    void start();
-    void stop();
+class BoardReader : public DAQProcess {
+ public:
+  BoardReader(std::string name, int num);
+  ~BoardReader();
+  void start();
+  void stop();
 
-    void runner();
+  void runner();
 };
 
 #endif /* BOARDREADER_HPP_ */

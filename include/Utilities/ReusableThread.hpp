@@ -26,7 +26,7 @@ class ReusableThread
 {
 public:
   ReusableThread(unsigned int threadID)
-    : m_thread_id(threadID), m_thread_pause(true), m_thread_quit(false),
+    : m_thread_id(threadID), m_thread_pause(true), m_thread_quit(false), m_function_ready(false),
       m_thread(&ReusableThread::thread_worker, this)
   { }
 

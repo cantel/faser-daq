@@ -3,6 +3,8 @@
 #include <ctime>
 #include <iomanip>
 #include <thread>
+#include <chrono>
+#include <exception>
 /// \endcond
 
 #include "Core/Command.hpp"
@@ -12,7 +14,7 @@
 #include "Utilities/Logging.hpp"
 
 #define REORD_DEBUG
-#define QATCOMP_DEBUG
+	#define QATCOMP_DEBUG
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
@@ -66,18 +68,23 @@ bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, const std::stri
     INFO(__METHOD_NAME__ << " Socket for channel already exists... Won't add this channel again.");
     return false;
   }
-#warning RS -> ZMQ connection handling exceptions should be catched.
   uint8_t ioT = 1;
   m_contexts[chn] = std::make_unique<zmq::context_t>(ioT);
   m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_PAIR);
   m_pcqs[chn] = std::make_unique<MessageQueue>(queueSize);
   m_directions[chn] = dir;
-  if (dir == EDirection::SERVER) {
-    m_sockets[chn]->bind(connStr.c_str());
-    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] bind: " << connStr);
-  } else if (dir == EDirection::CLIENT) {
-    m_sockets[chn]->connect(connStr.c_str());
-    INFO(__METHOD_NAME__ << " Added channel for: [" << chn << "] connect: " << connStr);
+  try {
+    if ( dir == EDirection::SERVER ) {
+      m_sockets[chn]->bind(connStr.c_str());
+      INFO(__METHOD_NAME__ << " Adding channel for: [" << chn << "] bind: " << connStr);
+    } else if ( dir == EDirection::CLIENT ) {
+      m_sockets[chn]->connect(connStr.c_str());
+      INFO(__METHOD_NAME__ << " Adding channel for: [" << chn << "] connect: " << connStr);
+    }
+  }
+  catch (std::exception& e) {
+    ERROR(__METHOD_NAME__ << " Failed to add channel! ZMQ returned: " << e.what());
+    return false;
   }
   return true;
 }
@@ -170,7 +177,7 @@ bool ConnectionManager::start() {
         break;
     }
   }
-  return false;  // TODO put some meaning or return void
+  return true;  // TODO put some meaning or return void
 }
 
 bool ConnectionManager::stop() {
@@ -180,5 +187,5 @@ bool ConnectionManager::stop() {
     tIt.second.join();
   }
   m_handlers.clear();
-  return false;  // TODO put some meaning or return void
+  return true;  // TODO put some meaning or return void
 }

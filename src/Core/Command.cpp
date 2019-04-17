@@ -103,7 +103,7 @@ bool daq::core::Command::executeCommand(std::string& response) {
   } else if (command == "status") {
     response = m_plugin.getState();
   }
-  return false;  // TODO put some meaning or return void
+  return true;  // TODO put some meaning or return void
 }
 
 bool daq::core::Command::handleCommand() {

@@ -40,6 +40,7 @@ class ConnectionManager : public daq::utilities::Singleton<ConnectionManager> {
     m_cmd_handler.join();
   }
 
+
   // Custom types
   typedef folly::ProducerConsumerQueue<zmq::message_t> MessageQueue;
   typedef std::unique_ptr<MessageQueue> UniqueMessageQueue;

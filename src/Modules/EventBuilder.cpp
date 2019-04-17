@@ -34,15 +34,13 @@ void EventBuilder::stop() {
 }
 
 void EventBuilder::runner() {
-  auto &cm = daq::core::ConnectionManager::instance();
-
   INFO(__METHOD_NAME__ << " Running...");
   const unsigned c_packing = 20;
   while (m_run) {
     std::string packed = "";
     for (unsigned i = 0; i < c_packing;) {
-      std::string s1{cm.getStr(1)};
-      std::string s2{cm.getStr(2)};
+      std::string s1{m_connections.getStr(1)};
+      std::string s2{m_connections.getStr(2)};
       if (s1 != "") {
         INFO("Received on channel 1 " << s1);
         packed += s1;
@@ -55,8 +53,8 @@ void EventBuilder::runner() {
       }
     }
     if (packed != "") {
-      INFO("Sending mega string " << packed);
-      cm.putStr(3, packed);
+      INFO("Sending mega string on channel 3 " << packed);
+      m_connections.putStr(3, packed);
     }
   }
   INFO(__METHOD_NAME__ << " Runner stopped");

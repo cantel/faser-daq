@@ -39,9 +39,11 @@ You can also do incremental compilation like:
 
     cd scripts/Control
 
-The `settings.json` and `config.json` files must be edited to match the desired system.
+The `settings.json` and `config*.json` files must be edited to match the desired system.
 
-    python3 daqinterface.py config.json configure
+`python3 daqinterface.py -h` shows the help menu. In order to run a complete example, use:
+
+    python3 daqinterface.py config.1.json complete
     start
     stop
     down

@@ -37,4 +37,6 @@
 - name: Install flask-apispec
   command: pip3 install flask-apispec
 
+- name: Install flask-login
+  command: pip3 install flask-login
 

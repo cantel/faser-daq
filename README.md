@@ -2,6 +2,14 @@
 
 DAQ framework for generic application
 
+# Documentation
+WIP: Scattered documentation can be found at the following links:
+- [Google documents][drive]
+- [Overleaf][overleaf]
+
+[drive]: <https://drive.google.com/drive/folders/1sMiRltFLZY9HFLqsrGpXrNlBZx4Yx3qN?usp=sharing>
+[overleaf]: <https://www.overleaf.com/9291872198hhwbjgmdstpv>
+
 # Install the daq framework
 ### Run ansible-playbook to configure your CentOS7 host
 The playbook will set up your host with the system libraries and will install supervisord
@@ -29,11 +37,14 @@ You can also do incremental compilation like:
 
 ### Running
 
-TBA
+    cd scripts/Control
 
-```
-pwd
-```
+The `settings.json` and `config.json` files must be edited to match the desired system.
+
+    python3 daqinterface.py config.json configure
+    start
+    stop
+    down
 
 ## How to add a submodule
 ### Cereal

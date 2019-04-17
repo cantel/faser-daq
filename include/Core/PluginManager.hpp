@@ -9,6 +9,7 @@
 /// \endcond
 
 #include "Core/DAQProcess.hpp"
+
 #include "Utilities/Logging.hpp"
 
 namespace daq
@@ -35,7 +36,7 @@ class PluginManager : public daq::utilities::Singleton<PluginManager>
     void setState(std::string state) { m_dp->setState(state); }
 };
 
-}
-}
+}  // namespace core
+}  // namespace daq
 
 #endif

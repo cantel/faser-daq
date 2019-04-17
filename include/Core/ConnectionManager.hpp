@@ -39,7 +39,7 @@ public:
   // 
   ConnectionManager() 
     : m_is_cmd_setup{false}, m_stop_cmd_handler{false}, m_stop_handlers{false} 
-  { }
+  { s_catch_signals(); }
   ~ConnectionManager() { m_stop_handlers = true; m_stop_cmd_handler = true; m_cmd_handler.join(); } 
 
   // Custom types

@@ -19,20 +19,8 @@ void FileDataLogger::setup() {}
 
 void FileDataLogger::write() {}
 
-void FileDataLogger::write() {
-
-}
-
 bool FileDataLogger::write(uint64_t keyId, daq::utilities::Binary& payload) {
   return false;
-}
-
-void FileDataLogger::read() {
-
-}
-
-void FileDataLogger::shutdown() {
-
 }
 
 void FileDataLogger::read() {}

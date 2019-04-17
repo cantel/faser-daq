@@ -30,6 +30,7 @@ bool daq::core::Command::startCommandHandler()
         setResponse(response);
         setHandled(true);
       });
+  return true;
 }
 
 bool daq::core::Command::executeCommand(std::string& response)
@@ -105,6 +106,7 @@ bool daq::core::Command::executeCommand(std::string& response)
   {
     response = m_plugin.getState();
   }
+  return true;
 }
 
 bool daq::core::Command::handleCommand()

@@ -20,6 +20,7 @@ bool Core::setupCommandPath(){
   std::string connStr(m_protocol + "://" + m_address + ":" + std::to_string(m_port));
   INFO(" BINDING COMMAND SOCKET : " << connStr);
   m_connections.setupCommandConnection(1, connStr);
+  return true;
 }
 
 bool Core::setupCommandHandler(){

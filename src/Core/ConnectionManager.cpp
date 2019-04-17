@@ -181,6 +181,7 @@ bool ConnectionManager::start()
         break;
     }
   }
+  return true;
 }
 
 bool ConnectionManager::stop()
@@ -191,6 +192,7 @@ bool ConnectionManager::stop()
     tIt.second.join(); 
   }
   m_handlers.clear();
+  return true;
 }
 
 

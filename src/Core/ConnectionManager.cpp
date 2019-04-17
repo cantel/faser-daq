@@ -40,10 +40,7 @@ bool ConnectionManager::setupCommandConnection(uint8_t ioT, std::string connStr)
         std::string cmdmsgStr(static_cast<char*>(cmdMsg.data()), cmdMsg.size());
         // INFO(m_className << " CMD_THREAD: Got CMD: " << cmdmsgStr);
         cmd.setMessage(cmdmsgStr);
-        while (!cmd.handleCommand()) {
-          // INFO(m_className << " CMD_THREAD: ... waiting signal for handled message...");
-          std::this_thread::sleep_for(100ms);
-        }
+        cmd.handleCommand();
         s_send(*(m_cmd_socket.get()), cmd.getResponse());
       }
       // INFO(m_className << " Sleeping a second...");

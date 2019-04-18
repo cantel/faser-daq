@@ -1,0 +1,48 @@
+[
+  {
+    "name": "boardreader01",
+    "host": "host01",
+    "port": 5555,
+    "type": "boardreader",
+    "stream_level": 0,
+    "settings": {
+      "some_int": 42,
+      "some_string": "test"
+    }
+  },
+  {
+    "name": "eventbuilder01",
+    "host": "host03",
+    "port": 5557,
+    "type": "eventbuilder",
+    "stream_level": 1,
+    "settings": {
+      "some_int": 42,
+      "some_string": "test"
+    }
+  },
+  {
+    "name": "boardreader02",
+    "host": "host02",
+    "port": 5556,
+    "type": "boardreader",
+    "stream_level": 0,
+    "settings": {
+      "some_int": 42,
+      "some_string": "test"
+    }
+  },
+  
+  {
+    "name": "datalogger01",
+    "host": "host03",
+    "port": 5558,
+    "type": "cassandradatalogger",
+    "stream_level": 2,
+    "settings": {
+      "ring": "127.0.0.1",
+      "some_int": 42,
+      "some_string": "test"
+    }
+  }
+]

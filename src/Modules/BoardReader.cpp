@@ -56,7 +56,7 @@ void BoardReader::runner() {
 
   INFO(__METHOD_NAME__ << " Running...");
   while (m_run) {
-    m_connections.putStr(1, "blyat");
+    m_connections.putStr(1, "WoofBla");
 
     // timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
     // const unsigned payload_size = rand() % 1000 + 1;

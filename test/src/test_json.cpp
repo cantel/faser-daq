@@ -26,9 +26,9 @@ void from_json(const json& j, std::vector<process>& ps) {
 }
 
 int main(int argc, char const* argv[]) {
-  json j = {{{"name", "ciao"}, {"type", "saluto"}},
-            {{"name", "stupido"}, {"type", "insulto"}},
-            {{"name", "cazzo"}, {"type", "parolaccia"}}};
+  json j = {{{"name", "Luke"}, {"type", "Jedi"}},
+            {{"name", "Han"}, {"type", "Mercenary"}},
+            {{"name", "Leia"}, {"type", "Princess"}}};
  
   std::cout << "size " << j.size() << std::endl;
   std::cout << "is_array " << j.is_array() << std::endl;

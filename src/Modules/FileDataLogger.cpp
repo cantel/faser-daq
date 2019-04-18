@@ -19,9 +19,10 @@ extern "C" void destroy_object(FileDataLogger *object) { delete object; }
 FileDataLogger::FileDataLogger() : m_payloads{10000}, m_randDevice{}, m_mt{m_randDevice()}, m_uniformDist{10240, 40960},
                                    m_stopWriters{false} { 
   INFO("FileDataLogger::FileDataLogger"); 
+ 
+#warning RS -> Needs to be properly configured.
   // Set up static resources...
-  //std::ios_base::sync_with_stdio(false);
-
+  std::ios_base::sync_with_stdio(false);
   m_fileNames[1] = "/tmp/test.bin";
   m_fileStreams[1] = std::fstream(m_fileNames[1], std::ios::out | std::ios::binary);
   m_fileBuffers[1] = daq::utilities::Binary(0);
@@ -57,6 +58,8 @@ void FileDataLogger::runner() {
   DEBUG(__METHOD_NAME__ << " Runner stopped");
 }
 
+#warning RS -> File rotation implementation is missing
+#warning RS -> Hardcoded values should come from config.
 void FileDataLogger::setup() {
   // Loop through sources from config and add a file writer for each sink.
   int tid = 1;

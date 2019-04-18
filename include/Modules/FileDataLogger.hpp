@@ -39,6 +39,9 @@ public:
   void shutdown();
 
 private:
+  // Configs
+  long m_writeBytes;
+
   // Internals 
   folly::ProducerConsumerQueue<daq::utilities::Binary> m_payloads;
   daq::utilities::Binary m_buffer;
@@ -53,6 +56,7 @@ private:
   std::random_device m_randDevice;
   std::mt19937 m_mt;
   std::uniform_int_distribution<int> m_uniformDist;
+  std::string m_dummyStr;
 
   // Thread control
   std::atomic<bool> m_stopWriters;

@@ -197,14 +197,13 @@ void CassandraDataLogger::stop() {
 }
 
 void CassandraDataLogger::runner() {
-  auto& cm = daq::core::ConnectionManager::instance();
   uint64_t incr = 0;
   while (m_run) {
     INFO(__METHOD_NAME__ << " Running...");
     std::this_thread::sleep_for(500ms);
     incr++;
     daqutils::Binary pl(0);
-    while (!cm.get(1, std::ref(pl))) {
+    while (!m_connections.get(1, std::ref(pl))) {
       std::this_thread::sleep_for(50ms);
     }
     write(incr, pl);

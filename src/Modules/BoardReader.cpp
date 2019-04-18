@@ -50,14 +50,13 @@ void BoardReader::stop() {
 }
 
 void BoardReader::runner() {
-  const unsigned source_id = 1;
-  unsigned sequence_number = 0;
-  microseconds timestamp;
-  auto &cm = daq::core::ConnectionManager::instance();
+  // const unsigned source_id = 1;
+  // unsigned sequence_number = 0;
+  // microseconds timestamp;
 
   INFO(__METHOD_NAME__ << " Running...");
   while (m_run) {
-    cm.putStr(1, "blyat");
+    m_connections.putStr(1, "blyat");
 
     // timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
     // const unsigned payload_size = rand() % 1000 + 1;

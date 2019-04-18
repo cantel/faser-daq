@@ -10,7 +10,7 @@ struct process {
 
 std::vector<process> processes;
 
-// void to_json(json& j, const std::vector<process>& c) { 
+// void to_json(json& j, const std::vector<process>& c) {
 //   j = json{{"name", p.name}, {"address", p.address}, {"age", p.age}};
 // }
 
@@ -29,7 +29,7 @@ int main(int argc, char const* argv[]) {
   json j = {{{"name", "Luke"}, {"type", "Jedi"}},
             {{"name", "Han"}, {"type", "Mercenary"}},
             {{"name", "Leia"}, {"type", "Princess"}}};
- 
+
   std::cout << "size " << j.size() << std::endl;
   std::cout << "is_array " << j.is_array() << std::endl;
   std::cout << j.dump() << std::endl;
@@ -38,9 +38,9 @@ int main(int argc, char const* argv[]) {
   from_json(j, ps);
   std::cout << "Let's check what's in the struct!" << std::endl;
   for (auto& element : ps) {
-      std::cout << element.name << std::endl;
-      std::cout << element.type << std::endl;
+    std::cout << "===============" << std::endl;
+    std::cout << element.name << std::endl;
+    std::cout << element.type << std::endl;
   }
-
   return 0;
 }

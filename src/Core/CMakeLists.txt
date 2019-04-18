@@ -9,7 +9,7 @@ include_directories("../../include")
 file(GLOB_RECURSE UTILITIES_SOURCES "*.cpp")
 add_library(core SHARED ${UTILITIES_SOURCES})
 
-target_link_libraries(core PUBLIC utilities boardreader zmq)
+target_link_libraries(core PUBLIC utilities zmq)
 
 
 #executable

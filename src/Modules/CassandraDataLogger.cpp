@@ -208,7 +208,7 @@ void CassandraDataLogger::runner() {
       std::this_thread::sleep_for(50ms);
     }
     write(incr, pl);
-    INFO("Wrote data from channel 1...");
+    INFO(__METHOD_NAME__ << "Wrote data from channel 1...");
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

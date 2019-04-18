@@ -3,6 +3,7 @@
 /// \endcond
 
 #include "Core/Core.hpp"
+#include "Utilities/Logging.hpp"
 
 using namespace std::chrono_literals;
 
@@ -11,6 +12,9 @@ int main(int argc, char **argv) {
     ERROR("No command port provided!");
     return 1;
   }
+
+  daq::utilities::set_log_level("debug");
+
   int port = atoi(argv[1]);
   INFO("Port " << port);
   daq::core::Core c(port, "tcp", "*");

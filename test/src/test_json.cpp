@@ -4,23 +4,43 @@
 using nlohmann::json;
 
 struct process {
-    std::string name = "";
+  std::string name;
+  std::string type;
 };
 
-struct config {
-    process p[2];
-};
+std::vector<process> processes;
 
-int main(int argc, char const *argv[]) {
-    json j = {{{"name", "ciao1"}}, {{"name", "ciao2"}}};
-    std::cout << j.dump() << std::endl;
+// void to_json(json& j, const std::vector<process>& c) { 
+//   j = json{{"name", p.name}, {"address", p.address}, {"age", p.age}};
+// }
 
-    for (int i = 0; i < 3; i++) {
-        config c{j["proc1:name"].get<std::string>(),
-                 j["proc2:name"].get<std::string>()};
-        std::cout << c.p[0].name << std::endl;
-        std::cout << c.p[1].name << std::endl;
-    }
+void from_json(const json& j, std::vector<process>& ps) {
+  std::cout << "range-based for" << std::endl;
+  for (auto& element : j) {
+    process p;
+    std::cout << element << '\n';
+    element.at("name").get_to(p.name);
+    element.at("type").get_to(p.type);
+    ps.push_back(p);
+  }
+}
 
-    return 0;
+int main(int argc, char const* argv[]) {
+  json j = {{{"name", "ciao"}, {"type", "saluto"}},
+            {{"name", "stupido"}, {"type", "insulto"}},
+            {{"name", "cazzo"}, {"type", "parolaccia"}}};
+ 
+  std::cout << "size " << j.size() << std::endl;
+  std::cout << "is_array " << j.is_array() << std::endl;
+  std::cout << j.dump() << std::endl;
+
+  std::vector<process> ps;
+  from_json(j, ps);
+  std::cout << "Let's check what's in the struct!" << std::endl;
+  for (auto& element : ps) {
+      std::cout << element.name << std::endl;
+      std::cout << element.type << std::endl;
+  }
+
+  return 0;
 }

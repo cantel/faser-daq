@@ -8,7 +8,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include "Utilities/json.hpp"
+#include "nlohmann/json.hpp"
 /// \endcond
 
 #include "Utilities/Logging.hpp"

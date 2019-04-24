@@ -46,10 +46,15 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 find_package(TBB ${tbb_version} EXACT REQUIRED)
 include_directories(${TBB_INCLUDE_DIRS})
-link_directories(${TBB_LIBRARY}/lib)
-#
-find_package(Boost ${boost_version} EXACT REQUIRED COMPONENTS system filesystem regex)
-include_directories(${Boost_INCLUDE_DIRS})
+link_directories(${TBB_ROOT_DIR}/lib)
+#message(INFO " TBB_INCLUDE_DIRS: " ${TBB_INCLUDE_DIRS})
+#message(INFO " TBB_LIBRARY: " ${TBB_LIBRARY})
+#message(INFO " TBB_LIBRARIES: " ${TBB_LIBRARIES})
+#message(INFO " TBB_ROOT_DIR: " ${TBB_ROOT_DIR})
+
+
+#find_package(Boost ${boost_version} EXACT REQUIRED COMPONENTS system filesystem regex)
+#include_directories(${Boost_INCLUDE_DIRS})
 
 # ZeroMQ
 #felix_add_external(zeromq ${zeromq_version} ${BINARY_TAG})

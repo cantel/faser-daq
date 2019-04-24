@@ -8,5 +8,8 @@ export LD_LIBRARY_PATH=/opt/ohpc/pub/compiler/gcc/7.3.0/lib64/:$LD_LIBRARY_PATH
 export CC='/opt/ohpc/pub/compiler/gcc/8.3.0/bin/gcc'
 export CXX='/opt/ohpc/pub/compiler/gcc/8.3.0/bin/g++'
 
+export TBB_VERSION=4.1
+#export TBB_ROOT_DIR=/opt/tbb
+
 #export COMPILER_PATH=${gcc_home}
 

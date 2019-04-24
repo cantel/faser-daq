@@ -52,9 +52,8 @@ link_directories(${TBB_ROOT_DIR}/lib)
 #message(INFO " TBB_LIBRARIES: " ${TBB_LIBRARIES})
 #message(INFO " TBB_ROOT_DIR: " ${TBB_ROOT_DIR})
 
-
-#find_package(Boost ${boost_version} EXACT REQUIRED COMPONENTS system filesystem regex)
-#include_directories(${Boost_INCLUDE_DIRS})
+find_package(Boost ${boost_version} EXACT REQUIRED COMPONENTS system filesystem regex)
+include_directories(${Boost_INCLUDE_DIRS})
 
 # ZeroMQ
 #felix_add_external(zeromq ${zeromq_version} ${BINARY_TAG})

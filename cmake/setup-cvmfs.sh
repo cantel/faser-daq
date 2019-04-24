@@ -106,7 +106,8 @@ case "${BINARY_TAG}" in
         #default (gcc62)
         export LCG_VERSION=93
         export CMAKE_COMPILER=gcc62
-        export BOOST_VERSION=1_66
+        export BOOST_VERSION=1.66
+        export BOOST_ROOT=${LCG_BASE}/releases/Boost/1.66.0-3ba23/${CMAKE_ARCH}-gcc62-opt
         export TBB_VERSION=2019.0
         export TBB_ROOT_DIR=${LCG_BASE}/releases/tbb/2019_U1-b3f06/${CMAKE_ARCH}-gcc62-opt
         export PYTHON_VERSION=2.7.13

@@ -47,7 +47,7 @@ else
     shift
 fi
 
-echo "Setting up FELIX (developer) using BINARY_TAG: ${BINARY_TAG}"
+echo "Setting up DAQ environment using BINARY_TAG: ${BINARY_TAG}"
 
 if [ ! -d "${LCG_BASE}" ]; then
     echo "LCG_BASE Directory Not Found: ${LCG_BASE}"

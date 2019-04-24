@@ -9,4 +9,8 @@ set(docopt_version                   0.6.2)
 set(json_version                     3.5.0)
 set(cassandra-driver_version         2.11.0)
 
+#
+# For find_ modules
+#
+set(tbb_version                      2019_U1-b3f06)
 

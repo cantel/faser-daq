@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.4.3)
 
+set(CMAKE_CXX_FLAGS -DGIT_DESCRIBE="`cd ${CMAKE_CURRENT_SOURCE_DIR}; git describe --tags --always --dirty`")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14 -Wall -O3 -g -pedantic")
 
 if(NOT AUTOLOAD_INCLUDED)
   set(AUTOLOAD_INCLUDED TRUE)
@@ -37,7 +39,8 @@ if(NOT AUTOLOAD_INCLUDED)
   set(BUILD_SHARED_LIBS true)
   set(CMAKE_INCLUDE_CURRENT_DIR true)
   add_definitions(-D_GNU_SOURCE -D_REENTRANT -D__USE_XOPEN2K8)
-  #include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmake_tdaq/cmake/modules/include)
+  set(LCG_RELEASE_BASE $ENV{LCG_BASE}/releases)
+  include_directories(${CMAKE_CURRENT_SOURCE_DIR}/cmake/modules/include)
 
   include(AUTOLOAD-versions)
 endif()

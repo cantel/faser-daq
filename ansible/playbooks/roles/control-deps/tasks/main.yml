@@ -1,0 +1,8 @@
+# <enrico.gamberini@cern.ch> 2019
+---
+
+- name: Install pyzmq
+  command: pip3 install pyzmq
+
+- name: Install jsonschema
+  command: pip3 install jsonschema

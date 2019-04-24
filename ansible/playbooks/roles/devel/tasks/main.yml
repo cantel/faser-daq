@@ -12,6 +12,7 @@
     - cmake3
     - mlocate
     - graphviz
+    - python36-pip
 
 - name: Updatedb
   shell: updatedb

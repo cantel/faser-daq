@@ -33,7 +33,6 @@ class PluginManager : public daq::utilities::Singleton<PluginManager>
     void start() { m_dp->start(); };
     void stop() { m_dp->stop(); };
     std::string getState() { return m_dp->getState(); }
-    void setState(std::string state) { m_dp->setState(state); }
 };
 
 }  // namespace core

@@ -63,38 +63,29 @@ bool daq::core::Command::executeCommand(std::string& response) {
                     100, false);
     }
 
-  
-    
     bool rv = m_plugin.load(type);
-    if(rv == true) {
+    if (rv == true) {
       response = "Success";
-      m_plugin.setState("ready");
-    }
-    else {
+    } else {
       response = "Failure";
       ERROR("Shutting down...");
       std::lock_guard<std::mutex> lk(m_mtx);
       m_should_stop = true;
       m_cv.notify_one();
     }
-  }
-  else if(command == "start")
-  {
+  } else if (command == "start") {
     cm.start();
 
     m_plugin.start();
     response = "Success";
-    m_plugin.setState("running");
 
     INFO("Started connection manager");
   } else if (command == "stop") {
-    m_plugin.setState("ready");
     m_plugin.stop();
 
     cm.stop();
 
     response = "Success";
-    m_plugin.setState("ready");
   } else if (command == "shutdown") {
     std::lock_guard<std::mutex> lk(m_mtx);
     m_should_stop = true;

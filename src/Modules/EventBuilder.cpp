@@ -22,15 +22,13 @@ EventBuilder::EventBuilder() {
 EventBuilder::~EventBuilder() { INFO(__METHOD_NAME__); }
 
 void EventBuilder::start() {
+  DAQProcess::start();
   INFO(__METHOD_NAME__ << " getState: " << getState());
-
-  m_runner_thread = std::make_unique<std::thread>(&EventBuilder::runner, this);
 }
 
 void EventBuilder::stop() {
+  DAQProcess::stop();
   INFO(__METHOD_NAME__ << " getState: " << this->getState());
-
-  m_runner_thread->join();
 }
 
 void EventBuilder::runner() {

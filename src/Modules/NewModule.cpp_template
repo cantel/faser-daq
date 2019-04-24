@@ -9,13 +9,13 @@ NewModule::NewModule() { INFO("NewModule::NewModule"); }
 NewModule::~NewModule() { INFO("NewModule::~NewModule"); }
 
 void NewModule::start() {
+  DAQProcess::start();
   INFO("NewModule::start");
-  m_runner_thread = std::make_unique<std::thread>(&NewModule::runner, this);
 }
 
 void NewModule::stop() {
+  DAQProcess::stop();
   INFO("NewModule::stop");
-  m_runner_thread->join();
 }
 
 void NewModule::runner() {

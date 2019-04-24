@@ -32,21 +32,19 @@ extern "C" void destroy_object(BoardReader *object) { delete object; }
 
 BoardReader::BoardReader(std::string name, int num) {
   INFO(__METHOD_NAME__ << " Passed " << name << " " << num << " with constructor");
-  INFO(__METHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO(__METHOD_NAME__ << " With config: " << m_config.dump());
 }
 
 BoardReader::~BoardReader() { INFO(__METHOD_NAME__); }
 
 void BoardReader::start() {
-  INFO(__METHOD_NAME__ << " getState: " << getState());
-
-  m_runner_thread = std::make_unique<std::thread>(&BoardReader::runner, this);
+  DAQProcess::start();
+  INFO(__METHOD_NAME__ << " getState: " << this->getState());
 }
 
 void BoardReader::stop() {
+  DAQProcess::stop();
   INFO(__METHOD_NAME__ << " getState: " << this->getState());
-
-  m_runner_thread->join();
 }
 
 void BoardReader::runner() {

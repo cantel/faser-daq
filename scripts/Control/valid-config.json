@@ -4,7 +4,7 @@
   "components": [
     {
       "name": "boardreader01",
-      "host": "rd51pro",
+      "host": "localhost",
       "port": 5555,
       "type": "boardreader",
       "settings": {
@@ -24,7 +24,7 @@
     },
     {
       "name": "boardreader02",
-      "host": "rd51pro",
+      "host": "localhost",
       "port": 5556,
       "type": "boardreader",
       "settings": {
@@ -44,7 +44,7 @@
     },
     {
       "name": "eventbuilder01",
-      "host": "rd51pro",
+      "host": "localhost",
       "port": 5557,
       "type": "eventbuilder",
       "settings": {
@@ -75,8 +75,8 @@
     },
     {
       "name": "datalogger01",
-      "host": "rd51pro",
-      "port": 6003,
+      "host": "localhost",
+      "port": 5558,
       "type": "cassandradatalogger",
       "settings": {
         "some_int": 42,

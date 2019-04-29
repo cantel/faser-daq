@@ -4,6 +4,7 @@ import sys
 import zmq
 import supervisord
 import json
+from jsonschema import validate
 from time import sleep
 import threading
 
@@ -13,7 +14,7 @@ exit = False
 
 
 def removeProcesses():
-  for p in data:
+  for p in data['components']:
     sd = supervisord.supervisord(p['host'], group)
     info = sd.getAllProcessInfo()
     for i in info:
@@ -31,7 +32,7 @@ def removeProcesses():
 
 
 def addProcesses():
-  for p in data:
+  for p in data['components']:
     sd = supervisord.supervisord(p['host'], group)
     print("Add", sd.addProgramToGroup(
         p['name'], exe+" "+str(p['port']), dir, env))
@@ -132,6 +133,11 @@ def spawnJoin(list, func):
     t.join()
 
 
+def print_help():
+  print("First argument must be a .json configuration file.\n"
+        "Available second arguments: 'remove' 'add' 'configure' 'complete'.\n"
+        "Add 'dev' in order to suppress production feature.")
+
 with open('settings.json') as f:
   settings = json.load(f)
 f.close()
@@ -141,16 +147,34 @@ dir = settings['build_dir']
 exe = settings['exe']
 env = settings['env']
 
+validation = True
+
 arg = "complete"
-if len(sys.argv) <= 2 or sys.argv[len(sys.argv)-1] == '-h':
-  print("First argument must be a .json configuration file. Available second arguments: 'remove' 'add' 'configure' 'complete'")
+if len(sys.argv) <= 2:
+  print_help()
   quit()
-else:
+elif sys.argv[2] != 'dev':
   arg = sys.argv[2]
+
+for o in sys.argv:
+  if o == '-h':
+    print_help()
+    quit()
+  elif o == 'dev':
+    print("Developer mode")
+    validation = False
 
 with open(sys.argv[1]) as f:
   data = json.load(f)
 f.close()
+
+with open("json-config.schema") as f:
+  schema = json.load(f)
+f.close()
+
+if validation:
+  print("Configuration Version:", data['version'])
+  validate(instance=data, schema=schema)
 
 if arg == "remove":
   removeProcesses()
@@ -163,7 +187,7 @@ if arg == 'add' or arg == 'complete':
 
 if arg == 'configure' or arg == 'complete':
   threads = []
-  for p in data:
+  for p in data['components']:
     t = configureProcess(p)
     t.start()
     threads.append(t)
@@ -172,7 +196,7 @@ if arg == 'configure' or arg == 'complete':
 
 # spawn status check threads
 threads = []
-for p in data:
+for p in data['components']:
   t = statusCheck(p)
   t.start()
   threads.append(t)
@@ -182,11 +206,11 @@ while(not exit):
   print("Executing", text)
   command_threads = []
   if text == "start":
-    spawnJoin(data, startProcess)
+    spawnJoin(data['components'], startProcess)
   elif text == "stop":
-    spawnJoin(data, stopProcess)
+    spawnJoin(data['components'], stopProcess)
   elif text == "down":
-    spawnJoin(data, shutdownProcess)
+    spawnJoin(data['components'], shutdownProcess)
     if arg != 'configure':
       removeProcesses()
     exit = True

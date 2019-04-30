@@ -59,7 +59,11 @@ class ConnectionManager : public daq::utilities::Singleton<ConnectionManager> {
   bool addChannel(uint64_t chn, EDirection dir, const std::string& connStr, size_t queueSize);
 
   // Getter/Putter for channels:
-  //  daq::utilities::Binary get(uint64_t chn);
+  /**
+  * @brief Get binary from channel
+  * 
+  * @return true when binary file is successfully passed
+  */
   bool get(uint64_t chn, daq::utilities::Binary& bin);
   void put(uint64_t chn, utilities::Binary& msgBin);
   void putStr(uint64_t chn, const std::string& string);

@@ -10,6 +10,8 @@
  * Date: May 2018
 */
 
+#include <iostream>
+#include <iomanip>
 
 namespace daq
 {
@@ -82,6 +84,27 @@ inline bool
 daq::utilities::Binary::operator!=( const Binary& rhs ) const
 {
   return ( ! ( this->operator==( rhs ) ) );
+}
+
+inline std::ostream& operator<<(std::ostream& out, const daq::utilities::Binary& rhs)
+{
+  for (int i = 0; i < rhs.size(); i++) {
+    std::cout << std::hex << std::setw(2) << std::setfill('0')
+              << (int)*((unsigned char*)rhs.data() + i) << std::dec;
+    if (i % 4 == 3)
+    {
+      if (i % 16 == 15)
+      {
+        std::cout << "\n";
+      }
+      else
+      {
+        std::cout << " ";
+      }
+    }
+  }
+  std::cout << "\n";
+  return out;
 }
 
 #endif

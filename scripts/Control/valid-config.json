@@ -6,7 +6,7 @@
       "name": "boardreader01",
       "host": "localhost",
       "port": 5555,
-      "type": "boardreader",
+      "type": "boardreaderbinary",
       "settings": {
         "some_int": 42,
         "some_string": "test"
@@ -26,7 +26,7 @@
       "name": "boardreader02",
       "host": "localhost",
       "port": 5556,
-      "type": "boardreader",
+      "type": "boardreaderbinary",
       "settings": {
         "some_int": 42,
         "some_string": "test"
@@ -46,7 +46,7 @@
       "name": "eventbuilder01",
       "host": "localhost",
       "port": 5557,
-      "type": "eventbuilder",
+      "type": "eventbuilderbinary",
       "settings": {
         "some_int": 42,
         "some_string": "test"

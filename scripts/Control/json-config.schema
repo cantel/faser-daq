@@ -45,7 +45,9 @@
             "type": "string",
             "enum": [
               "boardreader",
+              "boardreaderbinary",
               "eventbuilder",
+              "eventbuilderbinary",
               "datalogger",
               "cassandradatalogger"
             ],

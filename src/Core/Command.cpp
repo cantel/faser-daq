@@ -34,9 +34,9 @@ bool daq::core::Command::startCommandHandler() {
 bool daq::core::Command::executeCommand(std::string& response) {
   Configuration& cfg = Configuration::instance();
   cfg.load(m_message);
-  INFO("Loaded configuration");
+  // INFO("Loaded configuration");
   auto command = cfg.get<std::string>("command");
-  INFO("Get command: " << command);
+  // INFO("Get command: " << command);
   auto& m_plugin = daq::core::PluginManager::instance();
   auto& cm = daq::core::ConnectionManager::instance();
 

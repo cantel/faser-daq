@@ -13,8 +13,8 @@ context = zmq.Context()
 exit = False
 
 
-def removeProcesses():
-  for p in data['components']:
+def removeProcesses(components):
+  for p in components:
     sd = supervisord.supervisord(p['host'], group)
     info = sd.getAllProcessInfo()
     for i in info:
@@ -31,8 +31,8 @@ def removeProcesses():
         print("Exception: cannot remove process", i['name'])
 
 
-def addProcesses():
-  for p in data['components']:
+def addProcesses(components):
+  for p in components:
     sd = supervisord.supervisord(p['host'], group)
     print("Add", sd.addProgramToGroup(
         p['name'], exe+" "+str(p['port']), dir, env))
@@ -60,9 +60,8 @@ class configureProcess (threading.Thread):
 
   def run(self):
     self.p['command'] = 'configure'
-    s = json.dumps(self.p)
-    # print(s)
-    rv = handleRequest(self.p['host'], self.p['port'], s)
+    req = json.dumps(self.p)
+    rv = handleRequest(self.p['host'], self.p['port'], req)
     if rv != b'Success':
       print("Error", self.p['name'], rv)
 
@@ -73,9 +72,8 @@ class startProcess (threading.Thread):
     self.p = p
 
   def run(self):
-    self.p['command'] = 'start'
-    s = json.dumps(self.p)
-    rv = handleRequest(self.p['host'], self.p['port'], s)
+    req = json.dumps({'command': 'start'})
+    rv = handleRequest(self.p['host'], self.p['port'], req)
     if rv != b'Success':
       print("Error", self.p['name'], rv)
 
@@ -86,9 +84,8 @@ class stopProcess (threading.Thread):
     self.p = p
 
   def run(self):
-    self.p['command'] = 'stop'
-    s = json.dumps(self.p)
-    rv = handleRequest(self.p['host'], self.p['port'], s)
+    req = json.dumps({'command': 'stop'})
+    rv = handleRequest(self.p['host'], self.p['port'], req)
     if rv != b'Success':
       print("Error", self.p['name'], rv)
 
@@ -99,9 +96,8 @@ class shutdownProcess (threading.Thread):
     self.p = p
 
   def run(self):
-    self.p['command'] = 'shutdown'
-    s = json.dumps(self.p)
-    rv = handleRequest(self.p['host'], self.p['port'], s)
+    req = json.dumps({'command': 'shutdown'})
+    rv = handleRequest(self.p['host'], self.p['port'], req)
     if rv != b'Success':
       print("Error", self.p['name'], rv)
 
@@ -112,12 +108,11 @@ class statusCheck (threading.Thread):
     self.p = p
 
   def run(self):
-    self.p['command'] = 'status'
-    s = json.dumps(self.p)
     status = ""
     while(not exit):
       sleep(0.5)
-      new_status = handleRequest(self.p['host'], self.p['port'], s)
+      req = json.dumps({'command': 'status'})
+      new_status = handleRequest(self.p['host'], self.p['port'], req)
       if new_status != status and new_status != "":
         print(self.p['name'], "in status", new_status)
         status = new_status
@@ -137,6 +132,7 @@ def print_help():
   print("First argument must be a .json configuration file.\n"
         "Available second arguments: 'remove' 'add' 'configure' 'complete'.\n"
         "Add 'dev' in order to suppress production feature.")
+
 
 with open('settings.json') as f:
   settings = json.load(f)
@@ -177,11 +173,11 @@ if validation:
   validate(instance=data, schema=schema)
 
 if arg == "remove":
-  removeProcesses()
+  removeProcesses(data['components'])
   quit()
 
 if arg == 'add' or arg == 'complete':
-  addProcesses()
+  addProcesses(data['components'])
   if arg == 'add':
     quit()
 
@@ -212,7 +208,7 @@ while(not exit):
   elif text == "down":
     spawnJoin(data['components'], shutdownProcess)
     if arg != 'configure':
-      removeProcesses()
+      removeProcesses(data['components'])
     exit = True
 
 for t in threads:

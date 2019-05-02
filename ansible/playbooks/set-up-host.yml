@@ -9,4 +9,4 @@
     - twiddler
     - devel
     - openhpc
-    #- cvmfs
+    - cvmfs

@@ -73,7 +73,17 @@
                 "title": "Sources",
                 "uniqueItems": true,
                 "items": {
-                  "type": "object", "properties":{"chid": {"type":"integer"}, "host":{"type":"string"}, "port":{"type":"integer"}}, "required": ["chid", "host", "port"]
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": ["pair", "pubsub"]
+                    },
+                    "chid": {"type":"integer"},
+                    "host": {"type":"string"},
+                    "port": {"type":"integer"}
+                  },
+                  "required": ["type", "chid", "host", "port"]
                 }
               },
               "destinations": { 
@@ -82,7 +92,17 @@
                 "title": "Destinations",
                 "uniqueItems": true,
                 "items": {
-                  "type": "object", "properties":{"chid": {"type":"integer"}, "host":{"type":"string"}, "port":{"type":"integer"}}, "required": ["chid", "host", "port"]
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type":"string",
+                      "enum": ["pair", "pubsub"]
+                    },
+                    "chid": {"type":"integer"},
+                    "host": {"type":"string"},
+                    "port": {"type":"integer"}
+                  },
+                  "required": ["type", "chid", "host", "port"]
                 }
               }
             },

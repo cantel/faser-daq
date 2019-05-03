@@ -44,6 +44,12 @@ class Command : public daq::utilities::Singleton<Command> {
   // Command handler
   std::unique_ptr<daq::utilities::ReusableThread> m_commandHandler;
   std::vector<std::function<void()>> m_commandFunctors;
+
+  void stop_and_notify() {
+    std::lock_guard<std::mutex> lk(m_mtx);
+    m_should_stop = true;
+    m_cv.notify_one();
+  }
 };
 
 }  // namespace core

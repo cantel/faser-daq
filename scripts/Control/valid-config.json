@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "foo": "bar",
   "components": [
     {
@@ -15,8 +15,9 @@
         "sources": [],
         "destinations": [
           {
+            "type": "pubsub",
             "chid": 1,
-            "host": "localhost",
+            "host": "*",
             "port": 8101
           }
         ]
@@ -35,8 +36,9 @@
         "sources": [],
         "destinations": [
           {
+            "type": "pair",
             "chid": 1,
-            "host": "localhost",
+            "host": "*",
             "port": 8102
           }
         ]
@@ -54,20 +56,23 @@
       "connections": {
         "sources": [
           {
+            "type": "pubsub",
             "chid": 1,
-            "host": "*",
+            "host": "localhost",
             "port": 8101
           },
           {
+            "type": "pair",
             "chid": 2,
-            "host": "*",
+            "host": "localhost",
             "port": 8102
           }
         ],
         "destinations": [
           {
+            "type": "pair",
             "chid": 3,
-            "host": "localhost",
+            "host": "*",
             "port": 8103
           }
         ]
@@ -86,8 +91,9 @@
       "connections": {
         "sources": [
           {
+            "type": "pair",
             "chid": 1,
-            "host": "*",
+            "host": "localhost",
             "port": 8103
           }
         ],

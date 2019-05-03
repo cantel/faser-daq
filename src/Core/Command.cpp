@@ -49,18 +49,36 @@ bool daq::core::Command::executeCommand(std::string& response) {
     INFO("sources empty " << srcs.empty());
     for (auto& it : srcs) {
       INFO("key" << it);
-
-      cm.addChannel(it["chid"], ConnectionManager::EDirection::SERVER, 0, it["host"], it["port"],
-                    100, false);
+      if (it["type"] == "pair") {
+        cm.addChannel(it["chid"], ConnectionManager::EDirection::CLIENT, 0, it["host"], it["port"],
+                      100, false);
+      } else if (it["type"] == "pubsub") {
+        cm.addChannel(it["chid"], ConnectionManager::EDirection::SUBSCRIBER, 0, it["host"],
+                      it["port"], 100, false);
+      } else {
+        ERROR("Connection type not recognized!");
+        response = "Failure";
+        ERROR("Shutting down...");
+        stop_and_notify();
+      }
     }
 
     auto dests = j["connections"]["destinations"];
     INFO("destinations empty " << dests.empty());
     for (auto& it : dests) {
       INFO("key" << it);
-
-      cm.addChannel(it["chid"], ConnectionManager::EDirection::CLIENT, 0, it["host"], it["port"],
-                    100, false);
+      if (it["type"] == "pair") {
+        cm.addChannel(it["chid"], ConnectionManager::EDirection::SERVER, 0, it["host"], it["port"],
+                      100, false);
+      } else if (it["type"] == "pubsub") {
+        cm.addChannel(it["chid"], ConnectionManager::EDirection::PUBLISHER, 0, it["host"],
+                      it["port"], 100, false);
+      } else {
+        ERROR("Connection type not recognized!");
+        response = "Failure";
+        ERROR("Shutting down...");
+        stop_and_notify();
+      }
     }
 
     bool rv = m_plugin.load(type);
@@ -69,9 +87,7 @@ bool daq::core::Command::executeCommand(std::string& response) {
     } else {
       response = "Failure";
       ERROR("Shutting down...");
-      std::lock_guard<std::mutex> lk(m_mtx);
-      m_should_stop = true;
-      m_cv.notify_one();
+      stop_and_notify();
     }
   } else if (command == "start") {
     cm.start();
@@ -87,9 +103,7 @@ bool daq::core::Command::executeCommand(std::string& response) {
 
     response = "Success";
   } else if (command == "shutdown") {
-    std::lock_guard<std::mutex> lk(m_mtx);
-    m_should_stop = true;
-    m_cv.notify_one();
+    stop_and_notify();
     response = "Success";
   } else if (command == "status") {
     response = m_plugin.getState();

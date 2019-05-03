@@ -64,16 +64,26 @@ bool ConnectionManager::addChannel(uint64_t chn, EDirection dir, const std::stri
   }
   uint8_t ioT = 1;
   m_contexts[chn] = std::make_unique<zmq::context_t>(ioT);
-  m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_PAIR);
   m_pcqs[chn] = std::make_unique<MessageQueue>(queueSize);
   m_directions[chn] = dir;
   try {
     if ( dir == EDirection::SERVER ) {
+      m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_PAIR);
       m_sockets[chn]->bind(connStr.c_str());
-      INFO(__METHOD_NAME__ << " Adding channel for: [" << chn << "] bind: " << connStr);
+      INFO(__METHOD_NAME__ << " Adding SERVER channel for: [" << chn << "] bind: " << connStr);
     } else if ( dir == EDirection::CLIENT ) {
+      m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_PAIR);
       m_sockets[chn]->connect(connStr.c_str());
-      INFO(__METHOD_NAME__ << " Adding channel for: [" << chn << "] connect: " << connStr);
+      INFO(__METHOD_NAME__ << " Adding CLIENT channel for: [" << chn << "] connect: " << connStr);
+    } else if (dir == EDirection::PUBLISHER) {
+      m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_PUB);
+      m_sockets[chn]->bind(connStr.c_str());
+      INFO(__METHOD_NAME__ << " Adding PUBLISHER channel for: [" << chn << "] bind: " << connStr);
+    } else if (dir == EDirection::SUBSCRIBER) {
+      m_sockets[chn] = std::make_unique<zmq::socket_t>(*(m_contexts[chn].get()), ZMQ_SUB);
+      m_sockets[chn]->connect(connStr.c_str());
+      m_sockets[chn]->setsockopt(ZMQ_SUBSCRIBE, "", 0); // TODO add a tag?
+      INFO(__METHOD_NAME__ << " Adding SUBSCRIBE channel for: [" << chn << "] connect: " << connStr);
     }
   }
   catch (std::exception& e) {
@@ -89,7 +99,6 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn) {
     while (!m_stop_handlers) {
       zmq::message_t msg;
       if ((m_sockets[chn]->recv(&msg, ZMQ_DONTWAIT)) == true) {
-        INFO("WOOOOF WOOOF  RECEIVED SOMETHING!");
         m_pcqs[chn]->write(std::move(msg));
         INFO("    -> wrote to queue");
       }
@@ -109,6 +118,42 @@ bool ConnectionManager::addSendHandler(uint64_t chn) {
       zmq::message_t msg;
       if (m_pcqs[chn]->sizeGuess() != 0) {
         INFO("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
+      }
+      if (m_pcqs[chn]->read(msg)) {
+        // s_send( *(m_sockets[chn].get()), msg );
+        m_sockets[chn]->send(msg);
+      }
+    }
+    INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
+  });
+  return true;
+}
+
+bool ConnectionManager::addSubscribeHandler(uint64_t chn) {
+  INFO(__METHOD_NAME__ << " [SUB] SubscribeHandler for channel [" << chn << "] starting...");
+  m_handlers[chn] = std::thread([&, chn]() {
+    while (!m_stop_handlers) {
+      zmq::message_t msg;
+      if ((m_sockets[chn]->recv(&msg, ZMQ_DONTWAIT)) == true) {
+        m_pcqs[chn]->write(std::move(msg));
+        INFO("    -> wrote to queue");
+      }
+      // INFO(m_className << " No messages for some time... sleeping a second...");
+      INFO("SUB -> queue population: " << m_pcqs[chn]->sizeGuess());
+      std::this_thread::sleep_for(100ms);
+    }
+    INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
+  });
+  return true;
+}
+
+bool ConnectionManager::addPublishHandler(uint64_t chn) {
+  INFO(__METHOD_NAME__ << " [PUB] PublishHandler for channel [" << chn << "] starting...");
+  m_handlers[chn] = std::thread([&, chn]() {
+    while (!m_stop_handlers) {
+      zmq::message_t msg;
+      if (m_pcqs[chn]->sizeGuess() != 0) {
+        INFO("PUB -> queue population: " << m_pcqs[chn]->sizeGuess());
       }
       if (m_pcqs[chn]->read(msg)) {
         // s_send( *(m_sockets[chn].get()), msg );
@@ -158,16 +203,16 @@ bool ConnectionManager::start() {
   {
     switch (dirIt.second) {
       case CLIENT:
-        addSendHandler(dirIt.first);
-        break;
-      case SERVER:
         addReceiveHandler(dirIt.first);
         break;
+      case SERVER:
+        addSendHandler(dirIt.first);
+        break;
       case PUBLISHER:
-        ERROR(__METHOD_NAME__ << " PUBLISHING requested but it's not implemented!");
+        addPublishHandler(dirIt.first);
         break;
       case SUBSCRIBER:
-        ERROR(__METHOD_NAME__ << " SUBSCRIBE requested but it's not implemented!");
+        addSubscribeHandler(dirIt.first);
         break;
     }
   }

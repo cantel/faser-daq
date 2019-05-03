@@ -125,6 +125,9 @@ class ConnectionManager : public daq::utilities::Singleton<ConnectionManager> {
   // Internal
   bool addSendHandler(uint64_t chn);  // std::function<void()> task);
   bool addReceiveHandler(uint64_t chn);
+  bool addPublishHandler(uint64_t chn);
+  bool addSubscribeHandler(uint64_t chn);
+
 };
 
 }  // namespace core

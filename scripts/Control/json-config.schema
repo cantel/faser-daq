@@ -49,7 +49,8 @@
               "eventbuilder",
               "eventbuilderbinary",
               "datalogger",
-              "cassandradatalogger"
+              "cassandradatalogger",
+              "monitor"
             ],
             "default": "boardreader"
           },

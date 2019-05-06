@@ -10,6 +10,7 @@
 
 #include "Modules/BoardReader.hpp"
 #include "Modules/EventBuilder.hpp"
+#include "Modules/Monitor.hpp"
 #include "Utilities/Logging.hpp"
 #include "Core/ConnectionManager.hpp"
 

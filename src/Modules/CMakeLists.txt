@@ -31,3 +31,8 @@ file(GLOB_RECURSE CASSANDRADATALOGGER_SOURCES "CassandraDataLogger.cpp")
 add_library(cassandradatalogger SHARED ${CASSANDRADATALOGGER_SOURCES})
 target_link_libraries(cassandradatalogger PUBLIC core utilities zmq cassandra)
 
+file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
+add_library(monitor SHARED ${MONITOR_SOURCES})
+target_link_libraries(monitor PUBLIC core utilities zmq)
+
+

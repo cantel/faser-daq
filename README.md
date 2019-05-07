@@ -27,11 +27,11 @@ Cassandra
 
 Web dependencies
 
-    ansible-playbook webdeps.yml --ask-become-pass
+    ansible-playbook install-webdeps.yml --ask-become-pass
 
 Redis
 
-    ansible-playbook redis.yml --ask-become-pass
+    ansible-playbook install-redis.yml --ask-become-pass
 
 
 ## Software compilation

@@ -16,29 +16,16 @@
     state: present
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
-- name: Copy supervisor service configuration file
-  copy:
-    src: usr/lib/systemd/system/supervisor.service
-    dest: /usr/lib/systemd/system/
-  notify:
-    - restart supervisor
-  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
-
 - name: Copy supervisor gui configuration file
   copy:
     src: etc/supervisord.d/web-gui.ini
     dest: /etc/supervisord.d/
   notify:
-    - restart supervisor
+    - restart supervisord
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Enabling supervisor service
   service:
-    name: supervisor
+    name: supervisord
     enabled: yes
-
-- name: Start supervisor.service
-  service:
-    name: supervisor
-    state: started
 

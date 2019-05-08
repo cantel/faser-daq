@@ -31,3 +31,11 @@ file(GLOB_RECURSE CASSANDRADATALOGGER_SOURCES "CassandraDataLogger.cpp")
 add_library(cassandradatalogger SHARED ${CASSANDRADATALOGGER_SOURCES})
 target_link_libraries(cassandradatalogger PUBLIC core utilities zmq cassandra)
 
+file(GLOB_RECURSE TRIGGERGENERATOR_SOURCES "TriggerGenerator.cpp")
+add_library(triggergenerator SHARED ${TRIGGERGENERATOR_SOURCES})
+target_link_libraries(triggergenerator PUBLIC core utilities zmq)
+
+file(GLOB_RECURSE FRONTENDEMULATOR_SOURCES "FrontEndEmulator.cpp")
+add_library(frontendemulator SHARED ${FRONTENDEMULATOR_SOURCES})
+target_link_libraries(frontendemulator PUBLIC core utilities zmq)
+

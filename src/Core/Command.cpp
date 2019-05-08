@@ -106,7 +106,11 @@ bool daq::core::Command::executeCommand(std::string& response) {
     stop_and_notify();
     response = "Success";
   } else if (command == "status") {
-    response = m_plugin.getState();
+    if (m_plugin.getLoaded()) {
+      response = m_plugin.getState();
+    } else {
+      response = "booted";
+    }
   }
   return true;  // TODO put some meaning or return void
 }

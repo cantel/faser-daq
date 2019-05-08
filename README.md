@@ -83,7 +83,7 @@ The `settings.json` and `*config*.json` files must be edited to match the desire
     git commit
 
 
-### (Optional)Cereal
+### (Optional) Cereal
 
     git submodule add https://github.com/USCiLab/cereal.git vendor/cereal --single branch
 

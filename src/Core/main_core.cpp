@@ -13,7 +13,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  daq::utilities::set_log_level("debug");
+  daq::utilities::set_log_level("info");
 
   int port = atoi(argv[1]);
   INFO("Port " << port);

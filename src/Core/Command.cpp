@@ -22,7 +22,7 @@ bool daq::core::Command::startCommandHandler() {
   unsigned tid = 1;
   bool rv = false;
   m_commandFunctors.push_back([&, tid] {
-    INFO("CommandThread  ->>> Should handle message: " << m_message);
+    DEBUG("CommandThread  ->>> Should handle message: " << m_message);
     std::string response;
     rv = executeCommand(response);
     setResponse(response);

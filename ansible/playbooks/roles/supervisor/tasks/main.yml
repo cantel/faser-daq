@@ -29,3 +29,7 @@
     name: supervisord
     enabled: yes
 
+- name: Create /log folder
+  file:
+    path: /log
+    state: directory

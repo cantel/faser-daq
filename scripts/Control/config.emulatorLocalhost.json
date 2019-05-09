@@ -30,7 +30,7 @@
             "some_int": 42,
             "some_string": "test"
         },
-	"meanSize": 100,
+	"meanSize": 25,
 	"rmsSize":  0,
 	"fragmentID": 1000001,
         "triggerPort": 17001,
@@ -38,14 +38,31 @@
 	"daqPort": 18001
     },
     {
-      "name": "boardreader01",
+        "name": "frontendemulator02",
+        "host": "localhost",
+        "port": 5542,
+        "type": "frontendemulator",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+	"meanSize": 250,
+	"rmsSize":  20,
+	"fragmentID": 1000002,
+        "triggerPort": 17002,
+	"daqHost": "localhost",
+	"daqPort": 18002
+    },
+    {
+      "name": "frontendreceiver01",
       "host": "localhost",
       "port": 5555,
-      "type": "boardreaderbinary",
+      "type": "frontendreceiver",
       "settings": {
         "some_int": 42,
         "some_string": "test"
       },
+      "dataPort": 18001,
       "connections": {
         "sources": [],
         "destinations": [
@@ -59,14 +76,15 @@
       }
     },
     {
-      "name": "boardreader02",
+      "name": "frontendreceiver02",
       "host": "localhost",
       "port": 5556,
-      "type": "boardreaderbinary",
+      "type": "frontendreceiver",
       "settings": {
         "some_int": 42,
         "some_string": "test"
       },
+      "dataPort": 18002,
       "connections": {
         "sources": [],
         "destinations": [
@@ -117,7 +135,7 @@
       "name": "datalogger01",
       "host": "localhost",
       "port": 5558,
-      "type": "cassandradatalogger",
+      "type": "filedatalogger",
       "settings": {
         "some_int": 42,
         "some_string": "test",

@@ -49,7 +49,7 @@ void FrontEndEmulator::runner() {
   INFO(" Running...");
   std::default_random_engine generator;
   std::normal_distribution<float> gaussian(m_meanSize,m_rmsSize);
-  Fragment data;
+  RawFragment data;
   for(int ii=0;ii<MAXFRAGSIZE;ii++) data.data[ii]=m_fragID;
   while (m_run) {
     TriggerMsg buffer;
@@ -60,10 +60,10 @@ void FrontEndEmulator::runner() {
       continue;
     }
     m_eventCounter++;
-    INFO("Event "<<m_eventCounter<<": "<<buffer.eventID<<" BC:"<<buffer.bcID);
-    data.source=m_fragID;
-    data.eventID=m_eventCounter;
-    data.bcID=buffer.bcID;
+    INFO("Event "<<m_eventCounter<<": "<<buffer.event_id<<" BC:"<<buffer.bc_id);
+    data.source_id=m_fragID;
+    data.event_id=m_eventCounter;
+    data.bc_id=buffer.bc_id;
     data.dataLength=std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE);
     INFO("Fragment size: "<<data.size());
     m_outHandle.send(&data,data.size());

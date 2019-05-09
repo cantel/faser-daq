@@ -56,8 +56,8 @@ void TriggerGenerator::runner() {
     if (m_eventCounter % msgFreq == 0)
       INFO("Sending trigger for event: "<<m_eventCounter<<" then sleep "<<museconds<<" microseconds");
     TriggerMsg trigger;
-    trigger.eventID=m_eventCounter;
-    trigger.bcID=bcGen(generator);
+    trigger.event_id=m_eventCounter;
+    trigger.bc_id=bcGen(generator);
     
     for(auto& target : m_targets) {
       target->send(&trigger, sizeof(trigger));

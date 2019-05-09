@@ -16,7 +16,7 @@ class FrontEndEmulator : public DAQProcess {
 private:
   int m_meanSize;
   int m_rmsSize;
-  int m_fragID;
+  uint32_t m_fragID;
   UdpReceiver m_trigIn;
   UdpSender m_outHandle;
   int m_eventCounter;

@@ -56,7 +56,7 @@ void BoardReader::runner() {
   INFO(__METHOD_NAME__ << " Running...");
   while (m_run) {
     timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
-    const unsigned payload_size = (rand() % 32 + 1) * 4;
+    const unsigned payload_size = (rand() % 128 + 1);
     const unsigned total_size = sizeof(data_t) + sizeof(char) * payload_size;
 
     INFO(__METHOD_NAME__ << " sequence number " << sequence_number << "  >>  timestamp " << std::hex

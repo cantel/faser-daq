@@ -12,8 +12,8 @@ int main(int argc, char **argv) {
     ERROR("No command port provided!");
     return 1;
   }
-  
-  if (argc == 3 && (std::string) argv[2] == "debug") {
+
+  if (argc == 3 && (std::string)argv[2] == "debug") {
     daq::utilities::set_log_level("debug");
     INFO("Log level DEBUG");
   } else {

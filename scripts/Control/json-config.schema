@@ -35,7 +35,7 @@
           },
           "host": {
             "type": "string",
-            "default": "rd51pro.cern.ch"        
+            "default": "epdtdi-daqtest.cern.ch"        
           },          
           "port": {
             "type": "integer",
@@ -49,7 +49,8 @@
               "eventbuilder",
               "eventbuilderbinary",
               "datalogger",
-              "cassandradatalogger"
+              "cassandradatalogger",
+              "filedatalogger"
             ],
             "default": "boardreader"
           },

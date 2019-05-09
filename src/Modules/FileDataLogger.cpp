@@ -23,7 +23,7 @@ FileDataLogger::FileDataLogger() : m_payloads{10000}, m_randDevice{}, m_mt{m_ran
 #warning RS -> Needs to be properly configured.
   // Set up static resources...
   m_dummyStr = "dummy";
-  m_writeBytes = 1024; // 4K buffer writes
+  m_writeBytes = 4 * daqutils::Constant::Kilo; // 4K buffer writes
   std::ios_base::sync_with_stdio(false);
   m_fileNames[1] = "/tmp/test.bin";
   m_fileStreams[1] = std::fstream(m_fileNames[1], std::ios::out | std::ios::binary);
@@ -49,18 +49,16 @@ void FileDataLogger::stop() {
 
 void FileDataLogger::runner() {
   //auto& cm = daq::core::ConnectionManager::instance();
-  uint64_t incr = 0;
   while (m_run) {
-    std::this_thread::sleep_for(100ms);
-    incr++;
-    int randSize = m_uniformDist(m_mt);
-//    randSize = 32;
-//    DEBUG(__METHOD_NAME__ << " Rolled random size for payload: " << randSize);
-    daqutils::Binary pl(randSize);
-    memcpy(pl.startingAddress(), m_dummyStr.data(), m_dummyStr.length());
+    INFO(__METHOD_NAME__ << " Running...");
+    daqutils::Binary pl(0);
+    while (!m_connections.get(1, std::ref(pl))) {
+      std::this_thread::sleep_for(50ms);
+    }
     m_payloads.write(pl);
+    DEBUG(__METHOD_NAME__ << "Wrote data from channel 1...");
   }
-  DEBUG(__METHOD_NAME__ << " Runner stopped");
+  INFO(__METHOD_NAME__ << " Runner stopped");
 }
 
 #warning RS -> File rotation implementation is missing

@@ -30,7 +30,6 @@ class supervisord:
         'autorestart': 'false',
         'environment': env,
         'user': user,
-        'environment': "",
         'redirect_stderr': "true",
         'stdout_logfile': log_file,
         'stdout_logfile_maxbytes': "0",

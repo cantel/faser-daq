@@ -31,11 +31,15 @@ def removeProcesses(components):
         print("Exception: cannot remove process", i['name'])
 
 
-def addProcesses(components):
+def addProcesses(components, debug):
   for p in components:
     sd = supervisord.supervisord(p['host'], group)
-    print("Add", sd.addProgramToGroup(
-        p['name'], exe+" "+str(p['port']), dir, env))
+    if debug is True:
+      print("Add", sd.addProgramToGroup(
+          p['name'], exe+" "+str(p['port'])+" debug", dir, env))
+    else:
+      print("Add", sd.addProgramToGroup(
+          p['name'], exe+" "+str(p['port']), dir, env))
 
 
 def handleRequest(host, port, request):
@@ -144,6 +148,7 @@ exe = settings['exe']
 env = settings['env']
 
 validation = True
+debug = False
 
 arg = "complete"
 if len(sys.argv) <= 2:
@@ -159,6 +164,7 @@ for o in sys.argv:
   elif o == 'dev':
     print("Developer mode")
     validation = False
+    debug = True
 
 with open(sys.argv[1]) as f:
   data = json.load(f)
@@ -177,7 +183,7 @@ if arg == "remove":
   quit()
 
 if arg == 'add' or arg == 'complete':
-  addProcesses(data['components'])
+  addProcesses(data['components'], debug)
   if arg == 'add':
     quit()
 

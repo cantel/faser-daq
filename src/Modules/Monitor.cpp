@@ -26,14 +26,14 @@ void Monitor::runner() {
   const unsigned c_packing = 20;
   while (m_run) {
     //std::string packed = "";
-    for (unsigned i = 0; i < c_packing;) {
+    //for (unsigned i = 0; i < c_packing;) {
       std::string s1{m_connections.getStr(1)};
       if (s1 != "") {
         INFO("Received on channel 1 " << s1);
         //packed += s1;
-        i++;
+        //i++;
       }
-    }
+    //}
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

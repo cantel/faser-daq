@@ -10,3 +10,4 @@
     - devel
     - openhpc
     - cvmfs
+    - control-deps

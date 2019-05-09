@@ -1,4 +1,4 @@
-#Marco Boretto <marco.boretto@cern.ch> 2018
+#Marco Boretto <marco.boretto@cern.ch> 2019
 ---
 
 - name: Install libraries Centos
@@ -11,6 +11,7 @@
     - spdlog-devel
     - cppzmq-devel
     - glibc-devel
+    - doxygen
     #maybe not useful
     - glog-devel
     - libpcap-devel

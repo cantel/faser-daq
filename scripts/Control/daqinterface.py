@@ -198,10 +198,12 @@ for p in data['components']:
   threads.append(t)
 
 while(not exit):
-  text = input("start | stop | down\n")
+  text = input("(config) | start | stop | down\n")
   print("Executing", text)
   command_threads = []
-  if text == "start":
+  if text == "config":
+    spawnJoin(data['components'], configureProcess)
+  elif text == "start":
     spawnJoin(data['components'], startProcess)
   elif text == "stop":
     spawnJoin(data['components'], stopProcess)

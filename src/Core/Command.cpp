@@ -22,7 +22,7 @@ bool daq::core::Command::startCommandHandler() {
   unsigned tid = 1;
   bool rv = false;
   m_commandFunctors.push_back([&, tid] {
-    INFO("CommandThread  ->>> Should handle message: " << m_message);
+    DEBUG("CommandThread  ->>> Should handle message: " << m_message);
     std::string response;
     rv = executeCommand(response);
     setResponse(response);
@@ -106,7 +106,11 @@ bool daq::core::Command::executeCommand(std::string& response) {
     stop_and_notify();
     response = "Success";
   } else if (command == "status") {
-    response = m_plugin.getState();
+    if (m_plugin.getLoaded()) {
+      response = m_plugin.getState();
+    } else {
+      response = "booted";
+    }
   }
   return true;  // TODO put some meaning or return void
 }

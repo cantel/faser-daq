@@ -1,5 +1,6 @@
 from xmlrpc.client import ServerProxy
-
+import datetime
+import getpass
 
 class supervisord:
   def __init__(self, host, group):
@@ -20,11 +21,20 @@ class supervisord:
     return self.server.supervisor.getProcessInfo(self.group+":"+name)
 
   def addProgramToGroup(self, name, exe, dir, env):
+    now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+    user = getpass.getuser()
+    log_file = "/log/"+name+"-"+user+"-"+now+".log"
     settings = {
         'command': exe,
         'directory': dir,
         'autorestart': 'false',
-        'environment': env
+        'environment': env,
+        'user': user,
+        'redirect_stderr': "true",
+        'stdout_logfile': log_file,
+        'stdout_logfile_maxbytes': "0",
+        'stdout_logfile_backups': "0"
+
     }
     return self.server.twiddler.addProgramToGroup(self.group, name, settings)
 

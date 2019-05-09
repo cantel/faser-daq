@@ -13,18 +13,16 @@ Monitor::~Monitor() { INFO("Monitor::~Monitor"); }
 
 void Monitor::start() {
   DAQProcess::start();
-  INFO("Monitor::start");
-  //INFO(__METHOD_NAME__ << " getState: " << this->getState());
+  INFO(__METHOD_NAME__ << " getState: " << this->getState());
 }
 
 void Monitor::stop() {
   DAQProcess::stop();
-  INFO("Monitor::stop");
-  //INFO(__METHOD_NAME__ << " getState: " << this->getState());
+  INFO(__METHOD_NAME__ << " getState: " << this->getState());
 }
 
 void Monitor::runner() {
-  INFO(" Running...");
+  INFO(__METHOD_NAME__ << " Running...");
   const unsigned c_packing = 20;
   while (m_run) {
     //std::string packed = "";
@@ -37,5 +35,5 @@ void Monitor::runner() {
       }
     }
   }
-  INFO(" Runner stopped");
+  INFO(__METHOD_NAME__ << " Runner stopped");
 }

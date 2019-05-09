@@ -8,3 +8,4 @@ build
 *pyc
 html
 latex
+**/**/*.swp

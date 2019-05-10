@@ -46,12 +46,12 @@ void Monitor::runner() {
   while (m_run) {
     daq::utilities::Binary b1;
     while(!m_connections.get(1, b1) && m_run) {
-      INFO("b1.size() =" << b1.size());
-      const data_t * unpackeddata((data_t *)malloc(b1.size()));
-      //unpackeddata = static_cast<const data_t *>(b1.data());
-      //INFO(__METHOD_NAME__ <<  " data sequence number "<< unpackeddata->header.seq_number);
       std::this_thread::sleep_for(100ms);
     }
+    INFO("b1.size() =" << b1.size());
+    const data_t * unpackeddata((data_t *)malloc(b1.size()));
+    unpackeddata = static_cast<const data_t *>(b1.data());
+    INFO(__METHOD_NAME__ <<  " data sequence number "<< unpackeddata->header.seq_number);
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

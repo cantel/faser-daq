@@ -6,7 +6,7 @@
       "name": "boardreader01",
       "host": "localhost",
       "port": 5555,
-      "type": "boardreaderbinary",
+      "type": "boardreader",
       "settings": {
         "some_int": 42,
         "some_string": "test"
@@ -27,7 +27,7 @@
       "name": "boardreader02",
       "host": "localhost",
       "port": 5556,
-      "type": "boardreaderbinary",
+      "type": "boardreader",
       "settings": {
         "some_int": 42,
         "some_string": "test"
@@ -48,7 +48,7 @@
       "name": "eventbuilder01",
       "host": "localhost",
       "port": 5557,
-      "type": "eventbuilderbinary",
+      "type": "eventbuilder",
       "settings": {
         "some_int": 42,
         "some_string": "test"
@@ -82,7 +82,7 @@
       "name": "monitor01",
       "host": "localhost",
       "port": 5558,
-      "type": "monitorbinary",
+      "type": "monitor",
       "settings": {
         "some_int": 42,
         "some_string": "test"
@@ -93,7 +93,7 @@
             "type": "pubsub",
             "chid": 1,
             "host": "localhost",
-            "port": 8101
+            "port": 8103
           }
         ],
         "destinations": []

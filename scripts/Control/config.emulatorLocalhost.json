@@ -1,0 +1,157 @@
+{
+  "version": 2,
+  "foo": "bar",
+  "components": [
+    {
+        "name": "triggergenerator",
+        "host": "localhost",
+        "port": 5540,
+        "type": "triggergenerator",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+	"rateInHz": 15,
+        "frontendApps": [
+	    { "host": "localhost",
+	      "port": 17001
+	    } ,
+	    { "host": "localhost",
+	      "port": 17002
+	    }
+        ]
+    },
+    {
+        "name": "frontendemulator01",
+        "host": "localhost",
+        "port": 5541,
+        "type": "frontendemulator",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+	"meanSize": 25,
+	"rmsSize":  0,
+	"fragmentID": 1000001,
+        "triggerPort": 17001,
+	"daqHost": "localhost",
+	"daqPort": 18001
+    },
+    {
+        "name": "frontendemulator02",
+        "host": "localhost",
+        "port": 5542,
+        "type": "frontendemulator",
+        "settings": {
+            "some_int": 42,
+            "some_string": "test"
+        },
+	"meanSize": 250,
+	"rmsSize":  20,
+	"fragmentID": 1000002,
+        "triggerPort": 17002,
+	"daqHost": "localhost",
+	"daqPort": 18002
+    },
+    {
+      "name": "frontendreceiver01",
+      "host": "localhost",
+      "port": 5555,
+      "type": "frontendreceiver",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test"
+      },
+      "dataPort": 18001,
+      "connections": {
+        "sources": [],
+        "destinations": [
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "host": "*",
+            "port": 8101
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver02",
+      "host": "localhost",
+      "port": 5556,
+      "type": "frontendreceiver",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test"
+      },
+      "dataPort": 18002,
+      "connections": {
+        "sources": [],
+        "destinations": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "host": "*",
+            "port": 8102
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventbuilder01",
+      "host": "localhost",
+      "port": 5557,
+      "type": "eventbuilderbinary",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test"
+      },
+      "connections": {
+        "sources": [
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "host": "localhost",
+            "port": 8101
+          },
+          {
+            "type": "pair",
+            "chid": 2,
+            "host": "localhost",
+            "port": 8102
+          }
+        ],
+        "destinations": [
+          {
+            "type": "pair",
+            "chid": 3,
+            "host": "*",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "datalogger01",
+      "host": "localhost",
+      "port": 5558,
+      "type": "filedatalogger",
+      "settings": {
+        "some_int": 42,
+        "some_string": "test",
+        "ring": "127.0.0.1"
+      },
+      "connections": {
+        "sources": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "host": "localhost",
+            "port": 8103
+          }
+        ],
+        "destinations": []
+      }
+    }
+  ]
+}

@@ -84,7 +84,6 @@ void FrontEndReceiver::runner() {
     m_connections.put(1, binary);
 
     sequence_number++;
-    std::this_thread::sleep_for(500ms);
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

@@ -6,7 +6,6 @@
 #include <fstream>
 #include <queue>
 #include <map>
-#include <random>
 /// \endcond
 
 #include "Core/DAQProcess.hpp"
@@ -51,12 +50,6 @@ private:
   std::map<uint64_t, std::fstream> m_fileStreams;
   std::map<uint64_t, daq::utilities::Binary> m_fileBuffers;
   std::map<uint64_t, uint32_t> m_fileRotationCounters; 
-
-  // Random for testing.
-  std::random_device m_randDevice;
-  std::mt19937 m_mt;
-  std::uniform_int_distribution<int> m_uniformDist;
-  std::string m_dummyStr;
 
   // Thread control
   std::atomic<bool> m_stopWriters;

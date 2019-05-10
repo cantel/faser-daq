@@ -3,6 +3,7 @@
 /// \cond
 #include <chrono>
 #include <iomanip>
+#include <random>
 /// \endcond
 
 #include "Modules/BoardReader.hpp"
@@ -53,10 +54,14 @@ void BoardReader::runner() {
   unsigned sequence_number = 0;
   microseconds timestamp;
 
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(1, 128);
+
   INFO(__METHOD_NAME__ << " Running...");
   while (m_run) {
     timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
-    const unsigned payload_size = (rand() % 128 + 1);
+    const unsigned payload_size = dis(gen);
     const unsigned total_size = sizeof(data_t) + sizeof(char) * payload_size;
 
     INFO(__METHOD_NAME__ << " sequence number " << sequence_number << "  >>  timestamp " << std::hex

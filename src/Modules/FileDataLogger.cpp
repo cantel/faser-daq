@@ -16,13 +16,11 @@ extern "C" FileDataLogger *create_object() { return new FileDataLogger; }
 
 extern "C" void destroy_object(FileDataLogger *object) { delete object; }
 
-FileDataLogger::FileDataLogger() : m_payloads{10000}, m_randDevice{}, m_mt{m_randDevice()}, m_uniformDist{64, 512},
-                                   m_stopWriters{false} { 
-  INFO("FileDataLogger::FileDataLogger"); 
- 
+FileDataLogger::FileDataLogger() : m_payloads{10000}, m_stopWriters{false} {
+  INFO("FileDataLogger::FileDataLogger");
+
 #warning RS -> Needs to be properly configured.
   // Set up static resources...
-  m_dummyStr = "dummy";
   m_writeBytes = 4 * daqutils::Constant::Kilo; // 4K buffer writes
   std::ios_base::sync_with_stdio(false);
   m_fileNames[1] = "/tmp/test.bin";
@@ -34,6 +32,8 @@ FileDataLogger::FileDataLogger() : m_payloads{10000}, m_randDevice{}, m_mt{m_ran
 FileDataLogger::~FileDataLogger() { 
   INFO("FileDataLogger::~FileDataLogger"); 
   // Tear down resources...
+  m_stopWriters.store(true);
+  m_fileStreams[1].close();
 }
 
 void FileDataLogger::start() { 
@@ -44,7 +44,6 @@ void FileDataLogger::start() {
 void FileDataLogger::stop() { 
   DAQProcess::stop();
   INFO(__METHOD_NAME__ << " getState: " << this->getState());
-  m_stopWriters.store(true);
 }
 
 void FileDataLogger::runner() {

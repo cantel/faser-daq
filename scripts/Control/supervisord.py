@@ -4,7 +4,6 @@ import getpass
 
 class supervisord:
   def __init__(self, host, group):
-    print("host", host)
     self.group = group
     self.server = ServerProxy('http://'+host+':9001/RPC2')
 
@@ -24,6 +23,7 @@ class supervisord:
     now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     user = getpass.getuser()
     log_file = "/log/"+name+"-"+user+"-"+now+".log"
+    print(log_file)
     settings = {
         'command': exe,
         'directory': dir,

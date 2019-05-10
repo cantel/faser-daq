@@ -200,14 +200,14 @@ void CassandraDataLogger::runner() {
   uint64_t incr = 0;
   while (m_run) {
     INFO(__METHOD_NAME__ << " Running...");
-    std::this_thread::sleep_for(500ms);
+    // std::this_thread::sleep_for(500ms);
     incr++;
     daqutils::Binary pl(0);
     while (!m_connections.get(1, std::ref(pl))) {
       std::this_thread::sleep_for(50ms);
     }
     write(incr, pl);
-    INFO(__METHOD_NAME__ << "Wrote data from channel 1...");
+    DEBUG(__METHOD_NAME__ << "Wrote data from channel 1...");
   }
   INFO(__METHOD_NAME__ << " Runner stopped");
 }

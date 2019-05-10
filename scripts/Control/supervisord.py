@@ -30,11 +30,11 @@ class supervisord:
         'autorestart': 'false',
         'environment': env,
         'user': user,
-        'redirect_stderr': "true",
         'stdout_logfile': log_file,
-        'stdout_logfile_maxbytes': "0",
-        'stdout_logfile_backups': "0"
-
+        'stdout_logfile_maxbytes': '0',
+        'stdout_logfile_backups': '0',
+        'stderr_logfile': log_file
+        # 'redirect_stderr': 'true' # TODO apparently supervisor 3.1.4 ignores this.
     }
     return self.server.twiddler.addProgramToGroup(self.group, name, settings)
 

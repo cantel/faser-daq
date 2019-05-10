@@ -62,6 +62,16 @@ The `settings.json` and `*config*.json` files must be edited to match the desire
     stop
     down
 
+### Development
+In order to develop your own module, check the existing demonstration modules under `src/Modules` and `include/Modules` and adapt the `NewModule*_template` to your use case.
+
+The `dev` option of `daqinterface.py`
+
+    python3 daqinterface.py invalid-config.json complete dev
+
+  - skips the `json-config.schema` validation, therefore allowing to experiment with new fields in the configuration json files.
+  - sets the process logging level to `DEBUG`.
+
 ## How to add a new submodule
 ### Spdlog
 

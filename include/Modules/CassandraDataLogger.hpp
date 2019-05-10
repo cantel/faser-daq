@@ -70,7 +70,7 @@ class CassandraDataLogger : public DAQProcess, public DataLogger {
   private:
 
 // RS -> ALL THIS SHOULD BE NICELY HIDDEN BEHIND A SESSION LAYER.
-    const std::string M_KEYSPACE_NAME = "rd51daq";
+    const std::string M_KEYSPACE_NAME = "daq";
     const std::string M_CF_NAME = "payload";
 
     const std::string M_COLUMNFAMILY  = "pkey, type, s_info, version, time, size, data";
@@ -84,7 +84,7 @@ class CassandraDataLogger : public DAQProcess, public DataLogger {
 
     const std::string Q_SAY_HI = "SELECT key,bootstrapped,broadcast_address,cluster_name,cql_version,data_center FROM system.local";   
     const std::string Q_CF_EXISTS = "SELECT table_name from system_schema.tables WHERE keyspace_name=? AND table_name=?";
-    const std::string Q_INSERT = "INSERT INTO rd51daq.payload (pkey, type, s_info, version, time, size, data) VALUES (?,?,?,?,?,?,?);";
+    const std::string Q_INSERT = "INSERT INTO daq.payload (pkey, type, s_info, version, time, size, data) VALUES (?,?,?,?,?,?,?);";
 
     const std::string getErrorStr( CassFuture*& future );
     void readIntoBinary( daq::utilities::Binary& binary, const CassValue* const & value );

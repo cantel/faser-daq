@@ -47,12 +47,12 @@ void FileDataLogger::stop() {
 }
 
 void FileDataLogger::runner() {
+  INFO(__METHOD_NAME__ << " Running...");
   //auto& cm = daq::core::ConnectionManager::instance();
   while (m_run) {
-    INFO(__METHOD_NAME__ << " Running...");
     daqutils::Binary pl(0);
     while (!m_connections.get(1, std::ref(pl))) {
-      std::this_thread::sleep_for(50ms);
+      std::this_thread::sleep_for(10ms);
     }
     m_payloads.write(pl);
     DEBUG(__METHOD_NAME__ << "Wrote data from channel 1...");
@@ -102,7 +102,7 @@ void FileDataLogger::setup() {
  
          }
        }
-       std::this_thread::sleep_for(50ms);
+       std::this_thread::sleep_for(10ms);
      }
   };
   m_fileWriters[1]->set_work(m_writeFunctors[1]);

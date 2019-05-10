@@ -23,7 +23,7 @@ class supervisord:
     now = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     user = getpass.getuser()
     log_file = "/log/"+name+"-"+user+"-"+now+".log"
-    print(log_file)
+    print("tail -f "+log_file)
     settings = {
         'command': exe,
         'directory': dir,

@@ -4,7 +4,7 @@
 #include <chrono>
 /// \endcond
 
-#include "Modules/EventBuilder.hpp"
+#include "Modules/EventBuilderBinary.hpp"
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
@@ -36,10 +36,10 @@ void EventBuilder::runner() {
   while (m_run) {
     daq::utilities::Binary b1, b2;
     while(!m_connections.get(1, b1) && m_run) {
-      std::this_thread::sleep_for(100ms);
+      std::this_thread::sleep_for(10ms);
     }
     while(!m_connections.get(2, b2) && m_run) {
-      std::this_thread::sleep_for(100ms);
+      std::this_thread::sleep_for(10ms);
     }
 
     daq::utilities::Binary b3(b1);

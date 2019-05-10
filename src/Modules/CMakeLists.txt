@@ -35,4 +35,8 @@ file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
 add_library(monitor SHARED ${MONITOR_SOURCES})
 target_link_libraries(monitor PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE MONITORBINARY_SOURCES "MonitorBinary.cpp")
+add_library(monitorbinary SHARED ${MONITORBINARY_SOURCES})
+target_link_libraries(monitorbinary PUBLIC core utilities zmq)
+
 

@@ -55,7 +55,7 @@ void FrontEndReceiver::runner() {
     RawFragment buffer;
     int payload_size = m_dataIn.receive(&buffer,sizeof(buffer));
     if (payload_size < 0) continue;
-    if (payload_size < 4*buffer.headersize()) {
+    if (payload_size < (int) sizeof(uint32_t)*buffer.headerwords()) {
       WARNING("Received only"<<payload_size<<" bytes");
       continue;
     }
@@ -71,7 +71,11 @@ void FrontEndReceiver::runner() {
     data->header.source_id = buffer.source_id;
     data->header.bc_id = buffer.bc_id;
     data->header.payload_size = payload_size;
-
+    data->header.status = 0;
+    if (payload_size != buffer.sizeBytes()) {
+      data->header.status |= CorruptedFragment;
+      WARNING("Got corrupted event, event id "<<data->header.event_id<<" - "<<payload_size<<" != "<<buffer.sizeBytes());
+    }
     data->header.timestamp = timestamp.count();
     memcpy(data->payload, &buffer, payload_size);
 

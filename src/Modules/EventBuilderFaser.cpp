@@ -91,18 +91,35 @@ void EventBuilder::runner() {
     
     if (eventToSend) {
       daq::utilities::Binary outFragments;
+      EventHeader header;
+      header.event_id = eventToSend;
+      header.bc_id = 0xFFFF;
+      header.timestamp = 0;
+      header.num_fragments = pendingFragmentsCounts[eventToSend];
+      header.status = 0;
       for(int ch=0;ch<numChannels;ch++) {
-	if (pendingFragments[eventToSend][ch]) outFragments+=*pendingFragments[eventToSend][ch];
-	delete pendingFragments[eventToSend][ch];
+	if (pendingFragments[eventToSend][ch]) {
+	  outFragments += *pendingFragments[eventToSend][ch];
+	  const EventFragment* fragment = static_cast<const EventFragment*>(pendingFragments[eventToSend][ch]->data());
+	  header.status |= fragment->header.status;
+	  if (!header.timestamp) {
+	    header.timestamp = fragment->header.timestamp;
+	    header.bc_id = fragment->header.bc_id;
+	  } else {
+	    if (header.bc_id != fragment->header.bc_id) {
+	      WARNING("Mismatch in BCID for event "<<eventToSend<<" : "<<header.bc_id<<" != "<<fragment->header.bc_id);
+	      header.status |= BCIDMismatch;
+	    }
+	  }
+	  delete pendingFragments[eventToSend][ch];
+	} else {
+	  header.status |= MissingFragment;
+	}
       }
       pendingFragments.erase(pendingFragments.find(eventToSend));
       pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));
       pendingEventIDs.erase(std::find(pendingEventIDs.begin(),pendingEventIDs.end(),eventToSend));
-      EventHeader header;
-      header.event_id=eventToSend;
-      header.bc_id=((const EventFragment*) outFragments.data())->header.bc_id;
-      header.timestamp=((const EventFragment*) outFragments.data())->header.timestamp;
-      header.num_fragments=pendingFragmentsCounts[eventToSend];
+
       header.data_size=outFragments.size();
       daq::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
       data+=outFragments;

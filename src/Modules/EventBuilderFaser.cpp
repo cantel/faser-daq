@@ -6,6 +6,7 @@
 
 #include <map>
 #include <vector>
+#include <algorithm>
 
 #include "Modules/EventBuilderFaser.hpp"
 #include "Modules/EventFormat.hpp"
@@ -39,11 +40,14 @@ void EventBuilder::stop() {
 void EventBuilder::runner() {
   INFO(__METHOD_NAME__ << " Running...");
   int numChannels=2;  //should get this from connection manager...
+  unsigned maxPending=10; //should be configuration parameter
+
   int channelNum=1;
-  unsigned maxPending=10;
   bool noData=true;
   std::map<uint32_t,std::vector<daq::utilities::Binary *> > pendingFragments;
   std::map<uint32_t,int> pendingFragmentsCounts;
+  std::vector<uint32_t> pendingEventIDs;
+  pendingEventIDs.reserve(maxPending+1);
   daq::utilities::Binary* blob = new daq::utilities::Binary;
   while (m_run) {
     int channel=channelNum;
@@ -66,6 +70,7 @@ void EventBuilder::runner() {
     if (pendingFragments.find(event_id)==pendingFragments.end()) {
       pendingFragments[event_id]=std::vector<daq::utilities::Binary *>(numChannels,0);
       pendingFragmentsCounts[event_id]=0;
+      pendingEventIDs.push_back(event_id);
     }
     int ch=channel-1;
     if (pendingFragments[event_id][ch]!=0) {
@@ -79,9 +84,9 @@ void EventBuilder::runner() {
     uint32_t eventToSend=0;
     if (pendingFragmentsCounts[event_id]==numChannels) {
       eventToSend=event_id;
-    } else if (pendingFragments.size()>maxPending) {
+    } else if (pendingEventIDs.size()>maxPending) {
       WARNING("Too many events pending - will send first incomplete event");
-      eventToSend=pendingFragments.begin()->first;
+      eventToSend=pendingEventIDs[0];
     }
     
     if (eventToSend) {
@@ -92,6 +97,7 @@ void EventBuilder::runner() {
       }
       pendingFragments.erase(pendingFragments.find(eventToSend));
       pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));
+      pendingEventIDs.erase(std::find(pendingEventIDs.begin(),pendingEventIDs.end(),eventToSend));
       EventHeader header;
       header.event_id=eventToSend;
       header.bc_id=((const EventFragment*) outFragments.data())->header.bc_id;
@@ -100,8 +106,8 @@ void EventBuilder::runner() {
       header.data_size=outFragments.size();
       daq::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
       data+=outFragments;
-      INFO("Sending event "<<eventToSend<<" - "<<data.size()<<" bytes");
-      m_connections.put(3, data);
+      INFO("Sending event "<<eventToSend<<" - "<<data.size()<<" bytes - "<<pendingEventIDs.size()<<" incomplete events pending");
+      m_connections.put(numChannels+1, data);
     }
   }
   delete blob;

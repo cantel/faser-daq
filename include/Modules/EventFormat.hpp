@@ -33,4 +33,13 @@ struct EventFragment {
   char payload[];
 } __attribute__((__packed__));
 
+struct EventHeader {
+  uint32_t event_id;
+  uint16_t bc_id;
+  uint16_t num_fragments; 
+  uint64_t timestamp;
+  uint32_t data_size;
+}  __attribute__((__packed__));
+
+
 #endif  /* EVENTFORMAT */

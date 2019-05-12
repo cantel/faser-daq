@@ -101,7 +101,7 @@
       "name": "eventbuilder01",
       "host": "localhost",
       "port": 5557,
-      "type": "eventbuilderbinary",
+      "type": "eventbuilderfaser",
       "settings": {
         "some_int": 42,
         "some_string": "test"

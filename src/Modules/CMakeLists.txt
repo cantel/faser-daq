@@ -43,3 +43,7 @@ file(GLOB_RECURSE FRONTENDRECEIVER_SOURCES "FrontEndReceiver.cpp")
 add_library(frontendreceiver SHARED ${FRONTENDRECEIVER_SOURCES})
 target_link_libraries(frontendreceiver PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE EVENTBUILDERFASER_SOURCES "EventBuilderFaser.cpp")
+add_library(eventbuilderfaser SHARED ${EVENTBUILDERFASER_SOURCES})
+target_link_libraries(eventbuilderfaser PUBLIC core utilities zmq)
+

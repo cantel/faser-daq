@@ -79,7 +79,8 @@ void FrontEndReceiver::runner() {
     auto binary = daq::utilities::Binary(static_cast<const void *>(data.get()), total_size);
 
     // print binary
-    std::cout << binary << std::endl;
+    if (sequence_number%10==0) 
+      std::cout << binary << std::endl;
 
     m_connections.put(1, binary);
 

@@ -100,11 +100,10 @@ bool ConnectionManager::addReceiveHandler(uint64_t chn) {
       zmq::message_t msg;
       if ((m_sockets[chn]->recv(&msg, ZMQ_DONTWAIT)) == true) {
         m_pcqs[chn]->write(std::move(msg));
-        INFO("    -> wrote to queue");
+        DEBUG("    -> wrote to queue");
       }
-      // INFO(m_className << " No messages for some time... sleeping a second...");
-      INFO("SERVER -> queue population: " << m_pcqs[chn]->sizeGuess());
-      std::this_thread::sleep_for(100ms);
+      DEBUG("SERVER -> queue population: " << m_pcqs[chn]->sizeGuess());
+      std::this_thread::sleep_for(10ms);
     }
     INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
   });
@@ -117,7 +116,7 @@ bool ConnectionManager::addSendHandler(uint64_t chn) {
     while (!m_stop_handlers) {
       zmq::message_t msg;
       if (m_pcqs[chn]->sizeGuess() != 0) {
-        INFO("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
+        DEBUG("CLIENT -> queue population: " << m_pcqs[chn]->sizeGuess());
       }
       if (m_pcqs[chn]->read(msg)) {
         // s_send( *(m_sockets[chn].get()), msg );
@@ -136,11 +135,11 @@ bool ConnectionManager::addSubscribeHandler(uint64_t chn) {
       zmq::message_t msg;
       if ((m_sockets[chn]->recv(&msg, ZMQ_DONTWAIT)) == true) {
         m_pcqs[chn]->write(std::move(msg));
-        INFO("    -> wrote to queue");
+        DEBUG("    -> wrote to queue");
       }
       // INFO(m_className << " No messages for some time... sleeping a second...");
-      INFO("SUB -> queue population: " << m_pcqs[chn]->sizeGuess());
-      std::this_thread::sleep_for(100ms);
+      DEBUG("SUB -> queue population: " << m_pcqs[chn]->sizeGuess());
+      std::this_thread::sleep_for(10ms);
     }
     INFO(__METHOD_NAME__ << " joining channel [" << chn << "] handler.");
   });
@@ -153,7 +152,7 @@ bool ConnectionManager::addPublishHandler(uint64_t chn) {
     while (!m_stop_handlers) {
       zmq::message_t msg;
       if (m_pcqs[chn]->sizeGuess() != 0) {
-        INFO("PUB -> queue population: " << m_pcqs[chn]->sizeGuess());
+        DEBUG("PUB -> queue population: " << m_pcqs[chn]->sizeGuess());
       }
       if (m_pcqs[chn]->read(msg)) {
         // s_send( *(m_sockets[chn].get()), msg );
@@ -221,7 +220,7 @@ bool ConnectionManager::start() {
 
 bool ConnectionManager::stop() {
   m_stop_handlers.store(true);
-  std::this_thread::sleep_for(1s);
+  std::this_thread::sleep_for(100ms);
   for (auto& tIt : m_handlers) {
     tIt.second.join();
   }

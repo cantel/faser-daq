@@ -23,7 +23,7 @@ def removeProcesses(components):
         try:
           print('Stop', sd.stopProcess(i['name']))
         except:
-          print("Exception: cannot stop process", i['name'])
+          print("Exception: cannot stop process", i['name'], "(probably already stopped)")
         print('State', sd.getProcessState(i['name'])['statename'])
       try:
         print('Remove', sd.removeProcessFromGroup(i['name']))
@@ -120,6 +120,8 @@ class statusCheck (threading.Thread):
       if new_status != status and new_status != "":
         print(self.p['name'], "in status", new_status)
         status = new_status
+      elif new_status == "":
+        print("Error", self.p['name'])
 
 
 def spawnJoin(list, func):
@@ -214,12 +216,11 @@ while(not exit):
   elif text == "stop":
     spawnJoin(data['components'], stopProcess)
   elif text == "down":
+    exit = True
+    for t in threads:
+      t.join()
     spawnJoin(data['components'], shutdownProcess)
     if arg != 'configure':
       removeProcesses(data['components'])
-    exit = True
-
-for t in threads:
-  t.join()
 
 quit()

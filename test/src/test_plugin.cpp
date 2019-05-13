@@ -14,6 +14,8 @@
 #include "Utilities/Logging.hpp"
 #include "Core/ConnectionManager.hpp"
 
+using namespace std::chrono_literals;
+
 int main(int argc, char **argv)
 {
     if (argc == 1)
@@ -42,7 +44,7 @@ int main(int argc, char **argv)
     DAQProcess *dp = (DAQProcess *)create(name, num);
 
     dp->start();
-    std::this_thread::sleep_for(std::chrono::seconds(2));
+    std::this_thread::sleep_for(2s);
     dp->stop();
     destroy(dp);
 }

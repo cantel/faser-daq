@@ -3,9 +3,10 @@
 /// \cond
 #include <chrono>
 #include <iomanip>
+#include <random>
 /// \endcond
 
-#include "Modules/BoardReader.hpp"
+#include "Modules/BoardReaderBinary.hpp"
 
 #define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
 #define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
@@ -34,6 +35,8 @@ extern "C" void destroy_object(BoardReader *object) { delete object; }
 BoardReader::BoardReader(std::string name, int num) {
   INFO(__METHOD_NAME__ << " Passed " << name << " " << num << " with constructor");
   INFO(__METHOD_NAME__ << " With config: " << m_config.dump());
+
+  m_board_id = m_config.getConfig()["settings"]["board_id"];
 }
 
 BoardReader::~BoardReader() { INFO(__METHOD_NAME__); }
@@ -49,14 +52,17 @@ void BoardReader::stop() {
 }
 
 void BoardReader::runner() {
-  const unsigned source_id = 1;
   unsigned sequence_number = 0;
   microseconds timestamp;
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(1, 128);
 
   INFO(__METHOD_NAME__ << " Running...");
   while (m_run) {
     timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
-    const unsigned payload_size = (rand() % 128 + 1);
+    const unsigned payload_size = dis(gen);
     const unsigned total_size = sizeof(data_t) + sizeof(char) * payload_size;
 
     INFO(__METHOD_NAME__ << " sequence number " << sequence_number << "  >>  timestamp " << std::hex
@@ -66,7 +72,7 @@ void BoardReader::runner() {
     std::unique_ptr<data_t> data((data_t *)malloc(total_size));
     data->header.payload_size = payload_size;
     data->header.seq_number = sequence_number;
-    data->header.source_id = source_id;
+    data->header.source_id = m_board_id;
     data->header.timestamp = timestamp.count();
     memset(data->payload, 0xFE, payload_size);
 
@@ -74,7 +80,7 @@ void BoardReader::runner() {
     auto binary = daq::utilities::Binary(static_cast<const void *>(data.get()), total_size);
 
     // print binary
-    std::cout << binary << std::endl;
+    // std::cout << binary << std::endl;
 
     m_connections.put(1, binary);
 

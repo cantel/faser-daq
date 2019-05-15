@@ -1,0 +1,3 @@
+[submodule "daqling"]
+	path = daqling
+	url = https://gitlab.cern.ch/ep-dt-di/daq/daqling.git

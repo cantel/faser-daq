@@ -1,0 +1,1 @@
+/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/bin/g++ -fPIC -O2 -DNDEBUG  -shared -Wl,-soname,libtest.so -o libtest.so CMakeFiles/test.dir/Test.cpp.o -Wl,-rpath,/home/engamber/workspace/daqling_top/build/lib ../lib/libcore.so ../lib/libutilities.so -lzmq 

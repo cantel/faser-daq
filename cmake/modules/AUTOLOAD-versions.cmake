@@ -15,4 +15,5 @@ set(cassandra-driver_version         2.11.0)
 set(tbb_version                      $ENV{TBB_VERSION})
 set(TBB_ROOT_DIR                     $ENV{TBB_ROOT_DIR})
 set(boost_version                    $ENV{BOOST_VERSION})
+set(BOOST_ROOT                       $ENV{BOOST_ROOT_DIR})
 

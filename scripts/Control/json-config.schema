@@ -61,7 +61,8 @@
             "title": "Settings",
             "properties": {
               "some_int":    { "type": "integer" },
-              "some_string": { "type": "string" }
+              "some_string": { "type": "string" },
+              "board_id": { "type": "integer" }
             },
             "required": ["some_int", "some_string"]
           },

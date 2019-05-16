@@ -17,6 +17,9 @@ private:
   int m_meanSize;
   int m_rmsSize;
   uint32_t m_fragID;
+  float m_probMissTrig;
+  float m_probMissFrag;
+  float m_probCorruptFrag;
   UdpReceiver m_trigIn;
   UdpSender m_outHandle;
   int m_eventCounter;

@@ -33,6 +33,9 @@
 	"meanSize": 25,
 	"rmsSize":  0,
 	"fragmentID": 1000001,
+	"probMissingTrigger": 0.00,
+	"probMissingFragment": 0.00,
+	"probCorruptedFragment": 0.00,
         "triggerPort": 17001,
 	"daqHost": "localhost",
 	"daqPort": 18001
@@ -49,6 +52,9 @@
 	"meanSize": 250,
 	"rmsSize":  20,
 	"fragmentID": 1000002,
+	"probMissingTrigger": 0,
+	"probMissingFragment": 0,
+	"probCorruptedFragment": 0,
         "triggerPort": 17002,
 	"daqHost": "localhost",
 	"daqPort": 18002
@@ -101,7 +107,7 @@
       "name": "eventbuilder01",
       "host": "localhost",
       "port": 5557,
-      "type": "eventbuilderbinary",
+      "type": "eventbuilderfaser",
       "settings": {
         "some_int": 42,
         "some_string": "test"

@@ -51,4 +51,7 @@ file(GLOB_RECURSE MONITORBINARY_SOURCES "MonitorBinary.cpp")
 add_library(monitorbinary SHARED ${MONITORBINARY_SOURCES})
 target_link_libraries(monitorbinary PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE EVENTBUILDERFASER_SOURCES "EventBuilderFaser.cpp")
+add_library(eventbuilderfaser SHARED ${EVENTBUILDERFASER_SOURCES})
+target_link_libraries(eventbuilderfaser PUBLIC core utilities zmq)
 

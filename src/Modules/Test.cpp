@@ -15,20 +15,29 @@
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DAQLING_TEST_HPP
-#define DAQLING_TEST_HPP
+#include "Modules/Test.hpp"
 
-#include "Core/DAQProcess.hpp"
+extern "C" Test *create_object() { return new Test; }
 
-class NewModule : public daqling::core::DAQProcess {
- public:
-  NewModule();
-  ~NewModule();
+extern "C" void destroy_object(Test *object) { delete object; }
 
-  void start();
-  void stop();
+Test::Test() { INFO("Test::Test"); }
 
-  void runner();
-};
+Test::~Test() { INFO("Test::~Test"); }
 
-#endif // DAQLING_MODULES_TEST_HPP
+void Test::start() {
+  daqling::core::DAQProcess::start();
+  INFO("Test::start");
+}
+
+void Test::stop() {
+  daqling::core::DAQProcess::stop();
+  INFO("Test::stop");
+}
+
+void Test::runner() {
+  INFO(" Running...");
+  while (m_run) {
+  }
+  INFO(" Runner stopped");
+}

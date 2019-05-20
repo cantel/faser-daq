@@ -1,0 +1,6 @@
+{
+    "group": "daq",
+    "build_dir": "/daq/build/bin",
+    "exe": "/daq/build/bin/main_core",
+    "env": "LD_LIBRARY_PATH=/usr/local/lib64/:/cvmfs/sft.cern.ch/lcg/releases/gcc/6.2.0-b9934/x86_64-centos7/lib64"
+}

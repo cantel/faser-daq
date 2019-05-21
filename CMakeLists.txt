@@ -8,11 +8,11 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wno-unused-function -Wno-unused-variable -O3 -g -pedantic -fPIC")
 set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
 
-message("CMAKE_CXX_FLAGS = " ${CMAKE_CXX_FLAGS})
-message("CMAKE_CXX_LINK_FLAGS = " ${CMAKE_CXX_LINK_FLAGS})
+#message("CMAKE_CXX_FLAGS = " ${CMAKE_CXX_FLAGS})
+#message("CMAKE_CXX_LINK_FLAGS = " ${CMAKE_CXX_LINK_FLAGS})
 
-include_directories(daqling/vendor/spdlog/include)
-include_directories(daqling/vendor/json/single_include)
+include_directories(/opt/spdlog/include)
+include_directories(/opt/json/single_include)
 
 add_subdirectory(daqling)
 add_subdirectory(src/Modules)

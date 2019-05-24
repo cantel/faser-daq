@@ -6,11 +6,6 @@ Skeleton for project-specific DAQling Modules and configurations.
     git submodule init
     git submodule update
 
-Update to the latest DAQling release with:
-    
-    cd daqling/
-    git pull
-
 # Install the framework
 ## Configure your CentOS7 host
 Refer to daqling/README.md for host setup instructions.
@@ -19,6 +14,7 @@ Refer to daqling/README.md for host setup instructions.
 
     source daqling/cmake/setup.sh
     mkdir build
+    cd build
     cmake3 ..
     make
 
@@ -40,7 +36,7 @@ You can find example `valid-config.json` and `json-config.schema` under `daqling
 # Develop custom Modules
 In order to develop your own module, check the existing demonstration modules in `daqling/src/Modules` and `daqling/include/Modules` for guidance.
 
-Copy and adapt the `src/Modules/NewModule.cpp_template` and `include/Modules/NewModule.hpp_template` and start developing your custom module.
+Copy and adapt the template `src/Modules/NewModule.cpp` and `include/Modules/NewModule.hpp` and start developing your custom module.
 
 Finally add the new custom module to `src/Modules/CMakeLists.txt` in order to build it as part of the project.
 

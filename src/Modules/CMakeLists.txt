@@ -8,7 +8,7 @@ project(Modules VERSION 0.0.1
 include_directories("../../include")
 include_directories("../../daqling/include")
 
-#file(GLOB_RECURSE NEWMODULE_SOURCES "NewModule.cpp_template")
-#add_library(newmodule SHARED ${NEWMODULE_SOURCES})
-#target_link_libraries(newmodule PUBLIC core utilities zmq)
+file(GLOB_RECURSE NEWMODULE_SOURCES "NewModule.cpp")
+add_library(newmodule SHARED ${NEWMODULE_SOURCES})
+target_link_libraries(newmodule PUBLIC core utilities zmq)
 

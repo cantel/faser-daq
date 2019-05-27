@@ -9,7 +9,7 @@
 #include "Utilities/Udp.hpp"
 #include "Core/DAQProcess.hpp"
 
-class FrontEndReceiver : public DAQProcess {
+class FrontEndReceiver : public daqling::core::DAQProcess {
  public:
   FrontEndReceiver(std::string name, int num);
   ~FrontEndReceiver();

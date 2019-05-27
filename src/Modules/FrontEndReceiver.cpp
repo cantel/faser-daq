@@ -8,8 +8,8 @@
 
 #include "Modules/EventFormat.hpp"
 
-#define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
-#define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
+#define __METHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
+#define __CLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
@@ -80,7 +80,7 @@ void FrontEndReceiver::runner() {
     memcpy(data->payload, &buffer, payload_size);
 
     // ready to be sent to EB
-    auto binary = daq::utilities::Binary(static_cast<const void *>(data.get()), total_size);
+    auto binary = daqling::utilities::Binary(static_cast<const void *>(data.get()), total_size);
 
     // print binary
     if (sequence_number%10==0) 

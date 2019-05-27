@@ -11,8 +11,8 @@
 #include "Modules/EventBuilderFaser.hpp"
 #include "Modules/EventFormat.hpp"
 
-#define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
-#define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
+#define __METHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
+#define __CLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
 
 using namespace std::chrono_literals;
 
@@ -44,11 +44,11 @@ void EventBuilder::runner() {
 
   int channelNum=1;
   bool noData=true;
-  std::map<uint32_t,std::vector<daq::utilities::Binary *> > pendingFragments;
+  std::map<uint32_t,std::vector<daqling::utilities::Binary *> > pendingFragments;
   std::map<uint32_t,int> pendingFragmentsCounts;
   std::vector<uint32_t> pendingEventIDs;
   pendingEventIDs.reserve(maxPending+1);
-  daq::utilities::Binary* blob = new daq::utilities::Binary;
+  daqling::utilities::Binary* blob = new daqling::utilities::Binary;
   while (m_run) {
     int channel=channelNum;
     channelNum++;
@@ -68,7 +68,7 @@ void EventBuilder::runner() {
     int event_id=fragment->header.event_id;
     INFO("Got fragment : "<<event_id<<" from channel "<<channel);
     if (pendingFragments.find(event_id)==pendingFragments.end()) {
-      pendingFragments[event_id]=std::vector<daq::utilities::Binary *>(numChannels,0);
+      pendingFragments[event_id]=std::vector<daqling::utilities::Binary *>(numChannels,0);
       pendingFragmentsCounts[event_id]=0;
       pendingEventIDs.push_back(event_id);
     }
@@ -79,7 +79,7 @@ void EventBuilder::runner() {
       pendingFragmentsCounts[event_id]++;
     }
     pendingFragments[event_id][ch]=blob;
-    blob = new daq::utilities::Binary;
+    blob = new daqling::utilities::Binary;
 
     uint32_t eventToSend=0;
     if (pendingFragmentsCounts[event_id]==numChannels) {
@@ -90,7 +90,7 @@ void EventBuilder::runner() {
     }
     
     if (eventToSend) {
-      daq::utilities::Binary outFragments;
+      daqling::utilities::Binary outFragments;
       EventHeader header;
       header.event_id = eventToSend;
       header.bc_id = 0xFFFF;
@@ -121,7 +121,7 @@ void EventBuilder::runner() {
       pendingEventIDs.erase(std::find(pendingEventIDs.begin(),pendingEventIDs.end(),eventToSend));
 
       header.data_size=outFragments.size();
-      daq::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
+      daqling::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
       data+=outFragments;
       INFO("Sending event "<<eventToSend<<" - "<<data.size()<<" bytes - "<<pendingEventIDs.size()<<" incomplete events pending");
       m_connections.put(numChannels+1, data);

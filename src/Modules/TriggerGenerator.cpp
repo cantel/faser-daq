@@ -9,7 +9,7 @@ extern "C" void destroy_object(TriggerGenerator *object) { delete object; }
 
 TriggerGenerator::TriggerGenerator() {
   INFO("TriggerGenerator::TriggerGenerator");
-  auto cfg = m_config.getConfig();
+  auto cfg = m_config.getConfig()["settings"];
   m_rate = cfg["rateInHz"];
   INFO("Triggers generated at "<<m_rate<<" Hz");
   auto dests = cfg["frontendApps"];

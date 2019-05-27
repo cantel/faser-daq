@@ -10,7 +10,7 @@ extern "C" void destroy_object(FrontEndEmulator *object) { delete object; }
 FrontEndEmulator::FrontEndEmulator() {
   INFO("FrontEndEmulator::FrontEndEmulator");
 
-  auto cfg = m_config.getConfig();
+  auto cfg = m_config.getConfig()["settings"];
 
   m_meanSize = cfg["meanSize"];
   m_rmsSize = cfg["rmsSize"];

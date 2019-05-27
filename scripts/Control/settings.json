@@ -1,6 +1,0 @@
-{
-    "group": "faser",
-    "build_dir": "/home/faser/cantel/daq/build/bin",
-    "exe": "/home/faser/cantel/daq/build/bin/main_core",
-    "env": "LD_LIBRARY_PATH=/opt/ohpc/pub/compiler/gcc/8.3.0/lib64/:"
-}

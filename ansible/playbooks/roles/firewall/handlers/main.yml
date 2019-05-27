@@ -1,7 +1,0 @@
-#Marco Boretto <marco.boretto@cern.ch> 2019
----
-# Firewall Handlers
-- name: restart firewalld
-  service:
-    name: firewalld
-    state: restarted

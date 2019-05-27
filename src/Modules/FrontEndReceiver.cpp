@@ -24,7 +24,7 @@ FrontEndReceiver::FrontEndReceiver(std::string name, int num) {
   INFO(__METHOD_NAME__ << " Passed " << name << " " << num << " with constructor");
   INFO(__METHOD_NAME__ << " With config: " << m_config.dump());
 
-  auto cfg = m_config.getConfig();
+  auto cfg = m_config.getConfig()["settings"];
 
   if (m_dataIn.init(cfg["dataPort"])) {
     ERROR("Cannot bind data port");

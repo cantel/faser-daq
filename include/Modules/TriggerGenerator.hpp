@@ -6,7 +6,7 @@
 #include "Utilities/Udp.hpp"
 #include "Core/DAQProcess.hpp"
 
-class TriggerGenerator : public DAQProcess {
+class TriggerGenerator : public daqling::core::DAQProcess {
  public:
   TriggerGenerator();
   ~TriggerGenerator();

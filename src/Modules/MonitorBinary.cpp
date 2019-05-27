@@ -24,8 +24,8 @@ struct data_t {
 
 #include "Modules/Monitor.hpp"
 
-#define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
-#define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
+#define __METHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
+#define __CLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
 
 extern "C" Monitor *create_object() { return new Monitor; }
 
@@ -55,7 +55,7 @@ void Monitor::runner() {
  
   while (m_run) {
     INFO(__METHOD_NAME__ << "just checked. still running ..");
-    daq::utilities::Binary b1;
+    daqling::utilities::Binary b1;
     while(!m_connections.get(1, b1) && m_run) {
       std::this_thread::sleep_for(100ms);
     }

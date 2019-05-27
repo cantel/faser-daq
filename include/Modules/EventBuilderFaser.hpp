@@ -5,7 +5,7 @@
 
 #include "Core/DAQProcess.hpp"
 
-class EventBuilder : public DAQProcess {
+class EventBuilder : public daqling::core::DAQProcess {
  public:
   EventBuilder();
   ~EventBuilder();

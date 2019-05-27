@@ -3,7 +3,7 @@
 
 #include "Core/DAQProcess.hpp"
 
-class Monitor : public DAQProcess {
+class Monitor : public daqling::core::DAQProcess {
  public:
   Monitor();
   ~Monitor();

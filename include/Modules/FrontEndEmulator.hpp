@@ -4,7 +4,7 @@
 #include "Utilities/Udp.hpp"
 #include "Core/DAQProcess.hpp"
 
-class FrontEndEmulator : public DAQProcess {
+class FrontEndEmulator : public daqling::core::DAQProcess {
  public:
   FrontEndEmulator();
   ~FrontEndEmulator();

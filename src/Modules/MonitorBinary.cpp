@@ -14,11 +14,10 @@ using namespace std::chrono;
 using namespace boost::histogram;
 
 #include "Modules/Monitor.hpp"
-
 #include "Modules/EventFormat.hpp"
 
-#define __METHOD_NAME__ daq::utilities::methodName(__PRETTY_FUNCTION__)
-#define __CLASS_NAME__ daq::utilities::className(__PRETTY_FUNCTION__)
+#define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
+#define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
 
 extern "C" Monitor *create_object() { return new Monitor; }
 
@@ -31,50 +30,57 @@ Monitor::Monitor() {
    //initialize_hists( m_histMap );
    initialize_hists( );
 
-   m_timeDelayTolerance = 100. ; // make configurable ?
+   // make this configurable ...?
+   m_json_file_name = "test_histogram_output.json";
+   m_directory = "/home/faser/cantel/";
+   m_timeDelayTolerance = 100. ;
 
  }
 
 Monitor::~Monitor() { 
-  INFO(__METHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO(__MODULEMETHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
 void Monitor::start() {
   DAQProcess::start();
-  INFO(__METHOD_NAME__ << " getState: " << this->getState());
+  INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
 
 }
 
 void Monitor::stop() {
   DAQProcess::stop();
-  INFO(__METHOD_NAME__ << " getState: " << this->getState());
+
+  json jsonArray = json::array();
+  write_hist_to_json( h_payloadsize_rcv1, jsonArray);
+  write_hist_to_json( h_payloadsize_rcv2, jsonArray);
+  write_hist_to_json( h_timedelay_rcv1_rcv2, jsonArray);
+  write_hist_to_json( h_fragmenterrors, jsonArray);
+
+  std::string full_output_path = m_directory + m_json_file_name;
+  std::ofstream ofs( full_output_path );
+ 
+  ofs << jsonArray.dump(4);
+  ofs.close();
+
+  INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
 }
 
 void Monitor::runner() {
-  INFO(__METHOD_NAME__ << " Running...");
-
-  //histogram< std::tuple<axis::regular<>> , unlimited_storage<> > testhist;
-
-  //INFO("printing test hist ...");
-  //std::ostringstream os;
-  //os << testhist;
-  //std::cout << os.str() << std::endl;
-
+  INFO(__MODULEMETHOD_NAME__ << " Running...");
 
   bool isData(true);
 
- //std::map<uint32_t, EventFragment> fragments;
   const uint32_t EVENTHEADERSIZE = 24;
   const uint32_t FRAGMENTHEADERSIZE = 24;
   const uint64_t COMBINEDHEADERSIZE = EVENTHEADERSIZE + FRAGMENTHEADERSIZE;
  
   while (m_run) {
-    daq::utilities::Binary eventBuilderBinary;
+    daqling::utilities::Binary eventBuilderBinary;
 
     isData = m_connections.get(1, eventBuilderBinary);
     if ( !isData ) std::this_thread::sleep_for(10ms);
     else {
-        INFO(__METHOD_NAME__ <<  " isData "<< isData );
+        INFO(__MODULEMETHOD_NAME__ <<  " isData "<< isData );
         auto dataTotalSize = eventBuilderBinary.size();
 
         const EventHeader * eventHeader((EventHeader *)malloc(EVENTHEADERSIZE));
@@ -87,12 +93,12 @@ void Monitor::runner() {
         std::map<uint32_t, uint64_t> timeStamps;
         uint32_t accumulatedPayloadSize = 0;
 
-        INFO(__METHOD_NAME__ <<  " about to loop throught "<< numChannels << " channels." ); 
+        INFO(__MODULEMETHOD_NAME__ <<  " about to loop throught "<< numChannels << " channels." ); 
         for ( int chno=0; chno<numChannels; ++chno){
 
             int ch = chno + 1;
 
-            INFO(__METHOD_NAME__ <<  " channel number "<< ch ); 
+            INFO(__MODULEMETHOD_NAME__ <<  " channel number "<< ch ); 
 
             EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(FRAGMENTHEADERSIZE));
             memcpy( fragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+EVENTHEADERSIZE+FRAGMENTHEADERSIZE*(ch-1)+accumulatedPayloadSize, FRAGMENTHEADERSIZE);
@@ -105,7 +111,7 @@ void Monitor::runner() {
             timeStamps[ch] = fragmentHeader->timestamp;
             
             accumulatedPayloadSize += payloadSize;
-            INFO(__METHOD_NAME__ <<  " accumulated payload size "<<accumulatedPayloadSize ); 
+            INFO(__MODULEMETHOD_NAME__ <<  " accumulated payload size "<<accumulatedPayloadSize ); 
        
             EventFragment * payload((EventFragment *)malloc(payloadSize));
             memcpy( payload, static_cast<const char*>(eventBuilderBinary.data())+COMBINEDHEADERSIZE, payloadSize);
@@ -122,14 +128,14 @@ void Monitor::runner() {
 	
 	// sanity check
 	if ( totalCalculatedSize != totalPayloadSize ) 
-	ERROR(__METHOD_NAME__ <<  "total byte size unpacked, "
+	ERROR(__MODULEMETHOD_NAME__ <<  "total byte size unpacked, "
 		              << totalCalculatedSize 
                               <<", not equal to the total payload size, "
                               <<totalPayloadSize
                               <<" given in header. FIX ME." );
 
         if ( (timeStamps.find(1) == timeStamps.end()) || (timeStamps.find(2) == timeStamps.end()) ) {
-        	ERROR(__METHOD_NAME__ <<  "not all channels found. ");
+        	ERROR(__MODULEMETHOD_NAME__ <<  "not all channels found. ");
         }
         else{
         	int64_t timedelay = timeStamps[1] - timeStamps[2];
@@ -140,34 +146,33 @@ void Monitor::runner() {
 		INFO(" filling payload 1 size "<< payloadSizes[1] );
 		h_payloadsize_rcv1.hist( payloadSizes[1]);
         }
-	else ERROR(__METHOD_NAME__ <<  "did not find channel 1.");
+	else ERROR(__MODULEMETHOD_NAME__ <<  "did not find channel 1.");
         if ( !(payloadSizes.find(2) == payloadSizes.end()) ) {
 		INFO(" filling payload 1 size "<< payloadSizes[2] );
 		h_payloadsize_rcv2.hist( payloadSizes[2]);
         }
-	else ERROR(__METHOD_NAME__ <<  "did not find channel 2.");
+	else ERROR(__MODULEMETHOD_NAME__ <<  "did not find channel 2.");
 
     }
   }
   
-  INFO(__METHOD_NAME__ << " flushing h_payloadsize_rcv1");
+  INFO(__MODULEMETHOD_NAME__ << " flushing h_payloadsize_rcv1");
   flush_hist( h_payloadsize_rcv1 );
-  INFO(__METHOD_NAME__ << " flushing h_payloadsize_rcv2");
+  INFO(__MODULEMETHOD_NAME__ << " flushing h_payloadsize_rcv2");
   flush_hist( h_payloadsize_rcv2 );
-  INFO(__METHOD_NAME__ << " flushing h_timedelay_rcv1_rcv2");
+  INFO(__MODULEMETHOD_NAME__ << " flushing h_timedelay_rcv1_rcv2");
   flush_hist( h_timedelay_rcv1_rcv2 );
-  INFO(__METHOD_NAME__ << " flushing h_fragmenterrors");
+  INFO(__MODULEMETHOD_NAME__ << " flushing h_fragmenterrors");
   flush_hist( h_fragmenterrors );
 
    // write out
-  INFO(__METHOD_NAME__ << " writing out h_payloadsize_rcv2 ");
-  write_hist_to_file( h_payloadsize_rcv2, "/home/faser/cantel/");
-  write_hist_to_file( h_payloadsize_rcv1, "/home/faser/cantel/");
-  write_hist_to_file( h_timedelay_rcv1_rcv2, "/home/faser/cantel/"); 
-  write_hist_to_file( h_fragmenterrors, "/home/faser/cantel/"); 
+  write_hist_to_file( h_payloadsize_rcv2, m_directory);
+  write_hist_to_file( h_payloadsize_rcv1, m_directory);
+  write_hist_to_file( h_timedelay_rcv1_rcv2, m_directory); 
+  write_hist_to_file( h_fragmenterrors, m_directory); 
 
 
-  INFO(__METHOD_NAME__ << " Runner stopped");
+  INFO(__MODULEMETHOD_NAME__ << " Runner stopped");
 }
 
 //void Monitor::initialize_hists( HistMaps &histMap ) {
@@ -177,9 +182,9 @@ void Monitor::initialize_hists( ) {
   
   h_timedelay_rcv1_rcv2.hist = make_histogram(axis::regular<>(100, -500., 500., "time [mus]"));
     INFO("making h_payloadsize_rcv1"); 
-  h_payloadsize_rcv1.hist = make_histogram(axis::regular<>(100, -500., 500., "time [mus]"));
+  h_payloadsize_rcv1.hist = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
     INFO("making h_payloadsize_rcv2");
-  h_payloadsize_rcv2.hist = make_histogram(axis::regular<>(100, -500., 500., "time [mus]"));
+  h_payloadsize_rcv2.hist = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
     INFO("making h_fragmenterrors");
   auto axis_fragmenterrors = axis::category<std::string>({"Corrupted","Empty", "Missing", "BCIDMismatch"}, "error type");
   h_fragmenterrors.hist = make_histogram(axis_fragmenterrors);
@@ -206,7 +211,7 @@ void Monitor::initialize_hists( ) {
 template <typename T>
 void Monitor::flush_hist( T histStruct, bool coverage_all ) {
 
-  INFO(__METHOD_NAME__ << " flushing hist info for "<< histStruct.histname);
+  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<< histStruct.histname);
 
   std::ostringstream os;
   auto hist = histStruct.hist;
@@ -226,8 +231,8 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
 
 void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 
-  INFO(__METHOD_NAME__ << " flushing hist info for "<<histStruct.histname);
-  INFO(__METHOD_NAME__ << " hist axis is of type category; hist has no under/overflow bins. ");
+  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.histname);
+  INFO(__MODULEMETHOD_NAME__ << " hist axis is of type category; hist has no under/overflow bins. ");
 
   std::ostringstream os;
   auto hist = histStruct.hist;
@@ -249,7 +254,7 @@ void Monitor::write_hist_to_file( T histStruct, std::string dir, bool coverage_a
   auto hist = histStruct.hist; 
   std::string file_name = dir + "histoutput_"+histStruct.histname+".txt";
 
-  INFO(__METHOD_NAME__ << " writing hist info  to file ... "<< file_name);
+  INFO(__MODULEMETHOD_NAME__ << " writing hist info  to file ... "<< file_name);
 
   //std::ostringstream os;
   std::ofstream ofs( file_name );
@@ -274,7 +279,7 @@ void Monitor::write_hist_to_file( CategoryHist histStruct, std::string dir, bool
   auto hist = histStruct.hist; 
   std::string file_name = dir + "histoutput_"+histStruct.histname+".txt";
 
-  INFO(__METHOD_NAME__ << " writing hist info  to file ... "<< file_name);
+  INFO(__MODULEMETHOD_NAME__ << " writing hist info  to file ... "<< file_name);
 
   std::ofstream ofs( file_name );
 
@@ -290,4 +295,81 @@ void Monitor::write_hist_to_file( CategoryHist histStruct, std::string dir, bool
 
   return ;
 
+}
+
+template <typename T>
+void Monitor::write_hist_to_json( T histStruct, json &jsonArray, bool coverage_all ) {
+
+
+   auto hist = histStruct.hist;
+   
+   float binwidth =  hist.axis().bin(1).upper() - hist.axis().bin(2).lower();
+ 
+   json histogram = json::object();
+   histogram["name"] = histStruct.histname;
+   histogram["type"] = "regular";
+   histogram["title"] = histStruct.histtitle;
+   histogram["xlabel"] = histStruct.xlabel;
+   histogram["ylabel"] = histStruct.ylabel;
+   histogram["binwidth"] = binwidth;
+ 
+   std::vector<float> xcolumn;
+   std::vector<unsigned int> ycolumn;
+ 
+   auto thiscoverage = coverage::all;
+   if ( !coverage_all ) thiscoverage = coverage::inner;
+   auto this_axis = hist.axis();
+ 
+   for (auto x : indexed(hist, thiscoverage) ) {
+       xcolumn.push_back(this_axis.value(x.index())); 
+       ycolumn.push_back(*x); 
+    }
+    
+    if ( xcolumn.size() != ycolumn.size() ) {
+        ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+        xcolumn.clear();
+        ycolumn.clear();
+    }
+
+    histogram["x"] = xcolumn;
+    histogram["y"] = ycolumn;
+
+    jsonArray.push_back( histogram );
+
+    return ;
+}
+
+void Monitor::write_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all ) {
+
+   auto hist = histStruct.hist;
+  
+   json histogram = json::object();
+   histogram["name"] = histStruct.histname;
+   histogram["type"] = "category";
+   histogram["title"] = histStruct.histtitle;
+   histogram["xlabel"] = histStruct.xlabel;
+   histogram["ylabel"] = histStruct.ylabel;
+ 
+   std::vector<std::string> xcolumn;
+   std::vector<unsigned int> ycolumn;
+ 
+   auto this_axis = hist.axis();
+ 
+   for (auto x : indexed(hist, coverage::inner) ) {
+       xcolumn.push_back(this_axis.value(x.index())); 
+       ycolumn.push_back(*x); 
+    }
+    
+    if ( xcolumn.size() != ycolumn.size() ) {
+        ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+        xcolumn.clear();
+        ycolumn.clear();
+    }
+ 
+    histogram["x"] = xcolumn;
+    histogram["y"] = ycolumn;
+
+    jsonArray.push_back( histogram );
+
+    return ;
 }

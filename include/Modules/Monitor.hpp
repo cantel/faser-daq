@@ -4,6 +4,7 @@
 #include <boost/histogram.hpp>
 #include <tuple>
 #include "Core/DAQProcess.hpp"
+#include <nlohmann/json.hpp>
 
 class Monitor : public daqling::core::DAQProcess {
  public:
@@ -17,18 +18,32 @@ class Monitor : public daqling::core::DAQProcess {
 
  private:
 
+  using json = nlohmann::json;
+
   using axis_t = boost::histogram::axis::regular<>;
   using hist_t = decltype(boost::histogram::make_histogram(std::declval<axis_t>())); // most hists are of this type
   using categoryaxis_t = boost::histogram::axis::category<std::string>;
   using categoryhist_t = decltype(boost::histogram::make_histogram(std::declval<categoryaxis_t>())); 
 
    struct Hist {
+     Hist() : ylabel("counts") {}
+     Hist(std::string histname, std::string xlabel) : histname(histname), histtitle(histname), xlabel(xlabel), ylabel("counts") {}
      std::string histname;
+     std::string histtitle;
+     std::string xlabel;
+     std::string ylabel;
+     unsigned int binwidth;
      hist_t hist;
    };
    struct CategoryHist {
+     CategoryHist() : ylabel("counts") {}
+     CategoryHist(std::string histname, std::string xlabel) : histname(histname), histtitle(histname), xlabel(xlabel), ylabel("counts") {}
      std::string histname;
-     categoryhist_t hist;
+     std::string histtitle;
+     std::string xlabel;
+     std::string ylabel;
+     unsigned int binwidth;
+    categoryhist_t hist;
    };
 
    // using HistMap storage instead.
@@ -50,12 +65,14 @@ class Monitor : public daqling::core::DAQProcess {
   // Hist is hist with regular axis ( axis with constant bin width along real line ).  #
   // choose CategoryHist for hists with bin value of string type.		       #
   // storage is boost::histogram's default.					       #
-  Hist h_timedelay_rcv1_rcv2 = { "h_timedelay_rcv1_rcv2" };
-  Hist h_payloadsize_rcv1 = { "h_payloadsize_rcv1" };
-  Hist h_payloadsize_rcv2 = { "h_payloadsize_rcv2" };
-  CategoryHist h_fragmenterrors = { "h_fragmenterrors" };
+  Hist h_timedelay_rcv1_rcv2 = { "h_timedelay_rcv1_rcv2", "time delay"};
+  Hist h_payloadsize_rcv1 = { "h_payloadsize_rcv1", "payload size [bytes]" };
+  Hist h_payloadsize_rcv2 = { "h_payloadsize_rcv2", "payload size [bytes]" };
+  CategoryHist h_fragmenterrors = { "h_fragmenterrors", "error type" };
 
   uint64_t m_timeDelayTolerance; 
+  std::string m_directory;
+  std::string m_json_file_name;
 
   void initialize_hists( );
   template <typename T>
@@ -64,6 +81,10 @@ class Monitor : public daqling::core::DAQProcess {
   template <typename T>
   void write_hist_to_file( T histStruct, std::string dir, bool coverage_all = true );
   void write_hist_to_file( CategoryHist histStruct, std::string dir, bool coverage_all = false );
+  template <typename T>
+  void write_hist_to_json( T histStruct, json &jsonArray,bool coverage_all = true );
+  void write_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all = false );
+
 };
 
 #endif /* MONITOR_H_ */

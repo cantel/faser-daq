@@ -31,6 +31,7 @@ Monitor::Monitor() {
    initialize_hists( );
 
    // make this configurable ...?
+   m_timeblock = 10; // in seconds. like a lumi-block.
    m_json_file_name = "test_histogram_output.json";
    m_directory = "/home/faser/cantel/";
    m_timeDelayTolerance = 100. ;
@@ -50,17 +51,7 @@ void Monitor::start() {
 void Monitor::stop() {
   DAQProcess::stop();
 
-  json jsonArray = json::array();
-  write_hist_to_json( h_payloadsize_rcv1, jsonArray);
-  write_hist_to_json( h_payloadsize_rcv2, jsonArray);
-  write_hist_to_json( h_timedelay_rcv1_rcv2, jsonArray);
-  write_hist_to_json( h_fragmenterrors, jsonArray);
-
-  std::string full_output_path = m_directory + m_json_file_name;
-  std::ofstream ofs( full_output_path );
- 
-  ofs << jsonArray.dump(4);
-  ofs.close();
+  write_hists_to_json( m_hist_lists );
 
   INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
 }
@@ -73,6 +64,10 @@ void Monitor::runner() {
   const uint32_t EVENTHEADERSIZE = 24;
   const uint32_t FRAGMENTHEADERSIZE = 24;
   const uint64_t COMBINEDHEADERSIZE = EVENTHEADERSIZE + FRAGMENTHEADERSIZE;
+  m_error_rate_cnt = 0;
+  seconds timestamp_in_seconds;
+  bool update = true;
+  auto starting_time_in_seconds = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
  
   while (m_run) {
     daqling::utilities::Binary eventBuilderBinary;
@@ -117,11 +112,14 @@ void Monitor::runner() {
             memcpy( payload, static_cast<const char*>(eventBuilderBinary.data())+COMBINEDHEADERSIZE, payloadSize);
 
 	    // fill per channel hists.
-	    if ( fragmentStatus & CorruptedFragment ) h_fragmenterrors.hist( "Corrupted");
-	    if ( fragmentStatus & EmptyFragment ) h_fragmenterrors.hist( "Empty");
-	    if ( fragmentStatus & MissingFragment ) h_fragmenterrors.hist( "Missing");
-	    if ( fragmentStatus & BCIDMismatch ) h_fragmenterrors.hist( "BCIDMismatch");
-
+	    if ( fragmentStatus == 0 ) h_fragmenterrors.object( "Ok");
+	    else {
+	    m_error_rate_cnt+=1;
+	    if ( fragmentStatus & CorruptedFragment ) h_fragmenterrors.object( "Corrupted");
+	    if ( fragmentStatus & EmptyFragment ) h_fragmenterrors.object( "Empty");
+	    if ( fragmentStatus & MissingFragment ) h_fragmenterrors.object( "Missing");
+	    if ( fragmentStatus & BCIDMismatch ) h_fragmenterrors.object( "BCIDMismatch");
+	    }
         }
 
         auto totalCalculatedSize = EVENTHEADERSIZE+FRAGMENTHEADERSIZE*2+accumulatedPayloadSize ;
@@ -139,19 +137,30 @@ void Monitor::runner() {
         }
         else{
         	int64_t timedelay = timeStamps[1] - timeStamps[2];
-        	h_timedelay_rcv1_rcv2.hist( timedelay );
+        	h_timedelay_rcv1_rcv2.object( timedelay );
 		INFO(" time delay "<< timedelay );
         }
         if ( !(payloadSizes.find(1) == payloadSizes.end()) ) {
 		INFO(" filling payload 1 size "<< payloadSizes[1] );
-		h_payloadsize_rcv1.hist( payloadSizes[1]);
+		h_payloadsize_rcv1.object( payloadSizes[1]);
         }
 	else ERROR(__MODULEMETHOD_NAME__ <<  "did not find channel 1.");
         if ( !(payloadSizes.find(2) == payloadSizes.end()) ) {
 		INFO(" filling payload 1 size "<< payloadSizes[2] );
-		h_payloadsize_rcv2.hist( payloadSizes[2]);
+		h_payloadsize_rcv2.object( payloadSizes[2]);
         }
 	else ERROR(__MODULEMETHOD_NAME__ <<  "did not find channel 2.");
+
+        timestamp_in_seconds = duration_cast<seconds>(system_clock::now().time_since_epoch());
+	if ( (timestamp_in_seconds.count() - starting_time_in_seconds)%m_timeblock == 0){
+	    if ( update ) { 
+	    g_error_rate_per_timeblock.object.push_back( std::make_pair(timestamp_in_seconds.count(), m_error_rate_cnt));
+	    m_error_rate_cnt = 0;
+	    update = false;
+	    }
+ 	}
+	else update = true;
+
 
     }
   }
@@ -166,10 +175,10 @@ void Monitor::runner() {
   flush_hist( h_fragmenterrors );
 
    // write out
-  write_hist_to_file( h_payloadsize_rcv2, m_directory);
-  write_hist_to_file( h_payloadsize_rcv1, m_directory);
-  write_hist_to_file( h_timedelay_rcv1_rcv2, m_directory); 
-  write_hist_to_file( h_fragmenterrors, m_directory); 
+  //write_hist_to_file( h_payloadsize_rcv2, m_directory);
+  //write_hist_to_file( h_payloadsize_rcv1, m_directory);
+  //write_hist_to_file( h_timedelay_rcv1_rcv2, m_directory); 
+  //write_hist_to_file( h_fragmenterrors, m_directory); 
 
 
   INFO(__MODULEMETHOD_NAME__ << " Runner stopped");
@@ -180,14 +189,22 @@ void Monitor::initialize_hists( ) {
 
   // histograms
   
-  h_timedelay_rcv1_rcv2.hist = make_histogram(axis::regular<>(100, -500., 500., "time [mus]"));
+    INFO("making h_timedelay_rcv1_rcv2"); 
+  h_timedelay_rcv1_rcv2.object = make_histogram(axis::regular<>(100, -500., 500., "time [mus]"));
+  m_hist_lists.histlist.push_back(&h_timedelay_rcv1_rcv2);
     INFO("making h_payloadsize_rcv1"); 
-  h_payloadsize_rcv1.hist = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
+  h_payloadsize_rcv1.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
+  m_hist_lists.histlist.push_back(&h_payloadsize_rcv1);
     INFO("making h_payloadsize_rcv2");
-  h_payloadsize_rcv2.hist = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
+  h_payloadsize_rcv2.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
+  m_hist_lists.histlist.push_back(&h_payloadsize_rcv2);
     INFO("making h_fragmenterrors");
-  auto axis_fragmenterrors = axis::category<std::string>({"Corrupted","Empty", "Missing", "BCIDMismatch"}, "error type");
-  h_fragmenterrors.hist = make_histogram(axis_fragmenterrors);
+  auto axis_fragmenterrors = axis::category<std::string>({"Ok", "Corrupted","Empty", "Missing", "BCIDMismatch"}, "error type");
+  h_fragmenterrors.object = make_histogram(axis_fragmenterrors);
+  m_hist_lists.categoryhistlist.push_back(&h_fragmenterrors);
+
+  // graphs
+  m_hist_lists.graphlist.push_back(&g_error_rate_per_timeblock);
   
   //
   // using HistMap storage instead.
@@ -211,10 +228,10 @@ void Monitor::initialize_hists( ) {
 template <typename T>
 void Monitor::flush_hist( T histStruct, bool coverage_all ) {
 
-  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<< histStruct.histname);
+  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<< histStruct.name);
 
   std::ostringstream os;
-  auto hist = histStruct.hist;
+  auto hist = histStruct.object;
   auto this_axis = hist.axis();
   auto thiscoverage = coverage::all;
   if ( !coverage_all ) thiscoverage = coverage::inner;
@@ -231,11 +248,11 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
 
 void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 
-  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.histname);
+  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
   INFO(__MODULEMETHOD_NAME__ << " hist axis is of type category; hist has no under/overflow bins. ");
 
   std::ostringstream os;
-  auto hist = histStruct.hist;
+  auto hist = histStruct.object;
   auto this_axis = hist.axis();
 
    for (auto x : indexed(hist, coverage::inner) ) { // no under/overflow bins for category axis. 
@@ -251,8 +268,8 @@ void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 template <typename T>
 void Monitor::write_hist_to_file( T histStruct, std::string dir, bool coverage_all ) {
 
-  auto hist = histStruct.hist; 
-  std::string file_name = dir + "histoutput_"+histStruct.histname+".txt";
+  auto hist = histStruct.object; 
+  std::string file_name = dir + "histoutput_"+histStruct.name+".txt";
 
   INFO(__MODULEMETHOD_NAME__ << " writing hist info  to file ... "<< file_name);
 
@@ -276,8 +293,8 @@ void Monitor::write_hist_to_file( T histStruct, std::string dir, bool coverage_a
 
 void Monitor::write_hist_to_file( CategoryHist histStruct, std::string dir, bool coverage_all ) {
 
-  auto hist = histStruct.hist; 
-  std::string file_name = dir + "histoutput_"+histStruct.histname+".txt";
+  auto hist = histStruct.object; 
+  std::string file_name = dir + "histoutput_"+histStruct.name+".txt";
 
   INFO(__MODULEMETHOD_NAME__ << " writing hist info  to file ... "<< file_name);
 
@@ -301,14 +318,14 @@ template <typename T>
 void Monitor::write_hist_to_json( T histStruct, json &jsonArray, bool coverage_all ) {
 
 
-   auto hist = histStruct.hist;
+   auto hist = histStruct.object;
    
    float binwidth =  hist.axis().bin(1).upper() - hist.axis().bin(2).lower();
  
    json histogram = json::object();
-   histogram["name"] = histStruct.histname;
+   histogram["name"] = histStruct.name;
    histogram["type"] = "regular";
-   histogram["title"] = histStruct.histtitle;
+   histogram["title"] = histStruct.title;
    histogram["xlabel"] = histStruct.xlabel;
    histogram["ylabel"] = histStruct.ylabel;
    histogram["binwidth"] = binwidth;
@@ -341,12 +358,12 @@ void Monitor::write_hist_to_json( T histStruct, json &jsonArray, bool coverage_a
 
 void Monitor::write_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all ) {
 
-   auto hist = histStruct.hist;
+   auto hist = histStruct.object;
   
    json histogram = json::object();
-   histogram["name"] = histStruct.histname;
+   histogram["name"] = histStruct.name;
    histogram["type"] = "category";
-   histogram["title"] = histStruct.histtitle;
+   histogram["title"] = histStruct.title;
    histogram["xlabel"] = histStruct.xlabel;
    histogram["ylabel"] = histStruct.ylabel;
  
@@ -373,3 +390,59 @@ void Monitor::write_hist_to_json( CategoryHist histStruct, json &jsonArray, bool
 
     return ;
 }
+
+void Monitor::write_hist_to_json( Graph graphStruct, json &jsonArray, bool coverage_all ) {
+
+   json graph = json::object();
+   graph["name"] = graphStruct.name;
+   graph["type"] = "graph";
+   graph["title"] = graphStruct.title;
+   graph["xlabel"] = graphStruct.xlabel;
+   graph["ylabel"] = graphStruct.ylabel;
+ 
+   std::vector<unsigned int> xcolumn;
+   std::vector<unsigned int> ycolumn;
+ 
+   for (auto xy : graphStruct.object  ) {
+       xcolumn.push_back(xy.first); 
+       ycolumn.push_back(xy.second); 
+    }
+    
+    if ( xcolumn.size() != ycolumn.size() ) {
+        ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+        xcolumn.clear();
+        ycolumn.clear();
+    }
+ 
+    graph["x"] = xcolumn;
+    graph["y"] = ycolumn;
+
+    jsonArray.push_back( graph );
+
+    return ;
+}
+
+void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
+
+  json jsonArray = json::array();
+
+  for (auto histPtr : hist_lists.histlist ) {
+	write_hist_to_json( *histPtr, jsonArray, coverage_all );
+  }
+  for (auto histPtr : hist_lists.categoryhistlist ) {
+	write_hist_to_json( *histPtr, jsonArray, coverage_all );
+  }
+  for (auto histPtr : hist_lists.graphlist ) {
+	write_hist_to_json( *histPtr, jsonArray, coverage_all );
+  }
+
+  std::string full_output_path = m_directory + m_json_file_name;
+  std::ofstream ofs( full_output_path );
+ 
+  ofs << jsonArray.dump(4);
+  ofs.close();
+
+  return ;
+
+}
+

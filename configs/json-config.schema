@@ -35,23 +35,7 @@
             "type": "integer"
           },
           "type": {
-            "type": "string",
-            "enum": [
-              "triggergenerator",
-              "frontendemulator",
-              "frontendreceiver",
-              "boardreader",
-              "boardreaderbinary",
-              "eventbuilder",
-              "eventbuilderbinary",
-              "eventbuilderfaser",
-              "datalogger",
-              "cassandradatalogger",
-              "monitor",
-              "monitorbinary",
-              "filedatalogger"
-            ],
-            "default": "boardreader"
+            "type": "string"
           },
           "settings": {
             "type": "object",

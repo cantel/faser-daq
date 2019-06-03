@@ -63,8 +63,8 @@ void Monitor::runner() {
 
   bool isData(true);
 
-  const uint32_t EVENTHEADERSIZE = 24;
-  const uint32_t FRAGMENTHEADERSIZE = 24;
+  const uint32_t EVENTHEADERSIZE = sizeof(EventHeader);
+  const uint32_t FRAGMENTHEADERSIZE = sizeof(EventFragmentHeader);
   const uint64_t COMBINEDHEADERSIZE = EVENTHEADERSIZE + FRAGMENTHEADERSIZE;
   m_error_rate_cnt = 0;
   seconds timestamp_in_seconds;
@@ -124,7 +124,7 @@ void Monitor::runner() {
 	    }
         }
 
-        auto totalCalculatedSize = EVENTHEADERSIZE+FRAGMENTHEADERSIZE*2+accumulatedPayloadSize ;
+        auto totalCalculatedSize = EVENTHEADERSIZE+FRAGMENTHEADERSIZE*numChannels+accumulatedPayloadSize ;
 	
 	// sanity check
 	if ( totalCalculatedSize != totalPayloadSize ) 

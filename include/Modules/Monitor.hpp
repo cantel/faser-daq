@@ -95,7 +95,7 @@ class Monitor : public daqling::core::DAQProcess {
   uint64_t m_error_rate_cnt;
   uint16_t m_timeblock; //in seconds
   uint64_t m_timeDelayTolerance; 
-  std::string m_directory;
+  std::string m_outputdir;
   std::string m_json_file_name;
 
   void initialize_hists( );

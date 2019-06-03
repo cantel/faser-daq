@@ -30,9 +30,9 @@
         "meanSize": 10,
         "rmsSize": 5,
         "fragmentID": 1000001,
-        "probMissingTrigger": 0.00,
-        "probMissingFragment": 0.00,
-        "probCorruptedFragment": 0.00,
+        "probMissingTrigger": 0.1,
+        "probMissingFragment": 0.2,
+        "probCorruptedFragment": 0.3,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -129,7 +129,11 @@
       "host": "localhost",
       "port": 5558,
       "type": "monitorbinary",
-      "settings": {},
+      "settings": {
+	"lengthTimeBlock": 10,
+        "outputDir": "/home/faser/cantel/",
+	"timeDelayTolerance": 100
+      },
       "connections": {
         "receivers": [
           {

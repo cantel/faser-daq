@@ -31,10 +31,12 @@ Monitor::Monitor() {
    initialize_hists( );
 
    // make this configurable ...?
-   m_timeblock = 10; // in seconds. like a lumi-block.
    m_json_file_name = "test_histogram_output.json";
-   m_directory = "/home/faser/cantel/";
-   m_timeDelayTolerance = 100. ;
+
+   auto cfg = m_config.getConfig()["settings"];
+   m_timeblock = cfg["lengthTimeBlock"]; // seconds
+   m_outputdir = cfg["outputDir"];
+   m_timeDelayTolerance = cfg["timeDelayTolerance"]; // microseconds
 
  }
 
@@ -175,10 +177,10 @@ void Monitor::runner() {
   flush_hist( h_fragmenterrors );
 
    // write out
-  //write_hist_to_file( h_payloadsize_rcv2, m_directory);
-  //write_hist_to_file( h_payloadsize_rcv1, m_directory);
-  //write_hist_to_file( h_timedelay_rcv1_rcv2, m_directory); 
-  //write_hist_to_file( h_fragmenterrors, m_directory); 
+  //write_hist_to_file( h_payloadsize_rcv2, m_outputdir);
+  //write_hist_to_file( h_payloadsize_rcv1, m_outputdir);
+  //write_hist_to_file( h_timedelay_rcv1_rcv2, m_outputdir); 
+  //write_hist_to_file( h_fragmenterrors, m_outputdir); 
 
 
   INFO(__MODULEMETHOD_NAME__ << " Runner stopped");
@@ -436,7 +438,9 @@ void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
 	write_hist_to_json( *histPtr, jsonArray, coverage_all );
   }
 
-  std::string full_output_path = m_directory + m_json_file_name;
+  std::string full_output_path = m_outputdir + m_json_file_name;
+
+  INFO(__MODULEMETHOD_NAME__ << " writing monitoring information to " << full_output_path );
   std::ofstream ofs( full_output_path );
  
   ofs << jsonArray.dump(4);

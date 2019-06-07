@@ -14,7 +14,6 @@ using namespace std::chrono;
 using namespace boost::histogram;
 
 #include "Modules/Monitor.hpp"
-#include "Modules/EventFormat.hpp"
 
 #define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
 #define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
@@ -63,9 +62,6 @@ void Monitor::runner() {
 
   bool isData(true);
 
-  const uint32_t EVENTHEADERSIZE = sizeof(EventHeader);
-  const uint32_t FRAGMENTHEADERSIZE = sizeof(EventFragmentHeader);
-  const uint64_t COMBINEDHEADERSIZE = EVENTHEADERSIZE + FRAGMENTHEADERSIZE;
   m_error_rate_cnt = 0;
   seconds timestamp_in_seconds;
   bool update = true;
@@ -80,7 +76,7 @@ void Monitor::runner() {
         INFO(__MODULEMETHOD_NAME__ <<  " isData "<< isData );
         auto dataTotalSize = eventBuilderBinary.size();
 
-        const EventHeader * eventHeader((EventHeader *)malloc(EVENTHEADERSIZE));
+        const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
         eventHeader = static_cast<const EventHeader *>(eventBuilderBinary.data());
         uint16_t numChannels = eventHeader->num_fragments;
         uint32_t totalPayloadSize = eventBuilderBinary.size();
@@ -90,15 +86,15 @@ void Monitor::runner() {
         std::map<uint32_t, uint64_t> timeStamps;
         uint32_t accumulatedPayloadSize = 0;
 
-        INFO(__MODULEMETHOD_NAME__ <<  " about to loop throught "<< numChannels << " channels." ); 
+        INFO(__MODULEMETHOD_NAME__ <<  " about to loop through "<< numChannels << " channels." ); 
         for ( int chno=0; chno<numChannels; ++chno){
 
             int ch = chno + 1;
 
             INFO(__MODULEMETHOD_NAME__ <<  " channel number "<< ch ); 
 
-            EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(FRAGMENTHEADERSIZE));
-            memcpy( fragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+EVENTHEADERSIZE+FRAGMENTHEADERSIZE*(ch-1)+accumulatedPayloadSize, FRAGMENTHEADERSIZE);
+            EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
+            memcpy( fragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(ch-1)+accumulatedPayloadSize, m_fragmentHeaderSize);
 
             fragmentHeaders[ch] = fragmentHeader;	
 
@@ -111,7 +107,7 @@ void Monitor::runner() {
             INFO(__MODULEMETHOD_NAME__ <<  " accumulated payload size "<<accumulatedPayloadSize ); 
        
             EventFragment * payload((EventFragment *)malloc(payloadSize));
-            memcpy( payload, static_cast<const char*>(eventBuilderBinary.data())+COMBINEDHEADERSIZE, payloadSize);
+            memcpy( payload, static_cast<const char*>(eventBuilderBinary.data())+m_combinedHeaderSize, payloadSize);
 
 	    // fill per channel hists.
 	    if ( fragmentStatus == 0 ) h_fragmenterrors.object( "Ok");
@@ -124,7 +120,7 @@ void Monitor::runner() {
 	    }
         }
 
-        auto totalCalculatedSize = EVENTHEADERSIZE+FRAGMENTHEADERSIZE*numChannels+accumulatedPayloadSize ;
+        auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*numChannels+accumulatedPayloadSize ;
 	
 	// sanity check
 	if ( totalCalculatedSize != totalPayloadSize ) 
@@ -174,7 +170,9 @@ void Monitor::runner() {
   INFO(__MODULEMETHOD_NAME__ << " flushing h_timedelay_rcv1_rcv2");
   flush_hist( h_timedelay_rcv1_rcv2 );
   INFO(__MODULEMETHOD_NAME__ << " flushing h_fragmenterrors");
-  flush_hist( h_fragmenterrors );
+  flush_hist( h_fragmenterrors, false );
+  INFO(__MODULEMETHOD_NAME__ << " flushing g_error_rate_per_timeblock");
+  flush_hist( g_error_rate_per_timeblock, false );
 
    // write out
   //write_hist_to_file( h_payloadsize_rcv2, m_outputdir);
@@ -193,20 +191,20 @@ void Monitor::initialize_hists( ) {
   
     INFO("making h_timedelay_rcv1_rcv2"); 
   h_timedelay_rcv1_rcv2.object = make_histogram(axis::regular<>(100, -500., 500., "time [mus]"));
-  m_hist_lists.histlist.push_back(&h_timedelay_rcv1_rcv2);
+  m_hist_lists.addHist(&h_timedelay_rcv1_rcv2);
     INFO("making h_payloadsize_rcv1"); 
   h_payloadsize_rcv1.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
-  m_hist_lists.histlist.push_back(&h_payloadsize_rcv1);
+  m_hist_lists.addHist(&h_payloadsize_rcv1);
     INFO("making h_payloadsize_rcv2");
   h_payloadsize_rcv2.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
-  m_hist_lists.histlist.push_back(&h_payloadsize_rcv2);
+  m_hist_lists.addHist(&h_payloadsize_rcv2);
     INFO("making h_fragmenterrors");
   auto axis_fragmenterrors = axis::category<std::string>({"Ok", "Corrupted","Empty", "Missing", "BCIDMismatch"}, "error type");
   h_fragmenterrors.object = make_histogram(axis_fragmenterrors);
-  m_hist_lists.categoryhistlist.push_back(&h_fragmenterrors);
+  m_hist_lists.addHist(&h_fragmenterrors);
 
   // graphs
-  m_hist_lists.graphlist.push_back(&g_error_rate_per_timeblock);
+  m_hist_lists.addHist(&g_error_rate_per_timeblock);
   
   //
   // using HistMap storage instead.
@@ -233,7 +231,7 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
   INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<< histStruct.name);
 
   std::ostringstream os;
-  auto hist = histStruct.object;
+  auto hist = histStruct.getObject();
   auto this_axis = hist.axis();
   auto thiscoverage = coverage::all;
   if ( !coverage_all ) thiscoverage = coverage::inner;
@@ -254,7 +252,7 @@ void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
   INFO(__MODULEMETHOD_NAME__ << " hist axis is of type category; hist has no under/overflow bins. ");
 
   std::ostringstream os;
-  auto hist = histStruct.object;
+  auto hist = histStruct.getObject();
   auto this_axis = hist.axis();
 
    for (auto x : indexed(hist, coverage::inner) ) { // no under/overflow bins for category axis. 
@@ -267,10 +265,27 @@ void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 
 }
 
+void Monitor::flush_hist( Graph histStruct, bool coverage_all ) {
+
+  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
+
+  std::ostringstream os;
+  auto hist = histStruct.getObject();
+
+   for (auto xy : histStruct.getObject()  ) {
+      os << boost::format("x:  %2f y: %2f \n") % xy.first % xy.second;
+   }
+
+  std::cout << os.str() << std::flush;
+
+  return ;
+
+}
+
 template <typename T>
 void Monitor::write_hist_to_file( T histStruct, std::string dir, bool coverage_all ) {
 
-  auto hist = histStruct.object; 
+  auto hist = histStruct.getObject(); 
   std::string file_name = dir + "histoutput_"+histStruct.name+".txt";
 
   INFO(__MODULEMETHOD_NAME__ << " writing hist info  to file ... "<< file_name);
@@ -293,43 +308,20 @@ void Monitor::write_hist_to_file( T histStruct, std::string dir, bool coverage_a
 
 }
 
-void Monitor::write_hist_to_file( CategoryHist histStruct, std::string dir, bool coverage_all ) {
-
-  auto hist = histStruct.object; 
-  std::string file_name = dir + "histoutput_"+histStruct.name+".txt";
-
-  INFO(__MODULEMETHOD_NAME__ << " writing hist info  to file ... "<< file_name);
-
-  std::ofstream ofs( file_name );
-
-  ofs << "bin \t bin center \t x \n";
-
-  auto this_axis = hist.axis();
-  auto thiscoverage = coverage::inner; // no under/overflow bins for category axis.
-  for (auto x : indexed(hist, thiscoverage) ) {
-      ofs << boost::format("%2i  \t %2f \t %i\n") % x.index() % this_axis.value(x.index()) % *x;
-   }
-
-  ofs.close();
-
-  return ;
-
-}
-
 template <typename T>
-void Monitor::write_hist_to_json( T histStruct, json &jsonArray, bool coverage_all ) {
+void Monitor::add_hist_to_json( T * histStruct, json &jsonArray, bool coverage_all ) {
 
 
-   auto hist = histStruct.object;
+   auto hist = histStruct->getObject();
    
    float binwidth =  hist.axis().bin(1).upper() - hist.axis().bin(2).lower();
  
    json histogram = json::object();
-   histogram["name"] = histStruct.name;
+   histogram["name"] = histStruct->name;
    histogram["type"] = "regular";
-   histogram["title"] = histStruct.title;
-   histogram["xlabel"] = histStruct.xlabel;
-   histogram["ylabel"] = histStruct.ylabel;
+   histogram["title"] = histStruct->title;
+   histogram["xlabel"] = histStruct->xlabel;
+   histogram["ylabel"] = histStruct->ylabel;
    histogram["binwidth"] = binwidth;
  
    std::vector<float> xcolumn;
@@ -358,16 +350,16 @@ void Monitor::write_hist_to_json( T histStruct, json &jsonArray, bool coverage_a
     return ;
 }
 
-void Monitor::write_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all ) {
+void Monitor::add_hist_to_json( CategoryHist * histStruct, json &jsonArray, bool coverage_all ) {
 
-   auto hist = histStruct.object;
+   auto hist = histStruct->getObject();
   
    json histogram = json::object();
-   histogram["name"] = histStruct.name;
+   histogram["name"] = histStruct->name;
    histogram["type"] = "category";
-   histogram["title"] = histStruct.title;
-   histogram["xlabel"] = histStruct.xlabel;
-   histogram["ylabel"] = histStruct.ylabel;
+   histogram["title"] = histStruct->title;
+   histogram["xlabel"] = histStruct->xlabel;
+   histogram["ylabel"] = histStruct->ylabel;
  
    std::vector<std::string> xcolumn;
    std::vector<unsigned int> ycolumn;
@@ -393,19 +385,19 @@ void Monitor::write_hist_to_json( CategoryHist histStruct, json &jsonArray, bool
     return ;
 }
 
-void Monitor::write_hist_to_json( Graph graphStruct, json &jsonArray, bool coverage_all ) {
+void Monitor::add_hist_to_json( Graph * graphStruct, json &jsonArray, bool coverage_all ) {
 
    json graph = json::object();
-   graph["name"] = graphStruct.name;
+   graph["name"] = graphStruct->name;
    graph["type"] = "graph";
-   graph["title"] = graphStruct.title;
-   graph["xlabel"] = graphStruct.xlabel;
-   graph["ylabel"] = graphStruct.ylabel;
+   graph["title"] = graphStruct->title;
+   graph["xlabel"] = graphStruct->xlabel;
+   graph["ylabel"] = graphStruct->ylabel;
  
    std::vector<unsigned int> xcolumn;
    std::vector<unsigned int> ycolumn;
  
-   for (auto xy : graphStruct.object  ) {
+   for (auto xy : graphStruct->getObject()  ) {
        xcolumn.push_back(xy.first); 
        ycolumn.push_back(xy.second); 
     }
@@ -429,13 +421,13 @@ void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
   json jsonArray = json::array();
 
   for (auto histPtr : hist_lists.histlist ) {
-	write_hist_to_json( *histPtr, jsonArray, coverage_all );
+	add_hist_to_json( histPtr, jsonArray, coverage_all );
   }
   for (auto histPtr : hist_lists.categoryhistlist ) {
-	write_hist_to_json( *histPtr, jsonArray, coverage_all );
+	add_hist_to_json( histPtr, jsonArray, coverage_all );
   }
   for (auto histPtr : hist_lists.graphlist ) {
-	write_hist_to_json( *histPtr, jsonArray, coverage_all );
+	add_hist_to_json( histPtr, jsonArray, coverage_all );
   }
 
   std::string full_output_path = m_outputdir + m_json_file_name;

@@ -31,7 +31,7 @@
         "rmsSize": 5,
         "fragmentID": 1000001,
         "probMissingTrigger": 0.1,
-        "probMissingFragment": 0.2,
+        "probMissingFragment": 0,
         "probCorruptedFragment": 0.3,
         "triggerPort": 17001,
         "daqHost": "localhost",
@@ -66,7 +66,7 @@
       "connections": {
         "senders": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 1,
             "host": "*",
             "port": 8101
@@ -102,7 +102,7 @@
       "connections": {
         "receivers": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 1,
             "host": "localhost",
             "port": 8101
@@ -125,10 +125,31 @@
       }
     },
     {
-      "name": "monitor01",
+      "name": "trackermonitor01",
       "host": "localhost",
       "port": 5558,
-      "type": "monitorbinary",
+      "type": "trackermonitor",
+      "settings": {
+	"lengthTimeBlock": 10,
+        "outputDir": "/home/faser/cantel/",
+	"timeDelayTolerance": 100
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "host": "localhost",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "tlbmonitor01",
+      "host": "localhost",
+      "port": 5559,
+      "type": "tlbmonitor",
       "settings": {
 	"lengthTimeBlock": 10,
         "outputDir": "/home/faser/cantel/",

@@ -20,21 +20,25 @@ file(GLOB_RECURSE FRONTENDRECEIVER_SOURCES "FrontEndReceiver.cpp")
 add_library(frontendreceiver SHARED ${FRONTENDRECEIVER_SOURCES})
 target_link_libraries(frontendreceiver PUBLIC core utilities zmq)
 
-file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
-add_library(monitor SHARED ${MONITOR_SOURCES})
-target_link_libraries(monitor PUBLIC core utilities zmq)
+file(GLOB_RECURSE MONITORSTR_SOURCES "MonitorStr.cpp")
+add_library(monitorstr SHARED ${MONITORSTR_SOURCES})
+target_link_libraries(monitorstr PUBLIC core utilities zmq)
 
 #file(GLOB_RECURSE MONITORBINARY_SOURCES "MonitorBinary.cpp")
 #add_library(monitorbinary SHARED ${MONITORBINARY_SOURCES})
 #target_link_libraries(monitorbinary PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
+add_library(monitor SHARED ${MONITOR_SOURCES})
+target_link_libraries(monitor PUBLIC core utilities zmq)
+
 file(GLOB_RECURSE TRACKERMONITOR_SOURCES "TrackerMonitor.cpp")
 add_library(trackermonitor SHARED ${TRACKERMONITOR_SOURCES})
-target_link_libraries(trackermonitor PUBLIC core utilities zmq)
+target_link_libraries(trackermonitor PUBLIC monitor core utilities zmq)
 
 file(GLOB_RECURSE TLBMONITOR_SOURCES "TLBMonitor.cpp")
 add_library(tlbmonitor SHARED ${TLBMONITOR_SOURCES})
-target_link_libraries(tlbmonitor PUBLIC core utilities zmq)
+target_link_libraries(tlbmonitor PUBLIC monitor core utilities zmq)
 
 file(GLOB_RECURSE EVENTBUILDERFASER_SOURCES "EventBuilderFaser.cpp")
 add_library(eventbuilderfaser SHARED ${EVENTBUILDERFASER_SOURCES})

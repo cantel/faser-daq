@@ -28,3 +28,7 @@ file(GLOB_RECURSE NEWMODULE_SOURCES "NewModule.cpp")
 add_library(newmodule SHARED ${NEWMODULE_SOURCES})
 target_link_libraries(newmodule PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE DISRUPTORFILEDATALOGGER_SOURCES "DisruptorFileDataLogger.cpp")
+add_library(disruptorfiledatalogger SHARED ${DISRUPTORFILEDATALOGGER_SOURCES})
+target_link_libraries(disruptorfiledatalogger PUBLIC core utilities zmq)
+

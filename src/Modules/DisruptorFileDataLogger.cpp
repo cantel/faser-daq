@@ -1,5 +1,5 @@
 #include <fstream>
-#include "DisruptorFileDataLogger.hpp"
+#include "Modules/DisruptorFileDataLogger.hpp"
 
 
 
@@ -28,21 +28,20 @@ void DisruptorFileDataLogger::stop()
 
 void DisruptorFileDataLogger::runner()
 {
-
-    std::thread lWriterToBuffer(&DisruptorFileDataLogger::WriteToBuffer);
-    std::thread lWriterToFile(&DisruptorFileDataLogger::WriteToFile);
-    std::ofstream lOutPutFile("result.txt");
+    FILE* lOutPutFile = fopen("result.txt", "wb");
+    std::thread lWriterToFile = std::thread(&DisruptorFileDataLogger::WriteToFile, this, lOutPutFile);
+    daqling::utilities::Binary pl(0);
+    std::thread lWriterToBuffer = std::thread(&DisruptorFileDataLogger::WriteToBuffer, this, pl);
     while (m_run) {
-        daqling::utilities::Binary pl(0);
         while (!m_connections.get(1, std::ref(pl))) {
-            std::this_thread::sleep_for(10ms);
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
     }
     lWriterToBuffer.join();
     lWriterToFile.join();
 }
 
-void DisruptorFileDataLogger::WriteToFile(std::ofstream outputFile)
+void DisruptorFileDataLogger::WriteToFile(FILE* outputFile)
 {
     if(mEventBuffer.GetNumOfFreeToReadSlots() >= mReadSlots) //The Chunk available to be written to a file is large enough
     {

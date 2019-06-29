@@ -2,6 +2,7 @@
 #define FILEDATALOGGER_RINGBUFFER_HPP
 
 #include <iostream>
+#include <stdio.h>
 
 template <class T, size_t size>
 class RingBuffer
@@ -12,10 +13,11 @@ public:
 
     ~RingBuffer()
     {
+/**
         for (int i = 0; i < mSize; ++i)
         {
             delete mRingBuffer[i];
-        }
+        }*/
         delete[] mRingBuffer;
     }
 
@@ -33,8 +35,11 @@ public:
         return true;
     }
 
-    bool Read(std::ofstream& out, size_t slotsToRead)
+    bool Read(FILE* out, size_t slotsToRead)
     {
+	if(!out)
+	    return false;
+
         volatile unsigned int lReadIndex = mReadIndex;
         if(lReadIndex == mWriteIndex)
             return false;
@@ -61,7 +66,7 @@ public:
 
     unsigned int GetNumOfFreeToReadSlots()
     {
-        return abs((mWriteIndex+1) - (mReadIndex+1)); //one of the indexes might be zero, so we add one to both.
+        return abs(int((mWriteIndex+1) - (mReadIndex+1))); //one of the indexes might be zero, so we add one to both.
     }
 
 

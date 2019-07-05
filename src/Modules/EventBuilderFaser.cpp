@@ -39,8 +39,8 @@ void EventBuilder::stop() {
 
 void EventBuilder::runner() {
   INFO(__METHOD_NAME__ << " Running...");
-  int numChannels=2;  //should get this from connection manager...
-  unsigned maxPending=10; //should be configuration parameter
+  int numChannels=m_config.getConfig()["connections"]["receivers"].size();
+  unsigned maxPending=100; //should be configuration parameter
 
   int channelNum=1;
   bool noData=true;
@@ -55,7 +55,7 @@ void EventBuilder::runner() {
     if (channelNum>numChannels) channelNum=1;
     
     if (!m_connections.get(channel, *blob)) {
-      if (noData && channelNum==1) std::this_thread::sleep_for(10ms);
+      if (noData && channelNum==1) std::this_thread::sleep_for(100us);
       noData=true;
       continue;
     }
@@ -66,7 +66,7 @@ void EventBuilder::runner() {
     }
     const EventFragment* fragment=(const EventFragment*)blob->data();
     int event_id=fragment->header.event_id;
-    INFO("Got fragment : "<<event_id<<" from channel "<<channel);
+    INFO("Got fragment : "<<event_id<<" from channel "<<channel << " with size " << blob->size());
     if (pendingFragments.find(event_id)==pendingFragments.end()) {
       pendingFragments[event_id]=std::vector<daqling::utilities::Binary *>(numChannels,0);
       pendingFragmentsCounts[event_id]=0;
@@ -98,23 +98,23 @@ void EventBuilder::runner() {
       header.num_fragments = pendingFragmentsCounts[eventToSend];
       header.status = 0;
       for(int ch=0;ch<numChannels;ch++) {
-	if (pendingFragments[eventToSend][ch]) {
-	  outFragments += *pendingFragments[eventToSend][ch];
-	  const EventFragment* fragment = static_cast<const EventFragment*>(pendingFragments[eventToSend][ch]->data());
-	  header.status |= fragment->header.status;
-	  if (!header.timestamp) {
-	    header.timestamp = fragment->header.timestamp;
-	    header.bc_id = fragment->header.bc_id;
-	  } else {
-	    if (header.bc_id != fragment->header.bc_id) {
-	      WARNING("Mismatch in BCID for event "<<eventToSend<<" : "<<header.bc_id<<" != "<<fragment->header.bc_id);
-	      header.status |= BCIDMismatch;
-	    }
-	  }
-	  delete pendingFragments[eventToSend][ch];
-	} else {
-	  header.status |= MissingFragment;
-	}
+	      if (pendingFragments[eventToSend][ch]) {
+	        outFragments += *pendingFragments[eventToSend][ch];
+	        const EventFragment* fragment = static_cast<const EventFragment*>(pendingFragments[eventToSend][ch]->data());
+	        header.status |= fragment->header.status;
+	        if (!header.timestamp) {
+	          header.timestamp = fragment->header.timestamp;
+	          header.bc_id = fragment->header.bc_id;
+	        } else {
+	          if (header.bc_id != fragment->header.bc_id) {
+	            WARNING("Mismatch in BCID for event "<<eventToSend<<" : "<<header.bc_id<<" != "<<fragment->header.bc_id);
+	            header.status |= BCIDMismatch;
+	          }
+	        }
+	        delete pendingFragments[eventToSend][ch];
+	      } else {
+	        header.status |= MissingFragment;
+	      }
       }
       pendingFragments.erase(pendingFragments.find(eventToSend));
       pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));

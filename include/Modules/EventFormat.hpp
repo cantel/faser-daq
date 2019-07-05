@@ -16,7 +16,7 @@ struct RawFragment {  // will eventually be detector specific fragment...
   uint32_t data[MAXFRAGSIZE];
   int headerwords() { return 3; };
   int sizeBytes() {
-    return sizeof(uint32_t)*(headerwords()+dataLength);
+    return sizeof(uint32_t)*headerwords()+dataLength;
   }; 
 }  __attribute__((__packed__));
 

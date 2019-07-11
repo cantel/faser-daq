@@ -3,12 +3,13 @@
 
 #include <iostream>
 #include <stdio.h>
+#include "Utilities/Logging.hpp"
 
 template <class T, size_t size>
 class RingBuffer
 {
 public:
-    RingBuffer() : mReadIndex(0), mWriteIndex(0)
+    RingBuffer() : mReadIndex(-1), mWriteIndex(0)
     {}
 
     ~RingBuffer()
@@ -24,13 +25,14 @@ public:
     bool Write(const T& data)
     {
         volatile unsigned int lWriteIndex = mWriteIndex;
-        if(lWriteIndex == mReadIndex)
+        if(lWriteIndex == mReadIndex && mWriteFlag == true)
             return false;
 
         mRingBuffer[lWriteIndex] = data;
         lWriteIndex = IncrementIndex(lWriteIndex, 1);
 
         mWriteIndex = lWriteIndex;
+	mWriteFlag = true;
 
         return true;
     }
@@ -40,7 +42,7 @@ public:
 	if(!out)
 	    return false;
 
-        volatile unsigned int lReadIndex = mReadIndex;
+        volatile unsigned int lReadIndex = mReadIndex+1;
         if(lReadIndex == mWriteIndex)
             return false;
         if(GetNumOfFreeToReadSlots() < slotsToRead)
@@ -48,6 +50,7 @@ public:
         //We have enough slots to read
         if(mSize - lReadIndex < slotsToRead) //Our read needs to circle
         {
+            INFO("I'M ABOUT TO WRITE");
             size_t lBytesToRead = (mSize - lReadIndex) * sizeof(T);
             size_t lRemainderToRead = ( slotsToRead - (mSize - lReadIndex) )* sizeof(T);
             fwrite(mRingBuffer + lReadIndex, sizeof(T), lBytesToRead, out);
@@ -55,10 +58,14 @@ public:
         }
         else
         {
+            INFO("I'M ABOUT TO WRITE 2");
+            INFO(sizeof(T));
+            INFO(lReadIndex);
+            INFO(slotsToRead);
             fwrite(mRingBuffer + lReadIndex, sizeof(T), slotsToRead, out);
         }
 
-        lReadIndex = IncrementIndex(lReadIndex, slotsToRead);
+        lReadIndex = IncrementIndex(lReadIndex, slotsToRead-1);
 
         mReadIndex = lReadIndex;
         return true;
@@ -74,6 +81,7 @@ private:
     unsigned int mReadIndex;
     unsigned int mWriteIndex;
     const unsigned int mSize = size;
+    bool mWriteFlag = false;
     T mRingBuffer[size];
 
     unsigned int IncrementIndex(unsigned int currIndex, unsigned int amountToIncrease)

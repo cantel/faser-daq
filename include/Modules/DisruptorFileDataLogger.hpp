@@ -5,7 +5,7 @@
 #include "Utilities/Binary.hpp"
 #include "Utilities/RingBuffer.hpp"
 #include <thread>
-#define BUFFER_SIZE 256
+#define BUFFER_SIZE 1024
 
 class DisruptorFileDataLogger : public daqling::core::DAQProcess
 {
@@ -18,7 +18,7 @@ public:
 
 
 private:
-    const int mReadSlots = 200;
+    const int mReadSlots = 256;
     RingBuffer<daqling::utilities::Binary, BUFFER_SIZE> mEventBuffer;
     void WriteToFile(FILE* outputFile);
     void WriteToBuffer(daqling::utilities::Binary pl);

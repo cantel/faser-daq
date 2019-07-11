@@ -1,6 +1,6 @@
 #include <fstream>
 #include "Modules/DisruptorFileDataLogger.hpp"
-
+#include "Utilities/Logging.hpp"
 
 
 extern "C" DisruptorFileDataLogger *create_object() { return new DisruptorFileDataLogger; }
@@ -18,33 +18,47 @@ DisruptorFileDataLogger::~DisruptorFileDataLogger() {  }
 
 void DisruptorFileDataLogger::start()
 {
+    INFO("DisruptorFileDataLogger::start");
     daqling::core::DAQProcess::start();
 }
 
 void DisruptorFileDataLogger::stop()
 {
     daqling::core::DAQProcess::stop();
+    INFO("DisruptorFileDataLogger::stop");
 }
 
 void DisruptorFileDataLogger::runner()
 {
-    FILE* lOutPutFile = fopen("result.txt", "wb");
-    std::thread lWriterToFile = std::thread(&DisruptorFileDataLogger::WriteToFile, this, lOutPutFile);
+    INFO("DisruptorFileDataLogger::Running...");
+    FILE* lOutPutFile = fopen("result", "wb");
+    
     daqling::utilities::Binary pl(0);
-    std::thread lWriterToBuffer = std::thread(&DisruptorFileDataLogger::WriteToBuffer, this, pl);
-    while (m_run) {
-        while (!m_connections.get(1, std::ref(pl))) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    
+
+    while (m_run)
+    {
+        INFO("DisruptorFileDataLogger::m_run");
+        while (!m_connections.get(1, std::ref(pl)) && m_run)
+        {
+	    std::this_thread::sleep_for(std::chrono::milliseconds(10));
         }
+
+	INFO("DisruptorFileDataLogger::m_connections");
+	WriteToBuffer(pl);
+        WriteToFile(lOutPutFile);
     }
-    lWriterToBuffer.join();
-    lWriterToFile.join();
+    fclose(lOutPutFile);
+    INFO(" Runner stopped");
 }
 
 void DisruptorFileDataLogger::WriteToFile(FILE* outputFile)
 {
+    INFO("DisruptorFileDataLogger::Writing to file");
+    INFO(mEventBuffer.GetNumOfFreeToReadSlots());
     if(mEventBuffer.GetNumOfFreeToReadSlots() >= mReadSlots) //The Chunk available to be written to a file is large enough
     {
+	INFO("DisruptorFileDataLogger::Writing to file2");
         mEventBuffer.Read(outputFile, mReadSlots);
     }
 }

@@ -14,6 +14,8 @@ class EventBuilder : public daqling::core::DAQProcess {
   void stop();
 
   void runner();
+private:
+  unsigned int run_number;
 };
 
 #endif /* EVENTBUILDER_H_ */

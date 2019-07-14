@@ -29,6 +29,7 @@ EventBuilder::~EventBuilder() { INFO(__METHOD_NAME__); }
 void EventBuilder::start() {
   DAQProcess::start();
   INFO(__METHOD_NAME__ << " getState: " << getState());
+  run_number = 100; //BP: should get this from run control
 }
 
 void EventBuilder::stop() {
@@ -44,12 +45,12 @@ void EventBuilder::runner() {
 
   int channelNum=1;
   bool noData=true;
-  std::map<uint32_t,std::vector<daqling::utilities::Binary *> > pendingFragments;
-  std::map<uint32_t,int> pendingFragmentsCounts;
-  std::vector<uint32_t> pendingEventIDs;
+  std::map<uint64_t,std::vector<daqling::utilities::Binary *> > pendingFragments;
+  std::map<uint64_t,int> pendingFragmentsCounts;
+  std::vector<uint64_t> pendingEventIDs;
   pendingEventIDs.reserve(maxPending+1);
   daqling::utilities::Binary* blob = new daqling::utilities::Binary;
-  while (m_run) {
+  while (m_run) { //BP: At the moment there is no flushing of partial events on stop
     int channel=channelNum;
     channelNum++;
     if (channelNum>numChannels) channelNum=1;
@@ -65,7 +66,7 @@ void EventBuilder::runner() {
       continue;
     }
     const EventFragment* fragment=(const EventFragment*)blob->data();
-    int event_id=fragment->header.event_id;
+    uint64_t event_id=fragment->header.event_id;
     INFO("Got fragment : "<<event_id<<" from channel "<<channel);
     if (pendingFragments.find(event_id)==pendingFragments.end()) {
       pendingFragments[event_id]=std::vector<daqling::utilities::Binary *>(numChannels,0);
@@ -81,7 +82,7 @@ void EventBuilder::runner() {
     pendingFragments[event_id][ch]=blob;
     blob = new daqling::utilities::Binary;
 
-    uint32_t eventToSend=0;
+    uint64_t eventToSend=0;
     if (pendingFragmentsCounts[event_id]==numChannels) {
       eventToSend=event_id;
     } else if (pendingEventIDs.size()>maxPending) {
@@ -92,23 +93,36 @@ void EventBuilder::runner() {
     if (eventToSend) {
       daqling::utilities::Binary outFragments;
       EventHeader header;
+      header.marker = EventMarker;
+      header.event_tag = PhysicsTag; //updated below
+      header.trigger_bits = 0; //set below
+      header.version_number = EventHeaderVersion;
+      header.header_size = sizeof(header);
+      header.payload_size = 0; //set below
+      header.fragment_count = pendingFragmentsCounts[eventToSend];
+      header.run_number = run_number;
       header.event_id = eventToSend;
       header.bc_id = 0xFFFF;
-      header.timestamp = 0;
-      header.num_fragments = pendingFragmentsCounts[eventToSend];
       header.status = 0;
+      header.timestamp = 0;
       for(int ch=0;ch<numChannels;ch++) {
 	if (pendingFragments[eventToSend][ch]) {
 	  outFragments += *pendingFragments[eventToSend][ch];
 	  const EventFragment* fragment = static_cast<const EventFragment*>(pendingFragments[eventToSend][ch]->data());
 	  header.status |= fragment->header.status;
-	  if (!header.timestamp) {
+	  header.trigger_bits |= fragment->header.trigger_bits;
+	  if (!header.timestamp) { //BP: should be taken from TLB fragment if available
 	    header.timestamp = fragment->header.timestamp;
 	    header.bc_id = fragment->header.bc_id;
+	    header.event_tag = fragment->header.fragment_tag;
 	  } else {
-	    if (header.bc_id != fragment->header.bc_id) {
+	    if (header.bc_id != fragment->header.bc_id) { //Need to handle near match for digitizer
 	      WARNING("Mismatch in BCID for event "<<eventToSend<<" : "<<header.bc_id<<" != "<<fragment->header.bc_id);
 	      header.status |= BCIDMismatch;
+	    }
+	    if (header.event_tag != fragment->header.fragment_tag) {
+	      WARNING("Mismatch in event tag for event "<<eventToSend<<" : "<<header.event_tag<<" != "<<fragment->header.fragment_tag);
+	      header.status |= TagMismatch;
 	    }
 	  }
 	  delete pendingFragments[eventToSend][ch];
@@ -120,7 +134,7 @@ void EventBuilder::runner() {
       pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));
       pendingEventIDs.erase(std::find(pendingEventIDs.begin(),pendingEventIDs.end(),eventToSend));
 
-      header.data_size=outFragments.size();
+      header.payload_size=outFragments.size();
       daqling::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
       data+=outFragments;
       INFO("Sending event "<<eventToSend<<" - "<<data.size()<<" bytes - "<<pendingEventIDs.size()<<" incomplete events pending");

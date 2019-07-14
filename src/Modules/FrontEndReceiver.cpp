@@ -67,10 +67,15 @@ void FrontEndReceiver::runner() {
                          << payload_size);
 
     std::unique_ptr<EventFragment> data((EventFragment *)malloc(total_size));
-    data->header.event_id = buffer.event_id;  //Could add sequence number for received fragment, but merging must be done by frontend event_id, so that is main number. Also error flag is missing
+    data->header.marker = FragmentMarker;
+    data->header.fragment_tag = PhysicsTag;
+    data->header.trigger_bits = 0;
+    data->header.version_number = EventFragmentVersion;
+    data->header.header_size = sizeof(data->header);
+    data->header.payload_size = payload_size;
+    data->header.event_id = buffer.event_id;  
     data->header.source_id = buffer.source_id;
     data->header.bc_id = buffer.bc_id;
-    data->header.payload_size = payload_size;
     data->header.status = 0;
     if (payload_size != buffer.sizeBytes()) {
       data->header.status |= CorruptedFragment;

@@ -73,13 +73,21 @@ void FrontEndReceiver::runner() {
     data->header.version_number = EventFragmentVersion;
     data->header.header_size = sizeof(data->header);
     data->header.payload_size = payload_size;
-    data->header.event_id = buffer.event_id;  
-    data->header.source_id = buffer.source_id;
-    data->header.bc_id = buffer.bc_id;
     data->header.status = 0;
-    if (payload_size != buffer.sizeBytes()) {
-      data->header.status |= CorruptedFragment;
-      WARNING("Got corrupted event, event id "<<data->header.event_id<<" - "<<payload_size<<" != "<<buffer.sizeBytes());
+    if (buffer.type!=monType) {
+      data->header.event_id = buffer.event_id;  
+      data->header.source_id = buffer.source_id;
+      data->header.bc_id = buffer.bc_id;
+      if (payload_size != buffer.sizeBytes()) {
+	data->header.status |= CorruptedFragment;
+	WARNING("Got corrupted event, event id "<<data->header.event_id<<" - "<<payload_size<<" != "<<buffer.sizeBytes());
+      }
+    } else {
+      MonitoringFragment* monData=(MonitoringFragment*)&buffer;
+      data->header.event_id = monData->counter;
+      data->header.source_id = monData->source_id;
+      data->header.bc_id = 0xFFFF;
+      data->header.fragment_tag = MonitoringTag;
     }
     data->header.timestamp = timestamp.count();
     memcpy(data->payload, &buffer, payload_size);

@@ -33,6 +33,7 @@
         "probMissingTrigger": 0.00,
         "probMissingFragment": 0.00,
         "probCorruptedFragment": 0.00,
+	"monitoringInterval": 1.5,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -50,6 +51,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	"monitoringInterval": 0,
         "triggerPort": 17002,
         "daqHost": "localhost",
         "daqPort": 18002
@@ -98,7 +100,9 @@
       "host": "localhost",
       "port": 5557,
       "type": "eventbuilderfaser",
-      "settings": {},
+      "settings": {
+        "maxPending": 10
+      },
       "connections": {
         "receivers": [
           {

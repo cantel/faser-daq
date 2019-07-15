@@ -1,5 +1,4 @@
 #include "Modules/FrontEndEmulator.hpp"
-#include "Modules/EventFormat.hpp"
 
 #include <random>
 
@@ -22,6 +21,10 @@ FrontEndEmulator::FrontEndEmulator() {
   m_probMissFrag = cfg["probMissingFragment"];
   m_probCorruptFrag = cfg["probCorruptedFragment"];
 		      
+  m_monitoringInterval = seconds(cfg["monitoringInterval"]);
+
+  m_monFrag.type=monType;
+  m_monFrag.source_id=m_fragID;
   
   if (m_trigIn.init(cfg["triggerPort"])) {
     ERROR("Cannot bind trigger port");
@@ -50,6 +53,10 @@ void FrontEndEmulator::stop() {
   INFO("FrontEndEmulator::stop");
 }
 
+static microseconds timeNow() {
+  return duration_cast<microseconds>(system_clock::now().time_since_epoch());
+}
+
 void FrontEndEmulator::runner() {
   INFO(" Running...");
   std::default_random_engine generator;
@@ -57,6 +64,10 @@ void FrontEndEmulator::runner() {
   std::uniform_real_distribution<> flat(0.0, 1.0);
   RawFragment data;
   for(int ii=0;ii<MAXFRAGSIZE;ii++) data.data[ii]=m_fragID;
+  m_monFrag.counter = 0;
+  m_monFrag.num_fragments_sent = 0;
+  m_monFrag.size_fragments_sent = 0;
+  m_timeMonitoring = timeNow();
   while (m_run) {
     TriggerMsg buffer;
     int num=m_trigIn.receive(&buffer,sizeof(buffer));
@@ -71,10 +82,11 @@ void FrontEndEmulator::runner() {
     }
     m_eventCounter++;
     INFO("Event "<<m_eventCounter<<": "<<buffer.event_id<<" BC:"<<buffer.bc_id);
-    data.source_id=m_fragID;
-    data.event_id=m_eventCounter;
-    data.bc_id=buffer.bc_id;
-    data.dataLength=std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE);
+    data.type       = dataType;
+    data.source_id  = m_fragID;
+    data.event_id   = m_eventCounter;
+    data.bc_id      = buffer.bc_id;
+    data.dataLength = std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE);
     INFO("Fragment size: "<<data.sizeBytes()<<" bytes");
     if (flat(generator)<m_probMissFrag) {
       INFO("Emulating missed fragment for global id:"<<buffer.event_id);
@@ -82,6 +94,7 @@ void FrontEndEmulator::runner() {
     }
     int numBytes=data.sizeBytes();
     if (flat(generator)<m_probCorruptFrag) {
+      data.type=uint32_t(flat(generator)*0xFFFFFFFF);
       data.event_id=uint32_t(flat(generator)*0xFFFFFFFF);
       data.source_id=uint32_t(flat(generator)*0xFFFFFFFF);
       data.bc_id=uint16_t(flat(generator)*0xFFFF);
@@ -89,6 +102,19 @@ void FrontEndEmulator::runner() {
       numBytes=std::min(int(flat(generator)*0xFFFF),MAXFRAGSIZE);
     }
     m_outHandle.send(&data,numBytes);
+    m_monFrag.num_fragments_sent+=1;
+    m_monFrag.size_fragments_sent+=numBytes;
+    if (m_monitoringInterval!=microseconds::zero() &&
+	((timeNow()-m_timeMonitoring)>m_monitoringInterval)) {
+      m_outHandle.send(&m_monFrag,sizeof(m_monFrag));
+      INFO("Send monitoring fragment "<<m_monFrag.counter<<": "<<
+	   m_monFrag.num_fragments_sent<<" fragments with "<<m_monFrag.size_fragments_sent<<" bytes");
+      m_monFrag.counter++;
+      m_monFrag.num_fragments_sent=0;
+      m_monFrag.size_fragments_sent=0;
+      m_timeMonitoring = timeNow();
+    }
+
   }
   INFO(" Runner stopped");
 }

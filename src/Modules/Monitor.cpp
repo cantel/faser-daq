@@ -70,27 +70,46 @@ bool Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const 
 	bool dataOk =false;
 
         eventHeader = static_cast<const EventHeader *>(eventBuilderBinary.data());	
-        uint16_t numChannels = eventHeader->num_fragments;
+
+	// check integrity - not the correct check yet. should be checked within data.
+	if ( eventHeader->marker != EventMarker ) {
+	    ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking fragment header. Data NOT ok.");
+	    dataOk = false;
+	    return dataOk;
+	}
+        if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
+
+        uint16_t fragmentCnt = eventHeader->fragment_count;
         uint32_t totalDataPacketSize = eventBuilderBinary.size();
 
 	uint32_t accumulatedPayloadSize = 0;
 	uint8_t cnt = 0;
 
-        for ( unsigned int chidx=0; chidx<numChannels; ++chidx){
+        for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
 	
 	    cnt++;	
             EventFragmentHeader * currentChannelFragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
-	    memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(chidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
+	    memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
+
+            if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
+
+	    // check integrity - not the correct check yet.
+	    if ( currentChannelFragmentHeader->marker != FragmentMarker ) {
+		dataOk = false;
+		ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking fragment header. Data NOT ok.");
+		return dataOk;
+	    }
 
 	    uint32_t source_id = currentChannelFragmentHeader->source_id;
-
-            accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
 
             if ( source_id == m_sourceID ) {
 		fragmentHeader = currentChannelFragmentHeader;
 		dataOk = true; // found channel
 		break;
 	    }
+
+            accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
+
 	}
 
 
@@ -107,7 +126,7 @@ bool Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const 
 	    }
 	}
 	else {
-	    	ERROR(__MODULEMETHOD_NAME__ <<  " fragment with correct source ID not found.");
+	    	ERROR(__MODULEMETHOD_NAME__ <<  " no correct fragment source ID found.");
 	}
 
 	return dataOk;
@@ -119,10 +138,16 @@ void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
     if ( fragmentStatus == 0 ) hist.object( "Ok");
     else {
         m_error_rate_cnt+=1;
-        if ( fragmentStatus & CorruptedFragment ) hist.object( "Corrupted");
-        if ( fragmentStatus & EmptyFragment ) hist.object( "Empty");
-        if ( fragmentStatus & MissingFragment ) hist.object( "Missing");
-        if ( fragmentStatus & BCIDMismatch ) hist.object( "BCIDMismatch");
+        if ( fragmentStatus  &  UnclassifiedError ) hist.object( "Unclassified");
+        if ( fragmentStatus  &  BCIDMismatch ) hist.object( "BCIDMismatch");
+        if ( fragmentStatus  &  TagMismatch ) hist.object( "TagMismatch");
+        if ( fragmentStatus  &  Timeout ) hist.object( "Timeout");
+        if ( fragmentStatus  &  Overflow ) hist.object( "Overflow");
+        if ( fragmentStatus  &  CorruptedFragment ) hist.object( "Corrupted");
+        if ( fragmentStatus  &  DummyFragment ) hist.object( "Dummy");
+        if ( fragmentStatus  &  MissingFragment ) hist.object( "Missing");
+        if ( fragmentStatus  &  EmptyFragment ) hist.object( "Empty");
+        if ( fragmentStatus  &  DuplicateFragment ) hist.object( "Duplicate");
     }
     
     return ;
@@ -134,10 +159,16 @@ void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus )
     if ( fragmentStatus == 0 ) m_hist_map.fillHist(hist_name, "Ok");
     else {
         m_error_rate_cnt+=1;
-        if ( fragmentStatus & CorruptedFragment ) m_hist_map.fillHist( hist_name, "Corrupted");
-        if ( fragmentStatus & EmptyFragment ) m_hist_map.fillHist( hist_name, "Empty");
-        if ( fragmentStatus & MissingFragment ) m_hist_map.fillHist(hist_name,  "Missing");
-        if ( fragmentStatus & BCIDMismatch ) m_hist_map.fillHist( hist_name, "BCIDMismatch");
+        if ( fragmentStatus  &  UnclassifiedError ) m_hist_map.fillHist( hist_name, "Unclassified");
+        if ( fragmentStatus  &  BCIDMismatch ) m_hist_map.fillHist( hist_name, "BCIDMismatch");
+        if ( fragmentStatus  &  TagMismatch ) m_hist_map.fillHist( hist_name, "TagMismatch");
+        if ( fragmentStatus  &  Timeout ) m_hist_map.fillHist( hist_name, "Timeout");
+        if ( fragmentStatus  &  Overflow ) m_hist_map.fillHist( hist_name, "Overflow");
+        if ( fragmentStatus  &  CorruptedFragment ) m_hist_map.fillHist( hist_name, "Corrupted");
+        if ( fragmentStatus  &  DummyFragment ) m_hist_map.fillHist( hist_name, "Dummy");
+        if ( fragmentStatus  &  MissingFragment ) m_hist_map.fillHist( hist_name, "Missing");
+        if ( fragmentStatus  &  EmptyFragment ) m_hist_map.fillHist( hist_name, "Empty");
+        if ( fragmentStatus  &  DuplicateFragment ) m_hist_map.fillHist( hist_name, "Duplicate");
     }
     
     return ;

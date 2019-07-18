@@ -31,8 +31,9 @@
         "rmsSize": 5,
         "fragmentID": 1000001,
         "probMissingTrigger": 0.1,
-        "probMissingFragment": 0,
-        "probCorruptedFragment": 0.3,
+        "probMissingFragment": 0.1,
+        "probCorruptedFragment": 0.1,
+	"monitoringInterval": 0,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -47,9 +48,10 @@
         "meanSize": 50,
         "rmsSize": 20,
         "fragmentID": 1000002,
-        "probMissingTrigger": 0,
-        "probMissingFragment": 0,
-        "probCorruptedFragment": 0,
+        "probMissingTrigger": 0.1,
+        "probMissingFragment": 0.1,
+        "probCorruptedFragment": 0.1,
+	"monitoringInterval": 1.5,
         "triggerPort": 17002,
         "daqHost": "localhost",
         "daqPort": 18002
@@ -98,7 +100,9 @@
       "host": "localhost",
       "port": 5557,
       "type": "eventbuilderfaser",
-      "settings": {},
+      "settings": {
+	   "maxPending": 10
+       },
       "connections": {
         "receivers": [
           {
@@ -130,6 +134,7 @@
       "port": 5558,
       "type": "trackermonitor",
       "settings": {
+        "fragmentID": 1000001,
 	"lengthTimeBlock": 10,
         "outputDir": "/home/faser/cantel/",
 	"timeDelayTolerance": 100
@@ -151,6 +156,7 @@
       "port": 5559,
       "type": "tlbmonitor",
       "settings": {
+        "fragmentID": 1000002,
 	"lengthTimeBlock": 10,
         "outputDir": "/home/faser/cantel/",
 	"timeDelayTolerance": 100

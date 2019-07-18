@@ -28,12 +28,11 @@ TrackerMonitor::TrackerMonitor() {
 
    initialize_hists();
 
-   m_sourceID = 1000001; // Tracker ID
-
    // make this configurable ...?
    m_json_file_name = "tracker_histogram_output.json";
 
    auto cfg = m_config.getConfig()["settings"];
+   m_sourceID = cfg["fragmentID"];
    m_timeblock = cfg["lengthTimeBlock"]; // seconds
    m_outputdir = cfg["outputDir"];
    m_timeDelayTolerance = cfg["timeDelayTolerance"]; // microseconds
@@ -65,11 +64,10 @@ void TrackerMonitor::runner() {
         EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
 	bool dataOk = unpack_data( eventBuilderBinary, eventHeader, fragmentHeader );
 
-	uint32_t eventStatus = eventHeader->status;
-	fill_error_status( "h_fragmenterrors", eventStatus );
 	if (!dataOk) { 
 		ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data "); 
 		m_hist_map.fillHist("h_fragmenterrors","DataUnpack");
+		m_error_rate_cnt++;
 		continue;
 	}
 
@@ -100,22 +98,19 @@ void TrackerMonitor::runner() {
 void TrackerMonitor::initialize_hists() {
 
   INFO( __MODULEMETHOD_NAME__ << " ... initializing ... " );
+
   // TRACKER histograms
 
   RegularHist h_payloadsize = {"h_payloadsize","payload size [bytes]"};
   h_payloadsize.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
   m_hist_map.addHist(h_payloadsize.name, h_payloadsize);
-  //m_hist_map.reghistmap[h_payloadsize.name] = h_payloadsize;
 
-  auto axis_fragmenterrors = axis::category<std::string>({"Ok", "Corrupted","Empty", "Missing", "BCIDMismatch", "DataUnpack"}, "error type");
   CategoryHist h_fragmenterrors = { "h_fragmenterrors", "error type" };
-  h_fragmenterrors.object = make_histogram(axis_fragmenterrors);
+  h_fragmenterrors.object = make_histogram(m_axis_fragmenterrors);
   m_hist_map.addHist(h_fragmenterrors.name, h_fragmenterrors);
-  //m_hist_map.cathistmap[h_fragmenterrors.name] = h_fragmenterrors;
 
   Graph g_error_rate_per_timeblock = {"g_error_rate_per_timeblock", "time [s]", "error rate" };
   m_hist_map.addHist(g_error_rate_per_timeblock.name, g_error_rate_per_timeblock);
-  //m_hist_map.graphmap[g_error_rate_per_timeblock.name] = g_error_rate_per_timeblock;
 
   return ;
 

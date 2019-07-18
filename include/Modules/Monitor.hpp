@@ -142,8 +142,8 @@ class Monitor : public daqling::core::DAQProcess {
   uint32_t m_sourceID;
   const size_t m_eventHeaderSize = sizeof(EventHeader);
   const size_t m_fragmentHeaderSize = sizeof(EventFragmentHeader) ;
-  const size_t m_combinedHeaderSize = m_eventHeaderSize+m_fragmentHeaderSize;
 
+  categoryaxis_t m_axis_fragmenterrors = categoryaxis_t({"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"}, "error type");
   //HistList m_hist_lists;
   HistMaps m_hist_map;
   unsigned int m_error_rate_cnt;

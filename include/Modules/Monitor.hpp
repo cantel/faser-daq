@@ -152,10 +152,26 @@ class Monitor : public daqling::core::DAQProcess {
   std::string m_outputdir;
   std::string m_json_file_name;
 
+  std::atomic<int> m_metric_payload;
+  std::atomic<int> m_metric_error_ok;
+  std::atomic<int> m_metric_error_unclassified;
+  std::atomic<int> m_metric_error_bcidmismatch;
+  std::atomic<int> m_metric_error_tagmismatch;
+  std::atomic<int> m_metric_error_timeout;
+  std::atomic<int> m_metric_error_overflow;
+  std::atomic<int> m_metric_error_corrupted;
+  std::atomic<int> m_metric_error_dummy;
+  std::atomic<int> m_metric_error_missing;
+  std::atomic<int> m_metric_error_empty;
+  std::atomic<int> m_metric_error_duplicate;
+  std::atomic<int> m_metric_error_unpack;
+
   void initialize_hists( );
+  virtual void register_metrics();
   bool unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader );
   void fill_error_status(CategoryHist &hist, uint32_t fragmentStatus);
   void fill_error_status(std::string hist_name, uint32_t fragmentStatus);
+  void fill_error_status(uint32_t fragmentStatus);
   template <typename T>
   void flush_hist( T histStruct, bool coverage_all = true );
   void flush_hist( CategoryHist histStruct, bool coverage_all = false );

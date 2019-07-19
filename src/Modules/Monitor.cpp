@@ -14,6 +14,7 @@ using namespace std::chrono;
 using namespace boost::histogram;
 
 #include "Modules/Monitor.hpp"
+#include "Core/Statistics.hpp"
 
 #define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
 #define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
@@ -33,6 +34,8 @@ Monitor::~Monitor() {
 void Monitor::start() {
   DAQProcess::start();
   INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
+
+  register_metrics();
 
 }
 
@@ -169,6 +172,41 @@ void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus )
         if ( fragmentStatus  &  MissingFragment ) m_hist_map.fillHist( hist_name, "Missing");
         if ( fragmentStatus  &  EmptyFragment ) m_hist_map.fillHist( hist_name, "Empty");
         if ( fragmentStatus  &  DuplicateFragment ) m_hist_map.fillHist( hist_name, "Duplicate");
+    }
+    
+    return ;
+
+}
+
+void Monitor::fill_error_status( uint32_t fragmentStatus ) {
+
+    //if ( fragmentStatus == 0 ) m_metric_errortype = "Ok";
+    if ( fragmentStatus == 0 ) m_metric_error_ok + 1;
+    else {
+	std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
+	/*std::string fragmentStatusStr;
+        if ( fragmentStatus  &  UnclassifiedError ) fragmentStatusStr = "Unclassified";
+        if ( fragmentStatus  &  BCIDMismatch ) fragmentStatusStr = "BCIDMismatch";
+        if ( fragmentStatus  &  TagMismatch ) fragmentStatusStr = "TagMismatch";
+        if ( fragmentStatus  &  Timeout ) fragmentStatusStr = "Timeout";
+        if ( fragmentStatus  &  Overflow ) fragmentStatusStr = "Overflow";
+        if ( fragmentStatus  &  CorruptedFragment ) fragmentStatusStr = "Corrupted";
+        if ( fragmentStatus  &  DummyFragment ) fragmentStatusStr = "Dummy";
+        if ( fragmentStatus  &  MissingFragment ) fragmentStatusStr = "Missing";
+        if ( fragmentStatus  &  EmptyFragment ) fragmentStatusStr = "Empty";
+        if ( fragmentStatus  &  DuplicateFragment ) fragmentStatusStr = "Duplicate";
+	m_metric_errortype = fragmentStatusStr;
+	std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;*/
+        if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified + 1;
+        if ( fragmentStatus  &  BCIDMismatch ) m_metric_error_bcidmismatch + 1;
+        if ( fragmentStatus  &  TagMismatch ) m_metric_error_tagmismatch + 1;
+        if ( fragmentStatus  &  Timeout ) m_metric_error_timeout + 1;
+        if ( fragmentStatus  &  Overflow ) m_metric_error_overflow + 1;
+        if ( fragmentStatus  &  CorruptedFragment ) m_metric_error_corrupted + 1;
+        if ( fragmentStatus  &  DummyFragment ) m_metric_error_dummy + 1;
+        if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing + 1;
+        if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty + 1;
+        if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate + 1;
     }
     
     return ;

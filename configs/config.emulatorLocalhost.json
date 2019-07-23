@@ -63,6 +63,7 @@
       "port": 5555,
       "type": "frontendreceiver",
       "settings": {
+	"stats_uri": "tcp://*:7055",
         "dataPort": 18001
       },
       "connections": {
@@ -101,7 +102,8 @@
       "port": 5557,
       "type": "eventbuilderfaser",
       "settings": {
-        "maxPending": 10
+	  "stats_uri": "tcp://*:7057",
+          "maxPending": 10
       },
       "connections": {
         "receivers": [

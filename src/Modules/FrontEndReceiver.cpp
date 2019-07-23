@@ -27,7 +27,7 @@ FrontEndReceiver::FrontEndReceiver(std::string name, int num) {
     ERROR("Cannot bind data port");
     exit(1);
   }
-  
+
 }
 
 FrontEndReceiver::~FrontEndReceiver() { }
@@ -35,6 +35,10 @@ FrontEndReceiver::~FrontEndReceiver() { }
 void FrontEndReceiver::start() {
   DAQProcess::start();
   INFO("getState: " << this->getState());
+  m_recvCount = 0;
+  if (m_stats_on) {
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_recvCount, "RecvCount", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+  }
 }
 
 void FrontEndReceiver::stop() {
@@ -51,6 +55,7 @@ void FrontEndReceiver::runner() {
   while (m_run) {
     RawFragment buffer;
     int payload_size = m_dataIn.receive(&buffer,sizeof(buffer));
+    m_recvCount+=1;
     if (payload_size < 0) continue;
     if (payload_size < (int) sizeof(uint32_t)*buffer.headerwords()) {
       WARNING("Received only"<<payload_size<<" bytes");

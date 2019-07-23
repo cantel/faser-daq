@@ -27,6 +27,14 @@ EventBuilder::~EventBuilder() { }
 
 void EventBuilder::start() {
   DAQProcess::start();
+  m_physicsEventCount = 0;
+  m_monitoringEventCount = 0;
+  if (m_stats_on) {
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
+  }
   INFO("getState: " << getState());
   run_number = 100; //BP: should get this from run control
 }
@@ -124,6 +132,7 @@ void EventBuilder::runner() {
       std::vector<daqling::utilities::Binary *> toSend;
       toSend.push_back(blob);
       sendEvent(numChannels+1,toSend,1);
+      m_monitoringEventCount+=1;
     }
  
     INFO("Got data fragment : "<<event_id<<" from channel "<<channel);
@@ -151,6 +160,7 @@ void EventBuilder::runner() {
     
     if (eventToSend) {
       sendEvent(numChannels+1,pendingFragments[eventToSend],numChannels);
+      m_physicsEventCount+=1;
       pendingFragments.erase(pendingFragments.find(eventToSend));
       pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));
       pendingEventIDs.erase(std::find(pendingEventIDs.begin(),pendingEventIDs.end(),eventToSend));

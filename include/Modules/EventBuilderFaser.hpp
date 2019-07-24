@@ -1,5 +1,3 @@
-// enrico.gamberini@cern.ch
-
 #ifndef EVENTBUILDER_H_
 #define EVENTBUILDER_H_
 #include <vector>

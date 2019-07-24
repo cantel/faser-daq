@@ -1,5 +1,3 @@
-// enrico.gamberini@cern.ch
-
 /// \cond
 #include <chrono>
 /// \endcond
@@ -100,7 +98,7 @@ bool EventBuilder::sendEvent(int outChannel,
 
 void EventBuilder::runner() {
   INFO("Running...");
-  int numChannels=2;  //should get this from connection manager...
+  int numChannels=m_config.getConfig()["connections"]["receivers"].size();
 
   int channelNum=1;
   bool noData=true;
@@ -135,7 +133,7 @@ void EventBuilder::runner() {
       m_monitoringEventCount+=1;
     }
  
-    INFO("Got data fragment : "<<event_id<<" from channel "<<channel);
+    INFO("Got data fragment : "<<event_id<<" from channel "<<channel << " with size " << blob->size());
     if (pendingFragments.find(event_id)==pendingFragments.end()) {
       pendingFragments[event_id]=std::vector<daqling::utilities::Binary *>(numChannels,0);
       pendingFragmentsCounts[event_id]=0;

@@ -10,9 +10,6 @@
 #include "Modules/EventBuilderFaser.hpp"
 #include "Modules/EventFormat.hpp"
 
-#define __METHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
-#define __CLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
-
 using namespace std::chrono_literals;
 
 extern "C" EventBuilder *create_object() { return new EventBuilder; }
@@ -20,23 +17,31 @@ extern "C" EventBuilder *create_object() { return new EventBuilder; }
 extern "C" void destroy_object(EventBuilder *object) { delete object; }
 
 EventBuilder::EventBuilder() {
-  INFO(__METHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
   auto cfg = m_config.getConfig()["settings"];
 
   m_maxPending = cfg["maxPending"];
 }
 
-EventBuilder::~EventBuilder() { INFO(__METHOD_NAME__); }
+EventBuilder::~EventBuilder() { }
 
 void EventBuilder::start() {
   DAQProcess::start();
-  INFO(__METHOD_NAME__ << " getState: " << getState());
+  m_physicsEventCount = 0;
+  m_monitoringEventCount = 0;
+  if (m_stats_on) {
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
+  }
+  INFO("getState: " << getState());
   run_number = 100; //BP: should get this from run control
 }
 
 void EventBuilder::stop() {
   DAQProcess::stop();
-  INFO(__METHOD_NAME__ << " getState: " << this->getState());
+  INFO("getState: " << this->getState());
 }
 
 
@@ -94,7 +99,7 @@ bool EventBuilder::sendEvent(int outChannel,
 }
 
 void EventBuilder::runner() {
-  INFO(__METHOD_NAME__ << " Running...");
+  INFO("Running...");
   int numChannels=2;  //should get this from connection manager...
 
   int channelNum=1;
@@ -127,6 +132,7 @@ void EventBuilder::runner() {
       std::vector<daqling::utilities::Binary *> toSend;
       toSend.push_back(blob);
       sendEvent(numChannels+1,toSend,1);
+      m_monitoringEventCount+=1;
     }
  
     INFO("Got data fragment : "<<event_id<<" from channel "<<channel);
@@ -154,11 +160,12 @@ void EventBuilder::runner() {
     
     if (eventToSend) {
       sendEvent(numChannels+1,pendingFragments[eventToSend],numChannels);
+      m_physicsEventCount+=1;
       pendingFragments.erase(pendingFragments.find(eventToSend));
       pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));
       pendingEventIDs.erase(std::find(pendingEventIDs.begin(),pendingEventIDs.end(),eventToSend));
     }
   }
   delete blob;
-  INFO(__METHOD_NAME__ << " Runner stopped");
+  INFO("Runner stopped");
 }

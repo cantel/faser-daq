@@ -10,5 +10,6 @@ set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
 
 add_subdirectory(daqling)
 include_directories(${daqling_include_dirs})
+link_directories(${daqling_link_dirs})
 
 add_subdirectory(src/Modules)

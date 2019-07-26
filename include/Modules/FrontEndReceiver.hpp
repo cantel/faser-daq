@@ -19,6 +19,7 @@ class FrontEndReceiver : public daqling::core::DAQProcess {
   void runner();
 private:
   UdpReceiver m_dataIn;
+  std::atomic<int> m_recvCount;
 };
 
 #endif /* FRONTENDRECEIVER_HPP_ */

@@ -8,9 +8,6 @@
 
 #include "Modules/EventFormat.hpp"
 
-#define __METHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
-#define __CLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
-
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
@@ -21,8 +18,8 @@ extern "C" FrontEndReceiver *create_object(std::string name, int num) {
 extern "C" void destroy_object(FrontEndReceiver *object) { delete object; }
 
 FrontEndReceiver::FrontEndReceiver(std::string name, int num) {
-  INFO(__METHOD_NAME__ << " Passed " << name << " " << num << " with constructor");
-  INFO(__METHOD_NAME__ << " With config: " << m_config.dump());
+  INFO("Passed " << name << " " << num << " with constructor");
+  INFO("With config: " << m_config.dump());
 
   auto cfg = m_config.getConfig()["settings"];
 
@@ -30,19 +27,23 @@ FrontEndReceiver::FrontEndReceiver(std::string name, int num) {
     ERROR("Cannot bind data port");
     exit(1);
   }
-  
+
 }
 
-FrontEndReceiver::~FrontEndReceiver() { INFO(__METHOD_NAME__); }
+FrontEndReceiver::~FrontEndReceiver() { }
 
 void FrontEndReceiver::start() {
   DAQProcess::start();
-  INFO(__METHOD_NAME__ << " getState: " << this->getState());
+  INFO("getState: " << this->getState());
+  m_recvCount = 0;
+  if (m_stats_on) {
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_recvCount, "RecvCount", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+  }
 }
 
 void FrontEndReceiver::stop() {
   DAQProcess::stop();
-  INFO(__METHOD_NAME__ << " getState: " << this->getState());
+  INFO("getState: " << this->getState());
 }
 
 void FrontEndReceiver::runner() {
@@ -50,10 +51,11 @@ void FrontEndReceiver::runner() {
   unsigned sequence_number = 0;
   microseconds timestamp;
 
-  INFO(__METHOD_NAME__ << " Running...");
+  INFO("Running...");
   while (m_run) {
     RawFragment buffer;
     int payload_size = m_dataIn.receive(&buffer,sizeof(buffer));
+    m_recvCount+=1;
     if (payload_size < 0) continue;
     if (payload_size < (int) sizeof(uint32_t)*buffer.headerwords()) {
       WARNING("Received only"<<payload_size<<" bytes");
@@ -62,7 +64,7 @@ void FrontEndReceiver::runner() {
     timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
     const int total_size = sizeof(EventFragmentHeader) + sizeof(char) * payload_size;
 
-    INFO(__METHOD_NAME__ << " sequence number " << sequence_number << "  >>  timestamp " << std::hex
+    INFO("sequence number " << sequence_number << "  >>  timestamp " << std::hex
                          << "0x" << timestamp.count() << std::dec << "  >>  payload size "
                          << payload_size);
 
@@ -103,5 +105,5 @@ void FrontEndReceiver::runner() {
 
     sequence_number++;
   }
-  INFO(__METHOD_NAME__ << " Runner stopped");
+  INFO(" Runner stopped");
 }

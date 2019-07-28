@@ -27,14 +27,19 @@ void EventBuilder::start() {
   DAQProcess::start();
   m_physicsEventCount = 0;
   m_monitoringEventCount = 0;
+  m_run_number = 100; //BP: should get this from run control
+  m_status = STATUS_OK;
+  m_queueFraction = 0;
   if (m_stats_on) {
     m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_run_number, "RunNumber", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_status, "Status", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<float>, float>(&m_queueFraction, "QueueFraction", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::FLOAT);
   }
   INFO("getState: " << getState());
-  run_number = 100; //BP: should get this from run control
 }
 
 void EventBuilder::stop() {
@@ -54,7 +59,7 @@ bool EventBuilder::sendEvent(int outChannel,
       header.version_number = EventHeaderVersion;
       header.header_size = sizeof(header);
       header.payload_size = 0; //set below
-      header.run_number = run_number;
+      header.run_number = m_run_number;
       header.fragment_count = 0;
       header.event_id = 0;
       header.bc_id = 0xFFFF;
@@ -108,6 +113,16 @@ void EventBuilder::runner() {
   pendingEventIDs.reserve(m_maxPending+1);
   daqling::utilities::Binary* blob = new daqling::utilities::Binary;
   while (m_run) { //BP: At the moment there is no flushing of partial events on stop
+    m_queueFraction=1.0*pendingEventIDs.size()/m_maxPending;
+    if (m_queueFraction>0.5) { //BP: not a good example of status flag filling as nothing else is considered
+      m_status=STATUS_WARN;
+      if (m_queueFraction>0.85) {
+	m_status=STATUS_ERROR;
+      }
+    } else {
+      m_status=STATUS_OK;
+    }
+    
     int channel=channelNum;
     channelNum++;
     if (channelNum>numChannels) channelNum=1;
@@ -125,12 +140,14 @@ void EventBuilder::runner() {
     const EventFragment* fragment=(const EventFragment*)blob->data();
     uint64_t event_id=fragment->header.event_id;
     if ((fragment->header.fragment_tag==MonitoringTag) || (fragment->header.fragment_tag==TLBMonitoringTag)) {
-    INFO("Got monitoring fragment : "<<event_id<<" from channel "<<channel);
+      INFO("Got monitoring fragment : "<<event_id<<" from channel "<<channel);
       //send monitoring fragments immediately as no other fragments are expected for thos
       std::vector<daqling::utilities::Binary *> toSend;
       toSend.push_back(blob);
+      blob = new daqling::utilities::Binary;
       sendEvent(numChannels+1,toSend,1);
       m_monitoringEventCount+=1;
+      continue;
     }
  
     INFO("Got data fragment : "<<event_id<<" from channel "<<channel << " with size " << blob->size());

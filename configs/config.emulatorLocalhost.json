@@ -69,7 +69,7 @@
       "connections": {
         "senders": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 1,
             "host": "*",
             "port": 8101
@@ -108,7 +108,7 @@
       "connections": {
         "receivers": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 1,
             "host": "localhost",
             "port": 8101

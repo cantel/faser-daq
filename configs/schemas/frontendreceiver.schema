@@ -12,14 +12,14 @@
         "type": "string",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname",
+	"format": "hostname"
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535,
+	"maximum": 65535
       },
       "type": {
         "type": "string",
@@ -32,7 +32,7 @@
         "properties": {
           "stats_uri": {
 	    "type": "string",
-	    "format": "uri",
+	    "format": "uri"
 	  },
 	  "dataPort": {
 	    "type": "integer",
@@ -40,8 +40,8 @@
 	    "minimum": 1024,
 	    "maximum": 65535,
 	    "required": true,
-	    "description": "Port for receiving data from frontend",
-	  },
+	    "description": "Port for receiving data from frontend"
+	  }
 	}
       },
       "connections": {

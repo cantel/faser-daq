@@ -12,14 +12,14 @@
         "type": "string",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname",
+	"format": "hostname"
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535,
+	"maximum": 65535
       },
       "type": {
         "type": "string",
@@ -32,7 +32,7 @@
         "properties": {
           "stats_uri": {
 	    "type": "string",
-	    "format": "uri",
+	    "format": "uri"
 	  },
 	"meanSize": {
 	    "type": "integer",
@@ -40,7 +40,7 @@
 	    "minimum": 10,
 	    "maximum": 60000,
 	    "required": true,
-	    "description": "Mean data size to send",
+	    "description": "Mean data size to send"
 	  },
 	  "rmsSize": {
 	    "type": "integer",
@@ -48,45 +48,45 @@
 	    "minimum": 0,
 	    "maximum": 10000,
 	    "required": true,
-	    "description": "RMS of data size to send",
+	    "description": "RMS of data size to send"
 	  },
 	  "fragmentID": {
 	    "type": "integer",
 	    "default": 0,
 	    "required": true,
-	    "description": "Fragment identifier",
+	    "description": "Fragment identifier"
 	  },
 	  "probMissingTrigger": {
 	    "type": "number",
-	    "default": 0.,
-	    "minimum": 0.,
-	    "maximum": 1.,
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1,
 	    "required": true,
-	    "description": "Probability to miss trigger signal",
+	    "description": "Probability to miss trigger signal"
 	  },
 	  "probMissingFragment": {
 	    "type": "number",
-	    "default": 0.,
-	    "minimum": 0.,
-	    "maximum": 1.,
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1,
 	    "required": true,
-	    "description": "Probability to not send fragment on trigger",
+	    "description": "Probability to not send fragment on trigger"
 	  },
 	  "probCorruptedFragment": {
 	    "type": "number",
-	    "default": 0.,
-	    "minimum": 0.,
-	    "maximum": 1.,
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1,
 	    "required": true,
-	    "description": "Probability to send corrupted fragment",
+	    "description": "Probability to send corrupted fragment"
 	  },
 	  "monitoringInterval": {
 	    "type": "number",
-	    "default": 0.,
-	    "minimum": 0.,
-	    "maximum": 1000.,
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1000,
 	    "required": true,
-	    "description": "Time in seconds between monitoring fragments",
+	    "description": "Time in seconds between monitoring fragments"
 	  },
           "triggerPort": {
             "type": "integer",
@@ -100,7 +100,7 @@
             "type": "string",
 	    "required": true,
 	    "default": "localhost",
-	    "format": "hostname",
+	    "format": "hostname"
           },          
           "daqPort": {
             "type": "integer",
@@ -109,7 +109,7 @@
              "minimum": 1024,
              "maximum": 65535,
   	     "description": "Port for sending data fragments"
-           },
+           }
 	}
       },
       "connections": {

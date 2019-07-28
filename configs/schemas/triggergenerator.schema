@@ -12,14 +12,14 @@
         "type": "string",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname",
+	"format": "hostname"
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535,
+	"maximum": 65535
       },
       "type": {
         "type": "string",
@@ -32,7 +32,7 @@
         "properties": {
           "stats_uri": {
 	    "type": "string",
-	    "format": "uri",
+	    "format": "uri"
 	  },
 	  "rateInHz": {
 	    "type": "integer",
@@ -40,7 +40,7 @@
 	    "minimum": 1,
 	    "maximum": 5000,
 	    "required": true,
-	    "description": "Rate of triggers to generate",
+	    "description": "Rate of triggers to generate"
 	  },
 	  "frontendApps": {
 	    "type": "array",
@@ -55,16 +55,16 @@
                   "type":"string",
 		  "required": true,
 		  "default": "localhost",
-		  "format": "hostname",
+		  "format": "hostname"
                 },
                 "port": {
 		  "type":"integer",
 		  "required": true,
 		  "default": 0,
         	  "minimum": 1024,
-		  "maximum": 65535,
+		  "maximum": 65535
 		}
-              },
+              }
             }
           }
 	}

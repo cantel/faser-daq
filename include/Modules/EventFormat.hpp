@@ -88,7 +88,7 @@ struct EventFragmentHeader {
 
 struct EventFragment {
   EventFragmentHeader header;
-  char payload[];
+  uint32_t payload[];
 } __attribute__((__packed__));
 
 struct EventHeader {

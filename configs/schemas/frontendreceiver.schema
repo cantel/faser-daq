@@ -1,0 +1,95 @@
+{
+    "type": "object",
+    "title": "Component",
+    "properties": {
+      "name": {
+        "type": "string",
+	"required": true,
+	"default": "FrontEndReceiverXXX",
+	"pattern": "^((?!XXX).)*$"
+      },
+      "host": {
+        "type": "string",
+	"required": true,
+	"default": "localhost",
+	"format": "hostname"
+      },          
+      "port": {
+        "type": "integer",
+	"required": true,
+	"default": 0,
+        "minimum": 1024,
+	"maximum": 65535
+      },
+      "type": {
+        "type": "string",
+	"default": "frontendreceiver",
+	"readOnly": true
+      },
+      "settings": {
+        "type": "object",
+        "title": "Settings",
+        "properties": {
+          "stats_uri": {
+	    "type": "string",
+	    "format": "uri"
+	  },
+	  "dataPort": {
+	    "type": "integer",
+	    "default": 0,
+	    "minimum": 1024,
+	    "maximum": 65535,
+	    "required": true,
+	    "description": "Port for receiving data from frontend"
+	  }
+	}
+      },
+      "connections": {
+        "type": "object",
+        "title": "Connections",
+        "properties": {
+          "receivers": { 
+            "type": "array", 
+            "format": "table",
+            "title": "Receivers",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["pair", "pubsub"]
+                },
+                "chid": {"type":"integer"},
+                "host": {"type":"string"},
+                "port": {"type":"integer"}
+              },
+              "required": ["type", "chid", "host", "port"]
+            }
+          },
+          "senders": { 
+            "type": "array", 
+            "format": "table",
+            "title": "Senders",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type":"string",
+                  "enum": ["pair", "pubsub"]
+                },
+                "chid": {"type":"integer"},
+                "host": {"type":"string"},
+                "port": {"type":"integer"}
+              },
+              "required": ["type", "chid", "host", "port"]
+            }
+          }
+        }
+      }
+    },
+    "required": ["name", "host", "port", "type"]
+}
+
+

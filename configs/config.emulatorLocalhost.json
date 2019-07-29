@@ -69,7 +69,7 @@
         "sources": [],
         "destinations": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 1,
             "host": "*",
             "port": 8101
@@ -111,7 +111,7 @@
       "connections": {
         "sources": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 1,
             "host": "localhost",
             "port": 8101

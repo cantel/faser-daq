@@ -116,6 +116,21 @@ void TLBMonitor::runner() {
 }
 
 void TLBMonitor::initialize_hists() {
+
+  RegularHist h_payloadsize = {"h_payloadsize","payload size [bytes]"};
+  h_payloadsize.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
+  m_hist_map.addHist(h_payloadsize.name, h_payloadsize);
+
+  CategoryHist h_fragmenterrors = { "h_fragmenterrors", "error type" };
+  h_fragmenterrors.object = make_histogram(m_axis_fragmenterrors);
+  m_hist_map.addHist(h_fragmenterrors.name, h_fragmenterrors);
+
+  Graph g_error_rate_per_timeblock = {"g_error_rate_per_timeblock", "time [s]", "error rate" };
+  m_hist_map.addHist(g_error_rate_per_timeblock.name, g_error_rate_per_timeblock);
+
+  return ;
+}
+
 void TLBMonitor::register_metrics() {
 
  INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in TLBMonitor ... " );
@@ -138,22 +153,13 @@ void TLBMonitor::register_metrics() {
 
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_dummy, "tlb_error_dummy", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
-  RegularHist h_payloadsize = {"h_payloadsize","payload size [bytes]"};
-  h_payloadsize.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
-  m_hist_map.addHist(h_payloadsize.name, h_payloadsize);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unpack, "tlb_error_unpack", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
+
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_missing, "tlb_error_missing", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
-  CategoryHist h_fragmenterrors = { "h_fragmenterrors", "error type" };
-  h_fragmenterrors.object = make_histogram(m_axis_fragmenterrors);
-  m_hist_map.addHist(h_fragmenterrors.name, h_fragmenterrors);
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_empty, "tlb_error_empty", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
-  Graph g_error_rate_per_timeblock = {"g_error_rate_per_timeblock", "time [s]", "error rate" };
-  m_hist_map.addHist(g_error_rate_per_timeblock.name, g_error_rate_per_timeblock);
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_duplicate, "tlb_error_duplicate", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-  return ;
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unpack, "tlb_error_unpack", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
  return;
 }

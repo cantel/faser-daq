@@ -21,6 +21,7 @@ class TLBMonitor : public Monitor {
  protected:
 
   void initialize_hists( );
+  void register_metrics();
 
 };
 

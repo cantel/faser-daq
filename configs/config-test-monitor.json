@@ -3,7 +3,7 @@
   "group": "faser",
   "components": [
     {
-      "name": "triggergenerator",
+      "name": "triggergenerator01",
       "host": "localhost",
       "port": 5540,
       "type": "triggergenerator",
@@ -161,7 +161,33 @@
         "fragmentID": 1000002,
 	"lengthTimeBlock": 10,
         "outputDir": "/home/faser/cantel/",
-	"timeDelayTolerance": 100
+	"timeDelayTolerance": 100,
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQmetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "host": "localhost",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventmonitor01",
+      "host": "localhost",
+      "port": 5560,
+      "type": "eventmonitor",
+      "settings": {
+        "fragmentID": 0,
+	"lengthTimeBlock": 10,
+        "outputDir": "/home/faser/cantel/",
+	"timeDelayTolerance": 100,
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQmetrics"
       },
       "connections": {
         "receivers": [

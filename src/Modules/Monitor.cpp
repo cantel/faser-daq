@@ -72,15 +72,6 @@ bool Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const 
 
 	bool dataOk =false;
 
-        eventHeader = static_cast<const EventHeader *>(eventBuilderBinary.data());	
-
-	// check integrity - not the correct check yet. should be checked within data.
-	if ( eventHeader->marker != EventMarker ) {
-	    ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking fragment header. Data NOT ok.");
-	    dataOk = false;
-	    return dataOk;
-	}
-        if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
 
         uint16_t fragmentCnt = eventHeader->fragment_count;
         uint32_t totalDataPacketSize = eventBuilderBinary.size();
@@ -180,10 +171,10 @@ void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus )
 
 void Monitor::fill_error_status( uint32_t fragmentStatus ) {
 
+    std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
     //if ( fragmentStatus == 0 ) m_metric_errortype = "Ok";
-    if ( fragmentStatus == 0 ) m_metric_error_ok + 1;
+    if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
     else {
-	std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
 	/*std::string fragmentStatusStr;
         if ( fragmentStatus  &  UnclassifiedError ) fragmentStatusStr = "Unclassified";
         if ( fragmentStatus  &  BCIDMismatch ) fragmentStatusStr = "BCIDMismatch";
@@ -197,16 +188,16 @@ void Monitor::fill_error_status( uint32_t fragmentStatus ) {
         if ( fragmentStatus  &  DuplicateFragment ) fragmentStatusStr = "Duplicate";
 	m_metric_errortype = fragmentStatusStr;
 	std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;*/
-        if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified + 1;
-        if ( fragmentStatus  &  BCIDMismatch ) m_metric_error_bcidmismatch + 1;
-        if ( fragmentStatus  &  TagMismatch ) m_metric_error_tagmismatch + 1;
-        if ( fragmentStatus  &  Timeout ) m_metric_error_timeout + 1;
-        if ( fragmentStatus  &  Overflow ) m_metric_error_overflow + 1;
-        if ( fragmentStatus  &  CorruptedFragment ) m_metric_error_corrupted + 1;
-        if ( fragmentStatus  &  DummyFragment ) m_metric_error_dummy + 1;
-        if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing + 1;
-        if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty + 1;
-        if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate + 1;
+        if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified += 1;
+        if ( fragmentStatus  &  BCIDMismatch ) m_metric_error_bcidmismatch += 1;
+        if ( fragmentStatus  &  TagMismatch ) m_metric_error_tagmismatch += 1;
+        if ( fragmentStatus  &  Timeout ) m_metric_error_timeout += 1;
+        if ( fragmentStatus  &  Overflow ) m_metric_error_overflow += 1;
+        if ( fragmentStatus  &  CorruptedFragment ) m_metric_error_corrupted += 1;
+        if ( fragmentStatus  &  DummyFragment ) m_metric_error_dummy += 1;
+        if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing += 1;
+        if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty += 1;
+        if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate += 1;
     }
     
     return ;
@@ -227,10 +218,9 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
    for (auto x : indexed(hist, thiscoverage) ) { 
       os << boost::format("bin %2i bin value %s : %i\n") % x.index() % this_axis.value(x.index()) % *x;
    }
+void Monitor::register_metrics() {
 
-  std::cout << os.str() << std::flush;
-
-  return ;
+ INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in base Monitor class ... " );
 
 }
 

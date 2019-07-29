@@ -62,12 +62,25 @@ void TrackerMonitor::runner() {
     else {
         const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
         EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
+        eventHeader = static_cast<const EventHeader *>(eventBuilderBinary.data());	
+	// check integrity - not the correct check yet. should be checked within data.
+	if ( eventHeader->marker != EventMarker ) {
+	    ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
+            m_metric_error_unpack += 1;
+            m_error_rate_cnt++;
+	    continue;
+	}
+        if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
+
+        // only accept physics events
+        if ( eventHeader->event_tag != PhysicsTag ) continue;
+
 	bool dataOk = unpack_data( eventBuilderBinary, eventHeader, fragmentHeader );
 
 	if (!dataOk) { 
 		ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data "); 
 		m_hist_map.fillHist("h_fragmenterrors","DataUnpack");
-                m_metric_error_unpack + 1;
+                m_metric_error_unpack += 1;
 		m_error_rate_cnt++;
 		continue;
 	}
@@ -123,31 +136,31 @@ void TrackerMonitor::register_metrics() {
 
  INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in TrackerMonitor ... " );
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tracker_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tracker_payload", daqling::core::metrics::AVERAGE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_ok, "tracker_error_ok", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_ok, "tracker_error_ok", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unclassified, "tracker_error_unclassified", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unclassified, "tracker_error_unclassified", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_bcidmismatch, "tracker_error_bcidmismatch", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_bcidmismatch, "tracker_error_bcidmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_tagmismatch, "tracker_error_tagmismatch", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_tagmismatch, "tracker_error_tagmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_timeout, "tracker_error_timeout", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_timeout, "tracker_error_timeout", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_overflow, "tracker_error_overflow", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_overflow, "tracker_error_overflow", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_corrupted, "tracker_error_corrupted", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_corrupted, "tracker_error_corrupted", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_dummy, "tracker_error_dummy", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_dummy, "tracker_error_dummy", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_missing, "tracker_error_missing", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_missing, "tracker_error_missing", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_empty, "tracker_error_empty", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_empty, "tracker_error_empty", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_duplicate, "tracker_error_duplicate", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_duplicate, "tracker_error_duplicate", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unpack, "tracker_error_unpack", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unpack, "tracker_error_unpack", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 
  return;
 }

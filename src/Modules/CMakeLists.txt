@@ -32,6 +32,10 @@ file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
 add_library(monitor SHARED ${MONITOR_SOURCES})
 target_link_libraries(monitor PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE EVENTMONITOR_SOURCES "EventMonitor.cpp")
+add_library(eventmonitor SHARED ${EVENTMONITOR_SOURCES})
+target_link_libraries(eventmonitor PUBLIC monitor core utilities zmq)
+
 file(GLOB_RECURSE TRACKERMONITOR_SOURCES "TrackerMonitor.cpp")
 add_library(trackermonitor SHARED ${TRACKERMONITOR_SOURCES})
 target_link_libraries(trackermonitor PUBLIC monitor core utilities zmq)

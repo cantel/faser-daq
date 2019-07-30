@@ -26,8 +26,6 @@ TrackerMonitor::TrackerMonitor() {
 
    INFO("TrackerMonitor::TrackerMonitor");
 
-   initialize_hists();
-
    // make this configurable ...?
    m_json_file_name = "tracker_histogram_output.json";
 
@@ -78,7 +76,7 @@ void TrackerMonitor::runner() {
 	bool dataOk = unpack_data( eventBuilderBinary, eventHeader, fragmentHeader );
 
 	if (!dataOk) { 
-		ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data "); 
+		ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data for event "<<eventHeader->event_id); 
 		m_hist_map.fillHist("h_fragmenterrors","DataUnpack");
                 m_metric_error_unpack += 1;
 		m_error_rate_cnt++;
@@ -136,7 +134,7 @@ void TrackerMonitor::register_metrics() {
 
  INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in TrackerMonitor ... " );
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tracker_payload", daqling::core::metrics::AVERAGE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tracker_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
 
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_ok, "tracker_error_ok", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 

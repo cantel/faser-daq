@@ -26,8 +26,6 @@ TLBMonitor::TLBMonitor() {
 
    INFO("TLBMonitor::TLBMonitor");
 
-   initialize_hists();
-
    // make this configurable ...?
    m_json_file_name = "tlb_histogram_output.json";
 
@@ -135,7 +133,7 @@ void TLBMonitor::register_metrics() {
 
  INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in TLBMonitor ... " );
 
- m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tlb_payload", daqling::core::metrics::AVERAGE, daqling::core::metrics::INT);
+ m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tlb_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
 
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_ok, "tlb_error_ok", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
 

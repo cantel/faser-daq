@@ -166,7 +166,7 @@ class Monitor : public daqling::core::DAQProcess {
   std::atomic<int> m_metric_error_duplicate;
   std::atomic<int> m_metric_error_unpack;
 
-  void initialize_hists( );
+  virtual void initialize_hists( );
   virtual void register_metrics();
   bool unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader );
   void fill_error_status(CategoryHist &hist, uint32_t fragmentStatus);

@@ -35,6 +35,7 @@ void Monitor::start() {
   DAQProcess::start();
   INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
 
+  initialize_hists();
   register_metrics();
 
 }
@@ -65,6 +66,12 @@ void Monitor::initialize_hists() {
 
   INFO( __MODULEMETHOD_NAME__ << " ... initializing ... " );
   return;
+
+}
+
+void Monitor::register_metrics() {
+
+ INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in base Monitor class ... " );
 
 }
 
@@ -218,10 +225,6 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
    for (auto x : indexed(hist, thiscoverage) ) { 
       os << boost::format("bin %2i bin value %s : %i\n") % x.index() % this_axis.value(x.index()) % *x;
    }
-void Monitor::register_metrics() {
-
- INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in base Monitor class ... " );
-
 }
 
 void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {

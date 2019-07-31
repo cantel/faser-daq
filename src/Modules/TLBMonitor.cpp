@@ -31,10 +31,7 @@ TLBMonitor::TLBMonitor() {
 
    auto cfg = m_config.getConfig()["settings"];
    m_sourceID = cfg["fragmentID"];
-   m_timeblock = cfg["lengthTimeBlock"]; // seconds
    m_outputdir = cfg["outputDir"];
-   m_timeDelayTolerance = cfg["timeDelayTolerance"]; // microseconds
-   
 
  }
 
@@ -47,11 +44,6 @@ void TLBMonitor::runner() {
 
   bool isData(true);
 
-  m_error_rate_cnt = 0;
-  seconds timestamp_in_seconds;
-  bool update = true;
-  auto starting_time_in_seconds = duration_cast<seconds>(system_clock::now().time_since_epoch()).count();
- 
   while (m_run) {
 
     daqling::utilities::Binary eventBuilderBinary;
@@ -67,7 +59,6 @@ void TLBMonitor::runner() {
 	if ( eventHeader->marker != EventMarker ) {
 	    ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
             m_metric_error_unpack += 1;
-            m_error_rate_cnt++;
 	    continue;
 	}
         if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
@@ -80,7 +71,6 @@ void TLBMonitor::runner() {
 	if (!dataOk) { 
 		ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data "); 
                 m_metric_error_unpack += 1;
-		m_error_rate_cnt++;
 		m_hist_map.fillHist("h_fragmenterrors","DataUnpack");
 		continue;
 	}
@@ -93,18 +83,6 @@ void TLBMonitor::runner() {
 
 	m_hist_map.fillHist( "h_payloadsize", payloadSize);
         m_metric_payload = payloadSize;
-
-
-        timestamp_in_seconds = duration_cast<seconds>(system_clock::now().time_since_epoch());
-	if ( (timestamp_in_seconds.count() - starting_time_in_seconds)%m_timeblock == 0){
-	    if ( update ) { 
-	    std::cout<<" reached end of time block. current error rate is "<<m_error_rate_cnt<<std::endl;
-	    m_hist_map.fillHist("g_error_rate_per_timeblock", std::make_pair(timestamp_in_seconds.count(), m_error_rate_cnt));
-	    m_error_rate_cnt = 0;
-	    update = false;
-	    }
- 	}
-	else update = true;
     }
 
   }
@@ -122,9 +100,6 @@ void TLBMonitor::initialize_hists() {
   CategoryHist h_fragmenterrors = { "h_fragmenterrors", "error type" };
   h_fragmenterrors.object = make_histogram(m_axis_fragmenterrors);
   m_hist_map.addHist(h_fragmenterrors.name, h_fragmenterrors);
-
-  Graph g_error_rate_per_timeblock = {"g_error_rate_per_timeblock", "time [s]", "error rate" };
-  m_hist_map.addHist(g_error_rate_per_timeblock.name, g_error_rate_per_timeblock);
 
   return ;
 }

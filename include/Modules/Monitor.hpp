@@ -146,9 +146,6 @@ class Monitor : public daqling::core::DAQProcess {
   categoryaxis_t m_axis_fragmenterrors = categoryaxis_t({"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"}, "error type");
   //HistList m_hist_lists;
   HistMaps m_hist_map;
-  unsigned int m_error_rate_cnt;
-  uint16_t m_timeblock; //in seconds
-  uint64_t m_timeDelayTolerance; 
   std::string m_outputdir;
   std::string m_json_file_name;
 

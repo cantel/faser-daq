@@ -23,9 +23,7 @@ EventMonitor::EventMonitor() {
    INFO("EventMonitor::EventMonitor");
 
    auto cfg = m_config.getConfig()["settings"];
-   m_timeblock = cfg["lengthTimeBlock"]; // seconds
    m_outputdir = cfg["outputDir"];
-   m_timeDelayTolerance = cfg["timeDelayTolerance"]; // microseconds
 
  }
 

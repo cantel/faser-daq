@@ -138,7 +138,6 @@ void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
 
     if ( fragmentStatus == 0 ) hist.object( "Ok");
     else {
-        m_error_rate_cnt+=1;
         if ( fragmentStatus  &  UnclassifiedError ) hist.object( "Unclassified");
         if ( fragmentStatus  &  BCIDMismatch ) hist.object( "BCIDMismatch");
         if ( fragmentStatus  &  TagMismatch ) hist.object( "TagMismatch");
@@ -159,7 +158,6 @@ void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus )
 
     if ( fragmentStatus == 0 ) m_hist_map.fillHist(hist_name, "Ok");
     else {
-        m_error_rate_cnt+=1;
         if ( fragmentStatus  &  UnclassifiedError ) m_hist_map.fillHist( hist_name, "Unclassified");
         if ( fragmentStatus  &  BCIDMismatch ) m_hist_map.fillHist( hist_name, "BCIDMismatch");
         if ( fragmentStatus  &  TagMismatch ) m_hist_map.fillHist( hist_name, "TagMismatch");

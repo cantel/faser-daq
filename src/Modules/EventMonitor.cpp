@@ -34,37 +34,37 @@ EventMonitor::~EventMonitor() {
 void EventMonitor::runner() {
   INFO(__MODULEMETHOD_NAME__ << " Running...");
 
-  bool isData(true);
+  bool noData(true);
+  daqling::utilities::Binary* eventBuilderBinary = new daqling::utilities::Binary;
 
   while (m_run) {
 
-    daqling::utilities::Binary eventBuilderBinary;
+      if ( !m_connections.get(1, *eventBuilderBinary)){
+          if ( !noData ) std::this_thread::sleep_for(10ms);
+          noData=true;
+          continue;
+      }
+      noData=false;
 
-    isData = m_connections.get(1, eventBuilderBinary);
-    if ( !isData ) std::this_thread::sleep_for(10ms);
-    else {
-        const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
+      const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
 
-        eventHeader = static_cast<const EventHeader *>(eventBuilderBinary.data());	
-	// check integrity - not the correct check yet. should be checked within data.
-	if ( eventHeader->marker != EventMarker ) {
-	    ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
-            m_metric_error_unpack += 1;
-	    continue;
-	}
-        if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
+      eventHeader = static_cast<const EventHeader *>(eventBuilderBinary->data());	
+      // check integrity - not the correct check yet. should be checked within data.
+      if ( eventHeader->marker != EventMarker ) {
+          ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
+          m_metric_error_unpack += 1;
+          continue;
+      }
+      if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
 
-        // only accept physics events
-        if ( eventHeader->event_tag != PhysicsTag ) continue;
+      // only accept physics events
+      if ( eventHeader->event_tag != PhysicsTag ) continue;
 
-	uint32_t eventStatus = eventHeader->status;
-	fill_error_status( eventStatus );
+      uint32_t eventStatus = eventHeader->status;
+      fill_error_status( eventStatus );
 
-        uint16_t payloadSize = eventHeader->payload_size; 
-        m_metric_payload = payloadSize;
-
-    }
-
+      uint16_t payloadSize = eventHeader->payload_size; 
+      m_metric_payload = payloadSize;
   }
 
   INFO(__MODULEMETHOD_NAME__ << " Runner stopped");

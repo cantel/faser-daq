@@ -42,49 +42,50 @@ TLBMonitor::~TLBMonitor() {
 void TLBMonitor::runner() {
   INFO(__MODULEMETHOD_NAME__ << " Running...");
 
-  bool isData(true);
+  bool noData(true);
+  daqling::utilities::Binary* eventBuilderBinary = new daqling::utilities::Binary;
 
   while (m_run) {
 
-    daqling::utilities::Binary eventBuilderBinary;
+      if ( !m_connections.get(1, *eventBuilderBinary)){
+          if ( !noData ) std::this_thread::sleep_for(10ms);
+          noData=true;
+          continue;
+      }
+      noData=false;
 
-    isData = m_connections.get(1, eventBuilderBinary);
-    if ( !isData ) std::this_thread::sleep_for(10ms);
-    else {
-        const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
-        EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
+      const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
+      EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
 
-        eventHeader = static_cast<const EventHeader *>(eventBuilderBinary.data());	
-	// check integrity - not the correct check yet. should be checked within data.
-	if ( eventHeader->marker != EventMarker ) {
-	    ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
-            m_metric_error_unpack += 1;
-	    continue;
-	}
-        if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
+      eventHeader = static_cast<const EventHeader *>(eventBuilderBinary->data());	
+      // check integrity - not the correct check yet. should be checked within data.
+      if ( eventHeader->marker != EventMarker ) {
+          ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
+          m_metric_error_unpack += 1;
+          continue;
+      }
+      if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
 
-        // only accept physics events
-        if ( eventHeader->event_tag != PhysicsTag ) continue;
+      // only accept physics events
+      if ( eventHeader->event_tag != PhysicsTag ) continue;
 
-	bool dataOk = unpack_data( eventBuilderBinary, eventHeader, fragmentHeader );
+      bool dataOk = unpack_data( *eventBuilderBinary, eventHeader, fragmentHeader );
 
-	if (!dataOk) { 
-		ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data "); 
-                m_metric_error_unpack += 1;
-		m_hist_map.fillHist("h_fragmenterrors","DataUnpack");
-		continue;
-	}
+      if (!dataOk) { 
+      	ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data "); 
+              m_metric_error_unpack += 1;
+      	m_hist_map.fillHist("h_fragmenterrors","DataUnpack");
+      	continue;
+      }
 
-	uint32_t fragmentStatus = fragmentHeader->status;
-	fill_error_status( "h_fragmenterrors", fragmentStatus );
-	fill_error_status( fragmentStatus );
+      uint32_t fragmentStatus = fragmentHeader->status;
+      fill_error_status( "h_fragmenterrors", fragmentStatus );
+      fill_error_status( fragmentStatus );
 
-        uint16_t payloadSize = fragmentHeader->payload_size; 
+      uint16_t payloadSize = fragmentHeader->payload_size; 
 
-	m_hist_map.fillHist( "h_payloadsize", payloadSize);
-        m_metric_payload = payloadSize;
-    }
-
+      m_hist_map.fillHist( "h_payloadsize", payloadSize);
+      m_metric_payload = payloadSize;
   }
 
   INFO(__MODULEMETHOD_NAME__ << " Runner stopped");

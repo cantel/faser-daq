@@ -49,13 +49,6 @@ void EventMonitor::runner() {
       const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
 
       eventHeader = static_cast<const EventHeader *>(eventBuilderBinary->data());	
-      // check integrity - not the correct check yet. should be checked within data.
-      if ( eventHeader->marker != EventMarker ) {
-          ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
-          m_metric_error_unpack += 1;
-          continue;
-      }
-      if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
 
       // only accept physics events
       if ( eventHeader->event_tag != PhysicsTag ) continue;

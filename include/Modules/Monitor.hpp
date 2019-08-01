@@ -109,8 +109,6 @@ class Monitor : public daqling::core::DAQProcess {
 	}
 	else ERROR( " Histogram with name "<<hist_name<<" not found ! ");
     }
-    
-
    };
 
   // ###################################################################################
@@ -122,7 +120,6 @@ class Monitor : public daqling::core::DAQProcess {
   //RegularHist h_timedelay_rcv1_rcv2 = { "h_timedelay_rcv1_rcv2", "time delay [micro s]"};
 
   struct HistList {
-
     std::vector<RegularHist*> histlist;
     std::vector<CategoryHist*> categoryhistlist; 
     std::vector<Graph*> graphlist;
@@ -136,7 +133,6 @@ class Monitor : public daqling::core::DAQProcess {
     void addHist( Graph * histPtr ) {
 	graphlist.push_back( histPtr );
     }
-
   };
 
   uint32_t m_sourceID;
@@ -165,7 +161,7 @@ class Monitor : public daqling::core::DAQProcess {
 
   virtual void initialize_hists( );
   virtual void register_metrics();
-  bool unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader );
+  uint16_t unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader );
   void fill_error_status(CategoryHist &hist, uint32_t fragmentStatus);
   void fill_error_status(std::string hist_name, uint32_t fragmentStatus);
   void fill_error_status(uint32_t fragmentStatus);

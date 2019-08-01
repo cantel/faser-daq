@@ -75,17 +75,18 @@ void Monitor::register_metrics() {
 
 }
 
-bool Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader ) {
+uint16_t Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader ) {
 
-	bool dataOk =false;
-
+  uint16_t dataStatus=0;
+  bool foundSourceID(false);
 
   uint16_t fragmentCnt = eventHeader->fragment_count;
   uint32_t totalDataPacketSize = eventBuilderBinary.size();
 
-	uint32_t accumulatedPayloadSize = 0;
-	uint8_t cnt = 0;
+  uint32_t accumulatedPayloadSize = 0;
+  uint8_t cnt = 0;
 
+  // Claire: to do: need to incorporate markers.
   for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
 	
 	  cnt++;	
@@ -94,18 +95,18 @@ bool Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const 
 
     if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
 
-	   uint32_t source_id = currentChannelFragmentHeader->source_id;
+     uint32_t source_id = currentChannelFragmentHeader->source_id;
 
      if ( source_id == m_sourceID ) {
 		   fragmentHeader = currentChannelFragmentHeader;
-		   dataOk = true; // found channel
+		   foundSourceID = true;
 		   break;
-	   }
+     }
      accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
-	}
+  }
 
 
-	if ( dataOk ) {
+	if ( foundSourceID ) {
 	  // sanity check
     auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
 	  if ( totalCalculatedSize > totalDataPacketSize ) {
@@ -114,14 +115,15 @@ bool Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const 
                                   <<", larger than the total data packet size, "
                                   <<totalDataPacketSize
                                   <<". FIX ME." );
-	  	return dataOk = false;
+	  	return dataStatus |= CorruptedFragment; //To review: is this the right error type for this?
 	  }
 	}
 	else {
 	    	ERROR(__MODULEMETHOD_NAME__ <<  " no correct fragment source ID found.");
+		dataStatus |= MissingFragment;
 	}
 
-	return dataOk;
+	return dataStatus;
 }
 
 void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {

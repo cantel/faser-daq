@@ -57,29 +57,18 @@ void TrackerMonitor::runner() {
       const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
       EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
       eventHeader = static_cast<const EventHeader *>(eventBuilderBinary->data());	
-      // check integrity - not the correct check yet. should be checked within data.
-      if ( eventHeader->marker != EventMarker ) {
-          ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking event header. Data NOT ok.");
-          m_metric_error_unpack += 1;
-          continue;
-      }
-      if ( m_eventHeaderSize != eventHeader->header_size ) ERROR("event header gives wrong size!");
 
       // only accept physics events
       if ( eventHeader->event_tag != PhysicsTag ) continue;
 
-      bool dataOk = unpack_data( *eventBuilderBinary, eventHeader, fragmentHeader );
-
-      if (!dataOk) { 
-      	ERROR(__MODULEMETHOD_NAME__ << " ERROR in unpacking data for event "<<eventHeader->event_id); 
-      	m_hist_map.fillHist("h_fragmenterrors","DataUnpack");
-              m_metric_error_unpack += 1;
-      	continue;
-      }
+      uint16_t dataStatus = unpack_data( *eventBuilderBinary, eventHeader, fragmentHeader );
 
       uint32_t fragmentStatus = fragmentHeader->status;
+      fragmentStatus |= dataStatus;
       fill_error_status( "h_fragmenterrors", fragmentStatus );
       fill_error_status( fragmentStatus );
+      
+      if (fragmentStatus & MissingFragment ) continue; // go no further
 
       uint16_t payloadSize = fragmentHeader->payload_size; 
 

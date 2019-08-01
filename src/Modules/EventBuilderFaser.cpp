@@ -21,6 +21,7 @@ EventBuilder::EventBuilder() {
   m_maxPending = cfg["maxPending"];
 
   m_numChannels=m_config.getConfig()["connections"]["receivers"].size();
+  m_numOutChannels=m_config.getConfig()["connections"]["senders"].size();
 
 }
 
@@ -34,6 +35,11 @@ void EventBuilder::start() {
   m_status = STATUS_OK;
   m_queueFraction = 0;
   if (m_stats_on) {
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(1), "EB-CHN1-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(1), "EB-CHN1-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(2), "EB-CHN2-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(2), "EB-CHN2-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    // Claire: above metrics will in future be added automatically by daqling for every existing connection
     m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
@@ -68,6 +74,7 @@ bool EventBuilder::sendEvent(int outChannel,
       header.bc_id = 0xFFFF;
       header.status = 0;
       header.timestamp = 0;
+
       for(int ch=0;ch<numFragments;ch++) {
 	if (fragments.at(ch)) {
 	  outFragments += *fragments[ch];
@@ -100,8 +107,10 @@ bool EventBuilder::sendEvent(int outChannel,
       header.payload_size=outFragments.size();
       daqling::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
       data+=outFragments;
-      INFO("Sending event "<<header.event_id<<" - "<<data.size()<<" bytes");
-      m_connections.put(outChannel, data);
+      INFO("Sending event "<<header.event_id<<" - "<<data.size()<<" bytes.");
+      for ( unsigned int outch=m_numChannels+1;outch<=m_numChannels+m_numOutChannels;outch++){
+          m_connections.put(outch, data);
+      }
       return true;
 }
 

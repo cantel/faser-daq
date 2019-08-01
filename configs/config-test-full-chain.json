@@ -125,6 +125,33 @@
             "type": "pubsub",
             "chid": 3,
             "host": "*",
+            "port": 8104
+          },
+          {
+            "type": "pair",
+            "chid": 4,
+            "host": "*",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "filedatalogger01",
+      "host": "localhost",
+      "port": 5558,
+      "type": "filedatalogger",
+      "settings": {
+        "ring": "127.0.0.1",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQmetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "host": "localhost",
             "port": 8103
           }
         ]
@@ -133,11 +160,13 @@
     {
       "name": "trackermonitor01",
       "host": "localhost",
-      "port": 5558,
+      "port": 5559,
       "type": "trackermonitor",
       "settings": {
         "fragmentID": 1000001,
+	"lengthTimeBlock": 10,
         "outputDir": "/home/faser/cantel/",
+	"timeDelayTolerance": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQmetrics"
       },
@@ -147,7 +176,7 @@
             "type": "pubsub",
             "chid": 1,
             "host": "localhost",
-            "port": 8103
+            "port": 8104
           }
         ]
       }
@@ -155,7 +184,7 @@
     {
       "name": "tlbmonitor01",
       "host": "localhost",
-      "port": 5559,
+      "port": 5560,
       "type": "tlbmonitor",
       "settings": {
         "fragmentID": 1000002,
@@ -171,7 +200,7 @@
             "type": "pubsub",
             "chid": 1,
             "host": "localhost",
-            "port": 8103
+            "port": 8104
           }
         ]
       }
@@ -179,7 +208,7 @@
     {
       "name": "eventmonitor01",
       "host": "localhost",
-      "port": 5560,
+      "port": 5561,
       "type": "eventmonitor",
       "settings": {
         "fragmentID": 0,
@@ -195,7 +224,7 @@
             "type": "pubsub",
             "chid": 1,
             "host": "localhost",
-            "port": 8103
+            "port": 8104
           }
         ]
       }

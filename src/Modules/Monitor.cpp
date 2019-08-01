@@ -29,7 +29,7 @@ Monitor::Monitor() {
 
 Monitor::~Monitor() { 
   INFO(__MODULEMETHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
- }
+}
 
 void Monitor::start() {
   DAQProcess::start();
@@ -80,132 +80,108 @@ bool Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const 
 	bool dataOk =false;
 
 
-        uint16_t fragmentCnt = eventHeader->fragment_count;
-        uint32_t totalDataPacketSize = eventBuilderBinary.size();
+  uint16_t fragmentCnt = eventHeader->fragment_count;
+  uint32_t totalDataPacketSize = eventBuilderBinary.size();
 
 	uint32_t accumulatedPayloadSize = 0;
 	uint8_t cnt = 0;
 
-        for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
+  for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
 	
-	    cnt++;	
-            EventFragmentHeader * currentChannelFragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
-	    memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
+	  cnt++;	
+    EventFragmentHeader * currentChannelFragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
+	  memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
 
-            if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
+    if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
 
-	    // check integrity - not the correct check yet.
-	    if ( currentChannelFragmentHeader->marker != FragmentMarker ) {
-		dataOk = false;
-		ERROR(__MODULEMETHOD_NAME__ <<  " something went wrong in unpacking fragment header. Data NOT ok.");
-		return dataOk;
-	    }
+	   uint32_t source_id = currentChannelFragmentHeader->source_id;
 
-	    uint32_t source_id = currentChannelFragmentHeader->source_id;
-
-            if ( source_id == m_sourceID ) {
-		fragmentHeader = currentChannelFragmentHeader;
-		dataOk = true; // found channel
-		break;
-	    }
-
-            accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
-
+     if ( source_id == m_sourceID ) {
+		   fragmentHeader = currentChannelFragmentHeader;
+		   dataOk = true; // found channel
+		   break;
+	   }
+     accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
 	}
 
 
 	if ( dataOk ) {
-	    // sanity check
-            auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
-	    if ( totalCalculatedSize > totalDataPacketSize ) {
-	    	ERROR(__MODULEMETHOD_NAME__ <<  "total byte size unpacked, "
-	    	              << totalCalculatedSize 
+	  // sanity check
+    auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
+	  if ( totalCalculatedSize > totalDataPacketSize ) {
+	  	ERROR(__MODULEMETHOD_NAME__ <<  "total byte size unpacked, "
+	  	                            << totalCalculatedSize 
                                   <<", larger than the total data packet size, "
                                   <<totalDataPacketSize
                                   <<". FIX ME." );
-	    	return dataOk = false;
-	    }
+	  	return dataOk = false;
+	  }
 	}
 	else {
 	    	ERROR(__MODULEMETHOD_NAME__ <<  " no correct fragment source ID found.");
 	}
 
 	return dataOk;
-
 }
 
 void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
 
-    if ( fragmentStatus == 0 ) hist.object( "Ok");
-    else {
-        if ( fragmentStatus  &  UnclassifiedError ) hist.object( "Unclassified");
-        if ( fragmentStatus  &  BCIDMismatch ) hist.object( "BCIDMismatch");
-        if ( fragmentStatus  &  TagMismatch ) hist.object( "TagMismatch");
-        if ( fragmentStatus  &  Timeout ) hist.object( "Timeout");
-        if ( fragmentStatus  &  Overflow ) hist.object( "Overflow");
-        if ( fragmentStatus  &  CorruptedFragment ) hist.object( "Corrupted");
-        if ( fragmentStatus  &  DummyFragment ) hist.object( "Dummy");
-        if ( fragmentStatus  &  MissingFragment ) hist.object( "Missing");
-        if ( fragmentStatus  &  EmptyFragment ) hist.object( "Empty");
-        if ( fragmentStatus  &  DuplicateFragment ) hist.object( "Duplicate");
-    }
-    
-    return ;
+  if ( fragmentStatus == 0 ) hist.object( "Ok");
+  else {
+     if ( fragmentStatus  &  UnclassifiedError ) hist.object( "Unclassified");
+     if ( fragmentStatus  &  BCIDMismatch ) hist.object( "BCIDMismatch");
+     if ( fragmentStatus  &  TagMismatch ) hist.object( "TagMismatch");
+     if ( fragmentStatus  &  Timeout ) hist.object( "Timeout");
+     if ( fragmentStatus  &  Overflow ) hist.object( "Overflow");
+     if ( fragmentStatus  &  CorruptedFragment ) hist.object( "Corrupted");
+     if ( fragmentStatus  &  DummyFragment ) hist.object( "Dummy");
+     if ( fragmentStatus  &  MissingFragment ) hist.object( "Missing");
+     if ( fragmentStatus  &  EmptyFragment ) hist.object( "Empty");
+     if ( fragmentStatus  &  DuplicateFragment ) hist.object( "Duplicate");
+  }
+  
+  return ;
 
 }
 
 void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus ) {
 
-    if ( fragmentStatus == 0 ) m_hist_map.fillHist(hist_name, "Ok");
-    else {
-        if ( fragmentStatus  &  UnclassifiedError ) m_hist_map.fillHist( hist_name, "Unclassified");
-        if ( fragmentStatus  &  BCIDMismatch ) m_hist_map.fillHist( hist_name, "BCIDMismatch");
-        if ( fragmentStatus  &  TagMismatch ) m_hist_map.fillHist( hist_name, "TagMismatch");
-        if ( fragmentStatus  &  Timeout ) m_hist_map.fillHist( hist_name, "Timeout");
-        if ( fragmentStatus  &  Overflow ) m_hist_map.fillHist( hist_name, "Overflow");
-        if ( fragmentStatus  &  CorruptedFragment ) m_hist_map.fillHist( hist_name, "Corrupted");
-        if ( fragmentStatus  &  DummyFragment ) m_hist_map.fillHist( hist_name, "Dummy");
-        if ( fragmentStatus  &  MissingFragment ) m_hist_map.fillHist( hist_name, "Missing");
-        if ( fragmentStatus  &  EmptyFragment ) m_hist_map.fillHist( hist_name, "Empty");
-        if ( fragmentStatus  &  DuplicateFragment ) m_hist_map.fillHist( hist_name, "Duplicate");
-    }
-    
-    return ;
+  if ( fragmentStatus == 0 ) m_hist_map.fillHist(hist_name, "Ok");
+  else {
+     if ( fragmentStatus  &  UnclassifiedError ) m_hist_map.fillHist( hist_name, "Unclassified");
+     if ( fragmentStatus  &  BCIDMismatch ) m_hist_map.fillHist( hist_name, "BCIDMismatch");
+     if ( fragmentStatus  &  TagMismatch ) m_hist_map.fillHist( hist_name, "TagMismatch");
+     if ( fragmentStatus  &  Timeout ) m_hist_map.fillHist( hist_name, "Timeout");
+     if ( fragmentStatus  &  Overflow ) m_hist_map.fillHist( hist_name, "Overflow");
+     if ( fragmentStatus  &  CorruptedFragment ) m_hist_map.fillHist( hist_name, "Corrupted");
+     if ( fragmentStatus  &  DummyFragment ) m_hist_map.fillHist( hist_name, "Dummy");
+     if ( fragmentStatus  &  MissingFragment ) m_hist_map.fillHist( hist_name, "Missing");
+     if ( fragmentStatus  &  EmptyFragment ) m_hist_map.fillHist( hist_name, "Empty");
+     if ( fragmentStatus  &  DuplicateFragment ) m_hist_map.fillHist( hist_name, "Duplicate");
+  }
+  
+  return ;
 
 }
 
 void Monitor::fill_error_status( uint32_t fragmentStatus ) {
 
-    std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
-    //if ( fragmentStatus == 0 ) m_metric_errortype = "Ok";
-    if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
-    else {
-	/*std::string fragmentStatusStr;
-        if ( fragmentStatus  &  UnclassifiedError ) fragmentStatusStr = "Unclassified";
-        if ( fragmentStatus  &  BCIDMismatch ) fragmentStatusStr = "BCIDMismatch";
-        if ( fragmentStatus  &  TagMismatch ) fragmentStatusStr = "TagMismatch";
-        if ( fragmentStatus  &  Timeout ) fragmentStatusStr = "Timeout";
-        if ( fragmentStatus  &  Overflow ) fragmentStatusStr = "Overflow";
-        if ( fragmentStatus  &  CorruptedFragment ) fragmentStatusStr = "Corrupted";
-        if ( fragmentStatus  &  DummyFragment ) fragmentStatusStr = "Dummy";
-        if ( fragmentStatus  &  MissingFragment ) fragmentStatusStr = "Missing";
-        if ( fragmentStatus  &  EmptyFragment ) fragmentStatusStr = "Empty";
-        if ( fragmentStatus  &  DuplicateFragment ) fragmentStatusStr = "Duplicate";
-	m_metric_errortype = fragmentStatusStr;
-	std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;*/
-        if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified += 1;
-        if ( fragmentStatus  &  BCIDMismatch ) m_metric_error_bcidmismatch += 1;
-        if ( fragmentStatus  &  TagMismatch ) m_metric_error_tagmismatch += 1;
-        if ( fragmentStatus  &  Timeout ) m_metric_error_timeout += 1;
-        if ( fragmentStatus  &  Overflow ) m_metric_error_overflow += 1;
-        if ( fragmentStatus  &  CorruptedFragment ) m_metric_error_corrupted += 1;
-        if ( fragmentStatus  &  DummyFragment ) m_metric_error_dummy += 1;
-        if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing += 1;
-        if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty += 1;
-        if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate += 1;
-    }
-    
-    return ;
+  std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
+  if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
+  else {
+      if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified += 1;
+      if ( fragmentStatus  &  BCIDMismatch ) m_metric_error_bcidmismatch += 1;
+      if ( fragmentStatus  &  TagMismatch ) m_metric_error_tagmismatch += 1;
+      if ( fragmentStatus  &  Timeout ) m_metric_error_timeout += 1;
+      if ( fragmentStatus  &  Overflow ) m_metric_error_overflow += 1;
+      if ( fragmentStatus  &  CorruptedFragment ) m_metric_error_corrupted += 1;
+      if ( fragmentStatus  &  DummyFragment ) m_metric_error_dummy += 1;
+      if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing += 1;
+      if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty += 1;
+      if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate += 1;
+  }
+  
+  return ;
 
 }
 
@@ -220,26 +196,26 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
   auto thiscoverage = coverage::all;
   if ( !coverage_all ) thiscoverage = coverage::inner;
 
-   for (auto x : indexed(hist, thiscoverage) ) { 
-      os << boost::format("bin %2i bin value %s : %i\n") % x.index() % this_axis.value(x.index()) % *x;
-   }
+  for (auto x : indexed(hist, thiscoverage) ) { 
+     os << boost::format("bin %2i bin value %s : %i\n") % x.index() % this_axis.value(x.index()) % *x;
+  }
 }
 
 void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 
   INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
   INFO(__MODULEMETHOD_NAME__ << " hist axis is of type category; hist has no under/overflow bins. ");
-
+  
   std::ostringstream os;
   auto hist = histStruct.getObject();
   auto this_axis = hist.axis();
-
+  
    for (auto x : indexed(hist, coverage::inner) ) { // no under/overflow bins for category axis. 
       os << boost::format("bin %2i bin value %s : %i\n") % x.index() % this_axis.value(x.index()) % *x;
    }
-
+  
   std::cout << os.str() << std::flush;
-
+  
   return ;
 
 }
@@ -247,16 +223,16 @@ void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 void Monitor::flush_hist( Graph histStruct, bool coverage_all ) {
 
   INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
-
+  
   std::ostringstream os;
   auto hist = histStruct.getObject();
-
+  
    for (auto xy : histStruct.getObject()  ) {
       os << boost::format("x:  %2f y: %2f \n") % xy.first % xy.second;
    }
-
+  
   std::cout << os.str() << std::flush;
-
+  
   return ;
 
 }
@@ -291,108 +267,108 @@ template <typename T>
 void Monitor::add_hist_to_json( T histStruct, json &jsonArray, bool coverage_all ) {
 
 
-   auto hist = histStruct.getObject();
-   
-   float binwidth =  hist.axis().bin(1).upper() - hist.axis().bin(2).lower();
+  auto hist = histStruct.getObject();
+  
+  float binwidth =  hist.axis().bin(1).upper() - hist.axis().bin(2).lower();
  
-   json histogram = json::object();
-   histogram["name"] = histStruct.name;
-   histogram["type"] = "regular";
-   histogram["title"] = histStruct.title;
-   histogram["xlabel"] = histStruct.xlabel;
-   histogram["ylabel"] = histStruct.ylabel;
-   histogram["binwidth"] = binwidth;
+  json histogram = json::object();
+  histogram["name"] = histStruct.name;
+  histogram["type"] = "regular";
+  histogram["title"] = histStruct.title;
+  histogram["xlabel"] = histStruct.xlabel;
+  histogram["ylabel"] = histStruct.ylabel;
+  histogram["binwidth"] = binwidth;
  
-   std::vector<float> xcolumn;
-   std::vector<unsigned int> ycolumn;
+  std::vector<float> xcolumn;
+  std::vector<unsigned int> ycolumn;
  
-   auto thiscoverage = coverage::all;
-   if ( !coverage_all ) thiscoverage = coverage::inner;
-   auto this_axis = hist.axis();
+  auto thiscoverage = coverage::all;
+  if ( !coverage_all ) thiscoverage = coverage::inner;
+  auto this_axis = hist.axis();
  
-   for (auto x : indexed(hist, thiscoverage) ) {
-       xcolumn.push_back(this_axis.value(x.index())); 
-       ycolumn.push_back(*x); 
-    }
-    
-    if ( xcolumn.size() != ycolumn.size() ) {
-        ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
-        xcolumn.clear();
-        ycolumn.clear();
-    }
+  for (auto x : indexed(hist, thiscoverage) ) {
+     xcolumn.push_back(this_axis.value(x.index())); 
+     ycolumn.push_back(*x); 
+  }
+  
+  if ( xcolumn.size() != ycolumn.size() ) {
+      ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+      xcolumn.clear();
+      ycolumn.clear();
+  }
 
-    histogram["x"] = xcolumn;
-    histogram["y"] = ycolumn;
+  histogram["x"] = xcolumn;
+  histogram["y"] = ycolumn;
 
-    jsonArray.push_back( histogram );
+  jsonArray.push_back( histogram );
 
-    return ;
+  return ;
 }
 
 void Monitor::add_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all ) {
 
-   auto hist = histStruct.getObject();
+  auto hist = histStruct.getObject();
   
-   json histogram = json::object();
-   histogram["name"] = histStruct.name;
-   histogram["type"] = "category";
-   histogram["title"] = histStruct.title;
-   histogram["xlabel"] = histStruct.xlabel;
-   histogram["ylabel"] = histStruct.ylabel;
+  json histogram = json::object();
+  histogram["name"] = histStruct.name;
+  histogram["type"] = "category";
+  histogram["title"] = histStruct.title;
+  histogram["xlabel"] = histStruct.xlabel;
+  histogram["ylabel"] = histStruct.ylabel;
  
-   std::vector<std::string> xcolumn;
-   std::vector<unsigned int> ycolumn;
+  std::vector<std::string> xcolumn;
+  std::vector<unsigned int> ycolumn;
  
-   auto this_axis = hist.axis();
+  auto this_axis = hist.axis();
  
-   for (auto x : indexed(hist, coverage::inner) ) {
-       xcolumn.push_back(this_axis.value(x.index())); 
-       ycolumn.push_back(*x); 
-    }
-    
-    if ( xcolumn.size() != ycolumn.size() ) {
-        ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
-        xcolumn.clear();
-        ycolumn.clear();
-    }
+  for (auto x : indexed(hist, coverage::inner) ) {
+      xcolumn.push_back(this_axis.value(x.index())); 
+      ycolumn.push_back(*x); 
+   }
+   
+  if ( xcolumn.size() != ycolumn.size() ) {
+       ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+       xcolumn.clear();
+       ycolumn.clear();
+  }
  
-    histogram["x"] = xcolumn;
-    histogram["y"] = ycolumn;
+  histogram["x"] = xcolumn;
+  histogram["y"] = ycolumn;
 
-    jsonArray.push_back( histogram );
+  jsonArray.push_back( histogram );
 
-    return ;
+  return ;
 }
 
 void Monitor::add_hist_to_json( Graph graphStruct, json &jsonArray, bool coverage_all ) {
 
-   json graph = json::object();
-   graph["name"] = graphStruct.name;
-   graph["type"] = "graph";
-   graph["title"] = graphStruct.title;
-   graph["xlabel"] = graphStruct.xlabel;
-   graph["ylabel"] = graphStruct.ylabel;
+  json graph = json::object();
+  graph["name"] = graphStruct.name;
+  graph["type"] = "graph";
+  graph["title"] = graphStruct.title;
+  graph["xlabel"] = graphStruct.xlabel;
+  graph["ylabel"] = graphStruct.ylabel;
  
-   std::vector<unsigned int> xcolumn;
-   std::vector<unsigned int> ycolumn;
+  std::vector<unsigned int> xcolumn;
+  std::vector<unsigned int> ycolumn;
  
-   for (auto xy : graphStruct.getObject()  ) {
-       xcolumn.push_back(xy.first); 
-       ycolumn.push_back(xy.second); 
-    }
-    
-    if ( xcolumn.size() != ycolumn.size() ) {
-        ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
-        xcolumn.clear();
-        ycolumn.clear();
-    }
+  for (auto xy : graphStruct.getObject()  ) {
+      xcolumn.push_back(xy.first); 
+      ycolumn.push_back(xy.second); 
+  }
+  
+  if ( xcolumn.size() != ycolumn.size() ) {
+      ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+      xcolumn.clear();
+      ycolumn.clear();
+  }
  
-    graph["x"] = xcolumn;
-    graph["y"] = ycolumn;
+  graph["x"] = xcolumn;
+  graph["y"] = ycolumn;
 
-    jsonArray.push_back( graph );
+  jsonArray.push_back( graph );
 
-    return ;
+  return ;
 }
 
 void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
@@ -400,13 +376,13 @@ void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
   json jsonArray = json::array();
 
   for (auto hist : hist_lists.histlist ) {
-	add_hist_to_json( *hist, jsonArray, coverage_all );
+    add_hist_to_json( *hist, jsonArray, coverage_all );
   }
   for (auto hist : hist_lists.categoryhistlist ) {
-	add_hist_to_json( *hist, jsonArray, coverage_all );
+    add_hist_to_json( *hist, jsonArray, coverage_all );
   }
   for (auto hist : hist_lists.graphlist ) {
-	add_hist_to_json( *hist, jsonArray, coverage_all );
+    add_hist_to_json( *hist, jsonArray, coverage_all );
   }
 
   std::string full_output_path = m_outputdir + m_json_file_name;

@@ -20,14 +20,6 @@ file(GLOB_RECURSE FRONTENDRECEIVER_SOURCES "FrontEndReceiver.cpp")
 add_library(frontendreceiver SHARED ${FRONTENDRECEIVER_SOURCES})
 target_link_libraries(frontendreceiver PUBLIC core utilities zmq)
 
-file(GLOB_RECURSE MONITORSTR_SOURCES "MonitorStr.cpp")
-add_library(monitorstr SHARED ${MONITORSTR_SOURCES})
-target_link_libraries(monitorstr PUBLIC core utilities zmq)
-
-#file(GLOB_RECURSE MONITORBINARY_SOURCES "MonitorBinary.cpp")
-#add_library(monitorbinary SHARED ${MONITORBINARY_SOURCES})
-#target_link_libraries(monitorbinary PUBLIC core utilities zmq)
-
 file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
 add_library(monitor SHARED ${MONITOR_SOURCES})
 target_link_libraries(monitor PUBLIC core utilities zmq)

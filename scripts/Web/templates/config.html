@@ -46,7 +46,7 @@
    	 	padding-left: 0px;
    	 	margin-right: auto;
     		margin-left: auto;
-		padding-top:4px;
+		padding-top:6px;
 		padding-bottom:4px;
 	}	
 	</style>
@@ -59,14 +59,12 @@
 	<!--<div class="container">-->
 	<!--<form></form>-->
 	<!--<div id="res" class="alert"></div>-->
-	<div class="row">
+	<div class="container">
 				
-			<ul class="nav flex-column nav-tabs" id="schemaBar">
-				<script>
-				</script>
-			</ul>
+			<div class="dropdown" id="schemaDropDown">
+			</div>
 			
-		<div class= "column">
+		
 			<div class="container" id="editor-holder">
 				<script>	
 				</script>
@@ -133,7 +131,10 @@
 						remove.style.cssFloat = "right";
 						remove.innerHTML = "REMOVE BOARD";
 						remove.addEventListener("click", function(){
-							removeBoard(boardName);
+							if(window.opener.isDOWN())
+								removeBoard(boardName);
+							else
+								alert("not in DOWN mode");
 						});
 						buttonsContainer.appendChild(remove);
 
@@ -143,7 +144,10 @@
 						apply.style.cssFloat = "right";
 						apply.innerHTML = "APPLY CHANGES"
 						apply.addEventListener("click", function(){
-							applyChanges(editor, boardName);
+							if(window.opener.isDOWN())
+								applyChanges(editor, boardName);	
+							else
+								alert("not in DOWN mode");
 						});
 						buttonsContainer.appendChild(apply);
 
@@ -155,7 +159,10 @@
 						add.style.cssFloat = "right";
 						add.innerHTML = "ADD BOARD";
 						add.addEventListener("click", function(){
-							addBoard(editor);
+							if(window.opener.isDOWN())
+								addBoard(editor);
+							else
+								alert("not in DOWN mode");
 						});
 						buttonsContainer.appendChild(add);
 
@@ -186,7 +193,7 @@
 				}
 
 			</script>
-		</div>
+		
 	</div>
 	
 </body>

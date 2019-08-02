@@ -237,6 +237,21 @@ function updateCommandAvailability(data){
 }
 
 
+function isDOWN(){
+	var allDOWN = true;
+	$.ajax({url: '/status', async: false, success: function(data){
+		
+		for(var i = 0; i < Object.keys(data.allStatus).length; i++){
+			if( (data.allStatus[i].state) != "DOWN"){
+				allDOWN = false;
+			}
+		}
+
+	}}
+	);
+	return allDOWN;
+}
+
 function updateCommandsAndStatus(){
 	//var dat;
 	//document.write('in updateStaus');

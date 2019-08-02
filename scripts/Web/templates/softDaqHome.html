@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+
+<head>
+	<title>Daq software</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- the links to the bootstrap CDN -->
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+	<script src="{{ url_for('static', filename='softDaqHome.js', version='88')}}"></script>
+	<!--<script src="{{ url_for('static', filename='valid-config.json')}}"></script>-->
+
+
+
+	<style>
+	.jumbotron{
+		background-color: #2E2D88;
+		color:aqua;
+	}
+	
+	.btn-circle {
+ 		border-radius: 60%;
+	}
+/*
+	.col-3{
+		display: block;
+		float: left;
+		width: 5%;
+		margin-top: 15px;
+		height: auto;
+	}
+
+
+	.col-2{
+		display: block;
+		float: left;
+		width: 5%;
+		margin-top: 15px;
+		height: auto;
+	}
+*/
+	</style>
+
+</head>
+<body>
+
+
+	<div class = "container-fluid">
+		<div class = "page-header">
+			<br><br>
+			<center><h4>DAQ software</h4></center>
+			<br><br>
+		</div>
+		
+		<div class = "row">
+			<div class = "col-3">
+				<div class = "jumbotron"  style= "padding-right:15px ; padding-left:10px ; padding-bottom: 65px; padding-top:25px">
+					<div class="container" id = "configFilesRadioGroup">	
+					</div>
+
+					<div class = "container" id="saveNewFile">
+					</div>
+
+
+					<script>
+						updateConfigFileChoices();
+						document.getElementById("radio-" + "current.json").checked = "checked";
+						displaySaveButton();
+					</script>
+			
+				</div>
+
+			</div>
+			<div class = "col-9">
+				<div class = "jumbotron" style= "width: 700px; color:aqua;background-color: #1a52c6">
+					<center><h4>CONTROLS</h4></center>
+					<br>
+					<br>
+					<center>	
+						<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
+						&nbsp;
+						<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
+						&nbsp;
+						<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
+						&nbsp;
+						<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
+					</center>
+				
+				</div>
+			</div>
+		
+		</div>
+
+		<div class="row">
+			<!-- run and information-->
+			<div class="col-md-6">
+				<div class = "jumbotron">
+					<center><h4>RUN INFORMATION</h4></center>
+					<br>
+				</div>
+			</div>
+			<!-- status and settings-->
+			<div class="col-md-6">
+				
+				<div class= "container">				
+				<div class = "jumbotron" style= "padding-right:15px ; padding-left:10px ; padding-bottom: 80px; padding-top:25px">
+					<center><h3>STATUS AND SETTINGS</h3></center>
+					<div class = "container" id = "boards">
+		
+						<script>
+							updateBoardContainer("current.json");
+							setInterval(updateCommandsAndStatus, 500);
+						</script>
+			
+
+					</div>
+					<div class="container">	
+						<button type="button" class="btn btn-primary btn-lg" style="float: right;" onclick="addBoard()">ADD</button>
+					</div>
+					
+				</div>
+				</div>
+
+
+			</div<>
+
+		</div>
+
+	</div>	
+</body>
+
+
+
+</html>
+

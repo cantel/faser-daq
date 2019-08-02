@@ -6,25 +6,29 @@
         "type": "string",
 	"required": true,
 	"default": "DataLoggerXXX",
-	"pattern": "^((?!XXX).)*$"
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
       },
       "host": {
         "type": "string",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname"
+	"format": "hostname",
+	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535
+	"maximum": 65535,
+	"propertyOrder": 3
       },
       "type": {
         "type": "string",
 	"default": "filedatalogger",
-	"readOnly": true
+	"readOnly": true,
+	"propertyOrder": 4
       },
       "settings": {
         "type": "object",
@@ -34,7 +38,9 @@
 	    "type": "string",
 	    "format": "uri"
 	  }
-	}
+	},
+	"format": "grid",
+	"propertyOrder": 5
       },
       "connections": {
         "type": "object",
@@ -55,8 +61,7 @@
                 "chid": {"type":"integer"},
                 "host": {"type":"string"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           },
           "senders": { 
@@ -74,14 +79,14 @@
                 "chid": {"type":"integer"},
                 "host": {"type":"string"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           }
         }
       }
     },
-    "required": ["name", "host", "port", "type"]
+    "format": "grid",
+    "propertyOrder": 6
 }
 
 

@@ -139,11 +139,14 @@ function shutdown(){
 }
 
 function updateStatus(data){
-	
+	//alert("here");
+	console.log(data);	
 	for (var i = 0; i < Object.keys(data.allStatus).length; i++){
 		//document.write("in for of update status");
 
 		document.getElementById("status" + i.toString()).className = "badge badge-success";
+		//console.log(data.allStatus[i].state);
+		//alert(data.allStatus[i].state);
 		document.getElementById("status" + i.toString()).innerHTML = data.allStatus[i].state;
 		if(data.allStatus[i].state == "TIMEOUT"){
 			document.getElementById("status" + i.toString()).className = "badge badge-danger";
@@ -238,12 +241,14 @@ function updateCommandsAndStatus(){
 	//var dat;
 	//document.write('in updateStaus');
 	//document.write(Object.keys(config.components).length);
-	$.getJSON('/status', function(data){
+	$.ajax({url: '/status', async: false, success: function(data){
 		//dat  = data.allStatus[0].state;
 		//document.write(dat);
+		console.log(data);
+		console.log("in update general funciton");
 		updateStatus(data);
 		updateCommandAvailability(data);
-	}
+	}}
 	);
 	//document.write(dat);		
 	//document.write(dat.allStatus[0].status);
@@ -328,6 +333,7 @@ function saveConfigFile(){
 			if(result.message){
 				var mes = "File " + configFileName + " has been successfully added";
 				 updateConfigFileChoices();
+				document.getElementById('radio-current.json').checked = true;
 				alert(mes);
 			}
 			else{

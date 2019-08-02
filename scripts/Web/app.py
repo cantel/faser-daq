@@ -5,9 +5,7 @@ import os
 from os import environ as env
 import threading
 import sys
-sys.path.append("../")
 import daqcontrol
-import supervisor_wrapper
 #import pysftp
 #import paramiko
 #import select
@@ -19,11 +17,15 @@ app  = Flask(__name__)
 app.secret_key = 'verySecret:wq'
 def read(fileName):
 	session['fileName'] = fileName
-	with open('configFiles/' + fileName) as f:
-		data = json.load(f)
-	f.close()
+	if(os.path.exists(env['DAQ_CONFIG_DIR'] + fileName)):
+		with open(env['DAQ_CONFIG_DIR'] + fileName) as f:
+			data = json.load(f)
+		f.close()
+	else:
+		data = {}
+		write(data)
 	
-	with open("json-config.schema") as f:
+	with open(env['DAQ_CONFIG_DIR'] + "json-config.schema") as f:
 		 schema = json.load(f)
 	f.close()
 	#res = validate(instance=data, schema=schema)
@@ -31,7 +33,7 @@ def read(fileName):
 	return data
 
 def write(d):
-	with open('configFiles/current.json', 'w') as f:
+	with open(env['DAQ_CONFIG_DIR'] + 'current.json', 'w+') as f:
 		json.dump(d, f)
 
 def createDaqInstance():
@@ -55,11 +57,12 @@ def spawnJoin(list, func):
 
 @app.route("/configFileNames")
 def getConfigFileNames():
-	entries = os.listdir('configFiles')
-	print(entries)
+	entries = os.listdir(env['DAQ_CONFIG_DIR'])
+	#print(entries)
 	fileNames = []
 	for e in entries:
-		fileNames.append({'name': e})
+		if(e.endswith(".json")):
+			fileNames.append({'name': e})
 	return jsonify({'configFileNames' : fileNames})
 		
 @app.route("/")
@@ -71,6 +74,7 @@ def launche():
 
 	return render_template('softDaqHome.html')
 def translateStatus(rawStatus, timeout):
+	translatedStatus = rawStatus
 	if(timeout):
 		translatedStatus = "TIMEOUT"
 	else:
@@ -98,7 +102,7 @@ def sendStatusJsonFile():
 		#existing = sd.getProcessState(p['name'])['statename']
 		rawStatus, timeout = dc.getStatus(p)
 		status = translateStatus(rawStatus, timeout);
-		print('status of this component: ', status)
+		print('status of this componen ', p['name'],"is: ", status)
 		statusArr.append({'name' : p['name'] , 'state' : str(status)})
 	return jsonify({'allStatus' : statusArr})
 			
@@ -107,7 +111,7 @@ def findIndex(boardName):
 	index = 0
 	d = session.get("data")
 	for p in d['components']:
-		print("in findIndex, the index in for: ", index)
+		#print("in findIndex, the index in for: ", index)
 		if p['name'] == boardName:
 			break
 		else:
@@ -124,8 +128,8 @@ def initialise():
 	
 	logfiles = dc.addProcesses(d['components'], False)
 	session['logfiles'] = logfiles
-	print("after adding")
-	print('in initilaise the logfiles are : ', logfiles)
+	#print("after adding")
+	#print('in initilaise the logfiles are : ', logfiles)
 	spawnJoin(d['components'], dc.configureProcess)
 	
 	return "true"
@@ -166,7 +170,7 @@ def config(boardName):
 	boardName = d['components'][index]['name']
 	boardType = component['type']
 	
-	schemaFileName = "schemaTemplates/" + boardType + ".schema"
+	schemaFileName = env['DAQ_CONFIG_DIR'] +"schemas/" + boardType + ".schema"
 	#print(schemaFileName)
 
 	#f= open("schemaTemplates/" + "example.schema")
@@ -193,13 +197,13 @@ def removeBoard(boardName):
 @app.route("/config/<boardName>/changeConfigFile", methods=['GET', 'POST'])
 def changeConfigFile(boardName):
 	if (request.method == 'POST'):
-		print(request.content_type)
+		#print(request.content_type)
 		submittedValue = request.json
-		print("submittedValue: ", submittedValue)
+		#print("submittedValue: ", submittedValue)
 		index = findIndex(boardName)
 		d = session.get("data")
 		d['components'][index] = submittedValue
-		print(d)
+		#print(d)
 		session['data'] = d
 		write(d)
 		
@@ -211,11 +215,11 @@ def changeConfigFile(boardName):
 @app.route("/add/addBoard", methods=['GET', 'POST'])
 def writeBoardToFile():
 	if (request.method == 'POST'):
-		print(request.content_type)
+		#print(request.content_type)
 		submittedValue = request.json
-		print("submittedValue: ", submittedValue)
+		#print("submittedValue: ", submittedValue)
 		d = session.get("data")
-		print(d)
+		#print(d)
 		for p in d['components']:
 			if(submittedValue['name'] == p['name']):
 				return jsonify({ "message": "this board name already exists"})
@@ -229,21 +233,21 @@ def writeBoardToFile():
 @app.route("/add")
 def addBoard():
 		
-	schemas = os.listdir('schemaTemplates')
-	print(schemas)
+	schemas = os.listdir(env['DAQ_CONFIG_DIR'] +'schemas')
+	#print(schemas)
 	schemaChoices = []
 	for s in schemas:
 		if(s.endswith(".schema")):
 			schemaChoices.append({'name': s})
 		#print("hello")
 	schemaNames = {'schemaChoices' : schemaChoices}
-	print(schemaNames)	
+	#print(schemaNames)	
 	return render_template('config.html', pageName='Add Board', component = {}, schemaChoices = schemaNames, schema={}, flag = 1, boardName="")
 
 @app.route("/add/<schematype>")
 def getschema(schematype):
 
-	schemaFileName = "schemaTemplates/" + schematype
+	schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + schematype
 	f = open(schemaFileName)
 	#print(f.read())
 	schema = json.load(f)
@@ -253,16 +257,16 @@ def getschema(schematype):
 @app.route('/configurationFile/<fileName>')
 def getConfigFile(fileName):
 	session["data"] = read(fileName)
-	print(fileName)
-	print(session.get("data"))
+	#print(fileName)
+	#print(session.get("data"))
 	return jsonify(session.get("data"))
 
 @app.route('/saveConfigFile/<newFileName>')
 def saveNewConfigFile(newFileName):
-	if (os.path.exists("configFiles/" + newFileName)):
+	if (os.path.exists(env['DAQ_CONFIG_DIR'] + newFileName)):
 		return jsonify({ "message" : 0})
 	else:
-		shutil.copy("configFiles/current.json", "configFiles/" + newFileName + ".json", follow_symlinks=False)
+		shutil.copy(env['DAQ_CONFIG_DIR'] + "current.json", env['DAQ_CONFIG_DIR'] + newFileName + ".json", follow_symlinks=False)
 		return jsonify({"message" : 1})
 		
 		
@@ -272,9 +276,9 @@ def logfile(boardName):
 	#logfiles = session.get("logfiles", None)
 	logfiles = session.get('logfiles')
 	index = findIndex(boardName)
-	print("in logfile function and the boardName is:", boardName)
-	print('index of logFile: ', index)
-	print("in logfile function logfiles are : ", logfiles)
+	#print("in logfile function and the boardName is:", boardName)
+	#print('index of logFile: ', index)
+	#print("in logfile function logfiles are : ", logfiles)
 	#!/usr/bin/env python
 	#client = paramiko.SSHClient()
 	#client.load_system_host_keys()

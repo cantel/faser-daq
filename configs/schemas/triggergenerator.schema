@@ -6,25 +6,29 @@
         "type": "string",
 	"required": true,
 	"default": "TriggerGeneratorXXX",
-	"pattern": "^((?!XXX).)*$"
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
       },
       "host": {
         "type": "string",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname"
+	"format": "hostname",
+	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535
+	"maximum": 65535,
+	"propertyOrder": 3
       },
       "type": {
         "type": "string",
 	"default": "triggergenerator",
-	"readOnly": true
+	"readOnly": true,
+	"propertyOrder": 4
       },
       "settings": {
         "type": "object",
@@ -40,11 +44,15 @@
 	    "minimum": 1,
 	    "maximum": 5000,
 	    "required": true,
-	    "description": "Rate of triggers to generate"
+           "options": {
+                "infoText": "Rate of triggers to generate"
+            }   
 	  },
 	  "frontendApps": {
 	    "type": "array",
-	    "description": "Applications that should receive triggers",
+           "options": {
+                "infoText": "Applications that should receive triggers"
+            },
             "format": "table",
             "title": "Receivers",
             "uniqueItems": true,
@@ -67,7 +75,9 @@
               }
             }
           }
-	}
+	},
+	"format":"grid",
+	"propertyOrder": 5
       },
       "connections": {
         "type": "object",
@@ -88,8 +98,7 @@
                 "chid": {"type":"integer"},
                 "host": {"type":"string"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           },
           "senders": { 
@@ -107,14 +116,14 @@
                 "chid": {"type":"integer"},
                 "host": {"type":"string"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           }
         }
       }
     },
-    "required": ["name", "host", "port", "type"]
+    "format": "grid",
+    "propertyOrder": 6
 }
 
 

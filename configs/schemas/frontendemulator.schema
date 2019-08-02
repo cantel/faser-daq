@@ -6,25 +6,29 @@
         "type": "string",
 	"required": true,
 	"default": "FrontEndEmulatorXXX",
-	"pattern": "^((?!XXX).)*$"
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
       },
       "host": {
         "type": "string",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname"
+	"format": "hostname",
+	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535
+	"maximum": 65535,
+	"propertyOrder": 3
       },
       "type": {
         "type": "string",
 	"default": "frontendemulator",
-	"readOnly": true
+	"readOnly": true,
+	"propertyOrder": 4
       },
       "settings": {
         "type": "object",
@@ -40,7 +44,9 @@
 	    "minimum": 10,
 	    "maximum": 60000,
 	    "required": true,
-	    "description": "Mean data size to send"
+	    "options": {
+    		"infoText": "Mean data size to send"
+             }	
 	  },
 	  "rmsSize": {
 	    "type": "integer",
@@ -48,13 +54,17 @@
 	    "minimum": 0,
 	    "maximum": 10000,
 	    "required": true,
-	    "description": "RMS of data size to send"
+	     "options": {
+   		 "infoText": "RMS of data size to send"
+  	     }
 	  },
 	  "fragmentID": {
 	    "type": "integer",
 	    "default": 0,
 	    "required": true,
-	    "description": "Fragment identifier"
+	     "options": {
+                 "infoText": "Fragment identifier"
+             }
 	  },
 	  "probMissingTrigger": {
 	    "type": "number",
@@ -62,7 +72,10 @@
 	    "minimum": 0,
 	    "maximum": 1,
 	    "required": true,
-	    "description": "Probability to miss trigger signal"
+   	     "options": {
+                 "infoText":  "Probability to miss trigger signal"
+
+             }
 	  },
 	  "probMissingFragment": {
 	    "type": "number",
@@ -70,7 +83,10 @@
 	    "minimum": 0,
 	    "maximum": 1,
 	    "required": true,
-	    "description": "Probability to not send fragment on trigger"
+            "options": {
+                 "infoText":  "Probability to not send fragment on trigger"
+
+             }
 	  },
 	  "probCorruptedFragment": {
 	    "type": "number",
@@ -78,15 +94,21 @@
 	    "minimum": 0,
 	    "maximum": 1,
 	    "required": true,
-	    "description": "Probability to send corrupted fragment"
+	   "options": {
+                 "infoText": "Probability to send corrupted fragment"
+
+             }
 	  },
 	  "monitoringInterval": {
 	    "type": "number",
 	    "default": 0,
 	    "minimum": 0,
 	    "maximum": 1000,
-	    "required": true,
-	    "description": "Time in seconds between monitoring fragments"
+	    "required": true,	
+	   "options": {
+                 "infoText": "Time in seconds between monitoring fragments"
+
+             }
 	  },
           "triggerPort": {
             "type": "integer",
@@ -94,7 +116,10 @@
             	"default": 0,
                 "minimum": 1024,
            	"maximum": 65535,
-		"description": "Port for incoming triggers"
+	        "options": {
+                	 "infoText":  "Port for incoming triggers"
+                 
+        	 }
           },
 	  "daqHost": {
             "type": "string",
@@ -108,9 +133,12 @@
              "default": 0,
              "minimum": 1024,
              "maximum": 65535,
-  	     "description": "Port for sending data fragments"
+		  "options": {
+   			 "infoText": "Port for sending data fragments"
+ 		 }
            }
-	}
+	}, "format":"grid",
+		"propertyOrder": 5
       },
       "connections": {
         "type": "object",
@@ -131,8 +159,7 @@
                 "chid": {"type":"integer"},
                 "host": {"type":"string"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           },
           "senders": { 
@@ -150,14 +177,14 @@
                 "chid": {"type":"integer"},
                 "host": {"type":"string"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           }
         }
       }
     },
-    "required": ["name", "host", "port", "type"]
+    "format": "grid",
+     "propertyOrder": 6
 }
 
 

@@ -7,15 +7,29 @@ function displaySchemaOptions(schemas, flag){
 	else if(flag == 1){	
 		//alert("second");
 		//console.log(schemas);
-		var schemaBar = document.getElementById("schemaBar");	
+		var schemaBar = document.getElementById("schemaDropDown");	
+		var dropDown = document.createElement("button");
+		dropDown.className = "btn btn-primary dropdown-toggle";
+		dropDown.setAttribute("type", "button");
+		dropDown.innerHTML = "Schema Options";
+		dropDown.setAttribute("data-toggle","dropdown");	
+		var caret = document.createElement("span");
+		caret.className = "caret";
+		dropDown.appendChild(caret);
+
+		schemaBar.appendChild(dropDown);
+
+		var u1 = document.createElement("u1");
+		u1.className = "dropdown-menu";
+		schemaBar.appendChild(u1);
 
 		for(var i = 0; i < Object.keys(schemas.schemaChoices).length; i++){
 			var li = document.createElement("li");
-			li.className = "nav-item";
+			//li.className = "nav-item";
 	
 			var a = document.createElement("a");
-			a.className = "nav-link";
-			a.href = "#bla";
+			//a.className = "nav-link";
+			a.href = "#schema choice";
 			var name = schemas.schemaChoices[i].name;
 			var nameWithoutExt = name.split(".").slice(0, -1).join(".")
 			a.innerHTML = nameWithoutExt;
@@ -30,8 +44,12 @@ function displaySchemaOptions(schemas, flag){
 			});
 		
 			li.appendChild(a);
-			schemaBar.appendChild(li);
+			u1.appendChild(li);
 		}
+
+		$(document).ready(function() {  
+   			$(".dropdown .dropdown-menu li a")[0].click();
+		});	
 	}
 	
 }
@@ -60,6 +78,8 @@ function removeBoard(boardName){
 	$.ajax({url: urlPath, async: false});
 	closeWindow();
 }
+
+
 
 function closeWindow(){
 	window.opener.goToCurrent();

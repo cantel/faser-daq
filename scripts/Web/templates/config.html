@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+
+<head>
+	<title> {{ pageName }} </title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- the links to the bootstrap CDN -->
+
+
+	<!--<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">-->
+
+	<!--<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/foundation/4.3.2/css/foundation.min.css'>-->
+	<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+	<!--<link rel='stylesheet'type=text/css  href="{{ url_for('static', filename='bootstrap.min.css') }}">-->
+	<!--<link rel="stylesheet" href='//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css'>-->
+
+	<link rel="stylesheet" href='https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
+
+	<link rel="stylesheet" type="text/css" href="{{ url_for( 'static', filename='custom.css') }}">
+	<!--<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">-->
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	
+	<script src="{{ url_for('static', filename='config.js', version='104')}}"></script>
+
+	<!--<script src="{{ url_for('static', filename='softDaqHome.js', version='58')}}"></script>-->
+	<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+	<!--<script src=" {{  url_for('static', filename='jsoneditor.min.js') }}"></script>-->
+
+	<!--<link rel='stylesheet' id='theme_stylesheet'>-->
+	<!--<link rel='stylesheet' id='icon_stylesheet'>-->
+
+	<style>
+	.jumbotron{
+		background-color: #2E2D88;
+		color:aqua;
+	}
+	
+	.btn-circle {
+ 		border-radius: 60%;
+	}
+
+	.container {
+ 	   	width: 100%;
+   	 	padding-right: 0px;
+   	 	padding-left: 0px;
+   	 	margin-right: auto;
+    		margin-left: auto;
+		padding-top:4px;
+		padding-bottom:4px;
+	}	
+	</style>
+
+</head>
+	
+<body>
+<!--<center><h1>Component Configuration Form</h1></center>-->
+
+	<!--<div class="container">-->
+	<!--<form></form>-->
+	<!--<div id="res" class="alert"></div>-->
+	<div class="row">
+				
+			<ul class="nav flex-column nav-tabs" id="schemaBar">
+				<script>
+				</script>
+			</ul>
+			
+		<div class= "column">
+			<div class="container" id="editor-holder">
+				<script>	
+				</script>
+
+			</div>
+	
+			<div class= "container" id= "buttons">
+			</div>
+	
+
+			<script type="text/javascript">
+				
+				var flag = '{{ flag }}';
+				var schemas = JSON.parse('{{ schemaChoices | tojson | safe}}');
+				displaySchemaOptions(schemas , flag);
+				console.log(schemas);	
+				console.log(flag);
+
+
+				var schema = JSON.parse('{{ schema | tojson | safe }}');
+				console.log(schema);
+				var value = JSON.parse('{{ component | tojson | safe }}');
+
+				
+				var editor;
+
+				JSONEditor.defaults.options.required_by_default = true;
+				JSONEditor.defaults.options.disable_edit_json = true;	
+				JSONEditor.defaults.options.disable_properties = true;
+				JSONEditor.defaults.options.show_errors = "always";
+
+				loadSchema(schema, value);
+
+				//loadSchema(editor, schema, value);
+				loadButtons(flag, '{{ boardName }}');
+							
+
+				function loadSchema(schema, value){
+
+					var element = document.getElementById('editor-holder');
+					//JSONEditor.defaults.editors.object.options.hidden = true;
+					//JSONEditor.defaults.editors.object.options.disable_edit_json = true;	
+					//JSONEditor.defaults.editors.object.options.disable_properties = true;
+					while(element.firstChild && element.removeChild(element.firstChild));	
+					editor = new JSONEditor(element, {
+						schema:schema,
+						theme:'bootstrap3',
+						iconlib:'fontawesome4',
+						startval:value,
+						required_by_default:true 
+			
+					});
+
+					//return editor;
+				}
+
+				function loadButtons(flag, boardName){
+					var buttonsContainer = document.getElementById("buttons");
+					//config
+					//alert(flag);
+					if(flag == 0){
+						var remove = document.createElement("button");
+						remove.className = "btn btn-danger";
+						remove.style.cssFloat = "right";
+						remove.innerHTML = "REMOVE BOARD";
+						remove.addEventListener("click", function(){
+							removeBoard(boardName);
+						});
+						buttonsContainer.appendChild(remove);
+
+						
+						var apply = document.createElement("button");
+						apply.className = "btn btn-warning";
+						apply.style.cssFloat = "right";
+						apply.innerHTML = "APPLY CHANGES"
+						apply.addEventListener("click", function(){
+							applyChanges(editor, boardName);
+						});
+						buttonsContainer.appendChild(apply);
+
+					}
+					else if (flag == 1){
+						
+						var add = document.createElement("button");
+						add.className = "btn btn-success";
+						add.style.cssFloat = "right";
+						add.innerHTML = "ADD BOARD";
+						add.addEventListener("click", function(){
+							addBoard(editor);
+						});
+						buttonsContainer.appendChild(add);
+
+					}
+				}
+
+
+				function addBoard(){
+					
+					var urlPath = '/add/addBoard';
+					//alert(urlPath);
+					var errors = editor.validate();
+					console.log(errors);
+					if(!errors.length){
+						
+						var value = editor.getValue();
+						//console.log(value);	
+						$.ajax({url: urlPath, async : false, type:'POST', dataType: 'json', data : JSON.stringify(value), contentType:"application/json", success : function(data){
+							var message = data.message;
+							alert(message);
+						}});	
+								
+						window.opener.goToCurrent();
+					}
+					else{
+						alert("errors in submitted form, check console for more details");
+					}
+				}
+
+			</script>
+		</div>
+	</div>
+	
+</body>

@@ -19,6 +19,10 @@ EventBuilder::EventBuilder() {
   auto cfg = m_config.getConfig()["settings"];
 
   m_maxPending = cfg["maxPending"];
+
+  m_numChannels=m_config.getConfig()["connections"]["receivers"].size();
+  m_numOutChannels=m_config.getConfig()["connections"]["senders"].size();
+
 }
 
 EventBuilder::~EventBuilder() { }
@@ -31,6 +35,11 @@ void EventBuilder::start() {
   m_status = STATUS_OK;
   m_queueFraction = 0;
   if (m_stats_on) {
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(1), "EB-CHN1-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(1), "EB-CHN1-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(2), "EB-CHN2-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(2), "EB-CHN2-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
+    // Claire: above metrics will in future be added automatically by daqling for every existing connection
     m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
@@ -65,6 +74,7 @@ bool EventBuilder::sendEvent(int outChannel,
       header.bc_id = 0xFFFF;
       header.status = 0;
       header.timestamp = 0;
+
       for(int ch=0;ch<numFragments;ch++) {
 	if (fragments.at(ch)) {
 	  outFragments += *fragments[ch];
@@ -89,6 +99,7 @@ bool EventBuilder::sendEvent(int outChannel,
 	  }
 	  delete fragments[ch];
 	} else {
+	  WARNING("Missing fragment for event "<<header.event_id<<": No fragment for channel "<<ch);
 	  header.status |= MissingFragment;
 	}
       }
@@ -96,16 +107,17 @@ bool EventBuilder::sendEvent(int outChannel,
       header.payload_size=outFragments.size();
       daqling::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
       data+=outFragments;
-      INFO("Sending event "<<header.event_id<<" - "<<data.size()<<" bytes");
-      m_connections.put(outChannel, data);
+      INFO("Sending event "<<header.event_id<<" - "<<data.size()<<" bytes.");
+      for ( unsigned int outch=m_numChannels+1;outch<=m_numChannels+m_numOutChannels;outch++){
+          m_connections.put(outch, data);
+      }
       return true;
 }
 
 void EventBuilder::runner() {
   INFO("Running...");
-  int numChannels=m_config.getConfig()["connections"]["receivers"].size();
 
-  int channelNum=1;
+  unsigned int channelNum=1;
   bool noData=true;
   std::map<uint64_t,std::vector<daqling::utilities::Binary *> > pendingFragments;
   std::map<uint64_t,int> pendingFragmentsCounts;
@@ -125,7 +137,7 @@ void EventBuilder::runner() {
     
     int channel=channelNum;
     channelNum++;
-    if (channelNum>numChannels) channelNum=1;
+    if (channelNum>m_numChannels) channelNum=1;
     
     if (!m_connections.get(channel, *blob)) {
       if (noData && channelNum==1) std::this_thread::sleep_for(10ms);
@@ -145,14 +157,14 @@ void EventBuilder::runner() {
       std::vector<daqling::utilities::Binary *> toSend;
       toSend.push_back(blob);
       blob = new daqling::utilities::Binary;
-      sendEvent(numChannels+1,toSend,1);
+      sendEvent(m_numChannels+1,toSend,1);
       m_monitoringEventCount+=1;
       continue;
     }
  
     INFO("Got data fragment : "<<event_id<<" from channel "<<channel << " with size " << blob->size());
     if (pendingFragments.find(event_id)==pendingFragments.end()) {
-      pendingFragments[event_id]=std::vector<daqling::utilities::Binary *>(numChannels,0);
+      pendingFragments[event_id]=std::vector<daqling::utilities::Binary *>(m_numChannels,0);
       pendingFragmentsCounts[event_id]=0;
       pendingEventIDs.push_back(event_id);
     }
@@ -166,7 +178,7 @@ void EventBuilder::runner() {
     blob = new daqling::utilities::Binary;
 
     uint64_t eventToSend=0;
-    if (pendingFragmentsCounts[event_id]==numChannels) {
+    if (pendingFragmentsCounts[event_id]==m_numChannels) {
       eventToSend=event_id;
     } else if (pendingEventIDs.size()>m_maxPending) {
       WARNING("Too many events pending - will send first incomplete event");
@@ -174,7 +186,7 @@ void EventBuilder::runner() {
     }
     
     if (eventToSend) {
-      sendEvent(numChannels+1,pendingFragments[eventToSend],numChannels);
+      sendEvent(m_numChannels+1,pendingFragments[eventToSend],m_numChannels);
       m_physicsEventCount+=1;
       pendingFragments.erase(pendingFragments.find(eventToSend));
       pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));

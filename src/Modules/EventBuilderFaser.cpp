@@ -30,8 +30,10 @@ EventBuilder::~EventBuilder() { }
 void EventBuilder::start() {
   DAQProcess::start();
   m_physicsEventCount = 0;
+  m_calibrationEventCount = 0;
   m_monitoringEventCount = 0;
   m_run_number = 100; //BP: should get this from run control
+  m_run_start = std::time(nullptr);
   m_status = STATUS_OK;
   m_queueFraction = 0;
   if (m_stats_on) {
@@ -44,7 +46,10 @@ void EventBuilder::start() {
     m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_calibrationEventCount, "CalibrationEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_calibrationEventCount, "CalibrationRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_run_number, "RunNumber", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+    m_statistics->registerVariable<std::atomic<int>, int>(&m_run_start, "RunStart", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<int>, int>(&m_status, "Status", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
     m_statistics->registerVariable<std::atomic<float>, float>(&m_queueFraction, "QueueFraction", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::FLOAT);
   }

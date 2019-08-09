@@ -18,13 +18,13 @@ function createBoardNames(boardName){
 function createConfigButtons(boardName){
 	var btn = document.createElement("BUTTON");
 	btn.innerHTML = "CONFIG";
-	btn.className= "btn btn-primary btn-lg";
+	btn.className= "btn btn-primary";
 	btn.id = "config" + boardName;
 	btn.addEventListener("click", function(){
 		window.open("/config/" + boardName, 'Configuration Data','replace=true,top=200,left=100,height=800,width=1000,scrollbars=yes,titlebar=yes');
 	})	
 	var col2 = document.createElement("DIV");
-	col2.className = "col-3";
+	col2.className = "col-auto";
 	col2.appendChild(btn);
 	
 	return col2;
@@ -32,11 +32,12 @@ function createConfigButtons(boardName){
 }
 
 
+
 function createLogButtons(boardName){
 
 	var btn = document.createElement("BUTTON");
 	btn.innerHTML = "LOG";
-	btn.className= "btn btn-info btn-lg";
+	btn.className= "btn btn-info";
 	//window.location.href= "/log";
 	//print("board Name: ", configComp[i].name);	
 	btn.addEventListener("click", function(){
@@ -44,16 +45,32 @@ function createLogButtons(boardName){
 		window.open("/log/" + boardName, "replace=true");
 	}, false);
 	
-	var col3 = document.createElement("DIV");
+	var col4 = document.createElement("DIV");
 	
-	col3.className = "col-2";
-	col3.appendChild(btn);
+	col4.className = "col-auto";
+	col4.appendChild(btn);
 	
-	return col3;
+	return col4;
 	//document.getElementById("boards").appendChild(col3);
 }
 
+ 
+function createInfoButtons(boardName){
+	var btn = document.createElement("SPAN");
 
+	btn.innerHTML = 'INFO';
+	btn.className = "btn btn-info";
+	btn.id = "info-" + boardName;
+	btn.addEventListener("click", function(){
+		window.open("/monitoring/values/" + boardName, "replace=true");
+	}, false);
+	
+	var col3 = document.createElement("DIV");
+	col3.className = "col-auto";
+	col3.appendChild(btn);
+
+	return col3;
+}
 function createStatusBadges(i){
 
 	var btn = document.createElement("SPAN");
@@ -61,15 +78,15 @@ function createStatusBadges(i){
 
 	btn.innerHTML = 'LOAD';
 	btn.className= "badge badge-success";
-	btn.style.fontSize= "xx-large";
+	btn.style.fontSize= "x-large";
 	btn.style.background= "Green";
 	btn.id = "status" + i.toString();
 
-	var col4 = document.createElement("DIV");
-	col4.className = "col-3";
-	col4.appendChild(btn);
+	var col5 = document.createElement("DIV");
+	col5.className = "col-auto";
+	col5.appendChild(btn);
 
-	return col4;
+	return col5;
 	//document.getElementById("boards").appendChild(col4);
 }
 function updateBoardContainer(fileName){
@@ -92,22 +109,28 @@ function createBoardContainer(config){
 		
 		var row = document.createElement("DIV");
 		row.className = "row";	
-	
+			
 		var boardName = configComp[i].name;
 		//first column which shows the name of the board
 		var nameCol = createBoardNames(boardName);
+
 		//second column which shows the config button
 		var configCol = createConfigButtons(boardName);
-		//third column which shows the LOG button
-		var logCol = createLogButtons(boardName);
+
+		//third column which shows the information
+		var infoCol =  createInfoButtons(boardName);
+
 		//fourth column which shows the LOG button
+		var logCol = createLogButtons(boardName);
+
+		//fith column which shows the LOG button
 		var statusCol = createStatusBadges(i);
 
 		row.appendChild(nameCol);
 		row.appendChild(configCol);
 		row.appendChild(logCol);
+		row.appendChild(infoCol);
 		row.appendChild(statusCol);
-
 		boardContainer.appendChild(row);
 		//two br
 		var x = document.createElement("BR");
@@ -201,18 +224,18 @@ function updateCommandAvailability(data){
 	if (allDOWN){
 		document.getElementById("INITIALISE").disabled = false;
 		document.getElementById("SHUTDOWN").disabled = true;
-		disableFileChoice(false);
+		//disableFileChoice(false);
 		disableConfigButtons(data, false);
 	}
 	else{
-		disableFileChoice(true);
+		//disableFileChoice(true);
 		disableConfigButtons(data, true);
 		document.getElementById("INITIALISE").disabled = true;
 		document.getElementById("SHUTDOWN").disabled = false;
 	}
 
 	if(allREADY){
-		document.getElementById("START").disabled = false;
+	document.getElementById("START").disabled = false;
 	}
 	else{
 		document.getElementById("START").disabled = true;
@@ -252,7 +275,7 @@ function isDOWN(){
 	return allDOWN;
 }
 
-function updateCommandsAndStatus(){
+function updateCommandsAndStatusAndButtons(){
 	//var dat;
 	//document.write('in updateStaus');
 	//document.write(Object.keys(config.components).length);
@@ -267,6 +290,7 @@ function updateCommandsAndStatus(){
 	);
 	//document.write(dat);		
 	//document.write(dat.allStatus[0].status);
+	updateColorOfInfoButtons();
 }
 
 function createRadioInputs(fileNames){
@@ -320,7 +344,7 @@ function updateConfigFileChoices(){
 	}});
 	//alert(da.configFileNames[0].name);	
 	createRadioInputs(fileNames);	
-
+	
 }
 
 function goToCurrent(){
@@ -375,4 +399,36 @@ function displaySaveButton(){
 		document.getElementById("saveNewFile").appendChild(save);
 	}
 
+}
+
+function updateRunNumbers(){
+	$.ajax({url:"/monitoring/values/eventbuilder01/dataUpdate", async:false, success: function(data){
+		//alert("updating run numbers");	
+		for(var i = 0; i < Object.keys(data.values).length; i++){
+			if(document.getElementById(data.values[i].key)){
+				document.getElementById(data.values[i].key).innerHTML = data.values[i].value;
+				
+			}
+
+		}
+	}});
+}
+
+function updateColorOfInfoButtons(){
+	
+	$.ajax({url: "/monitoring/values/updateStatus", async: false, success: function(data){
+		console.log(data);
+		
+		for(var i = 0; i < Object.keys(data.allStatus).length; i++){
+			var source = data.allStatus[i].source;
+			var statusVal = data.allStatus[i].statusVal;
+			//alert("source: ", source, " statusVal: ",statusVal);
+			if(statusVal == 0)
+				document.getElementById("info-"+source).className = "btn btn-success";
+			else if(statusVal == 1)
+				document.getElementById("info-"+source).className = "btn btn-warning";
+			else if (statusVal == 2)
+				document.getElementById("info-"+source).className = "btn btn-danger";
+		}
+	}});
 }

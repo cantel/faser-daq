@@ -6,15 +6,18 @@ from os import environ as env
 import threading
 import sys
 import daqcontrol
-#import pysftp
-#import paramiko
-#import select
 import jsonschema
 from jsonschema import validate
 import shutil
 
+from monitoring.metric import metric_blueprint
+
+
 app  = Flask(__name__) 
+app.register_blueprint(metric_blueprint)
+
 app.secret_key = 'verySecret:wq'
+
 def read(fileName):
 	session['fileName'] = fileName
 	if(os.path.exists(env['DAQ_CONFIG_DIR'] + fileName)):
@@ -28,8 +31,6 @@ def read(fileName):
 	with open(env['DAQ_CONFIG_DIR'] + "json-config.schema") as f:
 		 schema = json.load(f)
 	f.close()
-	#res = validate(instance=data, schema=schema)
-	#print("REEEEEES", res)
 	return data
 
 def write(d):
@@ -97,9 +98,6 @@ def sendStatusJsonFile():
 	#group = session.get("group")
 	#print("group in status", group)
 	for p in d['components']:	
-		#if the processes have been addes and requesting the status is possibl
-		#print("info: ", info)
-		#existing = sd.getProcessState(p['name'])['statename']
 		rawStatus, timeout = dc.getStatus(p)
 		status = translateStatus(rawStatus, timeout);
 		print('status of this componen ', p['name'],"is: ", status)
@@ -170,19 +168,7 @@ def config(boardName):
 	boardName = d['components'][index]['name']
 	boardType = component['type']
 	
-	schemaFileName = env['DAQ_CONFIG_DIR'] +"schemas/" + boardType + ".schema"
-	#print(schemaFileName)
-
-	#f= open("schemaTemplates/" + "example.schema")
-	#s = json.load(f)
-	#f.close()
-	#print(s)
-	
-	f = open(schemaFileName)
-	#print(f.read())
-	schema = json.load(f)
-	f.close()
-	#print(schema)
+	schema = readSchema(boardType + ".schema")
 	
 	return render_template('config.html', pageName='Data', component = d['components'][index], schema = schema, flag= 0, schemaChoices = {}, boardName = boardName)
 
@@ -244,14 +230,25 @@ def addBoard():
 	#print(schemaNames)	
 	return render_template('config.html', pageName='Add Board', component = {}, schemaChoices = schemaNames, schema={}, flag = 1, boardName="")
 
-@app.route("/add/<schematype>")
-def getschema(schematype):
-
-	schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + schematype
+def readSchema(boardType):
+	schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + boardType
 	f = open(schemaFileName)
 	#print(f.read())
 	schema = json.load(f)
 	f.close()
+	#print(schema)
+	
+	#customizedFileName = env['DAQ_CONFIG_DIR'] + "customized/" + "customized.json"
+	#f = open(customizedFileName)
+	#custom = json.load(f)
+	#f.close()
+
+	#schema['properties']['host']['enum'].extend(custom['hostOptions'])
+	return schema
+
+@app.route("/add/<schematype>")
+def getschema(schematype):
+	schema = readSchema(schematype)
 	return jsonify(schema)
 	
 @app.route('/configurationFile/<fileName>')
@@ -276,21 +273,6 @@ def logfile(boardName):
 	#logfiles = session.get("logfiles", None)
 	logfiles = session.get('logfiles')
 	index = findIndex(boardName)
-	#print("in logfile function and the boardName is:", boardName)
-	#print('index of logFile: ', index)
-	#print("in logfile function logfiles are : ", logfiles)
-	#!/usr/bin/env python
-	#client = paramiko.SSHClient()
-	#client.load_system_host_keys()
-	#client.connect(logfiles[index][0])
-	#transport = client.get_transport()
-	#channel = transport.open_session()
-	#command = "cat " + logfiles[index][1]
-	#channel.exec_command(command)
-	#while True:
-	#	rl, wl, xl = select.select([channel],[],[],0.0)
-	#	if len(rl) > 0:
-	#		print(channel.recv(1024))
 	try:
 		return send_file(logfiles[index][1], cache_timeout=-1)
 	except IndexError as error:

@@ -40,19 +40,44 @@
 		height: auto;
 	}
 */
-	</style>
+.images {
+  float: right;
+}
+
+table td{
+  color:aqua;
+}    
+
+table th{
+  color: aqua;
+} 
+            .tableTxtColor{
+             
+              color: aqua;
+            }
+</style>
 
 </head>
 <body>
 
 
 	<div class = "container-fluid">
-		<div class = "page-header">
-			<br><br>
-			<center><h4>DAQ software</h4></center>
-			<br><br>
+		<div class = "row">
+			<div class = "col-4">
+			</div>
+			<div class = "col-4">
+				<div class = "page-header">
+					<br><br>
+					<center><h4>DAQ software</h4></center>
+					<br><br>
+				</div>
+			</div>
+			<div class= "col-4">	
+				<div class = "images">
+				<img src="{{ url_for('static', filename='faserLogo.jpeg')}}", style="width:300px;height:100px;" height="30" width="35" >
+				</div>
+			</div>
 		</div>
-		
 		<div class = "row">
 			<div class = "col-3">
 				<div class = "jumbotron"  style= "padding-right:15px ; padding-left:10px ; padding-bottom: 65px; padding-top:25px">
@@ -95,8 +120,51 @@
 		<div class="row">
 			<!-- run and information-->
 			<div class="col-md-6">
-				<div class = "jumbotron">
+				<div class = "jumbotron" style = "padding-bottom: 65px; padding-top:25px">
 					<center><h4>RUN INFORMATION</h4></center>
+					<script>setInterval(function(){ updateRunNumbers(); } , 500);</script>	
+					<table class="table table-sm table-hover table-bordered">
+						<tbody>
+								<!--<font color="blue">-->
+								<tr>
+									<th scope="row">Run</th>
+      									<td>  <a> number: </a> <a id="RunNumber"></a></td>
+      									<td> <a> Starting Time: </a> <a id="StartingTime"></a> </td>
+    								</tr>			
+							
+									
+								<tr>
+									<th scope="row">Physics</th>
+      									<td> <a id= "PhysicsEvents"></a> <a>events</a></td>
+      									<td><a id="PhysicsRate"></a>  <a>Hz</a> </td>
+    								</tr>
+
+				
+								<tr>
+									<th scope="row">Monitoring</th>
+      									<td> <a id="MonitoringEvents"> </a> <a>events</a> </td>
+      									<td> <a id= "MonitoringRate"></a>   <a>Hz</a> </td>
+    								</tr>
+
+	
+								<tr>
+									<th scope="row">Calibrates</th>
+      									<td></td>
+      									<td></td>
+    								</tr>		
+								<!--</font>-->		
+						</tbody>
+					</table>
+				 
+					<!--	<div class="embed-responsive embed-responsive-16by9">
+							<iframe class="embed-responsive-item" src="/values/graph/eventbuilder01" allowfullscreen>
+							</iframe>
+						</div>-->
+
+						<div class="embed-responsive embed-responsive-16by9">
+							<iframe class="embed-responsive-item" src="/monitoring/graph" allowfullscreen>
+							</iframe>
+						</div>
 					<br>
 				</div>
 			</div>
@@ -104,13 +172,13 @@
 			<div class="col-md-6">
 				
 				<div class= "container">				
-				<div class = "jumbotron" style= "padding-right:15px ; padding-left:10px ; padding-bottom: 80px; padding-top:25px">
+				<div class = "jumbotron" style= "padding-right:5px ; padding-left:5px ; padding-bottom: 80px; padding-top:25px">
 					<center><h3>STATUS AND SETTINGS</h3></center>
 					<div class = "container" id = "boards">
 		
 						<script>
 							updateBoardContainer("current.json");
-							setInterval(updateCommandsAndStatus, 500);
+							setInterval(updateCommandsAndStatusAndButtons, 500);
 						</script>
 			
 

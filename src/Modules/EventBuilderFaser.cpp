@@ -125,7 +125,7 @@ void EventBuilder::runner() {
   unsigned int channelNum=1;
   bool noData=true;
   std::map<uint64_t,std::vector<daqling::utilities::Binary *> > pendingFragments;
-  std::map<uint64_t,int> pendingFragmentsCounts;
+  std::map<uint64_t,unsigned int> pendingFragmentsCounts;
   std::vector<uint64_t> pendingEventIDs;
   pendingEventIDs.reserve(m_maxPending+1);
   daqling::utilities::Binary* blob = new daqling::utilities::Binary;

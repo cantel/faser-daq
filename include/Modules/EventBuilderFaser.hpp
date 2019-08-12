@@ -17,8 +17,12 @@ class EventBuilder : public daqling::core::DAQProcess {
   bool sendEvent(int outChannel, std::vector<daqling::utilities::Binary *>& fragments, int numFragments);
 private:
   unsigned int m_maxPending;
+  unsigned int m_numChannels;
+  unsigned int m_numOutChannels;
   std::atomic<int> m_run_number;
+  std::atomic<int> m_run_start;
   std::atomic<int> m_physicsEventCount;
+  std::atomic<int> m_calibrationEventCount;
   std::atomic<int> m_monitoringEventCount;
   std::atomic<int> m_status;
   std::atomic<float> m_queueFraction;

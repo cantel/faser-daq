@@ -20,6 +20,22 @@ file(GLOB_RECURSE FRONTENDRECEIVER_SOURCES "FrontEndReceiver.cpp")
 add_library(frontendreceiver SHARED ${FRONTENDRECEIVER_SOURCES})
 target_link_libraries(frontendreceiver PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
+add_library(monitor SHARED ${MONITOR_SOURCES})
+target_link_libraries(monitor PUBLIC core utilities zmq)
+
+file(GLOB_RECURSE EVENTMONITOR_SOURCES "EventMonitor.cpp")
+add_library(eventmonitor SHARED ${EVENTMONITOR_SOURCES})
+target_link_libraries(eventmonitor PUBLIC monitor core utilities zmq)
+
+file(GLOB_RECURSE TRACKERMONITOR_SOURCES "TrackerMonitor.cpp")
+add_library(trackermonitor SHARED ${TRACKERMONITOR_SOURCES})
+target_link_libraries(trackermonitor PUBLIC monitor core utilities zmq)
+
+file(GLOB_RECURSE TLBMONITOR_SOURCES "TLBMonitor.cpp")
+add_library(tlbmonitor SHARED ${TLBMONITOR_SOURCES})
+target_link_libraries(tlbmonitor PUBLIC monitor core utilities zmq)
+
 file(GLOB_RECURSE EVENTBUILDERFASER_SOURCES "EventBuilderFaser.cpp")
 add_library(eventbuilderfaser SHARED ${EVENTBUILDERFASER_SOURCES})
 target_link_libraries(eventbuilderfaser PUBLIC core utilities zmq)

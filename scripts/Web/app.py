@@ -56,6 +56,13 @@ def spawnJoin(list, func):
 	for t in threads:
 		t.join()
 
+@app.route("/hostOptions")
+def getHostChoices():
+	with open(env['DAQ_CONFIG_DIR'] + 'customized/customized.json') as f:
+		hostChoices = json.load(f)
+	f.close()
+	return jsonify(hostChoices)
+
 @app.route("/configFileNames")
 def getConfigFileNames():
 	entries = os.listdir(env['DAQ_CONFIG_DIR'])

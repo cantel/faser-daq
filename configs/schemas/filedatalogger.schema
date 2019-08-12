@@ -10,10 +10,9 @@
 	"propertyOrder": 1
       },
       "host": {
-        "type": "string",
+        "type": "host",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname",
 	"propertyOrder": 2
       },          
       "port": {
@@ -59,7 +58,7 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"string"},
+                "host": {"type":"host"},
                 "port": {"type":"integer"}
               }
             }
@@ -77,7 +76,7 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"string"},
+                "host": {"type":"host"},
                 "port": {"type":"integer"}
               }
             }

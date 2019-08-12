@@ -7,18 +7,20 @@ import time
 import zmq
 
 config=json.load(open(sys.argv[1]))
+print("hello")
 r = redis.Redis(host='localhost', port=6379, db=0,
                 charset="utf-8", decode_responses=True)
-
+print("hi again")
 #r= redis.StrictRedis('localhost', 6379, db=0,
 #                     charset="utf-8", decode_responses=True)
 r.flushdb()
 
 context = zmq.Context()
 poller = zmq.Poller()
-
+print("hi just before for")
 nameMap={}
 for comp in config["components"]:
+  print("hi just in for")
   if not "settings" in comp: continue
   if not "stats_uri" in comp["settings"]: continue
   uri=comp["settings"]["stats_uri"]

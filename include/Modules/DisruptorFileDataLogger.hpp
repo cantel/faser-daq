@@ -52,6 +52,7 @@ class DisruptorFileDataLogger : public daqling::core::DAQProcess, public daqling
   void write();
   void read();
   void writeToFile(int ftid);
+  void bookKeeper(int ftid, EventHeader* l_eh);
   bool write(uint64_t keyId, daqling::utilities::Binary& payload);
   void shutdown();
 
@@ -65,17 +66,22 @@ class DisruptorFileDataLogger : public daqling::core::DAQProcess, public daqling
   std::map<uint64_t, std::unique_ptr<daqling::utilities::ReusableThread>> m_fileWriters;
   std::map<uint64_t, std::function<void()>> m_writeFunctors;
   std::map<uint64_t, std::string> m_fileNames;
-  std::map<uint64_t, std::fstream> m_fileStreams;
+  //std::map<uint64_t, std::fstream> m_fileStreams;
+
+  std::map<uint64_t, std::map<uint8_t, std::pair<fstream, fstream>>> m_fileStreams;
+
   std::map<uint64_t, std::vector<daqling::utilities::Binary>> m_fileBuffers;
-  std::map<uint64_t, uint32_t> m_fileRotationCounters;
+  std::map<uint8_t, uint32_t> m_fileRotationCounters;
 
   //write thread
-  std::thread fileWriter;
+  std::unique_ptr<std::thread> m_fileWriter;
+  std::unique_ptr<daqling::utilities::ReusableThread> m_bookKeeper;
 
   std::atomic<int> m_bytes_sent;
   std::unique_ptr<std::thread> m_monitor_thread;
   // Thread control
   std::atomic<int> m_bufferReady; //Indicates which 4K buffer is ready to be written from the vector.
+  std::atomic<int> m_fstreamFull;
   std::atomic<bool> m_stopWriters;
 };
 

@@ -9,8 +9,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # Build daqling
 add_subdirectory(daqling)
 
-message("CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}")
-
 # Build modules
 include_directories(${daqling_include_dirs})
 link_directories(${daqling_link_dirs})

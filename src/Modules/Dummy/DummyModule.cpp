@@ -15,20 +15,31 @@
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DAQLING_MODULES_NEWMODULE_HPP
-#define DAQLING_MODULES_NEWMODULE_HPP
+#include "DummyModule.hpp"
 
-#include "Core/DAQProcess.hpp"
+DummyModule::DummyModule() { INFO(""); }
 
-class NewModule : public daqling::core::DAQProcess {
- public:
-  NewModule();
-  ~NewModule();
+DummyModule::~DummyModule() { INFO(""); }
 
-  void start();
-  void stop();
+// optional (configuration can be handled in the constructor)
+void DummyModule::configure() {
+  daqling::core::DAQProcess::configure();
+  INFO("");
+}
 
-  void runner();
-};
+void DummyModule::start() {
+  daqling::core::DAQProcess::start();
+  INFO("");
+}
 
-#endif // DAQLING_MODULES_NEWMODULE_HPP
+void DummyModule::stop() {
+  daqling::core::DAQProcess::stop();
+  INFO("");
+}
+
+void DummyModule::runner() {
+  INFO("Running...");
+  while (m_run) {
+  }
+  INFO("Runner stopped");
+}

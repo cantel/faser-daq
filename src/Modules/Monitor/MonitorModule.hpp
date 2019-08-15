@@ -1,5 +1,4 @@
-#ifndef MONITOR_H_
-#define MONITOR_H_
+#pragma once
 
 #include <boost/histogram.hpp>
 #include <tuple>
@@ -7,12 +6,12 @@
 #include <nlohmann/json.hpp>
 #include <list>
 
-#include "Modules/EventFormat.hpp"
+#include "../EventFormat.hpp"
 
-class Monitor : public daqling::core::DAQProcess {
+class MonitorModule : public daqling::core::DAQProcess {
  public:
-  Monitor();
-  virtual ~Monitor();
+  MonitorModule();
+  virtual ~MonitorModule();
 
   void start();
   void stop();
@@ -180,5 +179,3 @@ class Monitor : public daqling::core::DAQProcess {
   void write_hists_to_json( HistMaps hist_lists, bool coverage_all = true );
 
 };
-
-#endif /* MONITOR_H_ */

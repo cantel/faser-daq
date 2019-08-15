@@ -11,20 +11,13 @@ using namespace std::chrono;
 #include <sstream> // std::ostringstream
 #include <fstream>      // std::ofstream
 
+#include "TrackerMonitorModule.hpp"
+
 using namespace boost::histogram;
 
-#include "Modules/TrackerMonitor.hpp"
+TrackerMonitorModule::TrackerMonitorModule() { 
 
-#define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
-#define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
-
-extern "C" TrackerMonitor *create_object() { return new TrackerMonitor; }
-
-extern "C" void destroy_object(TrackerMonitor *object) { delete object; }
-
-TrackerMonitor::TrackerMonitor() { 
-
-   INFO("TrackerMonitor::TrackerMonitor");
+   INFO("");
 
    // make this configurable ...?
    m_json_file_name = "tracker_histogram_output.json";
@@ -35,12 +28,12 @@ TrackerMonitor::TrackerMonitor() {
 
  }
 
-TrackerMonitor::~TrackerMonitor() { 
-  INFO(__MODULEMETHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
+TrackerMonitorModule::~TrackerMonitorModule() { 
+  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void TrackerMonitor::runner() {
-  INFO(__MODULEMETHOD_NAME__ << " Running...");
+void TrackerMonitorModule::runner() {
+  INFO("Running...");
 
   bool noData(true);
   daqling::utilities::Binary* eventBuilderBinary = new daqling::utilities::Binary;
@@ -76,13 +69,13 @@ void TrackerMonitor::runner() {
       m_metric_payload = payloadSize;
   }
 
-  INFO(__MODULEMETHOD_NAME__ << " Runner stopped");
+  INFO("Runner stopped");
 
 }
 
-void TrackerMonitor::initialize_hists() {
+void TrackerMonitorModule::initialize_hists() {
 
-  INFO( __MODULEMETHOD_NAME__ << " ... initializing ... " );
+  INFO( "... initializing ... " );
 
   // TRACKER histograms
 
@@ -98,9 +91,9 @@ void TrackerMonitor::initialize_hists() {
 
 }
 
-void TrackerMonitor::register_metrics() {
+void TrackerMonitorModule::register_metrics() {
 
- INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in TrackerMonitor ... " );
+ INFO( "... registering metrics in TrackerMonitorModule ... " );
 
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tracker_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
 

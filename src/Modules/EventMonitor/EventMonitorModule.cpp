@@ -9,30 +9,23 @@ using namespace std::chrono;
 #include <sstream> // std::ostringstream
 #include <fstream>      // std::ofstream
 
-#include "Modules/EventMonitor.hpp"
+#include "EventMonitorModule.hpp"
 
-#define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
-#define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
+EventMonitorModule::EventMonitorModule() { 
 
-extern "C" EventMonitor *create_object() { return new EventMonitor; }
-
-extern "C" void destroy_object(EventMonitor *object) { delete object; }
-
-EventMonitor::EventMonitor() { 
-
-   INFO("EventMonitor::EventMonitor");
+   INFO("");
 
    auto cfg = m_config.getConfig()["settings"];
    m_outputdir = cfg["outputDir"];
 
  }
 
-EventMonitor::~EventMonitor() { 
-  INFO(__MODULEMETHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
+EventMonitorModule::~EventMonitorModule() { 
+  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void EventMonitor::runner() {
-  INFO(__MODULEMETHOD_NAME__ << " Running...");
+void EventMonitorModule::runner() {
+  INFO("Running...");
 
   bool noData(true);
   daqling::utilities::Binary* eventBuilderBinary = new daqling::utilities::Binary;
@@ -60,13 +53,13 @@ void EventMonitor::runner() {
       m_metric_payload = payloadSize;
   }
 
-  INFO(__MODULEMETHOD_NAME__ << " Runner stopped");
+  INFO("Runner stopped");
 
 }
 
-void EventMonitor::register_metrics() {
+void EventMonitorModule::register_metrics() {
 
- INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in EventMonitor ... " );
+ INFO("... registering metrics in EventMonitorModule ... " );
 
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "event_payload", daqling::core::metrics::AVERAGE, daqling::core::metrics::INT);
 

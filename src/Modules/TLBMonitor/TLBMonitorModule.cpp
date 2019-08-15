@@ -11,20 +11,13 @@ using namespace std::chrono;
 #include <sstream> // std::ostringstream
 #include <fstream>      // std::ofstream
 
+#include "TLBMonitorModule.hpp"
+
 using namespace boost::histogram;
 
-#include "Modules/TLBMonitor.hpp"
+TLBMonitorModule::TLBMonitorModule() { 
 
-#define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
-#define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
-
-extern "C" TLBMonitor *create_object() { return new TLBMonitor; }
-
-extern "C" void destroy_object(TLBMonitor *object) { delete object; }
-
-TLBMonitor::TLBMonitor() { 
-
-   INFO("TLBMonitor::TLBMonitor");
+   INFO("");
 
    // make this configurable ...?
    m_json_file_name = "tlb_histogram_output.json";
@@ -35,12 +28,12 @@ TLBMonitor::TLBMonitor() {
 
  }
 
-TLBMonitor::~TLBMonitor() { 
-  INFO(__MODULEMETHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
+TLBMonitorModule::~TLBMonitorModule() { 
+  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void TLBMonitor::runner() {
-  INFO(__MODULEMETHOD_NAME__ << " Running...");
+void TLBMonitorModule::runner() {
+  INFO("Running...");
 
   bool noData(true);
   daqling::utilities::Binary* eventBuilderBinary = new daqling::utilities::Binary;
@@ -77,11 +70,11 @@ void TLBMonitor::runner() {
       m_metric_payload = payloadSize;
   }
 
-  INFO(__MODULEMETHOD_NAME__ << " Runner stopped");
+  INFO("Runner stopped");
 
 }
 
-void TLBMonitor::initialize_hists() {
+void TLBMonitorModule::initialize_hists() {
 
   RegularHist h_payloadsize = {"h_payloadsize","payload size [bytes]"};
   h_payloadsize.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
@@ -94,9 +87,9 @@ void TLBMonitor::initialize_hists() {
   return ;
 }
 
-void TLBMonitor::register_metrics() {
+void TLBMonitorModule::register_metrics() {
 
- INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in TLBMonitor ... " );
+ INFO( "... registering metrics in TLBMonitorModule ... " );
 
  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, "tlb_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
 

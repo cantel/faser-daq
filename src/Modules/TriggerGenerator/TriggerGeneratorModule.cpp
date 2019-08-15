@@ -1,14 +1,10 @@
-#include "Modules/TriggerGenerator.hpp"
-#include "Modules/EventFormat.hpp"
+#include "TriggerGeneratorModule.hpp"
+#include "../EventFormat.hpp"
 
 #include <random>
 
-extern "C" TriggerGenerator *create_object() { return new TriggerGenerator; }
-
-extern "C" void destroy_object(TriggerGenerator *object) { delete object; }
-
-TriggerGenerator::TriggerGenerator() {
-  INFO("TriggerGenerator::TriggerGenerator");
+TriggerGeneratorModule::TriggerGeneratorModule() {
+  INFO("");
   auto cfg = m_config.getConfig()["settings"];
   m_rate = cfg["rateInHz"];
   INFO("Triggers generated at "<<m_rate<<" Hz");
@@ -28,22 +24,22 @@ TriggerGenerator::TriggerGenerator() {
   INFO("Done");
 }
 
-TriggerGenerator::~TriggerGenerator() {
-  INFO("TriggerGenerator::~TriggerGenerator");
+TriggerGeneratorModule::~TriggerGeneratorModule() {
+  INFO("");
 }
 
-void TriggerGenerator::start() {
+void TriggerGeneratorModule::start() {
   m_eventCounter=0;
   DAQProcess::start();
-  INFO("TriggerGenerator::start");
+  INFO("");
 }
 
-void TriggerGenerator::stop() {
+void TriggerGeneratorModule::stop() {
   DAQProcess::stop();
-  INFO("TriggerGenerator::stop");
+  INFO("");
 }
 
-void TriggerGenerator::runner() {
+void TriggerGeneratorModule::runner() {
   INFO(" Running...");
   int msgFreq=int(m_rate);
   float sleepTime=1000000./m_rate;

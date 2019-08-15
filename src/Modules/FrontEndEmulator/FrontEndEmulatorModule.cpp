@@ -1,13 +1,9 @@
-#include "Modules/FrontEndEmulator.hpp"
+#include "FrontEndEmulatorModule.hpp"
 
 #include <random>
 
-extern "C" FrontEndEmulator *create_object() { return new FrontEndEmulator; }
-
-extern "C" void destroy_object(FrontEndEmulator *object) { delete object; }
-
-FrontEndEmulator::FrontEndEmulator() {
-  INFO("FrontEndEmulator::FrontEndEmulator");
+FrontEndEmulatorModule::FrontEndEmulatorModule() {
+  INFO("");
 
   auto cfg = m_config.getConfig()["settings"];
 
@@ -38,27 +34,27 @@ FrontEndEmulator::FrontEndEmulator() {
   }
 }
 
-FrontEndEmulator::~FrontEndEmulator() {
-  INFO("FrontEndEmulator::~FrontEndEmulator");
+FrontEndEmulatorModule::~FrontEndEmulatorModule() {
+  INFO("");
 }
 
-void FrontEndEmulator::start() {
+void FrontEndEmulatorModule::start() {
   m_eventCounter=0;
   DAQProcess::start();
-  INFO("FrontEndEmulator::start");
+  INFO("");
 }
 
-void FrontEndEmulator::stop() {
+void FrontEndEmulatorModule::stop() {
   DAQProcess::stop();
-  INFO("FrontEndEmulator::stop");
+  INFO("");
 }
 
 static microseconds timeNow() {
   return duration_cast<microseconds>(system_clock::now().time_since_epoch());
 }
 
-void FrontEndEmulator::runner() {
-  INFO(" Running...");
+void FrontEndEmulatorModule::runner() {
+  INFO("Running...");
   std::default_random_engine generator;
   std::normal_distribution<float> gaussian(m_meanSize,m_rmsSize);
   std::uniform_real_distribution<> flat(0.0, 1.0);

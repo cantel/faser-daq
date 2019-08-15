@@ -5,16 +5,12 @@
 #include <map>
 #include <algorithm>
 
-#include "Modules/EventBuilderFaser.hpp"
-#include "Modules/EventFormat.hpp"
+#include "EventBuilderFaserModule.hpp"
+#include "../EventFormat.hpp"
 
 using namespace std::chrono_literals;
 
-extern "C" EventBuilder *create_object() { return new EventBuilder; }
-
-extern "C" void destroy_object(EventBuilder *object) { delete object; }
-
-EventBuilder::EventBuilder() {
+EventBuilderFaserModule::EventBuilderFaserModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
   auto cfg = m_config.getConfig()["settings"];
 
@@ -25,9 +21,9 @@ EventBuilder::EventBuilder() {
 
 }
 
-EventBuilder::~EventBuilder() { }
+EventBuilderFaserModule::~EventBuilderFaserModule() { }
 
-void EventBuilder::start() {
+void EventBuilderFaserModule::start() {
   DAQProcess::start();
   m_physicsEventCount = 0;
   m_calibrationEventCount = 0;
@@ -56,13 +52,13 @@ void EventBuilder::start() {
   INFO("getState: " << getState());
 }
 
-void EventBuilder::stop() {
+void EventBuilderFaserModule::stop() {
   DAQProcess::stop();
   INFO("getState: " << this->getState());
 }
 
 
-bool EventBuilder::sendEvent(int outChannel,
+bool EventBuilderFaserModule::sendEvent(int outChannel,
 			     std::vector<daqling::utilities::Binary *>& fragments,
 			     int numFragments) {
       daqling::utilities::Binary outFragments;
@@ -119,7 +115,7 @@ bool EventBuilder::sendEvent(int outChannel,
       return true;
 }
 
-void EventBuilder::runner() {
+void EventBuilderFaserModule::runner() {
   INFO("Running...");
 
   unsigned int channelNum=1;

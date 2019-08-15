@@ -13,69 +13,62 @@ using namespace std::chrono;
 
 using namespace boost::histogram;
 
-#include "Modules/Monitor.hpp"
+#include "MonitorModule.hpp"
 #include "Core/Statistics.hpp"
 
-#define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
-#define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
-
-extern "C" Monitor *create_object() { return new Monitor; }
-
-extern "C" void destroy_object(Monitor *object) { delete object; }
-
-Monitor::Monitor() { 
-   INFO("Monitor::Monitor");
+MonitorModule::MonitorModule() { 
+   INFO("");
  }
 
-Monitor::~Monitor() { 
-  INFO(__MODULEMETHOD_NAME__ << " With config: " << m_config.dump() << " getState: " << this->getState());
+MonitorModule::~MonitorModule() { 
+  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
 }
 
-void Monitor::start() {
+void MonitorModule::start() {
   DAQProcess::start();
-  INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
+  INFO("getState: " << this->getState());
 
   initialize_hists();
   register_metrics();
 
 }
 
-void Monitor::stop() {
+void MonitorModule::stop() {
   DAQProcess::stop();
 
-  INFO( __MODULEMETHOD_NAME__ << " ... finalizing ... " );
+  INFO("... finalizing ...");
   write_hists_to_json( m_hist_map );
 
-  INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
+  INFO("getState: " << this->getState());
 }
 
-void Monitor::runner() {
-  INFO(__MODULEMETHOD_NAME__ << " Running...");
+void MonitorModule::runner() {
+  INFO("Running...");
 
   while (m_run) {
 	//do nothing
   }
 
-  INFO(__MODULEMETHOD_NAME__ << " Runner stopped");
+  INFO("Runner stopped");
 
   return;
 
 }
 
-void Monitor::initialize_hists() {
+void MonitorModule::initialize_hists() {
 
-  INFO( __MODULEMETHOD_NAME__ << " ... initializing ... " );
+  INFO("... initializing ... " );
   return;
 
 }
 
-void Monitor::register_metrics() {
+void MonitorModule::register_metrics() {
 
- INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in base Monitor class ... " );
+ INFO("... registering metrics in base MonitorModule class ... " );
 
 }
 
-uint16_t Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader ) {
+uint16_t MonitorModule::unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader ) {
 
   uint16_t dataStatus=0;
   bool foundSourceID(false);
@@ -110,7 +103,7 @@ uint16_t Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, co
 	  // sanity check
     auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
 	  if ( totalCalculatedSize > totalDataPacketSize ) {
-	  	ERROR(__MODULEMETHOD_NAME__ <<  "total byte size unpacked, "
+	  	ERROR("total byte size unpacked, "
 	  	                            << totalCalculatedSize 
                                   <<", larger than the total data packet size, "
                                   <<totalDataPacketSize
@@ -119,14 +112,14 @@ uint16_t Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, co
 	  }
 	}
 	else {
-	    	ERROR(__MODULEMETHOD_NAME__ <<  " no correct fragment source ID found.");
+	    	ERROR("no correct fragment source ID found.");
 		dataStatus |= MissingFragment;
 	}
 
 	return dataStatus;
 }
 
-void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
+void MonitorModule::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
 
   if ( fragmentStatus == 0 ) hist.object( "Ok");
   else {
@@ -146,7 +139,7 @@ void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
 
 }
 
-void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus ) {
+void MonitorModule::fill_error_status(std::string hist_name, uint32_t fragmentStatus ) {
 
   if ( fragmentStatus == 0 ) m_hist_map.fillHist(hist_name, "Ok");
   else {
@@ -166,7 +159,7 @@ void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus )
 
 }
 
-void Monitor::fill_error_status( uint32_t fragmentStatus ) {
+void MonitorModule::fill_error_status( uint32_t fragmentStatus ) {
 
   std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
   if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
@@ -188,9 +181,9 @@ void Monitor::fill_error_status( uint32_t fragmentStatus ) {
 }
 
 template <typename T>
-void Monitor::flush_hist( T histStruct, bool coverage_all ) {
+void MonitorModule::flush_hist( T histStruct, bool coverage_all ) {
 
-  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<< histStruct.name);
+  INFO("flushing hist info for "<< histStruct.name);
 
   std::ostringstream os;
   auto hist = histStruct.getObject();
@@ -203,10 +196,10 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
   }
 }
 
-void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
+void MonitorModule::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 
-  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
-  INFO(__MODULEMETHOD_NAME__ << " hist axis is of type category; hist has no under/overflow bins. ");
+  INFO("flushing hist info for "<<histStruct.name);
+  INFO("hist axis is of type category; hist has no under/overflow bins. ");
   
   std::ostringstream os;
   auto hist = histStruct.getObject();
@@ -222,9 +215,9 @@ void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 
 }
 
-void Monitor::flush_hist( Graph histStruct, bool coverage_all ) {
+void MonitorModule::flush_hist( Graph histStruct, bool coverage_all ) {
 
-  INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
+  INFO("flushing hist info for "<<histStruct.name);
   
   std::ostringstream os;
   auto hist = histStruct.getObject();
@@ -240,12 +233,12 @@ void Monitor::flush_hist( Graph histStruct, bool coverage_all ) {
 }
 
 template <typename T>
-void Monitor::write_hist_to_file( T histStruct, std::string dir, bool coverage_all ) {
+void MonitorModule::write_hist_to_file( T histStruct, std::string dir, bool coverage_all ) {
 
   auto hist = histStruct.getObject(); 
   std::string file_name = dir + "histoutput_"+histStruct.name+".txt";
 
-  INFO(__MODULEMETHOD_NAME__ << " writing hist info  to file ... "<< file_name);
+  INFO("writing hist info  to file ... "<< file_name);
 
   //std::ostringstream os;
   std::ofstream ofs( file_name );
@@ -266,7 +259,7 @@ void Monitor::write_hist_to_file( T histStruct, std::string dir, bool coverage_a
 }
 
 template <typename T>
-void Monitor::add_hist_to_json( T histStruct, json &jsonArray, bool coverage_all ) {
+void MonitorModule::add_hist_to_json( T histStruct, json &jsonArray, bool coverage_all ) {
 
 
   auto hist = histStruct.getObject();
@@ -294,7 +287,7 @@ void Monitor::add_hist_to_json( T histStruct, json &jsonArray, bool coverage_all
   }
   
   if ( xcolumn.size() != ycolumn.size() ) {
-      ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+      ERROR("x and y columns do not have same size. Writing empty vectors to file.");
       xcolumn.clear();
       ycolumn.clear();
   }
@@ -307,7 +300,7 @@ void Monitor::add_hist_to_json( T histStruct, json &jsonArray, bool coverage_all
   return ;
 }
 
-void Monitor::add_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all ) {
+void MonitorModule::add_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all ) {
 
   auto hist = histStruct.getObject();
   
@@ -329,7 +322,7 @@ void Monitor::add_hist_to_json( CategoryHist histStruct, json &jsonArray, bool c
    }
    
   if ( xcolumn.size() != ycolumn.size() ) {
-       ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+       ERROR("x and y columns do not have same size. Writing empty vectors to file.");
        xcolumn.clear();
        ycolumn.clear();
   }
@@ -342,7 +335,7 @@ void Monitor::add_hist_to_json( CategoryHist histStruct, json &jsonArray, bool c
   return ;
 }
 
-void Monitor::add_hist_to_json( Graph graphStruct, json &jsonArray, bool coverage_all ) {
+void MonitorModule::add_hist_to_json( Graph graphStruct, json &jsonArray, bool coverage_all ) {
 
   json graph = json::object();
   graph["name"] = graphStruct.name;
@@ -360,7 +353,7 @@ void Monitor::add_hist_to_json( Graph graphStruct, json &jsonArray, bool coverag
   }
   
   if ( xcolumn.size() != ycolumn.size() ) {
-      ERROR(__MODULEMETHOD_NAME__ << " x and y columns do not have same size. Writing empty vectors to file.");
+      ERROR("x and y columns do not have same size. Writing empty vectors to file.");
       xcolumn.clear();
       ycolumn.clear();
   }
@@ -373,7 +366,7 @@ void Monitor::add_hist_to_json( Graph graphStruct, json &jsonArray, bool coverag
   return ;
 }
 
-void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
+void MonitorModule::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
 
   json jsonArray = json::array();
 
@@ -389,7 +382,7 @@ void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
 
   std::string full_output_path = m_outputdir + m_json_file_name;
 
-  INFO(__MODULEMETHOD_NAME__ << " writing monitoring information to " << full_output_path );
+  INFO("writing monitoring information to " << full_output_path );
   std::ofstream ofs( full_output_path );
  
   ofs << jsonArray.dump(4);
@@ -399,7 +392,7 @@ void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
 
 }
 
-void Monitor::write_hists_to_json( HistMaps hist_lists, bool coverage_all ) {
+void MonitorModule::write_hists_to_json( HistMaps hist_lists, bool coverage_all ) {
 
   json jsonArray = json::array();
 
@@ -415,7 +408,7 @@ void Monitor::write_hists_to_json( HistMaps hist_lists, bool coverage_all ) {
 
   std::string full_output_path = m_outputdir + m_json_file_name;
 
-  INFO(__MODULEMETHOD_NAME__ << " writing monitoring information to " << full_output_path );
+  INFO("writing monitoring information to " << full_output_path );
   std::ofstream ofs( full_output_path );
  
   ofs << jsonArray.dump(4);

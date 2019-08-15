@@ -1,15 +1,15 @@
-#ifndef EVENTBUILDER_H_
-#define EVENTBUILDER_H_
+#pragma once
+
 #include <vector>
 
 #include "Core/DAQProcess.hpp"
 
 enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 
-class EventBuilder : public daqling::core::DAQProcess {
+class EventBuilderFaserModule : public daqling::core::DAQProcess {
  public:
-  EventBuilder();
-  ~EventBuilder();
+  EventBuilderFaserModule();
+  ~EventBuilderFaserModule();
 
   void start();
   void stop();
@@ -27,5 +27,3 @@ private:
   std::atomic<int> m_status;
   std::atomic<float> m_queueFraction;
 };
-
-#endif /* EVENTBUILDER_H_ */

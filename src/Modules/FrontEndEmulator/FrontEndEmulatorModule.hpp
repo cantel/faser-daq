@@ -1,18 +1,17 @@
-#ifndef FRONTENDEMULATOR_H_
-#define FRONTENDEMULATOR_H_
+#pragma once
 
 #include <chrono>
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-#include "Utilities/Udp.hpp"
+#include "../Udp.hpp"
 #include "Core/DAQProcess.hpp"
-#include "Modules/EventFormat.hpp"
+#include "../EventFormat.hpp"
 
-class FrontEndEmulator : public daqling::core::DAQProcess {
+class FrontEndEmulatorModule : public daqling::core::DAQProcess {
  public:
-  FrontEndEmulator();
-  ~FrontEndEmulator();
+  FrontEndEmulatorModule();
+  ~FrontEndEmulatorModule();
 
   void start();
   void stop();
@@ -32,5 +31,3 @@ private:
   microseconds m_timeMonitoring;
   MonitoringFragment m_monFrag;
 };
-
-#endif /* FRONTENDEMULATOR_H_ */

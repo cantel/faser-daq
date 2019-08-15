@@ -4,21 +4,14 @@
 #include <iomanip>
 /// \endcond
 
-#include "Modules/FrontEndReceiver.hpp"
+#include "FrontEndReceiverModule.hpp"
 
-#include "Modules/EventFormat.hpp"
+#include "../EventFormat.hpp"
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-extern "C" FrontEndReceiver *create_object(std::string name, int num) {
-  return new FrontEndReceiver(name, num);
-}
-
-extern "C" void destroy_object(FrontEndReceiver *object) { delete object; }
-
-FrontEndReceiver::FrontEndReceiver(std::string name, int num) {
-  INFO("Passed " << name << " " << num << " with constructor");
+FrontEndReceiverModule::FrontEndReceiverModule() {
   INFO("With config: " << m_config.dump());
 
   auto cfg = m_config.getConfig()["settings"];
@@ -30,9 +23,9 @@ FrontEndReceiver::FrontEndReceiver(std::string name, int num) {
 
 }
 
-FrontEndReceiver::~FrontEndReceiver() { }
+FrontEndReceiverModule::~FrontEndReceiverModule() { }
 
-void FrontEndReceiver::start() {
+void FrontEndReceiverModule::start() {
   DAQProcess::start();
   INFO("getState: " << this->getState());
   m_recvCount = 0;
@@ -41,12 +34,12 @@ void FrontEndReceiver::start() {
   }
 }
 
-void FrontEndReceiver::stop() {
+void FrontEndReceiverModule::stop() {
   DAQProcess::stop();
   INFO("getState: " << this->getState());
 }
 
-void FrontEndReceiver::runner() {
+void FrontEndReceiverModule::runner() {
   const unsigned source_id = 1;
   unsigned sequence_number = 0;
   microseconds timestamp;

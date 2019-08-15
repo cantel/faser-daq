@@ -6,7 +6,7 @@
 #include <nlohmann/json.hpp>
 #include <list>
 
-#include "../EventFormat.hpp"
+#include "Commons/EventFormat.hpp"
 
 class MonitorModule : public daqling::core::DAQProcess {
  public:

@@ -6,7 +6,8 @@
       "name": "triggergenerator",
       "host": "localhost",
       "port": 5540,
-      "type": "triggergenerator",
+      "type": "TriggerGenerator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "rateInHz": 15,
         "frontendApps": [
@@ -25,7 +26,8 @@
       "name": "frontendemulator01",
       "host": "localhost",
       "port": 5541,
-      "type": "frontendemulator",
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "meanSize": 25,
         "rmsSize": 0,
@@ -33,7 +35,7 @@
         "probMissingTrigger": 0.00,
         "probMissingFragment": 0.00,
         "probCorruptedFragment": 0.00,
-	"monitoringInterval": 1.5,
+	      "monitoringInterval": 1.5,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -43,7 +45,8 @@
       "name": "frontendemulator02",
       "host": "localhost",
       "port": 5542,
-      "type": "frontendemulator",
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "meanSize": 250,
         "rmsSize": 20,
@@ -51,7 +54,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
-	"monitoringInterval": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17002,
         "daqHost": "localhost",
         "daqPort": 18002
@@ -61,9 +64,10 @@
       "name": "frontendreceiver01",
       "host": "localhost",
       "port": 5555,
-      "type": "frontendreceiver",
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	"stats_uri": "tcp://*:7055",
+	      "stats_uri": "tcp://*:7055",
         "dataPort": 18001
       },
       "connections": {
@@ -81,7 +85,8 @@
       "name": "frontendreceiver02",
       "host": "localhost",
       "port": 5556,
-      "type": "frontendreceiver",
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "dataPort": 18002
       },
@@ -100,10 +105,11 @@
       "name": "eventbuilder01",
       "host": "localhost",
       "port": 5557,
-      "type": "eventbuilderfaser",
+      "type": "EventBuilderFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	  "stats_uri": "tcp://*:7057",
-          "maxPending": 10
+	      "stats_uri": "tcp://*:7057",
+        "maxPending": 10
       },
       "connections": {
         "receivers": [
@@ -134,8 +140,11 @@
       "name": "datalogger01",
       "host": "localhost",
       "port": 5558,
-      "type": "filedatalogger",
-      "settings": {},
+      "type": "FileDataWriter",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "filename_pattern": "/tmp/test-%D.%n.%c.bin"
+      },
       "connections": {
         "receivers": [
           {

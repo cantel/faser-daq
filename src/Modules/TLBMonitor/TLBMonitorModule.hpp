@@ -4,8 +4,8 @@
 #include <tuple>
 #include <list>
 
-#include "../Monitor/MonitorModule.hpp"
-#include "../EventFormat.hpp"
+#include "Modules/Monitor/MonitorModule.hpp"
+#include "Commons/EventFormat.hpp"
 
 class TLBMonitorModule : public MonitorModule {
  public:

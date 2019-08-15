@@ -6,7 +6,7 @@
 #include <algorithm>
 
 #include "EventBuilderFaserModule.hpp"
-#include "../EventFormat.hpp"
+#include "Commons/EventFormat.hpp"
 
 using namespace std::chrono_literals;
 

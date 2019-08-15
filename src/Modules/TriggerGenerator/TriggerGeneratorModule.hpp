@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../Udp.hpp"
+#include "Utils/Udp.hpp"
 #include "Core/DAQProcess.hpp"
 
 class TriggerGeneratorModule : public daqling::core::DAQProcess {

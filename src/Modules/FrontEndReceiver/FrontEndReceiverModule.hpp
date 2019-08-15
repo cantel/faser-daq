@@ -5,7 +5,7 @@
 #include <string>
 /// \endcond
 
-#include "../Udp.hpp"
+#include "Utils/Udp.hpp"
 #include "Core/DAQProcess.hpp"
 
 class FrontEndReceiverModule : public daqling::core::DAQProcess {

@@ -20,6 +20,7 @@ add_subdirectory(daqling)
 
 # Build modules
 set(BUILD_New OFF)
+include_directories(src)
 include_directories(${daqling_include_dirs})
 link_directories(${daqling_link_dirs})
 

@@ -4,9 +4,9 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-#include "../Udp.hpp"
 #include "Core/DAQProcess.hpp"
-#include "../EventFormat.hpp"
+#include "Utils/Udp.hpp"
+#include "Commons/EventFormat.hpp"
 
 class FrontEndEmulatorModule : public daqling::core::DAQProcess {
  public:

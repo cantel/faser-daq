@@ -1,7 +1,8 @@
 #ifndef MONITOR_H_
 #define MONITOR_H_
 
-#include <boost/histogram.hpp>
+//#include <boost/histogram.hpp>
+#include "Modules/Histogram.hpp"
 #include <tuple>
 #include "Core/DAQProcess.hpp"
 #include <nlohmann/json.hpp>
@@ -24,46 +25,6 @@ class Monitor : public daqling::core::DAQProcess {
  protected:
 
   using json = nlohmann::json;
-
-  using axis_t = boost::histogram::axis::regular<>;
-  using hist_t = decltype(boost::histogram::make_histogram(std::declval<axis_t>())); // most hists are of this type
-  using categoryaxis_t = boost::histogram::axis::category<std::string>;
-  using categoryhist_t = decltype(boost::histogram::make_histogram(std::declval<categoryaxis_t>())); 
-  using graph_t = std::vector<std::pair<unsigned int, unsigned int>>; // assume for now int vs int is the most common type
-
-   struct Hist {
-     Hist() : ylabel("counts") {}
-     Hist(std::string name, std::string xlabel) : name(name), title(name), xlabel(xlabel), ylabel("counts") {}
-     Hist(std::string name, std::string xlabel, std::string ylabel) : name(name), title(name), xlabel(xlabel), ylabel(ylabel) {}
-     std::string name;
-     std::string title;
-     std::string xlabel;
-     std::string ylabel;
-     unsigned int binwidth; 
-     hist_t object;
-     hist_t getObject() { return object; };
-   };
-
-   struct RegularHist : Hist {
-     RegularHist() : Hist() {};
-     RegularHist(std::string name, std::string xlabel) : Hist(name, xlabel){}
-     hist_t object;
-     hist_t getObject() { return object; };
-   };
-
-   struct CategoryHist : Hist {
-     CategoryHist() : Hist() {};
-     CategoryHist(std::string name, std::string xlabel) : Hist(name, xlabel){}
-     categoryhist_t object;
-     categoryhist_t getObject() { return object; };
-   };
-
-   struct Graph : Hist {
-     Graph(){};
-     Graph(std::string name, std::string xlabel, std::string ylabel) : Hist(name, xlabel, ylabel){}
-     graph_t object;
-     graph_t getObject() { return object; };
-   };
 
    // using HistMap storage instead.
   using reghistmap_t = std::map<std::string, RegularHist>; 

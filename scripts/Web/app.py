@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, send_file, abort, session
+from flask_scss import Scss
 import json
 #from jsonschema import validate
 import os
@@ -15,6 +16,9 @@ from monitoring.metric import metric_blueprint
 
 app  = Flask(__name__) 
 app.register_blueprint(metric_blueprint)
+app.debug = True
+Scss(app, static_dir='static/css', asset_dir='assets/scss')
+#sass.compile(dirname=('assets/scss', 'static/css'))
 
 app.secret_key = 'verySecret:wq'
 
@@ -36,6 +40,35 @@ def read(fileName):
 def write(d):
 	with open(env['DAQ_CONFIG_DIR'] + 'current.json', 'w+') as f:
 		json.dump(d, f)
+
+	
+def findIndex(boardName):
+	index = 0
+	d = session.get("data")
+	for p in d['components']:
+		#print("in findIndex, the index in for: ", index)
+		if p['name'] == boardName:
+			break
+		else:
+			index += 1
+	return index
+
+
+def readSchema(boardType):
+	schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + boardType
+	f = open(schemaFileName)
+	#print(f.read())
+	schema = json.load(f)
+	f.close()
+	#print(schema)
+	
+	#customizedFileName = env['DAQ_CONFIG_DIR'] + "customized/" + "customized.json"
+	#f = open(customizedFileName)
+	#custom = json.load(f)
+	#f.close()
+
+	#schema['properties']['host']['enum'].extend(custom['hostOptions'])
+	return schema
 
 def createDaqInstance():
 	d = session.get("data")
@@ -106,23 +139,20 @@ def sendStatusJsonFile():
 	#print("group in status", group)
 	for p in d['components']:	
 		rawStatus, timeout = dc.getStatus(p)
-		status = translateStatus(rawStatus, timeout);
+		status = translateStatus(rawStatus, timeout)
 		print('status of this componen ', p['name'],"is: ", status)
 		statusArr.append({'name' : p['name'] , 'state' : str(status)})
 	return jsonify({'allStatus' : statusArr})
 			
-
-def findIndex(boardName):
-	index = 0
-	d = session.get("data")
-	for p in d['components']:
-		#print("in findIndex, the index in for: ", index)
-		if p['name'] == boardName:
-			break
-		else:
-			index += 1
-	return index
-
+#@app.route("/status/eventbuilder01")
+#def getEventBuilderStatus():	
+#	dc = createDaqInstance()
+#	d = session.get("data")
+#	index = findIndex("eventbuilder01")
+#	p = d['components'][index]
+#	rawStatus, timeout = dc.getStatus(p)
+#	status = translateStatus(rawStatus, timeout)
+#	return jsonify({ 'state' : status })
 
 @app.route("/initialise")
 def initialise():
@@ -236,23 +266,6 @@ def addBoard():
 	schemaNames = {'schemaChoices' : schemaChoices}
 	#print(schemaNames)	
 	return render_template('config.html', pageName='Add Board', component = {}, schemaChoices = schemaNames, schema={}, flag = 1, boardName="")
-
-def readSchema(boardType):
-	schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + boardType
-	f = open(schemaFileName)
-	#print(f.read())
-	schema = json.load(f)
-	f.close()
-	#print(schema)
-	
-	#customizedFileName = env['DAQ_CONFIG_DIR'] + "customized/" + "customized.json"
-	#f = open(customizedFileName)
-	#custom = json.load(f)
-	#f.close()
-
-	#schema['properties']['host']['enum'].extend(custom['hostOptions'])
-	return schema
-
 @app.route("/add/<schematype>")
 def getschema(schematype):
 	schema = readSchema(schematype)

@@ -75,7 +75,8 @@ def graph():
     if(not metric.startswith("History:eventbuilder")):
       metrics.remove(metric)
   for metric in metrics:
-      tabNames.append(metric.split("_")[1])
+    tabNames.append(metric.split("_")[1])
+  print(metrics)
   #print("///////////tabnames:",tabNames)
   return render_template('graph2.html', metrics=metrics, tabNames=tabNames)
 
@@ -84,7 +85,9 @@ def graph():
 def data(metric):
   metric_array = []
   for x in r.lrange(metric, 0, -1):
+    print("x: ",x)
     value = x.decode().split(':')
+    print("value: ", value)
     metric_array.append([1000.*float(value[0]), float(value[1])])
   #return json.dumps(metric_array[-1000:])
   metric_array.reverse()
@@ -115,7 +118,7 @@ def listvalues():
   return render_template('overview.html', metrics=metrics)
   
 
-@metric_blueprint.route("/values/<string:source>")
+@metric_blueprint.route("/info/<string:source>")
 def values(source):
   values={}
   dbVals=r.hgetall(source)
@@ -123,9 +126,11 @@ def values(source):
     values[key.decode()]=(dbVals[key].split(b':')[1].decode(),time.ctime(float(dbVals[key].split(b':')[0])))
   #print("source", source)
   #print("values", values)
+  if (source.startswith("frontendreceiver")):
+    return render_template('tracker.html', source=source,values=values)
   return render_template('values.html', source=source,values=values)
  
-@metric_blueprint.route("/values/<string:source>/dataUpdate")
+@metric_blueprint.route("/info/<string:source>/dataUpdate")
 def getValues(source):
   values=[]
   dbVals=r.hgetall(source)
@@ -137,10 +142,12 @@ def getValues(source):
 
 
 
-@metric_blueprint.route("/values/updateStatus")
+@metric_blueprint.route("/info/updateStatus")
 def getStatus():
   allStatus = []
+  print("r: ", r)
   for key in sorted(r.keys()):
+    print(key)
     if key.startswith(b"History:"): continue
     source = key.decode()
     #print("source in stat: ", source)

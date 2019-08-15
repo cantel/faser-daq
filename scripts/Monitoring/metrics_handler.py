@@ -5,22 +5,18 @@ import redis
 import sys
 import time
 import zmq
-
+import random
 config=json.load(open(sys.argv[1]))
-print("hello")
 r = redis.Redis(host='localhost', port=6379, db=0,
                 charset="utf-8", decode_responses=True)
-print("hi again")
 #r= redis.StrictRedis('localhost', 6379, db=0,
 #                     charset="utf-8", decode_responses=True)
 r.flushdb()
 
 context = zmq.Context()
 poller = zmq.Poller()
-print("hi just before for")
 nameMap={}
 for comp in config["components"]:
-  print("hi just in for")
   if not "settings" in comp: continue
   if not "stats_uri" in comp["settings"]: continue
   uri=comp["settings"]["stats_uri"]
@@ -38,11 +34,34 @@ while True:
     socks = dict(poller.poll())
   except KeyboardInterrupt:
     break
+
+  #temporary : simulating the frontEndReciever data
+
+  for comp in config["components"]:
+      if comp["name"].startswith("frontendreceiver"):
+        for i in range(8):
+          source = comp["name"]
+          moduleName = "module" + str(i)
+          valueName = "hits"
+          val = str(time.time())+":"+str(random.randint(1,4000))
+          name = moduleName + "_" + valueName
+          r.hset(source, name, val)
+          metric = source + ":" + name
+          #r.lpush(metric, val)
+
+          for j in range(12):
+            valueName1 = "chip" + str(j)
+            valueName2 = "hits"
+            val = str(time.time())+":"+str(random.randint(1,4000))
+            name = moduleName + "_" + valueName1 + "_" + valueName2
+            r.hset(source, name, val)
+            metric = source + ":" + name
+            #r.lpush(metric, val)
   for sock in socks:
     source=nameMap[sock]
     print("Message from: "+source)
     data=sock.recv()
-    #print(data)
+    print(data)
     name=data.split(b':')[0].decode()
     value=data.split()[1].decode()
     val=str(time.time())+":"+value
@@ -51,3 +70,5 @@ while True:
       metric="History:"+source+"_"+name
       r.lpush(metric,val)
       r.ltrim(metric,0,9) # this should be configurable
+
+

@@ -32,6 +32,7 @@
 	
 	.btn-circle {
  		border-radius: 60%;
+		margin:5px;
 	}
 
 	.container {
@@ -132,43 +133,54 @@
 					//alert(flag);
 					if(flag == 0){
 						var remove = document.createElement("button");
-						remove.className = "btn btn-danger";
+						remove.className = "btn btn-danger btn-lg";
 						remove.style.cssFloat = "right";
 						remove.innerHTML = "REMOVE BOARD";
+						remove.style.marginLeft = "10px";
+						remove.style.marginRight = "10px";
 						remove.addEventListener("click", function(){
-							if(window.opener.isDOWN())
-								removeBoard(boardName);
-							else
-								alert("not in DOWN mode");
+							removeBoard(boardName);
 						});
+						remove.id = "remove-button";
+						
+						/*if(window.opener.isDOWN()){
+							remove.disabled = false;
+						}*/
 						buttonsContainer.appendChild(remove);
-
+						
+						buttonsContainer.appendChild(document.createTextNode("   "));
 						
 						var apply = document.createElement("button");
-						apply.className = "btn btn-warning";
+						apply.className = "btn btn-warning btn-lg";
 						apply.style.cssFloat = "right";
-						apply.innerHTML = "APPLY CHANGES"
+						apply.innerHTML = "APPLY CHANGES";
+						apply.style.marginLeft = "10px";
+						apply.style.marginRight = "10px";
 						apply.addEventListener("click", function(){
-							if(window.opener.isDOWN())
-								applyChanges(editor, boardName);	
-							else
-								alert("not in DOWN mode");
+						//	if(window.opener.isDOWN())
+							applyChanges(editor, boardName);	
+						//	else
+						//		alert("not in DOWN mode");
 						});
+
+						apply.id = "apply-button";
 						buttonsContainer.appendChild(apply);
 
 					}
 					else if (flag == 1){
 						
 						var add = document.createElement("button");
-						add.className = "btn btn-success";
+						add.className = "btn btn-success btn-lg";
 						add.style.cssFloat = "right";
 						add.innerHTML = "ADD BOARD";
 						add.addEventListener("click", function(){
-							if(window.opener.isDOWN())
-								addBoard(editor);
-							else
-								alert("not in DOWN mode");
+							//if(window.opener.isDOWN())
+							addBoard(editor);
+							//else
+								//alert("not in DOWN mode");
 						});
+
+						add.id = "add-button";
 						buttonsContainer.appendChild(add);
 
 					}
@@ -195,6 +207,28 @@
 					else{
 						alert("errors in submitted form, check console for more details");
 					}
+				}
+
+
+				function disableAddingOrChangingBoards(disable){
+
+
+					if(document.getElementById("remove-button"))	
+						document.getElementById("remove-button").disabled = disable;	
+
+					if(document.getElementById("apply-button"))
+						document.getElementById("apply-button").disabled = disable;
+
+					if(document.getElementById("add-button"))
+						document.getElementById("add-button").disabled = disable;
+						
+					if(disable){
+						editor.disable();
+					}
+					else{	
+						editor.enable();
+					}
+					
 				}
 
 			</script>

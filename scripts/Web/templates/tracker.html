@@ -1,0 +1,55 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta charset="utf-8">
+
+
+    {% block head %}
+      <title>{% block title %} Values for {{source}} {% endblock %}</title>
+    {% endblock %}
+    
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!--<script src="{{ url_for('static', filename='css/circular.css')}}"></script> -->
+    <link href="{{ url_for('static', filename='css/circular.css')}}" rel="stylesheet" type="text/css">
+  </head>
+  <body>
+	
+
+		
+	<script>
+
+		function updateTableOfValues(){
+			$.ajax({url:"/monitoring/info/" +'{{source}}'+ "/dataUpdate", async:false, success:
+			function(data){
+				console.log(data.values);
+			}});
+		}
+		
+		
+		setInterval(function(){ updateTableOfValues();}, 1000);
+	</script>
+
+	<div class='container'>
+		<ul class='circle-container-8'>
+  			<li><button type="button" class="btn btn-dark btn-lg"> hello<br>bla<br>bye</button></li>
+  			<li><button type="button" class="btn btn-dark btn-lg"> </button></li>
+  			<li><button type="button" class="btn btn-dark btn-lg"> </button></li>
+  			<li><button type="button" class="btn btn-dark btn-lg"> </button></li>
+  			<li><button type="button" class="btn btn-dark btn-lg"> </button></li>
+  			<li><button type="button" class="btn btn-dark btn-lg"> </button></li>
+  			<li><button type="button" class="btn btn-dark btn-lg"> </button></li>
+  			<li><button type="button" class="btn btn-dark btn-lg"> </button></li>
+		</ul>
+	</div>
+	
+
+
+</body>
+</html>

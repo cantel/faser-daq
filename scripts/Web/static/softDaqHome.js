@@ -21,7 +21,8 @@ function createConfigButtons(boardName){
 	btn.className= "btn btn-primary";
 	btn.id = "config" + boardName;
 	btn.addEventListener("click", function(){
-		window.open("/config/" + boardName, 'Configuration Data','replace=true,top=200,left=100,height=800,width=1000,scrollbars=yes,titlebar=yes');
+		CHILD_WINDOW = window.open("/config/" + boardName, 'Configuration Data','replace=true,top=200,left=100,height=800,width=1000,scrollbars=yes,titlebar=yes');
+		console.log("CHILD", CHILD_WINDOW);
 	})	
 	var col2 = document.createElement("DIV");
 	col2.className = "col-auto";
@@ -62,7 +63,7 @@ function createInfoButtons(boardName){
 	btn.className = "btn btn-info";
 	btn.id = "info-" + boardName;
 	btn.addEventListener("click", function(){
-		window.open("/monitoring/values/" + boardName, "replace=true");
+		window.open("/monitoring/info/" + boardName, "replace=true");
 	}, false);
 	
 	var col3 = document.createElement("DIV");
@@ -164,18 +165,39 @@ function shutdown(){
 function updateStatus(data){
 	//alert("here");
 	console.log(data);	
+	$(document).ready(function(){
 	for (var i = 0; i < Object.keys(data.allStatus).length; i++){
 		//document.write("in for of update status");
 
 		document.getElementById("status" + i.toString()).className = "badge badge-success";
 		//console.log(data.allStatus[i].state);
 		//alert(data.allStatus[i].state);
+
+		//updating the run inforamation section if the status of the eventbuilder01 changes from RUN or to RUN
+		if(data.allStatus[i].name == "eventbuilder01"){
+			if(document.getElementById("status" + i.toString()).innerHTML == "RUN" && data.allStatus[i].state != "RUN"){
+				clearInterval(intervalIndices[0]);
+				var graphWindow = document.getElementById("graphWindow");
+				//while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));
+			}
+			else if(document.getElementById("status" + i.toString()).innerHTML != "RUN" && data.allStatus[i].state == "RUN"){
+				intervalIndices[0] = updateRunInformation(true);
+			}
+
+		
+			//if(document.getElementById("status" + i.toString()).innerHTML != data.allStatus[i].state  && data.allStatus[i].state != "RUN")
+			//	setDefaultValues();
+			
+
+		}
 		document.getElementById("status" + i.toString()).innerHTML = data.allStatus[i].state;
 		if(data.allStatus[i].state == "TIMEOUT"){
 			document.getElementById("status" + i.toString()).className = "badge badge-danger";
 		}
 
 	}
+
+	});
 }
 
 function disableFileChoice(bool){
@@ -220,18 +242,37 @@ function updateCommandAvailability(data){
 		//	allBOOTED = false;
 		//}
 	}
-	
+	console.log("CHILD window while updating: ", CHILD_WINDOW);
 	if (allDOWN){
 		document.getElementById("INITIALISE").disabled = false;
 		document.getElementById("SHUTDOWN").disabled = true;
 		//disableFileChoice(false);
-		disableConfigButtons(data, false);
+		//disableConfigButtons(data, false);
+		if(CHILD_WINDOW && !CHILD_WINDOW.closed){
+			$(CHILD_WINDOW.document).ready(function() {
+  				 // $(win.document).contents().find("...").doStuff();
+	
+				//$(CHILD_WINDOW.document).contents().disableAddingOrChangingBoards(false);
+
+				CHILD_WINDOW.disableAddingOrChangingBoards(false);
+			});
+		}
 	}
 	else{
 		//disableFileChoice(true);
-		disableConfigButtons(data, true);
+		//disableConfigButtons(data, true);
 		document.getElementById("INITIALISE").disabled = true;
 		document.getElementById("SHUTDOWN").disabled = false;
+
+		if(CHILD_WINDOW && !CHILD_WINDOW.closed)
+
+			$(CHILD_WINDOW.document).ready(function() {
+  				 // $(win.document).contents().find("...").doStuff();
+	
+				//$(CHILD_WINDOW.document).contents().disableAddingOrChangingBoards(true);
+
+				CHILD_WINDOW.disableAddingOrChangingBoards(true);
+			});
 	}
 
 	if(allREADY){
@@ -274,6 +315,7 @@ function isDOWN(){
 	);
 	return allDOWN;
 }
+
 
 function updateCommandsAndStatusAndButtons(){
 	//var dat;
@@ -348,10 +390,11 @@ function updateConfigFileChoices(){
 }
 
 function goToCurrent(){
+
 	//alert('simulating click');
-	document.getElementById('radio-current.json').checked = true;
+	document.getElementById('radio-current.json').click();
 	//alert("success");
-	updateBoardContainer('current.json');
+	//updateBoardContainer('current.json');
 	
 }
 
@@ -401,12 +444,76 @@ function displaySaveButton(){
 
 }
 
+function updateRunInformation(){
+/*	$.ajax({url: "/status/eventbuilder01", async: false, success: function(data){
+		console.log("status of eventBuilder", data);	
+			
+	}});  */
+
+	var graphWindow = document.getElementById("graphWindow");
+
+	//setinterval for the run table
+	var interval_updateRunNumbers = setInterval(function(){ updateRunNumbers();}, 1000);
+
+	//load the iframe
+	
+	while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));	
+	var graph = document.createElement("IFRAME");
+	graph.className = "embed-responsive-item";
+	graph.src = "/monitoring/graph";
+	
+	graphWindow.appendChild(graph);
+	return interval_updateRunNumbers;	
+		
+	
+}
+
+function setDefaultValues(){
+	
+		var graphWindow = document.getElementById("graphWindow");
+
+		//end the iframe and replace with eventbuilder is down
+		while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));
+		var noInfo = document.createElement("H1");
+		//var t = document.createTextNode("THE EVENTBUILDER IS NOT RUNNING. NO INFO AVAILABLE.");
+		//noInfo.appendChild(t);
+		noInfo.innerHTML = "THE EVENTBUILDER IS NOT RUNNING. NO INFO AVAILABLE.";
+		graphWindow.appendChild(noInfo);
+
+		document.getElementById("PhysicsEvents").innerHTML = "";
+		document.getElementById("PhysicsRate").innerHTML = "";
+		document.getElementById("MonitoringEvents").innerHTML = "";
+		document.getElementById("MonitoringRate").innerHTML = "";
+		document.getElementById("CalibrationEvents").innerHTML = "";
+		document.getElementById("CalibrationRate").innerHTML = "";
+		document.getElementById("RunNumber").innerHTML = "";
+		document.getElementById("RunStart").innerHTML = "";
+}
+
+function convertToDate(timestamp){
+	time = new Date(timestamp * 1000);
+	var year = time.getFullYear();
+	var month = time.getMonth() + 1;
+	var day = time.getDate();
+	
+	var convertedTime = month + "/" + day + "/" + year;
+	return convertedTime;
+}
 function updateRunNumbers(){
-	$.ajax({url:"/monitoring/values/eventbuilder01/dataUpdate", async:false, success: function(data){
+	$.ajax({url:"/monitoring/info/eventbuilder01/dataUpdate", async:false, success: function(data){
 		//alert("updating run numbers");	
+		console.log("helllooooo", data);
+		var date;
 		for(var i = 0; i < Object.keys(data.values).length; i++){
 			if(document.getElementById(data.values[i].key)){
-				document.getElementById(data.values[i].key).innerHTML = data.values[i].value;
+				if(data.values[i].key == "RunStart"){
+					console.log("time", data.values[i].value);
+					date = convertToDate(data.values[i].value);
+					document.getElementById(data.values[i].key).innerHTML = date;
+				}
+				else{
+					document.getElementById(data.values[i].key).innerHTML = data.values[i].value;
+				}
 				
 			}
 
@@ -416,7 +523,7 @@ function updateRunNumbers(){
 
 function updateColorOfInfoButtons(){
 	
-	$.ajax({url: "/monitoring/values/updateStatus", async: false, success: function(data){
+	$.ajax({url: "/monitoring/info/updateStatus", async: false, success: function(data){
 		console.log(data);
 		
 		for(var i = 0; i < Object.keys(data.allStatus).length; i++){

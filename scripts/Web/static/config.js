@@ -9,7 +9,7 @@ function displaySchemaOptions(schemas, flag){
 		//console.log(schemas);
 		var schemaBar = document.getElementById("schemaDropDown");	
 		var dropDown = document.createElement("button");
-		dropDown.className = "btn btn-primary dropdown-toggle";
+		dropDown.className = "btn btn-primary dropdown-toggle btn-lg";
 		dropDown.setAttribute("type", "button");
 		dropDown.innerHTML = "Schema Options";
 		dropDown.setAttribute("data-toggle","dropdown");	
@@ -86,4 +86,5 @@ function closeWindow(){
 	//alert("done");
 	window.close();
 }
+
 

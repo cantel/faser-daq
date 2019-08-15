@@ -15,8 +15,7 @@
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DAQLING_MODULES_NEWMODULE_HPP
-#define DAQLING_MODULES_NEWMODULE_HPP
+#pragma once
 
 #include "Core/DAQProcess.hpp"
 
@@ -25,10 +24,9 @@ class NewModule : public daqling::core::DAQProcess {
   NewModule();
   ~NewModule();
 
+  void configure(); // optional (configuration can be handled in the constructor)
   void start();
   void stop();
 
   void runner();
 };
-
-#endif // DAQLING_MODULES_NEWMODULE_HPP

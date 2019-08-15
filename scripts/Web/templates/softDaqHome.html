@@ -61,20 +61,21 @@ table th{
 <body>
 
 
-	<div class = "container-fluid">
+	<div class = "container-fluid" style= " padding-bottom: 65px; padding-top:25px">
 		<div class = "row">
-			<div class = "col-4">
+			<div class = "col-4">	
+				<a href="http://epdtdi-daqtest:3000/d/epfNxnHWz/faser_metrics?orgId=1&from=now-5m&to=now&refresh=5s">Monitoring Link</a>
 			</div>
 			<div class = "col-4">
 				<div class = "page-header">
-					<br><br>
+					
 					<center><h4>DAQ software</h4></center>
-					<br><br>
+					
 				</div>
 			</div>
-			<div class= "col-4">	
+			<div class= "col-4">
 				<div class = "images">
-				<img src="{{ url_for('static', filename='faserLogo.jpeg')}}", style="width:300px;height:100px;" height="30" width="35" >
+				<img src="{{ url_for('static', filename='faserLogo.jpeg')}}", style="width:200px;height:100px;" height="35" width="30" >
 				</div>
 			</div>
 		</div>
@@ -97,7 +98,7 @@ table th{
 				</div>
 
 			</div>
-			<div class = "col-9">
+			<div class = "col-6">
 				<div class = "jumbotron" style= "width: 700px; color:aqua;background-color: #1a52c6">
 					<center><h4>CONTROLS</h4></center>
 					<br>
@@ -113,6 +114,25 @@ table th{
 					</center>
 				
 				</div>
+			</div>
+
+
+			<div class = "col3">
+			<!--	<div class = "jumbotron" style= "width: 700px; color:aqua;background-color: #1a52c6">
+					<center><h4>CONTROLS</h4></center>
+					<br>
+					<br>
+					<center>	
+						<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
+						&nbsp;
+						<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
+						&nbsp;
+						<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
+						&nbsp;
+						<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
+					</center>
+				
+				</div>-->
 			</div>
 		
 		</div>

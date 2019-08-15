@@ -495,8 +495,10 @@ function convertToDate(timestamp){
 	var year = time.getFullYear();
 	var month = time.getMonth() + 1;
 	var day = time.getDate();
-	
-	var convertedTime = month + "/" + day + "/" + year;
+	var hour = time.getHours();
+	var minutes = time.getMinutes();
+	var seconds = time.getSeconds();	
+	var convertedTime = month + "/" + day + "/" + year + "  " + hour + ":" + minutes + ":" + seconds;
 	return convertedTime;
 }
 function updateRunNumbers(){

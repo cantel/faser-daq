@@ -122,14 +122,14 @@ table th{
 			<div class="col-md-6">
 				<div class = "jumbotron" style = "padding-bottom: 65px; padding-top:25px">
 					<center><h4>RUN INFORMATION</h4></center>
-					<script>setInterval(function(){ updateRunNumbers(); } , 500);</script>	
+					<!--<script>setInterval(function(){ updateRunInformation(); }, 1000);</script>-->
+					<script> var intervalIndices = {}; </script>
 					<table class="table table-sm table-hover table-bordered">
 						<tbody>
-								<!--<font color="blue">-->
 								<tr>
 									<th scope="row">Run</th>
       									<td>  <a> number: </a> <a id="RunNumber"></a></td>
-      									<td> <a> Starting Time: </a> <a id="StartingTime"></a> </td>
+      									<td> <a> Starting Time: </a> <a id="RunStart"></a> </td>
     								</tr>			
 							
 									
@@ -148,22 +148,16 @@ table th{
 
 	
 								<tr>
-									<th scope="row">Calibrates</th>
-      									<td></td>
-      									<td></td>
+									<th scope="row">Calibration</th>
+      									<td> <a id="CalibrationEvents"> </a> <a>events</a></td>
+      									<td> <a id="CalibrationRate"> </a> <a>Hz</a></td>
     								</tr>		
-								<!--</font>-->		
 						</tbody>
 					</table>
 				 
-					<!--	<div class="embed-responsive embed-responsive-16by9">
-							<iframe class="embed-responsive-item" src="/values/graph/eventbuilder01" allowfullscreen>
-							</iframe>
-						</div>-->
-
-						<div class="embed-responsive embed-responsive-16by9">
-							<iframe class="embed-responsive-item" src="/monitoring/graph" allowfullscreen>
-							</iframe>
+						<div class="embed-responsive embed-responsive-16by9" id="graphWindow">
+							<!--<iframe class="embed-responsive-item" src="/monitoring/graph" allowfullscreen>
+							</iframe>-->
 						</div>
 					<br>
 				</div>
@@ -177,6 +171,7 @@ table th{
 					<div class = "container" id = "boards">
 		
 						<script>
+							var CHILD_WINDOW;
 							updateBoardContainer("current.json");
 							setInterval(updateCommandsAndStatusAndButtons, 500);
 						</script>

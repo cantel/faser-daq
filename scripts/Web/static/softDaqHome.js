@@ -204,8 +204,6 @@ function disableFileChoice(bool){
 	
 	$.ajax({url : '/configFileNames', async:false, success : function(data){
 		fileNames = data;
-		//alert(da.configFileNames[0].name);	
-		//alert(da);
 	}});
 
 
@@ -347,33 +345,20 @@ function createRadioInputs(fileNames){
 			input.className = "custom-control-input";
 			input.setAttribute("name", "configFileGroup");
 
-			
 			input.id = "radio-" + fileNames.configFileNames[i].name;
 
-			//if(fileNames.configFileNames[i].name == "current.json"){
-				//input.checked = "checked";
-			//}
-		
 			var label = document.createElement("LABEL");
 			label.className = "custom-control-label";
 			label.htmlFor = "radio-" + fileNames.configFileNames[i].name;
 			label.innerHTML = fileNames.configFileNames[i].name;
 			
 			input.addEventListener("click", function(){
-				//alert(this.id);
+				//TODO : update the run information section
 				updateBoardContainer(this.id.slice(6));
 				if(this.id == "radio-current.json"){
-
-					//var saveContainer = document.getElementById("saveNewFile");
-					//while(saveContainer.firstChild && saveContainer.removeChild(saveContainer.firstChild));
-					//displaySaveButton();
-					//alert("visible");
 					document.getElementById("save-button").style.display = "initial";
 				}
 				else{
-					//var saveContainer = document.getElementById("saveNewFile");
-					//while(saveContainer.firstChild && saveContainer.removeChild(saveContainer.firstChild));
-					//alert("hidden");
 					document.getElementById("save-button").style.display = "none";
 				}
 			});
@@ -389,21 +374,14 @@ function updateConfigFileChoices(){
 	var fileNames;
 	$.ajax({url : '/configFileNames', async:false, success : function(data){
 		fileNames = data;
-		//alert(da.configFileNames[0].name);	
-		//alert(da);
 	}});
-	//alert(da.configFileNames[0].name);	
 	createRadioInputs(fileNames);	
 	
 }
 
 function goToCurrent(){
 
-	//alert('simulating click');
 	document.getElementById('radio-current.json').click();
-	//alert("success");
-	//updateBoardContainer('current.json');
-	
 }
 
 function addBoard(){
@@ -438,7 +416,6 @@ function displaySaveButton(){
 
 	
 	if(document.getElementById('radio-current.json').checked == true){
-		//alert("here");
 		var save = document.createElement("button");
 		save.className = "btn btn-primary";
 		save.innerHTML = "SAVE";
@@ -481,7 +458,6 @@ function setDefaultValues(){
 	
 		var graphWindow = document.getElementById("graphWindow");
 
-		//end the iframe and replace with eventbuilder is down
 		while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));
 		var noInfo = document.createElement("H1");
 		//var t = document.createTextNode("THE EVENTBUILDER IS NOT RUNNING. NO INFO AVAILABLE.");

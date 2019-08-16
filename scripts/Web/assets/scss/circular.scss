@@ -9,9 +9,9 @@
     //display: block;
     position: absolute;
     top:  50%; 
-    left: 50%;
-    width:  $item-size;
-    height: $item-size;
+    left: 45%;
+    width:  $item-size*4;
+    height: $item-size/2;
   
     $angle: (360 / $item-count);
     $rot: 0;
@@ -29,7 +29,7 @@
 }
 
 .circle-container-8 {
-  @include on-circle($item-count: 8, $circle-size: 50em, $item-size: 20px); 
+  @include on-circle($item-count: 8, $circle-size: 50em, $item-size: 50px); 
   margin: 5em auto 0;
 
   button { 

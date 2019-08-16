@@ -68,11 +68,11 @@ class Add(Resource):
 
 @metric_blueprint.route("/graph")
 def graph():
-  metrics = [x.decode() for x in r.keys() if x.startswith(b"History:")]
+  metrics = [x.decode() for x in r.keys() if x.startswith(b"History")]
   print(metrics)
   tabNames = []
   for metric in metrics:
-    if(not metric.startswith("History:eventbuilder")):
+    if(not metric.startswith("History")):
       metrics.remove(metric)
   for metric in metrics:
     tabNames.append(metric.split("_")[1])
@@ -112,7 +112,7 @@ def metric():
 def listvalues():
   metrics={}
   for key in sorted(r.keys()):
-    if key.startswith(b"History:"): continue
+    if (key.startswith(b"Helper:")) or (key.startswith(b"Subset:")): continue
     metrics[key.decode()]=str(r.hlen(key))
   #print("metrics", metrics)
   return render_template('overview.html', metrics=metrics)
@@ -148,7 +148,7 @@ def getStatus():
   print("r: ", r)
   for key in sorted(r.keys()):
     print(key)
-    if key.startswith(b"History:"): continue
+    if (key.startswith(b"History")) or (key.startswith(b"Subset")): continue
     source = key.decode()
     #print("source in stat: ", source)
     dbVals = r.hgetall(source)
@@ -163,6 +163,22 @@ def getStatus():
   #print("allStatus", allStatus) 
   return jsonify({"allStatus" : allStatus})
 
+
+@metric_blueprint.route("/info/<source>/<moduleId>")
+def moduloTemplate(source, moduleId):
+  return render_template("module.html", source=source, moduleId= moduleId)
+
+
+@metric_blueprint.route("/info/<source>/<moduleId>/getData")
+def getModuloData(source, moduleId): 
+  values=[]
+  hashName = "Subset:" + source + ":" + moduleId
+  dbVals=r.hgetall(hashName)
+  #print("dbVals in dataUpdate", dbVals)
+  for key in sorted(dbVals):
+    #print("keyyyyyyy:" ,key)
+    values.append({  'key':key.decode(), 'value': dbVals[key].split(b':')[1].decode(), 'time': time.ctime(float(dbVals[key].split(b':')[0]))  })
+  return jsonify({"values" : values})
 #api.add_resource(Add, "/add/<string:metric>", methods=['POST'])
 #api.add_resource(Metrics, "/metrics", methods=['GET'])
 

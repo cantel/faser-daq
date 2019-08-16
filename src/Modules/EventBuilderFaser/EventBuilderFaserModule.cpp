@@ -146,7 +146,7 @@ void EventBuilderFaserModule::runner() {
       continue;
     }
     noData=false;
-    if (blob->size()<(int)sizeof(EventFragment)) {
+    if (blob->size()<(int)sizeof(EventFragmentHeader)) {
       ERROR("Got to small fragment ("<<blob->size()<<" bytes) from channel "<<channel);
       continue;
     }

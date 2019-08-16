@@ -61,7 +61,7 @@ void FrontEndReceiverModule::runner() {
                          << "0x" << timestamp.count() << std::dec << "  >>  payload size "
                          << payload_size);
 
-    std::unique_ptr<EventFragment> data((EventFragment *)malloc(total_size));
+    std::unique_ptr<EventFragment> data(new EventFragment);
     data->header.marker = FragmentMarker;
     data->header.fragment_tag = PhysicsTag;
     data->header.trigger_bits = 0;

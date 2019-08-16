@@ -362,11 +362,19 @@ function createRadioInputs(fileNames){
 			input.addEventListener("click", function(){
 				//alert(this.id);
 				updateBoardContainer(this.id.slice(6));
-				if(this.id == "radio-current.json")
-					displaySaveButton();
+				if(this.id == "radio-current.json"){
+
+					//var saveContainer = document.getElementById("saveNewFile");
+					//while(saveContainer.firstChild && saveContainer.removeChild(saveContainer.firstChild));
+					//displaySaveButton();
+					//alert("visible");
+					document.getElementById("save-button").style.display = "initial";
+				}
 				else{
-					var saveContainer = document.getElementById("saveNewFile");
-					while(saveContainer.firstChild && saveContainer.removeChild(saveContainer.firstChild));
+					//var saveContainer = document.getElementById("saveNewFile");
+					//while(saveContainer.firstChild && saveContainer.removeChild(saveContainer.firstChild));
+					//alert("hidden");
+					document.getElementById("save-button").style.display = "none";
 				}
 			});
 			div.appendChild(input);
@@ -434,6 +442,7 @@ function displaySaveButton(){
 		var save = document.createElement("button");
 		save.className = "btn btn-primary";
 		save.innerHTML = "SAVE";
+		save.id = "save-button";
 		save.style.cssFloat = "right";
 		save.addEventListener("click", function(){
 			saveConfigFile();
@@ -496,9 +505,9 @@ function convertToDate(timestamp){
 	var month = time.getMonth() + 1;
 	var day = time.getDate();
 	var hour = time.getHours();
-	var minutes = time.getMinutes();
-	var seconds = time.getSeconds();	
-	var convertedTime = month + "/" + day + "/" + year + "  " + hour + ":" + minutes + ":" + seconds;
+	var minutes = "0" + time.getMinutes();
+	var seconds = "0" + time.getSeconds();	
+	var convertedTime = month + "/" + day + "/" + year + "  " + hour + ":" + minutes.substr(-2) + ":" + seconds.substr(-2);
 	return convertedTime;
 }
 function updateRunNumbers(){

@@ -10,7 +10,7 @@
 
 
     {% block head %}
-      <title>{% block title %} Values for {{source}} {% endblock %}</title>
+      <title>{% block title %} Values for {{source}} / {{ moduloId }} {% endblock %}</title>
     {% endblock %}
     
     <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
@@ -41,7 +41,7 @@
 	</div>
 
 		<script>
-				numberOfElm = 8;
+				numberOfElm = 12;
 				var container = document.getElementById("circleContainer");
 				var circle = document.createElement("ul");
 				container.appendChild(circle);
@@ -53,16 +53,11 @@
 					var item = document.createElement("li");
 					circle.appendChild(item);
 
-					var btn = document.createElement("button");
-					btn.id="Module" + i
-					btn.className = "btn btn-primary btn-lg";
+					var chip = document.createElement("span");
+					chip.id="Chip" + i
+					chip.className = "badge badge-info";
 
-					btn.addEventListener("click", function(){
-						//window.location.href = "/log/" + boardName;	
-						window.open("/monitoring/info/" + '{{source}}' + "/" + this.id, "replace=true");
-					}, false);
-			
-					item.appendChild(btn);
+					item.appendChild(chip);
 					//alert(btn.id);
 					
 				}
@@ -74,30 +69,30 @@
 	<script>
 
 		function updateValues(){
-			$.ajax({url:"/monitoring/info/" +'{{source}}'+ "/dataUpdate", async:false, success:
+			$.ajax({url:"/monitoring/info/" +'{{source}}'+ "/" + '{{ moduleId }}' + "/getData", async:false, success:
 			function(data){
-				console.log("tracker vlaues:" , data.values);
+				console.log("chip vlaues:" , data.values);
 			
 			var tableBody = document.getElementById("table-body");
 			while(tableBody.firstChild && tableBody.removeChild(tableBody.firstChild));	
 
 			for(var i = 0; i < Object.keys(data.values).length; i++){
-				if(data.values[i].key.startsWith("Module")){
+				if(data.values[i].key.includes("Chip")){
 				
-					moduleId = data.values[i].key.split("_")[0];
+					chipId = data.values[i].key.split("_")[0];
 					valueName = data.values[i].key.split("_")[1];
 					value = data.values[i].value;
 					
 					//alert(moduleId);
-					var btn = document.getElementById(moduleId);
-					while(btn.firstChild && btn.removeChild(btn.firstChild));	
+					var chip = document.getElementById(chipId);
+					while(chip.firstChild && chip.removeChild(chip.firstChild));	
 
 					var t = document.createTextNode(valueName + ": " + value);
-					btn.appendChild(t);
+					chip.appendChild(t);
 
 					var spn = document.createElement("span");
 					spn.innerHTML = "&nbsp;"
-					btn.appendChild(spn);
+					chip.appendChild(spn);
 				}
 				else{	
 					var tr = document.createElement("tr");

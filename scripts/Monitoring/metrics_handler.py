@@ -39,23 +39,24 @@ while True:
 
   for comp in config["components"]:
       if comp["name"].startswith("frontendreceiver"):
-        for i in range(8):
+        for i in range(1,9):
           source = comp["name"]
-          moduleName = "module" + str(i)
+          moduleName = "Module" + str(i)
           valueName = "hits"
           val = str(time.time())+":"+str(random.randint(1,4000))
           name = moduleName + "_" + valueName
           r.hset(source, name, val)
-          metric = source + ":" + name
+          r.hset("Subset:"+ source + ":" + moduleName, valueName, val)
+          #metric = source + ":" + name
           #r.lpush(metric, val)
 
-          for j in range(12):
-            valueName1 = "chip" + str(j)
+          for j in range(1,13):
+            valueName1 = "Chip" + str(j)
             valueName2 = "hits"
             val = str(time.time())+":"+str(random.randint(1,4000))
-            name = moduleName + "_" + valueName1 + "_" + valueName2
-            r.hset(source, name, val)
-            metric = source + ":" + name
+            name = valueName1 + "_" + valueName2
+            r.hset("Subset:" + source + ":" + moduleName, name, val)
+           # metric = source + ":" + name
             #r.lpush(metric, val)
   for sock in socks:
     source=nameMap[sock]

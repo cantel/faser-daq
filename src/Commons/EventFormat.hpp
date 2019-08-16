@@ -1,5 +1,4 @@
-#ifndef EVENTFORMAT_H_
-#define EVENTFORMAT_H_
+#pragma once
 
 #include <stdint.h>
 
@@ -105,6 +104,3 @@ struct EventHeader {
   uint16_t status;
   uint64_t timestamp;
 }  __attribute__((__packed__));
-
-
-#endif  /* EVENTFORMAT */

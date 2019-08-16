@@ -5,7 +5,7 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "FrontEndEmulatorXXX",
+	"default": "frontendemulatorXXX",
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },

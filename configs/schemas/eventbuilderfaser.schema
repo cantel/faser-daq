@@ -5,7 +5,8 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "EventBuilderXXX",
+	"default": "eventbuilderXXX",
+	"readOnly": true,
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },

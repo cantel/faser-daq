@@ -5,7 +5,7 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "BoardReaderXXX",
+	"default": "boardreaderXXX",
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },

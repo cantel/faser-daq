@@ -5,7 +5,7 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "DataLoggerXXX",
+	"default": "dataloggerXXX",
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },

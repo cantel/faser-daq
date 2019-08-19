@@ -1,20 +1,19 @@
 /// \cond
 #include <chrono>
-/// \endcond
-using namespace std::chrono_literals;
-using namespace std::chrono;
-
 #include <map>
 #include <boost/format.hpp>
 #include <boost/histogram/ostream.hpp> // write histogram straight to ostream
 #include <iostream> // std::flush
 #include <sstream> // std::ostringstream
 #include <fstream>      // std::ofstream
-
-using namespace boost::histogram;
+/// \endcond
 
 #include "MonitorModule.hpp"
 #include "Core/Statistics.hpp"
+
+using namespace boost::histogram;
+using namespace std::chrono_literals;
+using namespace std::chrono;
 
 MonitorModule::MonitorModule() { 
    INFO("");

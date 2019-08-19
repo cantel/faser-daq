@@ -10,7 +10,6 @@ class EventMonitorModule : public MonitorModule {
   void runner();
 
 
-
  protected:
 
   void register_metrics();

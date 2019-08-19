@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Monitor/MonitorModule.hpp"
+#include "Modules/Monitor/MonitorModule.hpp"
 
 class TrackerMonitorModule : public MonitorModule {
  public:

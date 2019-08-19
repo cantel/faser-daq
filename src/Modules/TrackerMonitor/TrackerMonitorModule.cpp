@@ -1,18 +1,17 @@
 /// \cond
 #include <chrono>
-/// \endcond
-using namespace std::chrono_literals;
-using namespace std::chrono;
-
 #include <map>
 #include <boost/format.hpp>
 #include <boost/histogram/ostream.hpp> // write histogram straight to ostream
 #include <iostream> // std::flush
 #include <sstream> // std::ostringstream
 #include <fstream>      // std::ofstream
+/// \endcond
 
 #include "TrackerMonitorModule.hpp"
 
+using namespace std::chrono_literals;
+using namespace std::chrono;
 using namespace boost::histogram;
 
 TrackerMonitorModule::TrackerMonitorModule() { 

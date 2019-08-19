@@ -1,15 +1,15 @@
 /// \cond
 #include <chrono>
-/// \endcond
-using namespace std::chrono_literals;
-using namespace std::chrono;
-
 #include <map>
 #include <iostream> // std::flush
 #include <sstream> // std::ostringstream
-#include <fstream>      // std::ofstream
+#include <fstream> // std::ofstream
+/// \endcond
 
 #include "EventMonitorModule.hpp"
+
+using namespace std::chrono_literals;
+using namespace std::chrono;
 
 EventMonitorModule::EventMonitorModule() { 
 

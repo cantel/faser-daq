@@ -2,10 +2,10 @@
 
 #include <boost/histogram.hpp>
 #include <tuple>
-#include "Core/DAQProcess.hpp"
 #include <nlohmann/json.hpp>
 #include <list>
 
+#include "Core/DAQProcess.hpp"
 #include "Commons/EventFormat.hpp"
 
 class MonitorModule : public daqling::core::DAQProcess {

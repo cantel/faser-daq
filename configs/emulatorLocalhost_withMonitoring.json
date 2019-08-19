@@ -1,12 +1,13 @@
 {
-  "version": 3,
+  "version": 5,
   "group": "faser",
   "components": [
     {
       "name": "triggergenerator",
       "host": "localhost",
       "port": 5540,
-      "type": "triggergenerator",
+      "type": "TriggerGenerator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "rateInHz": 15,
         "frontendApps": [
@@ -25,7 +26,8 @@
       "name": "frontendemulator01",
       "host": "localhost",
       "port": 5541,
-      "type": "frontendemulator",
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "meanSize": 25,
         "rmsSize": 0,
@@ -43,7 +45,8 @@
       "name": "frontendemulator02",
       "host": "localhost",
       "port": 5542,
-      "type": "frontendemulator",
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "meanSize": 250,
         "rmsSize": 20,
@@ -61,9 +64,10 @@
       "name": "frontendreceiver01",
       "host": "localhost",
       "port": 5555,
-      "type": "frontendreceiver",
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	"stats_uri": "tcp://*:7055",
+      	"stats_uri": "tcp://*:7055",
         "dataPort": 18001
       },
       "connections": {
@@ -81,7 +85,8 @@
       "name": "frontendreceiver02",
       "host": "localhost",
       "port": 5556,
-      "type": "frontendreceiver",
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "dataPort": 18002
       },
@@ -100,12 +105,13 @@
       "name": "eventbuilder01",
       "host": "localhost",
       "port": 5557,
-      "type": "eventbuilderfaser",
+      "type": "EventBuilderFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	  "stats_uri": "tcp://*:7057",
-          "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-          "influxDb_name": "DAQmetrics",
-          "maxPending": 10
+	      "stats_uri": "tcp://*:7057",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQmetrics",
+        "maxPending": 10
       },
       "connections": {
         "receivers": [
@@ -142,8 +148,10 @@
       "name": "datalogger01",
       "host": "localhost",
       "port": 5558,
-      "type": "filedatalogger",
+      "type": "FileDataWriter",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
+        "filename_pattern": "/tmp/test-%D.%n.%c.bin",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQmetrics"
       },
@@ -162,7 +170,8 @@
       "name": "trackermonitor01",
       "host": "localhost",
       "port": 5559,
-      "type": "trackermonitor",
+      "type": "TrackerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 1000001,
         "outputDir": "./",
@@ -184,7 +193,8 @@
       "name": "tlbmonitor01",
       "host": "localhost",
       "port": 5560,
-      "type": "tlbmonitor",
+      "type": "TLBMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 1000002,
         "outputDir": "./",
@@ -206,7 +216,8 @@
       "name": "eventmonitor01",
       "host": "localhost",
       "port": 5561,
-      "type": "eventmonitor",
+      "type": "EventMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 0,
         "outputDir": "./",

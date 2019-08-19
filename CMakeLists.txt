@@ -15,6 +15,10 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 FIND_PACKAGE(Threads REQUIRED)
 
+# Enable Boost
+set(ENABLE_BOOST ON)
+message(STATUS "Building with Boost")
+
 # Build daqling
 add_subdirectory(daqling)
 

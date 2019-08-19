@@ -19,6 +19,7 @@
 #define DAQLING_MODULES_DISRUPTORFILEDATALOGGER_HPP
 
 /// \cond
+#include <utility>
 #include <fstream>
 #include <map>
 #include <queue>
@@ -29,6 +30,7 @@
 #include "Utilities/Binary.hpp"
 #include "Utilities/ChunkedStorage.hpp"
 #include "Utilities/ProducerConsumerQueue.hpp"
+#include "Modules/EventFormat.hpp"
 
 /*
  * FileDataLogger
@@ -52,13 +54,14 @@ class DisruptorFileDataLogger : public daqling::core::DAQProcess, public daqling
   void write();
   void read();
   void writeToFile(int ftid);
-  void bookKeeper(int ftid, EventHeader* l_eh);
+  void bookKeeper(int ftid);
   bool write(uint64_t keyId, daqling::utilities::Binary& payload);
   void shutdown();
 
  private:
   // Configs
   long m_writeBytes;
+  long long m_maxFileSize;
 
   // Internals
   folly::ProducerConsumerQueue<daqling::utilities::Binary> m_payloads;
@@ -66,16 +69,21 @@ class DisruptorFileDataLogger : public daqling::core::DAQProcess, public daqling
   std::map<uint64_t, std::unique_ptr<daqling::utilities::ReusableThread>> m_fileWriters;
   std::map<uint64_t, std::function<void()>> m_writeFunctors;
   std::map<uint64_t, std::string> m_fileNames;
+  std::map<uint64_t, std::string> m_fileNameFormats;
   //std::map<uint64_t, std::fstream> m_fileStreams;
 
-  std::map<uint64_t, std::map<uint8_t, std::pair<fstream, fstream>>> m_fileStreams;
+  std::map<uint64_t, std::map<uint8_t, std::pair<std::fstream, std::fstream>>> m_fileStreams;
 
   std::map<uint64_t, std::vector<daqling::utilities::Binary>> m_fileBuffers;
   std::map<uint8_t, uint32_t> m_fileRotationCounters;
 
+  uint8_t m_eventTag;
+  std::map<uint8_t, uint32_t> m_fileStreamsReady;
+
+
   //write thread
   std::unique_ptr<std::thread> m_fileWriter;
-  std::unique_ptr<daqling::utilities::ReusableThread> m_bookKeeper;
+  std::unique_ptr<std::thread> m_bookKeeper;
 
   std::atomic<int> m_bytes_sent;
   std::unique_ptr<std::thread> m_monitor_thread;

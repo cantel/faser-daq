@@ -25,6 +25,6 @@ include_directories(${daqling_include_dirs})
 link_directories(${daqling_link_dirs})
 
 # Disable some CXX FLAGS for convenience
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-zero-as-null-pointer-constant -Wno-undef -Wno-sign-conversion -Wno-old-style-cast -Wno-strict-overflow")
 
 add_subdirectory(src/Modules)

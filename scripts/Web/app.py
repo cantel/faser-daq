@@ -1,4 +1,7 @@
-from flask import Flask, render_template, request, jsonify, send_file, abort, session
+from flask import Flask, render_template, request, jsonify, send_file, abort, session, Response
+#from file_read_backwards import FileReadBackwards
+from datetime import datetime
+#from flask_rangerequest import RangeRequest
 from flask_scss import Scss
 import json
 #from jsonschema import validate
@@ -225,6 +228,9 @@ def changeConfigFile(boardName):
 		#print("submittedValue: ", submittedValue)
 		index = findIndex(boardName)
 		d = session.get("data")
+		print(submittedValue)
+		print("***************")
+		print(	d['components'][index] )
 		d['components'][index] = submittedValue
 		#print(d)
 		session['data'] = d
@@ -285,7 +291,23 @@ def saveNewConfigFile(newFileName):
 	else:
 		shutil.copy(env['DAQ_CONFIG_DIR'] + "current.json", env['DAQ_CONFIG_DIR'] + newFileName + ".json", follow_symlinks=False)
 		return jsonify({"message" : 1})
-		
+	
+
+def tail(file, n=1, bs=1024):
+	f = open(file)
+	f.seek(0,2)
+	l = 1-f.read(1).count('\n')
+	B = f.tell()
+	while n >= l and B > 0:
+		block = min(bs, B)
+		B -= block
+		f.seek(B, 0)
+		l += f.read(block).count('\n')
+	f.seek(B, 0)
+	l = min(l,n)
+	lines = f.readlines()[-l:]
+	f.close()
+	return lines	
 		
 @app.route('/log/<boardName>')
 def logfile(boardName):
@@ -294,7 +316,19 @@ def logfile(boardName):
 	logfiles = session.get('logfiles')
 	index = findIndex(boardName)
 	try:
-		return send_file(logfiles[index][1], cache_timeout=-1)
+		#return send_file(logfiles[index][1], cache_timeout=-1)
+		#with open(logfiles[index][1]) as f:
+		#	return f
+
+		#print(logfiles[index][1])
+		#with open(logfiles[index][1], 'rb') as f:
+			#etag = RangeRequest.make_etag(f)
+			#last_modified = datetime.utcnow()
+
+		#return RangeRequest(FileReadBackwards(logfiles[index][1], encoding="utf-8"), etag=etag, last_modified=last_modified, size=10000).make_response()
+		data = tail(logfiles[index][1], 10)
+		return Response(data, mimetype='text/plain')
+
 	except IndexError as error:
 		abort(404)
 	except FileNotFoundError:

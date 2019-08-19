@@ -18,9 +18,25 @@
     <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
     <!--<script src="{{ url_for('static', filename='css/circular.css')}}"></script> -->
     <link href="{{ url_for('static', filename='css/circular.css')}}" rel="stylesheet" type="text/css">
+
+  <style>
+ 
+	hr.dashed{
+ 		 border-top: 2px dashed green;
+		 margin-bottom:0px;
+		 margin-top:2px;
+
+	}			
+
+   </style>
+  
   </head>
   <body>
 	
+		
+	<div class="page-header"  style = "margin-left:10px; padding-bottom: 15px; padding-top:15px">
+		<h2> Values for {{moduleId}} from {{ source }} <h2>
+	</div>
 		
 	<table class="table thead-dark table-striped table-hover">
 		<thead>
@@ -52,23 +68,42 @@
 						
 					var item = document.createElement("li");
 					circle.appendChild(item);
-
+					
+					
 					var chip = document.createElement("span");
-					chip.id="Chip" + i
 					chip.className = "badge badge-info";
+					
+
+					var labelDiv = document.createElement("div");
+					chip.appendChild(labelDiv); 
+
+					var label = document.createElement("span");
+					label.innerHTML = "Chip" + i;	
+					label.className="label label-info";
+					labelDiv.appendChild(label);
+											
+
+					var valuesDiv = document.createElement("div");
+					var dashed_line = document.createElement("hr");
+					dashed_line.className = "dashed";
+
+					chip.appendChild(dashed_line);
+
+					valuesDiv.id = "Chip" + i;
+					chip.appendChild(valuesDiv);
 
 					item.appendChild(chip);
 					//alert(btn.id);
 					
 				}
 
-				setInterval(function(){ updateValues();}, 1000);
+				setInterval(function(){ updateValues(numberOfElm);}, 1000);
 		</script>		
 
 		
 	<script>
 
-		function updateValues(){
+		function updateValues(n){
 			$.ajax({url:"/monitoring/info/" +'{{source}}'+ "/" + '{{ moduleId }}' + "/getData", async:false, success:
 			function(data){
 				console.log("chip vlaues:" , data.values);
@@ -76,6 +111,12 @@
 			var tableBody = document.getElementById("table-body");
 			while(tableBody.firstChild && tableBody.removeChild(tableBody.firstChild));	
 
+			for(var i = 1; i < n + 1; i++){
+				
+				var chip = document.getElementById("Chip" + i);
+				while(chip.firstChild && chip.removeChild(chip.firstChild));	
+			
+			}
 			for(var i = 0; i < Object.keys(data.values).length; i++){
 				if(data.values[i].key.includes("Chip")){
 				
@@ -85,14 +126,23 @@
 					
 					//alert(moduleId);
 					var chip = document.getElementById(chipId);
-					while(chip.firstChild && chip.removeChild(chip.firstChild));	
-
-					var t = document.createTextNode(valueName + ": " + value);
-					chip.appendChild(t);
 
 					var spn = document.createElement("span");
-					spn.innerHTML = "&nbsp;"
+					spn.innerHTML = valueName + ": " + value;
 					chip.appendChild(spn);
+ 
+					//var spn4 = document.createElement("span");
+					//spn4.innerHTML = "&nbsp;"
+					//btn.appendChild(spn4);
+					
+
+					//var t = document.createTextNode("<br/>");
+					//btn.appendChild(t);
+
+					var spn2 = document.createElement("span");
+					spn2.innerHTML = "</br>"
+					chip.appendChild(spn2);
+
 				}
 				else{	
 					var tr = document.createElement("tr");

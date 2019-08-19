@@ -69,14 +69,14 @@ class Add(Resource):
 @metric_blueprint.route("/graph")
 def graph():
   metrics = [x.decode() for x in r.keys() if x.startswith(b"History")]
-  print(metrics)
+  #print(metrics)
   tabNames = []
   for metric in metrics:
     if(not metric.startswith("History")):
       metrics.remove(metric)
   for metric in metrics:
     tabNames.append(metric.split("_")[1])
-  print(metrics)
+  #print(metrics)
   #print("///////////tabnames:",tabNames)
   return render_template('graph2.html', metrics=metrics, tabNames=tabNames)
 
@@ -85,9 +85,9 @@ def graph():
 def data(metric):
   metric_array = []
   for x in r.lrange(metric, 0, -1):
-    print("x: ",x)
+    #print("x: ",x)
     value = x.decode().split(':')
-    print("value: ", value)
+    #print("value: ", value)
     metric_array.append([1000.*float(value[0]), float(value[1])])
   #return json.dumps(metric_array[-1000:])
   metric_array.reverse()
@@ -145,9 +145,9 @@ def getValues(source):
 @metric_blueprint.route("/info/updateStatus")
 def getStatus():
   allStatus = []
-  print("r: ", r)
+  #print("r: ", r)
   for key in sorted(r.keys()):
-    print(key)
+    #print(key)
     if (key.startswith(b"History")) or (key.startswith(b"Subset")): continue
     source = key.decode()
     #print("source in stat: ", source)
@@ -157,7 +157,7 @@ def getStatus():
     if(b'Status' in sorted(dbVals)):
       val =  dbVals[b'Status'].split(b':')[1].decode()
     else: 
-      val = 1
+      val = -1
     #print("status number",val )
     allStatus.append({ "source": source, "statusVal": val })
   #print("allStatus", allStatus) 

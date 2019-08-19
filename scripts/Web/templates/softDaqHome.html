@@ -13,7 +13,7 @@
 
 
 
-	<style>
+<style>
 	.jumbotron{
 		background-color: #2E2D88;
 		color:aqua;
@@ -21,6 +21,33 @@
 	
 	.btn-circle {
  		border-radius: 60%;
+	}
+	.btn-settings{
+		margin-left: 14px;
+		margin-right: 14px;
+
+
+	//	padding-left: 5px;
+	//	padding-right:5px;
+	}
+
+	.badge{
+		margin-left: 14px;
+		margin-right: 14px;
+
+
+	//	padding-left: 5px;
+	//	padding-right:5px;
+	}
+
+
+	.label{
+		margin-left: 14px;
+		margin-right: 14px;
+
+
+	//	padding-left: 5px;
+	//	padding-right:5px;
 	}
 /*
 	.col-3{
@@ -40,21 +67,21 @@
 		height: auto;
 	}
 */
-.images {
-  float: right;
-}
+	.images {
+  		float: right;
+	}	
 
-table td{
-  color:aqua;
-}    
+	table td{
+  		color:aqua;
+	}    
 
-table th{
-  color: aqua;
-} 
-            .tableTxtColor{
-             
-              color: aqua;
-            }
+	table th{
+  		color: aqua;
+	}
+ 
+	.tableTxtColor{
+  		color: aqua;
+	}
 </style>
 
 </head>
@@ -64,7 +91,7 @@ table th{
 	<div class = "container-fluid" style= " padding-bottom: 65px; padding-top:25px">
 		<div class = "row">
 			<div class = "col-4">	
-				<a href="http://epdtdi-daqtest:3000/d/epfNxnHWz/faser_metrics?orgId=1&from=now-5m&to=now&refresh=5s">Monitoring Link</a>
+				<a href="http://epdtdi-daqtest:3000/d/epfNxnHWz/faser_metrics?orgId=1&from=now-5m&to=now&refresh=5s" style='font-size:2em' target="_blank" >Monitoring Link</a>
 			</div>
 			<div class = "col-4">
 				<div class = "page-header">
@@ -75,13 +102,13 @@ table th{
 			</div>
 			<div class= "col-4">
 				<div class = "images">
-				<img src="{{ url_for('static', filename='faserLogo.jpeg')}}", style="width:200px;height:100px;" height="35" width="30" >
+				<img src="{{ url_for('static', filename='faserLogo.jpeg')}}", style="width:250px;height:100px;" height="35" width="30" >
 				</div>
 			</div>
 		</div>
 		<div class = "row">
-			<div class = "col-3">
-				<div class = "jumbotron"  style= "padding-right:15px ; padding-left:10px ; padding-bottom: 65px; padding-top:25px">
+			<div class = "col-auto">
+				<div class = "jumbotron"  style= " padding-right:35px ; padding-left:10px ; padding-bottom: 65px; padding-top:25px">
 					<div class="container" id = "configFilesRadioGroup">	
 					</div>
 
@@ -105,11 +132,11 @@ table th{
 					<br>
 					<center>	
 						<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
-						&nbsp;
+						
 						<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
-						&nbsp;
+						
 						<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
-						&nbsp;
+					
 						<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
 					</center>
 				
@@ -118,21 +145,6 @@ table th{
 
 
 			<div class = "col3">
-			<!--	<div class = "jumbotron" style= "width: 700px; color:aqua;background-color: #1a52c6">
-					<center><h4>CONTROLS</h4></center>
-					<br>
-					<br>
-					<center>	
-						<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
-						&nbsp;
-						<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
-						&nbsp;
-						<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
-						&nbsp;
-						<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
-					</center>
-				
-				</div>-->
 			</div>
 		
 		</div>
@@ -188,8 +200,12 @@ table th{
 				<div class= "container">				
 				<div class = "jumbotron" style= "padding-right:5px ; padding-left:5px ; padding-bottom: 80px; padding-top:25px">
 					<center><h3>STATUS AND SETTINGS</h3></center>
-					<div class = "container" id = "boards">
-		
+					<div class = "container" >
+						
+						<table class= table-borderless id="boards">	
+							<tbody>	
+							</tbody>
+						</table>
 						<script>
 							var CHILD_WINDOW;
 							updateBoardContainer("current.json");
@@ -198,7 +214,7 @@ table th{
 			
 
 					</div>
-					<div class="container">	
+					<div class="container" style= "padding-top: 40px; ">	
 						<button type="button" class="btn btn-primary btn-lg" style="float: right;" onclick="addBoard()">ADD</button>
 					</div>
 					

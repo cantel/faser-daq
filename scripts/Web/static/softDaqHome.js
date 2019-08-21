@@ -94,6 +94,7 @@ function createStatusBadges(i){
 }
 function updateBoardContainer(fileName){
 	$.ajax({url:"/configurationFile/" + fileName, async: false, success: function(config){
+		console.log(config);
 		createBoardContainer(config);
 	}});
 }
@@ -356,7 +357,28 @@ function createRadioInputs(fileNames){
 			
 			input.addEventListener("click", function(){
 				//TODO : update the run information section
-				updateBoardContainer(this.id.slice(6));
+				fileName = this.id.slice(6);
+				$.ajax({url:"/configurationFile/" + fileName, async: false, success: function(config){
+					console.log(config);
+					if(config == "error"){
+						
+						document.getElementById("run-info-box").style.display = "none";
+						document.getElementById("control-box").style.display = "none";
+						document.getElementById("status&settings-box").style.display = "none";
+
+						window.open("/damaged", '_self');
+						
+					}
+					else{
+
+						document.getElementById("run-info-box").style.display = "initial";
+						document.getElementById("control-box").style.display = "initial";
+						document.getElementById("status&settings-box").style.display = "initial";
+						createBoardContainer(config);
+					}
+				}});
+
+				//updateBoardContainer(this.id.slice(6));
 				if(this.id == "radio-current.json"){
 					document.getElementById("save-button").style.display = "initial";
 				}

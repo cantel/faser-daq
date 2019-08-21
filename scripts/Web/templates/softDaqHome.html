@@ -113,33 +113,31 @@
 					</div>
 
 					<div class = "container" id="saveNewFile">
+						<button id="save-button" onclick="saveConfigFile();" style="float:right" class="btn btn-primary">SAVE</button>
 					</div>
 
 
-					<script>
-						updateConfigFileChoices();
-						document.getElementById("radio-" + "current.json").checked = "checked";
-						displaySaveButton();
-					</script>
 			
 				</div>
 
 			</div>
 			<div class = "col-6">
-				<div class = "jumbotron" style= "width: 700px; color:aqua;background-color: #1a52c6">
-					<center><h4>CONTROLS</h4></center>
-					<br>
-					<br>
-					<center>	
-						<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
+				<div class="container" id="control-box">
+					<div class = "jumbotron" style= "width: 700px; color:aqua;background-color: #1a52c6">
+						<center><h4>CONTROLS</h4></center>
+						<br>
+						<br>
+						<center>	
+							<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
+							
+							<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
+							
+							<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
 						
-						<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
-						
-						<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
+							<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
+						</center>
 					
-						<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
-					</center>
-				
+					</div>
 				</div>
 			</div>
 
@@ -152,52 +150,54 @@
 		<div class="row">
 			<!-- run and information-->
 			<div class="col-md-6">
-				<div class = "jumbotron" style = "padding-bottom: 65px; padding-top:25px">
-					<center><h4>RUN INFORMATION</h4></center>
-					<!--<script>setInterval(function(){ updateRunInformation(); }, 1000);</script>-->
-					<script> var intervalIndices = {}; </script>
-					<table class="table table-sm table-hover table-bordered">
-						<tbody>
-								<tr>
-									<th scope="row">Run</th>
-      									<td>  <a> number: </a> <a id="RunNumber"></a></td>
-      									<td> <a> Starting Time: </a> <a id="RunStart"></a> </td>
-    								</tr>			
-							
-									
-								<tr>
-									<th scope="row">Physics</th>
-      									<td> <a id= "PhysicsEvents"></a> <a>events</a></td>
-      									<td><a id="PhysicsRate"></a>  <a>Hz</a> </td>
-    								</tr>
+				<div class="container" id="run-info-box">
+					<div class = "jumbotron" style = "padding-bottom: 65px; padding-top:25px">
+						<center><h4>RUN INFORMATION</h4></center>
+						<!--<script>setInterval(function(){ updateRunInformation(); }, 1000);</script>-->
+						<script> var intervalIndices = {}; </script>
+						<table class="table table-sm table-hover table-bordered">
+							<tbody>
+									<tr>
+										<th scope="row">Run</th>
+										<td>  <a> number: </a> <a id="RunNumber"></a></td>
+										<td> <a> Starting Time: </a> <a id="RunStart"></a> </td>
+									</tr>			
+								
+										
+									<tr>
+										<th scope="row">Physics</th>
+										<td> <a id= "PhysicsEvents"></a> <a>events</a></td>
+										<td><a id="PhysicsRate"></a>  <a>Hz</a> </td>
+									</tr>
 
-				
-								<tr>
-									<th scope="row">Monitoring</th>
-      									<td> <a id="MonitoringEvents"> </a> <a>events</a> </td>
-      									<td> <a id= "MonitoringRate"></a>   <a>Hz</a> </td>
-    								</tr>
+					
+									<tr>
+										<th scope="row">Monitoring</th>
+										<td> <a id="MonitoringEvents"> </a> <a>events</a> </td>
+										<td> <a id= "MonitoringRate"></a>   <a>Hz</a> </td>
+									</tr>
 
-	
-								<tr>
-									<th scope="row">Calibration</th>
-      									<td> <a id="CalibrationEvents"> </a> <a>events</a></td>
-      									<td> <a id="CalibrationRate"> </a> <a>Hz</a></td>
-    								</tr>		
-						</tbody>
-					</table>
-				 
-						<div class="embed-responsive embed-responsive-16by9" id="graphWindow">
-							<!--<iframe class="embed-responsive-item" src="/monitoring/graph" allowfullscreen>
-							</iframe>-->
-						</div>
-					<br>
+		
+									<tr>
+										<th scope="row">Calibration</th>
+										<td> <a id="CalibrationEvents"> </a> <a>events</a></td>
+										<td> <a id="CalibrationRate"> </a> <a>Hz</a></td>
+									</tr>		
+							</tbody>
+						</table>
+					 
+							<div class="embed-responsive embed-responsive-16by9" id="graphWindow">
+								<!--<iframe class="embed-responsive-item" src="/monitoring/graph" allowfullscreen>
+								</iframe>-->
+							</div>
+						<br>
+					</div>	
 				</div>
 			</div>
 			<!-- status and settings-->
 			<div class="col-md-6">
 				
-				<div class= "container">				
+				<div class= "container"  id="status&settings-box">				
 				<div class = "jumbotron" style= "padding-right:5px ; padding-left:5px ; padding-bottom: 80px; padding-top:25px">
 					<center><h3>STATUS AND SETTINGS</h3></center>
 					<div class = "container" >
@@ -206,11 +206,6 @@
 							<tbody>	
 							</tbody>
 						</table>
-						<script>
-							var CHILD_WINDOW;
-							updateBoardContainer("current.json");
-							setInterval(updateCommandsAndStatusAndButtons, 500);
-						</script>
 			
 
 					</div>
@@ -226,7 +221,20 @@
 
 		</div>
 
-	</div>	
+	</div>
+	
+	<script>
+		var CHILD_WINDOW;
+		//updateBoardContainer("current.json");
+
+		updateConfigFileChoices();
+		document.getElementById("radio-current.json").click();
+		//displaySaveButton();
+
+		setInterval(updateCommandsAndStatusAndButtons, 500);
+	</script>
+
+
 </body>
 
 

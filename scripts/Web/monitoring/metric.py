@@ -108,14 +108,14 @@ def lastMeas(metric):
 def metric():
   return json.dumps([s.decode() for s in r.keys()])
 
-@metric_blueprint.route("/values")
-def listvalues():
-  metrics={}
-  for key in sorted(r.keys()):
-    if (key.startswith(b"Helper:")) or (key.startswith(b"Subset:")): continue
-    metrics[key.decode()]=str(r.hlen(key))
-  #print("metrics", metrics)
-  return render_template('overview.html', metrics=metrics)
+#@metric_blueprint.route("/values")
+#def listvalues():
+#  metrics={}
+#  for key in sorted(r.keys()):
+#    if (key.startswith(b"History:")) or (key.startswith(b"Subset:")): continue
+#    metrics[key.decode()]=str(r.hlen(key))
+#  #print("metrics", metrics)
+#  return render_template('overview.html', metrics=metrics)
   
 
 @metric_blueprint.route("/info/<string:source>")

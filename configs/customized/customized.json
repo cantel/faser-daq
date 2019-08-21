@@ -1,1 +1,1 @@
-{"hostOptions": ["localhost", "remotehost", "hostc", "hostd"]}
+{"hostOptions": ["*","localhost", "remotehost", "hostc", "hostd"]}

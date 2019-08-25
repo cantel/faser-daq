@@ -5,7 +5,7 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "EventBuilderXXX",
+	"default": "FrontEndEmulatorXXX",
 	"pattern": "^((?!XXX).)*$"
       },
       "host": {
@@ -23,7 +23,7 @@
       },
       "type": {
         "type": "string",
-	"default": "eventbuilderbinary",
+	"default": "FrontEndEmulator",
 	"readOnly": true
       },
       "settings": {
@@ -33,7 +33,83 @@
           "stats_uri": {
 	    "type": "string",
 	    "format": "uri"
-	  }
+	  },
+	"meanSize": {
+	    "type": "integer",
+	    "default": 0,
+	    "minimum": 10,
+	    "maximum": 60000,
+	    "required": true,
+	    "description": "Mean data size to send"
+	  },
+	  "rmsSize": {
+	    "type": "integer",
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 10000,
+	    "required": true,
+	    "description": "RMS of data size to send"
+	  },
+	  "fragmentID": {
+	    "type": "integer",
+	    "default": 0,
+	    "required": true,
+	    "description": "Fragment identifier"
+	  },
+	  "probMissingTrigger": {
+	    "type": "number",
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1,
+	    "required": true,
+	    "description": "Probability to miss trigger signal"
+	  },
+	  "probMissingFragment": {
+	    "type": "number",
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1,
+	    "required": true,
+	    "description": "Probability to not send fragment on trigger"
+	  },
+	  "probCorruptedFragment": {
+	    "type": "number",
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1,
+	    "required": true,
+	    "description": "Probability to send corrupted fragment"
+	  },
+	  "monitoringInterval": {
+	    "type": "number",
+	    "default": 0,
+	    "minimum": 0,
+	    "maximum": 1000,
+	    "required": true,
+	    "description": "Time in seconds between monitoring fragments"
+	  },
+          "triggerPort": {
+            "type": "integer",
+            	"required": true,
+            	"default": 0,
+                "minimum": 1024,
+           	"maximum": 65535,
+		"description": "Port for incoming triggers"
+          },
+	  "daqHost": {
+            "type": "string",
+	    "required": true,
+	    "default": "localhost",
+	    "format": "hostname"
+          },          
+          "daqPort": {
+            "type": "integer",
+             "required": true,
+             "default": 0,
+             "minimum": 1024,
+             "maximum": 65535,
+  	     "description": "Port for sending data fragments"
+           }
 	}
       },
       "connections": {

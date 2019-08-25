@@ -23,7 +23,7 @@
       },
       "type": {
         "type": "string",
-	"default": "eventbuilderfaser",
+	"default": "EventBuilderBinary",
 	"readOnly": true
       },
       "settings": {
@@ -33,14 +33,6 @@
           "stats_uri": {
 	    "type": "string",
 	    "format": "uri"
-	  },
-	  "maxPending": {
-	    "type": "integer",
-	    "default": 10,
-	    "minimum": 1,
-	    "maximum": 1000,
-	    "required": true,
-	    "description": "Maximum number of pending fragments before starting time outs"
 	  }
 	}
       },

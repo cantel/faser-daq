@@ -5,7 +5,7 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "FrontEndReceiverXXX",
+	"default": "BoardReaderXXX",
 	"pattern": "^((?!XXX).)*$"
       },
       "host": {
@@ -23,7 +23,7 @@
       },
       "type": {
         "type": "string",
-	"default": "frontendreceiver",
+	"default": "BoardReaderBinary",
 	"readOnly": true
       },
       "settings": {
@@ -34,13 +34,13 @@
 	    "type": "string",
 	    "format": "uri"
 	  },
-	  "dataPort": {
+	  "boardid": {
 	    "type": "integer",
 	    "default": 0,
-	    "minimum": 1024,
+	    "minimum": 0,
 	    "maximum": 65535,
 	    "required": true,
-	    "description": "Port for receiving data from frontend"
+	    "description": "Board identifier"
 	  }
 	}
       },

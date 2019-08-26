@@ -9,13 +9,21 @@ import random
 config=json.load(open(sys.argv[1]))
 r = redis.Redis(host='localhost', port=6379, db=0,
                 charset="utf-8", decode_responses=True)
+
+r1=redis.Redis(host='localhost', port=6379, db=2, charset="utf-8", decode_responses=True)
 #r= redis.StrictRedis('localhost', 6379, db=0,
 #                     charset="utf-8", decode_responses=True)
+
 r.flushdb()
+r1.flushdb()
 
 context = zmq.Context()
 poller = zmq.Poller()
 nameMap={}
+
+r1.hset("runningFile", "fileName", "current.json")
+r1.hset("runningFile", "isRunning", 0)
+
 for comp in config["components"]:
   if not "settings" in comp: continue
   if not "stats_uri" in comp["settings"]: continue
@@ -27,6 +35,7 @@ for comp in config["components"]:
   socket.connect(uri)
   socket.setsockopt_string(zmq.SUBSCRIBE,"")
   nameMap[socket]=name
+  #sourceMap[socket]
   poller.register(socket, zmq.POLLIN)
   
 while True:
@@ -43,7 +52,13 @@ while True:
           source = comp["name"]
           moduleName = "Module" + str(i)
           valueName = "hits"
-          val = str(time.time())+":"+str(random.randint(1,4000))
+          val = str(time.time())+":"+str(random.randint(1,20))
+          name = moduleName + "_" + valueName
+          r.hset(source, name, val)
+          r.hset("Subset:"+ source + ":" + moduleName, valueName, val)
+
+          valueName = "errors"
+          val = str(time.time())+":"+str(random.randint(1,10))
           name = moduleName + "_" + valueName
           r.hset(source, name, val)
           r.hset("Subset:"+ source + ":" + moduleName, valueName, val)
@@ -53,7 +68,13 @@ while True:
           for j in range(1,13):
             valueName1 = "Chip" + str(j)
             valueName2 = "hits"
-            val = str(time.time())+":"+str(random.randint(1,4000))
+            val = str(time.time())+":"+str(random.randint(1,20))
+            name = valueName1 + "_" + valueName2
+            r.hset("Subset:" + source + ":" + moduleName, name, val)
+
+
+            valueName2 = "errors"
+            val = str(time.time())+":"+str(random.randint(1,10))
             name = valueName1 + "_" + valueName2
             r.hset("Subset:" + source + ":" + moduleName, name, val)
            # metric = source + ":" + name

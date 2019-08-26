@@ -5,7 +5,8 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "frontendreceiverXXX",
+	"default": "eventbuilder01",
+	"readOnly": true,
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },
@@ -25,7 +26,7 @@
       },
       "type": {
         "type": "string",
-	"default": "frontendreceiver",
+	"default": "EventBuilderFaser",
 	"readOnly": true,
 	"propertyOrder": 4
       },
@@ -37,18 +38,18 @@
 	    "type": "string",
 	    "format": "uri"
 	  },
-	  "dataPort": {
+	  "maxPending": {
 	    "type": "integer",
-	    "default": 0,
-	    "minimum": 1024,
-	    "maximum": 65535,
+	    "default": 10,
+	    "minimum": 1,
+	    "maximum": 1000,
 	    "required": true,
-           "options": {
-                "infoText": "Port for receiving data from frontend"
-            }
+  	    "options": {
+    		"infoText": "Maximum number of pending fragments before starting time outs"
+  	    }
 	  }
 	},
-	"format": "grid",
+	"format":"grid",
 	"propertyOrder": 5
       },
       "connections": {
@@ -94,7 +95,7 @@
         }
       }
     },
-    "format": "grid",
+    "format":"grid",
     "propertyOrder": 6
 }
 

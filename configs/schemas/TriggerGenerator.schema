@@ -5,8 +5,7 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "eventbuilder01",
-	"readOnly": true,
+	"default": "triggergeneratorXXX",
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },
@@ -26,7 +25,7 @@
       },
       "type": {
         "type": "string",
-	"default": "eventbuilderfaser",
+	"default": "TriggerGenerator",
 	"readOnly": true,
 	"propertyOrder": 4
       },
@@ -38,16 +37,42 @@
 	    "type": "string",
 	    "format": "uri"
 	  },
-	  "maxPending": {
+	  "rateInHz": {
 	    "type": "integer",
-	    "default": 10,
+	    "default": 0,
 	    "minimum": 1,
-	    "maximum": 1000,
+	    "maximum": 5000,
 	    "required": true,
-  	    "options": {
-    		"infoText": "Maximum number of pending fragments before starting time outs"
-  	    }
-	  }
+           "options": {
+                "infoText": "Rate of triggers to generate"
+            }   
+	  },
+	  "frontendApps": {
+	    "type": "array",
+           "options": {
+                "infoText": "Applications that should receive triggers"
+            },
+            "format": "table",
+            "title": "Receivers",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type":"host",
+		  "required": true,
+		  "default": "localhost"
+                },
+                "port": {
+		  "type":"integer",
+		  "required": true,
+		  "default": 0,
+        	  "minimum": 1024,
+		  "maximum": 65535
+		}
+              }
+            }
+          }
 	},
 	"format":"grid",
 	"propertyOrder": 5
@@ -95,7 +120,7 @@
         }
       }
     },
-    "format":"grid",
+    "format": "grid",
     "propertyOrder": 6
 }
 

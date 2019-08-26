@@ -25,7 +25,7 @@
       },
       "type": {
         "type": "string",
-	"default": "filedatalogger",
+	"default": "FileDataWriter",
 	"readOnly": true,
 	"propertyOrder": 4
       },

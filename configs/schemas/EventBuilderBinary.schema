@@ -5,13 +5,15 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "boardreaderXXX",
+	"default": "eventbuilder01",
+	"readOnly":true,
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },
       "host": {
         "type": "host",
 	"required": true,
+	"default": "localhost",
 	"propertyOrder": 2
       },          
       "port": {
@@ -24,7 +26,7 @@
       },
       "type": {
         "type": "string",
-	"default": "boardreaderbinary",
+	"default": "EventBuilderBinary",
 	"readOnly": true,
 	"propertyOrder": 4
       },
@@ -35,19 +37,9 @@
           "stats_uri": {
 	    "type": "string",
 	    "format": "uri"
-	  },
-	  "boardid": {
-	    "type": "integer",
-	    "default": 0,
-	    "minimum": 0,
-	    "maximum": 65535,
-	    "required": true,
-	      "options": {
-   		 "infoText": "Board identifier"
-  	     }
 	  }
-	},
-	"format": "grid",
+	}, 
+	"format":"grid",
 	"propertyOrder": 5
       },
       "connections": {
@@ -93,7 +85,8 @@
         }
       }
     },
-    "format":"grid",	
+    "format":"grid",
     "propertyOrder": 6
 }
+
 

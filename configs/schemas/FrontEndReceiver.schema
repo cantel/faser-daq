@@ -5,8 +5,7 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "eventbuilder01",
-	"readOnly":true,
+	"default": "frontendreceiverXXX",
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },
@@ -26,7 +25,7 @@
       },
       "type": {
         "type": "string",
-	"default": "eventbuilderbinary",
+	"default": "FrontEndReceiver",
 	"readOnly": true,
 	"propertyOrder": 4
       },
@@ -37,9 +36,19 @@
           "stats_uri": {
 	    "type": "string",
 	    "format": "uri"
+	  },
+	  "dataPort": {
+	    "type": "integer",
+	    "default": 0,
+	    "minimum": 1024,
+	    "maximum": 65535,
+	    "required": true,
+           "options": {
+                "infoText": "Port for receiving data from frontend"
+            }
 	  }
-	}, 
-	"format":"grid",
+	},
+	"format": "grid",
 	"propertyOrder": 5
       },
       "connections": {
@@ -85,7 +94,7 @@
         }
       }
     },
-    "format":"grid",
+    "format": "grid",
     "propertyOrder": 6
 }
 

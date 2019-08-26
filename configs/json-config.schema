@@ -26,8 +26,7 @@
         "title": "Component",
         "properties": {
           "name": {
-            "type": "string",
-	    "uniqueItems": true
+            "type": "string"
           },
           "host": {
             "type": "string"
@@ -37,6 +36,21 @@
           },
           "type": {
             "type": "string"
+          },
+          "loglevel": {
+            "type": "object",
+            "title": "Log Levels",
+            "properties": {
+              "core": {
+                "type": "string",
+                "enum": ["DEBUG", "INFO"]
+              },
+              "module": {
+                "type": "string",
+                "enum": ["DEBUG", "INFO"]
+              }
+            },
+            "required": ["core", "module"]
           },
           "settings": {
             "type": "object",
@@ -53,16 +67,36 @@
                 "uniqueItems": true,
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": ["pair", "pubsub"]
-                    },
-                    "chid": {"type":"integer"},
-                    "host": {"type":"string"},
-                    "port": {"type":"integer"}
+                  "if": {
+                    "properties": {"transport":{"const":"tcp"}}
                   },
-                  "required": ["type", "chid", "host", "port"]
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "host": {"type":"string"},
+                      "port": {"type":"integer"}
+                    },
+                    "required": ["type", "chid", "host", "port"]
+                  },
+                  "if": {
+                    "properties": {"transport":{"const":"ipc"}}
+                  },
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "path": {"type":"string"}
+                    },
+                    "required": ["type", "chid", "path"]
+                  },
+                  "required": ["transport"]
                 }
               },
               "senders": { 
@@ -72,22 +106,42 @@
                 "uniqueItems": true,
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "type": {
-                      "type":"string",
-                      "enum": ["pair", "pubsub"]
-                    },
-                    "chid": {"type":"integer"},
-                    "host": {"type":"string"},
-                    "port": {"type":"integer"}
+                  "if": {
+                    "properties": {"transport":{"const":"tcp"}}
                   },
-                  "required": ["type", "chid", "host", "port"]
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type":"string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "host": {"type":"string"},
+                      "port": {"type":"integer"}
+                    },
+                    "required": ["type", "chid", "host", "port"]
+                  },
+                  "if": {
+                    "properties": {"transport":{"const":"ipc"}}
+                  },
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "path": {"type":"string"}
+                    },
+                    "required": ["type", "chid", "path"]
+                  },
+                  "required": ["transport"]
                 }
               }
             }
           }
         },
-        "required": ["name", "host", "port", "type"]
+        "required": ["name", "host", "port", "type", "loglevel"]
       }
     }
   }

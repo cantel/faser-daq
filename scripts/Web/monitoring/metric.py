@@ -118,17 +118,18 @@ def metric():
 #  return render_template('overview.html', metrics=metrics)
   
 
-@metric_blueprint.route("/info/<string:source>")
-def values(source):
+@metric_blueprint.route("/info/<boardType>/<string:source>")
+def values(boardType, source):
   values={}
   dbVals=r.hgetall(source)
   for key in sorted(dbVals):
     values[key.decode()]=(dbVals[key].split(b':')[1].decode(),time.ctime(float(dbVals[key].split(b':')[0])))
   #print("source", source)
   #print("values", values)
-  if (source.startswith("frontendreceiver")):
-    return render_template('tracker.html', source=source,values=values)
-  return render_template('values.html', source=source,values=values)
+  #if (source.startswith("frontendreceiver")):
+  if boardType == "frontendreceiver":
+    return render_template('tracker.html', source=source,values=values, boardType=boardType)
+  return render_template('values.html', source=source,values=values, boardType=boardType)
  
 @metric_blueprint.route("/info/<string:source>/dataUpdate")
 def getValues(source):
@@ -153,7 +154,7 @@ def getStatus():
     #print("source in stat: ", source)
     dbVals = r.hgetall(source)
     #dbVals = sorted(dbVals)
-    #print("*********bdVals:", dbVals)
+    print("*********bdVals:", dbVals)
     if(b'Status' in sorted(dbVals)):
       val =  dbVals[b'Status'].split(b':')[1].decode()
     else: 
@@ -164,13 +165,13 @@ def getStatus():
   return jsonify({"allStatus" : allStatus})
 
 
-@metric_blueprint.route("/info/<source>/<moduleId>")
-def moduloTemplate(source, moduleId):
-  return render_template("module.html", source=source, moduleId= moduleId)
+@metric_blueprint.route("/info/<boardType>/<source>/<moduleId>")
+def moduloTemplate(boardType, source, moduleId):
+  return render_template("module.html", source=source, moduleId= moduleId, boardType=boardType)
 
 
-@metric_blueprint.route("/info/<source>/<moduleId>/getData")
-def getModuloData(source, moduleId): 
+@metric_blueprint.route("/info/<boardType>/<source>/<moduleId>/getData")
+def getModuloData(boardType, source, moduleId): 
   values=[]
   hashName = "Subset:" + source + ":" + moduleId
   dbVals=r.hgetall(hashName)

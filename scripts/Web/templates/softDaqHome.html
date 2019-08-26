@@ -49,6 +49,11 @@
 	//	padding-left: 5px;
 	//	padding-right:5px;
 	}
+
+	p{
+		word-break:break-all;
+		//hyphens: auto;
+	}
 /*
 	.col-3{
 		display: block;
@@ -109,6 +114,7 @@
 		<div class = "row">
 			<div class = "col-auto">
 				<div class = "jumbotron"  style= " padding-right:35px ; padding-left:10px ; padding-bottom: 65px; padding-top:25px">
+					<center><h4>Configuration</h4></center>
 					<div class="container" id = "configFilesRadioGroup">	
 					</div>
 
@@ -136,20 +142,27 @@
 						
 							<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
 						</center>
-					
+					<br>
+					<br>
+					<div class="container">			
+						<center>
+							<font size="4" color="aqua"><p  target="_blank" id="runningFile"></p></font>
+						<center>
+					</div>
+				
 					</div>
 				</div>
 			</div>
 
 
-			<div class = "col3">
+			<div class = "col-2" style="padding-left:4px; margin-left:4px;"> 
 			</div>
 		
 		</div>
 
 		<div class="row">
 			<!-- run and information-->
-			<div class="col-md-6">
+			<div class="col-6">
 				<div class="container" id="run-info-box">
 					<div class = "jumbotron" style = "padding-bottom: 65px; padding-top:25px">
 						<center><h4>RUN INFORMATION</h4></center>
@@ -195,29 +208,26 @@
 				</div>
 			</div>
 			<!-- status and settings-->
-			<div class="col-md-6">
+			<div class="col">
 				
 				<div class= "container"  id="status&settings-box">				
-				<div class = "jumbotron" style= "padding-right:5px ; padding-left:5px ; padding-bottom: 80px; padding-top:25px">
-					<center><h3>STATUS AND SETTINGS</h3></center>
-					<div class = "container" >
-						
-						<table class= table-borderless id="boards">	
-							<tbody>	
-							</tbody>
-						</table>
-			
-
-					</div>
-					<div class="container" style= "padding-top: 40px; ">	
-						<button type="button" class="btn btn-primary btn-lg" style="float: right;" onclick="addBoard()">ADD</button>
-					</div>
+					<div class = "jumbotron" style= "padding-right:5px ; padding-left:5px ; padding-bottom: 80px; padding-top:25px;">
+						<center><h3>STATUS AND SETTINGS</h3></center>
+							
+							<table class= table-borderless id="boards">	
+								<tbody>	
+								</tbody>
+							</table>
+				
+						<div class="container" style= "padding-top: 40px; ">	
+							<button type="button" class="btn btn-primary btn-lg" style="float: right;" onclick="addBoard()">ADD</button>
+						</div>
 					
-				</div>
+					</div>
 				</div>
 
 
-			</div<>
+			</div>
 
 		</div>
 
@@ -228,10 +238,13 @@
 		//updateBoardContainer("current.json");
 
 		updateConfigFileChoices();
-		document.getElementById("radio-current.json").click();
+		var radioID = "radio-" + '{{selectedFile}}';
+		document.getElementById(radioID).click();
 		//displaySaveButton();
 
-		setInterval(updateCommandsAndStatusAndButtons, 500);
+		setInterval(updateCommandsAndStatus, 500);
+		setInterval(updateColorOfInfoButtons(), 500);
+		setInterval(updateRunningFile, 500);
 	</script>
 
 

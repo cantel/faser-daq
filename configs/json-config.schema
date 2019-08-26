@@ -26,7 +26,8 @@
         "title": "Component",
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+	    "uniqueItems": true
           },
           "host": {
             "type": "string"

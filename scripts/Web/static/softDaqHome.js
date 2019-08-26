@@ -58,14 +58,14 @@ function createLogButtons(boardName){
 }
 
  
-function createInfoButtons(boardName){
+function createInfoButtons(boardName, boardType){
 	var btn = document.createElement("SPAN");
 
 	btn.innerHTML = 'INFO';
 	btn.className = "btn btn-info btn-settings";
 	btn.id = "info-" + boardName;
 	btn.addEventListener("click", function(){
-		window.open("/monitoring/info/" + boardName, "replace=true");
+		window.open("/monitoring/info/" + boardType + "/" + boardName, "replace=true");
 	}, false);
 	
 	var col3 = document.createElement("th");
@@ -115,6 +115,7 @@ function createBoardContainer(config){
 		//row.className = "row";
 			
 		var boardName = configComp[i].name;
+		var boardType = configComp[i].type;
 		//first column which shows the name of the board
 		var nameCol = createBoardNames(boardName);
 
@@ -122,7 +123,7 @@ function createBoardContainer(config){
 		var configCol = createConfigButtons(boardName);
 
 		//third column which shows the information
-		var infoCol =  createInfoButtons(boardName);
+		var infoCol =  createInfoButtons(boardName, boardType);
 
 		//fourth column which shows the LOG button
 		var logCol = createLogButtons(boardName);
@@ -163,6 +164,17 @@ function stop(){
 
 function shutdown(){
 	$.get('/shutdown');
+	var inter = setInterval(function(){
+	$.ajax({url:"/shutDownRunningFile", async:false, success: function(data){
+		if(data == "true"){
+			clearInterval(inter);	
+		}
+		//else if(data == "true"){
+		//}
+	}
+	
+	});
+	},1000);
 }
 
 function updateStatus(data){
@@ -221,11 +233,13 @@ function disableConfigButtons(data, bool){
 		document.getElementById("config" + data.allStatus[i].name).disabled = bool;
 	}
 }
+
 function updateCommandAvailability(data){
 	var allDOWN = true;
 	var allREADY = true;
 	var allRUNNING = true;
 	var allBooted = true;
+	
 	for(var i = 0; i < Object.keys(data.allStatus).length; i++){
 		if( (data.allStatus[i].state) != "DOWN"){
 			allDOWN = false;
@@ -243,54 +257,61 @@ function updateCommandAvailability(data){
 		//	allBOOTED = false;
 		//}
 	}
+
 	console.log("CHILD window while updating: ", CHILD_WINDOW);
-	if (allDOWN){
-		document.getElementById("INITIALISE").disabled = false;
-		document.getElementById("SHUTDOWN").disabled = true;
-		//disableFileChoice(false);
-		//disableConfigButtons(data, false);
-		if(CHILD_WINDOW && !CHILD_WINDOW.closed){
-			$(CHILD_WINDOW.document).ready(function() {
-  				 // $(win.document).contents().find("...").doStuff();
-	
-				//$(CHILD_WINDOW.document).contents().disableAddingOrChangingBoards(false);
 
-				CHILD_WINDOW.disableAddingOrChangingBoards(false);
-			});
+	runningFileInfo = getRunningFileInfo();
+	if( runningFileInfo.isRunning == 1 && (($('input[name=configFileGroup]:checked').val()) != runningFileInfo.fileName)  ){
+		disableControls(true);
+	}
+	else{	
+		if (allDOWN){
+			document.getElementById("INITIALISE").disabled = false;
+			document.getElementById("SHUTDOWN").disabled = true;
+			//disableFileChoice(false);
+			//disableConfigButtons(data, false);
+			if(CHILD_WINDOW && !CHILD_WINDOW.closed){
+				$(CHILD_WINDOW.document).ready(function() {
+					 // $(win.document).contents().find("...").doStuff();
+		
+					//$(CHILD_WINDOW.document).contents().disableAddingOrChangingBoards(false);
+
+					CHILD_WINDOW.disableAddingOrChangingBoards(false);
+				});
+			}
 		}
-	}
-	else{
-		//disableFileChoice(true);
-		//disableConfigButtons(data, true);
-		document.getElementById("INITIALISE").disabled = true;
-		document.getElementById("SHUTDOWN").disabled = false;
+		else{
+			//disableFileChoice(true);
+			//disableConfigButtons(data, true);
+			document.getElementById("INITIALISE").disabled = true;
+			document.getElementById("SHUTDOWN").disabled = false;
 
-		if(CHILD_WINDOW && !CHILD_WINDOW.closed)
+			if(CHILD_WINDOW && !CHILD_WINDOW.closed)
 
-			$(CHILD_WINDOW.document).ready(function() {
-  				 // $(win.document).contents().find("...").doStuff();
-	
-				//$(CHILD_WINDOW.document).contents().disableAddingOrChangingBoards(true);
+				$(CHILD_WINDOW.document).ready(function() {
+					 // $(win.document).contents().find("...").doStuff();
+		
+					//$(CHILD_WINDOW.document).contents().disableAddingOrChangingBoards(true);
 
-				CHILD_WINDOW.disableAddingOrChangingBoards(true);
-			});
-	}
+					CHILD_WINDOW.disableAddingOrChangingBoards(true);
+				});
+		}
 
-	if(allREADY){
-	document.getElementById("START").disabled = false;
-	}
-	else{
-		document.getElementById("START").disabled = true;
-	}
+		if(allREADY){
+		document.getElementById("START").disabled = false;
+		}
+		else{
+			document.getElementById("START").disabled = true;
+		}
 
-	if(allRUNNING){
-		document.getElementById("STOP").disabled = false;
-	}
-	else{
-		document.getElementById("STOP").disabled = true;
-	}
+		if(allRUNNING){
+			document.getElementById("STOP").disabled = false;
+		}
+		else{
+			document.getElementById("STOP").disabled = true;
+		}
 
-	
+	}
 	//if(allBOOTED){
 	//	document.getElementById("INISIALISE").disabled = false;
 	//}
@@ -318,7 +339,7 @@ function isDOWN(){
 }
 
 
-function updateCommandsAndStatusAndButtons(){
+function updateCommandsAndStatus(){
 	//var dat;
 	//document.write('in updateStaus');
 	//document.write(Object.keys(config.components).length);
@@ -333,7 +354,6 @@ function updateCommandsAndStatusAndButtons(){
 	);
 	//document.write(dat);		
 	//document.write(dat.allStatus[0].status);
-	updateColorOfInfoButtons();
 }
 
 function createRadioInputs(fileNames){
@@ -347,7 +367,7 @@ function createRadioInputs(fileNames){
 			input.setAttribute("type", "radio");
 			input.className = "custom-control-input";
 			input.setAttribute("name", "configFileGroup");
-
+			input.setAttribute("value", fileNames.configFileNames[i].name);
 			input.id = "radio-" + fileNames.configFileNames[i].name;
 
 			var label = document.createElement("LABEL");
@@ -360,13 +380,22 @@ function createRadioInputs(fileNames){
 				fileName = this.id.slice(6);
 				$.ajax({url:"/configurationFile/" + fileName, async: false, success: function(config){
 					console.log(config);
-					if(config == "error"){
+					if(config == "NOTJSON" ||  config == "NOTSCHEMA" || config == "NOSCHEMA"){
 						
 						document.getElementById("run-info-box").style.display = "none";
 						document.getElementById("control-box").style.display = "none";
 						document.getElementById("status&settings-box").style.display = "none";
 
-						window.open("/damaged", '_self');
+						//window.open("/damaged", '_self');
+						if(config == "NOTJSON"){
+							alert("The selected json file is damaged. Check for missing brackets or mismatched paratheses");
+						}
+						else if(config == "NOTSCHEMA"){
+							alert("The selected json file was not validated by the general schema.");
+						}
+						else if(config == "NOSCHEMA"){
+							alert("The json-config.schema does not exist.");
+						}
 						
 					}
 					else{
@@ -549,4 +578,32 @@ function updateColorOfInfoButtons(){
 				document.getElementById("info-"+source).className = "btn btn-danger btn-settings";
 		}
 	}});
+}
+function disableControls(bool){
+	document.getElementById("INITIALISE").disabled = bool;
+	document.getElementById("START").disabled = bool;
+	document.getElementById("STOP").disabled = bool;
+	document.getElementById("SHUTDOWN").disabled = bool;
+}
+
+function getRunningFileInfo(){
+	var info;
+	$.ajax({url: "/runningFile", async: false, success: function(data){
+		info = data;
+	}});
+	console.log(info);
+	return info;
+		
+}
+function updateRunningFile(){
+
+	var data = getRunningFileInfo();
+	if(data.isRunning == 0){
+		document.getElementById("runningFile").innerHTML = "NO file running";
+	}		
+	else if(data.isRunning == 1){
+		document.getElementById("runningFile").innerHTML = "File " + data.fileName + " is running";
+	}
+
+		
 }

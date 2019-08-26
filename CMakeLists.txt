@@ -4,12 +4,31 @@ project(daqling_top)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -Wall -Wno-unused-function -Wno-unused-variable -O3 -g -pedantic -fPIC")
-set(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -ldl")
+# Require a C++17 compliant compiler
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Include Threads
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+FIND_PACKAGE(Threads REQUIRED)
+
+# Enable Boost
+set(ENABLE_BOOST ON)
+message(STATUS "Building with Boost")
+
+# Build daqling
 add_subdirectory(daqling)
+
+# Build modules
+set(BUILD_New OFF)
+include_directories(src)
 include_directories(${daqling_include_dirs})
 link_directories(${daqling_link_dirs})
+
+# Disable some CXX FLAGS for convenience
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-zero-as-null-pointer-constant -Wno-undef -Wno-sign-conversion -Wno-old-style-cast -Wno-strict-overflow")
 
 add_subdirectory(src/Modules)

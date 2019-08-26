@@ -99,14 +99,18 @@
   					}
 
  					 // If no valid editor is returned, the next resolver function will be used
-					});	
-				loadSchema(schema, value);
-				//console.log(schema);
-				//console.log(schema.properties.host);
-				//schema.push("enum":["a", "b", "c"]);
-				//loadSchema(editor, schema, value);
-				loadButtons(flag, '{{ boardName }}');
-							
+					});
+				if(schema == "error"){
+					alert("The schema does not exist or does't have the right format");
+				}	
+				else{
+					loadSchema(schema, value);
+					//console.log(schema);
+					//console.log(schema.properties.host);
+					//schema.push("enum":["a", "b", "c"]);
+					//loadSchema(editor, schema, value);
+					loadButtons(flag, '{{ boardName }}');
+				}					
 
 				function loadSchema(schema, value){
 					console.log(schema);

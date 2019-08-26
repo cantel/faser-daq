@@ -86,7 +86,7 @@
 
 					btn.addEventListener("click", function(){
 						//window.location.href = "/log/" + boardName;	
-						window.open("/monitoring/info/" + '{{source}}' + "/" + this.id, "replace=true");
+						window.open("/monitoring/info/" + '{{ boardType }}' + "/" + '{{source}}' + "/" + this.id, "replace=true");
 					}, false);
 			
 					item.appendChild(btn);

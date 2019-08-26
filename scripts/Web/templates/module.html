@@ -104,7 +104,7 @@
 	<script>
 
 		function updateValues(n){
-			$.ajax({url:"/monitoring/info/" +'{{source}}'+ "/" + '{{ moduleId }}' + "/getData", async:false, success:
+			$.ajax({url:"/monitoring/info/" + '{{ boardType }}' + "/"  +'{{source}}'+ "/" + '{{ moduleId }}' + "/getData", async:false, success:
 			function(data){
 				console.log("chip vlaues:" , data.values);
 			

@@ -23,9 +23,9 @@
 		function updateTableOfValues(){
 			var tableBody = document.getElementById("table-body");
 			while(tableBody.firstChild && tableBody.removeChild(tableBody.firstChild));	
-			$.ajax({url:"/monitoring/info/" +'{{source}}'+ "/dataUpdate", async:false, success:
+			$.ajax({url:"/monitoring/info/" +'{{source}}' + "/dataUpdate", async:false, success:
 			function(data){
-				console.log(data.values);
+				console.log("values", data.values);
 				for(var i = 0; i < Object.keys(data.values).length; i++){
 					//console.log(data.values[i].key);
 					var tr = document.createElement("tr");

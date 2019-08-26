@@ -37,21 +37,26 @@ def read(fileName):
 		with open(env['DAQ_CONFIG_DIR'] + fileName) as f:
 			try:
 				data = json.load(f)
+
+				f.close() 	
+				if(os.path.exists(env['DAQ_CONFIG_DIR'] + "json-config.schema")):
+					with open(env['DAQ_CONFIG_DIR'] + "json-config.schema") as f:
+						schema = json.load(f)
+					f.close()
+
+					try:
+						validate(instance=data, schema=schema)
+					except:
+						data= "NOTSCHEMA"
+				else:
+					data= "NOSCHEMA"
 			except:
-				data = "error"
-		f.close()
+				data = "NOTJSON"
+	#this can only happen for current
 	else:
 		data = {}
 		write(data)
 	
-	with open(env['DAQ_CONFIG_DIR'] + "json-config.schema") as f:
-		 schema = json.load(f)
-	f.close()
-
-	try:
-		validate(instance=data, schema=schema)
-	except:
-		data= "error"
 		
 	return data
 
@@ -73,11 +78,14 @@ def findIndex(boardName):
 
 
 def readSchema(boardType):
-	schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + boardType
-	f = open(schemaFileName)
-	#print(f.read())
-	schema = json.load(f)
-	f.close()
+	try:
+		schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + boardType
+		f = open(schemaFileName)
+		#print(f.read())
+		schema = json.load(f)
+		f.close()
+	except:
+		schema= "error"
 	#print(schema)
 	
 	#customizedFileName = env['DAQ_CONFIG_DIR'] + "customized/" + "customized.json"
@@ -109,7 +117,7 @@ def spawnJoin(list, func):
 
 @app.route("/hostOptions")
 def getHostChoices():
-	with open(env['DAQ_CONFIG_DIR'] + 'customized/customized.json') as f:
+	with open(env['DAQ_CONFIG_DIR'] + 'customized/host.json') as f:
 		hostChoices = json.load(f)
 	f.close()
 	return jsonify(hostChoices)
@@ -127,8 +135,18 @@ def getConfigFileNames():
 @app.route("/")
 def launche():
 	#session["dc"] = daqcontrol.daqcontrol(group, lib_path, dir, exe)
+	print(app.secret_key)
 	session["data"] = read("current.json")
-	return render_template('softDaqHome.html')
+	
+	print("running file info: ", r1.hgetall("runningFile"))
+	if(r1.hgetall("runningFile")["isRunning"]):
+		selectedFile = r1.hgetall("runningFile")["fileName"]
+	#else
+	#	selectedFile = "current.json"
+	print(selectedFile)
+	
+	#radioID = "radio-" + selectedFile	
+	return render_template('softDaqHome.html', selectedFile = selectedFile)
 
 def translateStatus(rawStatus, timeout):
 	translatedStatus = rawStatus
@@ -154,13 +172,37 @@ def sendStatusJsonFile():
 	statusArr = []
 	#group = session.get("group")
 	#print("group in status", group)
+	allDOWN = True
 	for p in d['components']:	
 		rawStatus, timeout = dc.getStatus(p)
 		status = translateStatus(rawStatus, timeout)
 		print('status of this componen ', p['name'],"is: ", status)
 		statusArr.append({'name' : p['name'] , 'state' : str(status)})
 	return jsonify({'allStatus' : statusArr})
-			
+
+#on redis, the runningFile is put to 0
+@app.route("/shutDownRunningFile")
+def shutDownRunningFile():
+	
+	dc = createDaqInstance()
+	runningFile = read(r1.hgetall("runningFile")["fileName"])
+	#print("in status data read from session", d)
+	#statusArr = []
+	#group = session.get("group")
+	#print("group in status", group)
+	allDOWN = True
+	for p in runningFile['components']:	
+		rawStatus, timeout = dc.getStatus(p)
+		status = translateStatus(rawStatus, timeout)
+		if(not status == "DOWN"):
+			allDOWN = False
+		#print('status of this componen ', p['name'],"is: ", status)
+		#statusArr.append({'name' : p['name'] , 'state' : str(status)})
+	if(allDOWN):
+		r1.hset("runningFile", "isRunning", 0)
+		return jsonify("true")
+	else:
+		return jsonify("false")
 #@app.route("/status/eventbuilder01")
 #def getEventBuilderStatus():	
 #	dc = createDaqInstance()
@@ -178,6 +220,9 @@ def initialise():
 	dc = createDaqInstance()
 	d = session.get('data')
 	
+	r1.hset("runningFile", "isRunning", 1)
+	r1.hset("runningFile", "fileName", session.get("selectedFile"))	
+
 	logfiles = dc.addProcesses(d['components'], False)
 	#print(logfiles)
 	
@@ -290,8 +335,10 @@ def addBoard():
 	schemaNames = {'schemaChoices' : schemaChoices}
 	#print(schemaNames)	
 	return render_template('config.html', pageName='Add Board', component = {}, schemaChoices = schemaNames, schema={}, flag = 1, boardName="")
+
 @app.route("/add/<schematype>")
 def getschema(schematype):
+	
 	schema = readSchema(schematype)
 	return jsonify(schema)
 	
@@ -299,7 +346,8 @@ def getschema(schematype):
 def getConfigFile(fileName):
 		
 	res = read(fileName)
-	if(res == "error"):
+	session["selectedFile"] = fileName;
+	if(res == "NOTJSON" or res == "NOTSCHEMA" or res == "NOSCHEMA"):
 		session["data"]={}
 	else:
 		session["data"] = res
@@ -362,13 +410,18 @@ def logfile(boardName):
 		abort(404)
 	except FileNotFoundError:
 		abort(404)
-
-@app.route('/damaged')
-def reportDamagedFile():
-	return render_template('damaged.html', pageName='Damaged File')
+@app.route('/runningFile')
+def runningFileInfo():
+	info = r1.hgetall("runningFile");
+	return(jsonify(info))
+	
+#@app.route('/damaged')
+#def reportDamagedFile():
+#	return render_template('damaged.html', pageName='Damaged File')
 if __name__ == '__main__':
 	#debug=True inorder to be able to update without recompiling
-	app.run(debug=True)
+	#app.run(threaded=True)
+	app.run(processe=19)
 
 
 ####main####

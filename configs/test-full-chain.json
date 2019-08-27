@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "group": "faser",
   "components": [
     {
@@ -54,7 +54,7 @@
         "probMissingTrigger": 0.0,
         "probMissingFragment": 0.0,
         "probCorruptedFragment": 0.0,
-	"monitoringInterval": 1.5,
+	      "monitoringInterval": 1.5,
         "triggerPort": 17002,
         "daqHost": "localhost",
         "daqPort": 18002
@@ -74,6 +74,7 @@
           {
             "type": "pair",
             "chid": 1,
+            "transport": "tcp",
             "host": "*",
             "port": 8101
           }
@@ -94,6 +95,7 @@
           {
             "type": "pair",
             "chid": 1,
+            "transport": "tcp",
             "host": "*",
             "port": 8102
           }
@@ -116,12 +118,14 @@
           {
             "type": "pair",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8101
           },
           {
             "type": "pair",
             "chid": 2,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8102
           }
@@ -130,12 +134,14 @@
           {
             "type": "pubsub",
             "chid": 3,
+            "transport": "tcp",
             "host": "*",
             "port": 8104
           },
           {
             "type": "pair",
             "chid": 4,
+            "transport": "tcp",
             "host": "*",
             "port": 8103
           }
@@ -158,6 +164,7 @@
           {
             "type": "pair",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8103
           }
@@ -183,6 +190,7 @@
           {
             "type": "pubsub",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8104
           }
@@ -208,6 +216,7 @@
           {
             "type": "pubsub",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8104
           }
@@ -233,6 +242,7 @@
           {
             "type": "pubsub",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8104
           }

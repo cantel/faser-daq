@@ -5,27 +5,45 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "DataLoggerXXX",
-	"pattern": "^((?!XXX).)*$"
+	"default": "dataloggerXXX",
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
       },
       "host": {
-        "type": "string",
+        "type": "host",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname"
+	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535
+	"maximum": 65535,
+	"propertyOrder": 3
       },
       "type": {
         "type": "string",
 	"default": "FileDataWriter",
-	"readOnly": true
+	"readOnly": true,
+	"propertyOrder": 4
       },
+       "loglevel": {
+            "type": "object",
+            "title": "Log Levels",
+            "properties": {
+              "core": {
+                "type": "string",
+                "enum": ["DEBUG", "INFO"]
+              },
+              "module": {
+                "type": "string",
+                "enum": ["DEBUG", "INFO"]
+              }
+            },
+            "required": ["core", "module"]
+          },
       "settings": {
         "type": "object",
         "title": "Settings",
@@ -34,7 +52,9 @@
 	    "type": "string",
 	    "format": "uri"
 	  }
-	}
+	},
+	"format": "grid",
+	"propertyOrder": 5
       },
       "connections": {
         "type": "object",
@@ -53,10 +73,9 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"string"},
+                "host": {"type":"host"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           },
           "senders": { 
@@ -72,16 +91,16 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"string"},
+                "host": {"type":"host"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           }
         }
       }
     },
-    "required": ["name", "host", "port", "type"]
+    "format": "grid",
+    "propertyOrder": 6
 }
 
 

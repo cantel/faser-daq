@@ -5,27 +5,46 @@
       "name": {
         "type": "string",
 	"required": true,
-	"default": "TriggerGeneratorXXX",
-	"pattern": "^((?!XXX).)*$"
+	"default": "triggergeneratorXXX",
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
       },
       "host": {
-        "type": "string",
+        "type": "host",
 	"required": true,
 	"default": "localhost",
-	"format": "hostname"
+	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
 	"required": true,
 	"default": 0,
         "minimum": 1024,
-	"maximum": 65535
+	"maximum": 65535,
+	"propertyOrder": 3
       },
       "type": {
         "type": "string",
 	"default": "TriggerGenerator",
-	"readOnly": true
+	"readOnly": true,
+	"propertyOrder": 4
       },
+
+      "loglevel": {
+            "type": "object",
+            "title": "Log Levels",
+            "properties": {
+              "core": {
+                "type": "string",
+                "enum": ["DEBUG", "INFO"]
+              },
+              "module": {
+                "type": "string",
+                "enum": ["DEBUG", "INFO"]
+              }
+            },
+            "required": ["core", "module"]
+          },
       "settings": {
         "type": "object",
         "title": "Settings",
@@ -40,11 +59,15 @@
 	    "minimum": 1,
 	    "maximum": 5000,
 	    "required": true,
-	    "description": "Rate of triggers to generate"
+           "options": {
+                "infoText": "Rate of triggers to generate"
+            }   
 	  },
 	  "frontendApps": {
 	    "type": "array",
-	    "description": "Applications that should receive triggers",
+           "options": {
+                "infoText": "Applications that should receive triggers"
+            },
             "format": "table",
             "title": "Receivers",
             "uniqueItems": true,
@@ -52,10 +75,9 @@
               "type": "object",
               "properties": {
                 "host": {
-                  "type":"string",
+                  "type":"host",
 		  "required": true,
-		  "default": "localhost",
-		  "format": "hostname"
+		  "default": "localhost"
                 },
                 "port": {
 		  "type":"integer",
@@ -67,7 +89,9 @@
               }
             }
           }
-	}
+	},
+	"format":"grid",
+	"propertyOrder": 5
       },
       "connections": {
         "type": "object",
@@ -86,10 +110,9 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"string"},
+                "host": {"type":"host"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           },
           "senders": { 
@@ -105,16 +128,16 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"string"},
+                "host": {"type":"host"},
                 "port": {"type":"integer"}
-              },
-              "required": ["type", "chid", "host", "port"]
+              }
             }
           }
         }
       }
     },
-    "required": ["name", "host", "port", "type"]
+    "format": "grid",
+    "propertyOrder": 6
 }
 
 

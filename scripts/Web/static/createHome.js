@@ -169,6 +169,10 @@ function createRadioInputs(fileNames){
 				fileName = this.id.slice(6);
 				$.ajax({url:"/configurationFiles/" + fileName, async: false, success: function(config){
 					console.log(config);
+					
+					if(CHILD_WINDOW && !CHILD_WINDOW.closed){
+						CHILD_WINDOW.close();
+					}
 					if(config == "NOTJSON" ||  config == "NOTSCHEMA" || config == "NOSCHEMA"){
 						
 						document.getElementById("run-info-box").style.display = "none";

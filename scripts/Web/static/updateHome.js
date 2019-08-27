@@ -146,7 +146,7 @@ function updateRunInformation(){
 }
 function updateRunNumbers(){
 	$.ajax({url:"/monitoring/info/eventbuilder01/dataUpdate", async:false, success: function(data){
-		console.log("helllooooo", data);
+		//console.log("helllooooo", data);
 		var date;
 		for(var i = 0; i < Object.keys(data.values).length; i++){
 			if(document.getElementById(data.values[i].key)){
@@ -201,7 +201,7 @@ function goToCurrent(){
 
 function addBoard(){
 	
-	window.open("/add", 'Configuration Data','replace=true,top=200,left=100,height=800,width=1200,scrollbars=yes,titlebar=yes');
+	CHILD_WINDOW = window.open("/add", 'Configuration Data','replace=true,top=200,left=100,height=800,width=1200,scrollbars=yes,titlebar=yes');
 }
 function saveConfigFile(){
 	var configFileName = prompt("Please enter your new configuration filename without json at the end:", "configXXX");

@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta charset="utf-8">
+
+
+    {% block head %}
+      <title>{% block title %} Values for {{source}} / {{ moduloId }} {% endblock %}</title>
+    {% endblock %}
+    
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <!--<script src="{{ url_for('static', filename='css/circular.css')}}"></script> -->
+    <link href="{{ url_for('static', filename='css/circular.css')}}" rel="stylesheet" type="text/css">
+
+  <style>
+ 
+	hr.dashed{
+ 		 border-top: 2px dashed green;
+		 margin-bottom:0px;
+		 margin-top:2px;
+
+	}			
+
+   </style>
+  
+  </head>
+  <body>
+	
+		
+	<div class="page-header"  style = "margin-left:10px; padding-bottom: 15px; padding-top:15px">
+		<h2> Values for {{moduleId}} from {{ source }} <h2>
+	</div>
+		
+	<table class="table thead-dark table-striped table-hover">
+		<thead>
+			<tr>
+				<th scope="col"> Key </th>	
+				<th scope="col"> Value </th>
+				<th scope="col"> Time </th>
+			<tr>
+		<thead>
+
+		<tbody id = "table-body">
+		</tbody>
+
+      </table>
+
+
+	<div class='container'id= "circleContainer" style = "margin-bottom: 65px; padding-top:0px">
+	</div>
+
+		<script>
+				numberOfElm = 12;
+				var container = document.getElementById("circleContainer");
+				var circle = document.createElement("ul");
+				container.appendChild(circle);
+
+				circle.className = "circle-container-" + numberOfElm;
+				for (i=1; i <= numberOfElm ; i++){
+			
+						
+					var item = document.createElement("li");
+					circle.appendChild(item);
+					
+					
+					var chip = document.createElement("span");
+					chip.className = "badge badge-info";
+					
+
+					var labelDiv = document.createElement("div");
+					chip.appendChild(labelDiv); 
+
+					var label = document.createElement("span");
+					label.innerHTML = "Chip" + i;	
+					label.className="label label-info";
+					labelDiv.appendChild(label);
+											
+
+					var valuesDiv = document.createElement("div");
+					var dashed_line = document.createElement("hr");
+					dashed_line.className = "dashed";
+
+					chip.appendChild(dashed_line);
+
+					valuesDiv.id = "Chip" + i;
+					chip.appendChild(valuesDiv);
+
+					item.appendChild(chip);
+					//alert(btn.id);
+					
+				}
+
+				setInterval(function(){ updateValues(numberOfElm);}, 1000);
+		</script>		
+
+		
+	<script>
+
+		function updateValues(n){
+			$.ajax({url:"/monitoring/info/" + '{{ boardType }}' + "/"  +'{{source}}'+ "/" + '{{ moduleId }}' + "/getData", async:false, success:
+			function(data){
+				console.log("chip vlaues:" , data.values);
+			
+			var tableBody = document.getElementById("table-body");
+			while(tableBody.firstChild && tableBody.removeChild(tableBody.firstChild));	
+
+			for(var i = 1; i < n + 1; i++){
+				
+				var chip = document.getElementById("Chip" + i);
+				while(chip.firstChild && chip.removeChild(chip.firstChild));	
+			
+			}
+			for(var i = 0; i < Object.keys(data.values).length; i++){
+				if(data.values[i].key.includes("Chip")){
+				
+					chipId = data.values[i].key.split("_")[0];
+					valueName = data.values[i].key.split("_")[1];
+					value = data.values[i].value;
+					
+					//alert(moduleId);
+					var chip = document.getElementById(chipId);
+
+					var spn = document.createElement("span");
+					spn.innerHTML = valueName + ": " + value;
+					chip.appendChild(spn);
+ 
+					//var spn4 = document.createElement("span");
+					//spn4.innerHTML = "&nbsp;"
+					//btn.appendChild(spn4);
+					
+
+					//var t = document.createTextNode("<br/>");
+					//btn.appendChild(t);
+
+					var spn2 = document.createElement("span");
+					spn2.innerHTML = "</br>"
+					chip.appendChild(spn2);
+
+				}
+				else{	
+					var tr = document.createElement("tr");
+
+					var th1 = document.createElement("th");
+					th1.innerHTML = data.values[i].key;
+	
+
+					var th2 = document.createElement("th");
+					th2.innerHTML = data.values[i].value;
+
+
+					var th3 = document.createElement("th");
+					th3.innerHTML = data.values[i].time;
+
+					tr.appendChild(th1);
+					tr.appendChild(th2);
+					tr.appendChild(th3);
+
+					tableBody.appendChild(tr);
+				}
+			}
+
+			}});
+			
+		}
+		
+		
+	
+	</script>
+
+	
+
+</body>
+</html>

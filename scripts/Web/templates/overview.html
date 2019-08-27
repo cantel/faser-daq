@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta charset="utf-8">
+
+
+    {% block head %}
+      <title>{% block title %} Overview of available source {% endblock %}</title>
+    {% endblock %}
+    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/ui-cupertino/easyui.css">
+    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/icon.css">
+  </head>
+  <body>
+    <div>
+    <table border = 1>
+      <thead><tr>
+	  <th>Application</th>
+	  <th>number of values</th>
+	</tr>
+	</thead>
+         {% for key, value in metrics.items() %}
+            <tr>
+               <th> <a href="/monitoring/values/{{ key }}">{{ key }}</a> </th>
+               <td> {{ value }} </td>
+            </tr>
+         {% endfor %}
+    </table>
+    </div>
+    <div>
+      <a href="graph">Graphs</a>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta charset="utf-8">
+
+
+    {% block head %}
+      <title>{% block title %} Monitor system{% endblock %}</title>
+    {% endblock %}
+    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/ui-cupertino/easyui.css">
+    <link rel="stylesheet" type="text/css" href="http://www.jeasyui.com/easyui/themes/icon.css">
+
+    <script src="{{ url_for('static', filename='addGraph.js', version='104')}}"></script> 
+  
+    <script>
+      function createNewTab(){
+        $(document).ready(function() {
+          var names = [];
+          
+          {% for metric in metrics %}
+            if(($('input[name="{{metric}}"').attr("checked")) == true){
+              names.push('{{metric}}');
+            }
+          {% endfor %}
+
+          if(names.length == 0){
+            return;
+          }
+
+          var tabName = "";
+          for (i in names){
+            if(i != names.length - 1){
+              tabName += names[i]+";";
+            }
+            else{
+              tabName += names[i];
+            }
+          }
+
+
+          if ($('#tt').tabs('exists', tabName)){
+            $('#tt').tabs('select', tabName);
+          } else {
+            $('#tt').tabs('add',{
+              title:tabName,
+              content:'<div id='+tabName+' style="height: 400px; min-width: 300px">',
+              closable:true
+            });
+            $(document).ready(function() {
+              addGraph(names, tabName);
+            });
+          }  
+        });
+      }
+      function createNewSeparateTabs(){
+        $(document).ready(function() {
+          var names = [];
+          
+          {% for metric in metrics %}
+            if(($('input[name="{{metric}}"').attr("checked")) == true){
+              names.push('{{metric}}');
+            }
+          {% endfor %}
+
+          if(names.length == 0){
+            return;
+          }
+
+          for (i in names){
+   
+            if ($('#tt').tabs('exists', names[i])){
+              $('#tt').tabs('select', names[i]);
+            } else {
+              $('#tt').tabs('add',{
+                title:names[i],
+                content:'<div id='+names[i]+' style="height: 400px; min-width: 300px">',
+                closable:true
+              });
+              $(document).ready(function() {
+                addGraph([names[i]], names[i]);
+              });
+            }               
+          }
+
+
+        });
+      }
+
+    </script>
+
+
+
+
+  </head>
+
+  <body>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.4.4.min.js"></script>
+    <script type="text/javascript" src="http://www.jeasyui.com/easyui/jquery.easyui.min.js"></script>
+
+
+
+    <div id="tt" class="easyui-tabs" style="height: 500px; min-width: 210px">
+<!--
+      <div title='monitor'>
+        <div id='monitor' style="height: 400px; min-width: 200px; margin-left:2%; margin-top:2%;">
+          <h2>Welcome to operational monitor!</h2>
+          <h3>Available metrics:</h3>
+            <form id="ff">
+              {% for metric in metrics %}
+                <div style="margin-bottom:20px">
+                  <input class="easyui-checkbox" name={{metric}} value={{metric}} label={{metric}} labelWidth=250>
+                </div>
+              {% endfor %}
+            </form>
+          <a href="#" class="easyui-linkbutton" onclick="createNewTab()">New Tab</a>
+          <a href="#" class="easyui-linkbutton" onclick="createNewSeparateTabs()">New Separate Tabs</a>
+        </div>
+      </div>-->
+      <script>'{{tabNames}}'</script>
+      {% for name in tabNames %}
+        <div title={{name}} closable=true>
+          <div id={{name}} style="height: 400px; min-width: 300px"></div>
+        </div>
+	<script>
+		//var varMet= '{{ metric }}';
+		//var pureName = varMet.split("_")[1];
+		//alert(pureName);
+		//document.getElementById("tab").title =  '{{ metric }}'.split("_")[1];
+		//document.getElementById("tab").id = "done";
+	</script>
+
+      {% endfor %}
+    </div>
+
+    <script>
+    $(document).ready(function() {
+      last_values = {};
+
+
+      setInterval(function(){ 
+        {% for metric in metrics %}
+          var url = '/monitoring/lastMeas/{{metric}}';
+
+          $.ajax({
+            url: url,
+            async: true,
+            dataType: 'json',
+            success: function (json) {   
+              assignVariable(json, '{{metric}}');
+            }
+          });
+
+        {% endfor %}
+        function assignVariable(data, name) {
+          last_values[name] = data;
+        }
+      }, 1000);
+
+      {% for metric in metrics %}
+	tabName = '{{ metric}}'.split("_")[1];
+        addGraph(['{{metric}}'], tabName);
+      {% endfor %}
+
+
+      });
+    </script>
+
+
+
+    <script src="https://assets.highcharts.com/js/code_prettify.js" type="text/javascript"></script>
+    <script src="https://www.highcharts.com/lib/jquery-3.1.1.js" type="text/javascript"></script>
+
+    <script src="https://code.highcharts.com/stock/highstock.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+  </body>
+</html>

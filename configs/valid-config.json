@@ -1,0 +1,101 @@
+{
+	"version": 5,
+	"group": "daq",
+	"components": [
+		{
+			"name": "boardreader01",
+			"host": "localhost",
+			"port": 5555,
+			"type": "boardreaderbinary",
+			"settings": {
+				"board_id": 0
+			},
+			"connections": {
+				"senders": [
+					{
+						"type": "pubsub",
+						"chid": 1,
+						"host": "*",
+						"port": 8101
+					}
+				]
+			}
+		},
+		{
+			"name": "boardreader02",
+			"host": "localhost",
+			"port": 5556,
+			"type": "boardreaderbinary",
+			"settings": {
+				"board_id": 1
+			},
+			"connections": {
+				"senders": [
+					{
+						"type": "pair",
+						"chid": 1,
+						"host": "*",
+						"port": 8102
+					}
+				]
+			}
+		},
+		{
+			"name": "eventbuilder01",
+			"host": "localhost",
+			"port": 5557,
+			"type": "eventbuilderbinary",
+			"settings": {
+			},
+			"connections": {
+				"receivers": [
+					{
+						"type": "pubsub",
+						"chid": 1,
+						"host": "localhost",
+						"port": 8101
+					},
+					{
+						"type": "pair",
+						"chid": 2,
+						"host": "localhost",
+						"port": 8102
+					}
+				],
+				"senders": [
+					{
+						"type": "pair",
+						"chid": 3,
+						"host": "*",
+						"port": 8103
+					}
+				]
+			}
+		},
+		{
+			"name": "filedatalogger01",
+			"host": "localhost",
+			"port": 5558,
+			"type": "filedatalogger",
+			"settings": {
+				"ring": "127.0.0.1"
+			},
+			"connections": {
+				"receivers": [
+					{
+						"type": "pair",
+						"chid": 1,
+						"host": "localhost",
+						"port": 8103
+					}
+				]
+			}
+		}
+
+
+
+
+	]
+}
+
+

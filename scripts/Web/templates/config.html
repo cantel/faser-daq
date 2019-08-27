@@ -1,0 +1,244 @@
+
+<head>
+	<title> {{ pageName }} </title>
+	<meta charset="utf-8"/>
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	
+
+
+	<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
+
+	<link rel="stylesheet" href='https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
+
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+	<script src="{{ url_for('static', filename='config.js')}}"></script> 
+
+	<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+
+
+	<script src="{{ url_for('static', filename='hostEditor.js')}}"></script> 
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
+
+	<style>
+	.jumbotron{
+		background-color: #2E2D88;
+		color:aqua;
+	}
+	
+	.btn-circle {
+ 		border-radius: 60%;
+		margin:5px;
+	}
+
+	.container {
+ 	   	width: 100%;
+   	 	padding-right: 6px;
+   	 	padding-left: 6px;
+   	 	margin-right: auto;
+    		margin-left: auto;
+		padding-top:6px;
+		padding-bottom:4px;
+	}	
+	</style>
+
+</head>
+	
+<body>
+<!--<center><h1>Component Configuration Form</h1></center>-->
+
+	<!--<div class="container">-->
+	<!--<form></form>-->
+	<!--<div id="res" class="alert"></div>-->
+	<div class="container">
+				
+			<div class="dropdown" id="schemaDropDown">
+			</div>
+			
+		
+			<div class="container" id="editor-holder">
+				<script>	
+				</script>
+
+			</div>
+	
+			<div class= "container" id= "buttons">
+			</div>
+	
+
+			<script type="text/javascript">
+				
+				var flag = '{{ flag }}';
+				var schemas = JSON.parse('{{ schemaChoices | tojson | safe}}');
+				var schema = JSON.parse('{{ schema | tojson | safe }}');
+				//console.log(schema);
+				var value = JSON.parse('{{ component | tojson | safe }}');
+				var editor;
+
+				JSONEditor.defaults.options.required_by_default = true;
+				JSONEditor.defaults.options.disable_edit_json = true;	
+				JSONEditor.defaults.options.disable_properties = true;
+				JSONEditor.defaults.options.show_errors = "always";
+				JSONEditor.defaults.options.compact = true;
+		
+				/////////************************************ The schema options is displayed if the add button is clicked(depending on the flag) ***************************////////////
+				displaySchemaOptions(schemas , flag);
+				//console.log(schemas);	
+				//console.log(flag);
+
+
+				
+				JSONEditor.defaults.resolvers.unshift(function(schema) {
+  					if(schema.type === "host") {
+    						return "hostEditor";
+  					}
+
+ 					 // If no valid editor is returned, the next resolver function will be used
+					});
+				if(schema == "error"){
+					alert("The schema does not exist or does't have the right format");
+				}	
+				else{
+					loadSchema(schema, value);
+					//console.log(schema);
+					//console.log(schema.properties.host);
+					//schema.push("enum":["a", "b", "c"]);
+					//loadSchema(editor, schema, value);
+					loadButtons(flag, '{{ fileName }}' , '{{ boardName }}');
+				}					
+				
+				setInterval(function(){disableConfigWindow();}, 500);
+				////*******************************   functions that will be using editor as a global variable  *****************************////
+				function loadSchema(schema, value){
+					console.log(schema);
+					var element = document.getElementById('editor-holder');
+					//JSONEditor.defaults.editors.object.options.hidden = true;
+					//JSONEditor.defaults.editors.object.options.disable_edit_json = true;	
+					//JSONEditor.defaults.editors.object.options.disable_properties = true;
+					while(element.firstChild && element.removeChild(element.firstChild));	
+					editor = new JSONEditor(element, {
+						schema:schema,
+						theme:'bootstrap3',
+						iconlib:'fontawesome4',
+						startval:value,
+						required_by_default:true 
+			
+					});
+
+					//return editor;
+				}
+
+				function loadButtons(flag, fileName, boardName){
+					var buttonsContainer = document.getElementById("buttons");
+					//config
+					//alert(flag);
+					if(flag == 0){
+						var remove = document.createElement("button");
+						remove.className = "btn btn-danger btn-lg";
+						remove.style.cssFloat = "right";
+						remove.innerHTML = "REMOVE BOARD";
+						remove.style.marginLeft = "10px";
+						remove.style.marginRight = "10px";
+						remove.addEventListener("click", function(){
+							removeBoard(fileName, boardName);
+						});
+						remove.id = "remove-button";
+						
+						/*if(window.opener.isDOWN()){
+							remove.disabled = false;
+						}*/
+						buttonsContainer.appendChild(remove);
+						
+						buttonsContainer.appendChild(document.createTextNode("   "));
+						
+						var apply = document.createElement("button");
+						apply.className = "btn btn-warning btn-lg";
+						apply.style.cssFloat = "right";
+						apply.innerHTML = "APPLY CHANGES";
+						apply.style.marginLeft = "10px";
+						apply.style.marginRight = "10px";
+						apply.addEventListener("click", function(){
+						//	if(window.opener.isDOWN())
+							applyChanges(editor, fileName, boardName);	
+						//	else
+						//		alert("not in DOWN mode");
+						});
+
+						apply.id = "apply-button";
+						buttonsContainer.appendChild(apply);
+
+					}
+					else if (flag == 1){
+						
+						var add = document.createElement("button");
+						add.className = "btn btn-success btn-lg";
+						add.style.cssFloat = "right";
+						add.innerHTML = "ADD BOARD";
+						add.addEventListener("click", function(){
+							//if(window.opener.isDOWN())
+							addBoard(editor);
+							//else
+								//alert("not in DOWN mode");
+						});
+
+						add.id = "add-button";
+						buttonsContainer.appendChild(add);
+
+					}
+				}
+
+
+				function addBoard(){
+					
+					var urlPath = '/add/addBoard';
+					//alert(urlPath);
+					var errors = editor.validate();
+					console.log(errors);
+					if(!errors.length){
+						
+						var value = editor.getValue();
+						//console.log(value);	
+						$.ajax({url: urlPath, async : false, type:'POST', dataType: 'json', data : JSON.stringify(value), contentType:"application/json", success : function(data){
+							var message = data.message;
+							alert(message);
+						}});	
+								
+						window.opener.goToCurrent();
+					}
+					else{
+						alert("errors in submitted form, check console for more details");
+					}
+				}
+
+
+				function disableConfigWindow(){
+					
+					var disable = !(window.opener.isDOWN());
+
+					if(document.getElementById("remove-button"))	
+						document.getElementById("remove-button").disabled = disable;	
+
+					if(document.getElementById("apply-button"))
+						document.getElementById("apply-button").disabled = disable;
+
+					if(document.getElementById("add-button"))
+						document.getElementById("add-button").disabled = disable;
+						
+					if(disable){
+						editor.disable();
+					}
+					else{	
+						editor.enable();
+					}
+					
+				}
+
+			</script>
+		
+	</div>
+	
+</body>

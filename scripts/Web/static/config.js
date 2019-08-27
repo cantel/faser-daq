@@ -53,10 +53,10 @@ function displaySchemaOptions(schemas, flag){
 	}
 	
 }
-function applyChanges(editor, boardName){
+function applyChanges(editor, fileName, boardName){
 	var errors = editor.validate();
 	if(!errors.length){	
-		var urlPath = '/config/'.concat(boardName);
+		var urlPath = '/config/'+ fileName + "/" +  boardName;
 		urlPath = urlPath.concat('/changeConfigFile');
 		//alert(urlPath);
 		value = editor.getValue();
@@ -71,8 +71,8 @@ function applyChanges(editor, boardName){
 }	
 		
 				
-function removeBoard(boardName){
-	var urlPath = "/config/" + boardName;
+function removeBoard(fileName, boardName){
+	var urlPath = "/config/" + fileName + "/"+ boardName;
 	urlPath = urlPath.concat('/removeBoard');
 	//alert(urlPath);
 	$.ajax({url: urlPath, async: false});

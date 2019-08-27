@@ -66,7 +66,7 @@ JSONEditor.defaults.editors.hostEditor = JSONEditor.AbstractEditor.extend({
 
     var hostOptions ;
 
-    $.ajax({url:"/hostOptions", async: false, success:function(data){
+    $.ajax({url:"/config/hostOptions", async: false, success:function(data){
 		hostOptions = data.hostOptions;
     }});
 

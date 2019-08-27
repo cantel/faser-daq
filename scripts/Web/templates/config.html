@@ -74,16 +74,9 @@
 				
 				var flag = '{{ flag }}';
 				var schemas = JSON.parse('{{ schemaChoices | tojson | safe}}');
-				displaySchemaOptions(schemas , flag);
-				console.log(schemas);	
-				console.log(flag);
-
-
 				var schema = JSON.parse('{{ schema | tojson | safe }}');
-				console.log(schema);
+				//console.log(schema);
 				var value = JSON.parse('{{ component | tojson | safe }}');
-
-				
 				var editor;
 
 				JSONEditor.defaults.options.required_by_default = true;
@@ -92,6 +85,12 @@
 				JSONEditor.defaults.options.show_errors = "always";
 				JSONEditor.defaults.options.compact = true;
 		
+				/////////************************************ The schema options is displayed if the add button is clicked(depending on the flag) ***************************////////////
+				displaySchemaOptions(schemas , flag);
+				//console.log(schemas);	
+				//console.log(flag);
+
+
 				
 				JSONEditor.defaults.resolvers.unshift(function(schema) {
   					if(schema.type === "host") {
@@ -109,9 +108,11 @@
 					//console.log(schema.properties.host);
 					//schema.push("enum":["a", "b", "c"]);
 					//loadSchema(editor, schema, value);
-					loadButtons(flag, '{{ boardName }}');
+					loadButtons(flag, '{{ fileName }}' , '{{ boardName }}');
 				}					
-
+				
+				setInterval(function(){disableConfigWindow();}, 500);
+				////*******************************   functions that will be using editor as a global variable  *****************************////
 				function loadSchema(schema, value){
 					console.log(schema);
 					var element = document.getElementById('editor-holder');
@@ -131,7 +132,7 @@
 					//return editor;
 				}
 
-				function loadButtons(flag, boardName){
+				function loadButtons(flag, fileName, boardName){
 					var buttonsContainer = document.getElementById("buttons");
 					//config
 					//alert(flag);
@@ -143,7 +144,7 @@
 						remove.style.marginLeft = "10px";
 						remove.style.marginRight = "10px";
 						remove.addEventListener("click", function(){
-							removeBoard(boardName);
+							removeBoard(fileName, boardName);
 						});
 						remove.id = "remove-button";
 						
@@ -162,7 +163,7 @@
 						apply.style.marginRight = "10px";
 						apply.addEventListener("click", function(){
 						//	if(window.opener.isDOWN())
-							applyChanges(editor, boardName);	
+							applyChanges(editor, fileName, boardName);	
 						//	else
 						//		alert("not in DOWN mode");
 						});
@@ -214,8 +215,9 @@
 				}
 
 
-				function disableAddingOrChangingBoards(disable){
-
+				function disableConfigWindow(){
+					
+					var disable = !(window.opener.isDOWN());
 
 					if(document.getElementById("remove-button"))	
 						document.getElementById("remove-button").disabled = disable;	

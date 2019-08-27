@@ -36,6 +36,7 @@ for comp in config["components"]:
   socket.setsockopt_string(zmq.SUBSCRIBE,"")
   nameMap[socket]=name
   #sourceMap[socket]
+  print("after nameMap")
   poller.register(socket, zmq.POLLIN)
   
 while True:
@@ -43,12 +44,15 @@ while True:
     socks = dict(poller.poll())
   except KeyboardInterrupt:
     break
+  print("in while")
 
   #temporary : simulating the frontEndReciever data
 
   for comp in config["components"]:
+      print("here")
       if comp["name"].startswith("frontendreceiver"):
         for i in range(1,9):
+          print("fake")
           source = comp["name"]
           moduleName = "Module" + str(i)
           valueName = "hits"

@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "group": "faser",
   "components": [
     {
@@ -74,6 +74,7 @@
           {
             "type": "pair",
             "chid": 1,
+            "transport": "tcp",
             "host": "*",
             "port": 8101
           }
@@ -94,6 +95,7 @@
           {
             "type": "pair",
             "chid": 1,
+            "transport": "tcp",
             "host": "*",
             "port": 8102
           }
@@ -116,12 +118,14 @@
           {
             "type": "pair",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8101
           },
           {
             "type": "pair",
             "chid": 2,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8102
           }
@@ -130,6 +134,7 @@
           {
             "type": "pubsub",
             "chid": 3,
+            "transport": "tcp",
             "host": "*",
             "port": 8103
           }
@@ -153,6 +158,7 @@
           {
             "type": "pubsub",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8103
           }
@@ -178,6 +184,7 @@
           {
             "type": "pubsub",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8103
           }
@@ -203,6 +210,7 @@
           {
             "type": "pubsub",
             "chid": 1,
+            "transport": "tcp",
             "host": "localhost",
             "port": 8103
           }

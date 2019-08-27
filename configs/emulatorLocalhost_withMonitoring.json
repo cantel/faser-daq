@@ -1,5 +1,5 @@
 {
-  "version": 5,
+  "version": 6,
   "group": "faser",
   "components": [
     {
@@ -35,7 +35,7 @@
         "probMissingTrigger": 0.00,
         "probMissingFragment": 0.00,
         "probCorruptedFragment": 0.00,
-	"monitoringInterval": 1.5,
+	      "monitoringInterval": 1.5,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001

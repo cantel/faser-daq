@@ -10,7 +10,7 @@
     "version": {
       "type": "integer",
       "description": "Configuration version",
-      "minimum": 1,
+      "minimum": 6,
       "maximum": 999
     },
     "group": {
@@ -67,16 +67,36 @@
                 "uniqueItems": true,
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "type": {
-                      "type": "string",
-                      "enum": ["pair", "pubsub"]
-                    },
-                    "chid": {"type":"integer"},
-                    "host": {"type":"string"},
-                    "port": {"type":"integer"}
+                  "if": {
+                    "properties": {"transport":{"const":"tcp"}}
                   },
-                  "required": ["type", "chid", "host", "port"]
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "host": {"type":"string"},
+                      "port": {"type":"integer"}
+                    },
+                    "required": ["type", "chid", "host", "port"]
+                  },
+                  "if": {
+                    "properties": {"transport":{"const":"ipc"}}
+                  },
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "path": {"type":"string"}
+                    },
+                    "required": ["type", "chid", "path"]
+                  },
+                  "required": ["transport"]
                 }
               },
               "senders": { 
@@ -86,16 +106,36 @@
                 "uniqueItems": true,
                 "items": {
                   "type": "object",
-                  "properties": {
-                    "type": {
-                      "type":"string",
-                      "enum": ["pair", "pubsub"]
-                    },
-                    "chid": {"type":"integer"},
-                    "host": {"type":"string"},
-                    "port": {"type":"integer"}
+                  "if": {
+                    "properties": {"transport":{"const":"tcp"}}
                   },
-                  "required": ["type", "chid", "host", "port"]
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type":"string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "host": {"type":"string"},
+                      "port": {"type":"integer"}
+                    },
+                    "required": ["type", "chid", "host", "port"]
+                  },
+                  "if": {
+                    "properties": {"transport":{"const":"ipc"}}
+                  },
+                  "then": {
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "enum": ["pair", "pubsub"]
+                      },
+                      "chid": {"type":"integer"},
+                      "path": {"type":"string"}
+                    },
+                    "required": ["type", "chid", "path"]
+                  },
+                  "required": ["transport"]
                 }
               }
             }

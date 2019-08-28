@@ -67,7 +67,7 @@ void MonitorModule::register_metrics() {
 
 }
 
-uint16_t MonitorModule::unpack_data( daqling::utilities::Binary eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader ) {
+uint16_t MonitorModule::unpack_data( daqling::utilities::Binary &eventBuilderBinary, const EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader ) {
 
   uint16_t dataStatus=0;
   bool foundSourceID(false);

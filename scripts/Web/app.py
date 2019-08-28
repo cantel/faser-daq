@@ -27,7 +27,6 @@ app.register_blueprint(configFiles_blueprint)
 
 app.debug = True
 Scss(app, static_dir='static/css', asset_dir='assets/scss')
-
 r1 = redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
 
 
@@ -147,9 +146,10 @@ def shutDownRunningFile():
 	
 	d = session.get("data")
 	dc = h.createDaqInstance(d)
+	print("running File name: ", r1.hgetall("runningFile")["fileName"])
 	runningFile = h.read(r1.hgetall("runningFile")["fileName"])
 	allDOWN = True
-	print(runningFile['components'])
+	print("running File:", runningFile['components'])
 	for p in runningFile['components']:	
 		rawStatus, timeout = dc.getStatus(p)
 		status = h.translateStatus(rawStatus, timeout)

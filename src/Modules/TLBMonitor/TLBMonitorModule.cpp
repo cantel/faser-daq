@@ -35,11 +35,11 @@ void TLBMonitorModule::runner() {
   INFO("Running...");
 
   bool noData(true);
-  daqling::utilities::Binary* eventBuilderBinary = new daqling::utilities::Binary;
+  daqling::utilities::Binary eventBuilderBinary;
 
   while (m_run) {
 
-      if ( !m_connections.get(1, *eventBuilderBinary)){
+      if ( !m_connections.get(1, eventBuilderBinary)){
           if ( !noData ) std::this_thread::sleep_for(10ms);
           noData=true;
           continue;
@@ -49,12 +49,12 @@ void TLBMonitorModule::runner() {
       const EventHeader * eventHeader((EventHeader *)malloc(m_eventHeaderSize));
       EventFragmentHeader * fragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
 
-      eventHeader = static_cast<const EventHeader *>(eventBuilderBinary->data());	
+      eventHeader = static_cast<const EventHeader *>(eventBuilderBinary.data());	
 
       // only accept physics events
       if ( eventHeader->event_tag != PhysicsTag ) continue;
 
-      uint16_t dataStatus = unpack_data( *eventBuilderBinary, eventHeader, fragmentHeader );
+      uint16_t dataStatus = unpack_data(eventBuilderBinary, eventHeader, fragmentHeader );
 
       uint32_t fragmentStatus = fragmentHeader->status;
       fragmentStatus |= dataStatus;

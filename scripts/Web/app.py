@@ -27,6 +27,7 @@ app.register_blueprint(configFiles_blueprint)
 
 app.debug = True
 Scss(app, static_dir='static/css', asset_dir='assets/scss')
+
 r1 = redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
 
 
@@ -43,8 +44,11 @@ def sessionsShow():
 @app.route("/")
 def launche():
 	print(app.secret_key)
+	try:
+		r1.ping()
+	except:
+		return "redis database isn't working"
 	#session["data"] = read("current.json")
-	
 	#r1.hset("runningFile", "isRunning", 0)
 	print("running file info: ", r1.hgetall("runningFile"))
 	if(r1.hgetall("runningFile")["isRunning"] == 1):
@@ -145,6 +149,7 @@ def shutDownRunningFile():
 	dc = h.createDaqInstance(d)
 	runningFile = h.read(r1.hgetall("runningFile")["fileName"])
 	allDOWN = True
+	print(runningFile['components'])
 	for p in runningFile['components']:	
 		rawStatus, timeout = dc.getStatus(p)
 		status = h.translateStatus(rawStatus, timeout)

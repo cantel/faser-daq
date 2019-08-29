@@ -173,21 +173,25 @@ function createRadioInputs(fileNames){
 					if(CHILD_WINDOW && !CHILD_WINDOW.closed){
 						CHILD_WINDOW.close();
 					}
-					if(config == "NOTJSON" ||  config == "NOTSCHEMA" || config == "NOSCHEMA"){
+					if(config == "BADJSON" ||  config == "BADSCHEMA" || config == "NOTCOMP" || config == "NOSCHEMA"){
 						
 						document.getElementById("run-info-box").style.display = "none";
 						document.getElementById("control-box").style.display = "none";
 						document.getElementById("status&settings-box").style.display = "none";
 
 						//window.open("/damaged", '_self');
-						if(config == "NOTJSON"){
+						if(config == "BADJSON"){
 							alert("The selected json file is damaged. Check for missing brackets or mismatched paratheses");
 						}
-						else if(config == "NOTSCHEMA"){
+						else if(config == "BADSCHEMA"){
+							alert("There is a problem with the general schema.");
+						}
+
+						else if(config == "NOTCOMP"){
 							alert("The selected json file was not validated by the general schema.");
 						}
 						else if(config == "NOSCHEMA"){
-							alert("The json-config.schema does not exist.");
+							alert("The general schema does not exist.");
 						}
 						
 					}

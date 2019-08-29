@@ -109,7 +109,7 @@ function updateCommandAvailability(data){
 }
 
 function updateCommandsAndStatus(){
-	$.ajax({url: '/status', async: false, success: function(data){
+	$.ajax({url: '/status', async: true, success: function(data){
 		console.log(data);
 		console.log("in update general funciton");
 		updateStatus(data);
@@ -265,7 +265,7 @@ function getRunningFileInfo(){
 function shutdown(){
 	$.get('/shutdown');
 	var inter = setInterval(function(){
-	$.ajax({url:"/shutDownRunningFile", async:false, success: function(data){
+	$.ajax({url:"/shutDownRunningFile", async:true, success: function(data){
 		if(data == "true"){
 			clearInterval(inter);	
 		}

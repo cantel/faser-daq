@@ -50,11 +50,15 @@ def launche():
 	#session["data"] = read("current.json")
 	#r1.hset("runningFile", "isRunning", 0)
 	print("running file info: ", r1.hgetall("runningFile"))
-	if(r1.hgetall("runningFile")["isRunning"] == 1):
-		selectedFile = r1.hgetall("runningFile")["fileName"]
-	else:
-		selectedFile = "current.json"
-	print(selectedFile)
+	try:
+		if(r1.hgetall("runningFile")["isRunning"] == 1):
+			selectedFile = r1.hgetall("runningFile")["fileName"]
+		else:
+			selectedFile = "current.json"
+		print(selectedFile)
+	except:
+		return "the key runningFile does not exist on the redis db 2" 
+		
 	
 	return render_template('softDaqHome.html', selectedFile = selectedFile)
 @app.route("/initialise")
@@ -64,6 +68,7 @@ def initialise():
 	
 	d = session.get('data')
 	dc = h.createDaqInstance(d)
+	
 	
 	r1.hset("runningFile", "isRunning", 1)
 	r1.hset("runningFile", "fileName", session.get("selectedFile"))	
@@ -108,7 +113,6 @@ def sendStatusJsonFile():
 	d = session.get("data")
 	if not d == {}:
 		dc = h.createDaqInstance(d)
-		allDOWN = True
 		for p in d['components']:	
 			rawStatus, timeout = dc.getStatus(p)
 			status = h.translateStatus(rawStatus, timeout)
@@ -146,10 +150,10 @@ def shutDownRunningFile():
 	
 	d = session.get("data")
 	dc = h.createDaqInstance(d)
-	print("running File name: ", r1.hgetall("runningFile")["fileName"])
+	#print("running File name: ", r1.hgetall("runningFile")["fileName"])
 	runningFile = h.read(r1.hgetall("runningFile")["fileName"])
 	allDOWN = True
-	print("running File:", runningFile['components'])
+	#print("running File:", runningFile['components'])
 	for p in runningFile['components']:	
 		rawStatus, timeout = dc.getStatus(p)
 		status = h.translateStatus(rawStatus, timeout)

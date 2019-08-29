@@ -16,17 +16,21 @@ def read(fileName):
 				f.close() 	
 				if(os.path.exists(env['DAQ_CONFIG_DIR'] + "json-config.schema")):
 					with open(env['DAQ_CONFIG_DIR'] + "json-config.schema") as f:
-						schema = json.load(f)
+						try:
+							schema = json.load(f)
+						
+							try:
+								validate(instance=data, schema=schema)
+							except:
+								data= "NOTCOMP"
+						except:
+							data= "BADSCHEMA"
 					f.close()
 
-					try:
-						validate(instance=data, schema=schema)
-					except:
-						data= "NOTSCHEMA"
 				else:
 					data= "NOSCHEMA"
 			except:
-				data = "NOTJSON"
+				data = "BADJSON"
 	else:
 		data = {}
 		write(data)

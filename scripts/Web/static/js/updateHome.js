@@ -138,10 +138,10 @@ function updateRunInformation(){
 	//load the iframe
 	while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));	
 	var graph = document.createElement("IFRAME");
+	graphWindow.appendChild(graph);
 	graph.className = "embed-responsive-item";
 	graph.src = "/monitoring/graph";
 	
-	graphWindow.appendChild(graph);
 	return interval_updateRunNumbers;
 }
 function updateRunNumbers(){

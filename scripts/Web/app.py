@@ -39,7 +39,6 @@ def sessionsShow():
 		session['visits'] = session.get('visits') + 1
 	return "Total visits: {}".format(session.get('visits'))
 
-
 @app.route("/")
 def launche():
 	print(app.secret_key)
@@ -54,10 +53,14 @@ def launche():
 		r1.hset("runningFile", "isRunning", 0)
 
 	print("running file info: ", r1.hgetall("runningFile"))
-	if(r1.hgetall("runningFile")["isRunning"] == 1):
-		selectedFile = r1.hgetall("runningFile")["fileName"]
-	else:
-		selectedFile = "current.json"
+	print("isRunning", r1.hgetall("runningFile")["isRunning"] )
+	print("fileNAme: ", r1.hgetall("runningFile")["fileName"])
+	
+	#selectedFile = "current.json"
+	#if(r1.hgetall("runningFile")["isRunning"] == 1):
+	selectedFile = r1.hgetall("runningFile")["fileName"]
+	#ielse:
+	#	selectedFile = "current.json"
 	print(selectedFile)
 	#return "the key runningFile does not exist on the redis db 2" 
 		
@@ -112,7 +115,10 @@ def shutdown():
 @app.route("/status")
 def sendStatusJsonFile():
 	statusArr = []
+	session_permanent = True
 	d = session.get("data")
+	print("data", d)
+	print("session; ", id(session))
 	if not d == {}:
 		dc = h.createDaqInstance(d)
 		for p in d['components']:	
@@ -163,6 +169,7 @@ def shutDownRunningFile():
 			allDOWN = False
 	if(allDOWN):
 		r1.hset("runningFile", "isRunning", 0)
+		r1.hset("runningFile", "fileName", "current.json")
 		return jsonify("true")
 	else:
 		return jsonify("false")
@@ -170,8 +177,8 @@ def shutDownRunningFile():
 	
 if __name__ == '__main__':
 	#debug=True inorder to be able to update without recompiling
-	#app.run(threaded=True)
-	app.run(processe=19)
+	app.run(threaded=True)
+	#app.run(processe=19)
 
 
 ####main####

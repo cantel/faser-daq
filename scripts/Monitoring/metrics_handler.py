@@ -49,7 +49,7 @@ while True:
   for comp in config["components"]:
       if comp["type"].startswith("FrontEndReceiver"):
         for i in range(1,9):
-          print("fake")
+          #print("fake")
           source = comp["name"]
           moduleName = "Module" + str(i)
           valueName = "hits"

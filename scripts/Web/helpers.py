@@ -7,6 +7,7 @@ from jsonschema import validate
 import json
 import daqcontrol
 
+#reads a configuration json file, handles the errors and validate with general schema
 def read(fileName):
 	if(os.path.exists(env['DAQ_CONFIG_DIR'] + fileName)):
 		with open(env['DAQ_CONFIG_DIR'] + fileName) as f:
@@ -37,14 +38,14 @@ def read(fileName):
 	
 		
 	return data
-
+#rewrites the current.json
 def write(d):
 	with open(env['DAQ_CONFIG_DIR'] + 'current.json', 'w+') as f:
 		json.dump(d, f)
 
 
 
-
+#reads the schema for the requested board type
 def readSchema(boardType):
 	try:
 		schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + boardType
@@ -91,7 +92,7 @@ def tail(file, n=1, bs=1024):
 	f.close()
 	return lines	
 		
-	
+#returns the index number of the boardName from the json d	
 def findIndex(boardName, d):
 	index = 0
 	for p in d['components']:
@@ -110,7 +111,7 @@ def createDaqInstance(d):
 	dc = daqcontrol.daqcontrol(group, lib_path, dir, exe)
 	return dc
 	
-
+#creates a thread for the function passed on argument
 def spawnJoin(list, func):
 	threads = []
 	for p in list:

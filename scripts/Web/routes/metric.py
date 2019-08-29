@@ -76,7 +76,7 @@ def graph():
       metrics.remove(metric)
   for metric in metrics:
     tabNames.append(metric.split("_")[1])
-  return render_template('graph2.html', metrics=metrics, tabNames=tabNames)
+  return render_template('graph.html', metrics=metrics, tabNames=tabNames)
 
 
 @metric_blueprint.route("/data/<string:metric>")
@@ -88,9 +88,9 @@ def data(metric):
   metric_array.reverse()
   return json.dumps(metric_array)
 
-@metric_blueprint.route("hello")
-def hello():
-  return "Total visits: {}".format(session.get('visits'))
+#@metric_blueprint.route("hello")
+#def hello():
+#  return "Total visits: {}".format(session.get('visits'))
 
 @metric_blueprint.route("/lastMeas/<string:metric>")
 def lastMeas(metric):
@@ -122,7 +122,7 @@ def values(boardType, source):
     values[key.decode()]=(dbVals[key].split(b':')[1].decode(),time.ctime(float(dbVals[key].split(b':')[0])))
   #print("source", source)
   #print("values", values)
-  if boardType == "frontendreceiver":
+  if boardType == "FrontEndReceiver":
     return render_template('tracker.html', source=source,values=values, boardType=boardType)
   return render_template('values.html', source=source,values=values, boardType=boardType)
  

@@ -49,15 +49,17 @@ def launche():
 		return "redis database isn't working"
 	#session["data"] = read("current.json")
 	#r1.hset("runningFile", "isRunning", 0)
+	if not r1.exists("runningFile"):	
+		r1.hset("runningFile", "fileName", "current.json")
+		r1.hset("runningFile", "isRunning", 0)
+
 	print("running file info: ", r1.hgetall("runningFile"))
-	try:
-		if(r1.hgetall("runningFile")["isRunning"] == 1):
-			selectedFile = r1.hgetall("runningFile")["fileName"]
-		else:
-			selectedFile = "current.json"
-		print(selectedFile)
-	except:
-		return "the key runningFile does not exist on the redis db 2" 
+	if(r1.hgetall("runningFile")["isRunning"] == 1):
+		selectedFile = r1.hgetall("runningFile")["fileName"]
+	else:
+		selectedFile = "current.json"
+	print(selectedFile)
+	#return "the key runningFile does not exist on the redis db 2" 
 		
 	
 	return render_template('softDaqHome.html', selectedFile = selectedFile)

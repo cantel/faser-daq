@@ -21,8 +21,8 @@ context = zmq.Context()
 poller = zmq.Poller()
 nameMap={}
 
-r1.hset("runningFile", "fileName", "current.json")
-r1.hset("runningFile", "isRunning", 0)
+#r1.hset("runningFile", "fileName", "current.json")
+#r1.hset("runningFile", "isRunning", 0)
 
 for comp in config["components"]:
   if not "settings" in comp: continue
@@ -36,7 +36,6 @@ for comp in config["components"]:
   socket.setsockopt_string(zmq.SUBSCRIBE,"")
   nameMap[socket]=name
   #sourceMap[socket]
-  print("after nameMap")
   poller.register(socket, zmq.POLLIN)
   
 while True:
@@ -44,13 +43,11 @@ while True:
     socks = dict(poller.poll())
   except KeyboardInterrupt:
     break
-  print("in while")
 
   #temporary : simulating the frontEndReciever data
 
   for comp in config["components"]:
-      print("here")
-      if comp["name"].startswith("frontendreceiver"):
+      if comp["type"].startswith("FrontEndReceiver"):
         for i in range(1,9):
           print("fake")
           source = comp["name"]

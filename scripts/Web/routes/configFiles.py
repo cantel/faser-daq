@@ -48,7 +48,7 @@ def getConfigFile(fileName):
 	session['fileName'] = fileName
 	res = h.read(fileName)
 	session["selectedFile"] = fileName;
-	if(res == "NOTJSON" or res == "NOTSCHEMA" or res == "NOSCHEMA"):
+	if(res == "NOJSON" or res == "BADSCHEMA" or res == "NOSCHEMA" or res == "NOTCOMP"):
 		session["data"]={}
 	else:
 		session["data"] = res

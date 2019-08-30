@@ -7,6 +7,7 @@ from jsonschema import validate
 import json
 import daqcontrol
 
+#reads a configuration json file, handles the errors and validate with general schema
 def read(fileName):
 	if(os.path.exists(env['DAQ_CONFIG_DIR'] + fileName)):
 		with open(env['DAQ_CONFIG_DIR'] + fileName) as f:
@@ -16,31 +17,35 @@ def read(fileName):
 				f.close() 	
 				if(os.path.exists(env['DAQ_CONFIG_DIR'] + "json-config.schema")):
 					with open(env['DAQ_CONFIG_DIR'] + "json-config.schema") as f:
-						schema = json.load(f)
+						try:
+							schema = json.load(f)
+						
+							try:
+								validate(instance=data, schema=schema)
+							except:
+								data= "NOTCOMP"
+						except:
+							data= "BADSCHEMA"
 					f.close()
 
-					try:
-						validate(instance=data, schema=schema)
-					except:
-						data= "NOTSCHEMA"
 				else:
 					data= "NOSCHEMA"
 			except:
-				data = "NOTJSON"
+				data = "BADJSON"
 	else:
 		data = {}
 		write(data)
 	
 		
 	return data
-
+#rewrites the current.json
 def write(d):
 	with open(env['DAQ_CONFIG_DIR'] + 'current.json', 'w+') as f:
 		json.dump(d, f)
 
 
 
-
+#reads the schema for the requested board type
 def readSchema(boardType):
 	try:
 		schemaFileName = env['DAQ_CONFIG_DIR'] + "schemas/" + boardType
@@ -50,6 +55,18 @@ def readSchema(boardType):
 	except:
 		schema= "error"
 	return schema
+
+
+def readGeneral():
+	try:
+		schemaFileName = env['DAQ_CONFIG_DIR'] +  "json-config.schema"
+		f = open(schemaFileName)
+		schema = json.load(f)
+		f.close()
+	except:
+		schema= "error"
+	return schema
+
 
 
 
@@ -69,7 +86,7 @@ def translateStatus(rawStatus, timeout):
 	return translatedStatus
 
 
-
+#takes the one thousand first lines of the log file
 def tail(file, n=1, bs=1024):
 
 	f = open(file)
@@ -87,7 +104,7 @@ def tail(file, n=1, bs=1024):
 	f.close()
 	return lines	
 		
-	
+#returns the index number of the boardName from the json d	
 def findIndex(boardName, d):
 	index = 0
 	for p in d['components']:
@@ -106,7 +123,7 @@ def createDaqInstance(d):
 	dc = daqcontrol.daqcontrol(group, lib_path, dir, exe)
 	return dc
 	
-
+#creates a thread for the function passed on argument
 def spawnJoin(list, func):
 	threads = []
 	for p in list:

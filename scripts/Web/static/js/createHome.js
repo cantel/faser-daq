@@ -24,7 +24,7 @@ function createConfigButtons(boardName){
 	btn.id = "config" + boardName;
 	btn.addEventListener("click", function(){
 		CHILD_WINDOW = window.open("/config/"+ ($('input[name=configFileGroup]:checked').val())+ "/" + boardName, 'Configuration Data','replace=true,top=200,left=100,height=800,width=1000,scrollbars=yes,titlebar=yes');
-		console.log("CHILD", CHILD_WINDOW);
+		//console.log("CHILD", CHILD_WINDOW);
 	})	
 	var col2 = document.createElement("th");
 	//col2.className = "col-auto";
@@ -168,26 +168,30 @@ function createRadioInputs(fileNames){
 				//TODO : update the run information section
 				fileName = this.id.slice(6);
 				$.ajax({url:"/configurationFiles/" + fileName, async: false, success: function(config){
-					console.log(config);
+					//console.log(config);
 					
 					if(CHILD_WINDOW && !CHILD_WINDOW.closed){
 						CHILD_WINDOW.close();
 					}
-					if(config == "NOTJSON" ||  config == "NOTSCHEMA" || config == "NOSCHEMA"){
+					if(config == "BADJSON" ||  config == "BADSCHEMA" || config == "NOTCOMP" || config == "NOSCHEMA"){
 						
 						document.getElementById("run-info-box").style.display = "none";
 						document.getElementById("control-box").style.display = "none";
 						document.getElementById("status&settings-box").style.display = "none";
 
 						//window.open("/damaged", '_self');
-						if(config == "NOTJSON"){
+						if(config == "BADJSON"){
 							alert("The selected json file is damaged. Check for missing brackets or mismatched paratheses");
 						}
-						else if(config == "NOTSCHEMA"){
+						else if(config == "BADSCHEMA"){
+							alert("There is a problem with the general schema.");
+						}
+
+						else if(config == "NOTCOMP"){
 							alert("The selected json file was not validated by the general schema.");
 						}
 						else if(config == "NOSCHEMA"){
-							alert("The json-config.schema does not exist.");
+							alert("The general schema does not exist.");
 						}
 						
 					}

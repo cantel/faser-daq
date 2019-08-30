@@ -4,25 +4,18 @@
 	<meta charset="utf-8"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	
-
-
 	<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.css'>
-
 	<link rel="stylesheet" href='https://netdna.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
 
 	
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
-
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 
-	<script src="{{ url_for('static', filename='config.js')}}"></script> 
+	<script src="{{ url_for('static', filename='js/config.js', version='107')}}"></script> 
 
 	<script src="https://cdn.jsdelivr.net/npm/@json-editor/json-editor@latest/dist/jsoneditor.min.js"></script>
+	<script src="{{ url_for('static', filename='js/hostEditor.js', version='104')}}"></script> 
 
-
-	<script src="{{ url_for('static', filename='hostEditor.js')}}"></script> 
-
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.3/jquery.min.js"></script>
 
 	<style>
 	.jumbotron{
@@ -78,39 +71,45 @@
 				//console.log(schema);
 				var value = JSON.parse('{{ component | tojson | safe }}');
 				var editor;
+				var generalSchema = JSON.parse('{{ generalSchema | tojson | safe}}'); 
 
 				JSONEditor.defaults.options.required_by_default = true;
 				JSONEditor.defaults.options.disable_edit_json = true;	
-				JSONEditor.defaults.options.disable_properties = true;
+				//JSONEditor.defaults.options.disable_properties = true;
 				JSONEditor.defaults.options.show_errors = "always";
 				JSONEditor.defaults.options.compact = true;
-		
-				/////////************************************ The schema options is displayed if the add button is clicked(depending on the flag) ***************************////////////
-				displaySchemaOptions(schemas , flag);
-				//console.log(schemas);	
-				//console.log(flag);
-
-
-				
+					
 				JSONEditor.defaults.resolvers.unshift(function(schema) {
-  					if(schema.type === "host") {
+  					if(schema.format === "host") {
     						return "hostEditor";
   					}
 
  					 // If no valid editor is returned, the next resolver function will be used
-					});
-				if(schema == "error"){
-					alert("The schema does not exist or does't have the right format");
-				}	
-				else{
-					loadSchema(schema, value);
-					//console.log(schema);
-					//console.log(schema.properties.host);
-					//schema.push("enum":["a", "b", "c"]);
-					//loadSchema(editor, schema, value);
-					loadButtons(flag, '{{ fileName }}' , '{{ boardName }}');
-				}					
+				});
+				/////////************************************ The schema options is displayed if the add button is clicked(depending on the flag) ***************************////////////
+				if(flag == 1){
+					displaySchemaOptions(generalSchema, schemas);
+					//console.log(schemas);	
+					//console.log(flag);
+				}
+				else if (flag == 0){
 				
+					if(schema == "error"){
+						alert("The schema does not exist or does't have the right format");
+					}	
+					else{
+						console.log("this is the schema in config:", schema);
+						improvedSchema = improveSchema(generalSchema, schema);
+						loadSchema(/*generalSchema*/improvedSchema/*schema*/, value);
+						//console.log(schema);
+						//console.log(schema.properties.host);
+						//schema.push("enum":["a", "b", "c"]);
+						//loadSchema(editor, schema, value);
+						loadButtons(flag, '{{ fileName }}' , '{{ boardName }}');
+					}			
+						
+				}
+
 				setInterval(function(){disableConfigWindow();}, 500);
 				////*******************************   functions that will be using editor as a global variable  *****************************////
 				function loadSchema(schema, value){
@@ -227,14 +226,15 @@
 
 					if(document.getElementById("add-button"))
 						document.getElementById("add-button").disabled = disable;
-						
-					if(disable){
-						editor.disable();
-					}
-					else{	
-						editor.enable();
-					}
 					
+					if(editor){
+						if(disable){
+							editor.disable();
+						}
+						else{	
+							editor.enable();
+						}
+					}
 				}
 
 			</script>

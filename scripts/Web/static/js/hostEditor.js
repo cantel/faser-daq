@@ -45,7 +45,7 @@ JSONEditor.defaults.editors.hostEditor = JSONEditor.AbstractEditor.extend({
     return Math.min(12,Math.max(longest_text/7,2));
   },
   typecast: function(value) {
-    if(this.schema.type === "host") {
+    if(this.schema.format === "host") {
       return value;
     }
 	
@@ -71,7 +71,7 @@ JSONEditor.defaults.editors.hostEditor = JSONEditor.AbstractEditor.extend({
     }});
 
     // host
-    if(this.schema.type === "host") {
+    if(this.schema.format === "host") {
       self.enum_display = this.schema.options && this.schema.options.enum_titles || hostOptions;
       self.enum_options = hostOptions;
       self.enum_values = hostOptions;

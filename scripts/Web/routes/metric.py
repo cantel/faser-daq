@@ -76,7 +76,7 @@ def graph():
       metrics.remove(metric)
   for metric in metrics:
     tabNames.append(metric.split("_")[1])
-  return render_template('graph2.html', metrics=metrics, tabNames=tabNames)
+  return render_template('graph.html', metrics=metrics, tabNames=tabNames)
 
 
 @metric_blueprint.route("/data/<string:metric>")
@@ -88,9 +88,9 @@ def data(metric):
   metric_array.reverse()
   return json.dumps(metric_array)
 
-@metric_blueprint.route("hello")
-def hello():
-  return "Total visits: {}".format(session.get('visits'))
+#@metric_blueprint.route("hello")
+#def hello():
+#  return "Total visits: {}".format(session.get('visits'))
 
 @metric_blueprint.route("/lastMeas/<string:metric>")
 def lastMeas(metric):
@@ -122,8 +122,8 @@ def values(boardType, source):
     values[key.decode()]=(dbVals[key].split(b':')[1].decode(),time.ctime(float(dbVals[key].split(b':')[0])))
   #print("source", source)
   #print("values", values)
-  if boardType == "frontendreceiver":
-    return render_template('tracker.html', source=source,values=values, boardType=boardType)
+  if boardType == "FrontEndReceiver":
+    return render_template('custom/tracker.html', source=source,values=values, boardType=boardType)
   return render_template('values.html', source=source,values=values, boardType=boardType)
  
 @metric_blueprint.route("/info/<string:source>/dataUpdate")
@@ -148,7 +148,7 @@ def getStatus():
     #print("source in stat: ", source)
     dbVals = r.hgetall(source)
     #dbVals = sorted(dbVals)
-    print("*********bdVals:", dbVals)
+    #print("*********bdVals:", dbVals)
     if(b'Status' in sorted(dbVals)):
       val =  dbVals[b'Status'].split(b':')[1].decode()
     else: 
@@ -160,7 +160,7 @@ def getStatus():
 
 @metric_blueprint.route("/info/<boardType>/<source>/<moduleId>")
 def moduloTemplate(boardType, source, moduleId):
-  return render_template("module.html", source=source, moduleId= moduleId, boardType=boardType)
+  return render_template("custom/module.html", source=source, moduleId= moduleId, boardType=boardType)
 
 
 @metric_blueprint.route("/info/<boardType>/<source>/<moduleId>/getData")

@@ -19,6 +19,9 @@ from routes.configFiles import configFiles_blueprint
 
 import helpers as h
 
+__author__ = "Elham Amin Mansour"
+__version__ = "0.0.1"
+
 app  = Flask(__name__) 
 app.register_blueprint(metric_blueprint)
 app.register_blueprint(config_blueprint)
@@ -39,20 +42,30 @@ def sessionsShow():
 		session['visits'] = session.get('visits') + 1
 	return "Total visits: {}".format(session.get('visits'))
 
-
 @app.route("/")
 def launche():
-	print(app.secret_key)
+	#print(app.secret_key)
+	try:
+		r1.ping()
+	except:
+		return "redis database isn't working"
 	#session["data"] = read("current.json")
-	
 	#r1.hset("runningFile", "isRunning", 0)
-	print("running file info: ", r1.hgetall("runningFile"))
-	if(r1.hgetall("runningFile")["isRunning"] == 1):
-		selectedFile = r1.hgetall("runningFile")["fileName"]
-	else:
-		selectedFile = "current.json"
-	print(selectedFile)
+	if not r1.exists("runningFile"):	
+		r1.hset("runningFile", "fileName", "current.json")
+		r1.hset("runningFile", "isRunning", 0)
+
+	#print("running file info: ", r1.hgetall("runningFile"))
+	#print("isRunning", r1.hgetall("runningFile")["isRunning"] )
+	#print("fileNAme: ", r1.hgetall("runningFile")["fileName"])
 	
+	#selectedFile = "current.json"
+	#if(r1.hgetall("runningFile")["isRunning"] == 1):
+	selectedFile = r1.hgetall("runningFile")["fileName"]
+	#ielse:
+	#	selectedFile = "current.json"
+	#print(selectedFile)
+	#return "the key runningFile does not exist on the redis db 2" 
 	return render_template('softDaqHome.html', selectedFile = selectedFile)
 @app.route("/initialise")
 def initialise():
@@ -61,6 +74,7 @@ def initialise():
 	
 	d = session.get('data')
 	dc = h.createDaqInstance(d)
+	
 	
 	r1.hset("runningFile", "isRunning", 1)
 	r1.hset("runningFile", "fileName", session.get("selectedFile"))	
@@ -102,10 +116,12 @@ def shutdown():
 @app.route("/status")
 def sendStatusJsonFile():
 	statusArr = []
+	session_permanent = True
 	d = session.get("data")
+	#print("data", d)
+	#print("session; ", id(session))
 	if not d == {}:
 		dc = h.createDaqInstance(d)
-		allDOWN = True
 		for p in d['components']:	
 			rawStatus, timeout = dc.getStatus(p)
 			status = h.translateStatus(rawStatus, timeout)
@@ -143,8 +159,10 @@ def shutDownRunningFile():
 	
 	d = session.get("data")
 	dc = h.createDaqInstance(d)
+	#print("running File name: ", r1.hgetall("runningFile")["fileName"])
 	runningFile = h.read(r1.hgetall("runningFile")["fileName"])
 	allDOWN = True
+	#print("running File:", runningFile['components'])
 	for p in runningFile['components']:	
 		rawStatus, timeout = dc.getStatus(p)
 		status = h.translateStatus(rawStatus, timeout)
@@ -152,6 +170,7 @@ def shutDownRunningFile():
 			allDOWN = False
 	if(allDOWN):
 		r1.hset("runningFile", "isRunning", 0)
+		r1.hset("runningFile", "fileName", "current.json")
 		return jsonify("true")
 	else:
 		return jsonify("false")
@@ -159,8 +178,8 @@ def shutDownRunningFile():
 	
 if __name__ == '__main__':
 	#debug=True inorder to be able to update without recompiling
-	#app.run(threaded=True)
-	app.run(processe=19)
+	app.run(threaded=True)
+	#app.run(processe=19)
 
 
 ####main####

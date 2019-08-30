@@ -10,7 +10,7 @@
 	"propertyOrder": 1
       },
       "host": {
-        "type": "host",
+        "type": "string",
 	"required": true,
 	"propertyOrder": 2
       },          
@@ -28,21 +28,6 @@
 	"readOnly": true,
 	"propertyOrder": 4
       },
-          "loglevel": {
-            "type": "object",
-            "title": "Log Levels",
-            "properties": {
-              "core": {
-                "type": "string",
-                "enum": ["DEBUG", "INFO"]
-              },
-              "module": {
-                "type": "string",
-                "enum": ["DEBUG", "INFO"]
-              }
-            },
-            "required": ["core", "module"]
-          },
       "settings": {
         "type": "object",
         "title": "Settings",
@@ -82,7 +67,7 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"host"},
+                "host": {"type":"string"},
                 "port": {"type":"integer"}
               }
             }
@@ -100,7 +85,7 @@
                   "enum": ["pair", "pubsub"]
                 },
                 "chid": {"type":"integer"},
-                "host": {"type":"host"},
+                "host": {"type":"string"},
                 "port": {"type":"integer"}
               }
             }

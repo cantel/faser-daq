@@ -57,6 +57,18 @@ def readSchema(boardType):
 	return schema
 
 
+def readGeneral():
+	try:
+		schemaFileName = env['DAQ_CONFIG_DIR'] +  "json-config.schema"
+		f = open(schemaFileName)
+		schema = json.load(f)
+		f.close()
+	except:
+		schema= "error"
+	return schema
+
+
+
 
 def translateStatus(rawStatus, timeout):
 	translatedStatus = rawStatus
@@ -74,7 +86,7 @@ def translateStatus(rawStatus, timeout):
 	return translatedStatus
 
 
-
+#takes the one thousand first lines of the log file
 def tail(file, n=1, bs=1024):
 
 	f = open(file)

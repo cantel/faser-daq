@@ -24,7 +24,7 @@ function createConfigButtons(boardName){
 	btn.id = "config" + boardName;
 	btn.addEventListener("click", function(){
 		CHILD_WINDOW = window.open("/config/"+ ($('input[name=configFileGroup]:checked').val())+ "/" + boardName, 'Configuration Data','replace=true,top=200,left=100,height=800,width=1000,scrollbars=yes,titlebar=yes');
-		console.log("CHILD", CHILD_WINDOW);
+		//console.log("CHILD", CHILD_WINDOW);
 	})	
 	var col2 = document.createElement("th");
 	//col2.className = "col-auto";
@@ -168,7 +168,7 @@ function createRadioInputs(fileNames){
 				//TODO : update the run information section
 				fileName = this.id.slice(6);
 				$.ajax({url:"/configurationFiles/" + fileName, async: false, success: function(config){
-					console.log(config);
+					//console.log(config);
 					
 					if(CHILD_WINDOW && !CHILD_WINDOW.closed){
 						CHILD_WINDOW.close();

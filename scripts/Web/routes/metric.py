@@ -123,7 +123,7 @@ def values(boardType, source):
   #print("source", source)
   #print("values", values)
   if boardType == "FrontEndReceiver":
-    return render_template('tracker.html', source=source,values=values, boardType=boardType)
+    return render_template('custom/tracker.html', source=source,values=values, boardType=boardType)
   return render_template('values.html', source=source,values=values, boardType=boardType)
  
 @metric_blueprint.route("/info/<string:source>/dataUpdate")
@@ -148,7 +148,7 @@ def getStatus():
     #print("source in stat: ", source)
     dbVals = r.hgetall(source)
     #dbVals = sorted(dbVals)
-    print("*********bdVals:", dbVals)
+    #print("*********bdVals:", dbVals)
     if(b'Status' in sorted(dbVals)):
       val =  dbVals[b'Status'].split(b':')[1].decode()
     else: 
@@ -160,7 +160,7 @@ def getStatus():
 
 @metric_blueprint.route("/info/<boardType>/<source>/<moduleId>")
 def moduloTemplate(boardType, source, moduleId):
-  return render_template("module.html", source=source, moduleId= moduleId, boardType=boardType)
+  return render_template("custom/module.html", source=source, moduleId= moduleId, boardType=boardType)
 
 
 @metric_blueprint.route("/info/<boardType>/<source>/<moduleId>/getData")

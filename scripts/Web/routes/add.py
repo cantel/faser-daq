@@ -47,11 +47,14 @@ def addBoard():
 		if(s.endswith(".schema")):
 			schemaChoices.append({'name': s})
 	schemaNames = {'schemaChoices' : schemaChoices}
-	return render_template('config.html', pageName='Add Board', component = {}, schemaChoices = schemaNames, schema={}, flag = 1, boardName="")
+	generalSchema = h.readGeneral()
+	#schema = h.readSchema("FrontEndReceiver")
+	return render_template('config.html', pageName='Add Board', component = {}, schemaChoices = schemaNames, schema={}, flag = 1, boardName="", generalSchema = generalSchema)
 
 @add_blueprint.route("/<schematype>")
 def getschema(schematype):
 	
 	schema = h.readSchema(schematype)
 	return jsonify(schema)
+
 	

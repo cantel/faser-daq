@@ -1,7 +1,7 @@
 
 function updateBoardContainer(fileName){
 	$.ajax({url:"/configurationFiles/" + fileName, async: false, success: function(config){
-		console.log(config);
+		//console.log(config);
 		createBoardContainer(config);
 	}});
 }
@@ -9,7 +9,7 @@ function updateBoardContainer(fileName){
 
 function updateStatus(data){
 	//alert("here");
-	console.log(data);	
+	//console.log(data);	
 	$(document).ready(function(){
 	for (var i = 0; i < Object.keys(data.allStatus).length; i++){
 		//document.write("in for of update status");
@@ -65,7 +65,7 @@ function updateCommandAvailability(data){
 		}
 }
 
-	console.log("CHILD window while updating: ", CHILD_WINDOW);
+	//console.log("CHILD window while updating: ", CHILD_WINDOW);
 
 	runningFileInfo = getRunningFileInfo();
 	if( runningFileInfo.isRunning == 1 && (($('input[name=configFileGroup]:checked').val()) != runningFileInfo.fileName)  ){
@@ -110,8 +110,8 @@ function updateCommandAvailability(data){
 
 function updateCommandsAndStatus(){
 	$.ajax({url: '/status', async: true, success: function(data){
-		console.log(data);
-		console.log("in update general funciton");
+		//console.log(data);
+		//console.log("in update general funciton");
 		updateStatus(data);
 		updateCommandAvailability(data);
 	}}
@@ -151,7 +151,7 @@ function updateRunNumbers(){
 		for(var i = 0; i < Object.keys(data.values).length; i++){
 			if(document.getElementById(data.values[i].key)){
 				if(data.values[i].key == "RunStart"){
-					console.log("time", data.values[i].value);
+					//console.log("time", data.values[i].value);
 					date = convertToDate(data.values[i].value);
 					document.getElementById(data.values[i].key).innerHTML = date;
 				}
@@ -167,7 +167,7 @@ function updateRunNumbers(){
 function updateColorOfInfoButtons(){
 	
 	$.ajax({url: "/monitoring/info/updateStatus", async: false, success: function(data){
-		console.log(data);
+		//console.log(data);
 		
 		for(var i = 0; i < Object.keys(data.allStatus).length; i++){
 			var source = data.allStatus[i].source;
@@ -184,10 +184,10 @@ function updateColorOfInfoButtons(){
 function updateRunningFile(){
 
 	var data = getRunningFileInfo();
-	if(data.isRunning == 0){
+	if(data.isRunning == 0 &&  document.getElementById("runningFile").innerHTML != "NO file running"){
 		document.getElementById("runningFile").innerHTML = "NO file running";
 	}		
-	else if(data.isRunning == 1){
+	else if(data.isRunning == 1 && document.getElementById("runningFile").innerHTML != "File " + data.fileName + " is running"){
 		document.getElementById("runningFile").innerHTML = "File " + data.fileName + " is running";
 	}
 
@@ -258,7 +258,7 @@ function getRunningFileInfo(){
 	$.ajax({url: "/runningFile", async: false, success: function(data){
 		info = data;
 	}});
-	console.log(info);
+	//console.log(info);
 	return info;
 		
 }

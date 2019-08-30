@@ -38,8 +38,8 @@ def config(fileName, boardName):
 	boardType = component['type']
 	
 	schema = h.readSchema(boardType + ".schema")
-	
-	return render_template('config.html', pageName='Data', component = d['components'][index], schema = schema, flag= 0, schemaChoices = {}, boardName = boardName, fileName= fileName)
+	generalSchema = h.readGeneral()	
+	return render_template('config.html', pageName='Data', component = d['components'][index], schema = schema, flag= 0, schemaChoices = {}, boardName = boardName, fileName= fileName, generalSchema= generalSchema)
 
 @config_blueprint.route("/<fileName>/<boardName>/removeBoard")
 def removeBoard(fileName, boardName):

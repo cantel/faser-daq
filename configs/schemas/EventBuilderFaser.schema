@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "title": "Component",
+    "title": "EventBuilderFaser",
     "properties": {
       "name": {
         "type": "string",
@@ -28,7 +28,8 @@
         "type": "string",
 	"default": "EventBuilderFaser",
 	"readOnly": true,
-	"propertyOrder": 4
+	"propertyOrder": 4,
+	"options": { "hidden": true }
       },
       "settings": {
         "type": "object",
@@ -51,52 +52,8 @@
 	},
 	"format":"grid",
 	"propertyOrder": 5
-      },
-      "connections": {
-        "type": "object",
-        "title": "Connections",
-        "properties": {
-          "receivers": { 
-            "type": "array", 
-            "format": "table",
-            "title": "Receivers",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": ["pair", "pubsub"]
-                },
-                "chid": {"type":"integer"},
-                "host": {"type":"string"},
-                "port": {"type":"integer"}
-              }
-            }
-          },
-          "senders": { 
-            "type": "array", 
-            "format": "table",
-            "title": "Senders",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type":"string",
-                  "enum": ["pair", "pubsub"]
-                },
-                "chid": {"type":"integer"},
-                "host": {"type":"string"},
-                "port": {"type":"integer"}
-              }
-            }
-          }
-        }
       }
-    },
-    "format":"grid",
-    "propertyOrder": 6
+    }
 }
 
 

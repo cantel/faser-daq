@@ -17,11 +17,11 @@ function displaySchemaOptions(generalSchema, schemas){
 	var u1 = document.createElement("u1");
 	u1.className = "dropdown-menu";
 	schemaBar.appendChild(u1);
-
+    //console.log(schemas);
 	for(var i = 0; i < Object.keys(schemas.schemaChoices).length; i++){
 		var li = document.createElement("li");
 		//li.className = "nav-item";
-
+	    //console.log(i);
 		var a = document.createElement("a");
 		//a.className = "nav-link";
 		a.href = "#schema choice";
@@ -97,7 +97,8 @@ function improveSchema(generalSchema, schema){
 	//improvedSchema.properties.host = schema.properties.host;
 	improvedSchema.properties.type = schema.properties.type;
 	improvedSchema.properties.settings = schema.properties.settings;
-	
+        improvedSchema.title = schema.title;
+        improvedSchema.required = improvedSchema.required + ["components"];
 	//console.log("the improved schema: ",improvedSchema);
 	return improvedSchema;
 }

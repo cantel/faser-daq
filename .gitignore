@@ -3,3 +3,4 @@ build
 */**/*.swp
 .vscode
 *.code-workspace
+__pycache__

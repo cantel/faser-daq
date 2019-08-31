@@ -25,6 +25,7 @@
         "type": "object",
 	"format":"grid",
         "title": "Component",
+	"options": { "disable_collapse": true },
         "properties": {
           "name": {
             "type": "string"
@@ -39,7 +40,7 @@
 		"default": 0,
 		"minimum": 1024,
 	        "maximum": 65535,
-		"propertyOrder":2
+		"propertyOrder":3
           },
           "type": {
             "type": "string"
@@ -47,6 +48,8 @@
           "loglevel": {
             "type": "object",
             "title": "Log Levels",
+	    "format":"grid",
+            "propertyOrder": 6,
             "properties": {
               "core": {
                 "type": "string",
@@ -66,6 +69,7 @@
           "connections": {
             "type": "object",
             "title": "Connections",
+            "propertyOrder": 100,
             "properties": {
               "receivers": { 
                 "type": "array", 
@@ -73,85 +77,130 @@
                 "title": "Receivers",
                 "uniqueItems": true,
                 "items": {
-                  "type": "object",
-                  "if": {
-                    "properties": {"transport":{"const":"tcp"}}
-                  },
-                  "then": {
-                    "properties": {
-                      "type": {
-                        "type": "string",
-                        "enum": ["pair", "pubsub"]
-                      },
-                      "chid": {"type":"integer"},
-                      "host": 
-			{"type":"string",
-			 "format":"host"
+                    "type": "object",
+		    "options": {
+			"disable_collapse": true
+		    },
+		    "oneOf": [
+			{
+			    "title": "TCP",
+			    "type": "object",
+			    "format": "grid",
+			    "properties": {
+				"transport": {
+				    "type": "string",
+				    "enum":["tcp"],
+				    "options": {
+					"hidden": true
+				    }
+				},
+				"type": {
+				    "type":"string",
+                              "enum": ["pair", "pubsub"]
+				},
+				"chid": {"type":"integer"},
+				"host": {
+                                    "type":"string",
+                                    "format": "host"
+				},
+				"port": {"type":"integer"}
+			    },
+			    "required": ["transport","type", "chid", "host", "port"],
+			    "additionalProperties": false
 			},
-                      "port": {"type":"integer"}
-                    },
-                    "required": ["type", "chid", "host", "port"]
-                  },
-                  "if": {
-                    "properties": {"transport":{"const":"ipc"}}
-                  },
-                  "then": {
-                    "properties": {
-                      "type": {
-                        "type": "string",
-                        "enum": ["pair", "pubsub"]
-                      },
-                      "chid": {"type":"integer"},
-                      "path": {"type":"string"}
-                    },
-                    "required": ["type", "chid", "path"]
-                  },
-                  "required": ["transport"]
-                }
-              },
+			{
+			    "title": "IPC",
+			    "type": "object",
+			    "format": "grid",
+			    "properties": {
+				"transport": {
+				    "type": "string",
+				    "enum":["ipc"],
+				    "options": {
+					"hidden": true
+				    }
+				},
+				"type": {
+				    "type":"string",
+				    "enum": ["pair", "pubsub"]
+				},
+				"chid": {"type":"integer"},
+				"path": {"type":"string"}
+			    },
+			    "required": ["transport","type", "chid", "path"],
+			    "additionalProperties": false
+			}
+		    ]
+		}
+	      },
               "senders": { 
                 "type": "array", 
                 "format": "table",
                 "title": "Senders",
                 "uniqueItems": true,
                 "items": {
-                  "type": "object",
-                  "if": {
-                    "properties": {"transport":{"const":"tcp"}}
-                  },
-                  "then": {
-                    "properties": {
-                      "type": {
-                        "type":"string",
-                        "enum": ["pair", "pubsub"]
-                      },
-                      "chid": {"type":"integer"},
-                      "host": 
+                    "type": "object",
+		    "options": {
+			"disable_collapse": true
+		    },
+		    "oneOf": [
 			{
-				"type":"string",
-				"format": "host"
+			    "title": "TCP",
+			    "type": "object",
+			    "format": "grid",
+			    "properties": {
+				"transport": {
+				    "type": "string",
+				    "enum":["tcp"],
+				    "options": {
+					"hidden": true
+				    }
+				},
+				"type": {
+				    "type":"string",
+                              "enum": ["pair", "pubsub"]
+				},
+				"chid": {"type":"integer"},
+				"host": {
+                                    "type":"string",
+                                    "format": "host"
+				},
+				"port": {"type":"integer"}
+			    },
+			    "required": ["transport","type", "chid", "host", "port"],
+			    "additionalProperties": false,
+			    "options": {
+				"disable_collapse": true
+			    }
 			},
-                      "port": {"type":"integer"}
-                    },
-                    "required": ["type", "chid", "host", "port"]
-                  },
-                  "if": {
-                    "properties": {"transport":{"const":"ipc"}}
-                  },
-                  "then": {
-                    "properties": {
-                      "type": {
-                        "type": "string",
-                        "enum": ["pair", "pubsub"]
-                      },
-                      "chid": {"type":"integer"},
-                      "path": {"type":"string"}
-                    },
-                    "required": ["type", "chid", "path"]
-                  },
-                  "required": ["transport"]
-                }
-              }
+			{
+			    "title": "IPC",
+			    "type": "object",
+			    "format": "grid",
+			    "properties": {
+				"transport": {
+				    "type": "string",
+				    "enum":["ipc"],
+				    "options": {
+					"hidden": true
+				    }
+				},
+				"type": {
+				    "type":"string",
+				    "enum": ["pair", "pubsub"]
+				},
+				"chid": {"type":"integer"},
+				"path": {"type":"string"}
+			    },
+			    "required": ["transport","type", "chid", "path"],
+			    "additionalProperties": false,
+			    "options": {
+				"disable_collapse": true
+			    }
+			}
+		    ]
+		}
+	      }
             }
           }
         },

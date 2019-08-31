@@ -13,7 +13,7 @@ with open(file_name) as infile:
         data = json.load(infile)
 
 for histobj in data:
-
+    print(histobj)
     print("drawing ", histobj["name"])
 
     x = histobj["x"]

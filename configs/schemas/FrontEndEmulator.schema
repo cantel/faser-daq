@@ -1,6 +1,6 @@
 {
     "type": "object",
-    "title": "Component",
+    "title": "FrontEndEmulator",
     "properties": {
       "name": {
         "type": "string",
@@ -27,7 +27,8 @@
         "type": "string",
 	"default": "FrontEndEmulator",
 	"readOnly": true,
-	"propertyOrder": 4
+	"propertyOrder": 4,
+	"options": { "hidden": true }
       },
       "settings": {
         "type": "object",
@@ -67,6 +68,7 @@
 	  },
 	  "probMissingTrigger": {
 	    "type": "number",
+	    "title": "P(Miss Trig.)",
 	    "default": 0,
 	    "minimum": 0,
 	    "maximum": 1,
@@ -77,6 +79,7 @@
              }
 	  },
 	  "probMissingFragment": {
+	    "title": "P(Miss Frag.)",
 	    "type": "number",
 	    "default": 0,
 	    "minimum": 0,
@@ -88,6 +91,7 @@
              }
 	  },
 	  "probCorruptedFragment": {
+	    "title": "P(Corrupt Frag.)",
 	    "type": "number",
 	    "default": 0,
 	    "minimum": 0,
@@ -135,54 +139,11 @@
    			 "infoText": "Port for sending data fragments"
  		 }
            }
-	}, "format":"grid",
-		"propertyOrder": 5
-      },
-      "connections": {
-        "type": "object",
-        "title": "Connections",
-        "properties": {
-          "receivers": { 
-            "type": "array", 
-            "format": "table",
-            "title": "Receivers",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": ["pair", "pubsub"]
-                },
-                "chid": {"type":"integer"},
-                "host": {"type":"string"},
-                "port": {"type":"integer"}
-              }
-            }
-          },
-          "senders": { 
-            "type": "array", 
-            "format": "table",
-            "title": "Senders",
-            "uniqueItems": true,
-            "items": {
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type":"string",
-                  "enum": ["pair", "pubsub"]
-                },
-                "chid": {"type":"integer"},
-                "host": {"type":"host"},
-                "port": {"type":"integer"}
-              }
-            }
-          }
-        }
+	},
+	"format":"grid",
+	"propertyOrder": 5
       }
-    },
-    "format": "grid",
-     "propertyOrder": 6
+    }
 }
 
 

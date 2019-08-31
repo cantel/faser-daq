@@ -68,14 +68,14 @@
 				var flag = '{{ flag }}';
 				var schemas = JSON.parse('{{ schemaChoices | tojson | safe}}');
 				var schema = JSON.parse('{{ schema | tojson | safe }}');
-				//console.log(schema);
+				//console.log(schemas);
 				var value = JSON.parse('{{ component | tojson | safe }}');
 				var editor;
 				var generalSchema = JSON.parse('{{ generalSchema | tojson | safe}}'); 
 
 				JSONEditor.defaults.options.required_by_default = true;
 				JSONEditor.defaults.options.disable_edit_json = true;	
-				//JSONEditor.defaults.options.disable_properties = true;
+				JSONEditor.defaults.options.disable_properties = true;
 				JSONEditor.defaults.options.show_errors = "always";
 				JSONEditor.defaults.options.compact = true;
 					
@@ -98,7 +98,7 @@
 						alert("The schema does not exist or does't have the right format");
 					}	
 					else{
-						console.log("this is the schema in config:", schema);
+						//console.log("this is the schema in config:", schema);
 						improvedSchema = improveSchema(generalSchema, schema);
 						loadSchema(/*generalSchema*/improvedSchema/*schema*/, value);
 						//console.log(schema);
@@ -113,7 +113,7 @@
 				setInterval(function(){disableConfigWindow();}, 500);
 				////*******************************   functions that will be using editor as a global variable  *****************************////
 				function loadSchema(schema, value){
-					console.log(schema);
+					//console.log(schema);
 					var element = document.getElementById('editor-holder');
 					//JSONEditor.defaults.editors.object.options.hidden = true;
 					//JSONEditor.defaults.editors.object.options.disable_edit_json = true;	

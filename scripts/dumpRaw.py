@@ -28,33 +28,56 @@ class BinaryReader:
 
 class EventHeader:
     def __init__(self,rh):
-        vals=rh.readStruct("422484")
+        vals=rh.readStruct("112224138228")
         if vals:
-            self.event_id=vals[0]
-            self.bc_id=vals[1]
-            self.num_fragments=vals[2]
-            self.status=vals[3]
-            self.timestamp=vals[4]
-            self.data_size=vals[5]
+            self.marker=vals[0]
+            self.event_tag=vals[1]
+            self.trigger_bits=vals[2]
+            self.version_number=vals[3]
+            self.header_size=vals[4]
+            self.payload_size=vals[5]
+            self.fragment_count=vals[6]
+            self.run_number=vals[7]
+            self.event_id=vals[8]
+            self.bc_id=vals[9]
+            self.status=vals[10]
+            self.timestamp=vals[11]
         else:
             raise Exception("End of file")
+        if self.marker!=0xBB:
+            raise Exception("Wrong Event Marker")
+        if self.version_number!=0x0001:
+            raise Exception("Wrong Event Format Version")
+        if self.header_size!=4*9:
+            raise Exception("Wrong header size")
     def __str__(self):
-        return "Event %6d, BC %4d (%s) - status: 0x%08x, %2d fragments, %5d bytes" % (self.event_id,self.bc_id,time.ctime(self.timestamp/1000000),self.status,self.num_fragments,self.data_size)
+        return "Run %6d, Event %6d, BC %4d (%s) - status: 0x%08x, tag: %2d, trigger: 0x%04x, %2d fragments, %5d bytes" % (self.run_number,self.event_id,self.bc_id,time.ctime(self.timestamp/1000000),self.status,self.event_tag,self.trigger_bits,self.fragment_count,self.payload_size)
 
 class FragmentHeader:
     def __init__(self,rh):
-        vals=rh.readStruct("442248")
+        vals=rh.readStruct("11222448228")
         if vals:
-            self.event_id=vals[0]
-            self.source_id=vals[1]
-            self.bc_id=vals[2]
-            self.payload_size=vals[3]
-            self.status=vals[4]
-            self.timestamp=vals[5]
+            self.marker=vals[0]
+            self.event_tag=vals[1]
+            self.trigger_bits=vals[2]
+            self.version_number=vals[3]
+            self.header_size=vals[4]
+            self.payload_size=vals[5]
+            self.source_id=vals[6]
+            self.event_id=vals[7]
+            self.bc_id=vals[8]
+            self.status=vals[9]
+            self.timestamp=vals[10]
         else:
             raise Exception("End of file")
+        if self.marker!=0xAA:
+            raise Exception("Wrong Fragment Marker")
+        if self.version_number!=0x0001:
+            raise Exception("Wrong Event Format Version")
+        if self.header_size!=4*9:
+            raise Exception("Wrong header size")
     def __str__(self):
-        return "Fragment 0x%08x (Event %6d, BC %4d, %s) - status: 0x%08x, %5d bytes" % (self.source_id,self.event_id,self.bc_id,time.ctime(self.timestamp/1000000),self.status,self.payload_size)
+        return "Fragment 0x%08x (Event %6d, BC %4d, %s) - status: 0x%08x, tag: %2d, trigger: 0x%04x, %5d bytes" % (self.source_id,self.event_id,self.bc_id,time.ctime(self.timestamp/1000000),self.status,self.event_tag,self.trigger_bits,self.payload_size)
    
 def main(args):
     dumpFrag=False
@@ -70,7 +93,7 @@ def main(args):
             event=EventHeader(rh)
             print(event)
             if dumpFrag:
-                for ii in range(event.num_fragments):
+                for ii in range(event.fragment_count):
                     frag=FragmentHeader(rh)
                     print(" - "+str(frag))
                     data=rh.readWords(frag.payload_size//4)
@@ -79,9 +102,10 @@ def main(args):
                             hexData=["    %08x" % val for val in data[ii:ii+4]]
                             print("".join(hexData))
             else:
-                rh.readWords(event.data_size//4)
-    except:
-        pass
+                rh.readWords(event.payload_size//4)
+    except Exception as inst:
+        if str(inst)!="End of file":
+            print(inst)
     
 main(sys.argv[1:])
 

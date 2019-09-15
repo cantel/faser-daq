@@ -1,0 +1,624 @@
+{
+  "version": 6,
+  "group": "faser",
+  "components": [
+    {
+      "name": "triggergenerator",
+      "host": "epdtdi01",
+      "port": 5540,
+      "type": "TriggerGenerator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "rateInHz": 500,
+        "frontendApps": [
+          {
+            "host": "epdtdi01",
+            "port": 17001
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17002
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17003
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17004
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17005
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17006
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17007
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17008
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17009
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17010
+          },
+          {
+            "host": "epdtdi01",
+            "port": 17011
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendemulator01",
+      "host": "epdtdi01",
+      "port": 5501,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 25,
+        "rmsSize": 0,
+        "fragmentID": 1000001,
+        "probMissingTrigger": 0.00,
+        "probMissingFragment": 0.00,
+        "probCorruptedFragment": 0.00,
+        "triggerPort": 17001,
+        "daqHost": "epdtdi101",
+        "daqPort": 18001
+      }
+    },
+    {
+      "name": "frontendemulator02",
+      "host": "epdtdi01",
+      "port": 5502,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000002,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17002,
+        "daqHost": "epdtdi101",
+        "daqPort": 18002
+      }
+    },
+    {
+      "name": "frontendemulator03",
+      "host": "epdtdi01",
+      "port": 5503,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000003,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17003,
+        "daqHost": "epdtdi101",
+        "daqPort": 18003
+      }
+    },
+    {
+      "name": "frontendemulator04",
+      "host": "epdtdi01",
+      "port": 5504,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000004,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17004,
+        "daqHost": "epdtdi101",
+        "daqPort": 18004
+      }
+    },
+    {
+      "name": "frontendemulator05",
+      "host": "epdtdi01",
+      "port": 5505,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+     "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000005,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17005,
+        "daqHost": "epdtdi101",
+        "daqPort": 18005
+      }
+    },
+    {
+      "name": "frontendemulator06",
+      "host": "epdtdi01",
+      "port": 5506,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000006,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17006,
+        "daqHost": "epdtdi101",
+        "daqPort": 18006
+      }
+    },
+    {
+      "name": "frontendemulator07",
+      "host": "epdtdi01",
+      "port": 5507,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000007,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17007,
+        "daqHost": "epdtdi101",
+        "daqPort": 18007
+      }
+    },
+    {
+      "name": "frontendemulator08",
+      "host": "epdtdi01",
+      "port": 5508,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000008,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17008,
+        "daqHost": "epdtdi101",
+        "daqPort": 18008
+      }
+    },
+    {
+      "name": "frontendemulator09",
+      "host": "epdtdi01",
+      "port": 5509,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000009,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17009,
+        "daqHost": "epdtdi101",
+        "daqPort": 18009
+      }
+    },
+    {
+      "name": "frontendemulator10",
+      "host": "epdtdi01",
+      "port": 5510,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000010,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17010,
+        "daqHost": "epdtdi101",
+        "daqPort": 18010
+      }
+    },
+    {
+      "name": "frontendemulator11",
+      "host": "epdtdi01",
+      "port": 5511,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 15000,
+        "rmsSize": 20,
+        "fragmentID": 1000011,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+        "triggerPort": 17011,
+        "daqHost": "epdtdi101",
+        "daqPort": 18011
+      }
+    },
+
+
+
+
+    {
+      "name": "frontendreceiver01",
+      "host": "epdtdi101",
+      "port": 5601,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18001
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8101
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver02",
+      "host": "epdtdi101",
+      "port": 5602,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18002
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8102
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver03",
+      "host": "epdtdi101",
+      "port": 5603,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18003
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver04",
+      "host": "epdtdi101",
+      "port": 5604,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18004
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8104
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver05",
+      "host": "epdtdi101",
+      "port": 5605,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18005
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8105
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver06",
+      "host": "epdtdi101",
+      "port": 5606,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18006
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8106
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver07",
+      "host": "epdtdi101",
+      "port": 5607,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18007
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8107
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver08",
+      "host": "epdtdi101",
+      "port": 5608,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18008
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8108
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver09",
+      "host": "epdtdi101",
+      "port": 5609,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18009
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8109
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver10",
+      "host": "epdtdi101",
+      "port": 5610,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18010
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8110
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver11",
+      "host": "epdtdi101",
+      "port": 5611,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18011
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8111
+          }
+        ]
+      }
+    },
+
+
+
+
+
+
+
+    {
+      "name": "eventbuilder01",
+      "host": "epdtdi101",
+      "port": 6001,
+      "type": "EventBuilderFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {},
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8101
+          },
+          {
+            "type": "pair",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8102
+          },
+          {
+            "type": "pair",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8103
+          },
+          {
+            "type": "pair",
+            "chid": 4,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8104
+          },
+          {
+            "type": "pair",
+            "chid": 5,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8105
+          },
+          {
+            "type": "pair",
+            "chid": 6,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8106
+          },
+          {
+            "type": "pair",
+            "chid": 7,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8107
+          },
+          {
+            "type": "pair",
+            "chid": 8,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8108
+          },
+          {
+            "type": "pair",
+            "chid": 9,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8109
+          },
+          {
+            "type": "pair",
+            "chid": 10,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8110
+          },
+          {
+            "type": "pair",
+            "chid": 11,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8111
+          }
+        ],
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 12,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8112
+          }
+        ]
+      }
+    },
+
+
+    
+    {
+      "name": "filedatawriter01",
+      "host": "epdtdi101",
+      "port": 7001,
+      "type": "FileDataWriter",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "filename_pattern": "/tmp/test-%D.%n.%c.bin"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "epdtdi101",
+            "port": 8112
+          }
+        ]
+      }
+    }
+  ]
+}

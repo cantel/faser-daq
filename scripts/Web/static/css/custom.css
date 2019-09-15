@@ -1,0 +1,235 @@
+/* remove rounding from cards, buttons and inputs */
+.btn { background-color:#736AFF; color:#FFFFFF; border-radius: 8px; }
+
+.div{ background-color: #736AFF;}
+
+.row{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+} 
+
+
+
+.div{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+
+
+.tr{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+ 
+
+.tbody{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+
+.table{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+
+.row-fluid{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+
+
+.span{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+}
+[data-schemapath='root.name'] input {
+ 
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+
+  
+}
+
+[data-schemapath='root.type'] input {
+
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+
+  
+}
+
+label {
+    margin-bottom: .0
+}
+[data-schemapath='root.host'] input{ 
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+
+  
+}
+
+[data-schemapath='root.port'] input{ 
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+
+  
+}
+
+.class {
+margin-bottom: 0;
+}
+
+.table td, .table th { 
+    border: none !important; 
+}
+
+.table > tbody > tr > td {
+    border-top: none;
+}
+
+
+.h1, .h2, .h3, h1, h2, h3 {
+    margin-top: 0px;
+    margin-bottom: 0px
+}
+
+
+.h4, .h5, .h6, h4, h5, h6{
+    margin-top: 0px;
+    margin-bottom: 0px
+}
+
+.h1,h1 {
+    font-size: 28px
+}
+
+.h2,h2 {
+    font-size: 24px
+}
+
+.h3,h3 {
+    font-size: 20px
+}
+
+
+.column{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 1px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 1px;
+  padding-top: 0px;
+}
+
+
+
+.form-control{
+  margin-right: 0px;
+  margin-left: 0px;
+  margin-bottom: 0px;
+  margin-top: 0px;
+
+
+  padding-right: 0px;
+  padding-left: 0px;
+  padding-bottom: 0px;
+  padding-top: 0px;
+
+  
+}

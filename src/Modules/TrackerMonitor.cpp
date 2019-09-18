@@ -65,14 +65,14 @@ void TrackerMonitor::runner() {
 
       uint32_t fragmentStatus = fragmentHeader->status;
       fragmentStatus |= dataStatus;
-      fill_error_status( "h_fragmenterrors", fragmentStatus );
-      fill_error_status( fragmentStatus );
+      fill_error_status_to_metric( fragmentStatus );
       
       if (fragmentStatus & MissingFragment ) continue; // go no further
 
       uint16_t payloadSize = fragmentHeader->payload_size; 
 
-      m_hist_map.fillHist( "h_payloadsize", payloadSize);
+      //m_hist_map["payload_size"](payloadSize);
+      m_histogrammanager->fill("tracker_payloadsize", payloadSize);
       m_metric_payload = payloadSize;
   }
 
@@ -80,20 +80,15 @@ void TrackerMonitor::runner() {
 
 }
 
-void TrackerMonitor::initialize_hists() {
+void TrackerMonitor::register_hists() {
 
-  INFO( __MODULEMETHOD_NAME__ << " ... initializing ... " );
+  INFO( __MODULEMETHOD_NAME__ << " ... registering histograms in TrackerMonitor ... " );
 
   // TRACKER histograms
+  m_histogrammanager->registerHistogram<short unsigned int>("tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
+  //m_hist_map["payload_size"] = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
 
-  RegularHist h_payloadsize = {"h_payloadsize","payload size [bytes]"};
-  h_payloadsize.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
-  m_hist_map.addHist(h_payloadsize.name, h_payloadsize);
-
-  CategoryHist h_fragmenterrors = { "h_fragmenterrors", "error type" };
-  h_fragmenterrors.object = make_histogram(m_axis_fragmenterrors);
-  m_hist_map.addHist(h_fragmenterrors.name, h_fragmenterrors);
-
+  INFO( __MODULEMETHOD_NAME__ << " ... done registering histograms ... " );
   return ;
 
 }

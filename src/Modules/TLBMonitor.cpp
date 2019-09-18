@@ -66,14 +66,15 @@ void TLBMonitor::runner() {
 
       uint32_t fragmentStatus = fragmentHeader->status;
       fragmentStatus |= dataStatus;
-      fill_error_status( "h_fragmenterrors", fragmentStatus );
-      fill_error_status( fragmentStatus );
+      fill_error_status_to_metric( fragmentStatus );
+      fill_error_status_to_histogram( fragmentStatus, "tlb_errorcount" );
       
       if (fragmentStatus & MissingFragment ) continue; // go no further
 
       uint16_t payloadSize = fragmentHeader->payload_size; 
 
-      m_hist_map.fillHist( "h_payloadsize", payloadSize);
+      std::cout<<"TLBMonitor: filling payload histogram"<<std::endl;
+      m_histogrammanager->fill("tlb_payloadsize", payloadSize);
       m_metric_payload = payloadSize;
   }
 
@@ -81,17 +82,20 @@ void TLBMonitor::runner() {
 
 }
 
-void TLBMonitor::initialize_hists() {
+void TLBMonitor::register_hists() {
 
-  RegularHist h_payloadsize = {"h_payloadsize","payload size [bytes]"};
-  h_payloadsize.object = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
-  m_hist_map.addHist(h_payloadsize.name, h_payloadsize);
+  INFO( __MODULEMETHOD_NAME__ << " ... registering histograms in TLBMonitor ... " );
 
-  CategoryHist h_fragmenterrors = { "h_fragmenterrors", "error type" };
-  h_fragmenterrors.object = make_histogram(m_axis_fragmenterrors);
-  m_hist_map.addHist(h_fragmenterrors.name, h_fragmenterrors);
+  m_histogrammanager->registerHistogram<short unsigned int>("tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
+  std::cout<<"done registering tlb_payloadsize"<<std::endl;
+  std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
+  m_histogrammanager->registerHistogram<const char *>("tlb_errorcount", "error type", categories, 5. );
+  std::cout<<"done registering tlb_errorcount"<<std::endl;
+  //m_hist_map["payload_size"] = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
 
-  return ;
+  INFO( __MODULEMETHOD_NAME__ << " ... done registering histograms ... " );
+  return;
+
 }
 
 void TLBMonitor::register_metrics() {

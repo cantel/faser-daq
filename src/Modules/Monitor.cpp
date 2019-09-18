@@ -4,17 +4,15 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
+#include "Modules/Monitor.hpp"
+#include "Core/Statistics.hpp"
 #include <map>
-#include <boost/format.hpp>
-#include <boost/histogram/ostream.hpp> // write histogram straight to ostream
 #include <iostream> // std::flush
 #include <sstream> // std::ostringstream
 #include <fstream>      // std::ofstream
 
 using namespace boost::histogram;
 
-#include "Modules/Monitor.hpp"
-#include "Core/Statistics.hpp"
 
 #define __MODULEMETHOD_NAME__ daqling::utilities::methodName(__PRETTY_FUNCTION__)
 #define __MODULECLASS_NAME__ daqling::utilities::className(__PRETTY_FUNCTION__)
@@ -25,6 +23,11 @@ extern "C" void destroy_object(Monitor *object) { delete object; }
 
 Monitor::Monitor() { 
    INFO("Monitor::Monitor");
+   
+   m_histogramming_on = false;
+   bool ok = setupHistogramManager();
+   //if (m_histogramming_on ) m_histogrammanager->start();
+
  }
 
 Monitor::~Monitor() { 
@@ -35,8 +38,10 @@ void Monitor::start() {
   DAQProcess::start();
   INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
 
-  initialize_hists();
+  //std::this_thread::sleep_for(std::chrono::seconds(15));
+
   register_metrics();
+  register_hists();
 
 }
 
@@ -44,7 +49,9 @@ void Monitor::stop() {
   DAQProcess::stop();
 
   INFO( __MODULEMETHOD_NAME__ << " ... finalizing ... " );
-  write_hists_to_json( m_hist_map );
+  //write_hists_to_json( m_reghist_map );
+  //write_hists_to_json( m_cathist_map );
+  //write_hists_to_json( m_graph_map );
 
   INFO(__MODULEMETHOD_NAME__ << " getState: " << this->getState());
 }
@@ -62,16 +69,15 @@ void Monitor::runner() {
 
 }
 
-void Monitor::initialize_hists() {
-
-  INFO( __MODULEMETHOD_NAME__ << " ... initializing ... " );
-  return;
-
-}
-
 void Monitor::register_metrics() {
 
  INFO( __MODULEMETHOD_NAME__ << " ... registering metrics in base Monitor class ... " );
+
+}
+
+void Monitor::register_hists() {
+
+ INFO( __MODULEMETHOD_NAME__ << " ... registering histograms in base Monitor class ... " );
 
 }
 
@@ -126,7 +132,25 @@ uint16_t Monitor::unpack_data( daqling::utilities::Binary eventBuilderBinary, co
 	return dataStatus;
 }
 
-void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
+bool Monitor::setupHistogramManager() {
+
+  //m_hists_context = std::make_unique<zmq::context_t>(ioT);
+  //m_stats_socket = std::make_unique<zmq::socket_t>(*(m_stats_context.get()), ZMQ_PUB);
+  //m_hists_socket->bind()
+
+  //m_histogrammanager = std::make_unique<HistogramManager>(m_connections.getStatSocket());
+  m_histogrammanager = std::make_unique<HistogramManager>(500);
+  m_histogrammanager->start();
+  //m_histogrammanager->setZMQpublishing(true);
+ 
+  m_histogramming_on = true;
+
+ return true;
+
+}
+
+/*
+void Monitor::fill_error_status(Hist<categoryhist_t> &hist,  uint32_t fragmentStatus ) {
 
   if ( fragmentStatus == 0 ) hist.object( "Ok");
   else {
@@ -148,25 +172,25 @@ void Monitor::fill_error_status(CategoryHist &hist,  uint32_t fragmentStatus ) {
 
 void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus ) {
 
-  if ( fragmentStatus == 0 ) m_hist_map.fillHist(hist_name, "Ok");
+  if ( fragmentStatus == 0 ) m_cathist_map.fillHist(hist_name, "Ok");
   else {
-     if ( fragmentStatus  &  UnclassifiedError ) m_hist_map.fillHist( hist_name, "Unclassified");
-     if ( fragmentStatus  &  BCIDMismatch ) m_hist_map.fillHist( hist_name, "BCIDMismatch");
-     if ( fragmentStatus  &  TagMismatch ) m_hist_map.fillHist( hist_name, "TagMismatch");
-     if ( fragmentStatus  &  Timeout ) m_hist_map.fillHist( hist_name, "Timeout");
-     if ( fragmentStatus  &  Overflow ) m_hist_map.fillHist( hist_name, "Overflow");
-     if ( fragmentStatus  &  CorruptedFragment ) m_hist_map.fillHist( hist_name, "Corrupted");
-     if ( fragmentStatus  &  DummyFragment ) m_hist_map.fillHist( hist_name, "Dummy");
-     if ( fragmentStatus  &  MissingFragment ) m_hist_map.fillHist( hist_name, "Missing");
-     if ( fragmentStatus  &  EmptyFragment ) m_hist_map.fillHist( hist_name, "Empty");
-     if ( fragmentStatus  &  DuplicateFragment ) m_hist_map.fillHist( hist_name, "Duplicate");
+     if ( fragmentStatus  &  UnclassifiedError ) m_cathist_map.fillHist( hist_name, "Unclassified");
+     if ( fragmentStatus  &  BCIDMismatch ) m_cathist_map.fillHist( hist_name, "BCIDMismatch");
+     if ( fragmentStatus  &  TagMismatch ) m_cathist_map.fillHist( hist_name, "TagMismatch");
+     if ( fragmentStatus  &  Timeout ) m_cathist_map.fillHist( hist_name, "Timeout");
+     if ( fragmentStatus  &  Overflow ) m_cathist_map.fillHist( hist_name, "Overflow");
+     if ( fragmentStatus  &  CorruptedFragment ) m_cathist_map.fillHist( hist_name, "Corrupted");
+     if ( fragmentStatus  &  DummyFragment ) m_cathist_map.fillHist( hist_name, "Dummy");
+     if ( fragmentStatus  &  MissingFragment ) m_cathist_map.fillHist( hist_name, "Missing");
+     if ( fragmentStatus  &  EmptyFragment ) m_cathist_map.fillHist( hist_name, "Empty");
+     if ( fragmentStatus  &  DuplicateFragment ) m_cathist_map.fillHist( hist_name, "Duplicate");
   }
   
   return ;
 
-}
+}*/
 
-void Monitor::fill_error_status( uint32_t fragmentStatus ) {
+void Monitor::fill_error_status_to_metric( uint32_t fragmentStatus ) {
 
   std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
   if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
@@ -187,6 +211,28 @@ void Monitor::fill_error_status( uint32_t fragmentStatus ) {
 
 }
 
+void Monitor::fill_error_status_to_histogram( uint32_t fragmentStatus, std::string hist_name ) {
+
+  std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
+  if ( fragmentStatus == 0 ) m_histogrammanager->fill(hist_name, "Ok");
+  else {
+      if ( fragmentStatus  &  UnclassifiedError ) m_histogrammanager->fill(hist_name, "Unclassified");
+      if ( fragmentStatus  &  BCIDMismatch ) m_histogrammanager->fill(hist_name, "BCIDMismatch");
+      if ( fragmentStatus  &  TagMismatch ) m_histogrammanager->fill(hist_name, "TagMismatch");
+      if ( fragmentStatus  &  Timeout ) m_histogrammanager->fill(hist_name, "Timeout");
+      if ( fragmentStatus  &  Overflow ) m_histogrammanager->fill(hist_name, "Overflow");
+      if ( fragmentStatus  &  CorruptedFragment ) m_histogrammanager->fill(hist_name, "CorruptedFragment");
+      if ( fragmentStatus  &  DummyFragment ) m_histogrammanager->fill(hist_name, "Dummy");
+      if ( fragmentStatus  &  MissingFragment ) m_histogrammanager->fill(hist_name, "Missing");
+      if ( fragmentStatus  &  EmptyFragment ) m_histogrammanager->fill(hist_name, "Empty");
+      if ( fragmentStatus  &  DuplicateFragment ) m_histogrammanager->fill(hist_name, "Duplicate");
+  }
+  
+  return ;
+
+}
+
+/*
 template <typename T>
 void Monitor::flush_hist( T histStruct, bool coverage_all ) {
 
@@ -203,7 +249,7 @@ void Monitor::flush_hist( T histStruct, bool coverage_all ) {
   }
 }
 
-void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
+void Monitor::flush_hist( Hist<categoryhist_t> histStruct, bool coverage_all ) {
 
   INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
   INFO(__MODULEMETHOD_NAME__ << " hist axis is of type category; hist has no under/overflow bins. ");
@@ -222,7 +268,7 @@ void Monitor::flush_hist( CategoryHist histStruct, bool coverage_all ) {
 
 }
 
-void Monitor::flush_hist( Graph histStruct, bool coverage_all ) {
+void Monitor::flush_hist( Hist<graph_t> histStruct, bool coverage_all ) {
 
   INFO(__MODULEMETHOD_NAME__ << " flushing hist info for "<<histStruct.name);
   
@@ -307,7 +353,7 @@ void Monitor::add_hist_to_json( T histStruct, json &jsonArray, bool coverage_all
   return ;
 }
 
-void Monitor::add_hist_to_json( CategoryHist histStruct, json &jsonArray, bool coverage_all ) {
+void Monitor::add_hist_to_json( Hist<categoryhist_t> histStruct, json &jsonArray, bool coverage_all ) {
 
   auto hist = histStruct.getObject();
   
@@ -342,7 +388,7 @@ void Monitor::add_hist_to_json( CategoryHist histStruct, json &jsonArray, bool c
   return ;
 }
 
-void Monitor::add_hist_to_json( Graph graphStruct, json &jsonArray, bool coverage_all ) {
+void Monitor::add_hist_to_json( Hist<graph_t> graphStruct, json &jsonArray, bool coverage_all ) {
 
   json graph = json::object();
   graph["name"] = graphStruct.name;
@@ -373,55 +419,24 @@ void Monitor::add_hist_to_json( Graph graphStruct, json &jsonArray, bool coverag
   return ;
 }
 
-void Monitor::write_hists_to_json( HistList hist_lists, bool coverage_all ) {
+template <typename T>
+void Monitor::write_hists_to_json( HistMap<T> hist_lists, bool coverage_all ) {
 
   json jsonArray = json::array();
 
-  for (auto hist : hist_lists.histlist ) {
-    add_hist_to_json( *hist, jsonArray, coverage_all );
-  }
-  for (auto hist : hist_lists.categoryhistlist ) {
-    add_hist_to_json( *hist, jsonArray, coverage_all );
-  }
-  for (auto hist : hist_lists.graphlist ) {
-    add_hist_to_json( *hist, jsonArray, coverage_all );
-  }
-
-  std::string full_output_path = m_outputdir + m_json_file_name;
-
-  INFO(__MODULEMETHOD_NAME__ << " writing monitoring information to " << full_output_path );
-  std::ofstream ofs( full_output_path );
- 
-  ofs << jsonArray.dump(4);
-  ofs.close();
-
-  return ;
-
-}
-
-void Monitor::write_hists_to_json( HistMaps hist_lists, bool coverage_all ) {
-
-  json jsonArray = json::array();
-
-  for (auto hist : hist_lists.reghistmap ) {
-	add_hist_to_json( hist.second, jsonArray, coverage_all );
-  }
-  for (auto hist : hist_lists.cathistmap ) {
-	add_hist_to_json( hist.second, jsonArray, coverage_all );
-  }
-  for (auto hist : hist_lists.graphmap ) {
+  for (auto hist : hist_lists.histmap ) {
 	add_hist_to_json( hist.second, jsonArray, coverage_all );
   }
 
   std::string full_output_path = m_outputdir + m_json_file_name;
 
   INFO(__MODULEMETHOD_NAME__ << " writing monitoring information to " << full_output_path );
-  std::ofstream ofs( full_output_path );
+  std::ofstream ofs( full_output_path, std::ios::out | std::ios::app );
  
   ofs << jsonArray.dump(4);
   ofs.close();
 
   return ;
 
-}
+}*/
 

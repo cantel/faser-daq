@@ -14,7 +14,7 @@ class TrackerMonitor : public Monitor {
 
  protected:
 
-  void initialize_hists( );
+  void register_hists( );
   void register_metrics();
 
 };

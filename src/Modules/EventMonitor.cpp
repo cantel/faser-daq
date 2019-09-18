@@ -54,7 +54,7 @@ void EventMonitor::runner() {
       if ( eventHeader->event_tag != PhysicsTag ) continue;
 
       uint32_t eventStatus = eventHeader->status;
-      fill_error_status( eventStatus );
+      fill_error_status_to_metric( eventStatus );
 
       uint16_t payloadSize = eventHeader->payload_size; 
       m_metric_payload = payloadSize;

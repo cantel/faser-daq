@@ -20,9 +20,13 @@ file(GLOB_RECURSE FRONTENDRECEIVER_SOURCES "FrontEndReceiver.cpp")
 add_library(frontendreceiver SHARED ${FRONTENDRECEIVER_SOURCES})
 target_link_libraries(frontendreceiver PUBLIC core utilities zmq)
 
+file(GLOB_RECURSE HISTOGRAMMANAGER_SOURCES "HistogramManager.cpp")
+add_library(histogrammanager SHARED ${HISTOGRAMMANAGER_SOURCES})
+target_link_libraries(histogrammanager PUBLIC core utilities zmq)
+
 file(GLOB_RECURSE MONITOR_SOURCES "Monitor.cpp")
 add_library(monitor SHARED ${MONITOR_SOURCES})
-target_link_libraries(monitor PUBLIC core utilities zmq)
+target_link_libraries(monitor PUBLIC core utilities zmq histogrammanager)
 
 file(GLOB_RECURSE EVENTMONITOR_SOURCES "EventMonitor.cpp")
 add_library(eventmonitor SHARED ${EVENTMONITOR_SOURCES})

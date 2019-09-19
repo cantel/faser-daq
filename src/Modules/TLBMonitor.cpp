@@ -73,7 +73,6 @@ void TLBMonitor::runner() {
 
       uint16_t payloadSize = fragmentHeader->payload_size; 
 
-      std::cout<<"TLBMonitor: filling payload histogram"<<std::endl;
       m_histogrammanager->fill("tlb_payloadsize", payloadSize);
       m_metric_payload = payloadSize;
   }
@@ -86,12 +85,9 @@ void TLBMonitor::register_hists() {
 
   INFO( __MODULEMETHOD_NAME__ << " ... registering histograms in TLBMonitor ... " );
 
-  m_histogrammanager->registerHistogram<short unsigned int>("tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
-  std::cout<<"done registering tlb_payloadsize"<<std::endl;
+  m_histogrammanager->registerHistogram("tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
-  m_histogrammanager->registerHistogram<const char *>("tlb_errorcount", "error type", categories, 5. );
-  std::cout<<"done registering tlb_errorcount"<<std::endl;
-  //m_hist_map["payload_size"] = make_histogram(axis::regular<>(275, -0.5, 545.5, "payload size"));
+  m_histogrammanager->registerHistogram("tlb_errorcount", "error type", categories, 5. );
 
   INFO( __MODULEMETHOD_NAME__ << " ... done registering histograms ... " );
   return;

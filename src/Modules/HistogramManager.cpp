@@ -53,7 +53,7 @@ void HistogramManager::publish( HistBase * h){
     msg<<h->publish();
     zmq::message_t message(msg.str().size());
     memcpy (message.data(), msg.str().data(), msg.str().size());
-    std::cout<<" MSG " << msg.str()<<std::endl;
+    std::cout<<"START_OF_MSG:" <<std::endl << msg.str()<<std::endl;
     //bool rc = m_hist_socket->send(message);
     //if(!rc)
     //  WARNING("Failed to publish hist: " << hist->name);

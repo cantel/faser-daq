@@ -192,7 +192,6 @@ void Monitor::fill_error_status(std::string hist_name, uint32_t fragmentStatus )
 
 void Monitor::fill_error_status_to_metric( uint32_t fragmentStatus ) {
 
-  std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
   if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
   else {
       if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified += 1;
@@ -213,7 +212,6 @@ void Monitor::fill_error_status_to_metric( uint32_t fragmentStatus ) {
 
 void Monitor::fill_error_status_to_histogram( uint32_t fragmentStatus, std::string hist_name ) {
 
-  std::cout<<"fragmentStatus = "<<fragmentStatus<<std::endl;
   if ( fragmentStatus == 0 ) m_histogrammanager->fill(hist_name, "Ok");
   else {
       if ( fragmentStatus  &  UnclassifiedError ) m_histogrammanager->fill(hist_name, "Unclassified");

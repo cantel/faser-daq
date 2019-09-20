@@ -88,7 +88,8 @@
 				});
 				/////////************************************ The schema options is displayed if the add button is clicked(depending on the flag) ***************************////////////
 				if(flag == 1){
-					displaySchemaOptions(generalSchema, schemas);
+				    displaySchemaOptions(generalSchema, schemas);
+				    loadButtons(flag, '{{ fileName }}' , 'dummy');
 					//console.log(schemas);	
 					//console.log(flag);
 				}

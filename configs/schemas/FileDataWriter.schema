@@ -1,0 +1,51 @@
+{
+    "type": "object",
+    "title": "FileDataWriter",
+    "properties": {
+      "name": {
+        "type": "string",
+	"required": true,
+	"default": "dataloggerXXX",
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
+      },
+      "host": {
+        "type": "string",
+	"required": true,
+	"default": "localhost",
+	"propertyOrder": 2
+      },          
+      "port": {
+        "type": "integer",
+	"required": true,
+	"default": 0,
+        "minimum": 1024,
+	"maximum": 65535,
+	"propertyOrder": 3
+      },
+      "type": {
+        "type": "string",
+	"default": "FileDataWriter",
+	"readOnly": true,
+	"propertyOrder": 4,
+	"options": { "hidden": true }
+      },
+      "settings": {
+        "type": "object",
+        "title": "Settings",
+        "properties": {
+          "stats_uri": {
+	    "type": "string",
+	    "format": "uri"
+	  },
+	  "filename_pattern": {
+            "type": "string"		      
+	  }
+	},
+	"format": "grid",
+	"propertyOrder": 5
+      }
+    }
+}
+
+

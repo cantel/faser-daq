@@ -1,0 +1,47 @@
+@mixin on-circle($item-count, $circle-size, $item-size) {  
+  position: relative;
+  width:  $circle-size;
+  height: $circle-size;
+  border-radius: 50%;
+  list-style: none;
+  
+  > * {
+    //display: block;
+    position: absolute;
+    top:  50%; 
+    left: 40%;
+    width:  $item-size*4;
+    height: $item-size*8;
+  
+    $angle: (360 / $item-count);
+    $rot: 0;
+
+    @for $i from 1 through $item-count {
+      &:nth-of-type(#{$i}) {
+        -webkit-transform: rotate($rot * 1deg) translate($circle-size / 2) rotate($rot * -1deg);
+            -ms-transform: rotate($rot * 1deg) translate($circle-size / 2) rotate($rot * -1deg);
+                transform: rotate($rot * 1deg) translate($circle-size / 2) rotate($rot * -1deg);
+      }
+
+      $rot: $rot + $angle;
+    }
+  }
+}
+
+.circle-container-8 {
+  @include on-circle($item-count: 8, $circle-size: 45em, $item-size: 50px); 
+  margin: 5em auto 0;
+
+  button { 
+  }
+}
+
+
+.circle-container-12 {
+  @include on-circle($item-count: 12, $circle-size: 45em, $item-size: 50px); 
+  margin: 5em auto 0;
+  //border: solid 5px tomato;
+
+  button { 
+  }
+}

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="">
+    <meta charset="utf-8">
+
+
+    {% block head %}
+      <title>{% block title %} Values for {{source}} {% endblock %}</title>
+    {% endblock %}
+    
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+	
+	<script>
+
+		function updateTableOfValues(){
+			var tableBody = document.getElementById("table-body");
+			while(tableBody.firstChild && tableBody.removeChild(tableBody.firstChild));	
+			$.ajax({url:"/monitoring/info/" +'{{source}}' + "/dataUpdate", async:false, success:
+			function(data){
+				console.log("values", data.values);
+				for(var i = 0; i < Object.keys(data.values).length; i++){
+					//console.log(data.values[i].key);
+					var tr = document.createElement("tr");
+
+					var th1 = document.createElement("th");
+					th1.innerHTML = data.values[i].key;
+	
+
+					var th2 = document.createElement("th");
+					th2.innerHTML = data.values[i].value;
+
+
+					var th3 = document.createElement("th");
+					th3.innerHTML = data.values[i].time;
+
+					tr.appendChild(th1);
+					tr.appendChild(th2);
+					tr.appendChild(th3);
+
+					tableBody.appendChild(tr);
+				}
+			}});
+		}
+		setInterval(function(){ updateTableOfValues();}, 1000);
+	</script>
+
+	<table class="table thead-dark table-striped table-hover">
+		<thead>
+			<tr>
+				<th scope="col"> Key </th>	
+				<th scope="col"> Value </th>
+				<th scope="col"> Time </th>
+			<tr>
+		<thead>
+
+		<tbody id = "table-body">
+		</tbody>
+
+      </table>
+
+        <!-- {% for key, value in values.items() %}
+            <tr>
+               <th> {{ key }} </th>
+               <td> {{ value[0] }} </td>
+	       <td> {{ value[1] }} </td>
+            </tr>
+         {% endfor %}-->
+
+
+
+  </body>
+</html>

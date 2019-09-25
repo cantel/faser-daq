@@ -1,0 +1,84 @@
+{
+    "type": "object",
+    "title": "TriggerGenerator",
+    "properties": {
+      "name": {
+        "type": "string",
+	"required": true,
+	"default": "triggergeneratorXXX",
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
+      },
+      "host": {
+        "type": "string",
+	"required": true,
+	"default": "localhost",
+	"propertyOrder": 2
+      },          
+      "port": {
+        "type": "integer",
+	"required": true,
+	"default": 0,
+        "minimum": 1024,
+	"maximum": 65535,
+	"propertyOrder": 3
+      },
+      "type": {
+        "type": "string",
+	"default": "TriggerGenerator",
+	"readOnly": true,
+	"propertyOrder": 4,
+	"options": { "hidden": true }
+      },
+      "settings": {
+        "type": "object",
+        "title": "Settings",
+        "properties": {
+          "stats_uri": {
+	    "type": "string",
+	    "format": "uri"
+	  },
+	  "rateInHz": {
+	    "type": "integer",
+	    "default": 0,
+	    "minimum": 1,
+	    "maximum": 5000,
+	    "required": true,
+           "options": {
+                "infoText": "Rate of triggers to generate"
+            }   
+	  },
+	  "frontendApps": {
+	    "type": "array",
+           "options": {
+                "infoText": "Applications that should receive triggers"
+            },
+            "format": "table",
+            "title": "Receivers",
+            "uniqueItems": true,
+            "items": {
+              "type": "object",
+              "properties": {
+                "host": {
+                  "type":"string",
+		  "required": true,
+		  "default": "localhost"
+                },
+                "port": {
+		  "type":"integer",
+		  "required": true,
+		  "default": 0,
+        	  "minimum": 1024,
+		  "maximum": 65535
+		}
+              }
+            }
+          }
+	},
+	"format":"grid",
+	"propertyOrder": 5
+      }
+    }
+}
+
+

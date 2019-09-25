@@ -1,0 +1,58 @@
+{
+    "type": "object",
+    "title": "FrontEndReceiver",
+    "properties": {
+      "name": {
+        "type": "string",
+	"required": true,
+	"default": "frontendreceiverXXX",
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
+      },
+      "host": {
+        "type": "string",
+	"required": true,
+	"default": "localhost",
+	"propertyOrder": 2
+      },          
+      "port": {
+        "type": "integer",
+	"required": true,
+	"default": 0,
+        "minimum": 1024,
+	"maximum": 65535,
+	"propertyOrder": 3
+      },
+      "type": {
+        "type": "string",
+	"default": "FrontEndReceiver",
+	"readOnly": true,
+	"propertyOrder": 4,
+	"options": { "hidden": true }
+      },
+      "settings": {
+        "type": "object",
+        "title": "Settings",
+        "properties": {
+          "stats_uri": {
+	    "type": "string",
+	    "format": "uri"
+	  },
+	  "dataPort": {
+	    "type": "integer",
+	    "default": 0,
+	    "minimum": 1024,
+	    "maximum": 65535,
+	    "required": true,
+           "options": {
+                "infoText": "Port for receiving data from frontend"
+            }
+	  }
+	},
+	"format": "grid",
+	"propertyOrder": 5
+      }
+    }
+}
+
+

@@ -29,13 +29,13 @@
       "type": "FrontEndEmulator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "meanSize": 10,
-        "rmsSize": 5,
+        "meanSize": 350,
+        "rmsSize": 70,
         "fragmentID": 1000001,
         "probMissingTrigger": 0.0,
         "probMissingFragment": 0.0,
-        "probCorruptedFragment": 0.0,
-	      "monitoringInterval": 0,
+        "probCorruptedFragment": 0.1,
+	"monitoringInterval": 0,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -48,8 +48,8 @@
       "type": "FrontEndEmulator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "meanSize": 50,
-        "rmsSize": 20,
+        "meanSize": 200,
+        "rmsSize": 50,
         "fragmentID": 1000002,
         "probMissingTrigger": 0.0,
         "probMissingFragment": 0.0,
@@ -109,7 +109,7 @@
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	         "maxPending": 100,
+	   "maxPending": 100,
            "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
            "influxDb_name": "DAQmetrics"
        },
@@ -209,7 +209,8 @@
         "outputDir": "/home/faser/cantel/",
 	      "timeDelayTolerance": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQmetrics",
+	"stats_uri": "tcp://*:7057"
       },
       "connections": {
         "receivers": [

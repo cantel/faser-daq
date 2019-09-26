@@ -56,7 +56,7 @@ void TrackerMonitorModule::runner() {
 
       uint16_t payloadSize = fragmentHeader->payload_size; 
 
-      m_histogrammanager->fill("tracker_payloadsize", payloadSize);
+      m_histogrammanager->fill("h_tracker_payloadsize", payloadSize);
       m_metric_payload = payloadSize;
   }
 
@@ -71,7 +71,7 @@ void TrackerMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TrackerMonitor ... " );
 
-  m_histogrammanager->registerHistogram("tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
+  m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
 
   INFO(" ... done registering histograms ... " );
 

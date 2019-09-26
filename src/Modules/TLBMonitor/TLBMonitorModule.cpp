@@ -51,13 +51,13 @@ void TLBMonitorModule::runner() {
       uint32_t fragmentStatus = fragmentHeader->status;
       fragmentStatus |= dataStatus;
       fill_error_status_to_metric( fragmentStatus );
-      fill_error_status_to_histogram( fragmentStatus, "tlb_errorcount" );
+      fill_error_status_to_histogram( fragmentStatus, "h_tlb_errorcount" );
       
       if (fragmentStatus & MissingFragment ) continue; // go no further
 
       uint16_t payloadSize = fragmentHeader->payload_size; 
 
-      m_histogrammanager->fill("tlb_payloadsize", payloadSize);
+      m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
       m_metric_payload = payloadSize;
   }
 
@@ -72,9 +72,9 @@ void TLBMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TLBMonitor ... " );
   
-  m_histogrammanager->registerHistogram("tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
+  m_histogrammanager->registerHistogram("h_tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
-  m_histogrammanager->registerHistogram("tlb_errorcount", "error type", categories, 5. );
+  m_histogrammanager->registerHistogram("h_tlb_errorcount", "error type", categories, 5. );
 
   INFO(" ... done registering histograms ... " );
   return;

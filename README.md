@@ -1,6 +1,6 @@
 # daqling_top
 
-Skeleton for project-specific DAQling Modules and configurations.
+Skeleton for project-specific DAQling Modules, scripts and configurations.
 
 ## Clone DAQling as a git submodule
 
@@ -9,7 +9,7 @@ Skeleton for project-specific DAQling Modules and configurations.
 
 ## Install the framework
 
-### Configure your CentOS7 host
+### Configure your CentOS 7 host
 
 Refer to daqling/README.md for host setup instructions.
 
@@ -28,19 +28,19 @@ Refer to daqling/README.md for advanced build instructions.
 ## Run
 
     source daqling/cmake/setup.sh
-    daqinterface configs/your-config.json complete
+    daqinterface configs/your-config.json
     start
     stop
     down
 
-You can find example `valid-config.json` and `json-config.schema` under `daqling/configs/`. You should copy these files to the `configs/` folder and adapt them to your DAQ needs.
+You can find example configuration (`valid-config.json`) and schema (`json-config.schema`) in `daqling/configs/`. You should copy these files to the `configs/` folder and adapt them to your DAQ needs.
 
-`daqinterface -h` shows the help menu! 
+`daqinterface -h` shows the help menu!
 
 ## Develop custom Modules
 
-In order to develop your own module, check the existing demonstration modules in `daqling/src/Modules` and `daqling/include/Modules` for guidance.
+In order to develop your own module, check the existing demo modules in `src/Modules/New/` for guidance.
 
-Copy and adapt the template `src/Modules/NewModule.cpp` and `include/Modules/NewModule.hpp` and start developing your custom module.
+Copy and adapt the template folder `src/Modules/New` and developing your custom module.
 
-Finally add the new custom module to `src/Modules/CMakeLists.txt` in order to build it as part of the project.
+The custom module will be discovered and built by CMake as part of the project.

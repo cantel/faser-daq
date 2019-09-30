@@ -1,15 +1,15 @@
 # daqling_top
 
-Skeleton for project-specific DAQling Modules, scripts and configurations.
+Skeleton for project-specific DAQling Modules, scripts, and configurations.
 
-## Clone DAQling as a git submodule
+## DAQling as a git submodule
 
     git submodule init
     git submodule update
 
-## Install the framework
+## Host configuration and framework build
 
-### Configure your CentOS 7 host
+### Configure the CERN CentOS 7 host
 
 Refer to daqling/README.md for host setup instructions.
 
@@ -28,19 +28,35 @@ Refer to daqling/README.md for advanced build instructions.
 ## Run
 
     source daqling/cmake/setup.sh
-    daqinterface configs/your-config.json
+    daqinterface configs/my-config.json
     start
     stop
     down
 
-You can find example configuration (`valid-config.json`) and schema (`json-config.schema`) in `daqling/configs/`. You should copy these files to the `configs/` folder and adapt them to your DAQ needs.
+An example configuration (`valid-config.json`) and schema (`json-config.schema`) can be found in `daqling/configs/`. It is necessary to copy these files to the `configs/` folder and adapt them to describe the desired configuration.
 
-`daqinterface -h` shows the help menu!
+`daqinterface -h` shows the help menu.
 
 ## Develop custom Modules
 
-In order to develop your own module, check the existing demo modules in `src/Modules/New/` for guidance.
+To develop a custom module, the existing modules in `daqling/src/Modules/` can provide guidance.
 
-Copy and adapt the template folder `src/Modules/New` and develop your custom module.
+It is necessary to copy and rename the template folder `src/Modules/New` and its files to start developing the new module.
 
-The custom module will be discovered (don't forget to modify the name of the module in the `CMakeLists.txt` file) and built by CMake as part of the project.
+The custom module will be discovered and built by CMake as part of the project.
+
+### Run custom Modules
+
+To run a newly created Module (e.g. `MyNewModule`), it is necessary to add a corresponding entry in `components:` to a JSON configuration file. Note that the name of the Module needs to be specified in the `type:` field. E.g.:
+
+    {
+      "name": "mynewmodule01",
+      "host": "localhost",
+      "port": 5555,
+      "type": "MyNewModule",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+      },
+      "connections": {
+      }    
+    }

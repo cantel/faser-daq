@@ -2,6 +2,12 @@
 
 Skeleton for project-specific DAQling Modules, scripts, and configurations.
 
+## Documentation
+
+In depth documentation can be found [here][codimd].
+
+[codimd]: <https://codimd.web.cern.ch/s/B1oArin-r>
+
 ## DAQling as a git submodule
 
     git submodule init

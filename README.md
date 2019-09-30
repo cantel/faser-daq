@@ -41,6 +41,6 @@ You can find example configuration (`valid-config.json`) and schema (`json-confi
 
 In order to develop your own module, check the existing demo modules in `src/Modules/New/` for guidance.
 
-Copy and adapt the template folder `src/Modules/New` and developing your custom module.
+Copy and adapt the template folder `src/Modules/New` and develop your custom module.
 
-The custom module will be discovered and built by CMake as part of the project.
+The custom module will be discovered (don't forget to modify the name of the module in the `CMakeLists.txt` file) and built by CMake as part of the project.

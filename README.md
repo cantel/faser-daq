@@ -4,7 +4,7 @@ Skeleton for project-specific DAQling Modules, scripts, and configurations.
 
 ## Documentation
 
-In depth documentation can be found [here][codimd].
+Detailed documentation can be found [here][codimd].
 
 [codimd]: <https://codimd.web.cern.ch/s/B1oArin-r>
 
@@ -31,7 +31,11 @@ Refer to daqling/README.md for host setup instructions.
 
 Refer to daqling/README.md for advanced build instructions.
 
-## Run
+## Run a data acquisition system
+
+`daqinterface` is a command line tool that spawns and configures the components listed in the JSON configuration file passed as argument.
+
+It then allows to control the components via standard commands such as `start`, `stop`, as well as custom commands.
 
     source daqling/cmake/setup.sh
     daqinterface configs/my-config.json

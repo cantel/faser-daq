@@ -1,6 +1,6 @@
-# daqling_top
+# DAQling_top
 
-Skeleton for project-specific DAQling Modules, scripts, and configurations.
+Template project for custom DAQling Modules, scripts, and configurations.
 
 ## Documentation
 

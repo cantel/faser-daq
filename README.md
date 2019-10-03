@@ -17,7 +17,7 @@ Detailed documentation can be found [here][codimd].
 
 ### Configure the CERN CentOS 7 host
 
-Refer to daqling/README.md for host setup instructions.
+Refer to `daqling/README.md` for host setup instructions.
 
 ### Build
 
@@ -29,7 +29,7 @@ Refer to daqling/README.md for host setup instructions.
 
 #### Advanced build options
 
-Refer to daqling/README.md for advanced build instructions.
+Refer to `daqling/README.md` for advanced build instructions.
 
 ## Run a data acquisition system
 

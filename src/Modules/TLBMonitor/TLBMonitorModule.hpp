@@ -7,12 +7,9 @@ class TLBMonitorModule : public MonitorModule {
   TLBMonitorModule();
   ~TLBMonitorModule();
 
-  void runner();
-
-
-
  protected:
 
+  void monitor(daqling::utilities::Binary &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
 

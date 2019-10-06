@@ -15,8 +15,7 @@ class MonitorModule : public daqling::core::DAQProcess {
 
   void start();
   void stop();
-
-  virtual void runner();
+  void runner();
 
 
 
@@ -51,6 +50,7 @@ class MonitorModule : public daqling::core::DAQProcess {
   std::atomic<int> m_metric_error_unpack;
 
   // functions 
+  virtual void monitor(daqling::utilities::Binary &eventBuilderBinary);
   virtual void register_hists( );
   virtual void register_metrics();
   uint16_t unpack_event_header( daqling::utilities::Binary &eventBuilderBinary );
@@ -59,7 +59,7 @@ class MonitorModule : public daqling::core::DAQProcess {
   void fill_error_status_to_metric(uint32_t fragmentStatus);
   void fill_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name);
 
- protected: // CHANGE TO PRIVATE
+ private: // CHANGE TO PRIVATE
 
   bool m_event_header_unpacked;
   bool m_fragment_header_unpacked;

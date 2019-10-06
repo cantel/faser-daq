@@ -50,14 +50,33 @@ void MonitorModule::stop() {
 void MonitorModule::runner() {
   INFO("Running...");
 
+  bool noData(true);
+  daqling::utilities::Binary eventBuilderBinary;
+
   while (m_run) {
-	//do nothing
+
+      if ( !m_connections.get(1, eventBuilderBinary)){
+          if ( !noData ) std::this_thread::sleep_for(10ms);
+          noData=true;
+          continue;
+      }
+      noData=false;
+
+      monitor(eventBuilderBinary);
+
+      m_event_header_unpacked = false;
+      m_fragment_header_unpacked = false;
+      m_raw_fragment_unpacked = false;
   }
+
 
   INFO("Runner stopped");
 
   return;
 
+}
+
+void MonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 }
 
 void MonitorModule::register_metrics() {

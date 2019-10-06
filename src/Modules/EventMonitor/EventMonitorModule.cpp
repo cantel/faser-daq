@@ -23,39 +23,19 @@ EventMonitorModule::~EventMonitorModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void EventMonitorModule::runner() {
-  INFO("Running...");
+void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
-  bool noData(true);
-  daqling::utilities::Binary eventBuilderBinary;
+  auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
 
-  while (m_run) {
+  // only accept physics events
+  if ( m_eventHeader->event_tag != PhysicsTag ) return;
 
-      if ( !m_connections.get(1, eventBuilderBinary)){
-          if ( !noData ) std::this_thread::sleep_for(10ms);
-          noData=true;
-          continue;
-      }
-      noData=false;
+  uint32_t eventStatus = m_eventHeader->status;
+  eventStatus |= eventUnpackStatus;
+  fill_error_status_to_metric( eventStatus );
 
-      auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
-
-      // only accept physics events
-      if ( m_eventHeader->event_tag != PhysicsTag ) continue;
-
-      uint32_t eventStatus = m_eventHeader->status;
-      eventStatus |= eventUnpackStatus;
-      fill_error_status_to_metric( eventStatus );
-
-      uint16_t payloadSize = m_eventHeader->payload_size; 
-      m_metric_payload = payloadSize;
-
-  }
-
-  INFO("Runner stopped");
-
-  m_event_header_unpacked = false;
-
+  uint16_t payloadSize = m_eventHeader->payload_size; 
+  m_metric_payload = payloadSize;
 }
 
 void EventMonitorModule::register_metrics() {

@@ -24,47 +24,27 @@ TrackerMonitorModule::~TrackerMonitorModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void TrackerMonitorModule::runner() {
-  INFO("Running...");
+void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
-  bool noData(true);
-  daqling::utilities::Binary eventBuilderBinary;
+  //auto eventDataStatus = unpack_event_header(eventBuilderBinary);
 
-  while (m_run) {
+  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
+  //auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
 
-      if ( !m_connections.get(1, eventBuilderBinary)){
-          if ( !noData ) std::this_thread::sleep_for(10ms);
-          noData=true;
-          continue;
-      }
-      noData=false;
+  // only accept physics events
+  if ( m_eventHeader->event_tag != PhysicsTag ) return;
 
-      //auto eventDataStatus = unpack_event_header(eventBuilderBinary);
+  uint32_t fragmentStatus = m_fragmentHeader->status;
+  fragmentStatus |= fragmentUnpackStatus;
+  fill_error_status_to_metric( fragmentStatus );
+  
+  if (fragmentStatus & MissingFragment ) return; // go no further
 
-      auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
-      //auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  uint16_t payloadSize = m_fragmentHeader->payload_size; 
 
-      // only accept physics events
-      if ( m_eventHeader->event_tag != PhysicsTag ) continue;
-
-      uint32_t fragmentStatus = m_fragmentHeader->status;
-      fragmentStatus |= fragmentUnpackStatus;
-      fill_error_status_to_metric( fragmentStatus );
-      
-      if (fragmentStatus & MissingFragment ) continue; // go no further
-
-      uint16_t payloadSize = m_fragmentHeader->payload_size; 
-
-      m_histogrammanager->fill("h_tracker_payloadsize", payloadSize);
-      std::cout<<"payload size is "<<payloadSize<<std::endl;
-      m_metric_payload = payloadSize;
-
-      m_event_header_unpacked = false;
-      m_fragment_header_unpacked = false;
-      m_raw_fragment_unpacked = false;
-  }
-
-  INFO("Runner stopped");
+  m_histogrammanager->fill("h_tracker_payloadsize", payloadSize);
+  std::cout<<"payload size is "<<payloadSize<<std::endl;
+  m_metric_payload = payloadSize;
 
 }
 

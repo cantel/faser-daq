@@ -24,49 +24,28 @@ TLBMonitorModule::~TLBMonitorModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void TLBMonitorModule::runner() {
-  INFO("Running...");
+void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
-  bool noData(true);
-  daqling::utilities::Binary eventBuilderBinary;
+  //auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
 
-  while (m_run) {
+  // only accept physics events
+  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
+  //auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary); // unpacks to m_fragmentHeader and m_rawFragment.
 
-      if ( !m_connections.get(1, eventBuilderBinary)){
-          if ( !noData ) std::this_thread::sleep_for(10ms);
-          noData=true;
-          continue;
-      }
-      noData=false;
+  if ( m_eventHeader->event_tag != PhysicsTag ) return;
 
-      //auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
+  uint32_t fragmentStatus = m_fragmentHeader->status;
+  fragmentStatus |= fragmentUnpackStatus;
+  fill_error_status_to_metric( fragmentStatus );
+  fill_error_status_to_histogram( fragmentStatus, "h_tlb_errorcount" );
 
-      // only accept physics events
-      auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
-      //auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary); // unpacks to m_fragmentHeader and m_rawFragment.
+  if (fragmentStatus & MissingFragment ) return; // go no further
 
-      if ( m_eventHeader->event_tag != PhysicsTag ) continue;
+  uint16_t payloadSize = m_fragmentHeader->payload_size; 
 
-      uint32_t fragmentStatus = m_fragmentHeader->status;
-      fragmentStatus |= fragmentUnpackStatus;
-      fill_error_status_to_metric( fragmentStatus );
-      fill_error_status_to_histogram( fragmentStatus, "h_tlb_errorcount" );
-
-      if (fragmentStatus & MissingFragment ) continue; // go no further
-
-      uint16_t payloadSize = m_fragmentHeader->payload_size; 
-
-      m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
-      std::cout<<"payload size is "<<payloadSize<<std::endl;
-      m_metric_payload = payloadSize;
-
-      m_event_header_unpacked = false;
-      m_fragment_header_unpacked = false;
-      m_raw_fragment_unpacked = false;
-  }
-
-  INFO("Runner stopped");
-
+  m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
+  std::cout<<"payload size is "<<payloadSize<<std::endl;
+  m_metric_payload = payloadSize;
 }
 
 void TLBMonitorModule::register_hists() {

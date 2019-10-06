@@ -7,11 +7,9 @@ class EventMonitorModule : public MonitorModule {
   EventMonitorModule();
   ~EventMonitorModule();
 
-  void runner();
-
-
  protected:
-
+ 
+  void monitor(daqling::utilities::Binary &eventBuilderBinary);
   void register_metrics();
 
 };

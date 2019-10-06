@@ -50,6 +50,9 @@ void MonitorModule::stop() {
 void MonitorModule::runner() {
   INFO("Running...");
 
+  m_event_header_unpacked = false;
+  m_fragment_header_unpacked = false;
+  m_raw_fragment_unpacked = false;
   bool noData(true);
   daqling::utilities::Binary eventBuilderBinary;
 

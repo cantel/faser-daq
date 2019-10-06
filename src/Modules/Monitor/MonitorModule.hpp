@@ -6,6 +6,7 @@
 #include "Core/DAQProcess.hpp"
 #include "Commons/EventFormat.hpp"
 #include "Utils/HistogramManager.hpp"
+#include "Utils/Logging.hpp"
 
 class MonitorModule : public daqling::core::DAQProcess {
  public:
@@ -15,15 +16,21 @@ class MonitorModule : public daqling::core::DAQProcess {
   void start();
   void stop();
 
-  void runner();
+  virtual void runner();
 
 
 
  protected:
 
+  // filled by json configs
   uint32_t m_sourceID;
+  
+  EventHeader * m_eventHeader = new EventHeader;
+  EventFragmentHeader * m_fragmentHeader = new EventFragmentHeader;
+  RawFragment * m_rawFragment = new RawFragment;
   const size_t m_eventHeaderSize = sizeof(EventHeader);
   const size_t m_fragmentHeaderSize = sizeof(EventFragmentHeader) ;
+  const size_t m_rawFragmentSize = sizeof(RawFragment) ;
 
   // histogramming
   bool m_histogramming_on;
@@ -44,10 +51,20 @@ class MonitorModule : public daqling::core::DAQProcess {
   std::atomic<int> m_metric_error_unpack;
 
   // functions 
-  void setupHistogramManager();
   virtual void register_hists( );
   virtual void register_metrics();
-  uint16_t unpack_data( daqling::utilities::Binary &eventBuilderBinary, EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader );
+  uint16_t unpack_event_header( daqling::utilities::Binary &eventBuilderBinary );
+  uint16_t unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary );
+  uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary );
   void fill_error_status_to_metric(uint32_t fragmentStatus);
   void fill_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name);
+
+ protected: // CHANGE TO PRIVATE
+
+  bool m_event_header_unpacked;
+  bool m_fragment_header_unpacked;
+  bool m_raw_fragment_unpacked;
+
+  void setupHistogramManager();
+
 };

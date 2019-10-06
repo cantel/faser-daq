@@ -14,9 +14,15 @@ using namespace std::chrono;
 
 MonitorModule::MonitorModule() { 
    INFO("");
+   m_histogramming_on = false;
  }
 
 MonitorModule::~MonitorModule() { 
+
+  delete m_eventHeader;
+  delete m_fragmentHeader;
+  delete m_rawFragment;
+
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
 }
 
@@ -24,11 +30,13 @@ void MonitorModule::start() {
   DAQProcess::start();
   INFO("getState: " << this->getState());
 
-   m_histogramming_on = false;
-   setupHistogramManager();
+  setupHistogramManager();
 
   register_metrics();
   register_hists();
+
+  m_histogrammanager->start();
+
 }
 
 void MonitorModule::stop() {
@@ -64,74 +72,150 @@ void MonitorModule::register_hists() {
 
 }
 
-uint16_t MonitorModule::unpack_data( daqling::utilities::Binary &eventBuilderBinary, EventHeader *& eventHeader, EventFragmentHeader *& fragmentHeader ) {
+uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBuilderBinary ) {
+
+  uint16_t dataStatus(0);
+
+  m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
+  m_event_header_unpacked = true;
+
+  return  dataStatus;
+
+}
+
+uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
 
   uint16_t dataStatus=0;
   bool foundSourceID(false);
 
-  uint16_t fragmentCnt = eventHeader->fragment_count;
+  if (!m_event_header_unpacked) {
+     m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
+     m_event_header_unpacked = true;
+  }
+
+  uint16_t fragmentCnt = m_eventHeader->fragment_count;
   uint32_t totalDataPacketSize = eventBuilderBinary.size();
 
   uint32_t accumulatedPayloadSize = 0;
   uint8_t cnt = 0;
 
+  EventFragmentHeader * currentChannelFragmentHeader = new EventFragmentHeader;
   // Claire: to do: need to incorporate markers.
   for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
 	
-	  cnt++;	
-    EventFragmentHeader * currentChannelFragmentHeader((EventFragmentHeader *)malloc(m_fragmentHeaderSize));
-	  memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
+    cnt++;	
+    memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
 
     if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
 
      uint32_t source_id = currentChannelFragmentHeader->source_id;
 
      if ( source_id == m_sourceID ) {
-		   fragmentHeader = currentChannelFragmentHeader;
 		   foundSourceID = true;
+		   memcpy(m_fragmentHeader, currentChannelFragmentHeader, m_fragmentHeaderSize);
+                   m_fragment_header_unpacked = true;
 		   break;
      }
      accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
   }
+  delete currentChannelFragmentHeader;
 
 
-	if ( foundSourceID ) {
-	  // sanity check
+  if ( foundSourceID ) {
+    // sanity check
     auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
-	  if ( totalCalculatedSize > totalDataPacketSize ) {
-	  	ERROR("total byte size unpacked, "
-	  	                            << totalCalculatedSize 
-                                  <<", larger than the total data packet size, "
-                                  <<totalDataPacketSize
-                                  <<". FIX ME." );
-	  	return dataStatus |= CorruptedFragment; //To review: is this the right error type for this?
-	  }
-	}
-	else {
-	    	ERROR("no correct fragment source ID found.");
-		dataStatus |= MissingFragment;
-	}
+    if ( totalCalculatedSize > totalDataPacketSize ) {
+    	ERROR("total byte size unpacked, "
+    	                            << totalCalculatedSize 
+                            <<", larger than the total data packet size, "
+                            <<totalDataPacketSize
+                            <<". FIX ME." );
+    	return dataStatus |= CorruptedFragment; //To review: is this the right error type for this?
+    }
+  }
+  else {
+      	ERROR("no correct fragment source ID found.");
+  	dataStatus |= MissingFragment;
+  }
+  return dataStatus;
+}
 
-	return dataStatus;
+uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary ) {
+
+  uint16_t dataStatus=0;
+  bool foundSourceID(false);
+
+  if (!m_event_header_unpacked) {
+     m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
+     m_event_header_unpacked = true;
+  }
+
+  uint16_t fragmentCnt = m_eventHeader->fragment_count;
+  uint32_t totalDataPacketSize = eventBuilderBinary.size();
+
+  uint32_t accumulatedPayloadSize = 0;
+  uint8_t cnt = 0;
+
+  EventFragmentHeader * currentChannelFragmentHeader = new EventFragmentHeader;
+  // Claire: to do: need to incorporate markers.
+  for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
+	
+    cnt++;	
+    memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
+
+    if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
+
+     uint32_t source_id = currentChannelFragmentHeader->source_id;
+
+     if ( source_id == m_sourceID ) {
+		   foundSourceID = true;
+                   memcpy(m_rawFragment, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize+m_fragmentHeaderSize, m_rawFragmentSize );
+		   memcpy(m_fragmentHeader, currentChannelFragmentHeader, m_fragmentHeaderSize);
+                   m_fragment_header_unpacked = true;
+                   m_raw_fragment_unpacked = true;
+		   break;
+     }
+     accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
+  }
+  delete currentChannelFragmentHeader;
+
+
+  if ( foundSourceID ) {
+    // sanity check
+    auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
+    if ( totalCalculatedSize > totalDataPacketSize ) {
+    	ERROR("total byte size unpacked, "
+    	                            << totalCalculatedSize 
+                            <<", larger than the total data packet size, "
+                            <<totalDataPacketSize
+                            <<". FIX ME." );
+    	return dataStatus |= CorruptedFragment; //To review: is this the right error type for this?
+    }
+  }
+  else {
+      	ERROR("no correct fragment source ID found.");
+  	dataStatus |= MissingFragment;
+  }
+  
+  return dataStatus;
 }
 
 void MonitorModule::setupHistogramManager() {
 
   INFO("Setting up HistogramManager.");
 
-  m_histogrammanager = std::make_unique<HistogramManager>(m_connections.getStatSocket(),500.);
-  
-  m_histogrammanager->start();
- 
+  m_histogrammanager = std::make_unique<HistogramManager>(m_connections.getStatSocket());
+
   m_histogramming_on = true;
 
-  if ( m_stats_on ) {
-    INFO("Statistics is on. Will publish histograms via the stats connection.");
+  auto statsURI = m_config.getConfig()["settings"]["stats_uri"];
+  if (statsURI != "" && statsURI != nullptr) {
+    INFO("Stats uri provided. Will publish histograms via the stats connection.");
     m_histogrammanager->setZMQpublishing(true);
 
   }
   else {
-    INFO("Statistics is off. Will not be publishing histograms.");
+    INFO("No stats uri given. Will not be publishing histograms.");
   }
 
   return ;

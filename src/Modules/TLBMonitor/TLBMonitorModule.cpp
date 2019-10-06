@@ -29,8 +29,6 @@ void TLBMonitorModule::runner() {
 
   bool noData(true);
   daqling::utilities::Binary eventBuilderBinary;
-  EventHeader * eventHeader = new EventHeader;
-  EventFragmentHeader * fragmentHeader = new EventFragmentHeader;
 
   while (m_run) {
 
@@ -41,28 +39,31 @@ void TLBMonitorModule::runner() {
       }
       noData=false;
 
-      eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());	
+      //auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
 
       // only accept physics events
-      if ( eventHeader->event_tag != PhysicsTag ) continue;
+      auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
+      //auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary); // unpacks to m_fragmentHeader and m_rawFragment.
 
-      uint16_t dataStatus = unpack_data(eventBuilderBinary, eventHeader, fragmentHeader);
+      if ( m_eventHeader->event_tag != PhysicsTag ) continue;
 
-      uint32_t fragmentStatus = fragmentHeader->status;
-      fragmentStatus |= dataStatus;
+      uint32_t fragmentStatus = m_fragmentHeader->status;
+      fragmentStatus |= fragmentUnpackStatus;
       fill_error_status_to_metric( fragmentStatus );
       fill_error_status_to_histogram( fragmentStatus, "h_tlb_errorcount" );
-      
+
       if (fragmentStatus & MissingFragment ) continue; // go no further
 
-      uint16_t payloadSize = fragmentHeader->payload_size; 
+      uint16_t payloadSize = m_fragmentHeader->payload_size; 
 
       m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
+      std::cout<<"payload size is "<<payloadSize<<std::endl;
       m_metric_payload = payloadSize;
-  }
 
-  delete eventHeader;
-  delete fragmentHeader;
+      m_event_header_unpacked = false;
+      m_fragment_header_unpacked = false;
+      m_raw_fragment_unpacked = false;
+  }
 
   INFO("Runner stopped");
 
@@ -72,7 +73,7 @@ void TLBMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TLBMonitor ... " );
   
-  m_histogrammanager->registerHistogram("h_tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 5.);
+  m_histogrammanager->registerHistogram("h_tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
   m_histogrammanager->registerHistogram("h_tlb_errorcount", "error type", categories, 5. );
 

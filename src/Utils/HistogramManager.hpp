@@ -9,6 +9,7 @@
 #include <type_traits> // is_integral, is_floating_point, ...
 
 #include "Utils/Histogram.hpp"
+#include "Utils/Logging.hpp"
 using namespace boost::histogram;
 
 class HistogramManager{
@@ -25,8 +26,12 @@ public:
 
   void start();
   
-  void registerHistogram( std::string name, std::string xlabel, float start_range, float end_range, unsigned int number_bins, float delta_t ) {
+  void registerHistogram( std::string name, std::string xlabel, float start_range, float end_range, unsigned int number_bins, float delta_t = 60. ) {
 
+    if ( delta_t < m_interval/1000. ){
+      delta_t = m_interval ;
+      INFO("publishing interval cannnot be set below "<<m_interval/1000.<<" s. Setting publishing interval to "<<m_interval/1000.<<" s."); 
+    }
     std::cout<<"creating hist with name "<< name<<std::endl;
     HistBase * hist = new Hist<hist_t>(name, xlabel, start_range, end_range, number_bins, delta_t);
     std::cout<<"adding to map "<<std::endl;

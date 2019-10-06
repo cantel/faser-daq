@@ -53,6 +53,8 @@ void HistogramManager::publish( HistBase * h){
         std::cout<<"WARNING: Failed to publish histogram with name "<<h->name<<std::endl;
    }
   h->timestamp = std::time(nullptr);
+ 
+  std::this_thread::sleep_for(std::chrono::milliseconds(m_interval));
 
   return;
 }

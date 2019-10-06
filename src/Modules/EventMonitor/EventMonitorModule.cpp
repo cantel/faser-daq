@@ -29,8 +29,6 @@ void EventMonitorModule::runner() {
   bool noData(true);
   daqling::utilities::Binary eventBuilderBinary;
 
-  EventHeader * eventHeader = new EventHeader;
-
   while (m_run) {
 
       if ( !m_connections.get(1, eventBuilderBinary)){
@@ -40,22 +38,23 @@ void EventMonitorModule::runner() {
       }
       noData=false;
 
-      eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());	
+      auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
 
       // only accept physics events
-      if ( eventHeader->event_tag != PhysicsTag ) continue;
+      if ( m_eventHeader->event_tag != PhysicsTag ) continue;
 
-      uint32_t eventStatus = eventHeader->status;
+      uint32_t eventStatus = m_eventHeader->status;
+      eventStatus |= eventUnpackStatus;
       fill_error_status_to_metric( eventStatus );
 
-      uint16_t payloadSize = eventHeader->payload_size; 
+      uint16_t payloadSize = m_eventHeader->payload_size; 
       m_metric_payload = payloadSize;
 
   }
 
-  delete eventHeader;
-
   INFO("Runner stopped");
+
+  m_event_header_unpacked = false;
 
 }
 

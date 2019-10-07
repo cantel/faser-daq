@@ -26,20 +26,19 @@ TLBMonitorModule::~TLBMonitorModule() {
 
 void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
-  //auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
+  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
+  if ( (fragmentUnpackStatus & CorruptedFragment) | (fragmentUnpackStatus & MissingFragment)){
+    fill_error_status_to_metric( fragmentUnpackStatus );
+    fill_error_status_to_histogram( fragmentUnpackStatus, "h_tlb_errorcount" );
+    return;
+  }
 
   // only accept physics events
-  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
-  //auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary); // unpacks to m_fragmentHeader and m_rawFragment.
-
   if ( m_eventHeader->event_tag != PhysicsTag ) return;
 
   uint32_t fragmentStatus = m_fragmentHeader->status;
-  fragmentStatus |= fragmentUnpackStatus;
   fill_error_status_to_metric( fragmentStatus );
   fill_error_status_to_histogram( fragmentStatus, "h_tlb_errorcount" );
-
-  if (fragmentStatus & MissingFragment ) return; // go no further
 
   uint16_t payloadSize = m_fragmentHeader->payload_size; 
 

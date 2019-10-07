@@ -79,7 +79,7 @@ void MonitorModule::runner() {
 
 }
 
-void MonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void MonitorModule::monitor(daqling::utilities::Binary&) {
 }
 
 void MonitorModule::register_metrics() {
@@ -100,6 +100,10 @@ uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBu
 
   m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
   m_event_header_unpacked = true;
+  if (m_eventHeader->marker != EventMarker) {
+    ERROR("Corrupted event header. Wrong event marker returned.");
+    return dataStatus |= CorruptedFragment;
+  }
 
   return  dataStatus;
 
@@ -111,8 +115,12 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
   bool foundSourceID(false);
 
   if (!m_event_header_unpacked) {
-     m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
+    m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
      m_event_header_unpacked = true;
+    if (m_eventHeader->marker != EventMarker) {
+      ERROR("Corrupted event header. Wrong event marker returned.");
+      return dataStatus |= CorruptedFragment;
+     }
   }
 
   uint16_t fragmentCnt = m_eventHeader->fragment_count;
@@ -122,7 +130,7 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
   uint8_t cnt = 0;
 
   EventFragmentHeader * currentChannelFragmentHeader = new EventFragmentHeader;
-  // Claire: to do: need to incorporate markers.
+
   for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
 	
     cnt++;	
@@ -136,6 +144,10 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
 		   foundSourceID = true;
 		   memcpy(m_fragmentHeader, currentChannelFragmentHeader, m_fragmentHeaderSize);
                    m_fragment_header_unpacked = true;
+                   if (m_fragmentHeader->marker != FragmentMarker){
+      		     ERROR("Corrupted fragment. Wrong fragment marker returned.");
+                     return dataStatus |= CorruptedFragment;
+                   }
 		   break;
      }
      accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
@@ -152,7 +164,7 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
                             <<", larger than the total data packet size, "
                             <<totalDataPacketSize
                             <<". FIX ME." );
-    	return dataStatus |= CorruptedFragment; //To review: is this the right error type for this?
+    	return dataStatus |= CorruptedFragment;
     }
   }
   else {
@@ -179,7 +191,7 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
   uint8_t cnt = 0;
 
   EventFragmentHeader * currentChannelFragmentHeader = new EventFragmentHeader;
-  // Claire: to do: need to incorporate markers.
+
   for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
 	
     cnt++;	
@@ -195,6 +207,10 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
 		   memcpy(m_fragmentHeader, currentChannelFragmentHeader, m_fragmentHeaderSize);
                    m_fragment_header_unpacked = true;
                    m_raw_fragment_unpacked = true;
+                   if (m_fragmentHeader->marker != FragmentMarker){
+      		     ERROR("Corrupted fragment. Wrong fragment marker returned.");
+                     return dataStatus |= CorruptedFragment;
+                   }
 		   break;
      }
      accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 

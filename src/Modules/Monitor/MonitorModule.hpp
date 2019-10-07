@@ -50,7 +50,7 @@ class MonitorModule : public daqling::core::DAQProcess {
   std::atomic<int> m_metric_error_unpack;
 
   // functions 
-  virtual void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  virtual void monitor(daqling::utilities::Binary&);
   virtual void register_hists( );
   virtual void register_metrics();
   uint16_t unpack_event_header( daqling::utilities::Binary &eventBuilderBinary );

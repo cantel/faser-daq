@@ -26,20 +26,19 @@ TrackerMonitorModule::~TrackerMonitorModule() {
 
 void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
-  //auto eventDataStatus = unpack_event_header(eventBuilderBinary);
-
   auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
-  //auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  if ( (fragmentUnpackStatus & CorruptedFragment) | (fragmentUnpackStatus & MissingFragment)){
+    fill_error_status_to_metric( fragmentUnpackStatus );
+    fill_error_status_to_histogram( fragmentUnpackStatus, "h_tracker_errorcount" );
+    return;
+  }
 
   // only accept physics events
   if ( m_eventHeader->event_tag != PhysicsTag ) return;
 
   uint32_t fragmentStatus = m_fragmentHeader->status;
-  fragmentStatus |= fragmentUnpackStatus;
   fill_error_status_to_metric( fragmentStatus );
   
-  if (fragmentStatus & MissingFragment ) return; // go no further
-
   uint16_t payloadSize = m_fragmentHeader->payload_size; 
 
   m_histogrammanager->fill("h_tracker_payloadsize", payloadSize);

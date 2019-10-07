@@ -26,6 +26,10 @@ EventMonitorModule::~EventMonitorModule() {
 void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
   auto eventUnpackStatus = unpack_event_header(eventBuilderBinary);
+  if ( eventUnpackStatus & CorruptedFragment){
+    fill_error_status_to_metric( eventUnpackStatus );
+    return;
+  }
 
   // only accept physics events
   if ( m_eventHeader->event_tag != PhysicsTag ) return;

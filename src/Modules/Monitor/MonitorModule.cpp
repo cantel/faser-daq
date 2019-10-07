@@ -28,6 +28,8 @@ MonitorModule::MonitorModule() {
    m_metric_error_empty=0;
    m_metric_error_duplicate=0;
    m_metric_error_unpack=0;
+   setupHistogramManager();
+
  }
 
 MonitorModule::~MonitorModule() { 
@@ -42,8 +44,6 @@ MonitorModule::~MonitorModule() {
 void MonitorModule::start() {
   DAQProcess::start();
   INFO("getState: " << this->getState());
-
-  setupHistogramManager();
 
   register_metrics();
   register_hists();

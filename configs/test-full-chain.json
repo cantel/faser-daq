@@ -225,9 +225,6 @@
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 0,
-        "lengthTimeBlock": 10,
-        "outputDir": "/home/faser/cantel/",
-      	"timeDelayTolerance": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQmetrics"
       },

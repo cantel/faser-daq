@@ -53,6 +53,7 @@ class MonitorModule : public daqling::core::DAQProcess {
   virtual void monitor(daqling::utilities::Binary&);
   virtual void register_hists( );
   virtual void register_metrics();
+  void register_error_metrics(std::string module_short_name); // lets derived classes register metrics for all error types defined in EventFormat.
   uint16_t unpack_event_header( daqling::utilities::Binary &eventBuilderBinary );
   uint16_t unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary );
   uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary );

@@ -8,7 +8,5 @@ daqling_target_sources(${module_name}
     ../../Utils/HistogramManager.cpp
 )
 
-#target_link_libraries(${module_name} ${FASERTOOLS_LIBRARIES})
-
 # Provide install target
 daqling_target_install(${module_name})

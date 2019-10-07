@@ -67,6 +67,8 @@ void TrackerMonitorModule::register_metrics() {
   std::string module_short_name = "tracker";
  
   register_error_metrics(module_short_name);
+
+  m_metric_payload = 0;
   m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, module_short_name+"_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
 
   return;

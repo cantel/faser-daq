@@ -15,6 +15,19 @@ using namespace std::chrono;
 MonitorModule::MonitorModule() { 
    INFO("");
    m_histogramming_on = false;
+   m_metric_payload=0;
+   m_metric_error_ok=0;
+   m_metric_error_unclassified=0;
+   m_metric_error_bcidmismatch=0;
+   m_metric_error_tagmismatch=0;
+   m_metric_error_timeout=0;
+   m_metric_error_overflow=0;
+   m_metric_error_corrupted=0;
+   m_metric_error_dummy=0;
+   m_metric_error_missing=0;
+   m_metric_error_empty=0;
+   m_metric_error_duplicate=0;
+   m_metric_error_unpack=0;
  }
 
 MonitorModule::~MonitorModule() { 

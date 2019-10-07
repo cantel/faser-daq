@@ -27,27 +27,23 @@ public:
   void start();
   
   void registerHistogram( std::string name, std::string xlabel, float start_range, float end_range, unsigned int number_bins, float delta_t = 60. ) {
+    INFO("Registering histogram "<<name);
 
     if ( delta_t < m_interval/1000. ){
       delta_t = m_interval ;
       INFO("publishing interval cannnot be set below "<<m_interval/1000.<<" s. Setting publishing interval to "<<m_interval/1000.<<" s."); 
     }
-    std::cout<<"creating hist with name "<< name<<std::endl;
     HistBase * hist = new Hist<hist_t>(name, xlabel, start_range, end_range, number_bins, delta_t);
-    std::cout<<"adding to map "<<std::endl;
     m_histogram_map.insert( std::make_pair( hist->name, hist));
-    std::cout<<"done!"<<std::endl;
 
     return;
   }
 
   void registerHistogram( std::string name, std::string xlabel, std::vector<std::string> categories, float delta_t ){
+    INFO("Registering histogram "<<name);
 
-    std::cout<<"creating hist with name "<< name<<std::endl;
     HistBase * hist = new Hist<categoryhist_t>(name, xlabel, categories, delta_t);
-    std::cout<<"adding to map "<<std::endl;
     m_histogram_map.insert( std::make_pair( hist->name, hist));
-    std::cout<<"done!"<<std::endl;
   
     return;
 
@@ -62,7 +58,6 @@ public:
                   "Cannot fill histogram with invalid value type. Value must be numeric or string based (std::string or const char *)");
 
     if ( m_histogram_map.count(name) ) {
-      std::cout<<"filling histogram with name "<<name<<std::endl;
       m_histogram_map[name]->fill(value);
     }
     else 

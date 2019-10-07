@@ -45,7 +45,6 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   uint16_t payloadSize = m_fragmentHeader->payload_size; 
 
   m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
-  std::cout<<"payload size is "<<payloadSize<<std::endl;
   m_metric_payload = payloadSize;
 }
 

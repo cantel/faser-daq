@@ -43,7 +43,6 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   uint16_t payloadSize = m_fragmentHeader->payload_size; 
 
   m_histogrammanager->fill("h_tracker_payloadsize", payloadSize);
-  std::cout<<"payload size is "<<payloadSize<<std::endl;
   m_metric_payload = payloadSize;
 
 }

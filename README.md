@@ -10,8 +10,16 @@ Detailed documentation can be found [here][codimd].
 
 ## DAQling as a git submodule
 
+After cloning DAQling_top, the following commands are necessary to clone DAQling as a submodule:
+
     git submodule init
     git submodule update
+
+After every `git checkout` or `git pull`
+
+    git submodule update
+
+will checkout the correct DAQling version for that commit.
 
 ## Host configuration and framework build
 

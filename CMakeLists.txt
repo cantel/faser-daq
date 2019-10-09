@@ -19,9 +19,10 @@ FIND_PACKAGE(Threads REQUIRED)
 add_subdirectory(daqling)
 
 # Build modules
-if(NOT BUILD_Dummy)
+if(NOT BUILD_New)
   set(BUILD_New OFF)
 endif()
+include_directories(src)
 include_directories(${daqling_include_dirs})
 link_directories(${daqling_link_dirs})
 

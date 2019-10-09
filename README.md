@@ -35,11 +35,11 @@ Refer to `daqling/README.md` for advanced build instructions.
 
 `daqinterface` is a command line tool that spawns and configures the components listed in the JSON configuration file passed as argument.
 
-It then allows to control the components via standard commands such as `start`, `stop`, as well as custom commands.
+It then allows to control the components via standard commands such as `start` (with optional run number), `stop`, as well as custom commands.
 
     source daqling/cmake/setup.sh
     daqinterface configs/my-config.json
-    start
+    start [run_num]
     stop
     down
 

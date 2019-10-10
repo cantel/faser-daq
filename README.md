@@ -8,6 +8,10 @@ Detailed documentation can be found [here][codimd].
 
 [codimd]: <https://codimd.web.cern.ch/s/B1oArin-r>
 
+Subscribe to the "daqling-users" CERN e-group for updates.
+
+To contact the developers: daqling-developers@cern.ch (only for "daqling-users" members).
+
 ## DAQling as a git submodule
 
 After cloning DAQling_top, the following commands are necessary to clone DAQling as a submodule:

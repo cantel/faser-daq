@@ -25,8 +25,8 @@ FrontEndReceiverModule::FrontEndReceiverModule() {
 
 FrontEndReceiverModule::~FrontEndReceiverModule() { }
 
-void FrontEndReceiverModule::start() {
-  DAQProcess::start();
+void FrontEndReceiverModule::start(int run_num) {
+  DAQProcess::start(run_num);
   INFO("getState: " << this->getState());
   m_recvCount = 0;
   if (m_stats_on) {

@@ -23,7 +23,9 @@ message(STATUS "Building with Boost")
 add_subdirectory(daqling)
 
 # Build modules
-set(BUILD_New OFF)
+if(NOT BUILD_New)
+  set(BUILD_New OFF)
+endif()
 include_directories(src)
 include_directories(${daqling_include_dirs})
 link_directories(${daqling_link_dirs})

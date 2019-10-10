@@ -23,8 +23,8 @@ MonitorModule::~MonitorModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
 }
 
-void MonitorModule::start() {
-  DAQProcess::start();
+void MonitorModule::start(int run_num) {
+  DAQProcess::start(run_num);
   INFO("getState: " << this->getState());
 
   initialize_hists();

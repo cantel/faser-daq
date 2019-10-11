@@ -10,7 +10,7 @@ class TriggerGeneratorModule : public daqling::core::DAQProcess {
   TriggerGeneratorModule();
   ~TriggerGeneratorModule();
 
-  void start();
+  void start(int);
   void stop();
 
   void runner();

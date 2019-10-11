@@ -23,8 +23,8 @@ EventBuilderFaserModule::EventBuilderFaserModule() {
 
 EventBuilderFaserModule::~EventBuilderFaserModule() { }
 
-void EventBuilderFaserModule::start() {
-  DAQProcess::start();
+void EventBuilderFaserModule::start(int run_num) {
+  DAQProcess::start(run_num);
   m_physicsEventCount = 0;
   m_calibrationEventCount = 0;
   m_monitoringEventCount = 0;

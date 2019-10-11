@@ -13,7 +13,7 @@ class MonitorModule : public daqling::core::DAQProcess {
   MonitorModule();
   virtual ~MonitorModule();
 
-  void start();
+  void start(int);
   void stop();
   void runner();
 

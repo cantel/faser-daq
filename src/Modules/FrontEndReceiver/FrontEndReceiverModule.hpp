@@ -12,7 +12,7 @@ class FrontEndReceiverModule : public daqling::core::DAQProcess {
  public:
   FrontEndReceiverModule();
   ~FrontEndReceiverModule();
-  void start();
+  void start(int);
   void stop();
 
   void runner();

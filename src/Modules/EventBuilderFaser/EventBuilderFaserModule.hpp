@@ -11,7 +11,7 @@ class EventBuilderFaserModule : public daqling::core::DAQProcess {
   EventBuilderFaserModule();
   ~EventBuilderFaserModule();
 
-  void start();
+  void start(int run_num);
   void stop();
   void runner();
   bool sendEvent(int outChannel, std::vector<daqling::utilities::Binary *>& fragments, int numFragments);

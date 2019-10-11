@@ -7,13 +7,10 @@ class TrackerMonitorModule : public MonitorModule {
   TrackerMonitorModule();
   ~TrackerMonitorModule();
 
-  void runner();
-
-
-
  protected:
 
-  void initialize_hists( );
+  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void register_hists( );
   void register_metrics();
 
 };

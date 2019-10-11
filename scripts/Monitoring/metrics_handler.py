@@ -86,7 +86,7 @@ while True:
     data=sock.recv()
     print(data)
     name=data.split(b':')[0].decode()
-    value=data.split()[1].decode()
+    value=data.split(b': ')[1].decode()
     val=str(time.time())+":"+value
     r.hset(source,name,val)
     if "Rate" in name: # this should be configurable

@@ -8,6 +8,7 @@ daqling_module(module_name)
 daqling_target_sources(${module_name}
     TrackerMonitorModule.cpp
     ../Monitor/MonitorModule.cpp
+    ../../Utils/HistogramManager.cpp
 )
 
 # Provide install target

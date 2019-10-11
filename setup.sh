@@ -22,4 +22,4 @@ alias daqinterface='python3 $FASERTOP/daqling/scripts/Control/daqinterface.py '
 
 #add python and binary directories needed for runnings
 export PYTHONPATH=${FASERTOP}/daqling/scripts/Control:$PYTHONPATH
-export PATH=${FASERTOP}/build/bin:${FASERTOP}/scripts/Web:${FASERTOP}/scripts/Monitoring$PATH
+export PATH=${FASERTOP}/build/bin:${FASERTOP}/scripts/Web:${FASERTOP}/scripts/Monitoring:$PATH

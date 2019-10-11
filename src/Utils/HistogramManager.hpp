@@ -61,7 +61,7 @@ public:
       m_histogram_map[name]->fill(value);
     }
     else 
-      std::cout<<"WARNING : histogram with name "<<name<<" does not exist."<<std::endl;	
+      WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
   private:

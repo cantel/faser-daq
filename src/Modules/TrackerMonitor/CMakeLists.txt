@@ -10,5 +10,6 @@ daqling_target_sources(${module_name}
     ../Monitor/MonitorModule.cpp
 )
 
+
 # Provide install target
 daqling_target_install(${module_name})

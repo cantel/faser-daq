@@ -34,5 +34,7 @@ class DigitizerModule : public daqling::core::DAQProcess {
   
   int m_var;
   
+  vx1730 *m_digitizer;
+  
   
 };

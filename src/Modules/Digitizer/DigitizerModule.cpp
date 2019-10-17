@@ -27,23 +27,24 @@ DigitizerModule::DigitizerModule() { INFO("");
   
   INFO("SAMSAMSAMSAM myVar printout "<<m_var);
   
-  /*
+
   // ip address
   char  ip_addr_string[32];
   strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; // SIS3153 IP address
-  std::cout<<"\nIP Address : "<<ip_addr_string<<std::endl;
+  INFO("IP Address : "<<ip_addr_string);
 
   // vme base address
   std::string vme_base_address_str = std::string(cfg["vme_base_address"]);
   UINT vme_base_address = std::stoi(vme_base_address_str,0,16);
-  INFO("Base VME Address = 0x"<<std::setfill('0')<<std::setw(8)<<std::hex<<vme_base_address<<std::endl);
+  INFO("Base VME Address = 0x"<<std::setfill('0')<<std::setw(8)<<std::hex<<vme_base_address);
 
   // make a new digitizer instance
-  vx1730 *digitizer = new vx1730(ip_addr_string, vme_base_address);
+  m_digitizer = new vx1730(ip_addr_string, vme_base_address);
 
   // test digitizer board interface
-  digitizer->TestComm();
-*/
+  m_digitizer->TestComm();
+
+
 }
 
 DigitizerModule::~DigitizerModule() { INFO(""); }
@@ -51,22 +52,36 @@ DigitizerModule::~DigitizerModule() { INFO(""); }
 // optional (configuration can be handled in the constructor)
 void DigitizerModule::configure() {
   daqling::core::DAQProcess::configure();
-  INFO("");
+  INFO("Digitizer --> Configuring");
+  m_digitizer->Configure(m_config.getConfig()["settings"]);
 }
 
 void DigitizerModule::start() {
   daqling::core::DAQProcess::start();
-  INFO("");
+  INFO("Digitizer --> Starting");
+  m_digitizer->StartAcquisition();
 }
 
 void DigitizerModule::stop() {
   daqling::core::DAQProcess::stop();
-  INFO("");
+  INFO("Digitizer --> Stopping");
+  m_digitizer->StopAcquisition();
 }
 
 void DigitizerModule::runner() {
   INFO("Running...");
   while (m_run) {
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   }
   INFO("Runner stopped");
 }

@@ -27,4 +27,7 @@ if(NOT BUILD_New)
   set(BUILD_New OFF)
 endif()
 
+# Disable some CXX FLAGS for convenience (if needed)
+#set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error")
+
 add_subdirectory(src/Modules)

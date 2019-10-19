@@ -99,7 +99,7 @@ class FileWriterFaserModule : public daqling::core::DAQProcess, public daqling::
     Inputs: const EventHeader* badEvent - Pointer to the bad event header.
     Output: File with the corrupted events information. Currently the file is stored under daq/build.
     */
-    void handleBadEvent(const EventHeader* badEvent);
+    void handleBadEvent(const EventFull* badEvent);
 
     //Write is a pure virtual function in DataLogger so we have to override it. We don't use it though.
     bool write(uint64_t keyId, daqling::utilities::Binary& payload);

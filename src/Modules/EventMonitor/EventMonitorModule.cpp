@@ -30,13 +30,13 @@ void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary)
   }
 
   // only accept physics events
-  if ( m_eventHeader->event_tag != PhysicsTag ) return;
+  if ( m_event->event_tag() != PhysicsTag ) return;
 
-  uint32_t eventStatus = m_eventHeader->status;
+  uint32_t eventStatus = m_event->status();
   eventStatus |= eventUnpackStatus;
   fill_error_status_to_metric( eventStatus );
 
-  uint16_t payloadSize = m_eventHeader->payload_size; 
+  uint16_t payloadSize = m_event->payload_size(); 
   m_metric_payload = payloadSize;
 }
 

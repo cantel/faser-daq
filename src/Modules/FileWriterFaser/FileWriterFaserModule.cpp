@@ -105,7 +105,6 @@ void FileWriterFaserModule::stop()
 void FileWriterFaserModule::runner() 
 {
     INFO(" Running...");
-    const EventHeader* l_eh ;
     while (m_run)
     {
         daqutils::Binary pl;
@@ -114,17 +113,19 @@ void FileWriterFaserModule::runner()
             std::this_thread::sleep_for(1ms);
         }
 	if (!m_run) break;
-        l_eh = static_cast<const EventHeader *>(pl.data()); 
-        m_eventTag = l_eh->event_tag; //Extracting the current event tag (the event tag of the current payload)
-        size_t l_eventSize = l_eh->payload_size+l_eh->header_size;
+	try {
+	  EventFull l_eh(pl);
+	  m_eventTag = l_eh.event_tag(); //Extracting the current event tag (the event tag of the current payload)
+	  size_t l_eventSize = l_eh.size();
        
-        if(m_fileRotationCounters.find(m_eventTag) == m_fileRotationCounters.end() || l_eventSize != pl.size() || l_eh->status != 0) //corrupted event
-        {
-            //handle
-            //handleBadEvent(l_eh);
-        }
-        else
-            m_payloads.write(pl);
+	  if(m_fileRotationCounters.find(m_eventTag) == m_fileRotationCounters.end() || l_eventSize != pl.size()) 
+	    throw std::runtime_error("Unknown or corrupted event");
+	  m_payloads.write(pl);
+	} catch (const std::runtime_error& e) {
+	  ERROR("Got corrupted fragment: "<<e.what());
+	      //handle
+	      //handleBadEvent(l_eh);
+	}
     }
     INFO(" Runner stopped");
 }

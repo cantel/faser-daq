@@ -6,7 +6,7 @@ using namespace std::chrono;
 
 #include "Core/DAQProcess.hpp"
 #include "Utils/Udp.hpp"
-#include "Commons/EventFormat.hpp"
+#include "Commons/RawExampleFormat.hpp"
 
 class FrontEndEmulatorModule : public daqling::core::DAQProcess {
  public:

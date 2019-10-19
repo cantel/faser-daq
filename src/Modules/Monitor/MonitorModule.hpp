@@ -5,6 +5,7 @@
 
 #include "Core/DAQProcess.hpp"
 #include "Commons/EventFormat.hpp"
+#include "Commons/RawExampleFormat.hpp"
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Logging.hpp"
 
@@ -24,11 +25,10 @@ class MonitorModule : public daqling::core::DAQProcess {
   // filled by json configs
   uint32_t m_sourceID;
   
-  EventHeader * m_eventHeader = new EventHeader;
-  EventFragmentHeader * m_fragmentHeader = new EventFragmentHeader;
-  RawFragment * m_rawFragment = new RawFragment;
-  const size_t m_eventHeaderSize = sizeof(EventHeader);
-  const size_t m_fragmentHeaderSize = sizeof(EventFragmentHeader) ;
+  EventFull* m_event=0;
+  const EventFragment* m_fragment=0; // do not delete this one. Owned by m_event!
+  const RawFragment * m_rawFragment = 0 ; // do not delete this one. Owned by m_event!
+
   const size_t m_rawFragmentSize = sizeof(RawFragment) ;
 
   // histogramming
@@ -63,8 +63,6 @@ class MonitorModule : public daqling::core::DAQProcess {
  private: // CHANGE TO PRIVATE
 
   bool m_event_header_unpacked;
-  bool m_fragment_header_unpacked;
-  bool m_raw_fragment_unpacked;
 
   void setupHistogramManager();
 

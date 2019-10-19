@@ -1,22 +1,19 @@
 
 /// \cond
-#include <chrono>
 #include <iomanip>
 /// \endcond
 
 #include "FrontEndReceiverModule.hpp"
 
 #include "Commons/EventFormat.hpp"
-
-using namespace std::chrono_literals;
-using namespace std::chrono;
+#include "Commons/RawExampleFormat.hpp"  
 
 FrontEndReceiverModule::FrontEndReceiverModule() {
   INFO("With config: " << m_config.dump());
 
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = m_config.getSettings();
 
-  if (m_dataIn.init(cfg["dataPort"])) {
+  if (m_dataIn.init(cfg.value("dataPort",0))) {
     ERROR("Cannot bind data port");
     exit(1);
   }
@@ -40,10 +37,6 @@ void FrontEndReceiverModule::stop() {
 }
 
 void FrontEndReceiverModule::runner() {
-  const unsigned source_id = 1;
-  unsigned sequence_number = 0;
-  microseconds timestamp;
-
   INFO("Running...");
   while (m_run) {
     RawFragment buffer;
@@ -54,49 +47,33 @@ void FrontEndReceiverModule::runner() {
       WARNING("Received only"<<payload_size<<" bytes");
       continue;
     }
-    timestamp = duration_cast<microseconds>(system_clock::now().time_since_epoch());
-    const int total_size = sizeof(EventFragmentHeader) + sizeof(char) * payload_size;
-
-    INFO("sequence number " << sequence_number << "  >>  timestamp " << std::hex
-                         << "0x" << timestamp.count() << std::dec << "  >>  payload size "
-                         << payload_size);
-
-    std::unique_ptr<EventFragment> data(new EventFragment);
-    data->header.marker = FragmentMarker;
-    data->header.fragment_tag = PhysicsTag;
-    data->header.trigger_bits = 0;
-    data->header.version_number = EventFragmentVersion;
-    data->header.header_size = sizeof(data->header);
-    data->header.payload_size = payload_size;
-    data->header.status = 0;
+    uint8_t fragment_tag = PhysicsTag;
+    uint64_t event_id=0;   // should add ECR counter her
+    uint16_t bc_id=0;
+    uint32_t source_id=0;  //most likely the system source should be set here and sub-board from payload (or config as well)
+    uint16_t status=0;
     if (buffer.type!=monType) {
-      data->header.event_id = buffer.event_id;  
-      data->header.source_id = buffer.source_id;
-      data->header.bc_id = buffer.bc_id;
+      event_id  = buffer.event_id;  
+      source_id = buffer.source_id;
+      bc_id     = buffer.bc_id;
       if (payload_size != buffer.sizeBytes()) {
-	data->header.status |= CorruptedFragment;
-	WARNING("Got corrupted event, event id "<<data->header.event_id<<" - "<<payload_size<<" != "<<buffer.sizeBytes());
-      }
+	status |= EventStatus::CorruptedFragment;
+	WARNING("Got corrupted event, event id "<<event_id<<" - "<<payload_size<<" != "<<buffer.sizeBytes());
+      } 
     } else {
       MonitoringFragment* monData=(MonitoringFragment*)&buffer;
-      data->header.event_id = monData->counter;
-      data->header.source_id = monData->source_id;
-      data->header.bc_id = 0xFFFF;
-      data->header.fragment_tag = MonitoringTag;
+      fragment_tag = MonitoringTag;
+      event_id = monData->counter;
+      source_id = monData->source_id;
+      bc_id = 0xFFFF;
     }
-    data->header.timestamp = timestamp.count();
-    memcpy(data->payload, &buffer, payload_size);
+    Binary rawData(&buffer,payload_size);
+    std::unique_ptr<EventFragment> fragment(new EventFragment(fragment_tag, source_id, event_id, bc_id, rawData));
+    fragment->set_status(status);
 
-    // ready to be sent to EB
-    auto binary = daqling::utilities::Binary(static_cast<const void *>(data.get()), total_size);
+    m_connections.put(1, const_cast<Binary&>(fragment->raw())); //BP: put() is not declared const...
 
-    // print binary
-    if (sequence_number%10==0) 
-      std::cout << binary << std::endl;
-
-    m_connections.put(1, binary);
-
-    sequence_number++;
   }
+
   INFO(" Runner stopped");
 }

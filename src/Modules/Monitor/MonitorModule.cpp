@@ -34,8 +34,7 @@ MonitorModule::MonitorModule() {
 
 MonitorModule::~MonitorModule() { 
 
-  delete m_eventHeader;
-  delete m_fragmentHeader;
+  delete m_event;
   delete m_rawFragment;
 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
@@ -64,8 +63,6 @@ void MonitorModule::runner() {
   INFO("Running...");
 
   m_event_header_unpacked = false;
-  m_fragment_header_unpacked = false;
-  m_raw_fragment_unpacked = false;
   bool noData(true);
   daqling::utilities::Binary eventBuilderBinary;
 
@@ -81,8 +78,6 @@ void MonitorModule::runner() {
       monitor(eventBuilderBinary);
 
       m_event_header_unpacked = false;
-      m_fragment_header_unpacked = false;
-      m_raw_fragment_unpacked = false;
   }
 
 
@@ -142,14 +137,15 @@ void MonitorModule::register_hists() {
 uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBuilderBinary ) {
 
   uint16_t dataStatus(0);
-
-  m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
-  m_event_header_unpacked = true;
-  if (m_eventHeader->marker != EventMarker) {
-    ERROR("Corrupted event header. Wrong event marker returned.");
+  try {
+    if (m_event) delete m_event;
+    m_event = new EventFull(eventBuilderBinary); //BP note that this unpacks full event
+  } catch (const std::runtime_error& e) {
+    ERROR(e.what());
     return dataStatus |= CorruptedFragment;
   }
-
+  m_event_header_unpacked = true;
+  
   return  dataStatus;
 
 }
@@ -157,64 +153,16 @@ uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBu
 uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
 
   uint16_t dataStatus=0;
-  bool foundSourceID(false);
 
   if (!m_event_header_unpacked) {
-    m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
-     m_event_header_unpacked = true;
-    if (m_eventHeader->marker != EventMarker) {
-      ERROR("Corrupted event header. Wrong event marker returned.");
-      return dataStatus |= CorruptedFragment;
-     }
+    dataStatus=unpack_event_header(eventBuilderBinary);
+    if (dataStatus) return dataStatus;
   }
 
-  uint16_t fragmentCnt = m_eventHeader->fragment_count;
-  uint32_t totalDataPacketSize = eventBuilderBinary.size();
-
-  uint32_t accumulatedPayloadSize = 0;
-  uint8_t cnt = 0;
-
-  EventFragmentHeader * currentChannelFragmentHeader = new EventFragmentHeader;
-
-  for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
-	
-    cnt++;	
-    memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
-
-    if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
-
-     uint32_t source_id = currentChannelFragmentHeader->source_id;
-
-     if ( source_id == m_sourceID ) {
-		   foundSourceID = true;
-		   memcpy(m_fragmentHeader, currentChannelFragmentHeader, m_fragmentHeaderSize);
-                   m_fragment_header_unpacked = true;
-                   if (m_fragmentHeader->marker != FragmentMarker){
-      		     ERROR("Corrupted fragment. Wrong fragment marker returned.");
-                     return dataStatus |= CorruptedFragment;
-                   }
-		   break;
-     }
-     accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
-  }
-  delete currentChannelFragmentHeader;
-
-
-  if ( foundSourceID ) {
-    // sanity check
-    auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
-    if ( totalCalculatedSize > totalDataPacketSize ) {
-    	ERROR("total byte size unpacked, "
-    	                            << totalCalculatedSize 
-                            <<", larger than the total data packet size, "
-                            <<totalDataPacketSize
-                            <<". FIX ME." );
-    	return dataStatus |= CorruptedFragment;
-    }
-  }
-  else {
-      	ERROR("no correct fragment source ID found.");
-  	dataStatus |= MissingFragment;
+  m_fragment=m_event->find_fragment(m_sourceID);
+  if (m_fragment==0) {
+    ERROR("no correct fragment source ID found.");
+    dataStatus |= MissingFragment;
   }
   return dataStatus;
 }
@@ -222,63 +170,11 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
 uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary ) {
 
   uint16_t dataStatus=0;
-  bool foundSourceID(false);
 
-  if (!m_event_header_unpacked) {
-     m_eventHeader = static_cast<EventHeader *>(eventBuilderBinary.data());
-     m_event_header_unpacked = true;
-  }
+  dataStatus=unpack_fragment_header(eventBuilderBinary);
+  if (dataStatus) return dataStatus;
 
-  uint16_t fragmentCnt = m_eventHeader->fragment_count;
-  uint32_t totalDataPacketSize = eventBuilderBinary.size();
-
-  uint32_t accumulatedPayloadSize = 0;
-  uint8_t cnt = 0;
-
-  EventFragmentHeader * currentChannelFragmentHeader = new EventFragmentHeader;
-
-  for ( unsigned int frgidx=0; frgidx<fragmentCnt; ++frgidx){
-	
-    cnt++;	
-    memcpy( currentChannelFragmentHeader, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize, m_fragmentHeaderSize);
-
-    if ( m_fragmentHeaderSize != currentChannelFragmentHeader->header_size )  ERROR("fragment header gives wrong size!");
-
-     uint32_t source_id = currentChannelFragmentHeader->source_id;
-
-     if ( source_id == m_sourceID ) {
-		   foundSourceID = true;
-                   memcpy(m_rawFragment, static_cast<const char*>(eventBuilderBinary.data())+m_eventHeaderSize+m_fragmentHeaderSize*(frgidx)+accumulatedPayloadSize+m_fragmentHeaderSize, m_rawFragmentSize );
-		   memcpy(m_fragmentHeader, currentChannelFragmentHeader, m_fragmentHeaderSize);
-                   m_fragment_header_unpacked = true;
-                   m_raw_fragment_unpacked = true;
-                   if (m_fragmentHeader->marker != FragmentMarker){
-      		     ERROR("Corrupted fragment. Wrong fragment marker returned.");
-                     return dataStatus |= CorruptedFragment;
-                   }
-		   break;
-     }
-     accumulatedPayloadSize += currentChannelFragmentHeader->payload_size; 
-  }
-  delete currentChannelFragmentHeader;
-
-
-  if ( foundSourceID ) {
-    // sanity check
-    auto totalCalculatedSize = m_eventHeaderSize+m_fragmentHeaderSize*cnt+accumulatedPayloadSize ;
-    if ( totalCalculatedSize > totalDataPacketSize ) {
-    	ERROR("total byte size unpacked, "
-    	                            << totalCalculatedSize 
-                            <<", larger than the total data packet size, "
-                            <<totalDataPacketSize
-                            <<". FIX ME." );
-    	return dataStatus |= CorruptedFragment; //To review: is this the right error type for this?
-    }
-  }
-  else {
-      	ERROR("no correct fragment source ID found.");
-  	dataStatus |= MissingFragment;
-  }
+  m_rawFragment=m_fragment->payload<const RawFragment*>();
   
   return dataStatus;
 }

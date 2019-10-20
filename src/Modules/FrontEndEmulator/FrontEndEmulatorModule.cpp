@@ -82,7 +82,7 @@ void FrontEndEmulatorModule::runner() {
     data.source_id  = m_fragID;
     data.event_id   = m_eventCounter;
     data.bc_id      = buffer.bc_id;
-    data.dataLength = std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE);
+    data.dataLength = (std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE)/4)*4;
     INFO("Fragment size: "<<data.sizeBytes()<<" bytes");
     if (flat(generator)<m_probMissFrag) {
       INFO("Emulating missed fragment for global id:"<<buffer.event_id);

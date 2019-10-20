@@ -15,7 +15,7 @@ TrackerMonitorModule::TrackerMonitorModule() {
 
    INFO("");
 
-   auto cfg = m_config.getConfig()["settings"];
+   auto cfg = m_config.getSettings();
    m_sourceID = cfg["fragmentID"];
 
  }
@@ -29,7 +29,7 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
-  if ( m_eventHeader->event_tag != PhysicsTag ) return;
+  if ( m_event->event_tag() != PhysicsTag ) return;
 
   auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
   if ( (fragmentUnpackStatus & CorruptedFragment) | (fragmentUnpackStatus & MissingFragment)){
@@ -37,10 +37,10 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
     return;
   }
 
-  uint32_t fragmentStatus = m_fragmentHeader->status;
+  uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
   
-  uint16_t payloadSize = m_fragmentHeader->payload_size; 
+  uint16_t payloadSize = m_fragment->payload_size(); 
 
   m_histogrammanager->fill("h_tracker_payloadsize", payloadSize);
   m_metric_payload = payloadSize;

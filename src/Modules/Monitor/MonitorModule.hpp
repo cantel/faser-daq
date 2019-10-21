@@ -3,13 +3,13 @@
 #include <tuple>
 #include <list>
 
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 #include "Commons/EventFormat.hpp"
 #include "Commons/RawExampleFormat.hpp"
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Logging.hpp"
 
-class MonitorModule : public daqling::core::DAQProcess {
+class MonitorModule : public FaserProcess {
  public:
   MonitorModule();
   virtual ~MonitorModule();

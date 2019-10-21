@@ -22,17 +22,26 @@ FrontEndReceiverModule::FrontEndReceiverModule() {
 
 FrontEndReceiverModule::~FrontEndReceiverModule() { }
 
+void FrontEndReceiverModule::configure() {
+  FaserProcess::configure();
+  registerVariable(m_recvCount,"RecvCount");  // variable is reset to zero here, but any reset on start of run has to be added to start() manually
+  
+  // any onetime electronics configuration should be done here
+  // in case of issues, set m_status to STATUS_WARN or STATUS_ERROR
+  // For fatal error set m_state="failed" as well to prevent starting run
+}
+
+void FrontEndReceiverModule::sendECR() {
+  // should send ECR to electronics here. In case of failure, seet m_status to STATUS_ERROR
+}
+
 void FrontEndReceiverModule::start(int run_num) {
-  DAQProcess::start(run_num);
+  FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
-  m_recvCount = 0;
-  if (m_stats_on) {
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_recvCount, "RecvCount", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-  }
 }
 
 void FrontEndReceiverModule::stop() {
-  DAQProcess::stop();
+  FaserProcess::stop();
   INFO("getState: " << this->getState());
 }
 
@@ -48,9 +57,9 @@ void FrontEndReceiverModule::runner() {
       continue;
     }
     uint8_t fragment_tag = PhysicsTag;
-    uint64_t event_id=0;   // should add ECR counter her
+    uint64_t event_id=0;   
     uint16_t bc_id=0;
-    uint32_t source_id=0;  //most likely the system source should be set here and sub-board from payload (or config as well)
+    uint32_t source_id=0;  //most likely the system source should be set here from and sub-board from payload (or from config)
     uint16_t status=0;
     if (buffer.type!=monType) {
       event_id  = buffer.event_id;  
@@ -68,10 +77,11 @@ void FrontEndReceiverModule::runner() {
       bc_id = 0xFFFF;
     }
     Binary rawData(&buffer,payload_size);
+    event_id|=m_ECRcount<<24;
     std::unique_ptr<EventFragment> fragment(new EventFragment(fragment_tag, source_id, event_id, bc_id, rawData));
     fragment->set_status(status);
 
-    m_connections.put(1, const_cast<Binary&>(fragment->raw())); //BP: put() is not declared const...
+    m_connections.put(1, const_cast<Binary&>(fragment->raw())); //BP: put() is not declared const, hence the cast...
 
   }
 

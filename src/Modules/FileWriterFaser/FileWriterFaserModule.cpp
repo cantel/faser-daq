@@ -87,7 +87,7 @@ FileWriterFaserModule::~FileWriterFaserModule()
 
 void FileWriterFaserModule::start(int run_num) 
 {
-    DAQProcess::start(run_num);
+    FaserProcess::start(run_num);
     INFO(" getState: " << getState());
     m_monitor_thread = std::make_unique<std::thread>(&FileWriterFaserModule::monitor_runner, this);
     m_bookKeeper = std::make_unique<std::thread>(&FileWriterFaserModule::bookKeeper, this, 1); //1 is the channel
@@ -96,7 +96,7 @@ void FileWriterFaserModule::start(int run_num)
 
 void FileWriterFaserModule::stop() 
 {
-    DAQProcess::stop();
+    FaserProcess::stop();
     INFO(" getState: " << this->getState());
     m_monitor_thread->join();
     INFO("Joined successfully monitor thread");

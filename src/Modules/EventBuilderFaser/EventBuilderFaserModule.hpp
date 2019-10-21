@@ -2,16 +2,17 @@
 
 #include <vector>
 
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 #include "Commons/EventFormat.hpp"
 
 enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 
-class EventBuilderFaserModule : public daqling::core::DAQProcess {
+class EventBuilderFaserModule : public FaserProcess {
  public:
   EventBuilderFaserModule();
   ~EventBuilderFaserModule();
 
+  void configure();
   void start(int run_num);
   void stop();
   void runner();
@@ -30,7 +31,6 @@ private:
   std::atomic<int> m_physicsEventCount;
   std::atomic<int> m_calibrationEventCount;
   std::atomic<int> m_monitoringEventCount;
-  std::atomic<int> m_status;
   std::atomic<float> m_queueFraction;
   std::atomic<int> m_corruptFragmentCount;
   std::atomic<int> m_duplicateCount;

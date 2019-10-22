@@ -130,7 +130,7 @@
 			</div>
 			<div class = "col-6">
 				<div class="container" id="control-box">
-					<div class = "jumbotron" style= "width: 700px; color:aqua;background-color: #1a52c6">
+					<div class = "jumbotron" style= "width: 800px; color:aqua;background-color: #1a52c6">
 						<center><h4>CONTROLS</h4></center>
 						<br>
 						<br>
@@ -140,10 +140,14 @@
 							<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
 							
 							<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
-						
 							<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
 						</center>
-					<br>
+						<br>
+						<center>	
+						<input id="PAUSE" type="submit" class="btn btn-warning btn-lg" value="PAUSE" onclick="pause();">
+						<input id="ECR" type="submit" class="btn btn-success btn-lg" value="ECR" onclick="sendECR();">
+						</center>
+
 					<br>
 					<div class="container">			
 						<center>

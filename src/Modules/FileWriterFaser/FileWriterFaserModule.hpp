@@ -25,7 +25,7 @@
 #include <queue>
 /// \endcond
 
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 #include "Core/DataLogger.hpp"
 #include "Utils/Binary.hpp"
 #include "Utils/ChunkedStorage.hpp"
@@ -38,7 +38,7 @@
  *   Relies on fixed size file IO with Binary splitting and concatenation.
  * Date: April 2019
  */
-class FileWriterFaserModule : public daqling::core::DAQProcess, public daqling::core::DataLogger
+class FileWriterFaserModule : public FaserProcess, public daqling::core::DataLogger
 {
   public:
     FileWriterFaserModule();

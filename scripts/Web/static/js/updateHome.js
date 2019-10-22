@@ -50,6 +50,7 @@ function updateCommandAvailability(data){
 	var allREADY = true;
 	var allRUNNING = true;
 	var allBooted = true;
+        var allPaused = true;
 	
 	for(var i = 0; i < Object.keys(data.allStatus).length; i++){
 		if( (data.allStatus[i].state) != "DOWN"){
@@ -62,6 +63,9 @@ function updateCommandAvailability(data){
 
 		if( (data.allStatus[i].state) != "RUN"){
 			allRUNNING = false;
+		}
+		if( (data.allStatus[i].state) != "PAUSED"){
+			allPaused = false;
 		}
 }
 
@@ -91,18 +95,35 @@ function updateCommandAvailability(data){
 					CHILD_WINDOW.disableAddingOrChangingBoards(true);
 				});*/
 		}
-		if(allREADY){
+		if(allREADY || allPaused){
 		document.getElementById("START").disabled = false;
+
+
 		}
 		else{
 			document.getElementById("START").disabled = true;
 		}
 
-		if(allRUNNING){
+		if( allPaused){
+		document.getElementById("ECR").disabled = false;
+
+
+		}
+		else{
+			document.getElementById("ECR").disabled = true;
+		}
+
+		if(allRUNNING||allPaused){
 			document.getElementById("STOP").disabled = false;
 		}
 		else{
 			document.getElementById("STOP").disabled = true;
+		}
+		if(allRUNNING){
+		    document.getElementById("PAUSE").disabled = false;
+		}
+		else{
+		    document.getElementById("PAUSE").disabled = true;
 		}
 
 	}
@@ -246,7 +267,19 @@ function initialise(){
 }
 
 function start(){
+    if (document.getElementById("ECR").disabled) {
 	$.get('/start');
+    } else {
+	$.get('/unpause');
+    }
+}
+
+function pause(){
+	$.get('/pause');
+}
+
+function sendECR(){
+	$.get('/ecr');
 }
 
 function stop(){
@@ -282,6 +315,8 @@ function disableControls(bool){
 	document.getElementById("START").disabled = bool;
 	document.getElementById("STOP").disabled = bool;
 	document.getElementById("SHUTDOWN").disabled = bool;
+	document.getElementById("PAUSE").disabled = bool;
+	document.getElementById("ECR").disabled = bool;
 }
 
 function convertToDate(timestamp){

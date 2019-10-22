@@ -41,7 +41,7 @@ MonitorModule::~MonitorModule() {
 }
 
 void MonitorModule::start(int run_num) {
-  DAQProcess::start(run_num);
+  FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
 
   register_metrics();
@@ -52,7 +52,7 @@ void MonitorModule::start(int run_num) {
 }
 
 void MonitorModule::stop() {
-  DAQProcess::stop();
+  FaserProcess::stop();
 
   INFO("... finalizing ...");
 

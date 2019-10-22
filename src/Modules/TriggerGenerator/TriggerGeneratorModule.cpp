@@ -30,13 +30,24 @@ TriggerGeneratorModule::~TriggerGeneratorModule() {
 
 void TriggerGeneratorModule::start(int run_num) {
   m_eventCounter=0;
-  DAQProcess::start(run_num);
+  m_enabled=true;
+  FaserProcess::start(run_num);
   INFO("");
 }
 
 void TriggerGeneratorModule::stop() {
-  DAQProcess::stop();
+  FaserProcess::stop();
   INFO("");
+}
+
+void TriggerGeneratorModule::enableTrigger(const std::string &/*arg*/) {
+  m_enabled=true;
+  INFO("Enabled trigger");
+}
+
+void TriggerGeneratorModule::disableTrigger(const std::string &/*arg*/) {
+  m_enabled=false;
+  INFO("Disabled trigger");
 }
 
 void TriggerGeneratorModule::runner() {
@@ -47,16 +58,18 @@ void TriggerGeneratorModule::runner() {
   std::exponential_distribution<float> distribution(1./sleepTime);
   std::uniform_int_distribution<int> bcGen(1,3564);
   while (m_run) {
-    m_eventCounter++;
     int museconds=distribution(generator);
-    if (m_eventCounter % msgFreq == 0)
-      INFO("Sending trigger for event: "<<m_eventCounter<<" then sleep "<<museconds<<" microseconds");
-    TriggerMsg trigger;
-    trigger.event_id=m_eventCounter;
-    trigger.bc_id=bcGen(generator);
-    
-    for(auto& target : m_targets) {
-      target->send(&trigger, sizeof(trigger));
+
+    if (m_enabled) {
+      m_eventCounter++;
+      TriggerMsg trigger;
+      trigger.event_id=m_eventCounter;
+      trigger.bc_id=bcGen(generator);
+      if (m_eventCounter % msgFreq == 0)
+	INFO("Sending trigger for event: "<<m_eventCounter<<" then sleep "<<museconds<<" microseconds");
+      for(auto& target : m_targets) {
+	target->send(&trigger, sizeof(trigger));
+      }
     }
     usleep(museconds);
   }

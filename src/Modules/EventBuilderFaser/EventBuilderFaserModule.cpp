@@ -25,50 +25,36 @@ EventBuilderFaserModule::EventBuilderFaserModule() {
 
 EventBuilderFaserModule::~EventBuilderFaserModule() { }
 
+
+void EventBuilderFaserModule::configure() {
+  FaserProcess::configure();
+  registerVariable(m_physicsEventCount, "PhysicsEvents");
+  registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
+  registerVariable(m_monitoringEventCount, "MonitoringEvents");
+  registerVariable(m_monitoringEventCount, "MonitoringRate", metrics::RATE);
+  registerVariable(m_calibrationEventCount, "CalibrationEvents");
+  registerVariable(m_calibrationEventCount, "CalibrationRate", metrics::RATE);
+  registerVariable(m_run_number, "RunNumber");
+  registerVariable(m_run_start, "RunStart");
+  registerVariable(m_corruptFragmentCount, "CorruptFragmentErrors");
+  registerVariable(m_duplicateCount, "DuplicateEventErrors");
+  registerVariable(m_duplicateSourceCount, "DuplicateSourceErrors");
+  registerVariable(m_overflowCount, "OverflowEventErrors");
+  registerVariable(m_timeoutCount, "TimeoutEventErrors");
+  registerVariable(m_BCIDMismatchCount, "BCIDMisMatches");
+  registerVariable(m_queueFraction, "QueueFraction");
+}
+
 void EventBuilderFaserModule::start(int run_num) {
-  DAQProcess::start(run_num);
-  m_physicsEventCount = 0;
-  m_calibrationEventCount = 0;
-  m_monitoringEventCount = 0;
+  FaserProcess::start(run_num);
   m_run_number = run_num; 
   m_run_start = std::time(nullptr);
   m_status = STATUS_OK;
-  m_queueFraction = 0;
-  m_duplicateCount = 0;
-  m_duplicateSourceCount = 0;
-  m_overflowCount = 0;
-  m_timeoutCount = 0;
-  m_BCIDMismatchCount = 0;
-  m_corruptFragmentCount = 0;
-  if (m_stats_on) {
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(1), "EB-CHN1-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(1), "EB-CHN1-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(2), "EB-CHN2-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(2), "EB-CHN2-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    // Claire: above metrics will in future be added automatically by daqling for every existing connection
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_calibrationEventCount, "CalibrationEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_calibrationEventCount, "CalibrationRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_run_number, "RunNumber", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_run_start, "RunStart", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_status, "Status", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<float>, float>(&m_queueFraction, "QueueFraction", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::FLOAT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_corruptFragmentCount, "CorruptFragmentErrors", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_duplicateCount, "DuplicateEventErrors", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_duplicateSourceCount, "DuplicateSourceErrors", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_overflowCount, "OverflowEventErrors", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_timeoutCount, "TimeoutEventErrors", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_BCIDMismatchCount, "BCIDMisMatches", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-  }
   INFO("getState: " << getState());
 }
 
 void EventBuilderFaserModule::stop() {
-  DAQProcess::stop();
+  FaserProcess::stop();
   INFO("getState: " << this->getState());
 }
 

@@ -24,6 +24,8 @@ nameMap={}
 #r1.hset("runningFile", "fileName", "current.json")
 #r1.hset("runningFile", "isRunning", 0)
 
+FakeData=False
+
 for comp in config["components"]:
   if not "settings" in comp: continue
   if not "stats_uri" in comp["settings"]: continue
@@ -46,7 +48,8 @@ while True:
 
   #temporary : simulating the frontEndReciever data
 
-  for comp in config["components"]:
+  if FakeData:
+    for comp in config["components"]:
       if comp["type"].startswith("FrontEndReceiver"):
         for i in range(1,9):
           #print("fake")
@@ -82,11 +85,13 @@ while True:
             #r.lpush(metric, val)
   for sock in socks:
     source=nameMap[sock]
-    print("Message from: "+source)
+    #print("Message from: "+source)
     data=sock.recv()
-    print(data)
-    name=data.split(b':')[0].decode()
-    value=data.split(b': ')[1].decode()
+    #print(data)
+    
+    name,value=data.split(b': ')
+    name=name.decode()
+    value=value.decode()
     val=str(time.time())+":"+value
     r.hset(source,name,val)
     if "Rate" in name: # this should be configurable

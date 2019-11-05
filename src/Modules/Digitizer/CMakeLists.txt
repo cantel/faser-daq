@@ -15,7 +15,6 @@ target_link_libraries( ${module_name} PUBLIC
                         Helper 
                         Helper_Event 
                         Helper_sis3153 
-                        Helper_vx1730 
                         sis3153-core)
 
 # Provide install target

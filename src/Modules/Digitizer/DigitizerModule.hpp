@@ -17,17 +17,18 @@
 
 #pragma once
 
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
+#include "Commons/EventFormat.hpp"
 
 #include "Comm_vx1730.h"
 
-class DigitizerModule : public daqling::core::DAQProcess {
+class DigitizerModule : public FaserProcess {
  public:
   DigitizerModule();
   ~DigitizerModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
-  void start();
+  void start(int);
   void stop();
 
   void runner();

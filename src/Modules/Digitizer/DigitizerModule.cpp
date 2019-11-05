@@ -51,37 +51,73 @@ DigitizerModule::~DigitizerModule() { INFO(""); }
 
 // optional (configuration can be handled in the constructor)
 void DigitizerModule::configure() {
-  daqling::core::DAQProcess::configure();
+  FaserProcess::configure();
   INFO("Digitizer --> Configuring");
   m_digitizer->Configure(m_config.getConfig()["settings"]);
 }
 
-void DigitizerModule::start() {
-  daqling::core::DAQProcess::start();
+void DigitizerModule::start(int run_num) {
+  FaserProcess::start(run_num);
   INFO("Digitizer --> Starting");
   m_digitizer->StartAcquisition();
 }
 
 void DigitizerModule::stop() {
-  daqling::core::DAQProcess::stop();
+  FaserProcess::stop();
   INFO("Digitizer --> Stopping");
   m_digitizer->StopAcquisition();
 }
 
 void DigitizerModule::runner() {
   INFO("Running...");
+  
+  int count=0;  
+  
   while (m_run) {
   
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+    // ask digitizer for events in buffer
+    
+    count+=1;    
+    INFO("Count"<<count);
+    if(count%5==0){
+      m_digitizer->SendSWTrigger();
+    }
+    
+    INFO("EventCount : "<<m_digitizer->DumpEventCount());
+    
+    if(m_digitizer->DumpEventCount()){
+
+
+      /////////////////////////////////
+      // get the event
+      /////////////////////////////////
+      INFO("Get the Event");
+      uint32_t raw_payload[MAXFRAGSIZE];
+      m_digitizer->ReadRawEvent( raw_payload, true );
+
+
+      int payload_size = Payload_GetEventSize( raw_payload );
+      const int total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
+
+      const EventFragment* fragment;
+      
+      // FIXME : these are variables that should be controlled by DAQ
+      uint8_t  local_fragment_tag = 0;
+      uint32_t local_source_id    = 0;
+      uint64_t local_event_id     = 0;
+      uint16_t local_bc_id        = 0;
+
+      fragment = new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) );
+      
+      fragment->payload();
+      
+      
+
+
+    
+      Wait(1.0);
+    
+    }
   }
   INFO("Runner stopped");
 }

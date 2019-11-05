@@ -13,7 +13,7 @@ class FrontEndEmulatorModule : public daqling::core::DAQProcess {
   FrontEndEmulatorModule();
   ~FrontEndEmulatorModule();
 
-  void start();
+  void start(int);
   void stop();
 
   void runner();

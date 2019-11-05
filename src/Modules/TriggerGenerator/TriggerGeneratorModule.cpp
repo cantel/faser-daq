@@ -28,9 +28,9 @@ TriggerGeneratorModule::~TriggerGeneratorModule() {
   INFO("");
 }
 
-void TriggerGeneratorModule::start() {
+void TriggerGeneratorModule::start(int run_num) {
   m_eventCounter=0;
-  DAQProcess::start();
+  DAQProcess::start(run_num);
   INFO("");
 }
 

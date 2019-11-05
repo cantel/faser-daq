@@ -27,8 +27,8 @@ void NewModule::configure() {
   INFO("");
 }
 
-void NewModule::start() {
-  daqling::core::DAQProcess::start();
+void NewModule::start(int run_num) {
+  daqling::core::DAQProcess::start(run_num);
   INFO("");
 }
 

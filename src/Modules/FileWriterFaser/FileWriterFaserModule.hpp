@@ -25,7 +25,7 @@
 #include <queue>
 /// \endcond
 
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 #include "Core/DataLogger.hpp"
 #include "Utils/Binary.hpp"
 #include "Utils/ChunkedStorage.hpp"
@@ -38,7 +38,7 @@
  *   Relies on fixed size file IO with Binary splitting and concatenation.
  * Date: April 2019
  */
-class FileWriterFaserModule : public daqling::core::DAQProcess, public daqling::core::DataLogger
+class FileWriterFaserModule : public FaserProcess, public daqling::core::DataLogger
 {
   public:
     FileWriterFaserModule();
@@ -99,7 +99,7 @@ class FileWriterFaserModule : public daqling::core::DAQProcess, public daqling::
     Inputs: const EventHeader* badEvent - Pointer to the bad event header.
     Output: File with the corrupted events information. Currently the file is stored under daq/build.
     */
-    void handleBadEvent(const EventHeader* badEvent);
+    void handleBadEvent(const EventFull* badEvent);
 
     //Write is a pure virtual function in DataLogger so we have to override it. We don't use it though.
     bool write(uint64_t keyId, daqling::utilities::Binary& payload);

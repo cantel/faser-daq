@@ -23,17 +23,17 @@ NewModule::~NewModule() { INFO(""); }
 
 // optional (configuration can be handled in the constructor)
 void NewModule::configure() {
-  daqling::core::DAQProcess::configure();
+  FaserProcess::configure();
   INFO("");
 }
 
 void NewModule::start(int run_num) {
-  daqling::core::DAQProcess::start(run_num);
+  FaserProcess::start(run_num);
   INFO("");
 }
 
 void NewModule::stop() {
-  daqling::core::DAQProcess::stop();
+  FaserProcess::stop();
   INFO("");
 }
 

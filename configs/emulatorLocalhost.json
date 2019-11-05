@@ -142,13 +142,18 @@
       }
     },
     {
-      "name": "filedatawriter01",
+      "name": "filewriterfaser01",
       "host": "localhost",
       "port": 5558,
-      "type": "FileDataWriter",
+      "type": "FileWriterFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "filename_pattern": "/tmp/test-%D.%n.%c.bin"
+	  "maxFileSizeInGB": 1,
+	  "fileFormat": [{"fileName": "/tmp/physics-"},
+			 {"fileName": "/tmp/calibration-"},
+			 {"fileName": "/tmp/monitoring-"},
+			 {"fileName": "/tmp/tlb-"}],
+	  "badEventsFileName": "/tmp/debug-"
       },
       "connections": {
         "receivers": [

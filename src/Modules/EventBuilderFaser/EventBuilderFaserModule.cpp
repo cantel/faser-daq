@@ -6,127 +6,106 @@
 #include <algorithm>
 
 #include "EventBuilderFaserModule.hpp"
-#include "Commons/EventFormat.hpp"
+#include <stdexcept>
 
+using namespace std::chrono;
 using namespace std::chrono_literals;
 
 EventBuilderFaserModule::EventBuilderFaserModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = m_config.getSettings();
 
-  m_maxPending = cfg["maxPending"];
+  m_maxPending = cfg.value("maxPending",10);
+  m_timeout = cfg.value("timeout_ms",1000);
 
-  m_numChannels=m_config.getConfig()["connections"]["receivers"].size();
-  m_numOutChannels=m_config.getConfig()["connections"]["senders"].size();
+  m_numChannels=m_config.getConnections()["receivers"].size();
+  m_numOutChannels=m_config.getConnections()["senders"].size();
 
 }
 
 EventBuilderFaserModule::~EventBuilderFaserModule() { }
 
+
+void EventBuilderFaserModule::configure() {
+  FaserProcess::configure();
+  registerVariable(m_physicsEventCount, "PhysicsEvents");
+  registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
+  registerVariable(m_monitoringEventCount, "MonitoringEvents");
+  registerVariable(m_monitoringEventCount, "MonitoringRate", metrics::RATE);
+  registerVariable(m_calibrationEventCount, "CalibrationEvents");
+  registerVariable(m_calibrationEventCount, "CalibrationRate", metrics::RATE);
+  registerVariable(m_run_number, "RunNumber");
+  registerVariable(m_run_start, "RunStart");
+  registerVariable(m_corruptFragmentCount, "CorruptFragmentErrors");
+  registerVariable(m_duplicateCount, "DuplicateEventErrors");
+  registerVariable(m_duplicateSourceCount, "DuplicateSourceErrors");
+  registerVariable(m_overflowCount, "OverflowEventErrors");
+  registerVariable(m_timeoutCount, "TimeoutEventErrors");
+  registerVariable(m_BCIDMismatchCount, "BCIDMisMatches");
+  registerVariable(m_queueFraction, "QueueFraction");
+}
+
 void EventBuilderFaserModule::start(int run_num) {
-  DAQProcess::start(run_num);
-  m_physicsEventCount = 0;
-  m_calibrationEventCount = 0;
-  m_monitoringEventCount = 0;
-  m_run_number = 100; //BP: should get this from run control
+  FaserProcess::start(run_num);
+  m_run_number = run_num; 
   m_run_start = std::time(nullptr);
   m_status = STATUS_OK;
-  m_queueFraction = 0;
-  if (m_stats_on) {
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(1), "EB-CHN1-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(1), "EB-CHN1-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getQueueStat(2), "EB-CHN2-QueueSizeGuess", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    m_statistics->registerVariable<std::atomic<size_t>, size_t>(&m_connections.getMsgStat(2), "EB-CHN2-NumMessages", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::SIZE);
-    // Claire: above metrics will in future be added automatically by daqling for every existing connection
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_physicsEventCount, "PhysicsRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_monitoringEventCount, "MonitoringRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_calibrationEventCount, "CalibrationEvents", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_calibrationEventCount, "CalibrationRate", daqling::core::metrics::RATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_run_number, "RunNumber", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_run_start, "RunStart", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_status, "Status", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<float>, float>(&m_queueFraction, "QueueFraction", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::FLOAT);
-  }
   INFO("getState: " << getState());
 }
 
 void EventBuilderFaserModule::stop() {
-  DAQProcess::stop();
+  FaserProcess::stop();
   INFO("getState: " << this->getState());
 }
 
 
-bool EventBuilderFaserModule::sendEvent(int outChannel,
-			     std::vector<daqling::utilities::Binary *>& fragments,
-			     int numFragments) {
+bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,
+					uint64_t event_number,
+					int outChannel,
+					std::vector<const EventFragment *>& fragments) {
       daqling::utilities::Binary outFragments;
-      EventHeader header;
-      header.marker = EventMarker;
-      header.event_tag = PhysicsTag; //updated below
-      header.trigger_bits = 0; //set below
-      header.version_number = EventHeaderVersion;
-      header.header_size = sizeof(header);
-      header.payload_size = 0; //set below
-      header.run_number = m_run_number;
-      header.fragment_count = 0;
-      header.event_id = 0;
-      header.bc_id = 0xFFFF;
-      header.status = 0;
-      header.timestamp = 0;
+      EventFull event(event_tag,m_run_number,event_number);
 
-      for(int ch=0;ch<numFragments;ch++) {
+      for(unsigned int ch=0;ch<fragments.size();ch++) {
 	if (fragments.at(ch)) {
-	  outFragments += *fragments[ch];
-	  const EventFragment* fragment = static_cast<const EventFragment*>(fragments[ch]->data());
-	  header.status |= fragment->header.status;
-	  header.fragment_count += 1;
-	  header.trigger_bits |= fragment->header.trigger_bits;
-	  if (!header.timestamp) { //BP: should be taken from TLB fragment if available
-	    header.timestamp = fragment->header.timestamp;
-	    header.bc_id = fragment->header.bc_id;
-	    header.event_id = fragment->header.event_id;
-	    header.event_tag = fragment->header.fragment_tag;
-	  } else {
-	    if (header.bc_id != fragment->header.bc_id) { //Need to handle near match for digitizer
-	      WARNING("Mismatch in BCID for event "<<header.event_id<<" : "<<header.bc_id<<" != "<<fragment->header.bc_id);
-	      header.status |= BCIDMismatch;
+	  try {
+	    auto status=event.addFragment(fragments[ch]);
+	    if (status&EventStatus::BCIDMismatch) {
+	      WARNING("Mismatch in BCID for event "<<event_number<<" : "<<event.bc_id()<<" != "<<fragments[ch]->bc_id());
+	      m_BCIDMismatchCount++;
 	    }
-	    if (header.event_tag != fragment->header.fragment_tag) {
-	      WARNING("Mismatch in event tag for event "<<header.event_id<<" : "<<header.event_tag<<" != "<<fragment->header.fragment_tag);
-	      header.status |= TagMismatch;
-	    }
+	  } catch (const std::runtime_error& e) {
+	    ERROR("Got error in fragment: "<<e.what());
+	    m_duplicateSourceCount++;
 	  }
-	  delete fragments[ch];
 	} else {
-	  WARNING("Missing fragment for event "<<header.event_id<<": No fragment for channel "<<ch);
-	  header.status |= MissingFragment;
+	  WARNING("Missing fragment for event "<<event_number<<": No fragment for channel "<<ch);
+	  event.updateStatus(EventStatus::MissingFragment);
 	}
       }
-
-      header.payload_size=outFragments.size();
-      daqling::utilities::Binary data(static_cast<const void *>(&header), sizeof(header));
-      data+=outFragments;
-      INFO("Sending event "<<header.event_id<<" - "<<data.size()<<" bytes.");
-      for ( unsigned int outch=m_numChannels+1;outch<=m_numChannels+m_numOutChannels;outch++){
-          m_connections.put(outch, data);
-      }
+      INFO("Sending event "<<event.event_id()<<" - "<<event.size()<<" bytes.");
+      Binary* data=event.raw();
+      m_connections.put(outChannel, *data);
+      delete data;
       return true;
 }
+
+
+struct pendingEvent_t {
+  time_point<steady_clock> start_time;
+  unsigned int fragmentCount;
+  std::vector<const EventFragment *> fragments;
+};
 
 void EventBuilderFaserModule::runner() {
   INFO("Running...");
 
   unsigned int channelNum=1;
   bool noData=true;
-  std::map<uint64_t,std::vector<daqling::utilities::Binary *> > pendingFragments;
-  std::map<uint64_t,unsigned int> pendingFragmentsCounts;
-  std::vector<uint64_t> pendingEventIDs;
-  pendingEventIDs.reserve(m_maxPending+1);
-  daqling::utilities::Binary* blob = new daqling::utilities::Binary;
+  std::map<uint64_t, pendingEvent_t> pendingEvents;
+  daqling::utilities::Binary  blob;
   while (m_run) { //BP: At the moment there is no flushing of partial events on stop
-    m_queueFraction=1.0*pendingEventIDs.size()/m_maxPending;
+    m_queueFraction=1.0*pendingEvents.size()/m_maxPending;
     if (m_queueFraction>0.5) { //BP: not a good example of status flag filling as nothing else is considered
       m_status=STATUS_WARN;
       if (m_queueFraction>0.85) {
@@ -140,60 +119,72 @@ void EventBuilderFaserModule::runner() {
     channelNum++;
     if (channelNum>m_numChannels) channelNum=1;
     
-    if (!m_connections.get(channel, *blob)) {
+    if (!m_connections.get(channel, blob)) {
       if (noData && channelNum==1) std::this_thread::sleep_for(10ms);
       noData=true;
       continue;
     }
     noData=false;
-    if (blob->size()<(int)sizeof(EventFragmentHeader)) {
-      ERROR("Got to small fragment ("<<blob->size()<<" bytes) from channel "<<channel);
+    const EventFragment* fragment;
+    try {
+      fragment = new EventFragment(blob);
+    } catch (const std::runtime_error& e) {
+      ERROR("Got error in fragment ("<<blob.size()<<" bytes) from channel "<<channel<<": "<<e.what());
+      INFO("Received:\n"<<blob);
+      m_corruptFragmentCount++;
       continue;
     }
-    const EventFragment* fragment=(const EventFragment*)blob->data();
-    uint64_t event_id=fragment->header.event_id;
-    if ((fragment->header.fragment_tag==MonitoringTag) || (fragment->header.fragment_tag==TLBMonitoringTag)) {
+    auto event_id=fragment->event_id();
+    auto fragment_tag=fragment->fragment_tag(); 
+    if ((fragment_tag==MonitoringTag) || (fragment_tag==TLBMonitoringTag)) {
       INFO("Got monitoring fragment : "<<event_id<<" from channel "<<channel);
       //send monitoring fragments immediately as no other fragments are expected for thos
-      std::vector<daqling::utilities::Binary *> toSend;
-      toSend.push_back(blob);
-      blob = new daqling::utilities::Binary;
-      sendEvent(m_numChannels+1,toSend,1);
-      m_monitoringEventCount+=1;
+      std::vector<const EventFragment *> monFragmentList;
+      monFragmentList.push_back(fragment);
+      sendEvent(fragment_tag,m_monitoringEventCount,m_numChannels+1,monFragmentList);
+      m_monitoringEventCount++;
       continue;
     }
  
-    INFO("Got data fragment : "<<event_id<<" from channel "<<channel << " with size " << blob->size());
-    if (pendingFragments.find(event_id)==pendingFragments.end()) {
-      pendingFragments[event_id]=std::vector<daqling::utilities::Binary *>(m_numChannels,0);
-      pendingFragmentsCounts[event_id]=0;
-      pendingEventIDs.push_back(event_id);
+    INFO("Got data fragment : "<<event_id<<" from channel "<<channel << " with size " << blob.size());
+    if (pendingEvents.find(event_id)==pendingEvents.end()) { //got first fragment in a new event
+      struct pendingEvent_t pending;
+      pending.start_time=steady_clock::now();
+      pending.fragmentCount=0;
+      pending.fragments=std::vector<const EventFragment *>(m_numChannels,0);
+      pendingEvents[event_id]=pending;
     }
     int ch=channel-1;
-    if (pendingFragments[event_id][ch]!=0) {
+    if (pendingEvents[event_id].fragments[ch]!=0) { 
+      //BP: this won't catch if an incomplete event was already sent
       ERROR("Got same event from same source more than once!");
+      m_duplicateCount++;
     } else {
-      pendingFragmentsCounts[event_id]++;
+      pendingEvents[event_id].fragmentCount++;
     }
-    pendingFragments[event_id][ch]=blob;
-    blob = new daqling::utilities::Binary;
+    pendingEvents[event_id].fragments[ch]=fragment;
 
     uint64_t eventToSend=0;
-    if (pendingFragmentsCounts[event_id]==m_numChannels) {
+    if (pendingEvents[event_id].fragmentCount==m_numChannels) {
       eventToSend=event_id;
-    } else if (pendingEventIDs.size()>m_maxPending) {
-      WARNING("Too many events pending - will send first incomplete event");
-      eventToSend=pendingEventIDs[0];
+    } else if (pendingEvents.size()>m_maxPending) {
+      eventToSend=pendingEvents.begin()->first;
+      WARNING("Too many events pending - will send first incomplete event (EventID: "<<eventToSend<<")");
+      m_overflowCount++;
+    } else {
+      auto oldestEvent=pendingEvents.begin()->second;
+      if ( duration_cast<std::chrono::milliseconds>(steady_clock::now()-oldestEvent.start_time).count()>m_timeout) {
+	eventToSend=pendingEvents.begin()->first;
+	WARNING("Incomplete event timed out (EventID: "<<eventToSend<<")");
+	m_timeoutCount++;
+      }
     }
     
     if (eventToSend) {
-      sendEvent(m_numChannels+1,pendingFragments[eventToSend],m_numChannels);
-      m_physicsEventCount+=1;
-      pendingFragments.erase(pendingFragments.find(eventToSend));
-      pendingFragmentsCounts.erase(pendingFragmentsCounts.find(eventToSend));
-      pendingEventIDs.erase(std::find(pendingEventIDs.begin(),pendingEventIDs.end(),eventToSend));
+      sendEvent(PhysicsTag,m_physicsEventCount,m_numChannels+1,pendingEvents[eventToSend].fragments);
+      pendingEvents.erase(pendingEvents.find(eventToSend));
+      m_physicsEventCount++;
     }
   }
-  delete blob;
   INFO("Runner stopped");
 }

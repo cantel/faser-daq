@@ -5,7 +5,7 @@
 FrontEndEmulatorModule::FrontEndEmulatorModule() {
   INFO("");
 
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = m_config.getSettings();
 
   m_meanSize = cfg["meanSize"];
   m_rmsSize = cfg["rmsSize"];
@@ -40,12 +40,12 @@ FrontEndEmulatorModule::~FrontEndEmulatorModule() {
 
 void FrontEndEmulatorModule::start(int run_num) {
   m_eventCounter=0;
-  DAQProcess::start(run_num);
+  FaserProcess::start(run_num);
   INFO("");
 }
 
 void FrontEndEmulatorModule::stop() {
-  DAQProcess::stop();
+  FaserProcess::stop();
   INFO("");
 }
 
@@ -82,7 +82,7 @@ void FrontEndEmulatorModule::runner() {
     data.source_id  = m_fragID;
     data.event_id   = m_eventCounter;
     data.bc_id      = buffer.bc_id;
-    data.dataLength = std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE);
+    data.dataLength = (std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE)/4)*4;
     INFO("Fragment size: "<<data.sizeBytes()<<" bytes");
     if (flat(generator)<m_probMissFrag) {
       INFO("Emulating missed fragment for global id:"<<buffer.event_id);

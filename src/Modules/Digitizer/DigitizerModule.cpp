@@ -111,6 +111,16 @@ void DigitizerModule::runner() {
       
       fragment->payload();
       
+      std::vector<uint32_t>* samData = fragment->raw().data<std::vector<uint32_t>*>();
+
+      std::cout<<"size : "<<samData->size()<<std::endl;
+
+      //std::cout<<"FragmentSize : "<<fragment->payload_size()<<std::endl;
+//      std::cout<<"Fragment0 : "<<(fragment->raw().data())[0]<<std::endl;
+//       std::cout<<"Fragment1 : "<<fragment->payload()[1]<<std::endl;
+//       std::cout<<"Fragment2 : "<<fragment->payload()[2]<<std::endl;
+//       std::cout<<"Fragment3 : "<<fragment->payload()[3]<<std::endl;
+      
       
 
 

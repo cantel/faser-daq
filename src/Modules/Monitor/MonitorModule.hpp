@@ -60,7 +60,7 @@ class MonitorModule : public daqling::core::DAQProcess {
   void fill_error_status_to_metric(uint32_t fragmentStatus);
   void fill_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name);
 
- private: // CHANGE TO PRIVATE
+ private:
 
   bool m_event_header_unpacked;
   bool m_fragment_header_unpacked;

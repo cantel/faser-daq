@@ -17,15 +17,15 @@
 
 #pragma once
 
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 
-class NewModule : public daqling::core::DAQProcess {
+class NewModule : public FaserProcess {
  public:
   NewModule();
   ~NewModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
-  void start();
+  void start(int);
   void stop();
 
   void runner();

@@ -28,7 +28,7 @@ class BinaryReader:
 
 class EventHeader:
     def __init__(self,rh):
-        vals=rh.readStruct("112224138228")
+        vals=rh.readStruct("1122241388228")
         if vals:
             self.marker=vals[0]
             self.event_tag=vals[1]
@@ -39,16 +39,17 @@ class EventHeader:
             self.fragment_count=vals[6]
             self.run_number=vals[7]
             self.event_id=vals[8]
-            self.bc_id=vals[9]
-            self.status=vals[10]
-            self.timestamp=vals[11]
+            self.event_counter=vals[9]
+            self.bc_id=vals[10]
+            self.status=vals[11]
+            self.timestamp=vals[12]
         else:
             raise Exception("End of file")
         if self.marker!=0xBB:
             raise Exception("Wrong Event Marker")
         if self.version_number!=0x0001:
             raise Exception("Wrong Event Format Version")
-        if self.header_size!=4*9:
+        if self.header_size!=4*11:
             raise Exception("Wrong header size")
     def __str__(self):
         return "Run %6d, Event %6d, BC %4d (%s) - status: 0x%08x, tag: %2d, trigger: 0x%04x, %2d fragments, %5d bytes" % (self.run_number,self.event_id,self.bc_id,time.ctime(self.timestamp/1000000),self.status,self.event_tag,self.trigger_bits,self.fragment_count,self.payload_size)

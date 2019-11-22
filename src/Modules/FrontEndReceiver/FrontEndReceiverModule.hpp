@@ -6,13 +6,15 @@
 /// \endcond
 
 #include "Utils/Udp.hpp"
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 
-class FrontEndReceiverModule : public daqling::core::DAQProcess {
+class FrontEndReceiverModule : public FaserProcess {
  public:
   FrontEndReceiverModule();
   ~FrontEndReceiverModule();
-  void start();
+  void configure();
+  void sendECR();
+  void start(int);
   void stop();
 
   void runner();

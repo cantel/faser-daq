@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, send_file, abort, session, Response
 from datetime import datetime
 from flask_scss import Scss
+import functools
 import json
 from jsonschema import validate
 import os
@@ -96,6 +97,31 @@ def start():
 	h.spawnJoin(d['components'], dc.startProcess)
 	return "true"
 
+@app.route("/pause")
+def pause():
+	print("pause button pressed")
+	d = session.get('data')	
+	dc = h.createDaqInstance(d)
+	h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="disableTrigger"))
+	return "true"
+
+@app.route("/ecr")
+def ecr():
+	print("ECR button pressed")
+	d = session.get('data')	
+	dc = h.createDaqInstance(d)
+	h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="ECR"))
+	return "true"
+
+@app.route("/unpause")
+def unpause():
+	print("unpause (start) button pressed")
+	d = session.get('data')	
+	dc = h.createDaqInstance(d)
+	h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="enableTrigger"))
+	return "true"
+
+
 @app.route("/stop")
 def stop():
 	print("stop button pressed")	
@@ -125,7 +151,7 @@ def sendStatusJsonFile():
 		for p in d['components']:	
 			rawStatus, timeout = dc.getStatus(p)
 			status = h.translateStatus(rawStatus, timeout)
-			print('status of this componen ', p['name'],"is: ", status)
+			#print('status of this componen ', p['name'],"is: ", status)
 			statusArr.append({'name' : p['name'] , 'state' : str(status)})
 	return jsonify({'allStatus' : statusArr})
 

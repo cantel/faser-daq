@@ -4,16 +4,16 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 #include "Utils/Udp.hpp"
-#include "Commons/EventFormat.hpp"
+#include "Commons/RawExampleFormat.hpp"
 
-class FrontEndEmulatorModule : public daqling::core::DAQProcess {
+class FrontEndEmulatorModule : public FaserProcess {
  public:
   FrontEndEmulatorModule();
   ~FrontEndEmulatorModule();
 
-  void start();
+  void start(int);
   void stop();
 
   void runner();

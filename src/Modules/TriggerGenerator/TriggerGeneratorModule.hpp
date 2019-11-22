@@ -3,19 +3,22 @@
 #include <vector>
 
 #include "Utils/Udp.hpp"
-#include "Core/DAQProcess.hpp"
+#include "Commons/FaserProcess.hpp"
 
-class TriggerGeneratorModule : public daqling::core::DAQProcess {
+class TriggerGeneratorModule : public FaserProcess {
  public:
   TriggerGeneratorModule();
   ~TriggerGeneratorModule();
 
-  void start();
+  void start(int);
+  void enableTrigger(const std::string &arg);
+  void disableTrigger(const std::string &arg);
   void stop();
 
   void runner();
 private:
   unsigned int m_eventCounter;
   float m_rate;
+  std::atomic<bool> m_enabled;
   std::vector<UdpSender*> m_targets;
 };

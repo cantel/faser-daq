@@ -11,6 +11,11 @@ HistogramManager::HistogramManager(std::unique_ptr<zmq::socket_t>& statSock, uns
 HistogramManager::~HistogramManager(){
   m_stop_thread = true;
   if(m_histogram_thread.joinable()) m_histogram_thread.join();
+
+  for (std::map<std::string, HistBase *>::iterator hist_itr = m_histogram_map.begin(); hist_itr!=m_histogram_map.end(); hist_itr++){
+    delete (hist_itr->second);
+  }
+
   m_histogram_map.clear();
 }
 

@@ -26,7 +26,7 @@ class HistBase {
   HistBase(){}
   HistBase(std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, float delta_t) : name(name), title(name), xlabel(xlabel), ylabel(ylabel), xmin(xmin), xmax(xmax), xbins(xbins), delta_t(delta_t) {timestamp = std::time(nullptr); json_object = json::object(); }
   HistBase(std::string name, std::string xlabel, std::string ylabel, unsigned int xbins, float delta_t) : name(name), title(name), xlabel(xlabel), ylabel(ylabel), xbins(xbins), delta_t(delta_t) { timestamp = std::time(nullptr); }
-  ~HistBase(){}
+  virtual ~HistBase(){}
   //define hist
   std::string name;
   std::string title;

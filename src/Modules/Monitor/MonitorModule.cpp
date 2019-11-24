@@ -150,7 +150,7 @@ uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBu
 
 }
 
-uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
@@ -159,7 +159,7 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
     if (dataStatus) return dataStatus;
   }
 
-  m_fragment=m_event->find_fragment(m_sourceID);
+  m_fragment=m_event->find_fragment(sourceID);
   if (m_fragment==0) {
     ERROR("no correct fragment source ID found.");
     dataStatus |= MissingFragment;
@@ -167,15 +167,25 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
   return dataStatus;
 }
 
-uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
+  auto dataStatus = unpack_fragment_header(eventBuilderBinary, m_sourceID);
+  return dataStatus;
+}
+
+uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
-  dataStatus=unpack_fragment_header(eventBuilderBinary);
+  dataStatus=unpack_fragment_header(eventBuilderBinary, sourceID);
   if (dataStatus) return dataStatus;
 
   m_rawFragment=m_fragment->payload<const RawFragment*>();
   
+  return dataStatus;
+}
+
+uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary) {
+  auto dataStatus = unpack_full_fragment(eventBuilderBinary, m_sourceID);
   return dataStatus;
 }
 

@@ -14,10 +14,6 @@ using namespace std::chrono;
 TrackerMonitorModule::TrackerMonitorModule() { 
 
    INFO("");
-
-   auto cfg = m_config.getSettings();
-   m_sourceID = cfg["fragmentID"];
-
  }
 
 TrackerMonitorModule::~TrackerMonitorModule() { 
@@ -29,13 +25,15 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
-  if ( m_event->event_tag() != PhysicsTag ) return;
+  if ( m_event->event_tag() != m_tag ) return;
 
-  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
-  if ( (fragmentUnpackStatus & CorruptedFragment) | (fragmentUnpackStatus & MissingFragment)){
+  //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
+  auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;
   }
+  // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
 
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );

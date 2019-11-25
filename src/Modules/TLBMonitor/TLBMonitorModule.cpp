@@ -14,10 +14,6 @@ using namespace std::chrono;
 TLBMonitorModule::TLBMonitorModule() { 
 
    INFO("");
-
-   auto cfg = m_config.getSettings();
-   m_sourceID = cfg["fragmentID"];
-
  }
 
 TLBMonitorModule::~TLBMonitorModule() { 
@@ -28,15 +24,17 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
+ 
+  if ( m_event->event_tag() != m_tag ) return;
 
-  if ( m_event->event_tag() != PhysicsTag ) return;
-
-  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
-  if ( (fragmentUnpackStatus & CorruptedFragment) | (fragmentUnpackStatus & MissingFragment)){
+  //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
+  auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     fill_error_status_to_histogram( fragmentUnpackStatus, "h_tlb_errorcount" );
     return;
   }
+  // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
 
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );

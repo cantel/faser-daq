@@ -14,6 +14,26 @@ using namespace std::chrono;
 
 MonitorModule::MonitorModule() { 
    INFO("");
+
+   auto cfg = m_config.getSettings();
+   auto cfg_sourceID = m_config.getConfig()["settings"]["fragmentID"];
+   std::cout<<"cf_sourceID = "<<cfg_sourceID<<std::endl;
+   if (cfg_sourceID!="" && cfg_sourceID!=nullptr)
+      m_sourceID = cfg_sourceID;
+   else m_sourceID=0;
+   auto cfg_tag = m_config.getConfig()["settings"]["eventTag"];
+   std::cout<<"cf_tag = "<<cfg_tag<<std::endl;
+   if (cfg_tag!="" && cfg_tag!=nullptr) m_tag = cfg_tag;
+   else {
+     WARNING("No event tag configured. Defaulting to PhysicsTag.");
+     m_tag=0; //default to Physics. ... should it though?
+   }
+ 
+   if (m_tag>TLBMonitoringTag) { // to update when all tags finalised. unless add dummy enum TagMAX.
+     ERROR("Configured tag does not exist!");
+     m_status = STATUS_ERROR;
+   }
+
    m_histogramming_on = false;
    m_metric_payload=0;
    m_metric_error_ok=0;
@@ -35,7 +55,6 @@ MonitorModule::MonitorModule() {
 MonitorModule::~MonitorModule() { 
 
   delete m_event;
-  delete m_rawFragment;
 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
 }
@@ -161,7 +180,7 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
 
   m_fragment=m_event->find_fragment(sourceID);
   if (m_fragment==0) {
-    ERROR("no correct fragment source ID found.");
+    ERROR("No correct fragment source ID found.");
     dataStatus |= MissingFragment;
   }
   return dataStatus;
@@ -179,7 +198,23 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
   dataStatus=unpack_fragment_header(eventBuilderBinary, sourceID);
   if (dataStatus) return dataStatus;
 
-  m_rawFragment=m_fragment->payload<const RawFragment*>();
+  switch (m_tag) {
+    case PhysicsTag:
+      m_rawFragment=m_fragment->payload<const RawFragment*>();
+      break;
+    case CalibrationTag:
+      m_rawFragment=m_fragment->payload<const RawFragment*>();
+      break;
+    case MonitoringTag:
+      m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>();
+      break;
+    case TLBMonitoringTag:
+      m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>(); //to be changed once subdetector specific formats defined.
+      break;
+    default:
+      ERROR("Specified tag not found.");
+      dataStatus |= UnclassifiedError;
+  }
   
   return dataStatus;
 }

@@ -100,7 +100,7 @@ struct pendingEvent_t {
 void EventBuilderFaserModule::runner() {
   INFO("Running...");
 
-  unsigned int channelNum=1;
+  unsigned int channelNum=0;
   bool noData=true;
   std::map<uint64_t, pendingEvent_t> pendingEvents;
   daqling::utilities::Binary  blob;
@@ -117,10 +117,10 @@ void EventBuilderFaserModule::runner() {
     
     int channel=channelNum;
     channelNum++;
-    if (channelNum>m_numChannels) channelNum=1;
+    if (channelNum>=m_numChannels) channelNum=0;
     
     if (!m_connections.get(channel, blob)) {
-      if (noData && channelNum==1) std::this_thread::sleep_for(10ms);
+      if (noData && channelNum==0) std::this_thread::sleep_for(10ms);
       noData=true;
       continue;
     }
@@ -141,7 +141,7 @@ void EventBuilderFaserModule::runner() {
       //send monitoring fragments immediately as no other fragments are expected for thos
       std::vector<const EventFragment *> monFragmentList;
       monFragmentList.push_back(fragment);
-      sendEvent(fragment_tag,m_monitoringEventCount,m_numChannels+1,monFragmentList);
+      sendEvent(fragment_tag,m_monitoringEventCount,m_numChannels,monFragmentList);
       m_monitoringEventCount++;
       continue;
     }
@@ -154,7 +154,7 @@ void EventBuilderFaserModule::runner() {
       pending.fragments=std::vector<const EventFragment *>(m_numChannels,0);
       pendingEvents[event_id]=pending;
     }
-    int ch=channel-1;
+    int ch=channel;
     if (pendingEvents[event_id].fragments[ch]!=0) { 
       //BP: this won't catch if an incomplete event was already sent
       ERROR("Got same event from same source more than once!");

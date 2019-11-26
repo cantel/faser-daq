@@ -108,7 +108,7 @@ void FileWriterFaserModule::runner()
     while (m_run)
     {
         daqutils::Binary pl;
-        while (!m_connections.get(1, std::ref(pl)) && m_run)
+        while (!m_connections.get(0, std::ref(pl)) && m_run)
         {
             std::this_thread::sleep_for(1ms);
         }

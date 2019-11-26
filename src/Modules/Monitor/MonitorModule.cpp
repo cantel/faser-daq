@@ -68,7 +68,7 @@ void MonitorModule::runner() {
 
   while (m_run) {
 
-      if ( !m_connections.get(1, eventBuilderBinary)){
+      if ( !m_connections.get(0, eventBuilderBinary)){
           if ( !noData ) std::this_thread::sleep_for(10ms);
           noData=true;
           continue;

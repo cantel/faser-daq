@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "group": "faser",
   "components": [
     {
@@ -73,7 +73,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8101
@@ -94,7 +94,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8102
@@ -111,20 +111,20 @@
       "settings": {
 	      "maxPending": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8101
           },
           {
             "type": "pair",
-            "chid": 2,
+            "chid": 1,
             "transport": "tcp",
             "host": "localhost",
             "port": 8102
@@ -133,7 +133,7 @@
         "senders": [
           {
             "type": "pubsub",
-            "chid": 3,
+            "chid": 2,
             "transport": "tcp",
             "host": "*",
             "port": 8103
@@ -151,13 +151,13 @@
         "fragmentID": 1000001,
         "outputDir": "/home/faser/cantel/",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pubsub",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8103
@@ -177,13 +177,13 @@
         "outputDir": "/home/faser/cantel/",
       	"timeDelayTolerance": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pubsub",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8103
@@ -203,13 +203,13 @@
         "outputDir": "/home/faser/cantel/",
       	"timeDelayTolerance": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pubsub",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8103

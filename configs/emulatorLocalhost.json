@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "group": "faser",
   "components": [
     {
@@ -74,7 +74,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8101
@@ -95,7 +95,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8102
@@ -117,14 +117,14 @@
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8101
           },
           {
             "type": "pair",
-            "chid": 2,
+            "chid": 1,
             "transport": "tcp",
             "host": "localhost",
             "port": 8102
@@ -133,7 +133,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 3,
+            "chid": 2,
             "transport": "tcp",
             "host": "*",
             "port": 8103
@@ -159,7 +159,7 @@
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8103

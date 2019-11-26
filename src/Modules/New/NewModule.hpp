@@ -25,7 +25,7 @@ class NewModule : public FaserProcess {
   ~NewModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
-  void start(int);
+  void start(unsigned);
   void stop();
 
   void runner();

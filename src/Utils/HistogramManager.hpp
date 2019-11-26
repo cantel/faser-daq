@@ -25,6 +25,8 @@ public:
   void setZMQpublishing(bool zmq_publisher){m_zmq_publisher = zmq_publisher;}
 
   void start();
+
+  void stop();
   
   void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, float delta_t = 60. ) {
     INFO("Registering histogram "<<name);
@@ -130,6 +132,7 @@ public:
   std::map< std::string, HistBase * > m_histogram_map;
 
   void CheckHistograms();
+  void flushHistograms();
 
 
 };

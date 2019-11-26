@@ -29,7 +29,7 @@ MonitorModule::MonitorModule() {
      m_tag=0; //default to Physics. ... should it though?
    }
  
-   if (m_tag>TLBMonitoringTag) { // to update when all tags finalised. unless add dummy enum TagMAX.
+   if (m_tag>TLBMonitoringTag) { // not needed once have module-level schema validation.
      ERROR("Configured tag does not exist!");
      m_status = STATUS_ERROR;
    }
@@ -48,12 +48,14 @@ MonitorModule::MonitorModule() {
    m_metric_error_empty=0;
    m_metric_error_duplicate=0;
    m_metric_error_unpack=0;
+
    setupHistogramManager();
 
  }
 
 MonitorModule::~MonitorModule() { 
 
+  if (m_histogramming_on) m_histogrammanager->stop();
   delete m_event;
 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
@@ -66,7 +68,7 @@ void MonitorModule::start(int run_num) {
   register_metrics();
   register_hists();
 
-  m_histogrammanager->start();
+  if ( m_histogramming_on ) m_histogrammanager->start();
 
 }
 
@@ -74,7 +76,6 @@ void MonitorModule::stop() {
   FaserProcess::stop();
 
   INFO("... finalizing ...");
-
   INFO("getState: " << this->getState());
 }
 
@@ -149,7 +150,8 @@ void MonitorModule::register_error_metrics( std::string module_short_name) {
 
 void MonitorModule::register_hists() {
 
- INFO(" ... registering histograms in base Monitor class ... " );
+ INFO(" ... No histograms to register. Will not start histogram service. " );
+ m_histogramming_on = false;
 
 }
 

@@ -40,7 +40,7 @@ MonitorModule::~MonitorModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
 }
 
-void MonitorModule::start(int run_num) {
+void MonitorModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
 

@@ -28,7 +28,7 @@ TriggerGeneratorModule::~TriggerGeneratorModule() {
   INFO("");
 }
 
-void TriggerGeneratorModule::start(int run_num) {
+void TriggerGeneratorModule::start(unsigned int run_num) {
   m_eventCounter=0;
   m_enabled=true;
   FaserProcess::start(run_num);

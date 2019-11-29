@@ -67,8 +67,8 @@
       "type": "FrontEndReceiver",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	      "stats_uri": "tcp://*:7055",
-        "dataPort": 18001
+	  "stats_uri": "tcp://localhost:7055",
+          "dataPort": 18001
       },
       "connections": {
         "senders": [
@@ -110,8 +110,8 @@
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	      "stats_uri": "tcp://*:7057",
-        "maxPending": 10
+	  "stats_uri": "tcp://localhost:7057",
+          "maxPending": 10
       },
       "connections": {
         "receivers": [

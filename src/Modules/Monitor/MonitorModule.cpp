@@ -34,23 +34,6 @@ MonitorModule::MonitorModule() {
      m_status = STATUS_ERROR;
    }
 
-   m_histogramming_on = false;
-   m_metric_payload=0;
-   m_metric_error_ok=0;
-   m_metric_error_unclassified=0;
-   m_metric_error_bcidmismatch=0;
-   m_metric_error_tagmismatch=0;
-   m_metric_error_timeout=0;
-   m_metric_error_overflow=0;
-   m_metric_error_corrupted=0;
-   m_metric_error_dummy=0;
-   m_metric_error_missing=0;
-   m_metric_error_empty=0;
-   m_metric_error_duplicate=0;
-   m_metric_error_unpack=0;
-
-   setupHistogramManager();
-
  }
 
 MonitorModule::~MonitorModule() { 
@@ -61,12 +44,22 @@ MonitorModule::~MonitorModule() {
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
 }
 
+void MonitorModule::configure() {
+  INFO("Configuring...");
+
+  FaserProcess::configure();
+  register_metrics();
+
+  m_histogramming_on = false;
+  setupHistogramManager();
+  register_hists();
+
+  return;
+}
+
 void MonitorModule::start(int run_num) {
   FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
-
-  register_metrics();
-  register_hists();
 
   if ( m_histogramming_on ) m_histogrammanager->start();
 
@@ -118,30 +111,33 @@ void MonitorModule::register_metrics() {
 
 void MonitorModule::register_error_metrics( std::string module_short_name) {
 
+   m_metric_payload=0;
+   m_metric_error_ok=0;
+   m_metric_error_unclassified=0;
+   m_metric_error_bcidmismatch=0;
+   m_metric_error_tagmismatch=0;
+   m_metric_error_timeout=0;
+   m_metric_error_overflow=0;
+   m_metric_error_corrupted=0;
+   m_metric_error_dummy=0;
+   m_metric_error_missing=0;
+   m_metric_error_empty=0;
+   m_metric_error_duplicate=0;
+   m_metric_error_unpack=0;
+
   if ( m_stats_on ) {
     INFO("... registering error metrics ... " );
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_ok, module_short_name+"_error_ok", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unclassified, module_short_name+"_error_unclassified", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_bcidmismatch, module_short_name+"_error_bcidmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_tagmismatch, module_short_name+"_error_tagmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_timeout, module_short_name+"_error_timeout", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_overflow, module_short_name+"_error_overflow", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_corrupted, module_short_name+"_error_corrupted", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_dummy, module_short_name+"_error_dummy", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unpack, module_short_name+"_error_unpack", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_missing, module_short_name+"_error_missing", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_empty, module_short_name+"_error_empty", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
     m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_duplicate, module_short_name+"_error_duplicate", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
   }
   return;

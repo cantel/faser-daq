@@ -85,7 +85,7 @@ FileWriterFaserModule::~FileWriterFaserModule()
     INFO("EVERYTHING JOINED SUCCESSFULY");
 }
 
-void FileWriterFaserModule::start(int run_num) 
+void FileWriterFaserModule::start(unsigned int run_num) 
 {
     FaserProcess::start(run_num);
     INFO(" getState: " << getState());
@@ -178,7 +178,6 @@ void FileWriterFaserModule::writeToFile(int ftid)
         {
             l_eventTag = m_eventTag;
             l_bufferReady = m_bufferReady;
-            
             
             while(m_fileStreamsReady[m_eventTag] == 0 && m_run) //Waiting for the bookKeeper to open the files
             {

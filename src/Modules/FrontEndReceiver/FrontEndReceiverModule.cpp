@@ -35,7 +35,7 @@ void FrontEndReceiverModule::sendECR() {
   // should send ECR to electronics here. In case of failure, seet m_status to STATUS_ERROR
 }
 
-void FrontEndReceiverModule::start(int run_num) {
+void FrontEndReceiverModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
 }

@@ -25,7 +25,7 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
-  if ( m_event->event_tag() != m_tag ) return;
+  if ( m_event->event_tag() != m_eventTag ) return;
 
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);

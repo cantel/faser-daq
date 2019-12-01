@@ -25,7 +25,7 @@ class MonitorModule : public FaserProcess {
 
   // filled by json configs
   uint32_t m_sourceID=0;
-  uint8_t m_tag;
+  uint8_t m_eventTag;
   
   EventFull* m_event=0;
   const EventFragment* m_fragment=0; // do not delete this one. Owned by m_event!

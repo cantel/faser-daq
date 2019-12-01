@@ -23,13 +23,13 @@ MonitorModule::MonitorModule() {
    else m_sourceID=0;
    auto cfg_tag = m_config.getConfig()["settings"]["eventTag"];
    std::cout<<"cf_tag = "<<cfg_tag<<std::endl;
-   if (cfg_tag!="" && cfg_tag!=nullptr) m_tag = cfg_tag;
+   if (cfg_tag!="" && cfg_tag!=nullptr) m_eventTag = cfg_tag;
    else {
      WARNING("No event tag configured. Defaulting to PhysicsTag.");
-     m_tag=0; //default to Physics. ... should it though?
+     m_eventTag=0; //default to Physics. ... should it though?
    }
  
-   if (m_tag>TLBMonitoringTag) { // not needed once have module-level schema validation.
+   if (m_eventTag>TLBMonitoringTag) { // not needed once have module-level schema validation.
      ERROR("Configured tag does not exist!");
      m_status = STATUS_ERROR;
    }
@@ -196,7 +196,7 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
   dataStatus=unpack_fragment_header(eventBuilderBinary, sourceID);
   if (dataStatus) return dataStatus;
 
-  switch (m_tag) {
+  switch (m_eventTag) {
     case PhysicsTag:
       m_rawFragment=m_fragment->payload<const RawFragment*>();
       break;

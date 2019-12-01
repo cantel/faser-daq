@@ -12,6 +12,13 @@
 #include "Utils/Logging.hpp"
 using namespace boost::histogram;
 
+namespace Axis {
+  enum Range{
+   NONEXTENDABLE=0,
+   EXTENDABLE=1
+  };
+}
+
 class HistogramManager{
 public:
 
@@ -28,7 +35,7 @@ public:
 
   void stop();
   
-  void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, float delta_t = 60. ) {
+  void registerHistogram( std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, Axis::Range extendable, unsigned int delta_t = 60) {
     INFO("Registering histogram "<<name);
 
     auto interval_in_s = m_interval/1000.;
@@ -37,22 +44,42 @@ public:
       delta_t = m_interval ;
       INFO("publishing interval cannnot be set below "<<interval_in_s<<" s. Setting publishing interval to "<<interval_in_s<<" s."); 
     }
-    HistBase * hist = new Hist<hist_t>(name, xlabel, xmin, xmax, xbins, delta_t);
+  
+    HistBase * hist;
+    if (extendable)
+      hist = new Hist<stretchy_hist_t>(name, xlabel, ylabel, xmin, xmax, xbins, Axis::Range::EXTENDABLE, delta_t);
+    else 
+      hist = new Hist<hist_t>(name, xlabel, ylabel, xmin, xmax, xbins, Axis::Range::NONEXTENDABLE, delta_t);
     m_histogram_map.insert( std::make_pair( hist->name, hist));
 
     return;
   }
 
-  void registerHistogram( std::string name, std::string xlabel, std::vector<std::string> categories, float delta_t ){
+  void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, unsigned int delta_t = 60 ) {
+    registerHistogram( name, xlabel, "counts", xmin, xmax, xbins, Axis::Range::NONEXTENDABLE, delta_t); 
+    return;
+  }
+
+  void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, Axis::Range extendable, unsigned int delta_t = 60 ) {
+    registerHistogram( name, xlabel, "counts", xmin, xmax, xbins, extendable, delta_t); 
+    return;
+  }
+
+  void registerHistogram( std::string name, std::string xlabel, std::string ylabel, std::vector<std::string> categories, unsigned int delta_t = 60 ){
     INFO("Registering histogram "<<name);
 
-    HistBase * hist = new Hist<categoryhist_t>(name, xlabel, categories, delta_t);
+    HistBase * hist = new CategoryHist(name, xlabel, ylabel, categories, delta_t);
     m_histogram_map.insert( std::make_pair( hist->name, hist));
   
     return;
   }
 
-  void register2DHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, std::string ylabel, float ymin, float ymax, unsigned int ybins, float delta_t = 60. ) {
+  void registerHistogram( std::string name, std::string xlabel, std::vector<std::string> categories, unsigned int delta_t = 60 ){
+    registerHistogram( name, xlabel, "counts", categories, delta_t);
+    return;
+  }
+
+  void register2DHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, std::string ylabel, float ymin, float ymax, unsigned int ybins, unsigned int delta_t = 60. ) {
     INFO("Registering histogram "<<name);
     
     auto interval_in_s = m_interval/1000.;
@@ -76,7 +103,11 @@ public:
                   "Cannot fill histogram with invalid value type. Value must be numeric or string based (std::string or const char *)");
 
     if ( m_histogram_map.count(name) ) {
-      static_cast<Hist<hist_t>*>(m_histogram_map[name])->fill(value);
+      HistBase * hist = m_histogram_map[name];
+      if (hist->extendable)
+        static_cast<Hist<stretchy_hist_t>*>(hist)->fill(value);
+      else 
+        static_cast<Hist<hist_t>*>(hist)->fill(value);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");
@@ -85,7 +116,7 @@ public:
   void fill( std::string name, std::string value )  {
     
     if ( m_histogram_map.count(name) ) {
-      static_cast<Hist<categoryhist_t>*>(m_histogram_map[name])->fill(value);
+      static_cast<CategoryHist*>(m_histogram_map[name])->fill(value);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");
@@ -94,7 +125,7 @@ public:
   void fill( std::string name, const char * value )  {
     
     if ( m_histogram_map.count(name) ) {
-      static_cast<Hist<categoryhist_t>*>(m_histogram_map[name])->fill(value);
+      static_cast<CategoryHist*>(m_histogram_map[name])->fill(value);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");

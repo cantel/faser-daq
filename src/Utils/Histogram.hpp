@@ -15,8 +15,18 @@ using json = nlohmann::json;
 //    - category histograms with labelled bins (labels are "std::string"s)
 //may consider more types in future: https://www.boost.org/doc/libs/1_71_0/libs/histogram/doc/html/histogram/overview.html#histogram.overview.rationale.structure.axis
 
+/*
+struct Axis{
+  float vmin;
+  float vmax;
+  float vbins;
+  bool extendable = false;
+}*/
+
 using axis_t = axis::regular<>; 
 using hist_t = decltype(make_histogram(std::declval<axis_t>()));
+using stretchy_axis_t = axis::regular<double, use_default, use_default, axis::option::growth_t>; 
+using stretchy_hist_t = decltype(make_histogram(std::declval<stretchy_axis_t>()));
 using hist2d_t = decltype(make_histogram(std::declval<axis_t>(), std::declval<axis_t>()));
 using categoryaxis_t = axis::category<std::string>;
 using categoryhist_t = decltype(make_histogram(std::declval<categoryaxis_t>())); 
@@ -24,8 +34,8 @@ using categoryhist_t = decltype(make_histogram(std::declval<categoryaxis_t>()));
 class HistBase {
   public:
   HistBase(){}
-  HistBase(std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, float delta_t) : name(name), title(name), xlabel(xlabel), ylabel(ylabel), xmin(xmin), xmax(xmax), xbins(xbins), delta_t(delta_t) {timestamp = std::time(nullptr); json_object = json::object(); }
-  HistBase(std::string name, std::string xlabel, std::string ylabel, unsigned int xbins, float delta_t) : name(name), title(name), xlabel(xlabel), ylabel(ylabel), xbins(xbins), delta_t(delta_t) { timestamp = std::time(nullptr); }
+  HistBase(std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, bool extendable, float delta_t) : name(name), title(name), xlabel(xlabel), ylabel(ylabel), xmin(xmin), xmax(xmax), xbins(xbins), extendable(extendable), delta_t(delta_t) {timestamp = std::time(nullptr); json_object = json::object(); }
+  HistBase(std::string name, std::string xlabel, std::string ylabel, unsigned int xbins, bool extendable, float delta_t) : name(name), title(name), xlabel(xlabel), ylabel(ylabel), xbins(xbins), extendable(extendable), delta_t(delta_t) { timestamp = std::time(nullptr); }
   virtual ~HistBase(){}
   //define hist
   std::string name;
@@ -35,13 +45,14 @@ class HistBase {
   float xmin = -1.;
   float xmax = -1.;
   unsigned int xbins;
+  bool extendable;
   //define published msg
   std::string type = "num_fixedwidth";
   std::ostringstream msg_head;
   //for publishing
   json json_object;
   std::time_t timestamp; 
-  float delta_t;
+  unsigned int delta_t;
   //public functions
   virtual std::string publish() { return "nothing";}
 };
@@ -51,10 +62,7 @@ template <typename T>
 class Hist : public HistBase {
   public:
   Hist() : HistBase(){}
-  Hist(std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, float delta_t) : HistBase(name, xlabel, ylabel, xmin, xmax, xbins, delta_t) { 
-     configure();
-  }
-  Hist(std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, float delta_t) : HistBase(name, xlabel, "counts", xmin, xmax, xbins, delta_t) {
+  Hist(std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, bool extendable, float delta_t) : HistBase(name, xlabel, ylabel, xmin, xmax, xbins, extendable, delta_t) { 
      configure();
   }
   ~Hist(){}
@@ -68,6 +76,12 @@ class Hist : public HistBase {
             yvalues.push_back(*y);
       }
       json jsonupdate;
+      if (extendable) {
+        unsigned int xbins_new = hist_object.axis().size();
+        jsonupdate["xbins"] = xbins_new;
+        jsonupdate["xmin"] = hist_object.axis().bin(0).lower(); 
+        jsonupdate["xmax"] = hist_object.axis().bin(xbins_new-1).upper(); 
+      }
       jsonupdate["yvalues"] = yvalues;
       json_object.update(jsonupdate);
       std::string json_str = json_object.dump();
@@ -77,8 +91,14 @@ class Hist : public HistBase {
   private:
   T hist_object;
   void configure() {
+    if (extendable){
+      hist_object = make_histogram(stretchy_axis_t(xbins, xmin, xmax, xlabel));
+      set_base_info(); 
+    }
+    else {
       hist_object = make_histogram(axis_t(xbins, xmin, xmax, xlabel));
       set_base_info(); 
+    }
   }
   void set_base_info(){
     json_object["name"]=name; 
@@ -91,17 +111,13 @@ class Hist : public HistBase {
   }
 };
 
-template <>
-class Hist<categoryhist_t> : public HistBase { // this hist object is of special type: filled by string values. Hence needs special handling upon creation and publishing.
+class CategoryHist : public HistBase { // this hist object is of special type: filled by string values. Hence needs special handling upon creation and publishing.
   public:
-  Hist() : HistBase(){}
-  Hist(std::string name, std::string xlabel, std::string ylabel, std::vector<std::string> categories, float delta_t) : HistBase(name, xlabel, ylabel, categories.size() , delta_t), categories(categories) { 
+  CategoryHist() : HistBase(){}
+  CategoryHist(std::string name, std::string xlabel, std::string ylabel, std::vector<std::string> categories, float delta_t) : HistBase(name, xlabel, ylabel, categories.size() , false, delta_t), categories(categories) { 
      configure();
   }
-  Hist(std::string name, std::string xlabel, std::vector<std::string> categories, float delta_t) : HistBase(name, xlabel, "counts", categories.size() , delta_t), categories(categories) { 
-     configure();
-  }
-  ~Hist(){}
+  ~CategoryHist(){}
   void fill(std::string x)  { hist_object(x);}
   void fill(const char * x)  { hist_object(x);}
   std::string publish() override {
@@ -147,7 +163,7 @@ class Hist<categoryhist_t> : public HistBase { // this hist object is of special
 class Hist2D : public HistBase {
   public:
   Hist2D() : HistBase(){}
-  Hist2D(std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, std::string ylabel, float ymin, float ymax, unsigned int ybins, float delta_t) : HistBase(name, xlabel, ylabel, xmin, xmax, xbins, delta_t), ymin(ymin), ymax(ymax), ybins(ybins) { 
+  Hist2D(std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, std::string ylabel, float ymin, float ymax, unsigned int ybins, float delta_t) : HistBase(name, xlabel, ylabel, xmin, xmax, xbins, false, delta_t), ymin(ymin), ymax(ymax), ybins(ybins) { 
      configure();
   }
   ~Hist2D(){}

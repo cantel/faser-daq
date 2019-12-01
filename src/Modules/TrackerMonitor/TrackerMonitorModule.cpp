@@ -49,7 +49,10 @@ void TrackerMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TrackerMonitor ... " );
 
-  m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
+  // example of 1D histogram: default is ylabel="counts" non-extendable axes (Axis::Range::NONEXTENDABLE & 60 second publishing interval.
+  //m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
+  // example of 1D histogram with extendable x-axis, publishing interval of every 30 seconds.
+  m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 349.5, 175, Axis::Range::EXTENDABLE, 30);
 
   INFO(" ... done registering histograms ... " );
 

@@ -27,7 +27,7 @@ void NewModule::configure() {
   INFO("");
 }
 
-void NewModule::start(int run_num) {
+void NewModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
   INFO("");
 }

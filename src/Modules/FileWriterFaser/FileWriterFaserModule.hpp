@@ -50,7 +50,7 @@ class FileWriterFaserModule : public FaserProcess, public daqling::core::DataLog
     Inputs: none.
     Output: none.
     */
-    void start(int run_num);
+    void start(unsigned int run_num);
 
     void stop();
 

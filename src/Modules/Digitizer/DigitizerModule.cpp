@@ -99,7 +99,7 @@ void DigitizerModule::runner() {
       int payload_size = Payload_GetEventSize( raw_payload );
       const int total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
 
-      const EventFragment* fragment;
+
       
       // FIXME : these are variables that should be controlled by DAQ
       uint8_t  local_fragment_tag = 0;
@@ -107,25 +107,22 @@ void DigitizerModule::runner() {
       uint64_t local_event_id     = 0;
       uint16_t local_bc_id        = 0;
 
-      fragment = new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) );
-      
-      fragment->payload();
-      
-      std::vector<uint32_t>* samData = fragment->raw().data<std::vector<uint32_t>*>();
+//       const EventFragment* fragment;
+//       fragment = new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) );
+//       std::vector<uint32_t>* samData = fragment->raw().data<std::vector<uint32_t>*>();
+//       std::cout<<"size : "<<samData->size()<<std::endl;
 
-      std::cout<<"size : "<<samData->size()<<std::endl;
+      std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) ));
 
-      //std::cout<<"FragmentSize : "<<fragment->payload_size()<<std::endl;
-//      std::cout<<"Fragment0 : "<<(fragment->raw().data())[0]<<std::endl;
-//       std::cout<<"Fragment1 : "<<fragment->payload()[1]<<std::endl;
-//       std::cout<<"Fragment2 : "<<fragment->payload()[2]<<std::endl;
-//       std::cout<<"Fragment3 : "<<fragment->payload()[3]<<std::endl;
-      
-      
+      uint16_t status=0;
+      fragment->set_status( status );
 
-
-    
+      INFO("Waiting");
       Wait(1.0);
+      
+      //std::unique_ptr<EventFragment> my_fragment(new EventFragment(fragment));
+
+      m_connections.put(1, const_cast<Binary&>(fragment->raw()));
     
     }
   }

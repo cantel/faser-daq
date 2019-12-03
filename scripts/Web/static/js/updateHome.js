@@ -70,8 +70,9 @@ function updateCommandAvailability(data){
 }
 
 	//console.log("CHILD window while updating: ", CHILD_WINDOW);
-
-	runningFileInfo = getRunningFileInfo();
+        console.log(data.runState);
+	runningFileInfo = data.runState; 
+        updateRunningFile(runningFileInfo);
 	if( runningFileInfo.isRunning == 1 && (($('input[name=configFileGroup]:checked').val()) != runningFileInfo.fileName)  ){
 		disableControls(true);
 	}
@@ -130,13 +131,19 @@ function updateCommandAvailability(data){
 }
 
 function updateCommandsAndStatus(){
-	$.ajax({url: '/status', async: true, success: function(data){
-		//console.log(data);
-		//console.log("in update general funciton");
-		updateStatus(data);
-		updateCommandAvailability(data);
-	}}
-	);
+    const source = new EventSource("/state");
+    
+    source.onmessage = function (event) {
+	const data = JSON.parse(event.data);
+	//console.log("in update general funciton");
+	//console.log(data);
+	updateStatus(data);
+	updateCommandAvailability(data);
+    }
+    source.onerror = function (event) {
+	console.log(event);
+	alert("disconnected");
+    }
 }
 
 
@@ -202,9 +209,8 @@ function updateColorOfInfoButtons(){
 		}
 	}});
 }
-function updateRunningFile(){
+function updateRunningFile(data){
 
-	var data = getRunningFileInfo();
 	if(data.isRunning == 0 &&  document.getElementById("runningFile").innerHTML != "NO file running"){
 		document.getElementById("runningFile").innerHTML = "NO file running";
 	}		
@@ -286,15 +292,6 @@ function stop(){
 	$.get('/stop');
 }
 
-function getRunningFileInfo(){
-	var info;
-	$.ajax({url: "/runningFile", async: false, success: function(data){
-		info = data;
-	}});
-	//console.log(info);
-	return info;
-		
-}
 function shutdown(){
 	$.get('/shutdown');
 	var inter = setInterval(function(){

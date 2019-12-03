@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+
+import copy
 from flask import Flask, render_template, request, jsonify, send_file, abort, session, Response
 from datetime import datetime
 from flask_scss import Scss
@@ -12,6 +15,8 @@ import daqcontrol
 import jsonschema
 import shutil
 import redis
+import time
+import threading
 
 from routes.metric import metric_blueprint
 from routes.config import config_blueprint
@@ -141,12 +146,28 @@ def shutdown():
 
 @app.route("/status")
 def sendStatusJsonFile():
+        status=r1.get("status")
+        return Response(status, mimetype="application/json")
+
+@app.route("/state")
+def sendState():
+        def getState():
+                pubsub=r1.pubsub()
+                pubsub.subscribe("status")
+                while True:
+                        json_data = r1.get("status")
+                        yield f"data:{json_data}\n\n"
+                        m=pubsub.get_message(timeout=10)
+                        print(m)
+        return Response(getState(), mimetype='text/event-stream')
+
+def oldcode():
 	statusArr = []
 	session_permanent = True
 	d = session.get("data")
 	#print("data", d)
 	#print("session; ", id(session))
-	if not d == {}:
+	if d:
 		dc = h.createDaqInstance(d)
 		for p in d['components']:	
 			rawStatus, timeout = dc.getStatus(p)
@@ -201,10 +222,59 @@ def shutDownRunningFile():
 	else:
 		return jsonify("false")
 
+def stateTracker():
+        pubsub=r1.pubsub()
+        pubsub.subscribe("stateAction")
+        oldState={}
+        configName=""
+        config={}
+        oldStatus=[]
+        daq=None
+        while True:
+                update=False
+                runState=r1.hgetall("runningFile")
+                if not oldState==runState:
+                        oldState=runState
+                        print("State changed to:",runState)
+                        update=True
+                if runState["fileName"]!=configName:
+                        configName=runState["fileName"]
+                        config=h.read(configName)
+                        #FIXME: add handling of failed reads here
+                        daq=None
+                if not daq and type(config)==dict:
+                        daq = h.createDaqInstance(config)
+                if daq:
+                        status=[]
+                        for comp in config['components']:	
+                                rawStatus, timeout = daq.getStatus(comp)
+                                state = h.translateStatus(rawStatus, timeout)
+                                status.append({'name' : comp['name'] , 'state' : str(state)})
+                        if status!=oldStatus:
+                                oldStatus=status
+                                print("Status changed to: ",status)
+                                r1.set("status",json.dumps({'allStatus' : status,
+                                                            'runState' : runState}))
+                                update=True
+                if update:
+                       r1.publish("status","new")
+
+                m=pubsub.get_message(timeout=0.5)
+                if m:
+                        cmd=m['data']
+                        if cmd=="quit": break
+                        if cmd=="updateConfig": configName=""
+                        
+        
 	
 if __name__ == '__main__':
 	#debug=True inorder to be able to update without recompiling
-	app.run(threaded=True)
+        t = threading.Thread(target=stateTracker)
+        t.start()
+        app.run(host="0.0.0.0",port=5002,threaded=True)
+        print("the end")
+        r1.publish("stateAction","quit")
+        t.join()
 	#app.run(processe=19)
 
 

@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "group": "faser",
   "components": [
     {
@@ -73,7 +73,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8101
@@ -94,7 +94,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8102
@@ -111,20 +111,20 @@
       "settings": {
 	   "maxPending": 100,
            "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-           "influxDb_name": "DAQmetrics"
+           "influxDb_name": "DAQlingMetrics"
        },
       "connections": {
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8101
           },
           {
             "type": "pair",
-            "chid": 2,
+            "chid": 1,
             "transport": "tcp",
             "host": "localhost",
             "port": 8102
@@ -133,14 +133,14 @@
         "senders": [
           {
             "type": "pubsub",
-            "chid": 3,
+            "chid": 2,
             "transport": "tcp",
             "host": "*",
             "port": 8104
           },
           {
             "type": "pair",
-            "chid": 4,
+            "chid": 3,
             "transport": "tcp",
             "host": "*",
             "port": 8103
@@ -149,21 +149,21 @@
       }
     },
     {
-      "name": "filedatalogger01",
+      "name": "filewriter01",
       "host": "localhost",
       "port": 5558,
-      "type": "FileDataWriter",
+      "type": "FileWriter",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "filename_pattern": "/tmp/test-%D.%n.%c.bin",
+        "filename_pattern": "/tmp/test-%D.%r.%c.%n.bin",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8103
@@ -181,13 +181,13 @@
         "eventTag": 0,
         "fragmentID": 1000001,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pubsub",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8104
@@ -205,13 +205,13 @@
         "eventTag": 2,
         "fragmentID": 1000002,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pubsub",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8104
@@ -228,13 +228,13 @@
       "settings": {
         "fragmentID": 0,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQmetrics"
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
           {
             "type": "pubsub",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8104

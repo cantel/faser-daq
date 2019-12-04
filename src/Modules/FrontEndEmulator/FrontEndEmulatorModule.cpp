@@ -38,7 +38,7 @@ FrontEndEmulatorModule::~FrontEndEmulatorModule() {
   INFO("");
 }
 
-void FrontEndEmulatorModule::start(int run_num) {
+void FrontEndEmulatorModule::start(unsigned int run_num) {
   m_eventCounter=0;
   FaserProcess::start(run_num);
   INFO("");

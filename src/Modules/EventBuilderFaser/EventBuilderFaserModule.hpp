@@ -13,7 +13,7 @@ class EventBuilderFaserModule : public FaserProcess {
   ~EventBuilderFaserModule();
 
   void configure();
-  void start(int run_num);
+  void start(unsigned int run_num);
   void stop();
   void runner();
   bool sendEvent(uint8_t event_tag,

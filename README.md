@@ -45,19 +45,19 @@ Refer to `daqling/README.md` for advanced build instructions.
 
 ## Run a data acquisition system
 
-`daqinterface` is a command line tool that spawns and configures the components listed in the JSON configuration file passed as argument.
+`daqpy` is a command line tool that spawns and configures the components listed in the JSON configuration file passed as argument.
 
 It then allows to control the components via standard commands such as `start` (with optional run number), `stop`, as well as custom commands.
 
     source daqling/cmake/setup.sh
-    daqinterface configs/my-config.json
+    daqpy configs/demo.json
     start [run_num]
     stop
     down
 
-An example configuration (`valid-config.json`) and schema (`json-config.schema`) can be found in `daqling/configs/`. It is necessary to copy these files to the `configs/` folder and adapt them to describe the desired configuration.
+An example configuration (`demo.json`) and schema (`json-config.schema`) can be found in `daqling/configs/`. It is necessary to copy these files to the `configs/` folder and adapt them to describe the desired configuration.
 
-`daqinterface -h` shows the help menu.
+`daqpy -h` shows the help menu.
 
 ## Develop custom Modules
 

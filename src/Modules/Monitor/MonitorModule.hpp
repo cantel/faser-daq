@@ -15,7 +15,7 @@ class MonitorModule : public FaserProcess {
   virtual ~MonitorModule();
 
   void configure();
-  void start(int);
+  void start(unsigned int);
   void stop();
   void runner();
 

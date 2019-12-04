@@ -1,3 +1,6 @@
 [submodule "daqling"]
 	path = daqling
-	url = https://gitlab.cern.ch/ep-dt-di/daq/daqling.git
+	url = ../../ep-dt-di/daq/daqling.git
+[submodule "gpiodrivers"]
+	path = gpiodrivers
+	url = ../gpiodrivers.git

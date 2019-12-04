@@ -22,10 +22,10 @@
 
 #include "Comm_vx1730.h"
 
-class DigitizerModule : public FaserProcess {
+class DigitizerReceiverModule : public FaserProcess {
  public:
-  DigitizerModule();
-  ~DigitizerModule();
+  DigitizerReceiverModule();
+  ~DigitizerReceiverModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
   void start(unsigned int);

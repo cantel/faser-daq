@@ -3,7 +3,7 @@ daqling_module(module_name)
 
 # Add source file to library
 daqling_target_sources(${module_name}
-    DigitizerModule.cpp
+    DigitizerReceiverModule.cpp
 )
 
 target_include_directories( ${module_name} PUBLIC 

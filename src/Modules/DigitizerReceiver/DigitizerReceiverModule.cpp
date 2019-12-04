@@ -15,10 +15,10 @@
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DigitizerModule.hpp"
+#include "DigitizerReceiverModule.hpp"
 
-DigitizerModule::DigitizerModule() { INFO(""); 
-  INFO("DigitizerModule Constructor");
+DigitizerReceiverModule::DigitizerReceiverModule() { INFO(""); 
+  INFO("DigitizerReceiverModule Constructor");
 
   auto cfg = m_config.getConfig()["settings"];
   
@@ -41,29 +41,29 @@ DigitizerModule::DigitizerModule() { INFO("");
 
 }
 
-DigitizerModule::~DigitizerModule() { INFO(""); }
+DigitizerReceiverModule::~DigitizerReceiverModule() { INFO(""); }
 
 // optional (configuration can be handled in the constructor)
-void DigitizerModule::configure() {
+void DigitizerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("Digitizer --> Configuring");
   m_digitizer->Configure(m_config.getConfig()["settings"]);
 }
 
-void DigitizerModule::start(unsigned int run_num) {
+void DigitizerReceiverModule::start(unsigned int run_num) {
   INFO("Digitizer --> Starting BEFORE");
   FaserProcess::start(run_num);
   INFO("Digitizer --> Starting");
   m_digitizer->StartAcquisition();
 }
 
-void DigitizerModule::stop() {
+void DigitizerReceiverModule::stop() {
   FaserProcess::stop();
   INFO("Digitizer --> Stopping");
   m_digitizer->StopAcquisition();
 }
 
-void DigitizerModule::sendECR() {
+void DigitizerReceiverModule::sendECR() {
   // should send ECR to electronics here. In case of failure, seet m_status to STATUS_ERROR
   
   // stop acquisition
@@ -82,7 +82,7 @@ void DigitizerModule::sendECR() {
 }
 
 
-void DigitizerModule::runner() {
+void DigitizerReceiverModule::runner() {
   INFO("Running...");
   
   int count=0;  
@@ -122,7 +122,7 @@ void DigitizerModule::runner() {
 
 
 
-void DigitizerModule::sendEvent() {
+void DigitizerReceiverModule::sendEvent() {
   INFO("Sending Event...");
   
   // get the event

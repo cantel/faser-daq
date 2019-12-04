@@ -39,7 +39,7 @@ public:
 
   virtual void sendECR() {}; //to be overloaded for frontend applications
 
-  virtual void start(int run_num) {
+  virtual void start(unsigned int run_num) {
     m_ECRcount=0;
     DAQProcess::start(run_num);
   }

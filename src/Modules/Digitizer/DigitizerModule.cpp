@@ -18,19 +18,13 @@
 #include "DigitizerModule.hpp"
 
 DigitizerModule::DigitizerModule() { INFO(""); 
-
-  INFO("");
+  INFO("DigitizerModule Constructor");
 
   auto cfg = m_config.getConfig()["settings"];
   
-  m_var = cfg["myVar"];
-  
-  INFO("SAMSAMSAMSAM myVar printout "<<m_var);
-  
-
-  // ip address
+  // SIS3153 IP address
   char  ip_addr_string[32];
-  strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; // SIS3153 IP address
+  strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; 
   INFO("IP Address : "<<ip_addr_string);
 
   // vme base address
@@ -56,7 +50,8 @@ void DigitizerModule::configure() {
   m_digitizer->Configure(m_config.getConfig()["settings"]);
 }
 
-void DigitizerModule::start(int run_num) {
+void DigitizerModule::start(unsigned int run_num) {
+  INFO("Digitizer --> Starting BEFORE");
   FaserProcess::start(run_num);
   INFO("Digitizer --> Starting");
   m_digitizer->StartAcquisition();
@@ -68,6 +63,25 @@ void DigitizerModule::stop() {
   m_digitizer->StopAcquisition();
 }
 
+void DigitizerModule::sendECR() {
+  // should send ECR to electronics here. In case of failure, seet m_status to STATUS_ERROR
+  
+  // stop acquisition
+  m_digitizer->StopAcquisition();
+  
+  // read out the data from the buffer
+  while(m_digitizer->DumpEventCount()){
+    sendEvent();
+  }
+  
+  // reconfigure - this is what resets the counter
+  m_digitizer->Configure(m_config.getConfig()["settings"]);
+  
+  // start acquisition
+  m_digitizer->StartAcquisition();
+}
+
+
 void DigitizerModule::runner() {
   INFO("Running...");
   
@@ -75,56 +89,85 @@ void DigitizerModule::runner() {
   
   while (m_run) {
   
-    // ask digitizer for events in buffer
-    
+    // send a SW trigger every 5 loop cycles
     count+=1;    
     INFO("Count"<<count);
     if(count%5==0){
-      m_digitizer->SendSWTrigger();
+      INFO("Sending SW Trigger");
+      m_digitizer->SendSWTrigger(true);
     }
     
-    INFO("EventCount : "<<m_digitizer->DumpEventCount());
+    // every 20 cycles
+    if(count%20==0){
+      INFO("Sending 3-SW Triggers and an ECR");
+
+      m_digitizer->SendSWTrigger(true);
+      m_digitizer->SendSWTrigger(true);
+      m_digitizer->SendSWTrigger(true);
     
+      sendECR();
+    }
+    
+    // if there is an event in the buffer then send it along
+    INFO("EventCount : "<<m_digitizer->DumpEventCount());    
     if(m_digitizer->DumpEventCount()){
-
-
-      /////////////////////////////////
-      // get the event
-      /////////////////////////////////
-      INFO("Get the Event");
-      uint32_t raw_payload[MAXFRAGSIZE];
-      m_digitizer->ReadRawEvent( raw_payload, true );
-
-
-      int payload_size = Payload_GetEventSize( raw_payload );
-      const int total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
-
-
-      
-      // FIXME : these are variables that should be controlled by DAQ
-      uint8_t  local_fragment_tag = 0;
-      uint32_t local_source_id    = 0;
-      uint64_t local_event_id     = 0;
-      uint16_t local_bc_id        = 0;
-
-//       const EventFragment* fragment;
-//       fragment = new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) );
-//       std::vector<uint32_t>* samData = fragment->raw().data<std::vector<uint32_t>*>();
-//       std::cout<<"size : "<<samData->size()<<std::endl;
-
-      std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) ));
-
-      uint16_t status=0;
-      fragment->set_status( status );
-
-      INFO("Waiting");
-      Wait(1.0);
-      
-      //std::unique_ptr<EventFragment> my_fragment(new EventFragment(fragment));
-
-      m_connections.put(1, const_cast<Binary&>(fragment->raw()));
-    
+      sendEvent();
     }
+    
+    Wait(1.0);
+    
   }
   INFO("Runner stopped");
+}
+
+
+
+void DigitizerModule::sendEvent() {
+  INFO("Sending Event...");
+  
+  // get the event
+  uint32_t raw_payload[MAXFRAGSIZE];
+  m_digitizer->ReadRawEvent( raw_payload, true );
+
+  // creating the payload
+  int payload_size = Payload_GetEventSize( raw_payload );
+  const int total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
+
+  // the event ID is what should be used, in conjunction with the ECR to give a unique event tag
+  // word[2] bits[23:0]
+  // need to blank out the top bits because these are the channel masks
+  unsigned int Header_EventCounter   = raw_payload[2];
+  SetBit(Header_EventCounter, 31, 0); 
+  SetBit(Header_EventCounter, 30, 0);
+  SetBit(Header_EventCounter, 29, 0);
+  SetBit(Header_EventCounter, 28, 0);
+  SetBit(Header_EventCounter, 27, 0);
+  SetBit(Header_EventCounter, 26, 0);
+  SetBit(Header_EventCounter, 25, 0);
+  SetBit(Header_EventCounter, 24, 0);
+  
+  // the trigger time tag is used to give a "verification" of the event ID if that fails
+  // it is nominally the LHC BCID but we need to do a conversion from our clock to the LHC clock
+  // word[3] bits[31:0]
+  unsigned int Header_TriggerTimeTag = raw_payload[3];
+  
+  std::cout<<"Header_EventCounter   : "<<ConvertIntToWord(Header_EventCounter)<<std::endl;
+  std::cout<<"Header_TriggerTimeTag : "<<ConvertIntToWord(Header_TriggerTimeTag)<<std::endl;
+  
+  // store the faser header information
+  uint8_t  local_fragment_tag = EventTags::PhysicsTag;
+  uint32_t local_source_id    = SourceIDs::PMTSourceID;
+  uint64_t local_event_id     = (m_ECRcount<<24) + Header_EventCounter; // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
+  uint16_t local_bc_id        = Header_TriggerTimeTag*(40.0/62.5);      // trigger time tag corrected by LHCClock/TrigClock = 40/62.5
+
+  // create the event fragment
+  std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) ));
+
+  // ToDo : What is the status supposed to be?
+  uint16_t status=0;
+  fragment->set_status( status );
+
+  // place the raw binary event fragment on the output port
+  m_connections.put(0, const_cast<Binary&>(fragment->raw()));
+    
 }

@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 7,
   "group": "faser",
   "components": [
     {
@@ -273,7 +273,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8101
@@ -294,7 +294,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8102
@@ -315,7 +315,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8103
@@ -336,7 +336,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8104
@@ -357,7 +357,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8105
@@ -378,7 +378,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8106
@@ -399,7 +399,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8107
@@ -420,7 +420,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8108
@@ -441,7 +441,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8109
@@ -462,7 +462,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8110
@@ -483,7 +483,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8111
@@ -509,77 +509,77 @@
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8101
           },
           {
             "type": "pair",
-            "chid": 2,
+            "chid": 1,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8102
           },
           {
             "type": "pair",
-            "chid": 3,
+            "chid": 2,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8103
           },
           {
             "type": "pair",
-            "chid": 4,
+            "chid": 3,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8104
           },
           {
             "type": "pair",
-            "chid": 5,
+            "chid": 4,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8105
           },
           {
             "type": "pair",
-            "chid": 6,
+            "chid": 5,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8106
           },
           {
             "type": "pair",
-            "chid": 7,
+            "chid": 6,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8107
           },
           {
             "type": "pair",
-            "chid": 8,
+            "chid": 7,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8108
           },
           {
             "type": "pair",
-            "chid": 9,
+            "chid": 8,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8109
           },
           {
             "type": "pair",
-            "chid": 10,
+            "chid": 9,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8110
           },
           {
             "type": "pair",
-            "chid": 11,
+            "chid": 10,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8111
@@ -588,7 +588,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 12,
+            "chid": 11,
             "transport": "tcp",
             "host": "*",
             "port": 8112
@@ -600,19 +600,19 @@
 
     
     {
-      "name": "filedatawriter01",
+      "name": "filewriter01",
       "host": "epdtdi101",
       "port": 7001,
-      "type": "FileDataWriter",
+      "type": "FileWriter",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "filename_pattern": "/tmp/test-%D.%n.%c.bin"
+        "filename_pattern": "/tmp/test-%D.%r.%c.%n.bin"
       },
       "connections": {
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "epdtdi101",
             "port": 8112

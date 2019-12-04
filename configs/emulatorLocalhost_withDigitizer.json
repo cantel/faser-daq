@@ -1,5 +1,5 @@
 {
-  "version": 6,
+  "version": 6.0,
   "group": "faser",
   "components": [
     {
@@ -74,7 +74,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8104
@@ -96,7 +96,7 @@
         "receivers": [
           {
             "type": "pair",
-            "chid": 1,
+            "chid": 0,
             "transport": "tcp",
             "host": "localhost",
             "port": 8104
@@ -105,13 +105,43 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 2,
+            "chid": 1,
             "transport": "tcp",
             "host": "*",
             "port": 8103
           }
         ]
       }
+    },
+    {
+      "name": "filewriterfaser01",
+      "host": "localhost",
+      "port": 5558,
+      "type": "FileWriterFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "maxFileSizeInGB": 1,
+        "fileFormat": [{"fileName": "/tmp/physics-"},
+           {"fileName": "/tmp/calibration-"},
+           {"fileName": "/tmp/monitoring-"},
+           {"fileName": "/tmp/tlb-"}],
+        "badEventsFileName": "/tmp/debug-"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8103
+          }
+        ]
+      }
     }
+
+    
+    
+    
   ]
 }

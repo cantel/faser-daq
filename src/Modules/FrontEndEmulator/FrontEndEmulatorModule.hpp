@@ -13,7 +13,7 @@ class FrontEndEmulatorModule : public FaserProcess {
   FrontEndEmulatorModule();
   ~FrontEndEmulatorModule();
 
-  void start(int);
+  void start(unsigned int);
   void stop();
 
   void runner();

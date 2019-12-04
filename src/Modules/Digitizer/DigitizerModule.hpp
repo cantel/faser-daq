@@ -28,12 +28,12 @@ class DigitizerModule : public FaserProcess {
   ~DigitizerModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
-  void start(int);
+  void start(unsigned int);
   void stop();
-
+  void sendECR();
   void runner();
-  
-  int m_var;
+
+  void sendEvent();
   
   vx1730 *m_digitizer;
   

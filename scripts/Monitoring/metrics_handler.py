@@ -33,12 +33,13 @@ for comp in config["components"]:
   uri=uri.replace("*",comp["host"])
   name=comp["name"]
   print("Listening to %s (%s)" % (name,uri))
-  socket = context.socket(zmq.SUB)
-  socket.connect(uri)
-  socket.setsockopt_string(zmq.SUBSCRIBE,"")
-  nameMap[socket]=name
-  #sourceMap[socket]
-  poller.register(socket, zmq.POLLIN)
+  sock = context.socket(zmq.SUB)
+#  socket.connect(uri)
+  uri=uri.replace("localhost","127.0.0.1") # has to be numeric address for bind
+  sock.bind(uri)
+  sock.setsockopt_string(zmq.SUBSCRIBE,"")
+  nameMap[sock]=name
+  poller.register(sock, zmq.POLLIN)
   
 while True:
   try:
@@ -85,9 +86,9 @@ while True:
             #r.lpush(metric, val)
   for sock in socks:
     source=nameMap[sock]
-    #print("Message from: "+source)
+    print("Message from: "+source)
     data=sock.recv()
-    #print(data)
+    print(data)
     
     name,value=data.split(b': ')
     name=name.decode()

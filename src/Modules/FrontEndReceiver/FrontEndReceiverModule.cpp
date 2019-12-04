@@ -35,7 +35,7 @@ void FrontEndReceiverModule::sendECR() {
   // should send ECR to electronics here. In case of failure, seet m_status to STATUS_ERROR
 }
 
-void FrontEndReceiverModule::start(int run_num) {
+void FrontEndReceiverModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
 }
@@ -81,7 +81,7 @@ void FrontEndReceiverModule::runner() {
     std::unique_ptr<EventFragment> fragment(new EventFragment(fragment_tag, source_id, event_id, bc_id, rawData));
     fragment->set_status(status);
 
-    m_connections.put(1, const_cast<Binary&>(fragment->raw())); //BP: put() is not declared const, hence the cast...
+    m_connections.put(0, const_cast<Binary&>(fragment->raw())); //BP: put() is not declared const, hence the cast...
 
   }
 

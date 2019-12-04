@@ -81,6 +81,9 @@ class FragmentHeader:
         return "Fragment 0x%08x (Event %6d, BC %4d, %s) - status: 0x%08x, tag: %2d, trigger: 0x%04x, %5d bytes" % (self.source_id,self.event_id,self.bc_id,time.ctime(self.timestamp/1000000),self.status,self.event_tag,self.trigger_bits,self.payload_size)
    
 def main(args):
+
+    print("Args : ",args)
+
     dumpFrag=False
     dumpData=False
     if args[0]=='-f' or args[0]=='-e':
@@ -108,6 +111,7 @@ def main(args):
         if str(inst)!="End of file":
             print(inst)
     
+
 main(sys.argv[1:])
 
 

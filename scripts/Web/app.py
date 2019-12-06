@@ -17,6 +17,7 @@ import shutil
 import redis
 import time
 import threading
+import zmq
 
 from routes.metric import metric_blueprint
 from routes.config import config_blueprint
@@ -27,6 +28,8 @@ import helpers as h
 
 __author__ = "Elham Amin Mansour"
 __version__ = "0.0.1"
+
+os.system("date >>log")
 
 app  = Flask(__name__) 
 app.register_blueprint(metric_blueprint)
@@ -244,16 +247,50 @@ def stateTracker():
                         print(m)
                         print(cmd)
 
-        
+                        
+def metricsHandler(stopEvent):
+        print("hello")
+        context = zmq.Context()
+
+        sock = context.socket(zmq.SUB)
+        sock.bind("tcp://127.0.0.1:7000")   #for now the port is hardcoded to 7000 on localhost
+        sock.setsockopt_string(zmq.SUBSCRIBE,"")
+        r = redis.Redis(host='localhost', port=6379, db=0,
+                        charset="utf-8", decode_responses=True)
+
+        while not stopEvent.isSet():
+                events=sock.poll(timeout=1000)
+                if not events: continue
+                data=sock.recv()
+                try:
+                        source,rest=data.decode().split("-",1)
+                        name,value=rest.split(': ')
+                        val=str(time.time())+":"+value
+                        r.hset(source,name,val)
+                        if "Rate" in name: # this should be configurable
+                                metric="History:"+source+"_"+name
+                                r.lpush(metric,val)
+                                r.ltrim(metric,0,9) # this should be configurable
+                except ValueError:
+                        print("failed to decode:",data)
+
 	
 if __name__ == '__main__':
-	#debug=True inorder to be able to update without recompiling
-        t = threading.Thread(target=stateTracker)
-        t.start()
-        app.run(host="0.0.0.0",port=5002,threaded=True)
-        print("the end")
+
+        event = threading.Event()
+        metrics = threading.Thread(name="metricsHandler",target=metricsHandler,args=(event,))
+        metrics.start()
+        tracker = threading.Thread(name="stateTracker",target=stateTracker)
+        tracker.start()
+
+        from werkzeug.serving import run_simple
+        run_simple("0.0.0.0",5002,app,threaded=True)
+        #app.run(host="0.0.0.0",port=5002,threaded=True)
+        print("The end! Wrapping up remaining threads, please standby ")
         r1.publish("stateAction","quit")
-        t.join()
+        event.set()
+        tracker.join()
+        metrics.join()
 	#app.run(processe=19)
 
 

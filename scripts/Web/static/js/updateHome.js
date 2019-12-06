@@ -143,17 +143,6 @@ function updateColorOfInfoButtons(){
 		}
 	}});
 }
-function updateRunningFile(data){
-
-	if(data.isRunning == 0 &&  document.getElementById("runningFile").innerHTML != "NO file running"){
-		document.getElementById("runningFile").innerHTML = "NO file running";
-	}		
-	else if(data.isRunning == 1 && document.getElementById("runningFile").innerHTML != "File " + data.fileName + " is running"){
-		document.getElementById("runningFile").innerHTML = "File " + data.fileName + " is running";
-	}
-
-		
-}
 
 function goToCurrent(){
 

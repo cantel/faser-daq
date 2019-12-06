@@ -40,39 +40,22 @@ r1 = redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_res
 
 
 app.secret_key = os.urandom(24)
-@app.route("/sessionTesting")
-def sessionsShow():
-	if (not "visits" in session):
-		session['visits'] = 1
-	else:
-		session['visits'] = session.get('visits') + 1
-	return "Total visits: {}".format(session.get('visits'))
 
 @app.route("/")
-def launche():
-	#print(app.secret_key)
+def launch():
 	try:
 		r1.ping()
 	except:
 		return "redis database isn't working"
-	#session["data"] = read("current.json")
-	#r1.hset("runningFile", "isRunning", 0)
-	if not r1.exists("runningFile"):	
-		r1.hset("runningFile", "fileName", "current.json")
-		r1.hset("runningFile", "isRunning", 0)
 
-	#print("running file info: ", r1.hgetall("runningFile"))
-	#print("isRunning", r1.hgetall("runningFile")["isRunning"] )
-	#print("fileNAme: ", r1.hgetall("runningFile")["fileName"])
-	
-	#selectedFile = "current.json"
-	#if(r1.hgetall("runningFile")["isRunning"] == 1):
+	if not r1.exists("runningFile"):	
+                r1.hset("runningFile", "fileName", "current.json")
+                r1.hset("runningFile", "isRunning", 0)
+
 	selectedFile = r1.hgetall("runningFile")["fileName"]
-	#ielse:
-	#	selectedFile = "current.json"
-	#print(selectedFile)
-	#return "the key runningFile does not exist on the redis db 2" 
 	return render_template('softDaqHome.html', selectedFile = selectedFile)
+
+
 @app.route("/initialise")
 def initialise():
 		
@@ -80,7 +63,8 @@ def initialise():
 	
 	d = session.get('data')
 	dc = h.createDaqInstance(d)
-	
+
+	r1.publish("stateAction","initialize "+session.get("selectedFile"))
 	
 	r1.hset("runningFile", "isRunning", 1)
 	r1.hset("runningFile", "fileName", session.get("selectedFile"))	
@@ -161,21 +145,6 @@ def sendState():
                         print(m)
         return Response(getState(), mimetype='text/event-stream')
 
-def oldcode():
-	statusArr = []
-	session_permanent = True
-	d = session.get("data")
-	#print("data", d)
-	#print("session; ", id(session))
-	if d:
-		dc = h.createDaqInstance(d)
-		for p in d['components']:	
-			rawStatus, timeout = dc.getStatus(p)
-			status = h.translateStatus(rawStatus, timeout)
-			#print('status of this componen ', p['name'],"is: ", status)
-			statusArr.append({'name' : p['name'] , 'state' : str(status)})
-	return jsonify({'allStatus' : statusArr})
-
 @app.route('/log/<boardName>')
 def logfile(boardName):
 	try:
@@ -193,11 +162,6 @@ def logfile(boardName):
 		abort(404)
 	except FileNotFoundError:
 		abort(404)
-
-@app.route('/runningFile')
-def runningFileInfo():
-	info = r1.hgetall("runningFile");
-	return(jsonify(info))
 
 
 #on redis, the runningFile is put to 0
@@ -264,7 +228,9 @@ def stateTracker():
                         cmd=m['data']
                         if cmd=="quit": break
                         if cmd=="updateConfig": configName=""
-                        
+                        print(m)
+                        print(cmd)
+
         
 	
 if __name__ == '__main__':

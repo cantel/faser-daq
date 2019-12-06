@@ -133,6 +133,11 @@ def sendStatusJsonFile():
         status=r1.get("status")
         return Response(status, mimetype="application/json")
 
+@app.route("/refreshState")
+def refresh():
+        r1.publish("status","new") # force update
+        return "true"
+
 @app.route("/state")
 def sendState():
         def getState():
@@ -194,6 +199,7 @@ def stateTracker():
         config={}
         oldStatus=[]
         daq=None
+        overallState=None
         while True:
                 update=False
                 runState=r1.hgetall("runningFile")
@@ -210,15 +216,22 @@ def stateTracker():
                         daq = h.createDaqInstance(config)
                 if daq:
                         status=[]
+                        overallState=None
+                        if not config['components']: overallState="DOWN"
                         for comp in config['components']:	
                                 rawStatus, timeout = daq.getStatus(comp)
-                                state = h.translateStatus(rawStatus, timeout)
-                                status.append({'name' : comp['name'] , 'state' : str(state)})
+                                state = str(h.translateStatus(rawStatus, timeout))
+                                if not overallState:
+                                        overallState=state
+                                if state!=overallState:
+                                        overallState="IN TRANSITION"
+                                status.append({'name' : comp['name'] , 'state' : state})
                         if status!=oldStatus:
                                 oldStatus=status
-                                print("Status changed to: ",status)
+                                print("Status changed to: ",status,overallState)
                                 r1.set("status",json.dumps({'allStatus' : status,
-                                                            'runState' : runState}))
+                                                            'runState' : runState,
+                                                            'globalStatus': overallState,}))
                                 update=True
                 if update:
                        r1.publish("status","new")

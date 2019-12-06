@@ -8,9 +8,6 @@ function updateBoardContainer(fileName){
 
 
 function updateStatus(data){
-	//alert("here");
-	//console.log(data);	
-	$(document).ready(function(){
 	for (var i = 0; i < Object.keys(data.allStatus).length; i++){
 		//document.write("in for of update status");
 
@@ -41,93 +38,27 @@ function updateStatus(data){
 		}
 
 	}
-
-	});
 }
 
 function updateCommandAvailability(data){
-	var allDOWN = true;
-	var allREADY = true;
-	var allRUNNING = true;
-	var allBooted = true;
-        var allPaused = true;
-	
-	for(var i = 0; i < Object.keys(data.allStatus).length; i++){
-		if( (data.allStatus[i].state) != "DOWN"){
-			allDOWN = false;
-		}
-
-		if( (data.allStatus[i].state) != "READY"){
-			allREADY = false;
-		}
-
-		if( (data.allStatus[i].state) != "RUN"){
-			allRUNNING = false;
-		}
-		if( (data.allStatus[i].state) != "PAUSED"){
-			allPaused = false;
-		}
-}
-
-	//console.log("CHILD window while updating: ", CHILD_WINDOW);
-        console.log(data.runState);
-	runningFileInfo = data.runState; 
-        updateRunningFile(runningFileInfo);
-	if( runningFileInfo.isRunning == 1 && (($('input[name=configFileGroup]:checked').val()) != runningFileInfo.fileName)  ){
-		disableControls(true);
+    document.getElementById("runningState").innerHTML =data.globalStatus;
+    document.getElementById("runningFile").innerHTML = data.runState.fileName;
+    var buttonEnableStates= {
+	"INITIALISE": ["DOWN"],
+	"START": ["READY","PAUSED"],
+	"STOP": ["RUN","PAUSED"],
+	"SHUTDOWN": ["READY","RUN","PAUSED","IN TRANSITION"],
+	"PAUSE": ["RUN"],
+	"ECR": ["PAUSED"] };
+    var runningFileInfo=data.runState;
+    if( data.globalStatus!="DOWN" && (($('input[name=configFileGroup]:checked').val()) != runningFileInfo.fileName)  ){
+	disableControls(true);
+    }
+    else{	
+	for (const [button, states] of Object.entries(buttonEnableStates)) {
+	    document.getElementById(button).disabled = ! states.includes(data.globalStatus);
 	}
-	else{	
-		if (allDOWN){
-			document.getElementById("INITIALISE").disabled = false;
-			document.getElementById("SHUTDOWN").disabled = true;
-			/*if(CHILD_WINDOW && !CHILD_WINDOW.closed){
-				$(CHILD_WINDOW.document).ready(function() {
-					CHILD_WINDOW.disableAddingOrChangingBoards(false);
-				});
-			}*/
-		}
-		else{
-			document.getElementById("INITIALISE").disabled = true;
-			document.getElementById("SHUTDOWN").disabled = false;
-
-			/*if(CHILD_WINDOW && !CHILD_WINDOW.closed)
-
-				$(CHILD_WINDOW.document).ready(function() {
-					CHILD_WINDOW.disableAddingOrChangingBoards(true);
-				});*/
-		}
-		if(allREADY || allPaused){
-		document.getElementById("START").disabled = false;
-
-
-		}
-		else{
-			document.getElementById("START").disabled = true;
-		}
-
-		if( allPaused){
-		document.getElementById("ECR").disabled = false;
-
-
-		}
-		else{
-			document.getElementById("ECR").disabled = true;
-		}
-
-		if(allRUNNING||allPaused){
-			document.getElementById("STOP").disabled = false;
-		}
-		else{
-			document.getElementById("STOP").disabled = true;
-		}
-		if(allRUNNING){
-		    document.getElementById("PAUSE").disabled = false;
-		}
-		else{
-		    document.getElementById("PAUSE").disabled = true;
-		}
-
-	}
+    }
 }
 
 function updateCommandsAndStatus(){
@@ -142,7 +73,10 @@ function updateCommandsAndStatus(){
     }
     source.onerror = function (event) {
 	console.log(event);
-	alert("disconnected");
+	console.log($("#reloadModal"));
+	$("#reloadModal").modal();	
+	event.srcElement.onerror=null;
+	//location.reload()
     }
 }
 
@@ -254,18 +188,7 @@ function saveConfigFile(){
 
 
 function isDOWN(){
-	var allDOWN = true;
-	$.ajax({url: '/status', async: false, success: function(data){
-		
-		for(var i = 0; i < Object.keys(data.allStatus).length; i++){
-			if( (data.allStatus[i].state) != "DOWN"){
-				allDOWN = false;
-			}
-		}
-
-	}}
-	);
-	return allDOWN;
+    return document.getElementById("runningState").innerHTML=="DOWN";
 }
 
 function initialise(){
@@ -294,17 +217,6 @@ function stop(){
 
 function shutdown(){
 	$.get('/shutdown');
-	var inter = setInterval(function(){
-	$.ajax({url:"/shutDownRunningFile", async:true, success: function(data){
-		if(data == "true"){
-			clearInterval(inter);	
-		}
-		//else if(data == "true"){
-		//}
-	}
-	
-	});
-	},1000);
 }
 
 function disableControls(bool){

@@ -1,0 +1,28 @@
+<div class = "col-8">
+  <div class="container" id="control-box">
+    <div class = "jumbotron" style= "padding: 2rem 1rem;color:aqua;background-color: #1a52c6">
+      <center><h4>CONTROLS</h4></center>
+      <br>
+      <br>
+      <center>	
+	<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
+	
+	<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
+	
+	<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
+	<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
+	<input id="PAUSE" type="submit" class="btn btn-warning btn-lg" value="PAUSE" onclick="pause();">
+	<input id="ECR" type="submit" class="btn btn-success btn-lg" value="ECR" onclick="sendECR();">
+      </center>
+
+      <br>
+      <div class="container">
+	<p><span class="font-weight-bold">State: </span><span id="runningState"></span>
+	</p><p>
+	  <span class="font-weight-bold">File: </span><span id="runningFile"></span>
+	</p>
+      </div>
+      
+    </div>
+  </div>
+</div>

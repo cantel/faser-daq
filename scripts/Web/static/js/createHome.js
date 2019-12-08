@@ -199,7 +199,7 @@ function createRadioInputs(fileNames){
 					else{
 
 						document.getElementById("run-info-box").style.display = "initial";
-						document.getElementById("control-box").style.display = "initial";
+						document.getElementById("control-box").style.display = "block";
 						document.getElementById("status&settings-box").style.display = "initial";
 						createBoardContainer(config);
 					}

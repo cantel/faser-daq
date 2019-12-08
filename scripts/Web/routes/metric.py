@@ -15,11 +15,11 @@
  along with DAQling. If not, see <http://www.gnu.org/licenses/>.
 """
 
-__author__ = "Roland Sipos"
+__author__ = "Elham Amin Mansour"
 __credits__ = [""]
 __version__ = "0.0.1"
-__maintainer__ = "Roland Sipos"
-__email__ = "roland.sipos@cern.ch"
+__maintainer__ = "Brian Petersen"
+__email__ = "Brian.Petersen@cern.ch"
 
 import ctypes
 from multiprocessing.pool import ThreadPool
@@ -38,6 +38,8 @@ from flask import render_template
 from flask_restful import Api, Resource, reqparse
 from flask import Blueprint, render_template
 
+
+rateSource="eventbuilder01" #FIXME: this is hardcoded in several places
 
 #import queries
 #import backend as db
@@ -66,19 +68,6 @@ class Add(Resource):
 #    r.expire(metric, 5);
 
 
-@metric_blueprint.route("/graph")
-def graph():
-  metrics = [x.decode() for x in r.keys() if x.startswith(b"History")]
-  #print(metrics)
-  tabNames = []
-  for metric in metrics:
-    if(not metric.startswith("History")):
-      metrics.remove(metric)
-  for metric in metrics:
-    tabNames.append(metric.split("_")[1])
-  return render_template('graph.html', metrics=metrics, tabNames=tabNames)
-
-
 @metric_blueprint.route("/data/<string:metric>")
 def data(metric):
   metric_array = []
@@ -88,9 +77,26 @@ def data(metric):
   metric_array.reverse()
   return json.dumps(metric_array)
 
-#@metric_blueprint.route("hello")
-#def hello():
-#  return "Total visits: {}".format(session.get('visits'))
+@metric_blueprint.route("/lastRates/<float:sleeptime>")
+def lastRates(sleeptime):
+  types=["Physics","Calibration","Monitoring"]
+  def getRates():
+    prevValues={}
+    while True:
+      values={}
+      for valType in ["Rate","Events"]:
+        for rateType in types:
+          name=rateType+valType
+          value=r.hget(rateSource,name)
+          if value and value!=prevValues.get(name,""):
+            prevValues[name]=value
+            value = value.decode().split(':')
+            values[rateType+valType]=[1000.*float(value[0]),float(value[1])]
+      if values:
+        yield f"data:{json.dumps(values)}\n\n"
+      time.sleep(sleeptime)
+  return Response(getRates(), mimetype='text/event-stream')
+    
 
 @metric_blueprint.route("/lastMeas/<string:metric>")
 def lastMeas(metric):

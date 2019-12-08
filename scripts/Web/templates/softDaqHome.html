@@ -191,13 +191,16 @@
     </div>
 
     <div class="row">
+      <div class="col-6">
+      </div>      
+    </div>
+    
+    <div class="row">
       <!-- run and information-->
       <div class="col-6">
 	<div class="container" id="run-info-box">
-	  <div class = "jumbotron" style = "padding-bottom: 65px; padding-top:25px">
+	  <div class = "jumbotron" style = "padding-bottom: 5px; padding-top:25px">
 	    <center><h4>RUN INFORMATION</h4></center>
-	    <!--<script>setInterval(function(){ updateRunInformation(); }, 1000);</script>-->
-	    <script> var intervalIndices = {}; </script>
 	    <table class="table table-sm table-hover table-bordered">
 	      <tbody>
 		<tr>
@@ -228,12 +231,11 @@
 		</tr>		
 	      </tbody>
 	    </table>
-	    
-	    <div class="embed-responsive embed-responsive-16by9" id="graphWindow">
+	    {% include 'rates.html' %}
+	    <!-- <div class="embed-responsive embed-responsive-16by9" id="graphWindow"> -->
 	      <!--<iframe class="embed-responsive-item" src="/monitoring/graph" allowfullscreen>
 		  </iframe>-->
-	    </div>
-	    <br>
+	    <!-- </div> -->
 	  </div>	
 	</div>
       </div>

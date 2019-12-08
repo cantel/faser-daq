@@ -8,36 +8,14 @@ function updateBoardContainer(fileName){
 
 
 function updateStatus(data){
-	for (var i = 0; i < Object.keys(data.allStatus).length; i++){
-		//document.write("in for of update status");
-
-		document.getElementById("status" + i.toString()).className = "badge badge-success";
-		//console.log(data.allStatus[i].state);
-		//alert(data.allStatus[i].state);
-
-		//updating the run inforamation section if the status of the eventbuilder01 changes from RUN or to RUN
-		if(data.allStatus[i].name == "eventbuilder01"){
-			if(document.getElementById("status" + i.toString()).innerHTML == "RUN" && data.allStatus[i].state != "RUN"){
-				clearInterval(intervalIndices[0]);
-				var graphWindow = document.getElementById("graphWindow");
-				//while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));
-			}
-			else if(document.getElementById("status" + i.toString()).innerHTML != "RUN" && data.allStatus[i].state == "RUN"){
-				intervalIndices[0] = updateRunInformation(true);
-			}
-
-		
-			//if(document.getElementById("status" + i.toString()).innerHTML != data.allStatus[i].state  && data.allStatus[i].state != "RUN")
-			//	setDefaultValues();
-			
-
-		}
-		document.getElementById("status" + i.toString()).innerHTML = data.allStatus[i].state;
-		if(data.allStatus[i].state == "TIMEOUT"){
-			document.getElementById("status" + i.toString()).className = "badge badge-danger";
-		}
-
+    for (var i = 0; i < Object.keys(data.allStatus).length; i++){
+	document.getElementById("status" + i.toString()).innerHTML = data.allStatus[i].state;
+	if(data.allStatus[i].state == "TIMEOUT"){
+	    document.getElementById("status" + i.toString()).className = "badge badge-danger";
+	} else {
+	    document.getElementById("status" + i.toString()).className = "badge badge-success";
 	}
+    }
 }
 
 function updateCommandAvailability(data){
@@ -61,22 +39,27 @@ function updateCommandAvailability(data){
     }
 }
 
+function updateRunNumber(data){
+    document.getElementById("RunNumber").innerHTML=data.runNumber;
+    document.getElementById("RunStart").innerHTML=convertToDate(data.runStart);
+
+}
+
 function updateCommandsAndStatus(){
     const source = new EventSource("/state");
     
     source.onmessage = function (event) {
 	const data = JSON.parse(event.data);
-	//console.log("in update general funciton");
 	//console.log(data);
 	updateStatus(data);
 	updateCommandAvailability(data);
+	updateRunNumber(data);
     }
     source.onerror = function (event) {
 	console.log(event);
 	console.log($("#reloadModal"));
 	$("#reloadModal").modal();	
 	event.srcElement.onerror=null;
-	//location.reload()
     }
 }
 
@@ -90,42 +73,6 @@ function updateConfigFileChoices(){
 	
 }
 
-
-function updateRunInformation(){
-	var graphWindow = document.getElementById("graphWindow");
-	
-	//setinterval for the run table
-	var interval_updateRunNumbers = setInterval(function(){ updateRunNumbers();}, 1000);
-
-	//load the iframe
-	while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));	
-	var graph = document.createElement("IFRAME");
-	graphWindow.appendChild(graph);
-	graph.className = "embed-responsive-item";
-	graph.src = "/monitoring/graph";
-	
-	return interval_updateRunNumbers;
-}
-function updateRunNumbers(){
-	$.ajax({url:"/monitoring/info/eventbuilder01/dataUpdate", async:false, success: function(data){
-		//console.log("helllooooo", data);
-		var date;
-		for(var i = 0; i < Object.keys(data.values).length; i++){
-			if(document.getElementById(data.values[i].key)){
-				if(data.values[i].key == "RunStart"){
-					//console.log("time", data.values[i].value);
-					date = convertToDate(data.values[i].value);
-					document.getElementById(data.values[i].key).innerHTML = date;
-				}
-				else{
-					document.getElementById(data.values[i].key).innerHTML = data.values[i].value;
-				}
-				
-			}
-
-		}
-	}});
-}
 function updateColorOfInfoButtons(){
 	
 	$.ajax({url: "/monitoring/info/updateStatus", async: false, success: function(data){

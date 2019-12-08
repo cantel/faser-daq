@@ -27,7 +27,9 @@ from routes.configFiles import configFiles_blueprint
 import helpers as h
 
 __author__ = "Elham Amin Mansour"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
+__maintainer__ = "Brian Petersen"
+__email__ = "Brian.Petersen@cern.ch"
 
 os.system("date >>log")
 
@@ -54,7 +56,9 @@ def launch():
 	if not r1.exists("runningFile"):	
                 r1.hset("runningFile", "fileName", "current.json")
                 r1.hset("runningFile", "isRunning", 0)
-
+	if not r1.exists("runNumber"):
+                r1.set("runNumber",99)
+                r1.set("runStart",0)
 	selectedFile = r1.hgetall("runningFile")["fileName"]
 	return render_template('softDaqHome.html', selectedFile = selectedFile)
 
@@ -84,9 +88,14 @@ def initialise():
 @app.route("/start")
 def start():
 	print("start button pressed")
+	runNumber=int(r1.get("runNumber"))
+	runNumber+=1
+	r1.set("runNumber",runNumber)
+	r1.set("runStart",time.time())
 	d = session.get('data')	
 	dc = h.createDaqInstance(d)
-	h.spawnJoin(d['components'], dc.startProcess)
+#	h.spawnJoin(d['components'], dc.startProcess)
+	h.spawnJoin(d['components'], functools.partial(dc.startProcess,arg=str(runNumber)))
 	return "true"
 
 @app.route("/pause")
@@ -172,27 +181,6 @@ def logfile(boardName):
 		abort(404)
 
 
-#on redis, the runningFile is put to 0
-@app.route("/shutDownRunningFile")
-def shutDownRunningFile():
-	
-	d = session.get("data")
-	dc = h.createDaqInstance(d)
-	#print("running File name: ", r1.hgetall("runningFile")["fileName"])
-	runningFile = h.read(r1.hgetall("runningFile")["fileName"])
-	allDOWN = True
-	#print("running File:", runningFile['components'])
-	for p in runningFile['components']:	
-		rawStatus, timeout = dc.getStatus(p)
-		status = h.translateStatus(rawStatus, timeout)
-		if(not status == "DOWN"):
-			allDOWN = False
-	if(allDOWN):
-		r1.hset("runningFile", "isRunning", 0)
-		r1.hset("runningFile", "fileName", "current.json")
-		return jsonify("true")
-	else:
-		return jsonify("false")
 
 def stateTracker():
         pubsub=r1.pubsub()
@@ -206,6 +194,8 @@ def stateTracker():
         while True:
                 update=False
                 runState=r1.hgetall("runningFile")
+                runNumber=r1.get("runNumber")
+                runStart=r1.get("runStart")
                 if not oldState==runState:
                         oldState=runState
                         print("State changed to:",runState)
@@ -234,6 +224,8 @@ def stateTracker():
                                 print("Status changed to: ",status,overallState)
                                 r1.set("status",json.dumps({'allStatus' : status,
                                                             'runState' : runState,
+                                                            'runNumber' : runNumber,
+                                                            'runStart' : runStart,
                                                             'globalStatus': overallState,}))
                                 update=True
                 if update:

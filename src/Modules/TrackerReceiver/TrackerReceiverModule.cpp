@@ -15,29 +15,29 @@
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NewModule.hpp"
+#include "TrackerReceiverModule.hpp"
 
-NewModule::NewModule() { INFO(""); }
+TrackerReceiverModule::TrackerReceiverModule() { INFO(""); }
 
-NewModule::~NewModule() { INFO(""); }
+TrackerReceiverModule::~TrackerReeiverModule() { INFO(""); }
 
 // optional (configuration can be handled in the constructor)
-void NewModule::configure() {
+void TrackerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("");
 }
 
-void NewModule::start(unsigned run_num) {
+void TrackerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
   INFO("");
 }
 
-void NewModule::stop() {
+void TrackerReceiverModule::stop() {
   FaserProcess::stop();
   INFO("");
 }
 
-void NewModule::runner() {
+void TrackerReceiverModule::runner() {
   INFO("Running...");
   while (m_run) {
   }

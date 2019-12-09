@@ -5,10 +5,12 @@ from flask import Flask, render_template, request, jsonify, send_file, abort, se
 from datetime import datetime
 from flask_scss import Scss
 import functools
+import getopt
 import json
 from jsonschema import validate
 import os
 from os import environ as env
+import platform
 import threading
 import sys
 import daqcontrol
@@ -16,8 +18,9 @@ import jsonschema
 import shutil
 import redis
 import time
-import threading
-import zmq
+
+import metricsHandler
+import statetracker
 
 from routes.metric import metric_blueprint
 from routes.config import config_blueprint
@@ -31,8 +34,6 @@ __version__ = "0.0.2"
 __maintainer__ = "Brian Petersen"
 __email__ = "Brian.Petersen@cern.ch"
 
-os.system("date >>log")
-
 app  = Flask(__name__) 
 app.register_blueprint(metric_blueprint)
 app.register_blueprint(config_blueprint)
@@ -43,246 +44,166 @@ app.debug = True
 Scss(app, static_dir='static/css', asset_dir='assets/scss')
 r1 = redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
 
-
 app.secret_key = os.urandom(24)
 
 @app.route("/")
 def launch():
-	try:
-		r1.ping()
-	except:
-		return "redis database isn't working"
-
-	if not r1.exists("runningFile"):	
-                r1.hset("runningFile", "fileName", "current.json")
-                r1.hset("runningFile", "isRunning", 0)
-	if not r1.exists("runNumber"):
-                r1.set("runNumber",99)
-                r1.set("runStart",0)
-	selectedFile = r1.hgetall("runningFile")["fileName"]
-	return render_template('softDaqHome.html', selectedFile = selectedFile)
+    selectedFile = r1.hgetall("runningFile")["fileName"]
+    return render_template('softDaqHome.html', selectedFile = selectedFile)
 
 
 @app.route("/initialise")
 def initialise():
-		
-	print("reboot button pressed")
-	
-	d = session.get('data')
-	dc = h.createDaqInstance(d)
+    print("reboot button pressed")
+    
+    d = session.get('data')
+    dc = h.createDaqInstance(d)
 
-	r1.publish("stateAction","initialize "+session.get("selectedFile"))
-	
-	r1.hset("runningFile", "isRunning", 1)
-	r1.hset("runningFile", "fileName", session.get("selectedFile"))	
+    r1.publish("stateAction","initialize "+session.get("selectedFile"))
+    
+    r1.hset("runningFile", "fileName", session.get("selectedFile")) 
 
-	logfiles = dc.addProcesses(d['components'])
-	
-	for logfile in logfiles:
-		name = logfile[1][5:].split("-")[0]
-		r1.hset("log", name, logfile[0] + logfile[1])
-	h.spawnJoin(d['components'], dc.configureProcess)
-	
-	return "true"
+    logfiles = dc.addProcesses(d['components'])
+        
+    for logfile in logfiles:
+        name = logfile[1][5:].split("-")[0]
+        r1.hset("log", name, logfile[0] + logfile[1])
+    h.spawnJoin(d['components'], dc.configureProcess)
+            
+    return "true"
 
 @app.route("/start")
 def start():
-	print("start button pressed")
-	runNumber=int(r1.get("runNumber"))
-	runNumber+=1
-	r1.set("runNumber",runNumber)
-	r1.set("runStart",time.time())
-	d = session.get('data')	
-	dc = h.createDaqInstance(d)
-#	h.spawnJoin(d['components'], dc.startProcess)
-	h.spawnJoin(d['components'], functools.partial(dc.startProcess,arg=str(runNumber)))
-	return "true"
+    print("start button pressed")
+    runNumber=int(r1.get("runNumber"))
+    runNumber+=1
+    r1.set("runNumber",runNumber)
+    r1.set("runStart",time.time())
+    d = session.get('data') 
+    dc = h.createDaqInstance(d)
+#       h.spawnJoin(d['components'], dc.startProcess)
+    h.spawnJoin(d['components'], functools.partial(dc.startProcess,arg=str(runNumber)))
+    return "true"
 
 @app.route("/pause")
 def pause():
-	print("pause button pressed")
-	d = session.get('data')	
-	dc = h.createDaqInstance(d)
-	h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="disableTrigger"))
-	return "true"
+    print("pause button pressed")
+    d = session.get('data') 
+    dc = h.createDaqInstance(d)
+    h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="disableTrigger"))
+    return "true"
 
 @app.route("/ecr")
 def ecr():
-	print("ECR button pressed")
-	d = session.get('data')	
-	dc = h.createDaqInstance(d)
-	h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="ECR"))
-	return "true"
+    print("ECR button pressed")
+    d = session.get('data') 
+    dc = h.createDaqInstance(d)
+    h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="ECR"))
+    return "true"
 
 @app.route("/unpause")
 def unpause():
-	print("unpause (start) button pressed")
-	d = session.get('data')	
-	dc = h.createDaqInstance(d)
-	h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="enableTrigger"))
-	return "true"
+    print("unpause (start) button pressed")
+    d = session.get('data') 
+    dc = h.createDaqInstance(d)
+    h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="enableTrigger"))
+    return "true"
 
 
 @app.route("/stop")
 def stop():
-	print("stop button pressed")	
-	d = session.get('data')
-	dc = h.createDaqInstance(d)
-	h.spawnJoin(d['components'], dc.stopProcess)
-	return "true"
+    print("stop button pressed")    
+    d = session.get('data')
+    dc = h.createDaqInstance(d)
+    h.spawnJoin(d['components'], dc.stopProcess)
+    return "true"
 
 @app.route("/shutdown")
 def shutdown():
-	print("shutdown button pressed")	
-	d = session.get('data')	
-	dc = h.createDaqInstance(d)
-	h.spawnJoin(d['components'], dc.shutdownProcess)
-	dc.removeProcesses(d['components'])	
-	return "true"
-
-@app.route("/status")
-def sendStatusJsonFile():
-        status=r1.get("status")
-        return Response(status, mimetype="application/json")
+    print("shutdown button pressed")    
+    d = session.get('data') 
+    dc = h.createDaqInstance(d)
+    h.spawnJoin(d['components'], dc.shutdownProcess)
+    dc.removeProcesses(d['components'])     
+    return "true"
 
 @app.route("/refreshState")
 def refresh():
-        r1.publish("status","new") # force update
-        return "true"
+    r1.publish("status","new") # force update
+    return "true"
 
 @app.route("/state")
 def sendState():
-        def getState():
-                pubsub=r1.pubsub()
-                pubsub.subscribe("status")
-                while True:
-                        json_data = r1.get("status")
-                        yield f"data:{json_data}\n\n"
-                        m=pubsub.get_message(timeout=10)
-                        print(m)
-        return Response(getState(), mimetype='text/event-stream')
+    def getState():
+        pubsub=r1.pubsub()
+        pubsub.subscribe("status")
+        while True:
+            json_data = r1.get("status")
+            yield f"data:{json_data}\n\n"
+            m=pubsub.get_message(timeout=10)
+#            print(m)
+    return Response(getState(), mimetype='text/event-stream')
 
 @app.route('/log/<boardName>')
 def logfile(boardName):
-	try:
-		logfile = r1.hgetall("log")[boardName]
-		logfile = logfile[len(logfile.split("/")[0]):]
-		print("logfile: ", logfile)
-
-		d = session.get('data')	
-		index = h.findIndex(boardName, d)
-		
-		data = h.tail(logfile, 1000)
-		return Response(data, mimetype='text/plain')
-
-	except IndexError as error:
-		abort(404)
-	except FileNotFoundError:
-		abort(404)
+    try:
+        logfile = r1.hgetall("log")[boardName]
+        logfile = logfile[len(logfile.split("/")[0]):]
+        data = h.tail(logfile, 1000)
+        return Response(data, mimetype='text/plain')
+    except KeyError:
+        return Response("No logfile available", mimetype='text/plain')
+    except IndexError as error:
+        abort(404)
+    except FileNotFoundError:
+        abort(404)
 
 
-
-def stateTracker():
-        pubsub=r1.pubsub()
-        pubsub.subscribe("stateAction")
-        oldState={}
-        configName=""
-        config={}
-        oldStatus=[]
-        daq=None
-        overallState=None
-        while True:
-                update=False
-                runState=r1.hgetall("runningFile")
-                runNumber=r1.get("runNumber")
-                runStart=r1.get("runStart")
-                if not oldState==runState:
-                        oldState=runState
-                        print("State changed to:",runState)
-                        update=True
-                if runState["fileName"]!=configName:
-                        configName=runState["fileName"]
-                        config=h.read(configName)
-                        #FIXME: add handling of failed reads here
-                        daq=None
-                if not daq and type(config)==dict:
-                        daq = h.createDaqInstance(config)
-                if daq:
-                        status=[]
-                        overallState=None
-                        if not config['components']: overallState="DOWN"
-                        for comp in config['components']:	
-                                rawStatus, timeout = daq.getStatus(comp)
-                                state = str(h.translateStatus(rawStatus, timeout))
-                                if not overallState:
-                                        overallState=state
-                                if state!=overallState:
-                                        overallState="IN TRANSITION"
-                                status.append({'name' : comp['name'] , 'state' : state})
-                        if status!=oldStatus:
-                                oldStatus=status
-                                print("Status changed to: ",status,overallState)
-                                r1.set("status",json.dumps({'allStatus' : status,
-                                                            'runState' : runState,
-                                                            'runNumber' : runNumber,
-                                                            'runStart' : runStart,
-                                                            'globalStatus': overallState,}))
-                                update=True
-                if update:
-                       r1.publish("status","new")
-
-                m=pubsub.get_message(timeout=0.5)
-                if m:
-                        cmd=m['data']
-                        if cmd=="quit": break
-                        if cmd=="updateConfig": configName=""
-                        print(m)
-                        print(cmd)
-
-                        
-def metricsHandler(stopEvent):
-        print("hello")
-        context = zmq.Context()
-
-        sock = context.socket(zmq.SUB)
-        sock.bind("tcp://127.0.0.1:7000")   #for now the port is hardcoded to 7000 on localhost
-        sock.setsockopt_string(zmq.SUBSCRIBE,"")
-        r = redis.Redis(host='localhost', port=6379, db=0,
-                        charset="utf-8", decode_responses=True)
-
-        while not stopEvent.isSet():
-                events=sock.poll(timeout=1000)
-                if not events: continue
-                data=sock.recv()
-                try:
-                        source,rest=data.decode().split("-",1)
-                        name,value=rest.split(': ')
-                        val=str(time.time())+":"+value
-                        r.hset(source,name,val)
-                        if "Rate" in name: # this should be configurable
-                                metric="History:"+source+"_"+name
-                                r.lpush(metric,val)
-                                r.ltrim(metric,0,9) # this should be configurable
-                except ValueError:
-                        print("failed to decode:",data)
-
-	
+def usage():
+    print("Usage:")
+    print("  app.py [-p <port>]")
+    sys.exit(0)
+    
 if __name__ == '__main__':
+    try:
+        opts, args= getopt.getopt(sys.argv[1:],"p:",[])
+    except getopt.GetoptError:
+        usage()
+    port=5000
+    for opt,arg in opts:
+        if opt=="-p":
+            port=int(arg)
+            if port<1024:
+                print("Port number has to be >1023")
+                sys.exit(1)
+    
+    try:
+        r1.ping()
+    except:
+           print("Redis database is not running - please start it")
+           #FIXME: print instructions here
+           sys.exit(1)
 
-        event = threading.Event()
-        metrics = threading.Thread(name="metricsHandler",target=metricsHandler,args=(event,))
-        metrics.start()
-        tracker = threading.Thread(name="stateTracker",target=stateTracker)
-        tracker.start()
+    if not r1.exists("runningFile"):    
+        r1.hset("runningFile", "fileName", "current.json")
+    if not r1.exists("runNumber"):
+        r1.set("runNumber",99)
+        r1.set("runStart",0)
 
-        from werkzeug.serving import run_simple
-        run_simple("0.0.0.0",5002,app,threaded=True)
-        #app.run(host="0.0.0.0",port=5002,threaded=True)
-        print("The end! Wrapping up remaining threads, please standby ")
-        r1.publish("stateAction","quit")
-        event.set()
-        tracker.join()
-        metrics.join()
+    metrics=metricsHandler.Metrics(app.logger)
+    state=statetracker.State(r1,app.logger)
+
+    print("Connect browser to:")
+    print(" http://%s:%d" % (platform.node(),port))
+    print(" - If connection does not work make sure browser runs on computer on CERN network")
+    print("   and that firewall is open for the port:")
+    print("   > sudo firewall-cmd --list-ports")
+    from werkzeug.serving import run_simple
+    run_simple("0.0.0.0",port,app,threaded=True)
+    #app.run(host="0.0.0.0",port=5002,threaded=True)
+    print("The end! Wrapping up remaining threads, please standby ")
+    state.stop()
+    metrics.stop()
 	#app.run(processe=19)
 
 

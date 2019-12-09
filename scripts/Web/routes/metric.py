@@ -31,7 +31,7 @@ import json
 import redis
 
 import flask
-from flask import Flask,session
+from flask import Flask
 from flask import Response
 from flask import jsonify
 from flask import render_template
@@ -187,3 +187,7 @@ def getModuloData(boardType, source, moduleId):
 # Normally spawned by gunicorn
 
 
+def getBoardStatus(boardname):
+  state=r.hget(boardname,'Status')
+  if not state: return -1
+  return int(state.decode().split(":")[1])

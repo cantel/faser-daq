@@ -15,6 +15,14 @@ function updateStatus(data){
 	} else {
 	    document.getElementById("status" + i.toString()).className = "badge badge-success";
 	}
+	var source = data.allStatus[i].name;
+	var statusVal = data.allStatus[i].infoState;
+	if(statusVal == 0)
+	    document.getElementById("info-"+source).className = "btn btn-success btn-settings";
+	else if(statusVal == 1)
+	    document.getElementById("info-"+source).className = "btn btn-warning btn-settings";
+	else if (statusVal == 2)
+	    document.getElementById("info-"+source).className = "btn btn-danger btn-settings";
     }
 }
 
@@ -71,24 +79,6 @@ function updateConfigFileChoices(){
 	}});
 	createRadioInputs(fileNames);	
 	
-}
-
-function updateColorOfInfoButtons(){
-	
-	$.ajax({url: "/monitoring/info/updateStatus", async: false, success: function(data){
-		//console.log(data);
-		
-		for(var i = 0; i < Object.keys(data.allStatus).length; i++){
-			var source = data.allStatus[i].source;
-			var statusVal = data.allStatus[i].statusVal;
-			if(statusVal == 0)
-				document.getElementById("info-"+source).className = "btn btn-success btn-settings";
-			else if(statusVal == 1)
-				document.getElementById("info-"+source).className = "btn btn-warning btn-settings";
-			else if (statusVal == 2)
-				document.getElementById("info-"+source).className = "btn btn-danger btn-settings";
-		}
-	}});
 }
 
 function goToCurrent(){
@@ -175,65 +165,3 @@ function convertToDate(timestamp){
 	var convertedTime = month + "/" + day + "/" + year + "  " + hour + ":" + minutes.substr(-2) + ":" + seconds.substr(-2);
 	return convertedTime;
 }
-/*
-function setDefaultValues(){
-	
-		var graphWindow = document.getElementById("graphWindow");
-
-		while(graphWindow.firstChild && graphWindow.removeChild(graphWindow.firstChild));
-		var noInfo = document.createElement("H1");
-		noInfo.innerHTML = "THE EVENTBUILDER IS NOT RUNNING. NO INFO AVAILABLE.";
-		graphWindow.appendChild(noInfo);
-
-		document.getElementById("PhysicsEvents").innerHTML = "";
-		document.getElementById("PhysicsRate").innerHTML = "";
-		document.getElementById("MonitoringEvents").innerHTML = "";
-		document.getElementById("MonitoringRate").innerHTML = "";
-		document.getElementById("CalibrationEvents").innerHTML = "";
-		document.getElementById("CalibrationRate").innerHTML = "";
-		document.getElementById("RunNumber").innerHTML = "";
-		document.getElementById("RunStart").innerHTML = "";
-}
-*/
-/*
-function displaySaveButton(){
-
-	
-	if(document.getElementById('radio-current.json').checked == true){
-		var save = document.createElement("button");
-		save.className = "btn btn-primary";
-		save.innerHTML = "SAVE";
-		save.id = "save-button";
-		save.style.cssFloat = "right";
-		save.addEventListener("click", function(){
-			saveConfigFile();
-		});
-		
-		document.getElementById("saveNewFile").appendChild(save);
-	}
-
-}
-
-*/
-/*
-function disableFileChoice(bool){
-	
-	$.ajax({url : '/configurationFiles/fileNames', async:false, success : function(data){
-		fileNames = data;
-	}});
-
-
-	for(var i = 0; i < Object.keys(fileNames.configFileNames).length; i++){
-		document.getElementById("radio-" + fileNames.configFileNames[i].name).disabled = bool;
-	}
-}
-*/
-/*
-function disableConfigButtons(data, bool){
-	
-	for(var i = 0; i < Object.keys(data.allStatus).length; i++){
-		document.getElementById("config" + data.allStatus[i].name).disabled = bool;
-	}
-}
-*/
-

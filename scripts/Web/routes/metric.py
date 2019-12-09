@@ -33,6 +33,7 @@ import redis
 import flask
 from flask import Flask
 from flask import Response
+from flask import request
 from flask import jsonify
 from flask import render_template
 from flask_restful import Api, Resource, reqparse
@@ -49,26 +50,14 @@ metric_blueprint = Blueprint('metric',__name__, url_prefix='/monitoring',
       static_url_path='',
       static_folder='static',
       template_folder='templates')
-#api = Api(metric)
-parser = reqparse.RequestParser()
-parser.add_argument('value')
-
 
 r = redis.Redis(host='localhost', port=6379, db=0)
-#r= redis.StrictRedis('localhost', 6379, db=0, charset="utf-8", decode_responses=True)
-#r.delete('datarate', 'size')
-#r.flushdb()
 
-class Add(Resource):
-  def post(self, metric):
-    args = parser.parse_args()
-    print(args)
-    value = str(args['value'])
-    r.rpush(metric, str(time.time()*1000)+':'+value)
-#    r.expire(metric, 5);
+@metric_blueprint.route("/metrics")
+def metric():
+  return json.dumps([s.decode() for s in r.keys()])
 
-
-@metric_blueprint.route("/data/<string:metric>")
+@metric_blueprint.route("/data/<string:metric>")  # used to get rate history data
 def data(metric):
   metric_array = []
   for x in r.lrange(metric, 0, -1):
@@ -106,85 +95,34 @@ def lastMeas(metric):
     return json.dumps([1000.*float(value[0]), float(value[1])])
   return "0"
 
-@metric_blueprint.route("/metrics")
-def metric():
-  return json.dumps([s.decode() for s in r.keys()])
-
-#@metric_blueprint.route("/values")
-#def listvalues():
-#  metrics={}
-#  for key in sorted(r.keys()):
-#    if (key.startswith(b"History:")) or (key.startswith(b"Subset:")): continue
-#    metrics[key.decode()]=str(r.hlen(key))
-#  #print("metrics", metrics)
-#  return render_template('overview.html', metrics=metrics)
-  
-
 @metric_blueprint.route("/info/<boardType>/<string:source>")
 def values(boardType, source):
-  values={}
-  dbVals=r.hgetall(source)
-  for key in sorted(dbVals):
-    values[key.decode()]=(dbVals[key].split(b':')[1].decode(),time.ctime(float(dbVals[key].split(b':')[0])))
-  #print("source", source)
-  #print("values", values)
-  if boardType == "FrontEndReceiver":
-    return render_template('custom/tracker.html', source=source,values=values, boardType=boardType)
-  return render_template('values.html', source=source,values=values, boardType=boardType)
+  module=request.args.get('module','')
+  return render_template('values.html',
+                         source=source,
+                         content="custom/"+boardType+".html",
+                         boardType=boardType,
+                         module=module
+  )
  
-@metric_blueprint.route("/info/<string:source>/dataUpdate")
-def getValues(source):
-  values=[]
-  dbVals=r.hgetall(source)
-  #print("dbVals in dataUpdate", dbVals)
-  for key in sorted(dbVals):
-    values.append({  'key':key.decode(), 'value': dbVals[key].split(b':')[1].decode(), 'time': time.ctime(float(dbVals[key].split(b':')[0]))  })
-  return jsonify({"values" : values})
-
-
-
-@metric_blueprint.route("/info/updateStatus")
-def getStatus():
-  allStatus = []
-  #print("r: ", r)
-  for key in sorted(r.keys()):
-    #print(key)
-    if (key.startswith(b"History")) or (key.startswith(b"Subset")): continue
-    source = key.decode()
-    #print("source in stat: ", source)
-    dbVals = r.hgetall(source)
-    #dbVals = sorted(dbVals)
-    #print("*********bdVals:", dbVals)
-    if(b'Status' in sorted(dbVals)):
-      val =  dbVals[b'Status'].split(b':')[1].decode()
-    else: 
-      val = -1
-    allStatus.append({ "source": source, "statusVal": val })
-  #print("allStatus", allStatus) 
-  return jsonify({"allStatus" : allStatus})
-
-
-@metric_blueprint.route("/info/<boardType>/<source>/<moduleId>")
-def moduloTemplate(boardType, source, moduleId):
-  return render_template("custom/module.html", source=source, moduleId= moduleId, boardType=boardType)
-
-
-@metric_blueprint.route("/info/<boardType>/<source>/<moduleId>/getData")
-def getModuloData(boardType, source, moduleId): 
-  values=[]
-  hashName = "Subset:" + source + ":" + moduleId
-  dbVals=r.hgetall(hashName)
-  for key in sorted(dbVals):
-    values.append({  'key':key.decode(), 'value': dbVals[key].split(b':')[1].decode(), 'time': time.ctime(float(dbVals[key].split(b':')[0]))  })
-  return jsonify({"values" : values})
-
-
-#api.add_resource(Add, "/add/<string:metric>", methods=['POST'])
-#api.add_resource(Metrics, "/metrics", methods=['GET'])
-
-# As a testserver.
-#app.run(host= '0.0.0.0', port=5000, debug=True)
-# Normally spawned by gunicorn
+@metric_blueprint.route("/infoTable/<string:source>")
+def sendValues(source):
+  def getValues(source):
+    oldValues=None
+    while True:
+      values=[]
+      dbVals=r.hgetall(source)
+      if dbVals==oldValues: continue
+      oldValues=dbVals
+      for key in sorted(dbVals):
+        values.append({
+          'key':key.decode(),
+          'value': dbVals[key].split(b':')[1].decode(),
+          'time': time.ctime(float(dbVals[key].split(b':')[0]))
+        })
+      yield f"data:{json.dumps(values)}\n\n"
+      time.sleep(1)
+  return Response(getValues(source), mimetype='text/event-stream')
 
 
 def getBoardStatus(boardname):

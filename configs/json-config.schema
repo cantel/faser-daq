@@ -28,12 +28,15 @@
 	"options": { "disable_collapse": true },
         "properties": {
           "name": {
-            "type": "string"
+            "type": "string",
+	    "propertyOrder": 1
+
           },
           "host": {
 		"type": "string",
 		"format":"host",
-		"default": "localhost"
+		"default": "localhost",
+		"propertyOrder": 2
           },          
           "port": {
 		"type": "integer",
@@ -49,7 +52,7 @@
             "type": "object",
             "title": "Log Levels",
 	    "format":"grid",
-            "propertyOrder": 6,
+            "propertyOrder": 4,
             "properties": {
               "core": {
                 "type": "string",
@@ -64,8 +67,9 @@
           },
           "settings": {
             "type": "object",
-            "title": "Settings"
-          },
+            "title": "Settings",
+             "propertyOrder": 10
+         },
           "connections": {
             "type": "object",
             "title": "Connections",
@@ -78,6 +82,7 @@
                 "uniqueItems": true,
                 "items": {
                     "type": "object",
+		    "title": "",
 		    "options": {
 			"disable_collapse": true
 		    },

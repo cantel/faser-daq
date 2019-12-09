@@ -19,10 +19,10 @@
 
 #include "Commons/FaserProcess.hpp"
 
-class NewModule : public FaserProcess {
+class TrackerReceiverModule : public FaserProcess {
  public:
-  NewModule();
-  ~NewModule();
+  TrackerReceiverModule();
+  ~TrackerReceiverModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
   void start(unsigned);

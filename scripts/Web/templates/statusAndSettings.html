@@ -8,10 +8,19 @@
 	</tbody>
       </table>
       
-      <div class="container" style= "padding-top: 40px; ">	
+<!--      <div class="container" style= "padding-top: 40px; ">	
 	<button type="button" class="btn btn-primary btn-lg" style="float: right;" onclick="addBoard()">ADD</button>
-      </div>
-      
+      </div> --->
+      <div class="dropdown">
+	<button type="button" class="btn btn-primary btn-lg dropdown-toggle" style="float: right;" data-toggle="dropdown">
+	  ADD
+	</button>
+	<div class="dropdown-menu">
+	  {% for schema in schemaChoices %}
+	  <a class="dropdown-item" onclick="addBoard('{{ schema }}');">{{ schema }}</a>
+	  {% endfor %}
+	</div>
+      </div> 
     </div>
   </div>
 </div>

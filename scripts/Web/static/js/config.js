@@ -1,56 +1,3 @@
-function displaySchemaOptions(generalSchema, schemas){
-	
-	//alert("second");
-	//console.log(schemas);
-	var schemaBar = document.getElementById("schemaDropDown");	
-	var dropDown = document.createElement("button");
-	dropDown.className = "btn btn-primary dropdown-toggle btn-lg";
-	dropDown.setAttribute("type", "button");
-	dropDown.innerHTML = "Schema Options";
-	dropDown.setAttribute("data-toggle","dropdown");	
-	var caret = document.createElement("span");
-	caret.className = "caret";
-	dropDown.appendChild(caret);
-
-	schemaBar.appendChild(dropDown);
-
-	var u1 = document.createElement("u1");
-	u1.className = "dropdown-menu";
-	schemaBar.appendChild(u1);
-    //console.log(schemas);
-	for(var i = 0; i < Object.keys(schemas.schemaChoices).length; i++){
-		var li = document.createElement("li");
-		//li.className = "nav-item";
-	    //console.log(i);
-		var a = document.createElement("a");
-		//a.className = "nav-link";
-		a.href = "#schema choice";
-		var name = schemas.schemaChoices[i].name;
-		var nameWithoutExt = name.split(".").slice(0, -1).join(".")
-		a.innerHTML = nameWithoutExt;
-		a.id = 'a-'+name;
-		a.addEventListener("click", function(){
-		//alert(this.id);
-			//find the schema
-
-			$.ajax({url : '/add/'+ this.id.slice(2)  ,async:false, success : function(schema){	
-				
-				var improvedSchema = improveSchema(generalSchema, schema);
-				//console.log("this is the schema", schema);
-				//var improvedSchema = generalSchema;
-				loadSchema(improvedSchema, {});
-			}});
-		});
-	
-		li.appendChild(a);
-		u1.appendChild(li);
-	}
-
-	$(document).ready(function() {  
-		$(".dropdown .dropdown-menu li a")[0].click();
-	});	
-}
-	
 
 function applyChanges(editor, fileName, boardName){
 	var errors = editor.validate();
@@ -167,7 +114,7 @@ function loadButtons(flag, fileName, boardName){
     else if (flag == 1){
 	
 	var add = document.createElement("button");
-	add.className = "btn btn-success btn-lg json-editor-btn-add";
+	add.className = "inline-block align-middle text-center text-sm bg-blue-700 text-white py-1 pr-1 m-2 shadow select-none whitespace-no-wrap rounded json-editor-btn-add json-editor-btntype-add";
 	add.style.cssFloat = "right";
 	add.innerHTML = "ADD BOARD";
 	add.addEventListener("click", function(){
@@ -185,11 +132,12 @@ function loadButtons(flag, fileName, boardName){
 
 
 function addBoard(){
-    
-    var urlPath = '/add/addBoard';
+    currentFile=window.opener.selectedFile();
+    console.log("Add to file: "+currentFile);
+    var urlPath = '/add/addBoard/'+currentFile;
     //alert(urlPath);
     var errors = editor.validate();
-    console.log(errors);
+    console.log("Errors: "+errors);
     if(!errors.length){
 	
 	var value = editor.getValue();

@@ -9,7 +9,9 @@ function updateBoardContainer(fileName){
 
 function updateStatus(data){
     for (var i = 0; i < Object.keys(data.allStatus).length; i++){
-	document.getElementById("status" + i.toString()).innerHTML = data.allStatus[i].state;
+	statusElement=document.getElementById("status" + i.toString());
+	if (statusElement==null) continue;
+	statusElement.innerHTML = data.allStatus[i].state;
 	if(data.allStatus[i].state == "TIMEOUT"){
 	    document.getElementById("status" + i.toString()).className = "badge badge-danger";
 	} else {
@@ -86,9 +88,10 @@ function goToCurrent(){
 	document.getElementById('radio-current.json').click();
 }
 
-function addBoard(){
-	
-	CHILD_WINDOW = window.open("/add", 'Configuration Data','replace=true,top=200,left=100,height=800,width=1200,scrollbars=yes,titlebar=yes');
+function addBoard(boardType){
+    console.log($('input[name=configFileGroup]:checked').val());
+    CHILD_WINDOW = window.open("/add/"+boardType, 'Configuration Data','replace=true,top=200,left=100,height=800,width=1200,scrollbars=yes,titlebar=yes');
+    
 }
 function saveConfigFile(){
 	var configFileName = prompt("Please enter your new configuration filename without json at the end:", "configXXX");
@@ -112,6 +115,10 @@ function saveConfigFile(){
 	}
 }
 
+
+function selectedFile() {
+    return $('input[name=configFileGroup]:checked').val()
+}
 
 function isDOWN(){
     return document.getElementById("runningState").innerHTML=="DOWN";

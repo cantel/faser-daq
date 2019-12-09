@@ -49,7 +49,12 @@ app.secret_key = os.urandom(24)
 @app.route("/")
 def launch():
     selectedFile = r1.hgetall("runningFile")["fileName"]
-    return render_template('softDaqHome.html', selectedFile = selectedFile)
+    schemas = os.listdir(env['DAQ_CONFIG_DIR'] +'schemas')
+    schemaChoices = []
+    for s in schemas:
+        if(s.endswith(".schema")):
+            schemaChoices.append(s.replace(".schema",""))
+    return render_template('softDaqHome.html', selectedFile = selectedFile, schemaChoices=schemaChoices)
 
 
 @app.route("/initialise")

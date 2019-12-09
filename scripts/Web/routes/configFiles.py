@@ -45,7 +45,6 @@ def saveNewConfigFile(newFileName):
 @configFiles_blueprint.route('/<fileName>')
 def getConfigFile(fileName):
 		
-	session['fileName'] = fileName
 	res = h.read(fileName)
 	session["selectedFile"] = fileName;
 	if(res == "NOJSON" or res == "BADSCHEMA" or res == "NOSCHEMA" or res == "NOTCOMP"):

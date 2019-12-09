@@ -90,29 +90,18 @@
         // If no valid editor is returned, the next resolver function will be used
       });
       /////////************************************ The schema options is displayed if the add button is clicked(depending on the flag) ***************************////////////
-      if(flag == 1){
-        displaySchemaOptions(generalSchema, schemas);
-        loadButtons(flag, '{{ fileName }}' , 'dummy');
-      //console.log(schemas);	
-      //console.log(flag);
-      }
-      else if (flag == 0){
       
-        if(schema == "error"){
-          alert("The schema does not exist or does't have the right format");
-        }	
-        else{
+      if(schema == "error"){
+        alert("The schema does not exist or does't have the right format");
+      }	
+      else{
           //console.log("this is the schema in config:", schema);
           improvedSchema = improveSchema(generalSchema, schema);
-          loadSchema(/*generalSchema*/improvedSchema/*schema*/, value);
-          //console.log(schema);
-          //console.log(schema.properties.host);
-          //schema.push("enum":["a", "b", "c"]);
-         //loadSchema(editor, schema, value);
-         loadButtons(flag, '{{ fileName }}' , '{{ boardName }}');
-        }			
+          loadSchema(improvedSchema, value);
+          loadButtons(flag, '{{ fileName }}' , '{{ boardName }}');
+      }			
 						
-      }
+      
 
       setInterval(function(){disableConfigWindow();}, 500);
       });

@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1570446458478,
+  "iteration": 1575966620262,
   "links": [],
   "panels": [
     {
@@ -40,7 +40,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -88,7 +88,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "DL_PayloadQueueBytes_chid1",
+          "measurement": "filewriter01-BytesWritten_chid0",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -186,7 +186,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "DataLogger Writing Speed",
+      "title": "File Writer Writing Speed",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -231,6 +231,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -279,7 +280,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "DL_PayloadQueueSize_chid1",
+          "measurement": "filewriter01-PayloadQueueSize_chid0",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -305,7 +306,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "DataLogger Payload Queue Size",
+      "title": "File Writer Payload Queue Size",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -351,7 +352,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -509,7 +510,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -556,7 +557,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "EB-CHN1-QueueSizeGuess",
+          "measurement": "eventbuilder01-ch0-QueueSizeGuess",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -592,7 +593,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "EB-CHN2-QueueSizeGuess",
+          "measurement": "eventbuilder01-ch1-QueueSizeGuess",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -656,6 +657,41 @@
       }
     },
     {
+      "alert": {
+        "conditions": [
+          {
+            "evaluator": {
+              "params": [
+                0.9
+              ],
+              "type": "gt"
+            },
+            "operator": {
+              "type": "and"
+            },
+            "query": {
+              "params": [
+                "A",
+                "5m",
+                "now"
+              ]
+            },
+            "reducer": {
+              "params": [],
+              "type": "avg"
+            },
+            "type": "query"
+          }
+        ],
+        "executionErrorState": "alerting",
+        "for": "30s",
+        "frequency": "5s",
+        "handler": 1,
+        "message": "EventBuilder full!",
+        "name": "EB QueueFraction alert",
+        "noDataState": "no_data",
+        "notifications": []
+      },
       "aliasColors": {
         "max queue fraction": "red",
         "min queue fraction": "purple"
@@ -663,7 +699,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -772,20 +808,11 @@
       ],
       "thresholds": [
         {
-          "colorMode": "warning",
-          "fill": false,
-          "line": true,
-          "op": "gt",
-          "value": 0.5,
-          "yaxis": "left"
-        },
-        {
           "colorMode": "critical",
-          "fill": false,
+          "fill": true,
           "line": true,
           "op": "gt",
-          "value": 1,
-          "yaxis": "left"
+          "value": 0.9
         }
       ],
       "timeFrom": null,
@@ -838,7 +865,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -885,7 +912,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "EB-CHN1-NumMessages",
+          "measurement": "eventbuilder01-ch0-NumMessages",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -927,7 +954,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "EB-CHN2-NumMessages",
+          "measurement": "eventbuilder01-ch1-NumMessages",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -1017,7 +1044,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -1067,7 +1094,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_payload",
+          "measurement": "eventmonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1104,7 +1131,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_payload",
+          "measurement": "eventmonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -1185,7 +1212,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -1235,47 +1262,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_payload",
+          "measurement": "eventmonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "payload mean (10s)",
-          "groupBy": [
-            {
-              "params": [
-                "10s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "none"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "event_payload",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
           "resultFormat": "time_series",
           "select": [
             [
@@ -1353,7 +1343,7 @@
       "cacheTimeout": null,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -1404,7 +1394,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tracker_payload",
+          "measurement": "trackermonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1441,7 +1431,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tracker_payload",
+          "measurement": "trackermonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -1513,7 +1503,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -1563,47 +1553,10 @@
               "type": "fill"
             }
           ],
-          "measurement": "tracker_payload",
+          "measurement": "trackermonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
-          "resultFormat": "time_series",
-          "select": [
-            [
-              {
-                "params": [
-                  "value"
-                ],
-                "type": "field"
-              },
-              {
-                "params": [],
-                "type": "mean"
-              }
-            ]
-          ],
-          "tags": []
-        },
-        {
-          "alias": "payload mean (10s)",
-          "groupBy": [
-            {
-              "params": [
-                "10s"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "none"
-              ],
-              "type": "fill"
-            }
-          ],
-          "measurement": "event_payload",
-          "orderByTime": "ASC",
-          "policy": "default",
-          "refId": "B",
           "resultFormat": "time_series",
           "select": [
             [
@@ -1684,7 +1637,7 @@
       "cacheTimeout": null,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -1733,7 +1686,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_payload",
+          "measurement": "tlbmonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1770,7 +1723,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_payload",
+          "measurement": "tlbmonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -1842,7 +1795,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -1892,7 +1845,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_payload",
+          "measurement": "tlbmonitor01-payload",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -1981,11 +1934,13 @@
       "type": "row"
     },
     {
-      "aliasColors": {},
+      "aliasColors": {
+        "TimeOut": "dark-blue"
+      },
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -2006,7 +1961,7 @@
       "lines": true,
       "linewidth": 1,
       "links": [],
-      "nullPointMode": "null",
+      "nullPointMode": "connected",
       "options": {},
       "percentage": false,
       "pointradius": 2,
@@ -2034,7 +1989,7 @@
             }
           ],
           "hide": false,
-          "measurement": "event_error_ok",
+          "measurement": "eventmonitor01-error_ok",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -2071,7 +2026,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_bcidmismatch",
+          "measurement": "eventmonitor01-error_bcidmismatch",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -2108,7 +2063,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_tagmismatch",
+          "measurement": "eventmonitor01-error_tagmismatch",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -2145,7 +2100,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_missing",
+          "measurement": "eventmonitor01-error_missing",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "D",
@@ -2182,10 +2137,47 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_corrupted",
+          "measurement": "eventmonitor01-error_corrupted",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "TimeOut",
+          "groupBy": [
+            {
+              "params": [
+                "$delta_t"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "eventmonitor01-error_timeout",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "F",
           "resultFormat": "time_series",
           "select": [
             [
@@ -2253,7 +2245,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -2301,7 +2293,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_ok",
+          "measurement": "eventmonitor01-error_ok",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -2338,7 +2330,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_bcidmismatch",
+          "measurement": "eventmonitor01-error_bcidmismatch",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -2375,7 +2367,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_tagmismatch",
+          "measurement": "eventmonitor01-error_tagmismatch",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -2412,7 +2404,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_missing",
+          "measurement": "eventmonitor01-error_missing",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "D",
@@ -2449,10 +2441,47 @@
               "type": "fill"
             }
           ],
-          "measurement": "event_error_corrupted",
+          "measurement": "eventmonitor01-error_corrupted",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "E",
+          "resultFormat": "time_series",
+          "select": [
+            [
+              {
+                "params": [
+                  "value"
+                ],
+                "type": "field"
+              },
+              {
+                "params": [],
+                "type": "sum"
+              }
+            ]
+          ],
+          "tags": []
+        },
+        {
+          "alias": "TimeOut",
+          "groupBy": [
+            {
+              "params": [
+                "$__interval"
+              ],
+              "type": "time"
+            },
+            {
+              "params": [
+                "null"
+              ],
+              "type": "fill"
+            }
+          ],
+          "measurement": "eventmonitor01-error_timeout",
+          "orderByTime": "ASC",
+          "policy": "default",
+          "refId": "F",
           "resultFormat": "time_series",
           "select": [
             [
@@ -2522,7 +2551,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -2571,7 +2600,7 @@
             }
           ],
           "hide": false,
-          "measurement": "tracker_error_ok",
+          "measurement": "trackermonitor01-error_ok",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -2608,7 +2637,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tracker_error_missing",
+          "measurement": "trackermonitor01-error_missing",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -2645,7 +2674,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tracker_error_corrupted",
+          "measurement": "trackermonitor01-error_corrupted",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -2716,7 +2745,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -2758,7 +2787,7 @@
               "type": "time"
             }
           ],
-          "measurement": "tracker_error_ok",
+          "measurement": "trackermonitor01-error_ok",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -2795,7 +2824,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tracker_error_missing",
+          "measurement": "trackermonitor01-error_missing",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -2832,7 +2861,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tracker_error_corrupted",
+          "measurement": "trackermonitor01-error_corrupted",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "D",
@@ -2905,7 +2934,7 @@
       "bars": false,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 0,
       "gridPos": {
         "h": 8,
@@ -2954,7 +2983,7 @@
             }
           ],
           "hide": false,
-          "measurement": "tlb_error_ok",
+          "measurement": "tlbmonitor01-error_ok",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -2991,7 +3020,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_error_missing",
+          "measurement": "tlbmonitor01-error_missing",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -3028,7 +3057,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_error_corrupted",
+          "measurement": "tlbmonitor01-error_corrupted",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -3100,7 +3129,7 @@
       "bars": true,
       "dashLength": 10,
       "dashes": false,
-      "datasource": "DAQmetrics",
+      "datasource": "DAQlingMetrics",
       "fill": 1,
       "gridPos": {
         "h": 8,
@@ -3148,7 +3177,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_error_ok",
+          "measurement": "tlbmonitor01-error_ok",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -3185,7 +3214,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_error_missing",
+          "measurement": "tlbmonitor01-error_missing",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -3222,7 +3251,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "tlb_error_corrupted",
+          "measurement": "tlbmonitor01-error_corrupted",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "C",
@@ -3370,5 +3399,5 @@
   "timezone": "",
   "title": "faser_Metrics",
   "uid": "epfNxnHWz",
-  "version": 54
+  "version": 69
 }

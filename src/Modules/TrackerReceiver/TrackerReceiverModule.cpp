@@ -16,10 +16,14 @@
  */
 
 #include "TrackerReceiverModule.hpp"
+#include "../../gpiodrivers/TRBAccess/TrackerReadout/TRBAccess.h"
+//#include "../../gpiodrivers/GPIOBase/GPIOBase/GPIOBaseClass.h"
+
+TRBAccess *trb = nullptr;
 
 TrackerReceiverModule::TrackerReceiverModule() { INFO(""); }
 
-TrackerReceiverModule::~TrackerReeiverModule() { INFO(""); }
+TrackerReceiverModule::~TrackerReceiverModule() { INFO(""); }
 
 // optional (configuration can be handled in the constructor)
 void TrackerReceiverModule::configure() {

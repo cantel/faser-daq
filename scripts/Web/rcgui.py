@@ -48,7 +48,7 @@ app.secret_key = os.urandom(24)
 
 @app.route("/")
 def launch():
-    selectedFile = r1.hgetall("runningFile")["fileName"]
+    selectedFile = statetracker.getSelectedFile()
     schemas = os.listdir(env['DAQ_CONFIG_DIR'] +'schemas')
     schemaChoices = []
     for s in schemas:
@@ -59,82 +59,51 @@ def launch():
 
 @app.route("/initialise")
 def initialise():
-    print("reboot button pressed")
-    
-    d = session.get('data')
-    dc = h.createDaqInstance(d)
-
-    r1.publish("stateAction","initialize "+session.get("selectedFile"))
-    
-    r1.hset("runningFile", "fileName", session.get("selectedFile")) 
-
-    logfiles = dc.addProcesses(d['components'])
-        
-    for logfile in logfiles:
-        name = logfile[1][5:].split("-")[0]
-        r1.hset("log", name, logfile[0] + logfile[1])
-    h.spawnJoin(d['components'], dc.configureProcess)
+    app.logger.info("Initialize button pressed")
+    statetracker.initialize(session.get("selectedFile"))
             
     return "true"
 
 @app.route("/start")
 def start():
-    print("start button pressed")
-    runNumber=int(r1.get("runNumber"))
-    runNumber+=1
-    r1.set("runNumber",runNumber)
-    r1.set("runStart",time.time())
-    d = session.get('data') 
-    dc = h.createDaqInstance(d)
-#       h.spawnJoin(d['components'], dc.startProcess)
-    h.spawnJoin(d['components'], functools.partial(dc.startProcess,arg=str(runNumber)))
+    app.logger.info("Start button pressed")
+    statetracker.start()
     return "true"
 
 @app.route("/pause")
 def pause():
-    print("pause button pressed")
-    d = session.get('data') 
-    dc = h.createDaqInstance(d)
-    h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="disableTrigger"))
+    app.logger.info("Pause button pressed")
+    statetracker.pause()
     return "true"
 
 @app.route("/ecr")
 def ecr():
-    print("ECR button pressed")
-    d = session.get('data') 
-    dc = h.createDaqInstance(d)
-    h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="ECR"))
+    app.logger.info("ECR button pressed")
+    statetracker.ecr()
     return "true"
 
 @app.route("/unpause")
 def unpause():
-    print("unpause (start) button pressed")
-    d = session.get('data') 
-    dc = h.createDaqInstance(d)
-    h.spawnJoin(d['components'], functools.partial(dc.customCommandProcess,command="enableTrigger"))
+    app.logger.info("Unpause button pressed")
+    statetracker.unpause()
     return "true"
 
 
 @app.route("/stop")
 def stop():
-    print("stop button pressed")    
-    d = session.get('data')
-    dc = h.createDaqInstance(d)
-    h.spawnJoin(d['components'], dc.stopProcess)
+    app.logger.info("stop button pressed")    
+    statetracker.stop()
     return "true"
 
 @app.route("/shutdown")
 def shutdown():
-    print("shutdown button pressed")    
-    d = session.get('data') 
-    dc = h.createDaqInstance(d)
-    h.spawnJoin(d['components'], dc.shutdownProcess)
-    dc.removeProcesses(d['components'])     
+    app.logger.info("shutdown button pressed")
+    statetracker.shutdown()
     return "true"
 
 @app.route("/refreshState")
 def refresh():
-    r1.publish("status","new") # force update
+    statetracker.refresh()
     return "true"
 
 @app.route("/state")
@@ -182,21 +151,9 @@ if __name__ == '__main__':
                 print("Port number has to be >1023")
                 sys.exit(1)
     
-    try:
-        r1.ping()
-    except:
-           print("Redis database is not running - please start it")
-           #FIXME: print instructions here
-           sys.exit(1)
 
-    if not r1.exists("runningFile"):    
-        r1.hset("runningFile", "fileName", "current.json")
-    if not r1.exists("runNumber"):
-        r1.set("runNumber",99)
-        r1.set("runStart",0)
-
+    state=statetracker.State(app.logger)
     metrics=metricsHandler.Metrics(app.logger)
-    state=statetracker.State(r1,app.logger)
 
     print("Connect browser to:")
     print(" http://%s:%d" % (platform.node(),port))

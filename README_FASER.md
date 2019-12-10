@@ -29,9 +29,7 @@ See commands in main README.md (skip the setup script)
 
 One can use the command line interface (See README.md) or the web-based GUI. 
 The GUI is started with
-
-    cd $FASERTOP/scripts/Web
-    flask run --host=0.0.0.0 
+    rcgui
 
 Connect to port 5000 on host in a webbrowser. More detailed instructions can be found in:
 https://espace.cern.ch/faser-share/Shared%20Documents/Trigger,%20DAQ%20and%20DCS/FASER_Run_Control_User_s_Guide.pdf

@@ -1,0 +1,31 @@
+<!-- Nav tabs -->
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+<script src="https://code.highcharts.com/stock/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/stock/modules/export-data.js"></script>
+<script src="{{ url_for('static', filename='js/rates.js', version='108')}}"></script>
+
+<ul class="nav nav-tabs">
+  <li class="nav-item">
+    <a class="nav-link active" data-toggle="tab" href="#PhysicsRateGraph">Physics</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-toggle="tab" href="#CalibrationRateGraph">Calibration</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" data-toggle="tab" href="#MonitoringRateGraph">Monitoring</a>
+  </li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+  <div class="tab-pane container active" id="PhysicsRateGraph" style="padding-left: 0px;padding-right: 0px;height: 300px; min-width: 310px"></div>
+  <div class="tab-pane container" id="CalibrationRateGraph"  style="padding-left: 0px;padding-right: 0px;height: 300px; min-width: 310px"></div>
+  <div class="tab-pane container" id="MonitoringRateGraph"  style="padding-left: 0px;padding-right: 0px;height: 300px; min-width: 310px"></div>
+</div>
+
+
+<script>
+  $(document).ready(function() {
+    addRates();
+  });
+</script>

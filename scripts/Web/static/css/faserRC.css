@@ -1,0 +1,73 @@
+.jumbotron{
+    background-color: #2E2D88;
+    color:aqua;
+}
+    
+.btn-circle {
+    border-radius: 60%;
+}
+.btn-settings{
+    margin-left: 14px;
+    margin-right: 14px;
+
+
+    //	padding-left: 5px;
+    //	padding-right:5px;
+}
+
+.badge{
+    margin-left: 14px;
+    margin-right: 14px;
+    
+
+    //	padding-left: 5px;
+    //	padding-right:5px;
+}
+
+
+.label{
+    margin-left: 14px;
+    margin-right: 14px;
+
+
+    //	padding-left: 5px;
+    //	padding-right:5px;
+    }
+
+p{
+    word-break:break-all;
+    //hyphens: auto;
+}
+/*
+.col-3{
+display: block;
+float: left;
+width: 5%;
+margin-top: 15px;
+height: auto;
+}
+
+.col-2{
+display: block;
+float: left;
+width: 5%;
+margin-top: 15px;
+height: auto;
+}
+*/
+
+.images {
+    float: right;
+}	
+
+table td{
+    color:aqua;
+}    
+
+table th{
+    color: aqua;
+}
+    
+.tableTxtColor{
+    color: aqua;
+}

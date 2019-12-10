@@ -9,6 +9,21 @@ from routes.metric import getBoardStatus
 
 r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
 
+#FIXME: this should probably be in daqcontrol
+import supervisor_wrapper
+def removeProcess(p,group,logger):
+    sd = supervisor_wrapper.supervisor_wrapper(p['host'], group)
+    try:
+        if sd.getProcessState(p['name'])['statename'] == 'RUNNING':
+            try:
+                sd.stopProcess(p['name'])
+            except Exception as e:
+                logger.error("Exception"+str(e)+": cannot stop process"+
+                  p['name']+ "(probably already stopped)")
+        sd.removeProcessFromGroup(p['name'])
+    except Exception as e:
+        logger.error("Exception"+str(e)+": Couldn't get process state")
+
 def stateTracker(logger):
     pubsub=r1.pubsub()
     pubsub.subscribe("stateAction")
@@ -47,13 +62,15 @@ def stateTracker(logger):
                 h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="disableTrigger"))
             elif cmd=="ECR":
                 h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="ECR"))
+                update=True
             elif cmd=="unpause":
                 h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="enableTrigger"))
             elif cmd=="stop":
                 h.spawnJoin(config['components'], daq.stopProcess)
             elif cmd=="shutdown":
                 h.spawnJoin(config['components'], daq.shutdownProcess)
-                daq.removeProcesses(config['components'])
+                #daq.removeProcesses(config['components']) # was too slow since it is serialized
+                h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
             overallState=None
             if not config['components']: overallState="DOWN"
@@ -121,7 +138,7 @@ def stateTracker(logger):
                 if overallState=="DOWN":
                     logger.warn("Tried to shutdown run in state: "+overallState)
                     cmd=""
-            if cmd and cmd!="updateConfig":
+            if cmd and cmd!="updateConfig" and cmd!="ECR":
                 overallState="IN TRANSITION"
                 r1.set("status",json.dumps({'allStatus' : status,
                                 'runState' : runState,

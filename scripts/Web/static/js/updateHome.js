@@ -44,7 +44,9 @@ function updateCommandAvailability(data){
     }
     else{	
 	for (const [button, states] of Object.entries(buttonEnableStates)) {
-	    document.getElementById(button).disabled = ! states.includes(data.globalStatus);
+	    el=document.getElementById(button);
+	    el.disabled = ! states.includes(data.globalStatus);
+	    if (data.globalStatus!="IN TRANSITION" && data.globalStatus!="ADDED") el.children[0].style="display: none";
 	}
     }
 }
@@ -124,11 +126,13 @@ function isDOWN(){
     return document.getElementById("runningState").innerHTML=="DOWN";
 }
 
-function initialise(){
-	$.get('/initialise');
+function initialise(self){
+    self.children[0].style="display: inline-block";
+    $.get('/initialise');
 }
 
-function start(){
+function start(self){
+    self.children[0].style="display: inline-block";
     if (document.getElementById("ECR").disabled) {
 	$.get('/start');
     } else {
@@ -136,19 +140,23 @@ function start(){
     }
 }
 
-function pause(){
+function pause(self){
+    self.children[0].style="display: inline-block";
 	$.get('/pause');
 }
 
-function sendECR(){
+function sendECR(self){
+    self.children[0].style="display: inline-block";
 	$.get('/ecr');
 }
 
-function stop(){
+function stop(self){
+    self.children[0].style="display: inline-block";
 	$.get('/stop');
 }
 
-function shutdown(){
+function shutdown(self){
+    self.children[0].style="display: inline-block";
 	$.get('/shutdown');
 }
 

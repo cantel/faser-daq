@@ -5,14 +5,36 @@
       <br>
       <br>
       <center>	
-	<input  id="INITIALISE" type="submit" class="btn btn-success btn-lg" value="INITIALISE" onclick="initialise();"/>
-	
-	<input id="START" type="submit" class="btn btn-success btn-lg" value="START" onclick="start();">
-	
-	<input id="STOP" type="submit" class="btn btn-warning btn-lg" value="STOP" onclick="stop();">
-	<input id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg" value="SHUTDOWN" onclick="shutdown();">
-	<input id="PAUSE" type="submit" class="btn btn-warning btn-lg" value="PAUSE" onclick="pause();">
-	<input id="ECR" type="submit" class="btn btn-success btn-lg" value="ECR" onclick="sendECR();">
+	<button type="button" id="INITIALISE" type="submit" class="btn btn-success btn-lg"
+		onclick="initialise(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  INITIALISE
+	</button>
+	<button type="button" id="START" type="submit" class="btn btn-success btn-lg"
+		onclick="start(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  START
+	</button>
+	<button type="button" id="STOP" type="submit" class="btn btn-warning btn-lg"
+		onclick="stop(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  STOP
+	</button>
+	<button type="button" id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg"
+		onclick="shutdown(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  SHUTDOWN
+	</button>
+	<button type="button" id="PAUSE" type="submit" class="btn btn-warning btn-lg"
+		onclick="pause(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  PAUSE
+	</button>
+	<button type="button" id="ECR" type="submit" class="btn btn-success btn-lg"
+		onclick="sendECR(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  ECR
+	</button>
       </center>
 
       <br>

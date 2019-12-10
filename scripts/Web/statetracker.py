@@ -117,6 +117,10 @@ def stateTracker(logger):
                 if overallState!="PAUSED" and overallState!="RUN":
                     logger.warn("Tried to stop run in state: "+overallState)
                     cmd=""
+            elif cmd=="shutdown":
+                if overallState=="DOWN":
+                    logger.warn("Tried to shutdown run in state: "+overallState)
+                    cmd=""
             if cmd and cmd!="updateConfig":
                 overallState="IN TRANSITION"
                 r1.set("status",json.dumps({'allStatus' : status,

@@ -24,7 +24,7 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
- 
+
   if ( m_event->event_tag() != MonitoringTag ) return; //redundant check if have configured pub/sub filter (daqling v0.6+)
                                                        //Forcing here to guard against incorrect configuration
                                                        //as calling MonitoringFragment values for 2D hist.
@@ -70,12 +70,10 @@ void TLBMonitorModule::register_metrics() {
 
   INFO( "... registering metrics in TLBMonitorModule ... " );
 
-  std::string module_short_name = "tlb";
- 
-  register_error_metrics(module_short_name);
+  register_error_metrics();
 
   m_metric_payload = 0;
-  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, module_short_name+"_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+  m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
   return;
 }

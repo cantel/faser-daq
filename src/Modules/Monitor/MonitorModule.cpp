@@ -109,7 +109,7 @@ void MonitorModule::register_metrics() {
 
 }
 
-void MonitorModule::register_error_metrics( std::string module_short_name) {
+void MonitorModule::register_error_metrics() {
 
    m_metric_payload=0;
    m_metric_error_ok=0;
@@ -127,18 +127,18 @@ void MonitorModule::register_error_metrics( std::string module_short_name) {
 
   if ( m_stats_on ) {
     INFO("... registering error metrics ... " );
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_ok, module_short_name+"_error_ok", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unclassified, module_short_name+"_error_unclassified", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_bcidmismatch, module_short_name+"_error_bcidmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_tagmismatch, module_short_name+"_error_tagmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_timeout, module_short_name+"_error_timeout", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_overflow, module_short_name+"_error_overflow", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_corrupted, module_short_name+"_error_corrupted", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_dummy, module_short_name+"_error_dummy", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unpack, module_short_name+"_error_unpack", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_missing, module_short_name+"_error_missing", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_empty, module_short_name+"_error_empty", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_duplicate, module_short_name+"_error_duplicate", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
+    m_statistics->registerMetric(&m_metric_error_ok, "error_ok", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_unclassified, "error_unclassified", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_bcidmismatch, "error_bcidmismatch", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_tagmismatch, "error_tagmismatch", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_timeout, "error_timeout", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_overflow, "error_overflow", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_corrupted, "error_corrupted", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_dummy, "error_dummy", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_unpack, "error_unpack", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_missing, "error_missing", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_empty, "error_empty", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_duplicate, "error_duplicate", daqling::core::metrics::ACCUMULATE);
   }
   return;
 

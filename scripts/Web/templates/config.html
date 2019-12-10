@@ -39,6 +39,17 @@
 		padding-top:6px;
 		padding-bottom:4px;
 	}	
+	input:disabled {
+	  opacity: 50%;
+	  background: #ccc;
+	}
+	select:disabled {
+	  opacity: 50%;
+	  background: #ccc;
+	}
+	button:disabled {
+	  opacity: 50%;
+	}
 	</style>
 
 </head>
@@ -49,20 +60,15 @@
 <!--<div class="container">-->
 <!--<form></form>-->
 <!--<div id="res" class="alert"></div>-->
-  <div class="container">
-				
-    <div class="dropdown" id="schemaDropDown">
+  <div class="flex mb-4">
+    <div class="w-full">
+      <div class="container" id="editor-holder">
+      </div>
     </div>
-			
-		
-    <div class="container" id="editor-holder">
-      <script>	
-      </script>
-
-    </div>
+  </div>
 	
-    <div class= "container" id="buttons" data-theme="tailwind">
-    </div>
+  <div class= "container w-full" id="buttons" data-theme="tailwind">
+  </div>
 	
 
     <script type="text/javascript">
@@ -106,7 +112,5 @@
       setInterval(function(){disableConfigWindow();}, 500);
       });
     </script>
-    
-  </div>
-	
+    	
 </body>

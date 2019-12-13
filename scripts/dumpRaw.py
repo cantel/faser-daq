@@ -9,9 +9,13 @@ class BinaryReader:
 
     def readStruct(self,struct):
         vals=[]
+        #print(struct)
+        #print(type(struct))
         for ss in struct:
+            #print("next : ",ss)
+            #print(type(ss))
             size=int(ss)
-            bytestring=self._fh.read(size)
+            bytestring=self._fh.read(size) # gets "size" bytes from the file
             if len(bytestring)!=size:
                 return None #reached EOF
             vals.append(int.from_bytes(bytestring,sys.byteorder))
@@ -90,12 +94,16 @@ def main(args):
         dumpFrag=True
         if args[0]=='-e': dumpData=True
         args=args[1:]
+    print("args[0] : ",args[0])
     rh=BinaryReader(args[0])
     
     try:
         while True:
             event=EventHeader(rh)
             print(event)
+            
+            #x=input()
+            
             if dumpFrag:
                 for ii in range(event.fragment_count):
                     frag=FragmentHeader(rh)

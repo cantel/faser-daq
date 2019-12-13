@@ -73,10 +73,7 @@ void DigitizerReceiverModule::sendECR() {
   while(m_digitizer->DumpEventCount()){
     sendEvent();
   }
-  
-  // reconfigure - this is what resets the counter
-  m_digitizer->Configure(m_config.getConfig()["settings"]);
-  
+
   // start acquisition
   m_digitizer->StartAcquisition();
 }
@@ -86,15 +83,20 @@ void DigitizerReceiverModule::runner() {
   INFO("Running...");
   
   int count=0;  
+  int trig_count=0;
   
   while (m_run) {
   
+  
+    /*
+    // testing the ECR
     // send a SW trigger every 5 loop cycles
     count+=1;    
     INFO("Count"<<count);
     if(count%5==0){
       INFO("Sending SW Trigger");
       m_digitizer->SendSWTrigger(true);
+      trig_count++;
     }
     
     // every 20 cycles
@@ -102,8 +104,11 @@ void DigitizerReceiverModule::runner() {
       INFO("Sending 3-SW Triggers and an ECR");
 
       m_digitizer->SendSWTrigger(true);
+      trig_count++;
       m_digitizer->SendSWTrigger(true);
+      trig_count++;
       m_digitizer->SendSWTrigger(true);
+      trig_count++;
     
       sendECR();
     }
@@ -111,10 +116,23 @@ void DigitizerReceiverModule::runner() {
     // if there is an event in the buffer then send it along
     INFO("EventCount : "<<m_digitizer->DumpEventCount());    
     if(m_digitizer->DumpEventCount()){
+      std::cout<<"Header_TriggerTimeTag Count : "<<trig_count<<std::endl;
       sendEvent();
     }
     
     Wait(1.0);
+    */
+    
+    // testing the timer reset via S-IN
+    Wait(1.0);
+    INFO("Sending SW Trigger");
+    m_digitizer->SendSWTrigger(true);
+    trig_count++;
+    
+    if(m_digitizer->DumpEventCount()){
+      std::cout<<"Header_TriggerTimeTag Count : "<<trig_count<<std::endl;
+      sendEvent();
+    }
     
   }
   INFO("Runner stopped");
@@ -157,7 +175,7 @@ void DigitizerReceiverModule::sendEvent() {
   // store the faser header information
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::PMTSourceID;
-  uint64_t local_event_id     = (m_ECRcount<<24) + Header_EventCounter; // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
+  uint64_t local_event_id     = (m_ECRcount<<24) + (Header_EventCounter+1); // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
   uint16_t local_bc_id        = Header_TriggerTimeTag*(40.0/62.5);      // trigger time tag corrected by LHCClock/TrigClock = 40/62.5
 
   // create the event fragment
@@ -169,5 +187,5 @@ void DigitizerReceiverModule::sendEvent() {
 
   // place the raw binary event fragment on the output port
   m_connections.put(0, const_cast<Binary&>(fragment->raw()));
-    
+  
 }

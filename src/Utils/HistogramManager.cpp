@@ -3,7 +3,6 @@
 #include <typeinfo>
 
 HistogramManager::HistogramManager(std::unique_ptr<zmq::socket_t>& statSock, unsigned interval) : m_stat_socket{statSock}, m_interval{interval} {
-  m_stop_thread = false;
   m_zmq_publisher = false;  
 }
 
@@ -25,6 +24,7 @@ void HistogramManager::start(){
 
   INFO("HistogramManager thread about to spawn...");
   
+  m_stop_thread = false;
   m_histogram_thread = std::thread(&HistogramManager::CheckHistograms,this);
 }
 

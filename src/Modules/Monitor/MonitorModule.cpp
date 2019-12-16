@@ -34,7 +34,6 @@ MonitorModule::MonitorModule() {
 
 MonitorModule::~MonitorModule() { 
 
-  if (m_histogramming_on) m_histogrammanager->stop();
   delete m_event;
 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
@@ -65,6 +64,7 @@ void MonitorModule::stop() {
   FaserProcess::stop();
 
   INFO("... finalizing ...");
+  if (m_histogramming_on) m_histogrammanager->stop();
   INFO("getState: " << this->getState());
 }
 

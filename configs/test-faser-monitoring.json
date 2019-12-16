@@ -35,7 +35,7 @@
         "probMissingTrigger": 0.0,
         "probMissingFragment": 0.0,
         "probCorruptedFragment": 0.0,
-	"monitoringInterval": 1.5,
+	"monitoringInterval": 0,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -178,7 +178,6 @@
       "type": "TrackerMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "eventTag": 0,
         "fragmentID": 1000001,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"
@@ -203,7 +202,6 @@
       "type": "TLBMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "eventTag": 2,
         "fragmentID": 1000002,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"

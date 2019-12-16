@@ -17,22 +17,24 @@ MonitorModule::MonitorModule() {
 
    auto cfg = m_config.getSettings();
    auto cfg_sourceID = m_config.getConfig()["settings"]["fragmentID"];
-   std::cout<<"cf_sourceID = "<<cfg_sourceID<<std::endl;
    if (cfg_sourceID!="" && cfg_sourceID!=nullptr)
       m_sourceID = cfg_sourceID;
    else m_sourceID=0;
-   auto cfg_tag = m_config.getConfig()["settings"]["eventTag"];
-   std::cout<<"cf_tag = "<<cfg_tag<<std::endl;
-   if (cfg_tag!="" && cfg_tag!=nullptr) m_eventTag = cfg_tag;
+   auto cfg_tag = m_config.getConfig()["connections"]["receivers"][0]["filter"];
+   if ((cfg_tag!="" && cfg_tag!=nullptr)){
+     m_eventTag = ((uint16_t)cfg_tag) & 0x0f;
+   }
    else {
      WARNING("No event tag configured. Defaulting to PhysicsTag.");
-     m_eventTag=0; //default to Physics. ... should it though?
+     m_eventTag=0; //default to Physics. Should not happen if force setting or set default in schema validation..
    }
  
    if (m_eventTag>TLBMonitoringTag) { // not needed once have module-level schema validation.
      ERROR("Configured tag does not exist!");
      m_status = STATUS_ERROR;
    }
+   else INFO("Valid event tag found.");
+   DEBUG("EventTag is "<<m_eventTag<<std::endl);
 
  }
 
@@ -199,15 +201,19 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
   switch (m_eventTag) {
     case PhysicsTag:
       m_rawFragment=m_fragment->payload<const RawFragment*>();
+      DEBUG("unpacking raw fragment.");
       break;
     case CalibrationTag:
       m_rawFragment=m_fragment->payload<const RawFragment*>();
+      DEBUG("unpacking calibration fragment.");
       break;
     case MonitoringTag:
       m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>();
+      DEBUG("unpacking monitoring fragment.");
       break;
     case TLBMonitoringTag:
       m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>(); //to be changed once subdetector specific formats defined.
+      DEBUG("unpacking TLB monitoring fragment.");
       break;
     default:
       ERROR("Specified tag not found.");

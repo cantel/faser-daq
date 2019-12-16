@@ -190,7 +190,8 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8104
+            "port": 8104,
+            "filter": 47872
           }
         ]
       }
@@ -214,7 +215,8 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8104
+            "port": 8104,
+            "filter": 47874
           }
         ]
       }

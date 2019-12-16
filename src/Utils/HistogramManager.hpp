@@ -134,10 +134,10 @@ public:
   template<typename X, typename Y>
   void fill( std::string name, X xvalue, Y yvalue ){
     
-    static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value || std::is_same<X, std::string>::value || std::is_same<X, const char *>::value,
-                  "Cannot fill histogram with invalid  x value type. Value must be numeric or string based (std::string or const char *)");
-    static_assert(std::is_integral<Y>::value || std::is_floating_point<Y>::value || std::is_same<Y, std::string>::value || std::is_same<Y, const char *>::value,
-                  "Cannot fill histogram with invalid  y value type. Value must be numeric or string based (std::string or const char *)");
+    static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
+                  "Cannot fill histogram with invalid  x value type. Value must be numeric.");
+    static_assert(std::is_integral<Y>::value || std::is_floating_point<Y>::value,
+                  "Cannot fill histogram with invalid  y value type. Value must be numeric.");
 
     if ( m_histogram_map.count(name) ) {
      static_cast<Hist2D*>(m_histogram_map[name])->fill(xvalue, yvalue);

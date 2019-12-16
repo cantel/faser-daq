@@ -103,10 +103,18 @@
                                     "type":"string",
                                     "format": "host"
 				},
-				"port": {"type":"integer"}
+				"port": {"type":"integer"},
+                                "filter": {
+                                   "type":"integer",
+                                   "minimum":47872,
+                                   "maximum":47875
+                                },
+                                "filter_size": {
+                                   "type":"integer"
+                                }
 			    },
 			    "required": ["transport","type", "chid", "host", "port"],
-			    "additionalProperties": true
+			    "additionalProperties": false
 			},
 			{
 			    "title": "IPC",

@@ -28,12 +28,6 @@ MonitorModule::MonitorModule() {
      WARNING("No event tag configured. Defaulting to PhysicsTag.");
      m_eventTag=0; //default to Physics. Should not happen if force setting or set default in schema validation..
    }
- 
-   if (m_eventTag>TLBMonitoringTag) { // not needed once have module-level schema validation.
-     ERROR("Configured tag does not exist!");
-     m_status = STATUS_ERROR;
-   }
-   else INFO("Valid event tag found.");
    DEBUG("EventTag is "<<m_eventTag<<std::endl);
 
  }

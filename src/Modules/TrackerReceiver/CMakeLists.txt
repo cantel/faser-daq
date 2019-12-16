@@ -7,7 +7,8 @@ daqling_target_sources(${module_name}
 )
 
 target_include_directories (${module_name} PUBLIC
-                            "${daqling_top_SOURCE_DIR}/gpiodrivers/")
+                            "${daqling_top_SOURCE_DIR}/gpiodrivers/GPIOBase"
+                            "${daqling_top_SOURCE_DIR}/gpiodrivers/TRBAccess")
 
 #add_library(TRBAccess ${daqling_top_SOURCE_DIR}/gpiodrivers/TRBAccess/src/TRBAccess.cxx)
 #add_library(GPIOBase ${daqling_top_SOURCE_DIR}/gpiodrivers/GPIOBase/GPIOBase/GPIOBaseClass.h)

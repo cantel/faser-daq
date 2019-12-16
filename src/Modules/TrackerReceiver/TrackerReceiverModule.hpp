@@ -18,6 +18,7 @@
 #pragma once
 
 #include "Commons/FaserProcess.hpp"
+#include "TrackerReadout/TRBAccess.h"
 
 class TrackerReceiverModule : public FaserProcess {
  public:
@@ -29,4 +30,6 @@ class TrackerReceiverModule : public FaserProcess {
   void stop();
 
   void runner();
+
+  FASER::TRBAccess *trb;
 };

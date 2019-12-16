@@ -1,0 +1,32 @@
+<div class="col-6">
+  <div class="container" id="run-info-box">
+    <div class = "jumbotron" style = "padding-bottom: 5px; padding-top:25px">
+      <center><h4>RUN INFORMATION</h4></center>
+      <table class="table table-sm table-hover table-bordered">
+	<tbody>
+	  <tr>
+	    <th scope="row">Run</th>
+	    <td>  <a> number: </a> <a id="RunNumber"></a></td>
+	    <td> <a> Starting Time: </a> <a id="RunStart"></a> </td>
+	  </tr>			
+	  <tr>
+	    <th scope="row">Physics</th>
+	    <td> <a id= "PhysicsEvents"></a> <a>events</a></td>
+	    <td><a id="PhysicsRate"></a>  <a>Hz</a> </td>
+	  </tr>
+	  <tr>
+	    <th scope="row">Monitoring</th>
+	    <td> <a id="MonitoringEvents"> </a> <a>events</a> </td>
+	    <td> <a id= "MonitoringRate"></a>   <a>Hz</a> </td>
+	  </tr>
+	  <tr>
+	    <th scope="row">Calibration</th>
+	    <td> <a id="CalibrationEvents"> </a> <a>events</a></td>
+	    <td> <a id="CalibrationRate"> </a> <a>Hz</a></td>
+	  </tr>		
+	</tbody>
+      </table>
+      {% include 'rates.html' %}
+    </div>	
+  </div>
+</div>

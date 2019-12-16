@@ -1,0 +1,50 @@
+<div class = "col-8">
+  <div class="container" id="control-box">
+    <div class = "jumbotron" style= "padding: 2rem 1rem;color:aqua;background-color: #1a52c6">
+      <center><h4>CONTROLS</h4></center>
+      <br>
+      <br>
+      <center>	
+	<button type="button" id="INITIALISE" type="submit" class="btn btn-success btn-lg"
+		onclick="initialise(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  INITIALISE
+	</button>
+	<button type="button" id="START" type="submit" class="btn btn-success btn-lg"
+		onclick="start(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  START
+	</button>
+	<button type="button" id="STOP" type="submit" class="btn btn-warning btn-lg"
+		onclick="stop(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  STOP
+	</button>
+	<button type="button" id="SHUTDOWN" type="submit" class="btn btn-danger btn-lg"
+		onclick="shutdown(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  SHUTDOWN
+	</button>
+	<button type="button" id="PAUSE" type="submit" class="btn btn-warning btn-lg"
+		onclick="pause(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  PAUSE
+	</button>
+	<button type="button" id="ECR" type="submit" class="btn btn-success btn-lg"
+		onclick="sendECR(this);">
+	  <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="display: none"></span>
+	  ECR
+	</button>
+      </center>
+
+      <br>
+      <div class="container">
+	<p><span class="font-weight-bold">State: </span><span id="runningState"></span>
+	</p><p>
+	  <span class="font-weight-bold">File: </span><span id="runningFile"></span>
+	</p>
+      </div>
+      
+    </div>
+  </div>
+</div>

@@ -79,7 +79,7 @@ function createStatusBadges(i){
 	var btn = document.createElement("SPAN");
 
 
-	btn.innerHTML = 'LOAD';
+	btn.innerHTML = 'UNKNOWN';
 	btn.className= "badge badge-success";
 	btn.style.fontSize= "x-large";
 	btn.style.background= "Green";
@@ -141,7 +141,8 @@ function createBoardContainer(config){
 
 
 	}
-	return true;
+    $.ajax({url:"/refreshState", async: true}); //get new status information
+    return true;
 }
 
 function createRadioInputs(fileNames){
@@ -198,7 +199,7 @@ function createRadioInputs(fileNames){
 					else{
 
 						document.getElementById("run-info-box").style.display = "initial";
-						document.getElementById("control-box").style.display = "initial";
+						document.getElementById("control-box").style.display = "block";
 						document.getElementById("status&settings-box").style.display = "initial";
 						createBoardContainer(config);
 					}

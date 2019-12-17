@@ -25,7 +25,10 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
-  if ( m_event->event_tag() != m_eventTag ) return;
+  if ( m_event->event_tag() != m_eventTag ) {
+    ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
+    return;
+  }
 
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);

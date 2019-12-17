@@ -22,7 +22,7 @@ MonitorModule::MonitorModule() {
    else m_sourceID=0;
    auto cfg_tag = m_config.getConfig()["connections"]["receivers"][0]["filter"];
    if ((cfg_tag!="" && cfg_tag!=nullptr)){
-     m_eventTag = ((uint16_t)cfg_tag) & 0x0f;
+     m_eventTag = ((uint16_t)cfg_tag) >> 8 ;
    }
    else {
      WARNING("No event tag configured. Defaulting to PhysicsTag.");

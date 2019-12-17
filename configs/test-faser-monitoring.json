@@ -110,6 +110,7 @@
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
 	   "maxPending": 100,
+	   "stats_uri": "tcp://localhost:7000",
            "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
            "influxDb_name": "DAQlingMetrics"
        },
@@ -190,7 +191,8 @@
             "transport": "tcp",
             "host": "localhost",
             "port": 8104,
-            "filter": 47872
+            "filter": 187,
+            "filter_size": 2
           }
         ]
       }
@@ -214,7 +216,8 @@
             "transport": "tcp",
             "host": "localhost",
             "port": 8104,
-            "filter": 47874
+            "filter": 699,
+            "filter_size": 2
           }
         ]
       }

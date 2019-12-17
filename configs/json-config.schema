@@ -108,17 +108,49 @@
                                     "type":"string",
                                     "format": "host"
 				},
+				"port": {"type":"integer"}
+			    },
+			    "required": ["transport","type", "chid", "host", "port"],
+			    "additionalProperties": false
+			},
+			{
+			    "title": "FilteredTCP",
+			    "type": "object",
+			    "format": "grid",
+			    "properties": {
+				"transport": {
+				    "type": "string",
+				    "enum":["tcp"],
+				    "options": {
+					"hidden": true
+				    }
+				},
+				"type": {
+				    "type":"string",
+                              "enum": ["pair", "pubsub"]
+				},
+				"chid": {"type":"integer"},
+				"host": {
+                                    "type":"string",
+                                    "format": "host"
+				},
 				"port": {"type":"integer"},
                                 "filter": {
                                    "type":"integer",
-                                   "minimum":47872,
-                                   "maximum":47875
+                                   "enum": [187,443,699,955],
+				   "options": {
+				       "enum_titles": ["Physics","Calibration","Monitoring","TLBMonitoring"]
+				   }
                                 },
                                 "filter_size": {
-                                   "type":"integer"
+                                   "type":"integer",
+				   "default": 2,
+				   "options": {
+				      "hidden": true
+				   }
                                 }
 			    },
-			    "required": ["transport","type", "chid", "host", "port"],
+			    "required": ["transport","type", "chid", "host", "port","filter","filter_size"],
 			    "additionalProperties": false
 			},
 			{

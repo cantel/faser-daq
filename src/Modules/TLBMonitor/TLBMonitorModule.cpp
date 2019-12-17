@@ -25,9 +25,10 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
-  if ( m_event->event_tag() != MonitoringTag ) return; //redundant check if have configured pub/sub filter (daqling v0.6+)
-                                                       //Forcing here to guard against incorrect configuration
-                                                       //as calling MonitoringFragment values for 2D hist.
+  if ( m_event->event_tag() != m_eventTag ) {
+    ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
+    return;
+  }
 
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);

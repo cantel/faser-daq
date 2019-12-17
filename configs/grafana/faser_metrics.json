@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 1,
-  "iteration": 1575966620262,
+  "iteration": 1576568578193,
   "links": [],
   "panels": [
     {
@@ -387,6 +387,7 @@
       "steppedLine": false,
       "targets": [
         {
+          "alias": "Monitoring Rate",
           "groupBy": [
             {
               "params": [
@@ -401,7 +402,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "MonitoringRate",
+          "measurement": "eventbuilder01-MonitoringRate",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -423,6 +424,7 @@
           "tags": []
         },
         {
+          "alias": "Physics Rate",
           "groupBy": [
             {
               "params": [
@@ -437,7 +439,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "PhysicsRate",
+          "measurement": "eventbuilder01-PhysicsRate",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "B",
@@ -747,7 +749,7 @@
               "type": "fill"
             }
           ],
-          "measurement": "QueueFraction",
+          "measurement": "eventbuilder01-QueueFraction",
           "orderByTime": "ASC",
           "policy": "default",
           "refId": "A",
@@ -3317,7 +3319,7 @@
       }
     }
   ],
-  "refresh": false,
+  "refresh": "",
   "schemaVersion": 18,
   "style": "dark",
   "tags": [],
@@ -3399,5 +3401,5 @@
   "timezone": "",
   "title": "faser_Metrics",
   "uid": "epfNxnHWz",
-  "version": 69
+  "version": 71
 }

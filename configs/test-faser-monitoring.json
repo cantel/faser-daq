@@ -29,13 +29,13 @@
       "type": "FrontEndEmulator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "meanSize": 10,
-        "rmsSize": 5,
+        "meanSize": 350,
+        "rmsSize": 70,
         "fragmentID": 1000001,
         "probMissingTrigger": 0.0,
         "probMissingFragment": 0.0,
         "probCorruptedFragment": 0.0,
-	      "monitoringInterval": 0,
+	"monitoringInterval": 0,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -48,13 +48,13 @@
       "type": "FrontEndEmulator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "meanSize": 50,
-        "rmsSize": 20,
+        "meanSize": 200,
+        "rmsSize": 50,
         "fragmentID": 1000002,
         "probMissingTrigger": 0.0,
         "probMissingFragment": 0.0,
         "probCorruptedFragment": 0.0,
-      	"monitoringInterval": 1.5,
+	      "monitoringInterval": 1.5,
         "triggerPort": 17002,
         "daqHost": "localhost",
         "daqPort": 18002
@@ -109,10 +109,11 @@
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	      "maxPending": 100,
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics"
-      },
+	   "maxPending": 100,
+	   "stats_uri": "tcp://localhost:7000",
+           "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+           "influxDb_name": "DAQlingMetrics"
+       },
       "connections": {
         "receivers": [
           {
@@ -136,6 +137,36 @@
             "chid": 2,
             "transport": "tcp",
             "host": "*",
+            "port": 8104
+          },
+          {
+            "type": "pair",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "filewriter01",
+      "host": "localhost",
+      "port": 5558,
+      "type": "FileWriter",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "filename_pattern": "/tmp/test-%D.%r.%c.%n.bin",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
             "port": 8103
           }
         ]
@@ -144,12 +175,11 @@
     {
       "name": "trackermonitor01",
       "host": "localhost",
-      "port": 5558,
+      "port": 5559,
       "type": "TrackerMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 1000001,
-        "outputDir": "/home/faser/cantel/",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"
       },
@@ -160,7 +190,9 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8103
+            "port": 8104,
+            "filter": 187,
+            "filter_size": 2
           }
         ]
       }
@@ -168,14 +200,11 @@
     {
       "name": "tlbmonitor01",
       "host": "localhost",
-      "port": 5559,
+      "port": 5560,
       "type": "TLBMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 1000002,
-	      "lengthTimeBlock": 10,
-        "outputDir": "/home/faser/cantel/",
-      	"timeDelayTolerance": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"
       },
@@ -186,7 +215,9 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8103
+            "port": 8104,
+            "filter": 699,
+            "filter_size": 2
           }
         ]
       }
@@ -194,14 +225,11 @@
     {
       "name": "eventmonitor01",
       "host": "localhost",
-      "port": 5560,
+      "port": 5561,
       "type": "EventMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 0,
-	      "lengthTimeBlock": 10,
-        "outputDir": "/home/faser/cantel/",
-      	"timeDelayTolerance": 100,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"
       },
@@ -212,7 +240,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8103
+            "port": 8104
           }
         ]
       }

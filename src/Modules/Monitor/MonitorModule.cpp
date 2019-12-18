@@ -14,40 +14,49 @@ using namespace std::chrono;
 
 MonitorModule::MonitorModule() { 
    INFO("");
-   m_histogramming_on = false;
-   m_metric_payload=0;
-   m_metric_error_ok=0;
-   m_metric_error_unclassified=0;
-   m_metric_error_bcidmismatch=0;
-   m_metric_error_tagmismatch=0;
-   m_metric_error_timeout=0;
-   m_metric_error_overflow=0;
-   m_metric_error_corrupted=0;
-   m_metric_error_dummy=0;
-   m_metric_error_missing=0;
-   m_metric_error_empty=0;
-   m_metric_error_duplicate=0;
-   m_metric_error_unpack=0;
-   setupHistogramManager();
+
+   auto cfg = m_config.getSettings();
+   auto cfg_sourceID = m_config.getConfig()["settings"]["fragmentID"];
+   if (cfg_sourceID!="" && cfg_sourceID!=nullptr)
+      m_sourceID = cfg_sourceID;
+   else m_sourceID=0;
+   auto cfg_tag = m_config.getConfig()["connections"]["receivers"][0]["filter"];
+   if ((cfg_tag!="" && cfg_tag!=nullptr)){
+     m_eventTag = ((uint16_t)cfg_tag) >> 8 ;
+   }
+   else {
+     WARNING("No event tag configured. Defaulting to PhysicsTag.");
+     m_eventTag=0; //default to Physics. Should not happen if force setting or set default in schema validation..
+   }
+   DEBUG("EventTag is "<<m_eventTag<<std::endl);
 
  }
 
 MonitorModule::~MonitorModule() { 
 
   delete m_event;
-  delete m_rawFragment;
 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+}
+
+void MonitorModule::configure() {
+  INFO("Configuring...");
+
+  FaserProcess::configure();
+  register_metrics();
+
+  m_histogramming_on = false;
+  setupHistogramManager();
+  register_hists();
+
+  return;
 }
 
 void MonitorModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
 
-  register_metrics();
-  register_hists();
-
-  m_histogrammanager->start();
+  if ( m_histogramming_on ) m_histogrammanager->start();
 
 }
 
@@ -55,7 +64,7 @@ void MonitorModule::stop() {
   FaserProcess::stop();
 
   INFO("... finalizing ...");
-
+  if (m_histogramming_on) m_histogrammanager->stop();
   INFO("getState: " << this->getState());
 }
 
@@ -96,33 +105,36 @@ void MonitorModule::register_metrics() {
 
 }
 
-void MonitorModule::register_error_metrics( std::string module_short_name) {
+void MonitorModule::register_error_metrics() {
+
+   m_metric_payload=0;
+   m_metric_error_ok=0;
+   m_metric_error_unclassified=0;
+   m_metric_error_bcidmismatch=0;
+   m_metric_error_tagmismatch=0;
+   m_metric_error_timeout=0;
+   m_metric_error_overflow=0;
+   m_metric_error_corrupted=0;
+   m_metric_error_dummy=0;
+   m_metric_error_missing=0;
+   m_metric_error_empty=0;
+   m_metric_error_duplicate=0;
+   m_metric_error_unpack=0;
 
   if ( m_stats_on ) {
     INFO("... registering error metrics ... " );
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_ok, module_short_name+"_error_ok", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unclassified, module_short_name+"_error_unclassified", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_bcidmismatch, module_short_name+"_error_bcidmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_tagmismatch, module_short_name+"_error_tagmismatch", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_timeout, module_short_name+"_error_timeout", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_overflow, module_short_name+"_error_overflow", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_corrupted, module_short_name+"_error_corrupted", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_dummy, module_short_name+"_error_dummy", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_unpack, module_short_name+"_error_unpack", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_missing, module_short_name+"_error_missing", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_empty, module_short_name+"_error_empty", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
-
-    m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_error_duplicate, module_short_name+"_error_duplicate", daqling::core::metrics::ACCUMULATE, daqling::core::metrics::INT);
+    m_statistics->registerMetric(&m_metric_error_ok, "error_ok", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_unclassified, "error_unclassified", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_bcidmismatch, "error_bcidmismatch", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_tagmismatch, "error_tagmismatch", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_timeout, "error_timeout", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_overflow, "error_overflow", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_corrupted, "error_corrupted", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_dummy, "error_dummy", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_unpack, "error_unpack", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_missing, "error_missing", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_empty, "error_empty", daqling::core::metrics::ACCUMULATE);
+    m_statistics->registerMetric(&m_metric_error_duplicate, "error_duplicate", daqling::core::metrics::ACCUMULATE);
   }
   return;
 
@@ -130,7 +142,8 @@ void MonitorModule::register_error_metrics( std::string module_short_name) {
 
 void MonitorModule::register_hists() {
 
- INFO(" ... registering histograms in base Monitor class ... " );
+ INFO(" ... No histograms to register. Will not start histogram service. " );
+ m_histogramming_on = false;
 
 }
 
@@ -150,7 +163,7 @@ uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBu
 
 }
 
-uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
@@ -159,23 +172,53 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
     if (dataStatus) return dataStatus;
   }
 
-  m_fragment=m_event->find_fragment(m_sourceID);
+  m_fragment=m_event->find_fragment(sourceID);
   if (m_fragment==0) {
-    ERROR("no correct fragment source ID found.");
+    ERROR("No correct fragment source ID found.");
     dataStatus |= MissingFragment;
   }
   return dataStatus;
 }
 
-uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
+  auto dataStatus = unpack_fragment_header(eventBuilderBinary, m_sourceID);
+  return dataStatus;
+}
+
+uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
-  dataStatus=unpack_fragment_header(eventBuilderBinary);
+  dataStatus=unpack_fragment_header(eventBuilderBinary, sourceID);
   if (dataStatus) return dataStatus;
 
-  m_rawFragment=m_fragment->payload<const RawFragment*>();
+  switch (m_eventTag) {
+    case PhysicsTag:
+      m_rawFragment=m_fragment->payload<const RawFragment*>();
+      DEBUG("unpacking raw fragment.");
+      break;
+    case CalibrationTag:
+      m_rawFragment=m_fragment->payload<const RawFragment*>();
+      DEBUG("unpacking calibration fragment.");
+      break;
+    case MonitoringTag:
+      m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>();
+      DEBUG("unpacking monitoring fragment.");
+      break;
+    case TLBMonitoringTag:
+      m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>(); //to be changed once subdetector specific formats defined.
+      DEBUG("unpacking TLB monitoring fragment.");
+      break;
+    default:
+      ERROR("Specified tag not found.");
+      dataStatus |= UnclassifiedError;
+  }
   
+  return dataStatus;
+}
+
+uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary) {
+  auto dataStatus = unpack_full_fragment(eventBuilderBinary, m_sourceID);
   return dataStatus;
 }
 

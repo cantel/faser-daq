@@ -14,10 +14,6 @@ using namespace std::chrono;
 TrackerMonitorModule::TrackerMonitorModule() { 
 
    INFO("");
-
-   auto cfg = m_config.getSettings();
-   m_sourceID = cfg["fragmentID"];
-
  }
 
 TrackerMonitorModule::~TrackerMonitorModule() { 
@@ -29,13 +25,18 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
-  if ( m_event->event_tag() != PhysicsTag ) return;
+  if ( m_event->event_tag() != m_eventTag ) {
+    ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
+    return;
+  }
 
-  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary);
-  if ( (fragmentUnpackStatus & CorruptedFragment) | (fragmentUnpackStatus & MissingFragment)){
+  //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
+  auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;
   }
+  // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
 
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
@@ -51,7 +52,10 @@ void TrackerMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TrackerMonitor ... " );
 
-  m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
+  // example of 1D histogram: default is ylabel="counts" non-extendable axes (Axis::Range::NONEXTENDABLE & 60 second publishing interval.
+  //m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
+  // example of 1D histogram with extendable x-axis, publishing interval of every 30 seconds.
+  m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 349.5, 175, Axis::Range::EXTENDABLE, 30);
 
   INFO(" ... done registering histograms ... " );
 
@@ -63,12 +67,10 @@ void TrackerMonitorModule::register_metrics() {
 
   INFO( "... registering metrics in TrackerMonitorModule ... " );
 
-  std::string module_short_name = "tracker";
- 
-  register_error_metrics(module_short_name);
+  register_error_metrics();
 
   m_metric_payload = 0;
-  m_statistics->registerVariable<std::atomic<int>, int>(&m_metric_payload, module_short_name+"_payload", daqling::core::metrics::LAST_VALUE, daqling::core::metrics::INT);
+  m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
   return;
 }

@@ -114,6 +114,46 @@
 			    "additionalProperties": false
 			},
 			{
+			    "title": "FilteredTCP",
+			    "type": "object",
+			    "format": "grid",
+			    "properties": {
+				"transport": {
+				    "type": "string",
+				    "enum":["tcp"],
+				    "options": {
+					"hidden": true
+				    }
+				},
+				"type": {
+				    "type":"string",
+                              "enum": ["pair", "pubsub"]
+				},
+				"chid": {"type":"integer"},
+				"host": {
+                                    "type":"string",
+                                    "format": "host"
+				},
+				"port": {"type":"integer"},
+                                "filter": {
+                                   "type":"integer",
+                                   "enum": [187,443,699,955],
+				   "options": {
+				       "enum_titles": ["Physics","Calibration","Monitoring","TLBMonitoring"]
+				   }
+                                },
+                                "filter_size": {
+                                   "type":"integer",
+				   "default": 2,
+				   "options": {
+				      "hidden": true
+				   }
+                                }
+			    },
+			    "required": ["transport","type", "chid", "host", "port","filter","filter_size"],
+			    "additionalProperties": false
+			},
+			{
 			    "title": "IPC",
 			    "type": "object",
 			    "format": "grid",

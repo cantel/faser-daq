@@ -15,30 +15,75 @@
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
  */
 
+//TODO Deal with 
+
 #include "TrackerReceiverModule.hpp"
 #include "TrackerReadout/TRBAccess.h"
-//#include "../../gpiodrivers/GPIOBase/GPIOBase/GPIOBaseClass.h"
+#include "GPIOBase/DummyInterface.h"
+#include <string>
+#include <iostream>
 
-//TRBAccess *trb = nullptr;
+TrackerReceiverModule::TrackerReceiverModule() { 
+    INFO("");
+     
+    m_trb = new FASER::TRBAccess(0, m_config.getConfig()["settings"]["emulation"]);
 
-TrackerReceiverModule::TrackerReceiverModule() { INFO(""); }
+    if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
+      m_trb->SetDebug(true);
+    }
+    else {
+      m_trb->SetDebug(false);    
+    }
+    
+    //Setting up the emulated interface
+    if (m_config.getConfig()["settings"]["emulation"] == true) {
+      //(static_cast<FASER::dummyInterface*>(m_trb->m_interface))->SetInputFile((m_config.getConfig()["settings"]["emulationFile"])); //file to read events from
+      (static_cast<FASER::dummyInterface*>(m_trb->m_interface))->SetInputFile("/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq"); //file to read events from
+      m_trb->SetupStorageStream("TestEmulatorOutFile.daq");
+    }    
 
-TrackerReceiverModule::~TrackerReceiverModule() { INFO(""); }
+TrackerReceiverModule::~TrackerReceiverModule() { 
+    INFO(""); 
+    delete m_trb;
+}
 
 // optional (configuration can be handled in the constructor)
 void TrackerReceiverModule::configure() {
   FaserProcess::configure();
-  INFO("");
+  INFO("TRB --> configuration");
+
+  unsigned int m_moduleMask = m_config.getConfig()["settings"]["moduleMask"].get<int>();
+
+  if (m_moduleMask > 0xff) {
+    ERROR("We have at most 8 modules per TRB, but you specified 0x" <<std::hex<<m_moduleMask<< " as moduleMask!");
+    return;
+  }
+  
+  m_trb->GetConfig()->Set_Global_L1TimeoutDisable(true);
+  for (unsigned int i = 0; i < 8; i++){
+    if ( (0x1 << i) & m_moduleMask) { // module enabled
+      m_trb->GetConfig()->Set_Module_L1En(i, false);
+      m_trb->GetConfig()->Set_Module_ClkCmdSelect(i, false); // switch between CMD_0 and CMD_1 lines
+      m_trb->GetConfig()->Set_Module_LedxRXEn(i, true, true); // switch between led and ledx lines
+    }
+  }
+  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
+  m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
+  m_trb->GetConfig()->Set_Global_L2SoftL1AEn(true);
+ 
+  m_trb->WriteConfigReg();
 }
 
 void TrackerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
-  INFO("");
+  m_trb->StartReadout();
+  INFO("TRB --> readout started.");
 }
 
 void TrackerReceiverModule::stop() {
   FaserProcess::stop();
-  INFO("");
+  m_trb->StopReadout();
+  INFO("TRB --> readout stopped.");
 }
 
 void TrackerReceiverModule::runner() {

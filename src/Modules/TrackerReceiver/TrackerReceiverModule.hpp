@@ -30,6 +30,6 @@ class TrackerReceiverModule : public FaserProcess {
   void stop();
 
   void runner();
-
-  FASER::TRBAccess *trb;
+  
+  FASER::TRBAccess *m_trb;
 };

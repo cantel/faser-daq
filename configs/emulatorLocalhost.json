@@ -177,7 +177,7 @@
         "emulation" :true,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
         "moduleMask" : 1, 
-        "TRBconfigFile": "../prrrrrrrrrrrrrrrrrr",
+        "TRBconfigFile": "../nonexistentpath_forTesting",
         "moduleConfigFile": ".."
        },
       "connections": {

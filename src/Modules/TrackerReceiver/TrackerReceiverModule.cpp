@@ -13,9 +13,7 @@
  * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
- */
-
-//TODO Deal with 
+ */ 
 
 #include "TrackerReceiverModule.hpp"
 #include "TrackerReadout/TRBAccess.h"
@@ -40,7 +38,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
       //(static_cast<FASER::dummyInterface*>(m_trb->m_interface))->SetInputFile((m_config.getConfig()["settings"]["emulationFile"])); //file to read events from
       (static_cast<FASER::dummyInterface*>(m_trb->m_interface))->SetInputFile("/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq"); //file to read events from
       m_trb->SetupStorageStream("TestEmulatorOutFile.daq");
-    }    
+    }
+}    
 
 TrackerReceiverModule::~TrackerReceiverModule() { 
     INFO(""); 

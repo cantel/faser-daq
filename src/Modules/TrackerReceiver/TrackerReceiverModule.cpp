@@ -87,7 +87,21 @@ void TrackerReceiverModule::stop() {
 
 void TrackerReceiverModule::runner() {
   INFO("Running...");
+  std::vector<std::vector<uint32_t>> vector_of_raw_events;
+  
   while (m_run) {
+    vector_of_raw_events = m_trb->GetTRBEventData();
+
+    int counter = 0;
+    for(auto event : vector_of_raw_events){
+      counter += 1;
+      std::cout << "printing event " << counter << std::endl;
+      for(auto word : event){
+        std::cout << word << std::endl;
+      }
+    }
+  
+  //m_trb->PollData();   
   }
   INFO("Runner stopped");
 }

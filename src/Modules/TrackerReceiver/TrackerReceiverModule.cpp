@@ -23,6 +23,7 @@
 #include "Commons/RawExampleFormat.hpp"
 #include <string>
 #include <iostream>
+#include <bitset>
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
@@ -97,10 +98,10 @@ void TrackerReceiverModule::runner() {
   uint64_t local_event_id;
   uint16_t local_bc_id;
 
+  int counter = 0;
   while (m_run) {
     vector_of_raw_events = m_trb->GetTRBEventData();
 
-    int counter = 0;
     for(auto event : vector_of_raw_events){
       counter += 1;
       std::cout << "printing event " << counter << std::endl;
@@ -120,7 +121,8 @@ void TrackerReceiverModule::runner() {
 
       //Following for-cycle is only for debugging
       for(auto word : event){
-        std::cout << word << std::endl;
+        std::bitset<32> y(word);
+        std::cout << y << std::endl;
       }
     }   
   }

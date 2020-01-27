@@ -21,6 +21,7 @@
 #include "Commons/FaserProcess.hpp"
 #include "Commons/EventFormat.hpp"
 #include "Commons/RawExampleFormat.hpp"
+#include "TrackerReadout/ConfigurationHandling.h"
 #include <string>
 #include <iostream>
 #include <bitset>
@@ -39,8 +40,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
     
     //Setting up the emulated interface
     if (m_config.getConfig()["settings"]["emulation"] == true) {
-      //(static_cast<FASER::dummyInterface*>(m_trb->m_interface))->SetInputFile((m_config.getConfig()["settings"]["emulationFile"])); //file to read events from
-      (static_cast<FASER::dummyInterface*>(m_trb->m_interface))->SetInputFile("/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq"); //file to read events from
+      std::string l_TRBconfigFile = m_config.getConfig()["settings"]["emulatorFile"];
+      static_cast<FASER::dummyInterface*>(m_trb->m_interface)->SetInputFile(l_TRBconfigFile); //file to read events from
       m_trb->SetupStorageStream("TestEmulatorOutFile.daq");
     }
 }    
@@ -50,11 +51,11 @@ TrackerReceiverModule::~TrackerReceiverModule() {
     delete m_trb;
 }
 
-// optional (configuration can be handled in the constructor)
 void TrackerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("TRB --> configuration");
 
+  //TRB configuration
   unsigned int m_moduleMask = m_config.getConfig()["settings"]["moduleMask"].get<int>();
 
   if (m_moduleMask > 0xff) {
@@ -75,6 +76,28 @@ void TrackerReceiverModule::configure() {
   m_trb->GetConfig()->Set_Global_L2SoftL1AEn(true);
  
   m_trb->WriteConfigReg();
+  
+  //Modules configuration
+  for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
+  
+    if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
+    INFO("Starting configuration of module number " << l_moduleNo);
+        
+      FASER::ConfigHandlerSCT *l_cfg = new FASER::ConfigHandlerSCT();
+      if (m_config.getConfig()["settings"]["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
+        std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
+        //std::cout << "-----------------------------------------" << l_moduleConfigFile <<", " << std::dec << (0x1 << l_moduleNo)  << std::endl;
+        if (l_moduleConfigFile != ""){
+            l_cfg->ReadFromFile(l_moduleConfigFile);
+        }
+        m_trb->ConfigureSCTModule(l_cfg, (0x1 << l_moduleNo)); //sending configuration to corresponding module
+        INFO("Configuration of module " << l_moduleNo << " finished.");
+      }
+      else{
+        ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
+      }
+    }
+  }
 }
 
 void TrackerReceiverModule::start(unsigned run_num) {

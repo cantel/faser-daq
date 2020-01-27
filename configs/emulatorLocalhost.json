@@ -176,9 +176,12 @@
       "settings": {
         "emulation" :true,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-        "moduleMask" : 1, 
         "TRBconfigFile": "../nonexistentpath_forTesting",
-        "moduleConfigFile": ".."
+        "moduleMask" : 31, 
+        "moduleConfigFiles": {"0" : "../path0",
+                              "1" : "../path1",
+                              "2" : "../path2",
+                              "4" : "../path4"}
        },
       "connections": {
         "senders": [

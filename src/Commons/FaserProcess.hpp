@@ -53,13 +53,13 @@ protected:
   void registerVariable(std::atomic<int> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, float delta_t = 1) {
     var=0;
     if (m_stats_on) {
-      m_statistics->registerVariable<std::atomic<int>, int>(&var, name, mtype, metrics::INT,delta_t);
+      m_statistics->registerMetric<std::atomic<int>>(&var, name, mtype, delta_t);
     }
   }
   void registerVariable(std::atomic<float> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, float delta_t = 1) {
     var=0;
     if (m_stats_on) {
-      m_statistics->registerVariable<std::atomic<float>, float>(&var, name, mtype,metrics::FLOAT,delta_t);
+      m_statistics->registerMetric<std::atomic<float>>(&var, name, mtype,delta_t);
     }
   }
 

@@ -14,6 +14,7 @@ class MonitorModule : public FaserProcess {
   MonitorModule();
   virtual ~MonitorModule();
 
+  void configure();
   void start(unsigned int);
   void stop();
   void runner();
@@ -23,13 +24,13 @@ class MonitorModule : public FaserProcess {
  protected:
 
   // filled by json configs
-  uint32_t m_sourceID;
+  uint32_t m_sourceID=0;
+  uint8_t m_eventTag;
   
   EventFull* m_event=0;
   const EventFragment* m_fragment=0; // do not delete this one. Owned by m_event!
   const RawFragment * m_rawFragment = 0 ; // do not delete this one. Owned by m_event!
-
-  const size_t m_rawFragmentSize = sizeof(RawFragment) ;
+  const MonitoringFragment * m_monitoringFragment = 0 ; // ""
 
   // histogramming
   bool m_histogramming_on;
@@ -53,14 +54,16 @@ class MonitorModule : public FaserProcess {
   virtual void monitor(daqling::utilities::Binary&);
   virtual void register_hists( );
   virtual void register_metrics();
-  void register_error_metrics(std::string module_short_name); // lets derived classes register metrics for all error types defined in EventFormat.
+  void register_error_metrics(); // lets derived classes register metrics for all error types defined in EventFormat.
   uint16_t unpack_event_header( daqling::utilities::Binary &eventBuilderBinary );
-  uint16_t unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary );
-  uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary );
+  uint16_t unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID);
+  uint16_t unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary);
+  uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID);
+  uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary);
   void fill_error_status_to_metric(uint32_t fragmentStatus);
   void fill_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name);
 
- private: // CHANGE TO PRIVATE
+ private:
 
   bool m_event_header_unpacked;
 

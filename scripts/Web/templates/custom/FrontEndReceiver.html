@@ -1,0 +1,58 @@
+<head>
+  <link href="{{ url_for('static', filename='css/circular.css')}}" rel="stylesheet" type="text/css">
+  <style>
+    hr.dashed{
+    border-top: 1px dashed blue;
+    margin-bottom:0px;
+    margin-top:0px;
+    }			
+  </style>
+</head>
+<center><h1> FrontEnd: {{ source }} </h1></center>
+<div class='container'id= "circleContainer" style = "margin-bottom: 65px; padding-top:0px">
+</div>
+
+<script>
+  numberOfElm = 8;
+  var container = document.getElementById("circleContainer");
+  var circle = document.createElement("ul");
+  container.appendChild(circle);
+
+  circle.className = "circle-container-" + numberOfElm;
+  for (i=1; i <= numberOfElm ; i++){
+
+		 var item = document.createElement("li");
+		 circle.appendChild(item);
+
+		 var btn = document.createElement("button");
+		 btn.className = "btn btn-primary btn-lg";
+		 btn.id = "Module" + i;			
+		 
+		 var labelDiv = document.createElement("div");
+		 btn.appendChild(labelDiv);
+
+		 var label = document.createElement("span");
+		 label.className="label label-info";
+		 label.innerHTML = "Module" + i;
+		 labelDiv.appendChild(label);
+
+		 var dashed_line = document.createElement("hr");
+		 dashed_line.className = "dashed";
+		 btn.appendChild(dashed_line);
+
+		 var valuesDiv = document.createElement("div");	
+		 valuesDiv.id = "moduleNumber" + i;
+		 btn.appendChild(valuesDiv);
+		 
+		 btn.addEventListener("click", function(){
+		 window.open("/monitoring/info/module/" + '{{source}}' + "?module=" + this.id, "replace=true");
+		 }, false);
+			
+		 item.appendChild(btn);
+		 //alert(btn.id);
+		 
+		 }
+
+</script>		
+
+{% include 'custom/table.html' %}

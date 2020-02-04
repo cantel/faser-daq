@@ -22,6 +22,7 @@
 #include "Commons/EventFormat.hpp"
 #include "Commons/RawExampleFormat.hpp"
 #include "TrackerReadout/ConfigurationHandling.h"
+#include "TrackerReadout/TRBEventDecoder.h"
 #include <string>
 #include <iostream>
 #include <bitset>
@@ -78,7 +79,8 @@ void TrackerReceiverModule::configure() {
   m_trb->WriteConfigReg();
   
   //Modules configuration
-  for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
+  //TODO Why this couses runtime error (in log messades of daqlink)
+  /*for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
   
     if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
     INFO("Starting configuration of module number " << l_moduleNo);
@@ -97,7 +99,7 @@ void TrackerReceiverModule::configure() {
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
     }
-  }
+  }*/
 }
 
 void TrackerReceiverModule::start(unsigned run_num) {
@@ -120,19 +122,23 @@ void TrackerReceiverModule::runner() {
   uint32_t local_source_id    = SourceIDs::TrackerSourceID;
   uint64_t local_event_id;
   uint16_t local_bc_id;
+  FASER::TRBEventDecoder *ed = new FASER::TRBEventDecoder();
 
   int counter = 0;
   while (m_run) {
     vector_of_raw_events = m_trb->GetTRBEventData();
-
+   
     for(auto event : vector_of_raw_events){
-      counter += 1;
-      std::cout << "printing event " << counter << std::endl;
-
+      //TODO Decode following two numbers from raw data by event decoder
       *raw_payload = event.data();
-      /*//TODO Decode following two numbers from raw data by event decoder
-      local_event_id = 
-      local_bc_id = 
+      int total_size = (*raw_payload[0] & 0xFFFFFFF) * sizeof(uint32_t); //Event size in bytes     
+
+      ed->LoadTRBEventData(event);
+      auto decoded_event = ed->GetEvents(); 
+
+      //TODO Here I get runtime error: null pointer exception
+ /*     local_event_id = decoded_event[0]->GetL1ID();
+      local_bc_id = decoded_event[0]->GetBCID();
       std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload, total_size)));
       // TODO : What is the status supposed to be?
@@ -140,14 +146,14 @@ void TrackerReceiverModule::runner() {
           fragment->set_status( status );
       
             // place the raw binary event fragment on the output port
-              m_connections.put(0, const_cast<Binary&>(fragment->raw()));*/
+              m_connections.put(0, const_cast<Binary&>(fragment->raw()));
 
       //Following for-cycle is only for debugging
       for(auto word : event){
         std::bitset<32> y(word);
         std::cout << y << std::endl;
-      }
-    }   
+      }*/
+     }   
   }
   INFO("Runner stopped");
-}
+    }

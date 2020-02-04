@@ -172,7 +172,7 @@
       "host": "localhost",
       "port": 5559, 
       "type": "TrackerReceiver",
-      "loglevel": {"core": "DEBUG", "module": "INFO"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "emulation" :true,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",

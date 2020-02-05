@@ -49,7 +49,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
 
 TrackerReceiverModule::~TrackerReceiverModule() { 
     INFO(""); 
-    delete m_trb;
+    //delete m_trb;
 }
 
 void TrackerReceiverModule::configure() {
@@ -131,28 +131,31 @@ void TrackerReceiverModule::runner() {
     for(auto event : vector_of_raw_events){
       //TODO Decode following two numbers from raw data by event decoder
       *raw_payload = event.data();
-      int total_size = (*raw_payload[0] & 0xFFFFFFF) * sizeof(uint32_t); //Event size in bytes     
+      int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
+      //int total_size = 1000; //Event size in bytes     
 
       ed->LoadTRBEventData(event);
       auto decoded_event = ed->GetEvents(); 
 
       //TODO Here I get runtime error: null pointer exception
- /*     local_event_id = decoded_event[0]->GetL1ID();
+      local_event_id = decoded_event[0]->GetL1ID();
       local_bc_id = decoded_event[0]->GetBCID();
       std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload, total_size)));
       // TODO : What is the status supposed to be?
-        uint16_t status=0;
+          uint16_t status=0;
           fragment->set_status( status );
-      
+     
             // place the raw binary event fragment on the output port
               m_connections.put(0, const_cast<Binary&>(fragment->raw()));
-
+    
       //Following for-cycle is only for debugging
+      counter += 1;
+      std::cout << "-------------- printing event " << counter << std::endl;
       for(auto word : event){
         std::bitset<32> y(word);
         std::cout << y << std::endl;
-      }*/
+      }
      }   
   }
   INFO("Runner stopped");

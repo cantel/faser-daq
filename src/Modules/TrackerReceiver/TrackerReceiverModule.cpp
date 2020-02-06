@@ -52,6 +52,10 @@ TrackerReceiverModule::~TrackerReceiverModule() {
     //delete m_trb;
 }
 
+
+/***************************************
+ *        Configure module
+ * ************************************/
 void TrackerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("TRB --> configuration");
@@ -102,18 +106,33 @@ void TrackerReceiverModule::configure() {
   }*/
 }
 
+
+/***************************************
+ *        Start module
+ * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
+  //TODO Reset event counters
   m_trb->StartReadout();
   INFO("TRB --> readout started.");
 }
 
+
+/***************************************
+ *        Stop module
+ * ************************************/
 void TrackerReceiverModule::stop() {
   FaserProcess::stop();
+  //m_trb->GetTRBEventData(); //making sure that no data are in the buffer 
   m_trb->StopReadout();
+  usleep(100);
   INFO("TRB --> readout stopped.");
 }
 
+
+/***************************************
+ *        Runner of the module
+ * ************************************/
 void TrackerReceiverModule::runner() {
   INFO("Running...");
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
@@ -127,36 +146,38 @@ void TrackerReceiverModule::runner() {
   int counter = 0;
   while (m_run) {
     vector_of_raw_events = m_trb->GetTRBEventData();
-   
-    for(auto event : vector_of_raw_events){
-      //TODO Decode following two numbers from raw data by event decoder
-      *raw_payload = event.data();
-      int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
-      //int total_size = 1000; //Event size in bytes     
 
-      ed->LoadTRBEventData(event);
-      auto decoded_event = ed->GetEvents(); 
-
-      //TODO Here I get runtime error: null pointer exception
-      local_event_id = decoded_event[0]->GetL1ID();
-      local_bc_id = decoded_event[0]->GetBCID();
-      std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, Binary(raw_payload, total_size)));
-      // TODO : What is the status supposed to be?
-          uint16_t status=0;
-          fragment->set_status( status );
-     
-            // place the raw binary event fragment on the output port
-              m_connections.put(0, const_cast<Binary&>(fragment->raw()));
-    
-      //Following for-cycle is only for debugging
-      counter += 1;
-      std::cout << "-------------- printing event " << counter << std::endl;
-      for(auto word : event){
-        std::bitset<32> y(word);
-        std::cout << y << std::endl;
+      if (vector_of_raw_events.size() == 0){
+        usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
       }
-     }   
+      else{
+      for(auto event : vector_of_raw_events){
+        *raw_payload = event.data();
+        int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
+
+        ed->LoadTRBEventData(event);
+        auto decoded_event = ed->GetEvents(); 
+
+        local_event_id = decoded_event[0]->GetL1ID();
+        local_bc_id = decoded_event[0]->GetBCID();
+        std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
+                                              local_event_id, local_bc_id, Binary(raw_payload, total_size)));
+        // TODO : What is the status supposed to be?
+        uint16_t status=0;
+        fragment->set_status( status );
+     
+        // place the raw binary event fragment on the output port
+        m_connections.put(0, const_cast<Binary&>(fragment->raw()));
+    
+        //Following for-cycle is only for debugging
+        counter += 1;
+        std::cout << "-------------- printing event " << counter << std::endl;
+        for(auto word : event){
+          std::bitset<32> y(word);
+          std::cout << y << std::endl;
+        }
+      }
+    }   
   }
   INFO("Runner stopped");
-    }
+}

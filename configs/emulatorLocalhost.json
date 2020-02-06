@@ -166,31 +166,6 @@
           }
         ]
       }
-    },
-    {
-      "name": "trackerreceiver",
-      "host": "localhost",
-      "port": 5559, 
-      "type": "TrackerReceiver",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "TRBconfigFile": "..",
-        "moduleConfigFiles": [{"fileName": ".."},
-          {"fileName": ".."},
-          {"fileName": ".."},
-          {"fileName": ".."}]
-      },
-      "connections": {
-        "senders": [
-          {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "*",
-            "port": 8105
-          }
-        ]
-      }
     }
   ]
 }

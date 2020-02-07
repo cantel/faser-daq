@@ -19,6 +19,7 @@
 
 #include "Commons/FaserProcess.hpp"
 #include "TLBAccess/TLBAccess.h"
+#include "TLBAccess/TLBDecode.h"
 
 class TriggerReceiverModule : public FaserProcess {
  public:
@@ -34,5 +35,6 @@ class TriggerReceiverModule : public FaserProcess {
  private:
  
   FASER::TLBAccess *m_tlb;
+  FASER::TLBDecode *m_decode;
  
 };

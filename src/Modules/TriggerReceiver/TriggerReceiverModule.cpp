@@ -83,12 +83,16 @@ void TriggerReceiverModule::runner() {
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }
     else {
-      for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){ //event is a single vector containing one event
+      for(std::vector<std::vector<uint32_t>>::size_type i=1; i<vector_of_raw_events.size(); i++){
+        
+        //std::cout<<"Header: "<<std::hex<<vector_of_raw_events[i][0]<<std::dec<<std::endl;
+        if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){local_fragment_tag=EventTags::PhysicsTag;}
+        if (m_decode->IsMonitoringHeader(vector_of_raw_events[i][0])){local_fragment_tag=EventTags::MonitoringTag;}
+        
         *raw_payload = vector_of_raw_events[i].data(); //converts it to an array
         int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in bytes
-        
         status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
-        std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Status: "<<status<<std::endl;
+        //std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Status: "<<status<<std::endl;
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload, total_size)));
         fragment->set_status(status);

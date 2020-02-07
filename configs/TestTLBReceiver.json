@@ -57,7 +57,7 @@
         "LHC_CLK": false,
         "OrbitDelay": 0,
         "Deadtime": 0,
-        "MonitoringRate": 0,
+        "MonitoringRate": 100,
         "OutputDestination": 0,
         "Input": [false, false, false, false, false, false, false, false],
         "Reset": true,
@@ -66,7 +66,7 @@
         "SoftwareTrigger": false,
         "BusyDisable": true,
         "EnableTriggerData": true,
-        "EnableMonitoringData": false,
+        "EnableMonitoringData": true,
         "ReadoutFIFOReset": true
       },
       "connections": {
@@ -104,7 +104,7 @@
         "senders": [
           {
             "type": "pair",
-            "chid": 2,
+            "chid": 1,
             "transport": "tcp",
             "host": "*",
             "port": 9104

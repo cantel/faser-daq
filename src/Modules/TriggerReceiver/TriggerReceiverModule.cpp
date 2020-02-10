@@ -43,6 +43,18 @@ void TriggerReceiverModule::configure() {
   INFO("Done.");  
 }
 
+void TriggerReceiverModule::enableTrigger(const std::string &arg) {
+  INFO("Got enableTrigger command with argument "<<arg);
+  // everything but the TLB process should ignore this
+  m_tlb->EnableTrigger();
+}
+
+void TriggerReceiverModule::disableTrigger(const std::string &arg) {
+  INFO("Got disableTrigger command with argument "<<arg);
+  // everything but the TLB proces should ignore this
+  m_tlb->DisableTrigger();
+}
+
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
   INFO("");
@@ -89,10 +101,10 @@ void TriggerReceiverModule::runner() {
         if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){local_fragment_tag=EventTags::PhysicsTag;}
         if (m_decode->IsMonitoringHeader(vector_of_raw_events[i][0])){local_fragment_tag=EventTags::MonitoringTag;}
         
-        *raw_payload = vector_of_raw_events[i].data(); //converts it to an array
+        *raw_payload = vector_of_raw_events[i].data(); //converts each vector event to an array
         int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in bytes
         status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
-        //std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Status: "<<status<<std::endl;
+        std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Status: "<<status<<std::endl;
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload, total_size)));
         fragment->set_status(status);

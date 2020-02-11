@@ -31,6 +31,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
     INFO("");
      
     m_trb = new FASER::TRBAccess(0, m_config.getConfig()["settings"]["emulation"]);
+    m_ed = new FASER::TRBEventDecoder();
 
     if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
       m_trb->SetDebug(true);
@@ -49,7 +50,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
 
 TrackerReceiverModule::~TrackerReceiverModule() { 
     INFO(""); 
-    //delete m_trb;
+    delete m_trb;
+    delete m_ed;
 }
 
 
@@ -60,8 +62,13 @@ void TrackerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("TRB --> configuration");
 
-  //TRB configuration
-  unsigned int m_moduleMask = m_config.getConfig()["settings"]["moduleMask"].get<int>();
+  //TRB configuration 
+  m_moduleMask = 0;
+  for (int i = 7; i >= 0; i--){ //there are 8 modules
+    if (m_config.getConfig()["settings"]["moduleMask"][i]){
+      m_moduleMask |= (1 << i);
+    }
+  }
 
   if (m_moduleMask > 0xff) {
     ERROR("We have at most 8 modules per TRB, but you specified 0x" <<std::hex<<m_moduleMask<< " as moduleMask!");
@@ -71,9 +78,13 @@ void TrackerReceiverModule::configure() {
   m_trb->GetConfig()->Set_Global_L1TimeoutDisable(true);
   for (unsigned int i = 0; i < 8; i++){
     if ( (0x1 << i) & m_moduleMask) { // module enabled
-      m_trb->GetConfig()->Set_Module_L1En(i, false);
-      m_trb->GetConfig()->Set_Module_ClkCmdSelect(i, false); // switch between CMD_0 and CMD_1 lines
-      m_trb->GetConfig()->Set_Module_LedxRXEn(i, true, true); // switch between led and ledx lines
+      //m_trb->GetConfig()->Set_Module_L1En(i, false);
+      m_trb->GetConfig()->Set_Module_L1En(m_moduleMask);
+      //m_trb->GetConfig()->Set_Module_ClkCmdSelect(i, false); // switch between CMD_0 and CMD_1 lines
+      m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleMask);
+      //m_trb->GetConfig()->Set_Module_LedxRXEn(i, true, true); // switch between led and ledx lines
+      m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
+      m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
     }
   }
   m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
@@ -83,8 +94,8 @@ void TrackerReceiverModule::configure() {
   m_trb->WriteConfigReg();
   
   //Modules configuration
-  //TODO Why this couses runtime error (in log messades of daqlink)
-  /*for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
+  //This stage causes Timeout exception in DAQling, probably because of the transfer capacity. Maybe it will disapear with USB3 or ethernet
+  for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
   
     if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
     INFO("Starting configuration of module number " << l_moduleNo);
@@ -92,7 +103,6 @@ void TrackerReceiverModule::configure() {
       FASER::ConfigHandlerSCT *l_cfg = new FASER::ConfigHandlerSCT();
       if (m_config.getConfig()["settings"]["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
         std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
-        //std::cout << "-----------------------------------------" << l_moduleConfigFile <<", " << std::dec << (0x1 << l_moduleNo)  << std::endl;
         if (l_moduleConfigFile != ""){
             l_cfg->ReadFromFile(l_moduleConfigFile);
         }
@@ -103,7 +113,7 @@ void TrackerReceiverModule::configure() {
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
     }
-  }*/
+  }
 }
 
 
@@ -122,10 +132,11 @@ void TrackerReceiverModule::start(unsigned run_num) {
  *        Stop module
  * ************************************/
 void TrackerReceiverModule::stop() {
-  FaserProcess::stop();
-  //m_trb->GetTRBEventData(); //making sure that no data are in the buffer 
   m_trb->StopReadout();
   usleep(100);
+  //TODO Does it read out whole event at the end???
+  //m_trb->GetTRBEventData(); //making sure that no data are in the buffer 
+  FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }
 
@@ -141,10 +152,22 @@ void TrackerReceiverModule::runner() {
   uint32_t local_source_id    = SourceIDs::TrackerSourceID;
   uint64_t local_event_id;
   uint16_t local_bc_id;
-  FASER::TRBEventDecoder *ed = new FASER::TRBEventDecoder();
+
+  //sleep(10000);
+  //m_trb->GenerateL1A(m_moduleMask);
+  //m_trb->GenerateL1A(m_moduleMask);
+  //m_trb->GenerateL1A(m_moduleMask);
+ // m_trb->GenerateL1A(m_moduleMask);
+  for (int i = 0; i < 3; i++){
+    m_trb->GenerateL1A(m_moduleMask);
+  }
 
   int counter = 0;
   while (m_run) {
+    
+    //for testing
+    //m_trb->GenerateL1A(m_moduleMask);
+    
     vector_of_raw_events = m_trb->GetTRBEventData();
 
       if (vector_of_raw_events.size() == 0){
@@ -155,11 +178,14 @@ void TrackerReceiverModule::runner() {
         *raw_payload = event.data();
         int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
 
-        ed->LoadTRBEventData(event);
-        auto decoded_event = ed->GetEvents(); 
+        m_ed->LoadTRBEventData(event);
+        auto decoded_event = m_ed->GetEvents(); 
 
-        local_event_id = decoded_event[0]->GetL1ID();
-        local_bc_id = decoded_event[0]->GetBCID();
+        if (decoded_event.size() != 0){
+            local_event_id = decoded_event[0]->GetL1ID(); //we can always ask element 0 - we are feeding only one event at the time to ed
+            local_bc_id = decoded_event[0]->GetBCID();
+        }
+
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload, total_size)));
         // TODO : What is the status supposed to be?

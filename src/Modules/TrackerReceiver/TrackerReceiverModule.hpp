@@ -19,6 +19,15 @@
 
 #include "Commons/FaserProcess.hpp"
 #include "TrackerReadout/TRBAccess.h"
+#include "TrackerReceiverModule.hpp" 
+#include "GPIOBase/DummyInterface.h"
+#include "Commons/EventFormat.hpp"
+#include "Commons/RawExampleFormat.hpp"
+#include "TrackerReadout/ConfigurationHandling.h"
+#include "TrackerReadout/TRBEventDecoder.h"
+#include <string>
+#include <iostream>
+#include <bitset>
 
 class TrackerReceiverModule : public FaserProcess {
  public:
@@ -32,4 +41,6 @@ class TrackerReceiverModule : public FaserProcess {
   void runner();
   
   FASER::TRBAccess *m_trb;
+  FASER::TRBEventDecoder *m_ed;
+  unsigned int m_moduleMask;
 };

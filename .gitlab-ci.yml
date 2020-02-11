@@ -17,24 +17,22 @@ build_faser_daq:
     - cmake3 ../
     - make
     
-# Sam Meehan is leaving this here because it can easily be used to autogenerate doxygen stuff
-# perhaps something for a future DAQ'athon would be proper commenting
-# that can be DAQ'athon #6 after we have everything implemented
-# document:
-#   only:
-#     - master
-#   image: gitlab-registry.cern.ch/cholm/docker-ubuntu-doxygen:latest    
-#   before_script:
-#     - echo $SERVICE_PASS | kinit $CERN_USER@CERN.CH
-#   script:
-#     - ls
-#     - pwd
-#     - doxygen Doxyfile
-#     - ls
-#     - ls ..
-#     - echo "FOR THIS TO WORK YOU NEED TO HAVE THE DIRECTORIES PRESENT ON THE OTHER END"
-#     - cd ..
-#     - ls gpiodrivers
-#     - xrdcopy -s -f -p -r gpiodrivers root://eoshome.cern.ch//eos/user/f/faserdaq/www/gpiodrivers/.
-#     - pwd
+# creation of doxygen documentation
+document:
+  only:
+    - master
+  image: gitlab-registry.cern.ch/cholm/docker-ubuntu-doxygen:latest    
+  before_script:
+    - echo $SERVICE_PASS | kinit $CERN_USER@CERN.CH
+  script:
+    - ls
+    - pwd
+    - doxygen Doxyfile
+    - ls
+    - ls ..
+    - echo "FOR THIS TO WORK YOU NEED TO HAVE THE DIRECTORIES PRESENT ON THE OTHER END"
+    - cd ..
+    - ls daq
+    - xrdcopy -s -f -p -r daq root://eoshome.cern.ch//eos/user/f/faserdaq/www/daq/.
+    - pwd
 

@@ -3,7 +3,7 @@ stages:
 
 build_faser_daq:
   stage: build
-  image: gitlab-registry.cern.ch/meehan/faser-docker/daq
+  image: gitlab-registry.cern.ch/meehan/faser-docker/daq:master
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:

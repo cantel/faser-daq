@@ -16,7 +16,7 @@ build_faser_daq:
     - mkdir -p build 
     - cd build
     - cmake3 ../
-    - make
+    - make -j8
     
 # creation of doxygen documentation
 document:

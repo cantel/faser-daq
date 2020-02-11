@@ -1,5 +1,6 @@
 stages:
   - build
+  - document
 
 build_faser_daq:
   stage: build
@@ -19,6 +20,7 @@ build_faser_daq:
     
 # creation of doxygen documentation
 document:
+  stage: document
   only:
     - master
   image: gitlab-registry.cern.ch/cholm/docker-ubuntu-doxygen:latest    

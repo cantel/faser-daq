@@ -135,7 +135,6 @@ void TrackerReceiverModule::stop() {
   m_trb->StopReadout();
   usleep(100);
   //TODO Does it read out whole event at the end???
-  //m_trb->GetTRBEventData(); //making sure that no data are in the buffer 
   FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }
@@ -153,11 +152,6 @@ void TrackerReceiverModule::runner() {
   uint64_t local_event_id;
   uint16_t local_bc_id;
 
-  //sleep(10000);
-  //m_trb->GenerateL1A(m_moduleMask);
-  //m_trb->GenerateL1A(m_moduleMask);
-  //m_trb->GenerateL1A(m_moduleMask);
- // m_trb->GenerateL1A(m_moduleMask);
   for (int i = 0; i < 3; i++){
     m_trb->GenerateL1A(m_moduleMask);
   }
@@ -182,7 +176,7 @@ void TrackerReceiverModule::runner() {
         auto decoded_event = m_ed->GetEvents(); 
 
         if (decoded_event.size() != 0){
-            local_event_id = decoded_event[0]->GetL1ID(); //we can always ask element 0 - we are feeding only one event at the time to ed
+            local_event_id = decoded_event[0]->GetL1ID(); //we can always ask element 0 - we are feeding only one event at the time to m_ed
             local_bc_id = decoded_event[0]->GetBCID();
         }
 
@@ -196,14 +190,17 @@ void TrackerReceiverModule::runner() {
         m_connections.put(0, const_cast<Binary&>(fragment->raw()));
     
         //Following for-cycle is only for debugging
-        counter += 1;
-        std::cout << "-------------- printing event " << counter << std::endl;
-        for(auto word : event){
-          std::bitset<32> y(word);
-          std::cout << y << std::endl;
+        usleep(10000);
+        if (m_run){
+          counter += 1;
+          std::cout << "-------------- printing event " << counter << std::endl;
+          for(auto word : event){
+            std::bitset<32> y(word);
+            std::cout << y << std::endl;
+          }
         }
       }
     }   
-  }
+  } 
   INFO("Runner stopped");
 }

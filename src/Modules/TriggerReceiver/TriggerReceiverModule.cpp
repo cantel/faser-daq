@@ -31,6 +31,17 @@ TriggerReceiverModule::~TriggerReceiverModule() { INFO(""); }
 void TriggerReceiverModule::configure() {
   FaserProcess::configure();
   
+
+  registerVariable(m_physicsEventCount, "PhysicsEvents");
+  registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
+  registerVariable(m_monitoringEventCount, "MonitoringEvents");
+  registerVariable(m_monitoringEventCount, "MonitoringRate", metrics::RATE);
+  registerVariable(m_badFragmentsCount, "BadFragments");
+  registerVariable(m_badFragmentsCount, "BadFragmentsRate", metrics::RATE);
+  registerVariable(m_status, "Status");
+  registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
+  registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
+  
   auto cfg = m_config.getSettings();
   
   INFO("Configuring TLB");
@@ -83,7 +94,7 @@ void TriggerReceiverModule::runner() {
   uint32_t* raw_payload[64000/4];
   uint16_t status=0;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
-  uint32_t local_source_id    = SourceIDs::TrackerSourceID;
+  uint32_t local_source_id    = SourceIDs::TriggerSourceID;
   uint64_t local_event_id;
   uint16_t local_bc_id;
 
@@ -91,19 +102,30 @@ void TriggerReceiverModule::runner() {
   while (m_run) {
     vector_of_raw_events = m_tlb->GetTLBEventData();
    
+   
     if (vector_of_raw_events.size()==0){
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }
     else {
       for(std::vector<std::vector<uint32_t>>::size_type i=1; i<vector_of_raw_events.size(); i++){
         
-        //std::cout<<"Header: "<<std::hex<<vector_of_raw_events[i][0]<<std::dec<<std::endl;
-        if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){local_fragment_tag=EventTags::PhysicsTag;}
-        if (m_decode->IsMonitoringHeader(vector_of_raw_events[i][0])){local_fragment_tag=EventTags::MonitoringTag;}
-        
         *raw_payload = vector_of_raw_events[i].data(); //converts each vector event to an array
-        int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in bytes
+        int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
+        
+        //std::cout<<"Header: "<<std::hex<<vector_of_raw_events[i][0]<<std::dec<<std::endl;
+        if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){
+          local_fragment_tag=EventTags::PhysicsTag;
+          m_physicsEventCount+=1;
+          m_trigger_payload_size = total_size;
+        }
+        if (m_decode->IsMonitoringHeader(vector_of_raw_events[i][0])){
+          local_fragment_tag=EventTags::TLBMonitoringTag;
+          m_monitoringEventCount+=1;
+          m_monitoring_payload_size = total_size;
+        }
         status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
+        m_status=status;
+        if (status!=0){m_badFragmentsCount+=1;}
         std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Status: "<<status<<std::endl;
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload, total_size)));

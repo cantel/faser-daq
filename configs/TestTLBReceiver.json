@@ -48,16 +48,18 @@
       "type": "TriggerReceiver",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",      
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 4,
+        "RandomTriggerRate": 1,
         "Prescale": [0, 0, 0, 0, 1, 0],
         "TrackerDelay": 0,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
         "OrbitDelay": 0,
         "Deadtime": 0,
-        "MonitoringRate": 100,
+        "MonitoringRate": 11245,
         "OutputDestination": 0,
         "Input": [false, false, false, false, false, false, false, false],
         "Reset": true,
@@ -88,9 +90,7 @@
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
-          "maxPending": 10
-      },
+      "maxPending": 10},
       "connections": {
         "receivers": [
           {
@@ -103,7 +103,7 @@
         ],
         "senders": [
           {
-            "type": "pair",
+            "type": "pubsub",
             "chid": 1,
             "transport": "tcp",
             "host": "*",
@@ -133,7 +133,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 9104
+            "port": 9105
           }
         ]
       }

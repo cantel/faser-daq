@@ -68,7 +68,6 @@
       "settings": {
         "emulation" : false,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-        "TRBconfigFile": "../nonexistentpath_forTesting",
         "moduleMask" : [true, false, false, false, false, false, false, false], 
         "moduleConfigFiles": {"0" : "../configs/TemplateModuleCfg0.json",
                               "1" : "../configs/TemplateModuleCfg1.json",

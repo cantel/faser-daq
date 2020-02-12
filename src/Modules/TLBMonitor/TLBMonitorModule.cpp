@@ -48,19 +48,27 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
   m_metric_payload = payloadSize;
 
+  m_metric_event_id = m_tlbmonitoringFragment->event_id;
+
+ // veto counters
+  m_deadtime_veto_counter = m_tlbmonitoringFragment->deadtime_veto_counter;
+  m_busy_veto_counter = m_tlbmonitoringFragment->busy_veto_counter;
+  m_rate_limiter_veto_counter = m_tlbmonitoringFragment->rate_limiter_veto_counter;
+  m_bcr_veto_counter = m_tlbmonitoringFragment->bcr_veto_counter;
+
   // 2D hist fill
-  m_histogrammanager->fill("h_tlb_numfrag_vs_sizefrag", m_monitoringFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
+  //m_histogrammanager->fill("h_tlb_numfrag_vs_sizefrag", m_monitoringFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
 }
 
 void TLBMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TLBMonitor ... " );
   
-  m_histogrammanager->registerHistogram("h_tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
+  m_histogrammanager->registerHistogram("h_tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 3.);
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
   m_histogrammanager->registerHistogram("h_tlb_errorcount", "error type", categories, 5. );
   // example 2D hist
-  m_histogrammanager->register2DHistogram("h_tlb_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20 );
+  //m_histogrammanager->register2DHistogram("h_tlb_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20, 5 );
 
   INFO(" ... done registering histograms ... " );
   return;
@@ -75,6 +83,19 @@ void TLBMonitorModule::register_metrics() {
 
   m_metric_payload = 0;
   m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
+
+  m_metric_event_id = 0;
+  m_statistics->registerMetric(&m_metric_event_id, "eventID", daqling::core::metrics::LAST_VALUE);
+  //veto counters
+  m_deadtime_veto_counter = 0;
+  m_statistics->registerMetric(&m_deadtime_veto_counter, "deadtimeVetoCounter", daqling::core::metrics::LAST_VALUE);
+  m_busy_veto_counter = 0;
+  m_statistics->registerMetric(&m_busy_veto_counter, "busyVetoCounter", daqling::core::metrics::LAST_VALUE);
+  m_rate_limiter_veto_counter = 0;
+  m_statistics->registerMetric(&m_rate_limiter_veto_counter, "ratelimiterVetoCounter", daqling::core::metrics::LAST_VALUE);
+  m_bcr_veto_counter = 0;
+  m_statistics->registerMetric(&m_bcr_veto_counter, "BCRVetoCounter", daqling::core::metrics::LAST_VALUE);
+
 
   return;
 }

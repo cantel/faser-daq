@@ -8,7 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # Require a C++17 compliant compiler
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+#set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Include Threads
@@ -21,6 +21,7 @@ message(STATUS "Building with Boost")
 
 # Build daqling
 add_subdirectory(daqling)
+add_subdirectory(gpiodrivers)
 
 # Build modules
 include_directories(src)

@@ -1,0 +1,171 @@
+{
+  "version": 7,
+  "group": "faser",
+  "components": [
+    {
+      "name": "triggergenerator",
+      "host": "localhost",
+      "port": 5540,
+      "type": "TriggerGenerator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "rateInHz": 15,
+        "frontendApps": [
+          {
+            "host": "localhost",
+            "port": 17001
+          },
+          {
+            "host": "localhost",
+            "port": 17002
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendemulator01",
+      "host": "localhost",
+      "port": 5541,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 25,
+        "rmsSize": 0,
+        "fragmentID": 1000001,
+        "probMissingTrigger": 0.00,
+        "probMissingFragment": 0.00,
+        "probCorruptedFragment": 0.00,
+	      "monitoringInterval": 1.5,
+        "triggerPort": 17001,
+        "daqHost": "localhost",
+        "daqPort": 18001
+      }
+    },
+    {
+      "name": "frontendemulator02",
+      "host": "localhost",
+      "port": 5542,
+      "type": "FrontEndEmulator",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "meanSize": 250,
+        "rmsSize": 20,
+        "fragmentID": 1000002,
+        "probMissingTrigger": 0,
+        "probMissingFragment": 0,
+        "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
+        "triggerPort": 17002,
+        "daqHost": "localhost",
+        "daqPort": 18002
+      }
+    },
+    {
+      "name": "frontendreceiver01",
+      "host": "localhost",
+      "port": 5555,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7055",
+          "dataPort": 18001
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8101
+          }
+        ]
+      }
+    },
+    {
+      "name": "frontendreceiver02",
+      "host": "localhost",
+      "port": 5556,
+      "type": "FrontEndReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "dataPort": 18002
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8102
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventbuilder01",
+      "host": "localhost",
+      "port": 5557,
+      "type": "EventBuilderFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7057",
+          "maxPending": 10
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8101
+          },
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8102
+          }
+        ],
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "filewriterfaser01",
+      "host": "localhost",
+      "port": 5558,
+      "type": "FileWriterFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "maxFileSizeInGB": 1,
+	  "fileFormat": [{"fileName": "/tmp/physics-"},
+			 {"fileName": "/tmp/calibration-"},
+			 {"fileName": "/tmp/monitoring-"},
+			 {"fileName": "/tmp/tlb-"}],
+	  "badEventsFileName": "/tmp/debug-"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8103
+          }
+        ]
+      }
+    }
+  ]
+}

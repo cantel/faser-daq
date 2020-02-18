@@ -83,7 +83,7 @@ void MonitorModule::runner() {
           continue;
       }
       noData=false;
-
+      INFO("Event received");
       monitor(eventBuilderBinary);
 
       m_event_header_unpacked = false;

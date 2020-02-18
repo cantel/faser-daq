@@ -62,6 +62,10 @@ void TrackerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("TRB --> configuration");
 
+  registerVariable(event_id, "event_id");
+  registerVariable(event_size, "event_size_bytes");
+  registerVariable(bc_id, "bc_id");
+
   //TRB configuration 
   m_moduleMask = 0;
   for (int i = 7; i >= 0; i--){ //there are 8 modules
@@ -134,7 +138,6 @@ void TrackerReceiverModule::start(unsigned run_num) {
 void TrackerReceiverModule::stop() {
   m_trb->StopReadout();
   usleep(100);
-  //TODO Does it read out whole event at the end???
   FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }
@@ -157,11 +160,7 @@ void TrackerReceiverModule::runner() {
   }
 
   int counter = 0;
-  while (m_run) {
-    
-    //for testing
-    //m_trb->GenerateL1A(m_moduleMask);
-    
+  while (m_run) { 
     vector_of_raw_events = m_trb->GetTRBEventData();
 
       if (vector_of_raw_events.size() == 0){
@@ -171,26 +170,28 @@ void TrackerReceiverModule::runner() {
       for(auto event : vector_of_raw_events){
         *raw_payload = event.data();
         int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
+        event_size = total_size; //Monitoring data
 
         m_ed->LoadTRBEventData(event);
         auto decoded_event = m_ed->GetEvents(); 
 
         if (decoded_event.size() != 0){
-            local_event_id = decoded_event[0]->GetL1ID(); //we can always ask element 0 - we are feeding only one event at the time to m_ed
+            local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
+            event_id = local_event_id; //Monitoring data
             local_bc_id = decoded_event[0]->GetBCID();
+            bc_id = local_bc_id; // Monitoring data
         }
 
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload, total_size)));
         // TODO : What is the status supposed to be?
         uint16_t status=0;
-        fragment->set_status( status );
+        fragment->set_status(status);
      
         // place the raw binary event fragment on the output port
         m_connections.put(0, const_cast<Binary&>(fragment->raw()));
     
         //Following for-cycle is only for debugging
-        usleep(10000);
         if (m_run){
           counter += 1;
           std::cout << "-------------- printing event " << counter << std::endl;

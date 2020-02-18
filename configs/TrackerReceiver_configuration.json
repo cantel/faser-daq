@@ -1,0 +1,96 @@
+{
+  "version": 7,
+  "group": "faser",
+  "components": [
+    {
+      "name": "eventbuilder01",
+      "host": "localhost",
+      "port": 5557,
+      "type": "EventBuilderFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7057",
+          "maxPending": 10
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8105
+          }
+        ],
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "filewriterfaser01",
+      "host": "localhost",
+      "port": 5558,
+      "type": "FileWriterFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "maxFileSizeInGB": 1,
+	  "fileFormat": [{"fileName": "/tmp/physics-"},
+			 {"fileName": "/tmp/calibration-"},
+			 {"fileName": "/tmp/monitoring-"},
+			 {"fileName": "/tmp/tlb-"}],
+	  "badEventsFileName": "/tmp/debug-"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0, 
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackerreceiver",
+      "host": "localhost",
+      "port": 5559, 
+      "type": "TrackerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",  
+        "emulation" : false,
+        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+        "moduleMask" : [true, false, false, false, false, false, false, false], 
+        "moduleConfigFiles": {"0" : "../configs/TemplateModuleCfg0.json",
+                              "1" : "../configs/TemplateModuleCfg1.json",
+                              "2" : "../configs/TemplateModuleCfg2.json",
+                              "3" : "../configs/TemplateModuleCfg3.json",
+                              "4" : "../configs/TemplateModuleCfg4.json",
+                              "5" : "../configs/TemplateModuleCfg5.json",
+                              "6" : "../configs/TemplateModuleCfg6.json",
+                              "7" : "../configs/TemplateModuleCfg7.json"}
+       },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8105
+          }
+        ]
+      }
+    }
+  ]
+}

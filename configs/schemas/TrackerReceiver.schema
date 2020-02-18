@@ -39,25 +39,30 @@
                     "type"          : "boolean",
                     "title"         : "Emulate TRB",
                     "description"   : "Enable data emulation.",
+                    "propertyOrder" : 1,
                     "default"       : false
                     },
                 "emulatorFile"      : {
                     "type"          : "string",
                     "title"         : "File",
-                    "description"   : "File used emulate data taking (if emulation is on)"
+                    "propertyOrder" : 2,
+                    "description"   : "File used to emulate data taking (if emulation is on)"
                     },
                 "moduleMask"        : {
                     "type"          : "array",
                     "title"         : "Mask for modules",
+                    "propertyOrder" : 3,
                     "minItems"      : 8,
                     "maxItems"      : 8,
                     "items"    : {
-                        "type" : "boolean"
+                        "type"      : "boolean",
+                        "format"    : "row"
                     }
                     },
                 "moduleConfigFiles" : {
                     "type"          : "object",
                     "title"         : "Configuration files for TRB modules",
+                    "propertyOrder" : 4,
                     "properties"    : {
                         "0" : {
                             "type"      : "string",

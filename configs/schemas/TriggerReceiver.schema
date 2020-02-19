@@ -1,0 +1,63 @@
+{
+    "type"      : "object",
+    "title"     : "TrackerReceiver",
+    "properties" : {
+        "name" : {
+            "type"          : "string",
+            "required"      : true,
+            "default"       : "trackerreceiver",
+            "readOnly"      : true,
+            "pattern"       : "^((?!XXX).)*$",
+            "propertyOrder" : 1
+            },
+        "host": {
+            "type"          : "string",
+            "required"      : true,
+            "default"       : "localhost",
+            "propertyOrder" : 2
+            },          
+        "port": {
+            "type"          : "integer",
+            "required"      : true,
+            "default"       : 0,
+            "minimum"       : 1024,
+            "maximum"       : 65535,
+            "propertyOrder" : 3
+            },
+        "type": {
+            "type"          : "string",
+            "default"       : "TrackerReceiver",
+            "readOnly"      : true,
+            "propertyOrder" : 4,
+            "options"       : { "hidden": true }
+            },
+        "settings": {
+            "type"          : "object",
+            "title"         : "Settings",
+            "properties"    : {
+                "emulation"         : {
+                    "type"          : "boolean",
+                    "title"         : "Emulate TRB",
+                    "description"   : "Enable data emulation.",
+                    "default"       : false
+                    },
+                "emulatorFile"      : {
+                    "type"          : "string",
+                    "title"         : "File",
+                    "description"   : "File used emulate data taking (if emulation is on)"
+                    },
+                "moduleMask"        : {
+                    "type"          : "array",
+                    "title"         : "Mask for modules",
+                    "minItems"      : 8,
+                    "maxItems"      : 8,
+                    "items"    : {
+                        "type" : "boolean"
+                    }
+                    }
+                },
+            "format"        : "table",
+            "propertyOrder" : 5
+            }
+    }
+}

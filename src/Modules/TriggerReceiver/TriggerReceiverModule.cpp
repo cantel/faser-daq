@@ -30,7 +30,6 @@ TriggerReceiverModule::~TriggerReceiverModule() { INFO(""); }
 // optional (configuration can be handled in the constructor)
 void TriggerReceiverModule::configure() {
   FaserProcess::configure();
-  
 
   registerVariable(m_physicsEventCount, "PhysicsEvents");
   registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
@@ -60,10 +59,11 @@ void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   m_tlb->EnableTrigger();
 }
 
-void TriggerReceiverModule::disableTrigger(const std::string &arg) {
+void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with "command disableTrigger"
   INFO("Got disableTrigger command with argument "<<arg);
   // everything but the TLB proces should ignore this
   m_tlb->DisableTrigger();
+  usleep(100); //value to be tweaked. Should be large enough to empty the on-board buffer.
 }
 
 void TriggerReceiverModule::start(unsigned run_num) {
@@ -80,7 +80,7 @@ void TriggerReceiverModule::start(unsigned run_num) {
 }
 
 void TriggerReceiverModule::stop() {  
-  std::cout<<"   End of DAQ timer, stopping readout."<<std::endl;
+  std::cout<<"Stopping readout."<<std::endl;
   m_tlb->StopReadout();
   usleep(100);  
   FaserProcess::stop(); //this turns m_run to false
@@ -91,7 +91,8 @@ void TriggerReceiverModule::runner() {
   INFO("Running...");
   
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
-  uint32_t* raw_payload[64000/4];
+  uint32_t raw_payload[64000/4];
+  uint32_t* raw_payload_ptr = raw_payload;
   uint16_t status=0;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::TriggerSourceID;
@@ -108,10 +109,8 @@ void TriggerReceiverModule::runner() {
     }
     else {
       for(std::vector<std::vector<uint32_t>>::size_type i=1; i<vector_of_raw_events.size(); i++){
-        
-        *raw_payload = vector_of_raw_events[i].data(); //converts each vector event to an array
+        raw_payload_ptr = vector_of_raw_events[i].data(); //converts each vector event to an array
         int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
-        
         //std::cout<<"Header: "<<std::hex<<vector_of_raw_events[i][0]<<std::dec<<std::endl;
         if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){
           local_fragment_tag=EventTags::PhysicsTag;
@@ -126,9 +125,13 @@ void TriggerReceiverModule::runner() {
         status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
         m_status=status;
         if (status!=0){m_badFragmentsCount+=1;}
-        std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Status: "<<status<<std::endl;
+        std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id;
+        if (local_fragment_tag==EventTags::PhysicsTag){std::cout<<" Trigger";}
+        if (local_fragment_tag==EventTags::TLBMonitoringTag){std::cout<<" Monitoring";}
+        std::cout<<" Status: "<<status<<" ECRcount: "<<m_ECRcount<<std::endl;
+        local_event_id = (m_ECRcount<<24) + (local_event_id);
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, Binary(raw_payload, total_size)));
+                                              local_event_id, local_bc_id, Binary(raw_payload_ptr, total_size)));
         fragment->set_status(status);
         m_connections.put(0, const_cast<Binary&>(fragment->raw())); // place the raw binary event fragment on the output port
       }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "Commons/EventFormat.hpp"
 
 struct TriggerMsg {
   int event_id;
@@ -41,6 +42,12 @@ struct TLBMonitoringFragment {
   uint32_t event_id;
   uint32_t orbit_id;
   uint32_t bc_id;
+  uint32_t tbp0;
+  uint32_t tbp1;
+  uint32_t tbp2;
+  uint32_t tbp3;
+  uint32_t tbp4;
+  uint32_t tbp5;
   uint32_t tap0;
   uint32_t tap1;
   uint32_t tap2;

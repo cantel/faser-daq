@@ -1,63 +1,253 @@
 {
-    "type"      : "object",
-    "title"     : "TrackerReceiver",
-    "properties" : {
-        "name" : {
-            "type"          : "string",
-            "required"      : true,
-            "default"       : "trackerreceiver",
-            "readOnly"      : true,
-            "pattern"       : "^((?!XXX).)*$",
-            "propertyOrder" : 1
-            },
-        "host": {
-            "type"          : "string",
-            "required"      : true,
-            "default"       : "localhost",
-            "propertyOrder" : 2
-            },          
-        "port": {
-            "type"          : "integer",
-            "required"      : true,
-            "default"       : 0,
-            "minimum"       : 1024,
-            "maximum"       : 65535,
-            "propertyOrder" : 3
-            },
-        "type": {
-            "type"          : "string",
-            "default"       : "TrackerReceiver",
-            "readOnly"      : true,
-            "propertyOrder" : 4,
-            "options"       : { "hidden": true }
-            },
-        "settings": {
-            "type"          : "object",
-            "title"         : "Settings",
-            "properties"    : {
-                "emulation"         : {
-                    "type"          : "boolean",
-                    "title"         : "Emulate TRB",
-                    "description"   : "Enable data emulation.",
-                    "default"       : false
-                    },
-                "emulatorFile"      : {
-                    "type"          : "string",
-                    "title"         : "File",
-                    "description"   : "File used emulate data taking (if emulation is on)"
-                    },
-                "moduleMask"        : {
-                    "type"          : "array",
-                    "title"         : "Mask for modules",
-                    "minItems"      : 8,
-                    "maxItems"      : 8,
-                    "items"    : {
-                        "type" : "boolean"
-                    }
-                    }
+  "type"      : "object",
+  "title"     : "TriggerReceiver",
+  "properties" : {
+      "name" : {
+          "type"          : "string",
+          "required"      : true,
+          "default"       : "tlbreceiver01",
+          "readOnly"      : true,
+          "pattern"       : "^((?!XXX).)*$",
+          "propertyOrder" : 1
+      },
+      "host": {
+          "type"          : "string",
+          "required"      : true,
+          "default"       : "localhost",
+          "propertyOrder" : 2
+      },          
+      "port": {
+          "type"          : "integer",
+          "required"      : true,
+          "default"       : 6556,
+          "minimum"       : 1024,
+          "maximum"       : 65535,
+          "propertyOrder" : 3
+      },
+      "type": {
+          "type"          : "string",
+          "default"       : "TriggerReceiver",
+          "readOnly"      : true,
+          "propertyOrder" : 4,
+          "options"       : { "hidden": true }
+      },
+      "loglevel": {
+          "type"          : "object",
+          "title"         : "Loglevel",
+          "properties"    : {
+              "core": {
+                  "type"          : "string",
+                  "title"         : "core",
+                  "propertyOrder" : 1,
+                  "default"       : "INFO"
+              },
+              "module": {
+                  "type"          : "string",
+                  "title"         : "module",
+                  "propertyOrder" : 2,
+                  "default"       : "DEBUG"
+              }
+          }
+      },
+      "settings": {
+        "type"     : "object",
+        "title"         : "Settings",
+          "properties"    : {
+              "influxDb_uri": {
+                  "type"          : "string",
+                  "title"         : "influxDb_uri",
+                  "default"       : "http://epdtdi-daqtest:8086/write?db="
+              },
+              "influxDb_name": {
+                  "type"          : "string",
+                  "title"         : "influxDb_name",
+                  "default"       : "DAQlingMetrics"
+              },
+              "SamplingPhase": {
+                "type"            : "array",
+                "title"           : "SamplingPhase",
+                "minItems"        : "8",
+                "maxItems"        : "8",
+                "items": {
+                  "type": "boolean"
+                }
+              },
+              "InputDelay": {
+                "type"            : "array",
+                "title"           : "InputDelay",
+                "minItems"        : "8",
+                "maxItems"        : "8",
+                "items": {
+                  "type": "integer",
+                  "default": "0",
+                  "minimum": "0",
+                  "maximum": "3"
+                }
+              },
+              "RandomTriggerRate": {
+                  "type"          : "integer",
+                  "title"         : "RandomTriggerRate",
+                  "default"       : "0",
+                  "minimum"       : "0",
+                  "maximum"       : "7"
+              },
+              "Prescale": {
+                "type"            : "array",
+                "title"           : "Prescale",
+                "minItems"        : "8",
+                "maxItems"        : "8",
+                "items": {
+                  "type": "integer",
+                  "default": "0",
+                  "minimum": "0",
+                  "maximum": "255"
+                }
+              },
+              "TrackerDelay": {
+                  "type"          : "integer",
+                  "title"         : "TrackerDelay",
+                  "default"       : "0",
+                  "minimum"       : "0",
+                  "maximum"       : "127"
+              },
+              "DigitizerDelay": {
+                  "type"          : "integer",
+                  "title"         : "DigitizerDelay",
+                  "default"       : "0",
+                  "minimum"       : "0",
+                  "maximum"       : "127"
+              },
+              "LHC_CLK": {
+                  "type"          : "boolean",
+                  "title"         : "LHC CLK"
+              },
+              "OrbitDelay": {
+                  "type"          : "integer",
+                  "title"         : "OrbitDelay",
+                  "default"       : "0",
+                  "minimum"       : "0",
+                  "maximum"       : "4095"
+              },
+              "Deadtime": {
+                  "type"          : "integer",
+                  "title"         : "Deadtime",
+                  "default"       : "0",
+                  "minimum"       : "0",
+                  "maximum"       : "4095"
+              },
+              "MonitoringRate": {
+                  "type"          : "integer",
+                  "title"         : "MonitoringRate",
+                  "default"       : "11245",
+                  "minimum"       : "0",
+                  "maximum"       : "1048575"
+              },
+              "OutputDestination": {
+                  "type"          : "integer",
+                  "title"         : "OutputDestination",
+                  "default"       : "0",
+                  "minimum"       : "0",
+                  "maximum"       : "4294967295"
+              },
+              "Input": {
+                "type"            : "array",
+                "title"           : "Input",
+                "minItems"        : "8",
+                "maxItems"        : "8",
+                "items": {
+                  "type": "boolean"
+                }
+              },
+              "Reset": {
+                  "type"          : "boolean",
+                  "title"         : "Reset",
+                  "default"       : "true"
+              },
+              "ECR": {
+                  "type"          : "boolean",
+                  "title"         : "ECR",
+                  "default"       : "true"
+              },
+              "TriggerEnable": {
+                  "type"          : "boolean",
+                  "title"         : "TriggerEnable",
+                  "default"       : "true"
+              },
+              "SoftwareTrigger": {
+                  "type"          : "boolean",
+                  "title"         : "SoftwareTrigger"
+              },
+              "BusyDisable": {
+                  "type"          : "boolean",
+                  "title"         : "BusyDisable",
+                  "default"       : "true"
+              },
+              "EnableTriggerData": {
+                  "type"          : "boolean",
+                  "title"         : "EnableTriggerData",
+                  "default"       : "true"
+              },
+              "EnableMonitoringData": {
+                  "type"          : "boolean",
+                  "title"         : "EnableMonitoringData",
+                  "default"       : "true"
+              },
+              "ReadoutFIFOReset": {
+                  "type"          : "boolean",
+                  "title"         : "ReadoutFIFOReset",
+                  "default"       : "true"
+              }
+          }
+      },
+      "connections": {
+        "type": "object",
+        "title": "connections",
+        "properties": {
+          "senders":{
+            "type": "array",
+            "title": "senders",
+            "minItems": "1",
+            "maxItems": "1",
+            "items": {
+              "type": "object",
+              "title": "items",
+              "required": [
+              "type",
+              "chid",
+              "transport",
+              "host",
+              "port"
+              ],
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "title": "type",
+                  "default": "pair"
                 },
-            "format"        : "table",
-            "propertyOrder" : 5
+                "chid": {
+                  "type": "integer",
+                  "title": "chid",
+                  "default": 0
+                },
+                "transport": {
+                  "type": "string",
+                  "title": "transport",
+                  "default": "tcp"
+                },
+                "host": {
+                  "type": "string",
+                  "title": "host",
+                  "default": "*"
+                },
+                "port": {
+                  "type": "integer",
+                  "title": "port",
+                  "default": 9102
+                }
+              }
             }
-    }
+          }
+        }
+      }
+  }
 }

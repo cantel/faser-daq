@@ -67,10 +67,11 @@
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",  
+        "influxDb_name": "DAQlingMetrics",
+        "L1A_TLB" : false,  
         "emulation" : false,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-        "moduleMask" : [true, false, false, false, false, false, false, false], 
+        "moduleMask" : [false, false, false, false, false, false, false, false], 
         "moduleConfigFiles": {"0" : "../configs/TemplateModuleCfg0.json",
                               "1" : "../configs/TemplateModuleCfg1.json",
                               "2" : "../configs/TemplateModuleCfg2.json",
@@ -78,7 +79,8 @@
                               "4" : "../configs/TemplateModuleCfg4.json",
                               "5" : "../configs/TemplateModuleCfg5.json",
                               "6" : "../configs/TemplateModuleCfg6.json",
-                              "7" : "../configs/TemplateModuleCfg7.json"}
+                              "7" : "../configs/TemplateModuleCfg7.json"},
+        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
        },
       "connections": {
         "senders": [

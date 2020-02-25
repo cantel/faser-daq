@@ -43,8 +43,9 @@ class TrackerReceiverModule : public FaserProcess {
   FASER::TRBAccess *m_trb;
   FASER::TRBEventDecoder *m_ed;
   unsigned int m_moduleMask;
+  unsigned int m_moduleClkCmdMask;
 
-  std::atomic<int> event_size;
+  std::atomic<int> event_size_bytes;
   std::atomic<int> event_id;
   std::atomic<int> bc_id;
 };

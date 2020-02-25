@@ -190,25 +190,34 @@ void TrackerReceiverModule::runner() {
         int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
         event_size_bytes = total_size; //Monitoring data
 
-        m_ed->LoadTRBEventData(event);
-        auto decoded_event = m_ed->GetEvents(); 
+        //TODO should we also send the EndOfDAQ trailer? Currently, we are not sending it
+        if ((event.size() != 1) && m_ed->IsEndOfDAQ(event[0])){
+          m_ed->LoadTRBEventData(event);
+          auto decoded_event = m_ed->GetEvents(); 
 
-        if (decoded_event.size() != 0){
-            local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
-            event_id = local_event_id; //Monitoring data
-            local_bc_id = decoded_event[0]->GetBCID();
-            bc_id = local_bc_id; // Monitoring data
-        }
+          if (decoded_event.size() != 0){
+              local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
+              event_id = local_event_id; //Monitoring data
+              local_bc_id = decoded_event[0]->GetBCID();
+              bc_id = local_bc_id; // Monitoring data
+          }
 
-        std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
+          std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload_ptr, total_size)));
-        // TODO : What is the status supposed to be?
-        uint16_t status=0;
-        fragment->set_status(status);
-     
-        // place the raw binary event fragment on the output port
-        m_connections.put(0, const_cast<Binary&>(fragment->raw()));
-    
+          
+          uint16_t error;
+          fragment->set_status(0);
+          for (uint32_t frame : event){
+            if(m_ed->HasError(frame, error)){
+              //TODO Error can be specified based on the value of variable error. Status can be set accordingly - 1 for now.
+              fragment->set_status(1);
+            }
+          }
+
+          // place the raw binary event fragment on the output port
+          m_connections.put(0, const_cast<Binary&>(fragment->raw()));
+        }
+ 
         //Following for-cycle is only for debugging
         if (m_run){
           counter += 1;

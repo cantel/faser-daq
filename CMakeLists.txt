@@ -31,6 +31,8 @@ if(NOT BUILD_New)
   set(BUILD_New OFF)
 endif()
 
+add_subdirectory(faser-common)
+
 # Disable some CXX FLAGS for convenience
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-zero-as-null-pointer-constant -Wno-undef -Wno-sign-conversion -Wno-old-style-cast -Wno-strict-overflow")
 

@@ -1,5 +1,5 @@
 #include "TriggerGeneratorModule.hpp"
-#include "Commons/RawExampleFormat.hpp"
+#include "EventFormats/RawExampleFormat.hpp"
 
 #include <random>
 

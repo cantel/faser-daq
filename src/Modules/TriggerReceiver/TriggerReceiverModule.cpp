@@ -81,8 +81,9 @@ void TriggerReceiverModule::start(unsigned run_num) {
 
 void TriggerReceiverModule::stop() {  
   std::cout<<"Stopping readout."<<std::endl;
+  m_tlb->DisableTrigger();
   m_tlb->StopReadout();
-  usleep(100);  
+  usleep(100); //value to be tweaked. Should be large enough to empty the on-board buffer.
   FaserProcess::stop(); //this turns m_run to false
   INFO("");
 }
@@ -108,9 +109,10 @@ void TriggerReceiverModule::runner() {
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }
     else {
-      for(std::vector<std::vector<uint32_t>>::size_type i=1; i<vector_of_raw_events.size(); i++){
+      for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
         raw_payload_ptr = vector_of_raw_events[i].data(); //converts each vector event to an array
         int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
+        if (!total_size) continue;
         //std::cout<<"Header: "<<std::hex<<vector_of_raw_events[i][0]<<std::dec<<std::endl;
         if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){
           local_fragment_tag=EventTags::PhysicsTag;

@@ -3,45 +3,6 @@
   "group": "faser",
   "components": [
     {
-      "name": "triggergenerator",
-      "host": "localhost",
-      "port": 6540,
-      "type": "TriggerGenerator",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "rateInHz": 15,
-        "frontendApps": [
-          {
-            "host": "localhost",
-            "port": 18002
-          },
-          {
-            "host": "localhost",
-            "port": 18003
-          }
-        ]
-      }
-    },
-    {
-      "name": "frontendemulator02",
-      "host": "localhost",
-      "port": 6543,
-      "type": "FrontEndEmulator",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "meanSize": 250,
-        "rmsSize": 20,
-        "fragmentID": 1000002,
-        "probMissingTrigger": 0,
-        "probMissingFragment": 0,
-        "probCorruptedFragment": 0,
-	      "monitoringInterval": 0,
-        "triggerPort": 18003,
-        "daqHost": "localhost",
-        "daqPort": 19003
-      }
-    },
-    {
       "name": "tlbreceiver01",
       "host": "localhost",
       "port": 6556,
@@ -52,14 +13,14 @@
         "influxDb_name": "DAQlingMetrics",      
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 1,
+        "RandomTriggerRate": 0,
         "Prescale": [0, 0, 0, 0, 1, 0],
         "TrackerDelay": 0,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
         "OrbitDelay": 0,
         "Deadtime": 0,
-        "MonitoringRate": 100,
+        "MonitoringRate": 11245,
         "OutputDestination": 0,
         "Input": [false, false, false, false, false, false, false, false],
         "Reset": true,
@@ -107,7 +68,7 @@
             "chid": 1,
             "transport": "tcp",
             "host": "*",
-            "port": 9104
+            "port": 9105
           }
         ]
       }

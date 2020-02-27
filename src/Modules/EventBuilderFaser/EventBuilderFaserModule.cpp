@@ -7,6 +7,7 @@
 
 #include "EventBuilderFaserModule.hpp"
 #include <stdexcept>
+#include <Utils/Binary.hpp>
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
@@ -63,7 +64,6 @@ bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,
 					uint64_t event_number,
 					int outChannel,
 					std::vector<const EventFragment *>& fragments) {
-      daqling::utilities::Binary outFragments;
       EventFull event(event_tag,m_run_number,event_number);
 
       for(unsigned int ch=0;ch<fragments.size();ch++) {
@@ -84,9 +84,10 @@ bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,
 	}
       }
       INFO("Sending event "<<event.event_id()<<" - "<<event.size()<<" bytes on channel "<<outChannel);
-      Binary* data=event.raw();
-      m_connections.put(outChannel, *data);
-      delete data;
+      auto *bytestream=event.raw();
+      daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+      m_connections.put(outChannel,binData);
+      delete bytestream;
       return true;
 }
 
@@ -127,7 +128,7 @@ void EventBuilderFaserModule::runner() {
     noData=false;
     const EventFragment* fragment;
     try {
-      fragment = new EventFragment(blob);
+      fragment = new EventFragment(blob.data<uint8_t *>(),blob.size());
     } catch (const std::runtime_error& e) {
       ERROR("Got error in fragment ("<<blob.size()<<" bytes) from channel "<<channel<<": "<<e.what());
       INFO("Received:\n"<<blob);

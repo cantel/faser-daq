@@ -69,14 +69,13 @@ void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with 
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
   INFO("");
-  
   auto myjson = m_config.getSettings();
   int WhatToRead=0x0;
   WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13));
   WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14));
   WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15));
   m_tlb->StartReadout(WhatToRead);
-  
+  m_tlb->EnableTrigger();
 }
 
 void TriggerReceiverModule::stop() {  
@@ -103,8 +102,7 @@ void TriggerReceiverModule::runner() {
 
   while (m_run) {
     vector_of_raw_events = m_tlb->GetTLBEventData();
-   
-   
+      
     if (vector_of_raw_events.size()==0){
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }

@@ -171,7 +171,8 @@
               "TriggerEnable": {
                   "type"          : "boolean",
                   "title"         : "TriggerEnable",
-                  "default"       : "true"
+                  "default"       : "true",
+                  "enum"          : [true]
               },
               "SoftwareTrigger": {
                   "type"          : "boolean",

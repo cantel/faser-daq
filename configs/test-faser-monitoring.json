@@ -32,9 +32,9 @@
         "meanSize": 350,
         "rmsSize": 70,
         "fragmentID": 1000001,
-        "probMissingTrigger": 0.1,
-        "probMissingFragment": 0.1,
-        "probCorruptedFragment": 0.2,
+        "probMissingTrigger": 0.0,
+        "probMissingFragment": 0.0,
+        "probCorruptedFragment": 0.0,
 	"monitoringInterval": 0,
         "triggerPort": 17001,
         "daqHost": "localhost",
@@ -51,9 +51,9 @@
         "meanSize": 200,
         "rmsSize": 50,
         "fragmentID": 1000002,
-        "probMissingTrigger": 0.1,
-        "probMissingFragment": 0.1,
-        "probCorruptedFragment": 0.2,
+        "probMissingTrigger": 0.0,
+        "probMissingFragment": 0.0,
+        "probCorruptedFragment": 0.0,
 	      "monitoringInterval": 1.5,
         "triggerPort": 17002,
         "daqHost": "localhost",
@@ -109,7 +109,7 @@
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	   "maxPending": 10,
+	   "maxPending": 100,
 	   "stats_uri": "tcp://localhost:7000",
            "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
            "influxDb_name": "DAQlingMetrics"
@@ -216,7 +216,7 @@
             "transport": "tcp",
             "host": "localhost",
             "port": 8104,
-            "filter": 955,
+            "filter": 699,
             "filter_size": 2
           }
         ]

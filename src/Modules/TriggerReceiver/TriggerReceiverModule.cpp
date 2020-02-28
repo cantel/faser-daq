@@ -69,6 +69,14 @@ void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with 
   usleep(100); //value to be tweaked. Should be large enough to empty the on-board buffer.
 }
 
+void ECRcommand(const std::string &arg) {
+  INFO("Got ECR command with argument "<<arg);
+  m_ECRcount+=1;
+  m_tlb->DisableTrigger();
+  m_tlb->EnableTrigger(true,false); //sends ECR but not Reset
+  sendECR();
+}
+
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
   auto myjson = m_config.getSettings();

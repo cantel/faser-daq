@@ -29,6 +29,7 @@ class TriggerReceiverModule : public FaserProcess {
   void configure(); // optional (configuration can be handled in the constructor)
   void enableTrigger(const std::string &arg);
   void disableTrigger(const std::string &arg);
+  //void ECRcommand(const std::string &arg); Doesn't work yet
   void start(unsigned);
   void stop();
 

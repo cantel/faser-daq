@@ -161,18 +161,20 @@
               "Reset": {
                   "type"          : "boolean",
                   "title"         : "Reset",
-                  "default"       : "true"
+                  "default"       : "true",
+                  "enum"          : [false]
               },
               "ECR": {
                   "type"          : "boolean",
                   "title"         : "ECR",
-                  "default"       : "true"
+                  "default"       : "true",
+                  "enum"          : [false]
               },
               "TriggerEnable": {
                   "type"          : "boolean",
                   "title"         : "TriggerEnable",
-                  "default"       : "true",
-                  "enum"          : [true]
+                  "default"       : "false",
+                  "enum"          : [false]
               },
               "SoftwareTrigger": {
                   "type"          : "boolean",

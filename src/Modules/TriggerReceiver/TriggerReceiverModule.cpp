@@ -45,7 +45,10 @@ void TriggerReceiverModule::configure() {
   
   INFO("Configuring TLB");
   if (m_tlb->ConfigureAndVerifyTLB(cfg)){INFO("TLB Configuration OK");}
-  else{ERROR("TLB Configuration failed");}
+  else{
+    ERROR("TLB Configuration failed");
+    m_status=STATUS_ERROR;
+  }
   INFO("Done.");
   
   INFO("Configuring LUT");
@@ -68,7 +71,6 @@ void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with 
 
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
-  INFO("");
   auto myjson = m_config.getSettings();
   int WhatToRead=0x0;
   WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13));
@@ -79,12 +81,11 @@ void TriggerReceiverModule::start(unsigned run_num) {
 }
 
 void TriggerReceiverModule::stop() {  
-  std::cout<<"Stopping readout."<<std::endl;
+  INFO("Stopping readout.");
   m_tlb->DisableTrigger();
   m_tlb->StopReadout();
   usleep(100); //value to be tweaked. Should be large enough to empty the on-board buffer.
   FaserProcess::stop(); //this turns m_run to false
-  INFO("");
 }
 
 void TriggerReceiverModule::runner() {
@@ -93,7 +94,6 @@ void TriggerReceiverModule::runner() {
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
   uint32_t raw_payload[64000/4];
   uint32_t* raw_payload_ptr = raw_payload;
-  uint16_t status=0;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::TriggerSourceID;
   uint64_t local_event_id;
@@ -111,7 +111,6 @@ void TriggerReceiverModule::runner() {
         raw_payload_ptr = vector_of_raw_events[i].data(); //converts each vector event to an array
         int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
         if (!total_size) continue;
-        //std::cout<<"Header: "<<std::hex<<vector_of_raw_events[i][0]<<std::dec<<std::endl;
         if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){
           local_fragment_tag=EventTags::PhysicsTag;
           m_physicsEventCount+=1;
@@ -122,17 +121,18 @@ void TriggerReceiverModule::runner() {
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
-        status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
-        m_status=status;
-        if (status!=0){m_badFragmentsCount+=1;}
-        std::cout<<std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id;
-        if (local_fragment_tag==EventTags::PhysicsTag){std::cout<<" Trigger";}
-        if (local_fragment_tag==EventTags::TLBMonitoringTag){std::cout<<" Monitoring";}
-        std::cout<<" Status: "<<status<<" ECRcount: "<<m_ECRcount<<std::endl;
+        m_status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
+        if (m_status!=0){m_badFragmentsCount+=1;}
+        if (local_fragment_tag==EventTags::PhysicsTag){
+          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Trigger"<<" Status: "<<m_status<<" ECRcount: "<<m_ECRcount);
+        }
+        if (local_fragment_tag==EventTags::TLBMonitoringTag){
+          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Monitoring"<<" Status: "<<m_status<<" ECRcount: "<<m_ECRcount);
+        }
         local_event_id = (m_ECRcount<<24) + (local_event_id);
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload_ptr, total_size)));
-        fragment->set_status(status);
+        fragment->set_status(m_status);
         m_connections.put(0, const_cast<Binary&>(fragment->raw())); // place the raw binary event fragment on the output port
       }
     } 

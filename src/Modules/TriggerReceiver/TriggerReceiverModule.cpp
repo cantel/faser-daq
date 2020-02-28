@@ -59,7 +59,7 @@ void TriggerReceiverModule::configure() {
 void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   INFO("Got enableTrigger command with argument "<<arg);
   // everything but the TLB process should ignore this
-  m_tlb->EnableTrigger();
+  m_tlb->EnableTrigger(true,false); //sends ECR but not Reset
 }
 
 void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with "command disableTrigger"
@@ -77,7 +77,7 @@ void TriggerReceiverModule::start(unsigned run_num) {
   WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14));
   WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15));
   m_tlb->StartReadout(WhatToRead);
-  m_tlb->EnableTrigger();
+  m_tlb->EnableTrigger(true,true); //sends ECR and Reset
 }
 
 void TriggerReceiverModule::stop() {  

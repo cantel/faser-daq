@@ -5,8 +5,11 @@
 
 #include "FrontEndReceiverModule.hpp"
 
-#include "Commons/EventFormat.hpp"
-#include "Commons/RawExampleFormat.hpp"  
+#include "EventFormats/DAQFormats.hpp"
+#include "EventFormats/RawExampleFormat.hpp"  
+#include <Utils/Binary.hpp>
+
+using namespace DAQFormats;
 
 FrontEndReceiverModule::FrontEndReceiverModule() {
   INFO("With config: " << m_config.dump());
@@ -76,12 +79,13 @@ void FrontEndReceiverModule::runner() {
       source_id = monData->source_id;
       bc_id = 0xFFFF;
     }
-    Binary rawData(&buffer,payload_size);
     event_id|=m_ECRcount<<24;
-    std::unique_ptr<EventFragment> fragment(new EventFragment(fragment_tag, source_id, event_id, bc_id, rawData));
+    std::unique_ptr<EventFragment> fragment(new EventFragment(fragment_tag, source_id, event_id, bc_id, &buffer,payload_size));
     fragment->set_status(status);
+    std::unique_ptr<const byteVector> bytestream(fragment->raw());
+    daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
 
-    m_connections.put(0, const_cast<Binary&>(fragment->raw())); //BP: put() is not declared const, hence the cast...
+    m_connections.put(0,binData);
 
   }
 

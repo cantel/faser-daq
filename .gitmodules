@@ -1,6 +1,9 @@
 [submodule "daqling"]
 	path = daqling
 	url = ../../ep-dt-di/daq/daqling.git
+[submodule "faser-common"]
+	path = faser-common
+	url = ../faser-common.git
 [submodule "digitizerreadout"]
 	path = digitizerreadout
 	url = ../digitizerreadout.git

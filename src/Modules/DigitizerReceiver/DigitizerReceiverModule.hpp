@@ -18,7 +18,7 @@
 #pragma once
 
 #include "Commons/FaserProcess.hpp"
-#include "Commons/EventFormat.hpp"
+#include "EventFormats/DAQFormats.hpp"
 
 #include "Comm_vx1730.h"
 

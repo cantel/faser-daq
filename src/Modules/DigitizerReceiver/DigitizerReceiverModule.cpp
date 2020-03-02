@@ -179,13 +179,18 @@ void DigitizerReceiverModule::sendEvent() {
   uint16_t local_bc_id        = Header_TriggerTimeTag*(40.0/62.5);      // trigger time tag corrected by LHCClock/TrigClock = 40/62.5
 
   // create the event fragment
-  std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, Binary(raw_payload, total_size) ));
+  std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, raw_payload, total_size ));
 
   // ToDo : What is the status supposed to be?
   uint16_t status=0;
   fragment->set_status( status );
 
   // place the raw binary event fragment on the output port
-  m_connections.put(0, const_cast<Binary&>(fragment->raw()));
+  
+  std::unique_ptr<const byteVector> bytestream(fragment->raw());
+  daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+
+  
+  m_connections.put(0, binData);
   
 }

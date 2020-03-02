@@ -89,9 +89,11 @@ void TrackerReceiverModule::configure() {
   
   if (m_config.getConfig()["settings"]["L1Atype"] == "internal"){
     m_trb->GetConfig()->Set_Module_L1En(0x0);
+    m_trb->GetConfig()->Set_Global_L2SoftL1AEn(true);
   }
   else {
-    m_trb->GetConfig()->Set_Module_L1En(m_moduleMask);
+    m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
+    m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
   }
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
   m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
@@ -99,12 +101,6 @@ void TrackerReceiverModule::configure() {
 
   m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
   m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
-  if (m_config.getConfig()["settings"]["L1Atype"] == "external"){
-    m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
-  }
-  else {
-     m_trb->GetConfig()->Set_Global_L2SoftL1AEn(true);
-  }
   m_trb->GetConfig()->Set_Global_Overflow(4095);
 
   m_trb->WriteConfigReg();

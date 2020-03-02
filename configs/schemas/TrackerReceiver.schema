@@ -64,12 +64,23 @@
                     "items"    : {
                         "type"      : "boolean",
                         "format"    : "row"
-                    }
+                         }
+                    },
+                "moduleClkMask"        : {
+                    "type"          : "array",
+                    "title"         : "Mask for modules",
+                    "propertyOrder" : 5,
+                    "minItems"      : 8,
+                    "maxItems"      : 8,
+                    "items"    : {
+                        "type"      : "boolean",
+                        "format"    : "row"
+                         }
                     },
                 "moduleConfigFiles" : {
                     "type"          : "object",
                     "title"         : "Configuration files for TRB modules",
-                    "propertyOrder" : 5,
+                    "propertyOrder" : 6,
                     "properties"    : {
                         "0" : {
                             "type"      : "string",
@@ -116,7 +127,7 @@
                     }
                 },
             "format"        : "table",
-            "propertyOrder" : 6
+            "propertyOrder" : 7
             }
     }
 }

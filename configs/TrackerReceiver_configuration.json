@@ -68,7 +68,7 @@
       "settings": {
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics",
-        "L1A_TLB" : false,  
+        "L1Atype" : "internal",  
         "emulation" : false,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
         "moduleMask" : [false, false, false, false, false, false, false, false], 

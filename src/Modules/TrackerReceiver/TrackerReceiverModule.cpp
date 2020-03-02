@@ -87,7 +87,7 @@ void TrackerReceiverModule::configure() {
     return;
   }
   
-  if (m_config.getConfig()["settings"]["emulation"]){
+  if (m_config.getConfig()["settings"]["L1Atype"] == "internal"){
     m_trb->GetConfig()->Set_Module_L1En(0x0);
   }
   else {
@@ -99,7 +99,7 @@ void TrackerReceiverModule::configure() {
 
   m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
   m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
-  if (m_config.getConfig()["settings"]["L1A_TLB"]){
+  if (m_config.getConfig()["settings"]["L1Atype"] == "external"){
     m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
   }
   else {
@@ -191,7 +191,7 @@ void TrackerReceiverModule::runner() {
         event_size_bytes = total_size; //Monitoring data
 
         //TODO should we also send the EndOfDAQ trailer? Currently, we are not sending it
-        if ((event.size() != 1) && m_ed->IsEndOfDAQ(event[0])){
+        if (!(m_ed->IsEndOfDAQ(event[0]))){
           m_ed->LoadTRBEventData(event);
           auto decoded_event = m_ed->GetEvents(); 
 
@@ -216,15 +216,17 @@ void TrackerReceiverModule::runner() {
 
           // place the raw binary event fragment on the output port
           m_connections.put(0, const_cast<Binary&>(fragment->raw()));
-        }
  
-        //Following for-cycle is only for debugging
-        if (m_run){
-          counter += 1;
-          std::cout << "-------------- printing event " << counter << std::endl;
-          for(auto word : event){
-            std::bitset<32> y(word);
-            std::cout << y << std::endl;
+          //Following for-cycle is only for debugging
+          if (m_run){
+            counter += 1;
+            std::cout << "-------------- printing event " << counter << std::endl;
+            for(auto word : event){
+              std::bitset<32> y(word);
+              std::cout << y << " ";
+              if(m_ed->HasError(word, error)){std::cout << "error word";} 
+              std:: cout << std::endl;
+            }
           }
         }
       }

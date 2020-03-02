@@ -42,16 +42,23 @@
                     "propertyOrder" : 1,
                     "default"       : false
                     },
+                "L1Atype"           : {
+                    "type"          : "string",
+                    "title"         : "L1A type",
+                    "propertyOrder" : 2,
+                    "description"   : "Switch between internal triggers (from TRB) and external triggers (from TLB)",
+                    "enum"          : ["internal", "external"]
+                    },
                 "emulatorFile"      : {
                     "type"          : "string",
                     "title"         : "File",
-                    "propertyOrder" : 2,
+                    "propertyOrder" : 3,
                     "description"   : "File used to emulate data taking (if emulation is on)"
                     },
                 "moduleMask"        : {
                     "type"          : "array",
                     "title"         : "Mask for modules",
-                    "propertyOrder" : 3,
+                    "propertyOrder" : 4,
                     "minItems"      : 8,
                     "maxItems"      : 8,
                     "items"    : {
@@ -62,7 +69,7 @@
                 "moduleConfigFiles" : {
                     "type"          : "object",
                     "title"         : "Configuration files for TRB modules",
-                    "propertyOrder" : 4,
+                    "propertyOrder" : 5,
                     "properties"    : {
                         "0" : {
                             "type"      : "string",
@@ -109,7 +116,7 @@
                     }
                 },
             "format"        : "table",
-            "propertyOrder" : 5
+            "propertyOrder" : 6
             }
     }
 }

@@ -66,8 +66,8 @@ class Hist : public HistBase {
      configure();
   }
   ~Hist(){}
-  template <typename X>
-  void fill(X x)   { hist_object(x); }
+  template <typename X, typename W>
+  void fill(X x, W w = 1.)   { hist_object(x, weight(w)); }
   std::string publish() {
       std::ostringstream os;
       auto this_axis = hist_object.axis();
@@ -118,8 +118,8 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
      configure();
   }
   ~CategoryHist(){}
-  void fill(std::string x)  { hist_object(x);}
-  void fill(const char * x)  { hist_object(x);}
+  void fill(std::string x, float w = 1.)  { hist_object(x, weight(w));}
+  void fill(const char * x, float w = 1.)  { hist_object(x, weight(w));}
   std::string publish() override {
       std::ostringstream os;
       auto this_axis = hist_object.axis();
@@ -170,8 +170,8 @@ class Hist2D : public HistBase {
   float ymin;
   float ymax;
   float ybins;
-  template <typename X, typename Y>
-  void fill( X x, Y y) { hist_object(x,y);}
+  template <typename X, typename Y, typename W>
+  void fill( X x, Y y, W w=1) { hist_object(x,y, weight(w));}
   std::string publish() {
       std::ostringstream os;
       auto this_axis = hist_object.axis();

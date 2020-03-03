@@ -129,12 +129,19 @@ void TrackerReceiverModule::configure() {
 }
 
 
+void TrackerReceiverModule::sendECR()
+{
+    m_trb->L1CounterReset();
+}
+
+
 /***************************************
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
   //TODO Reset event counters
+  sendECR();
   m_trb->StartReadout();
   INFO("TRB --> readout started.");
 }

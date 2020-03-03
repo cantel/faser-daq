@@ -24,7 +24,6 @@
 #include "FileWriterFaserModule.hpp"
 #include "Utils/Logging.hpp"
 
-
 using namespace std::chrono_literals;
 namespace daqutils = daqling::utilities;
 
@@ -114,7 +113,7 @@ void FileWriterFaserModule::runner()
         }
 	if (!m_run) break;
 	try {
-	  EventFull l_eh(pl);
+	  EventFull l_eh(pl.data<const uint8_t *>(),pl.size());
 	  m_eventTag = l_eh.event_tag(); //Extracting the current event tag (the event tag of the current payload)
 	  size_t l_eventSize = l_eh.size();
        

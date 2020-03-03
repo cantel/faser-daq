@@ -1,0 +1,40 @@
+stages:
+  - build
+  - document
+
+build_faser_daq:
+  stage: build
+  image: gitlab-registry.cern.ch/faser/docker/daq:master
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  script:
+    - ls
+    - pwd
+    - source setup.sh
+    - export BOOST_ROOT_DIR=/opt/lcg/Boost/1.70.0-eebf1/x86_64-centos7-gcc8-opt 
+    - export BOOST_VERSION=1.70
+    - mkdir -p build 
+    - cd build
+    - cmake3 ../
+    - make -j8
+    
+# creation of doxygen documentation
+document:
+  stage: document
+  only:
+    - master
+  image: gitlab-registry.cern.ch/cholm/docker-ubuntu-doxygen:latest    
+  before_script:
+    - echo $SERVICE_PASS | kinit $CERN_USER@CERN.CH
+  script:
+    - ls
+    - pwd
+    - doxygen Doxyfile
+    - ls
+    - ls ..
+    - echo "FOR THIS TO WORK YOU NEED TO HAVE THE DIRECTORIES PRESENT ON THE OTHER END"
+    - cd ..
+    - ls daq
+    - xrdcopy -s -f -p -r daq root://eoshome.cern.ch//eos/user/f/faserdaq/www/daq/.
+    - pwd
+

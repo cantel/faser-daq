@@ -4,10 +4,13 @@
 #include <list>
 
 #include "Commons/FaserProcess.hpp"
-#include "Commons/EventFormat.hpp"
-#include "Commons/RawExampleFormat.hpp"
+#include "EventFormats/DAQFormats.hpp"
+#include "EventFormats/RawExampleFormat.hpp"
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Logging.hpp"
+#include <Utils/Binary.hpp>
+
+using namespace DAQFormats;
 
 class MonitorModule : public FaserProcess {
  public:

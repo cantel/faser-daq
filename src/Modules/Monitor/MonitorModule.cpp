@@ -152,7 +152,7 @@ uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBu
   uint16_t dataStatus(0);
   try {
     if (m_event) delete m_event;
-    m_event = new EventFull(eventBuilderBinary); //BP note that this unpacks full event
+    m_event = new EventFull(eventBuilderBinary.data<const uint8_t*>(),eventBuilderBinary.size()); //BP note that this unpacks full event
   } catch (const std::runtime_error& e) {
     ERROR(e.what());
     return dataStatus |= CorruptedFragment;

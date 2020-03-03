@@ -16,9 +16,13 @@
  */
 
 #include "TriggerReceiverModule.hpp"
-#include "Commons/EventFormat.hpp"
-#include "Commons/RawExampleFormat.hpp"
+#include "EventFormats/DAQFormats.hpp"
 #include "Utils/Logging.hpp"
+#include <Utils/Binary.hpp>
+#include "EventFormats/DAQFormats.hpp"
+
+using namespace DAQFormats;
+using namespace daqling::utilities;
 
 TriggerReceiverModule::TriggerReceiverModule() {
   INFO("");
@@ -129,18 +133,20 @@ void TriggerReceiverModule::runner() {
           local_fragment_tag=EventTags::TLBMonitoringTag;
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
-          TLBMonitoringFragment * decodedData = (TLBMonitoringFragment*)raw_payload_ptr;
+          /*TLBMonitoringFragment * decodedData = (TLBMonitoringFragment*)raw_payload_ptr;
           DEBUG("decodedData header ="<<decodedData->header);
-          DEBUG("decodedData event id ="<<decodedData->event_id);
+          DEBUG("decodedData event id ="<<decodedData->event_id);*/
         }
         status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
         m_status=status;
         if (status!=0){m_badFragmentsCount+=1;}
         DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Status: "<<status);
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, Binary(raw_payload_ptr, total_size)));
+                                              local_event_id, local_bc_id, raw_payload_ptr, total_size));
         fragment->set_status(status);
-        m_connections.put(0, const_cast<Binary&>(fragment->raw())); // place the raw binary event fragment on the output port
+        std::unique_ptr<const byteVector> bytestream(fragment->raw());
+        daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+        m_connections.put(0, binData); // place the raw binary event fragment on the output port
       }
     } 
   }

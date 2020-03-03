@@ -6,6 +6,7 @@
 #include "Commons/FaserProcess.hpp"
 #include "EventFormats/DAQFormats.hpp"
 #include "EventFormats/RawExampleFormat.hpp"
+#include "EventFormats/TLBMonitoringFragment.hpp"
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Logging.hpp"
 #include <Utils/Binary.hpp>

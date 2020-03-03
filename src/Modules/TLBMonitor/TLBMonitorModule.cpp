@@ -46,7 +46,7 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   uint16_t payloadSize = m_fragment->payload_size(); 
 
   m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
-  m_histogrammanager->fill("h_tlb_BCID", m_tlbmonitoringFragment->bc_id);
+  m_histogrammanager->fill("h_tlb_BCID", m_tlbmonitoringFragment->bc_id());
   m_metric_payload = payloadSize;
 
   m_metric_event_id = m_tlbmonitoringFragment->event_id();
@@ -96,10 +96,10 @@ void TLBMonitorModule::register_metrics() {
   register_error_metrics();
 
   m_metric_payload = 0;
-  m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST);
+  m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
   m_metric_event_id = 0;
-  m_statistics->registerMetric(&m_metric_event_id, "eventID", daqling::core::metrics::LAST);
+  m_statistics->registerMetric(&m_metric_event_id, "eventID", daqling::core::metrics::LAST_VALUE);
   //veto counters
   m_deadtime_veto_counter = 0;
   m_statistics->registerMetric(&m_deadtime_veto_counter, "deadtimeVetoCounter", daqling::core::metrics::ACCUMULATE);

@@ -56,7 +56,7 @@ void TriggerReceiverModule::configure() {
   INFO("Done.");
   
   INFO("Configuring LUT");
-  m_tlb->ConfigureLUT("/home/eljohnso/daq/gpiodrivers/TLBAccess/config/LUT1.txt"); //Path has to be absolut
+  m_tlb->ConfigureLUT("/root/faser_cantel/TLBConfigFiles/LUT1.txt"); //Path has to be absolut
   INFO("Done.");  
 }
 

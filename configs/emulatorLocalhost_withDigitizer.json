@@ -1,45 +1,23 @@
 {
-  "version": 7,
+  "version": 6,
   "group": "faser",
   "components": [
     {
-      "name": "tlbreceiver01",
+      "name": "triggergenerator",
       "host": "localhost",
-      "port": 6556,
-      "type": "TriggerReceiver",
+      "port": 5540,
+      "type": "TriggerGenerator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",
-        "SamplingPhase": [false, false, false, false, false, false, false, false],
-        "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 4,
-        "Prescale": [0, 0, 0, 0, 1, 0],
-        "TrackerDelay": 0,
-        "DigitizerDelay": 0,
-        "LHC_CLK": false,
-        "OrbitDelay": 0,
-        "Deadtime": 0,
-        "MonitoringRate": 5000,
-        "OutputDestination": 0,
-        "Input": [false, false, false, false, false, false, false, false],
-        "Reset": true,
-        "ECR": false,
-        "TriggerEnable": true,
-        "SoftwareTrigger": false,
-        "BusyDisable": true,
-        "EnableTriggerData": true,
-        "EnableMonitoringData": true,
-        "ReadoutFIFOReset": true
-      },
-      "connections": {
-        "senders": [
+        "rateInHz": 15,
+        "frontendApps": [
           {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "*",
-            "port": 9102
+            "host": "localhost",
+            "port": 17001
+          },
+          {
+            "host": "localhost",
+            "port": 17002
           }
         ]
       }
@@ -99,7 +77,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 9103
+            "port": 8104
           }
         ]
       }
@@ -107,11 +85,13 @@
     {
       "name": "eventbuilder01",
       "host": "localhost",
-      "port": 6558,
+      "port": 5557,
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-      "maxPending": 10},
+	      "stats_uri": "",
+        "maxPending": 10
+      },
       "connections": {
         "receivers": [
           {
@@ -119,52 +99,49 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 9102
-          },
-          {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 9103
+            "port": 8104
           }
         ],
         "senders": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 1,
             "transport": "tcp",
             "host": "*",
-            "port": 9104
+            "port": 8103
           }
         ]
       }
     },
     {
-      "name": "tlbmonitor01",
+      "name": "filewriterfaser01",
       "host": "localhost",
-      "port": 6559,
-      "type": "TLBMonitor",
+      "port": 5558,
+      "type": "FileWriterFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "fragmentID": 131072,
-	"stats_uri": "tcp://localhost:7000",
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics"
+        "maxFileSizeInGB": 1,
+        "fileFormat": [{"fileName": "/tmp/physics-"},
+           {"fileName": "/tmp/calibration-"},
+           {"fileName": "/tmp/monitoring-"},
+           {"fileName": "/tmp/tlb-"}],
+        "badEventsFileName": "/tmp/debug-"
       },
       "connections": {
         "receivers": [
           {
-            "type": "pubsub",
+            "type": "pair",
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 9104,
-            "filter": 955,
-            "filter_size": 2
+            "port": 8103
           }
         ]
       }
     }
+
+    
+    
+    
   ]
 }

@@ -11,25 +11,25 @@
       "settings": {
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics",
-        "SamplingPhase": [false, false, false, false, false, false, false, false],
+        "SamplingPhase": [false, false, false, false, false, false, false, true],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 4,
-        "Prescale": [0, 0, 0, 0, 1, 0],
+        "RandomTriggerRate": 7,
+        "Prescale": [1, 1, 1, 1, 0, 0],
         "TrackerDelay": 0,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
         "OrbitDelay": 0,
         "Deadtime": 0,
-        "MonitoringRate": 5000,
+        "MonitoringRate": 0,
         "OutputDestination": 0,
-        "Input": [false, false, false, false, false, false, false, false],
+        "Input": [true, true, true, true, true, true, true, true],
         "Reset": true,
         "ECR": false,
         "TriggerEnable": true,
         "SoftwareTrigger": false,
         "BusyDisable": true,
         "EnableTriggerData": true,
-        "EnableMonitoringData": true,
+        "EnableMonitoringData": false,
         "ReadoutFIFOReset": true
       },
       "connections": {
@@ -47,7 +47,7 @@
     {
       "name": "digitizer",
       "host": "localhost",
-      "port": 5560,
+      "port": 6557,
       "type": "DigitizerReceiver",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
@@ -57,7 +57,7 @@
         "buffer_length":         "0x0A",
         "buffer_n_post_samples": "0x20",
         "internal_sawtooth":     false,
-        "global_trigger": { "lvds": 0, "external": 0, "software": 1, "polarity": "under", "coincidence": false, "nchan": 2, "timewindow": 20},
+        "global_trigger": { "lvds": 0, "external": 1, "software": 0, "polarity": "under", "coincidence": false, "nchan": 2, "timewindow": 20},
         "channel_config": [{"group" : 0, "trig_enable": 1, "trig_logic": "OnlyA", "trig_width":32,
                             "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 10000},
                             "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
@@ -111,6 +111,8 @@
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
       "maxPending": 10},
       "connections": {
         "receivers": [
@@ -123,7 +125,7 @@
           },
           {
             "type": "pair",
-            "chid": 0,
+            "chid": 1,
             "transport": "tcp",
             "host": "localhost",
             "port": 9103
@@ -132,7 +134,7 @@
         "senders": [
           {
             "type": "pubsub",
-            "chid": 1,
+            "chid": 2,
             "transport": "tcp",
             "host": "*",
             "port": 9104
@@ -141,14 +143,13 @@
       }
     },
     {
-      "name": "tlbmonitor01",
+      "name": "eventmonitor01",
       "host": "localhost",
       "port": 6559,
-      "type": "TLBMonitor",
+      "type": "EventMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "fragmentID": 131072,
-	"stats_uri": "tcp://localhost:7000",
+        "fragmentID": 0,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"
       },
@@ -159,9 +160,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 9104,
-            "filter": 955,
-            "filter_size": 2
+            "port": 9104
           }
         ]
       }

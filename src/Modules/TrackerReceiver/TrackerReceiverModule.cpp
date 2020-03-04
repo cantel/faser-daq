@@ -199,7 +199,7 @@ void TrackerReceiverModule::runner() {
 
           if (decoded_event.size() != 0){
               local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
-              event_id = local_event_id; //Monitoring data
+              event_id = local_event_id | (m_ECRcount << 24); //Monitoring data
               local_bc_id = decoded_event[0]->GetBCID();
               bc_id = local_bc_id; // Monitoring data
           }

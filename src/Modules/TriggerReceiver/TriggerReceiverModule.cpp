@@ -135,18 +135,18 @@ void TriggerReceiverModule::runner() {
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
-        m_status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
-        if (m_status!=0){m_badFragmentsCount+=1;}
+        m_fragment_status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
+        if (m_fragment_status!=0){m_badFragmentsCount+=1;}
         if (local_fragment_tag==EventTags::PhysicsTag){
-          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Trigger"<<" Status: "<<m_status<<" ECRcount: "<<m_ECRcount);
+          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Trigger"<<" Status: "<<m_fragment_status<<" ECRcount: "<<m_ECRcount);
         }
         if (local_fragment_tag==EventTags::TLBMonitoringTag){
-          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Monitoring"<<" Status: "<<m_status<<" ECRcount: "<<m_ECRcount);
+          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Monitoring"<<" Status: "<<m_fragment_status<<" ECRcount: "<<m_ECRcount);
         }
         local_event_id = (m_ECRcount<<24) + (local_event_id);
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, Binary(raw_payload_ptr, total_size)));
-        fragment->set_status(m_status);
+        fragment->set_status(m_fragment_status);
         m_connections.put(0, const_cast<Binary&>(fragment->raw())); // place the raw binary event fragment on the output port
       }
     } 

@@ -45,6 +45,6 @@ class TriggerReceiverModule : public FaserProcess {
   std::atomic<int> m_badFragmentsCount;
   std::atomic<int> m_trigger_payload_size;
   std::atomic<int> m_monitoring_payload_size;
-  std::atomic<int> m_status;
+  std::atomic<int> m_fragment_status;
  
 };

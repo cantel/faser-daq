@@ -18,6 +18,8 @@
 #include "TriggerReceiverModule.hpp"
 #include "Commons/EventFormat.hpp"
 
+#define _ms 1000 // used for usleep
+
 TriggerReceiverModule::TriggerReceiverModule() {
   INFO("");
   m_tlb = new FASER::TLBAccess();
@@ -58,26 +60,26 @@ void TriggerReceiverModule::configure() {
 
 void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   INFO("Got enableTrigger command with argument "<<arg);
-  // everything but the TLB process should ignore this
-  m_tlb->EnableTrigger(true,false); //sends ECR but not Reset
+  //auto myjson = m_config.getSettings(); //Temporary while using USB.
+  //int WhatToRead=0x0; //Temp
+  //WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13)); //Temp
+  //WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14)); //Temp
+  //WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15)); //Temp
+  //m_tlb->StartReadout(WhatToRead); //Temp
+  m_tlb->EnableTrigger(false,false); //Only enables trigger. Doesn't send ECR nor Reset
 }
 
 void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with "command disableTrigger"
   INFO("Got disableTrigger command with argument "<<arg);
-  // everything but the TLB proces should ignore this
   m_tlb->DisableTrigger();
-  usleep(100); //value to be tweaked. Should be large enough to empty the on-board buffer.
+  //m_tlb->StopReadout(); //Temporary while using USB. Should empty USB buffer.
+  usleep(100); //Once ethernet is implemented you should either check if data is pushed or if timeout (100musec).  
 }
 
-/* Doesn't work yet
-void TriggerReceiverModule::ECRcommand(const std::string &arg) { //run with "command ECR"
-  INFO("Got ECR command with argument "<<arg);
-  std::cout<<"doing ECR"<<std::endl;
-  m_tlb->EnableTrigger(true,false); //ECR , Reset
-  std::cout<<"finish ECR"<<std::endl;
-  sendECR();
+void TriggerReceiverModule::sendECR() { //run with "command ECR"
+  INFO("Got ECR command");
+  m_tlb->SendECR();
 }
-*/
 
 
 void TriggerReceiverModule::start(unsigned run_num) {
@@ -88,6 +90,7 @@ void TriggerReceiverModule::start(unsigned run_num) {
   WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14));
   WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15));
   m_tlb->StartReadout(WhatToRead);
+  usleep(100*_ms);//temporary - wait for all modules
   m_tlb->EnableTrigger(true,true); //sends ECR and Reset
 }
 

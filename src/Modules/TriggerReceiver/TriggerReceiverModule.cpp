@@ -98,7 +98,7 @@ void TriggerReceiverModule::stop() {
   INFO("Stopping readout.");
   m_tlb->DisableTrigger();
   m_tlb->StopReadout();
-  usleep(100); //value to be tweaked. Should be large enough to empty the on-board buffer.
+  usleep(100*_ms); //value to be tweaked. Should be large enough to empty the buffer.
   FaserProcess::stop(); //this turns m_run to false
 }
 
@@ -136,7 +136,12 @@ void TriggerReceiverModule::runner() {
           m_monitoring_payload_size = total_size;
         }
         m_fragment_status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
-        if (m_fragment_status!=0){m_badFragmentsCount+=1;}
+        if (m_fragment_status!=0){
+          m_badFragmentsCount+=1;
+          for (int j=0; j<vector_of_raw_events[i].size(); j++){
+            DEBUG("vector_of_raw_events[i]["<<j<<"]: "<<std::bitset<32>(vector_of_raw_events[i][j])<<std::endl);
+          }
+        }
         if (local_fragment_tag==EventTags::PhysicsTag){
           DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Trigger"<<" Status: "<<m_fragment_status<<" ECRcount: "<<m_ECRcount);
         }

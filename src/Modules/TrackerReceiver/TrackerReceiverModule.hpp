@@ -41,8 +41,8 @@ class TrackerReceiverModule : public FaserProcess {
 
   void runner();
   
-  FASER::TRBAccess *m_trb;
-  FASER::TRBEventDecoder *m_ed;
+  std::unique_ptr<FASER::TRBAccess> m_trb;
+  std::unique_ptr<FASER::TRBEventDecoder> m_ed;
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;
 

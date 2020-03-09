@@ -30,8 +30,8 @@
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
      
-    m_trb = new FASER::TRBAccess(0, m_config.getConfig()["settings"]["emulation"]);
-    m_ed = new FASER::TRBEventDecoder();
+    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
+    m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
     if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
       m_trb->SetDebug(true);
@@ -49,9 +49,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
 }    
 
 TrackerReceiverModule::~TrackerReceiverModule() { 
-    INFO(""); 
-    delete m_trb;
-    delete m_ed;
+    INFO("");
 }
 
 
@@ -112,19 +110,18 @@ void TrackerReceiverModule::configure() {
     if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
     INFO("Starting configuration of module number " << l_moduleNo);
         
-      FASER::ConfigHandlerSCT *l_cfg = new FASER::ConfigHandlerSCT();
+      std::unique_ptr<FASER::ConfigHandlerSCT> l_cfg(new FASER::ConfigHandlerSCT());
       if (m_config.getConfig()["settings"]["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
         std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
         if (l_moduleConfigFile != ""){
             l_cfg->ReadFromFile(l_moduleConfigFile);
         }
-        m_trb->ConfigureSCTModule(l_cfg, (0x1 << l_moduleNo)); //sending configuration to corresponding module
+        m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
         INFO("Configuration of module " << l_moduleNo << " finished.");
       }
       else{
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
-    delete l_cfg;
     }
   }
 }

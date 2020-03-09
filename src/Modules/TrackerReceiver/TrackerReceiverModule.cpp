@@ -124,6 +124,7 @@ void TrackerReceiverModule::configure() {
       else{
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
+    delete l_cfg;
     }
   }
 }

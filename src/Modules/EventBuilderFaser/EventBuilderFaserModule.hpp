@@ -3,7 +3,9 @@
 #include <vector>
 
 #include "Commons/FaserProcess.hpp"
-#include "Commons/EventFormat.hpp"
+#include "EventFormats/DAQFormats.hpp"
+
+using namespace DAQFormats;
 
 enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 

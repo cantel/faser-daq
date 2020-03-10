@@ -21,8 +21,8 @@
 #include "TrackerReadout/TRBAccess.h"
 #include "TrackerReceiverModule.hpp" 
 #include "GPIOBase/DummyInterface.h"
-#include "Commons/EventFormat.hpp"
-#include "Commons/RawExampleFormat.hpp"
+//#include "Commons/EventFormat.hpp"
+//#include "Commons/RawExampleFormat.hpp"
 #include "TrackerReadout/ConfigurationHandling.h"
 #include "TrackerReadout/TRBEventDecoder.h"
 #include <string>

@@ -17,15 +17,20 @@
 
 #include "TrackerReceiverModule.hpp"
 #include "TrackerReadout/TRBAccess.h"
-#include "GPIOBase/DummyInterface.h"
+//#include "GPIOBase/DummyInterface.h"
 #include "Commons/FaserProcess.hpp"
-#include "Commons/EventFormat.hpp"
-#include "Commons/RawExampleFormat.hpp"
+//#include "Commons/EventFormat.hpp"
+#include "EventFormats/DAQFormats.hpp"
+#include <Utils/Binary.hpp>
+//#include "Commons/RawExampleFormat.hpp"
 #include "TrackerReadout/ConfigurationHandling.h"
 #include "TrackerReadout/TRBEventDecoder.h"
 #include <string>
 #include <iostream>
 #include <bitset>
+
+using namespace DAQFormats;
+using namespace daqling::utilities;
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
@@ -161,8 +166,8 @@ void TrackerReceiverModule::stop() {
 void TrackerReceiverModule::runner() {
   INFO("Running...");
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
-  uint32_t raw_payload[MAXFRAGSIZE];
-  uint32_t* raw_payload_ptr = raw_payload;
+  //uint32_t raw_payload[MAXFRAGSIZE];
+ // uint32_t* raw_payload_ptr = raw_payload;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::TrackerSourceID;
   uint64_t local_event_id;
@@ -186,7 +191,7 @@ void TrackerReceiverModule::runner() {
       }
       else{
       for(std::vector<uint32_t> event : vector_of_raw_events){
-        raw_payload_ptr = event.data();
+       // raw_payload_ptr = event.data();
         int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
         event_size_bytes = total_size; //Monitoring data
 
@@ -203,7 +208,7 @@ void TrackerReceiverModule::runner() {
           }
 
           std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, Binary(raw_payload_ptr, total_size)));
+                                              local_event_id, local_bc_id, event.data(), total_size));
           
           uint16_t error;
           fragment->set_status(0);
@@ -214,19 +219,30 @@ void TrackerReceiverModule::runner() {
             }
           }
 
-          // place the raw binary event fragment on the output port
-          m_connections.put(0, const_cast<Binary&>(fragment->raw()));
+          // place the raw binary event fragment on the output porti
+          std::unique_ptr<const byteVector> bytestream(fragment->raw());
+          daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+          m_connections.put(0, binData);
  
           //Following for-cycle is only for debugging
           if (m_run){
             counter += 1;
             std::cout << "-------------- printing event " << counter << std::endl;
-            for(auto word : event){
+            /*for(auto word : event){
               std::bitset<32> y(word);
               std::cout << y << " ";
               if(m_ed->HasError(word, error)){std::cout << "error word";} 
               std:: cout << std::endl;
-            }
+            }*/
+            std::cout << "event id: 0x"<< fragment->event_id() << std::endl;
+            std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
+            std::cout << "source id: 0x"<< fragment->event_id() << std::endl;
+            std::cout << "bc id: 0x"<< fragment->bc_id() << std::endl;
+            std::cout << "status: 0x"<< fragment->status() << std::endl;
+            std::cout << "trigger bits: 0x"<< fragment->trigger_bits() << std::endl;
+            std::cout << "size: 0x"<< fragment->size() << std::endl;
+            std::cout << "payload size: 0x"<< fragment->payload_size() << std::endl;
+            std::cout << "event id: 0x"<< fragment->timestamp() << std::endl;
           }
         }
       }

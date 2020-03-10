@@ -42,7 +42,7 @@ target_include_directories (${module_name} PUBLIC
 
 # Maybe whole chain should be added. Add necessary libraries!!!
 #target_link_libraries (TRBAccess)
-target_link_libraries (${module_name} PUBLIC ${LIBUSB_LIBRARY} TRBAccess TRBEventDecoder ConfigurationHandling)
+target_link_libraries (${module_name} PUBLIC ${LIBUSB_LIBRARY} TRBAccess TRBEventDecoder ConfigurationHandling EventFormats)
 
 # Provide install target
 daqling_target_install(${module_name})

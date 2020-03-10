@@ -17,12 +17,9 @@
 
 #include "TrackerReceiverModule.hpp"
 #include "TrackerReadout/TRBAccess.h"
-//#include "GPIOBase/DummyInterface.h"
 #include "Commons/FaserProcess.hpp"
-//#include "Commons/EventFormat.hpp"
 #include "EventFormats/DAQFormats.hpp"
 #include <Utils/Binary.hpp>
-//#include "Commons/RawExampleFormat.hpp"
 #include "TrackerReadout/ConfigurationHandling.h"
 #include "TrackerReadout/TRBEventDecoder.h"
 #include <string>
@@ -191,9 +188,10 @@ void TrackerReceiverModule::runner() {
       }
       else{
       for(std::vector<uint32_t> event : vector_of_raw_events){
-       // raw_payload_ptr = event.data();
         int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
         event_size_bytes = total_size; //Monitoring data
+
+        if (event.size() == 0){ continue;}
 
         //TODO should we also send the EndOfDAQ trailer? Currently, we are not sending it
         if (!(m_ed->IsEndOfDAQ(event[0]))){
@@ -228,21 +226,28 @@ void TrackerReceiverModule::runner() {
           if (m_run){
             counter += 1;
             std::cout << "-------------- printing event " << counter << std::endl;
-            /*for(auto word : event){
+            std::cout << "Data received from TRB: " << std::endl;
+            for(auto word : event){
               std::bitset<32> y(word);
-              std::cout << y << " ";
+              std::cout << "               " << y << " ";
               if(m_ed->HasError(word, error)){std::cout << "error word";} 
               std:: cout << std::endl;
-            }*/
+            }
             std::cout << "event id: 0x"<< fragment->event_id() << std::endl;
             std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
-            std::cout << "source id: 0x"<< fragment->event_id() << std::endl;
+            std::cout << "source id: 0x"<< fragment->source_id() << std::endl;
             std::cout << "bc id: 0x"<< fragment->bc_id() << std::endl;
             std::cout << "status: 0x"<< fragment->status() << std::endl;
             std::cout << "trigger bits: 0x"<< fragment->trigger_bits() << std::endl;
             std::cout << "size: 0x"<< fragment->size() << std::endl;
             std::cout << "payload size: 0x"<< fragment->payload_size() << std::endl;
-            std::cout << "event id: 0x"<< fragment->timestamp() << std::endl;
+            std::cout << "timestamp: 0x"<< fragment->timestamp() << std::endl;
+            std::cout << "Raw data sent further: " << std::endl;
+            auto data = fragment->raw();
+            for (int i = 0; i <  data->size(); i++){
+                std::bitset<8> y(data->at(i));
+                std::cout << "               " << y << std::endl;
+            }
           }
         }
       }

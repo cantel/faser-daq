@@ -6,7 +6,7 @@ using namespace std::chrono;
 
 #include "Commons/FaserProcess.hpp"
 #include "Utils/Udp.hpp"
-#include "Commons/RawExampleFormat.hpp"
+#include "EventFormats/RawExampleFormat.hpp"
 
 class FrontEndEmulatorModule : public FaserProcess {
  public:

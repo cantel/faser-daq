@@ -30,7 +30,11 @@
 #include "Utils/Binary.hpp"
 #include "Utils/ChunkedStorage.hpp"
 #include "Utils/ProducerConsumerQueue.hpp"
-#include "Commons/EventFormat.hpp"
+
+#include "EventFormats/DAQFormats.hpp"
+
+using namespace DAQFormats;
+
 
 /*
  * FileDataLogger

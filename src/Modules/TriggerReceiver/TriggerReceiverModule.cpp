@@ -16,7 +16,13 @@
  */
 
 #include "TriggerReceiverModule.hpp"
-#include "Commons/EventFormat.hpp"
+#include "EventFormats/DAQFormats.hpp"
+
+#include <Utils/Binary.hpp>
+
+using namespace DAQFormats;
+using namespace daqling::utilities;
+
 
 #define _ms 1000 // used for usleep
 
@@ -135,6 +141,8 @@ void TriggerReceiverModule::runner() {
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
+        //local_event_id=0xfffff //otherwise when we get a corrupted fragment it doesn't update the L1ID and BCID
+        //local_bc_id=0xff 
         m_fragment_status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
         if (m_fragment_status!=0){
           m_badFragmentsCount+=1;
@@ -150,9 +158,12 @@ void TriggerReceiverModule::runner() {
         }
         local_event_id = (m_ECRcount<<24) + (local_event_id);
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, Binary(raw_payload_ptr, total_size)));
+                                              local_event_id, local_bc_id, raw_payload_ptr, total_size));
         fragment->set_status(m_fragment_status);
-        m_connections.put(0, const_cast<Binary&>(fragment->raw())); // place the raw binary event fragment on the output port
+        std::unique_ptr<const byteVector> bytestream(fragment->raw());
+
+        daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+        m_connections.put(0,binData); // place the raw binary event fragment on the output port
       }
     } 
   }

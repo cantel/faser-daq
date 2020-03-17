@@ -66,10 +66,6 @@ FileWriterFaserModule::FileWriterFaserModule() : m_payloads{10000}, m_bytes_sent
 FileWriterFaserModule::~FileWriterFaserModule() 
 {
     INFO(__METHOD_NAME__);
-    // Tear down resources...
-    m_stopWriters.store(true);
-    m_fileWriter->join();
-    m_bookKeeper->join();
     for(auto & outer_map_itr : m_fileStreams) //Closing all the fstreams
     {
         for(auto & inner_map_itr : outer_map_itr.second)
@@ -97,8 +93,12 @@ void FileWriterFaserModule::stop()
 {
     FaserProcess::stop();
     INFO(" getState: " << this->getState());
+    // Tear down resources...
+    m_stopWriters.store(true);
+    m_fileWriter->join();
+    m_bookKeeper->join();
     m_monitor_thread->join();
-    INFO("Joined successfully monitor thread");
+    INFO("Joined successfully threads");
 }
 
 void FileWriterFaserModule::runner() 

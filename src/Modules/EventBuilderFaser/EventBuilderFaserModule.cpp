@@ -138,7 +138,7 @@ void EventBuilderFaserModule::runner() {
     auto event_id=fragment->event_id();
     auto fragment_tag=fragment->fragment_tag(); 
     if ((fragment_tag==MonitoringTag) || (fragment_tag==TLBMonitoringTag)) {
-      INFO("Got monitoring fragment : "<<event_id<<" from channel "<<channel<<" with tag "<<fragment_tag);
+      INFO("Got monitoring fragment : "<<event_id<<" from channel "<<channel);
       //send monitoring fragments immediately as no other fragments are expected for thos
       std::vector<const EventFragment *> monFragmentList;
       monFragmentList.push_back(fragment);

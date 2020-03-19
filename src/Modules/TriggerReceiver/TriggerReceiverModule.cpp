@@ -112,8 +112,7 @@ void TriggerReceiverModule::runner() {
   INFO("Running...");
   
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
-  uint32_t raw_payload[64000/4];
-  uint32_t* raw_payload_ptr = raw_payload;
+  std::vector<uint32_t> event;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::TriggerSourceID;
   uint64_t local_event_id;
@@ -128,26 +127,26 @@ void TriggerReceiverModule::runner() {
     }
     else {
       for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
-        raw_payload_ptr = vector_of_raw_events[i].data(); //converts each vector event to an array
-        int total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
+        event = vector_of_raw_events[i]; //converts each vector event to an array
+        int total_size = event.size() * sizeof(uint32_t); //Event size in byte
         if (!total_size) continue;
-        if (m_decode->IsTriggerHeader(vector_of_raw_events[i][0])){
+        if (m_decode->IsTriggerHeader(event[0])){
           local_fragment_tag=EventTags::PhysicsTag;
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;
         }
-        if (m_decode->IsMonitoringHeader(vector_of_raw_events[i][0])){
+        if (m_decode->IsMonitoringHeader(event[0])){
           local_fragment_tag=EventTags::TLBMonitoringTag;
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
-        //local_event_id=0xfffff //otherwise when we get a corrupted fragment it doesn't update the L1ID and BCID
-        //local_bc_id=0xff 
-        m_fragment_status=m_decode->GetL1IDandBCID(vector_of_raw_events[i], local_event_id, local_bc_id);
+        local_event_id=0xffffff; //otherwise when we get a corrupted fragment it doesn't update the L1ID and BCID
+        local_bc_id=0xffff;
+        m_fragment_status=m_decode->GetL1IDandBCID(event, local_event_id, local_bc_id);
         if (m_fragment_status!=0){
           m_badFragmentsCount+=1;
-          for (int j=0; j<vector_of_raw_events[i].size(); j++){
-            DEBUG("vector_of_raw_events[i]["<<j<<"]: "<<std::bitset<32>(vector_of_raw_events[i][j])<<std::endl);
+          for (int j=0; j<event.size(); j++){
+            DEBUG("event["<<j<<"]: "<<std::bitset<32>(event[j])<<std::endl);
           }
         }
         if (local_fragment_tag==EventTags::PhysicsTag){
@@ -158,7 +157,7 @@ void TriggerReceiverModule::runner() {
         }
         local_event_id = (m_ECRcount<<24) + (local_event_id);
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, raw_payload_ptr, total_size));
+                                              local_event_id, local_bc_id, event.data(), total_size));
         fragment->set_status(m_fragment_status);
         std::unique_ptr<const byteVector> bytestream(fragment->raw());
 

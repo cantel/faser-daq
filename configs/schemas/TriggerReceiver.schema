@@ -132,7 +132,7 @@
                   "type"          : "integer",
                   "title"         : "Deadtime",
                   "default"       : "0",
-                  "minimum"       : "0",
+                  "minimum"       : "128",
                   "maximum"       : "4095"
               },
               "MonitoringRate": {

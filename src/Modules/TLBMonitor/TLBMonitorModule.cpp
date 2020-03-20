@@ -56,6 +56,21 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   m_busy_veto_counter += m_tlbmonitoringFragment->busy_veto_counter();
   m_rate_limiter_veto_counter += m_tlbmonitoringFragment->rate_limiter_veto_counter();
   m_bcr_veto_counter += m_tlbmonitoringFragment->bcr_veto_counter();
+  // tav counters
+  m_tav0 += m_tlbmonitoringFragment->tav0();
+  m_tav1 += m_tlbmonitoringFragment->tav1();
+  m_tav2 += m_tlbmonitoringFragment->tav2();
+  m_tav3 += m_tlbmonitoringFragment->tav3();
+  m_tav4 += m_tlbmonitoringFragment->tav4();
+  m_tav5 += m_tlbmonitoringFragment->tav5();
+
+  m_tap0 += m_tlbmonitoringFragment->tap0();
+  m_tap1 += m_tlbmonitoringFragment->tap1();
+  m_tap2 += m_tlbmonitoringFragment->tap2();
+  m_tap3 += m_tlbmonitoringFragment->tap3();
+  m_tap4 += m_tlbmonitoringFragment->tap4();
+  m_tap5 += m_tlbmonitoringFragment->tap5();
+
   m_histogrammanager->fill("h_tlb_bcrcount_vs_eventid", m_tlbmonitoringFragment->event_id(), float(m_tlbmonitoringFragment->bcr_veto_counter()));
   m_histogrammanager->fill("h_tlb_ratelimiter_vs_eventid", m_tlbmonitoringFragment->event_id(), float(m_tlbmonitoringFragment->rate_limiter_veto_counter()));
   m_histogrammanager->fill("h_tlb_veto_counts", "SimpleDeadtime", float(m_deadtime_veto_counter));
@@ -110,6 +125,31 @@ void TLBMonitorModule::register_metrics() {
   m_bcr_veto_counter = 0;
   m_statistics->registerMetric(&m_bcr_veto_counter, "BCRVetoCounter", daqling::core::metrics::ACCUMULATE);
 
+  m_tav0 = 0;
+  m_statistics->registerMetric(&m_tav0, "TAV0", daqling::core::metrics::ACCUMULATE);
+  m_tav1 = 0;
+  m_statistics->registerMetric(&m_tav1, "TAV1", daqling::core::metrics::ACCUMULATE);
+  m_tav2 = 0;
+  m_statistics->registerMetric(&m_tav2, "TAV2", daqling::core::metrics::ACCUMULATE);
+  m_tav3 = 0;
+  m_statistics->registerMetric(&m_tav3, "TAV3", daqling::core::metrics::ACCUMULATE);
+  m_tav4 = 0;
+  m_statistics->registerMetric(&m_tav4, "TAV4", daqling::core::metrics::ACCUMULATE);
+  m_tav5 = 0;
+  m_statistics->registerMetric(&m_tav5, "TAV5", daqling::core::metrics::ACCUMULATE);
+
+  m_tap0 = 0;
+  m_statistics->registerMetric(&m_tap0, "TAP0", daqling::core::metrics::ACCUMULATE);
+  m_tap1 = 0;
+  m_statistics->registerMetric(&m_tap1, "TAP1", daqling::core::metrics::ACCUMULATE);
+  m_tap2 = 0;
+  m_statistics->registerMetric(&m_tap2, "TAP2", daqling::core::metrics::ACCUMULATE);
+  m_tap3 = 0;
+  m_statistics->registerMetric(&m_tap3, "TAP3", daqling::core::metrics::ACCUMULATE);
+  m_tap4 = 0;
+  m_statistics->registerMetric(&m_tap4, "TAP4", daqling::core::metrics::ACCUMULATE);
+  m_tap5 = 0;
+  m_statistics->registerMetric(&m_tap5, "TAP5", daqling::core::metrics::ACCUMULATE);
 
   return;
 }

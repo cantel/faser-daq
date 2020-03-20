@@ -19,7 +19,7 @@
         "DigitizerDelay": 0,
         "LHC_CLK": false,
         "OrbitDelay": 0,
-        "Deadtime": 0,
+        "Deadtime": 128,
         "MonitoringRate": 11245,
         "OutputDestination": 0,
         "Input": [false, false, false, false, false, false, false, false],
@@ -30,7 +30,8 @@
         "BusyDisable": true,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
-        "ReadoutFIFOReset": true
+        "ReadoutFIFOReset": true,
+        "LUTConfig": "/root/faser_cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt" 
       },
       "connections": {
         "senders": [

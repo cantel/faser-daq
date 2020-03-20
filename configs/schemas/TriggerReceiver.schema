@@ -199,6 +199,11 @@
                   "type"          : "boolean",
                   "title"         : "ReadoutFIFOReset",
                   "default"       : "true"
+              },
+              "LUTConfig": {
+                  "type"          : "string",
+                  "title"         : "LUTConfig",
+                  "required"       : true
               }
           }
       },

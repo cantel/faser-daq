@@ -50,7 +50,8 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
   
   auto cfg = m_config.getSettings();
-  
+  auto cfg_LUTconfig = cfg.value("LUTConfig", "");
+
   INFO("Configuring TLB");
   if (m_tlb->ConfigureAndVerifyTLB(cfg)){INFO("TLB Configuration OK");}
   else{
@@ -59,9 +60,15 @@ void TriggerReceiverModule::configure() {
   }
   INFO("Done.");
   
-  INFO("Configuring LUT");
-  m_tlb->ConfigureLUT("/home/eljohnso/daq/gpiodrivers/TLBAccess/config/LUT1.txt"); //Path has to be absolut
-  INFO("Done.");  
+  if ( cfg_LUTconfig.empty() ) {
+    ERROR("No LUT configuration provided. TLB Configuration failed.");
+    m_status=STATUS_ERROR;
+  }
+  else {
+    INFO("Configuring LUT");
+    m_tlb->ConfigureLUT(cfg_LUTconfig); // TO DO: catch when ConfigureLUT fails (requires modification in gpiodrivers)
+    INFO("Done.");  
+  }
 }
 
 void TriggerReceiverModule::enableTrigger(const std::string &arg) {
@@ -127,7 +134,7 @@ void TriggerReceiverModule::runner() {
     }
     else {
       for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
-        event = vector_of_raw_events[i]; //converts each vector event to an array
+        event = vector_of_raw_events[i];
         int total_size = event.size() * sizeof(uint32_t); //Event size in byte
         if (!total_size) continue;
         if (m_decode->IsTriggerHeader(event[0])){

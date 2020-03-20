@@ -45,7 +45,7 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_monitoringEventCount, "MonitoringRate", metrics::RATE);
   registerVariable(m_badFragmentsCount, "BadFragments");
   registerVariable(m_badFragmentsCount, "BadFragmentsRate", metrics::RATE);
-  registerVariable(m_status, "Status");
+  registerVariable(m_fragment_status, "FragmentStatus");
   registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
   

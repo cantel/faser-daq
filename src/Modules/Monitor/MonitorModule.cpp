@@ -206,7 +206,7 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
       DEBUG("unpacking monitoring fragment.");
       break;
     case TLBMonitoringTag:
-      m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>(); //to be changed once subdetector specific formats defined.
+      m_tlbmonitoringFragment=m_fragment->payload<const TLBMonitoringFragment*>(); //to be changed once subdetector specific formats defined.
       DEBUG("unpacking TLB monitoring fragment.");
       break;
     default:

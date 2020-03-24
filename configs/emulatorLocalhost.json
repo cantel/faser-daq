@@ -132,11 +132,53 @@
         ],
         "senders": [
           {
-            "type": "pair",
-            "chid": 2,
+            "type": "pubsub",
+            "chid": 10,
             "transport": "tcp",
             "host": "*",
-            "port": 8103
+            "port": 8110
+          },
+          {
+            "type": "pubsub",
+            "chid": 11,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8111
+          },
+          {
+            "type": "pubsub",
+            "chid": 12,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8112
+          },
+          {
+            "type": "pubsub",
+            "chid": 13,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8113
+          },
+          {
+            "type": "pubsub",
+            "chid": 26,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8126
+          },
+          {
+            "type": "pubsub",
+            "chid": 27,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8127
+          },
+          {
+            "type": "pubsub",
+            "chid": 28,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8128
           }
         ]
       }

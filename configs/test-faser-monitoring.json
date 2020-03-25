@@ -134,40 +134,120 @@
         "senders": [
           {
             "type": "pubsub",
-            "chid": 2,
+            "chid": 100,
             "transport": "tcp",
             "host": "*",
-            "port": 8104
+            "port": 8200
           },
           {
-            "type": "pair",
-            "chid": 3,
+            "type": "pubsub",
+            "chid": 101,
             "transport": "tcp",
             "host": "*",
-            "port": 8103
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 102,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 103,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 116,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 117,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 118,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8218
           }
         ]
       }
     },
     {
-      "name": "filewriter01",
+      "name": "filewriter",
       "host": "localhost",
       "port": 5558,
-      "type": "FileWriter",
+      "type": "FileWriterFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "filename_pattern": "/tmp/test-%D.%r.%c.%n.bin",
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics"
+	  "stats_uri": "tcp://localhost:7000",
+	  "max_filesize": 100000,
+	  "buffer_size": 4000,
+	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
+	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
+			    "Corrupted","Incomplete","Duplicate"]
       },
       "connections": {
         "receivers": [
           {
-            "type": "pair",
+            "type": "pubsub",
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8103
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 4,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 5,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 6,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8218
           }
         ]
       }
@@ -190,7 +270,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8104,
+            "port": 8200,
             "filter": 187,
             "filter_size": 2
           }
@@ -215,7 +295,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8104,
+            "port": 8202,
             "filter": 699,
             "filter_size": 2
           }
@@ -240,7 +320,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8104
+            "port": 8200
           }
         ]
       }

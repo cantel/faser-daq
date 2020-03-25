@@ -65,7 +65,7 @@ void EventBuilderFaserModule::stop() {
 
 
 bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,EventFull *event) {
-  int channel=event_tag+10; //FIXME should use different offset
+  int channel=event_tag+100; 
   INFO("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
   daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
@@ -174,7 +174,7 @@ void EventBuilderFaserModule::runner() {
 	  event->updateStatus(EventStatus::MissingFragment);
 	  WARNING("Missing fragments for "<<event->event_id());
 	  m_timeoutCount++;
-	  sendEvent(tag,event);
+	  sendEvent(EventTags::IncompleteTag,event);
 	  delete event;
 	  m_pendingEvents[tag].erase(m_pendingEvents[tag].begin());
 	}

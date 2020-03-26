@@ -48,45 +48,13 @@
     {
       "name": "eventbuilder01",
       "host": "localhost",
-      "port": 6558,
+      "port": 5557,
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-      "maxPending": 10},
-      "connections": {
-        "receivers": [
-          {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 9102
-          }
-        ],
-        "senders": [
-          {
-            "type": "pubsub",
-            "chid": 1,
-            "transport": "tcp",
-            "host": "*",
-            "port": 9105
-          }
-        ]
-      }
-    },
-    {
-      "name": "filewriterfaser01",
-      "host": "localhost",
-      "port": 6559,
-      "type": "FileWriterFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-	  "maxFileSizeInGB": 1,
-	  "fileFormat": [{"fileName": "/tmp/physics-"},
-			 {"fileName": "/tmp/calibration-"},
-			 {"fileName": "/tmp/monitoring-"},
-			 {"fileName": "/tmp/tlb-"}],
-	  "badEventsFileName": "/tmp/debug-"
+	  "stats_uri": "tcp://localhost:7000",
+          "maxPending": 10,
+	  "timeout_ms": 1000
       },
       "connections": {
         "receivers": [
@@ -95,7 +63,133 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 9105
+            "port": 8101
+          },
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8102
+          }
+        ],
+        "senders": [
+          {
+            "type": "pubsub",
+            "chid": 100,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 101,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 102,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 103,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 116,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 117,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 118,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8218
+          }
+        ]
+      }
+    },
+    {
+      "name": "filewriter",
+      "host": "localhost",
+      "port": 5558,
+      "type": "FileWriterFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7000",
+	  "max_filesize": 100000,
+	  "buffer_size": 4000,
+	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
+	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
+			    "Corrupted","Incomplete","Duplicate"]
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 4,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 5,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 6,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8218
           }
         ]
       }

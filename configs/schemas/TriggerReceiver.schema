@@ -50,6 +50,8 @@
           }
       },
       "settings": {
+        "propertyOrder" : 5,
+	"format":"grid",
         "type"     : "object",
         "title"         : "Settings",
           "properties"    : {
@@ -64,8 +66,11 @@
                   "default"       : "DAQlingMetrics"
               },
               "SamplingPhase": {
+		  "propertyOrder" : 102,
+		  "format"          : "table",
+		  "options": { "disable_array_reorder": true },
                 "type"            : "array",
-                "title"           : "SamplingPhase",
+                "title"           : "Sampling Phase",
                 "minItems"        : "8",
                 "maxItems"        : "8",
                 "items": {
@@ -73,18 +78,24 @@
                 }
               },
               "InputDelay": {
-                "type"            : "array",
-                "title"           : "InputDelay",
-                "minItems"        : "8",
-                "maxItems"        : "8",
-                "items": {
-                  "type": "integer",
-                  "default": "0",
-                  "minimum": "0",
-                  "maximum": "3"
-                }
+		  "propertyOrder" : 103,
+                  "type"            : "array",
+		  "format"          : "table",
+		  "options": {
+		      "disable_array_reorder": true
+		  },
+                  "title"           : "Input Delay",
+                  "minItems"        : "8",
+                  "maxItems"        : "8",
+                  "items": {
+                      "type": "integer",
+                      "default": "0",
+                      "minimum": "0",
+                      "maximum": "3"
+                  }
               },
               "RandomTriggerRate": {
+		  "propertyOrder" : 12,
                   "type"          : "integer",
                   "title"         : "RandomTriggerRate",
                   "default"       : "0",
@@ -92,10 +103,13 @@
                   "maximum"       : "7"
               },
               "Prescale": {
+		  "propertyOrder" : 104,
+		  "format"          : "table",
+		  "options": { "disable_array_reorder": true },
                 "type"            : "array",
-                "title"           : "Prescale",
-                "minItems"        : "8",
-                "maxItems"        : "8",
+                "title"           : "Prescales",
+                "minItems"        : "6",
+                "maxItems"        : "6",
                 "items": {
                   "type": "integer",
                   "default": "0",
@@ -104,24 +118,28 @@
                 }
               },
               "TrackerDelay": {
+		  "propertyOrder" : 14,
                   "type"          : "integer",
-                  "title"         : "TrackerDelay",
+                  "title"         : "Tracker Delay",
                   "default"       : "0",
                   "minimum"       : "0",
                   "maximum"       : "127"
               },
               "DigitizerDelay": {
+		  "propertyOrder" : 15,
                   "type"          : "integer",
-                  "title"         : "DigitizerDelay",
+                  "title"         : "Digitizer Delay",
                   "default"       : "0",
                   "minimum"       : "0",
                   "maximum"       : "127"
               },
               "LHC_CLK": {
+		  "propertyOrder" : 16,
                   "type"          : "boolean",
                   "title"         : "LHC CLK"
               },
               "OrbitDelay": {
+		  "propertyOrder" : 17,
                   "type"          : "integer",
                   "title"         : "OrbitDelay",
                   "default"       : "0",
@@ -129,6 +147,7 @@
                   "maximum"       : "4095"
               },
               "Deadtime": {
+		  "propertyOrder" : 18,
                   "type"          : "integer",
                   "title"         : "Deadtime",
                   "default"       : "0",
@@ -136,6 +155,8 @@
                   "maximum"       : "4095"
               },
               "MonitoringRate": {
+		  "propertyOrder" : 19,
+
                   "type"          : "integer",
                   "title"         : "MonitoringRate",
                   "default"       : "11245",
@@ -143,6 +164,8 @@
                   "maximum"       : "1048575"
               },
               "OutputDestination": {
+		  "propertyOrder" : 20,
+		  
                   "type"          : "integer",
                   "title"         : "OutputDestination",
                   "default"       : "0",
@@ -150,57 +173,82 @@
                   "maximum"       : "4294967295"
               },
               "Input": {
-                "type"            : "array",
-                "title"           : "Input",
-                "minItems"        : "8",
-                "maxItems"        : "8",
-                "items": {
-                  "type": "boolean"
-                }
+		  "propertyOrder" : 100,
+                  "type"            : "array",
+		  "format"          : "table",
+		  "options": { "disable_array_reorder": true },
+                  "title"           : "Input Enable",
+                  "minItems"        : "8",
+                  "maxItems"        : "8",
+                  "items": {
+                      "type": "boolean"
+                  }
+              },
+              "Alternate Enable": {
+	          "propertyOrder" : 101,
+ 	          "type": "array",
+		  "format": "checkbox",
+		  "uniqueItems": true,
+		  "options": {
+                      "infoText": "Not used, but example of how to get checkboxes"
+		  },   
+		  "items": {
+		      "type": "string",
+		      "enum": ["IN0","IN1","IN2","IN3","IN4","IN5","IN6","IN7"]
+		  }
               },
               "Reset": {
+		  "propertyOrder" : 21,
                   "type"          : "boolean",
                   "title"         : "Reset",
                   "default"       : "true",
                   "enum"          : [false]
               },
               "ECR": {
+		  "propertyOrder" : 22,
                   "type"          : "boolean",
                   "title"         : "ECR",
                   "default"       : "true",
                   "enum"          : [false]
               },
               "TriggerEnable": {
-                  "type"          : "boolean",
+ 		  "propertyOrder" : 23,
+                 "type"          : "boolean",
                   "title"         : "TriggerEnable",
                   "default"       : "false",
                   "enum"          : [false]
               },
               "SoftwareTrigger": {
+		  "propertyOrder" : 24,
                   "type"          : "boolean",
                   "title"         : "SoftwareTrigger"
               },
               "BusyDisable": {
+		  "propertyOrder" : 25,
                   "type"          : "boolean",
                   "title"         : "BusyDisable",
                   "default"       : "true"
               },
               "EnableTriggerData": {
+		  "propertyOrder" : 26,
                   "type"          : "boolean",
                   "title"         : "EnableTriggerData",
                   "default"       : "true"
               },
               "EnableMonitoringData": {
+		  "propertyOrder" : 27,
                   "type"          : "boolean",
                   "title"         : "EnableMonitoringData",
                   "default"       : "true"
               },
               "ReadoutFIFOReset": {
-                  "type"          : "boolean",
+ 		  "propertyOrder" : 28,
+                 "type"          : "boolean",
                   "title"         : "ReadoutFIFOReset",
                   "default"       : "true"
               },
               "LUTConfig": {
+		  "propertyOrder" : 29,
                   "type"          : "string",
                   "title"         : "LUTConfig",
                   "required"       : true

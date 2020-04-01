@@ -48,6 +48,16 @@
   	    "options": {
     		"infoText": "Maximum number of pending fragments before starting time outs"
   	    }
+	  },
+	  "timeout_ms": {
+	    "type": "integer",
+	    "default": 1000,
+	    "minimum": 100,
+	    "maximum": 100000,
+	    "required": true,
+  	    "options": {
+    		"infoText": "Maximum time an event is pending before starting time outs"
+  	    }
 	  }
 	},
 	"format":"grid",

@@ -3,72 +3,35 @@
   "group": "faser",
   "components": [
     {
-      "name": "triggergenerator",
+      "name": "tlbreceiver01",
       "host": "localhost",
-      "port": 5540,
-      "type": "TriggerGenerator",
+      "port": 6556,
+      "type": "TriggerReceiver",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "rateInHz": 15,
-        "frontendApps": [
-          {
-            "host": "localhost",
-            "port": 17001
-          },
-          {
-            "host": "localhost",
-            "port": 17002
-          }
-        ]
-      }
-    },
-    {
-      "name": "frontendemulator01",
-      "host": "localhost",
-      "port": 5541,
-      "type": "FrontEndEmulator",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "meanSize": 25,
-        "rmsSize": 0,
-        "fragmentID": 1000001,
-        "probMissingTrigger": 0.00,
-        "probMissingFragment": 0.00,
-        "probCorruptedFragment": 0.00,
-	      "monitoringInterval": 1.5,
-        "triggerPort": 17001,
-        "daqHost": "localhost",
-        "daqPort": 18001
-      }
-    },
-    {
-      "name": "frontendemulator02",
-      "host": "localhost",
-      "port": 5542,
-      "type": "FrontEndEmulator",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "meanSize": 250,
-        "rmsSize": 20,
-        "fragmentID": 1000002,
-        "probMissingTrigger": 0,
-        "probMissingFragment": 0,
-        "probCorruptedFragment": 0,
-	      "monitoringInterval": 0,
-        "triggerPort": 17002,
-        "daqHost": "localhost",
-        "daqPort": 18002
-      }
-    },
-    {
-      "name": "frontendreceiver01",
-      "host": "localhost",
-      "port": 5555,
-      "type": "FrontEndReceiver",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-	  "stats_uri": "tcp://localhost:7000",
-          "dataPort": 18001
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",      
+        "SamplingPhase": [false, false, false, false, false, false, false, false],
+        "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+        "RandomTriggerRate": 6,
+        "Prescale": [0, 0, 0, 0, 1, 0],
+        "TrackerDelay": 0,
+        "DigitizerDelay": 0,
+        "LHC_CLK": false,
+        "OrbitDelay": 0,
+        "Deadtime": 128,
+        "MonitoringRate": 11245,
+        "OutputDestination": 0,
+        "Input": [false, false, false, false, false, false, false, false],
+        "Reset": false,
+        "ECR": false,
+        "TriggerEnable": false,
+        "SoftwareTrigger": false,
+        "BusyDisable": true,
+        "EnableTriggerData": true,
+        "EnableMonitoringData": true,
+        "ReadoutFIFOReset": true,
+        "LUTConfig": "/root/faser_cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt" 
       },
       "connections": {
         "senders": [
@@ -77,28 +40,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 8101
-          }
-        ]
-      }
-    },
-    {
-      "name": "frontendreceiver02",
-      "host": "localhost",
-      "port": 5556,
-      "type": "FrontEndReceiver",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "dataPort": 18002
-      },
-      "connections": {
-        "senders": [
-          {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "*",
-            "port": 8102
+            "port": 9102
           }
         ]
       }
@@ -248,38 +190,6 @@
             "transport": "tcp",
             "host": "localhost",
             "port": 8218
-          }
-        ]
-      }
-    },
-    {
-      "name": "trackerreceiver",
-      "host": "localhost",
-      "port": 5559, 
-      "type": "TrackerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
-      "settings": {
-        "emulation" : false,
-        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-        "TRBconfigFile": "../nonexistentpath_forTesting",
-        "moduleMask" : 3, 
-        "moduleConfigFiles": {"0" : "../configs/TemplateModuleCfg0.json",
-                              "1" : "../configs/TemplateModuleCfg1.json",
-                              "2" : "../configs/TemplateModuleCfg2.json",
-                              "3" : "../configs/TemplateModuleCfg3.json",
-                              "4" : "../configs/TemplateModuleCfg4.json",
-                              "5" : "../configs/TemplateModuleCfg5.json",
-                              "6" : "../configs/TemplateModuleCfg6.json",
-                              "7" : "../configs/TemplateModuleCfg7.json"}
-       },
-      "connections": {
-        "senders": [
-          {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "*",
-            "port": 8105
           }
         ]
       }

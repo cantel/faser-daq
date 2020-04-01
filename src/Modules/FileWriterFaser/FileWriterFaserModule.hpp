@@ -15,135 +15,100 @@
  * along with DAQling. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DAQLING_MODULES_FILEWRITERFASER_HPP
-#define DAQLING_MODULES_FILEWRITERFASER_HPP
+#pragma once
 
 /// \cond
-#include <utility>
+#include <condition_variable>
 #include <fstream>
 #include <map>
+#include <memory>
 #include <queue>
+#include <tuple>
 /// \endcond
 
 #include "Commons/FaserProcess.hpp"
-#include "Core/DataLogger.hpp"
 #include "Utils/Binary.hpp"
-#include "Utils/ChunkedStorage.hpp"
 #include "Utils/ProducerConsumerQueue.hpp"
 
-#include "EventFormats/DAQFormats.hpp"
-
-using namespace DAQFormats;
-
-
-/*
- * FileDataLogger
- * Description: Data logger for binary files with fstream.
- *   Relies on fixed size file IO with Binary splitting and concatenation.
- * Date: April 2019
+/**
+ * Module for writing your acquired data to file.
  */
-class FileWriterFaserModule : public FaserProcess, public daqling::core::DataLogger
-{
+class FileWriterFaserModule : public FaserProcess {
+public:
+  FileWriterFaserModule();
+  ~FileWriterFaserModule();
+
+  void configure();
+  void start(unsigned run_num);
+  void stop();
+  void runner();
+
+  void monitor_runner();
+
+private:
+  struct ThreadContext {
+    ThreadContext(std::array<unsigned int, 2> tids) : consumer(tids[0]), producer(tids[1]) {}
+    daqling::utilities::ReusableThread consumer;
+    daqling::utilities::ReusableThread producer;
+  };
+  using PayloadQueue = folly::ProducerConsumerQueue<daqling::utilities::Binary>;
+  using Context = std::tuple<PayloadQueue, ThreadContext>;
+
+  struct Metrics {
+    std::atomic<size_t> bytes_written = 0;
+    std::atomic<size_t> payload_queue_size = 0;
+    std::atomic<size_t> payload_size = 0;
+  };
+
+  size_t m_buffer_size;
+  std::string m_pattern;
+  std::map<int,std::string> m_channel_names;
+  std::atomic<bool> m_start_completed;
+
+  /**
+   * Output file generator with a printf-like filename pattern.
+   */
+  class FileGenerator {
   public:
-    FileWriterFaserModule();
-    
-    ~FileWriterFaserModule();
-
-    /** 
-    In start we spawn the monitor, file writer and book keeper threads.
-    Inputs: none.
-    Output: none.
-    */
-    void start(unsigned int run_num);
-
-    void stop();
-
-    /** 
-    In runner we get the binary payloads and insert them into the producer consumer buffer (m_payloads). In addition we call the bad event handler
-    incase of a corrupted event.
-    Inputs: none.
-    Output: none.
-    */
-    void runner();
-
-    void monitor_runner();
-
-    /** 
-    In setup we initialize our write functors. The write functors are responsible for filling m_fileBuffers with data right before it's
-    written into a file. The write functors also signal to the file writer that the data is ready.
-    Inputs: none.
-    Output: none.
-    */
-    void setup();
-    
-    //write and read are not used but are pure virtual in DataLogger so we supply a dummy implementation.
-    void write();
-    
-    void read();
-    
-    /**
-    This is our write method. We write to different files based on the event we got. The splitting is done according to the event tag.
-    the event into
-    Inputs: int ftid - less relevant for the current version, but it indicates the channel we get data from (needed if we have multiple event builders)
-    Output: Files with the events information. Currently the files are stored under daq/build.
-    */
-    void writeToFile(int ftid);
+    FileGenerator(const std::string pattern, const std::string channel_name, const uint64_t chid, const unsigned run_number)
+      : m_pattern(pattern), m_channel_name(channel_name), m_chid(chid), m_run_number(run_number) {}
 
     /**
-    Book keeper is responsible for the file rotation, basically opening and closing the different files that we write
-    the event into
-    Inputs: int ftid - less relevant for the current version, but it indicates the channel we get data from (needed if we have multiple event builders)
-    Output: none
-    */
-    void bookKeeper(int ftid);
+     * Generates the next output file in the sequence.
+     *
+     * @warning Silently overwrites files if they already exists
+     * @warning Silently overwrites previous output files if specified pattern does not generate
+     * unique file names.
+     */
+    std::ofstream next();
 
     /**
-    This method is responsible for dumping data of corrupted events (Corrupted event - an event with a tag that wasn't specified in the config file)
-    into a file specified in the config.
-    Inputs: const EventHeader* badEvent - Pointer to the bad event header.
-    Output: File with the corrupted events information. Currently the file is stored under daq/build.
-    */
-    void handleBadEvent(const EventFull* badEvent);
-
-    //Write is a pure virtual function in DataLogger so we have to override it. We don't use it though.
-    bool write(uint64_t keyId, daqling::utilities::Binary& payload);
-    
-    void shutdown();
+     * Returns whether `pattern` yields unique output files on rotation.
+     * Effectively checks whether the pattern contains %n.
+     */
+    static bool yields_unique(const std::string &pattern);
 
   private:
-    // Configs
-    long m_writeBytes;
-    long long m_maxFileSize;
+    const std::string m_pattern;
+    const std::string m_channel_name;
+    const uint64_t m_chid;
+    unsigned m_filenum = 0;
+    const unsigned m_run_number;
+  };
 
-    // Internals
-    folly::ProducerConsumerQueue<daqling::utilities::Binary> m_payloads;
-    daqling::utilities::Binary m_buffer;
-    std::map<uint64_t, std::unique_ptr<daqling::utilities::ReusableThread>> m_fileWriters;
-    std::map<uint64_t, std::function<void()>> m_writeFunctors;
-    std::map<uint8_t, std::string> m_fileNames;
-    std::map<uint8_t, std::string> m_fileNameFormats;
+  // Configs
+  size_t m_max_filesize;
+  uint64_t m_channels = 0;
 
-    std::map<uint64_t, std::map<uint8_t, std::pair<std::fstream, std::fstream>>> m_fileStreams;
+  // Thread control
+  std::atomic<bool> m_stopWriters;
 
-    std::map<uint8_t, std::vector<daqling::utilities::Binary>> m_fileBuffers;
-    std::map<uint8_t, uint32_t> m_fileRotationCounters;
+  // Metrics
+  mutable std::map<uint64_t, Metrics> m_channelMetrics;
 
-    uint8_t m_eventTag;
-    std::map<uint8_t, uint32_t> m_fileStreamsReady;
-
-    std::ofstream m_badEventsDumpFile;
-
-    //write thread
-    std::unique_ptr<std::thread> m_fileWriter;
-    std::unique_ptr<std::thread> m_bookKeeper;
-
-    std::atomic<int> m_bytes_sent;
-    std::unique_ptr<std::thread> m_monitor_thread;
-    // Thread control
-    std::atomic<int> m_bufferReady; //Indicates which 24K buffer is ready to be written from the vector.
-    std::atomic<int> m_fstreamFull;
-    std::atomic<bool> m_stopWriters;
+  // Internals
+  void flusher(const uint64_t chid, PayloadQueue &pq, const size_t max_buffer_size,
+               FileGenerator fg) const;
+  std::map<uint64_t, Context> m_channelContexts;
+  std::thread m_monitor_thread;
 };
-
-#endif  // DAQLING_MODULES_DISRUPTORFILEDATALOGGER_HPP
-

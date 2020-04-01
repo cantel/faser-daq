@@ -27,13 +27,18 @@ using namespace daqling::utilities;
 #define _ms 1000 // used for usleep
 
 TriggerReceiverModule::TriggerReceiverModule() {
-  INFO("");
+  INFO("In TriggerReceiverModule()");
   m_tlb = new FASER::TLBAccess();
-  m_decode = new FASER::TLBDecode();
+  m_decoder = new FASER::TLBDecode();
   m_tlb->SetDebug(0); //Set to 0 for no debug, to 1 for debug. Changes the m_DEBUG variable
 }
 
-TriggerReceiverModule::~TriggerReceiverModule() { INFO(""); }
+TriggerReceiverModule::~TriggerReceiverModule() { 
+  INFO("In ~TriggerReceiverModule"); 
+ 
+  delete m_tlb;
+  delete m_decoder;
+}
 
 // optional (configuration can be handled in the constructor)
 void TriggerReceiverModule::configure() {
@@ -66,7 +71,7 @@ void TriggerReceiverModule::configure() {
   }
   else {
     INFO("Configuring LUT");
-    m_tlb->ConfigureLUT(cfg_LUTconfig); // TO DO: catch when ConfigureLUT fails (requires modification in gpiodrivers)
+    m_tlb->ConfigureLUT(cfg_LUTconfig); // TODO: catch when ConfigureLUT fails (requires modification in gpiodrivers)
     INFO("Done.");  
   }
 }
@@ -137,22 +142,22 @@ void TriggerReceiverModule::runner() {
         event = vector_of_raw_events[i];
         int total_size = event.size() * sizeof(uint32_t); //Event size in byte
         if (!total_size) continue;
-        if (m_decode->IsTriggerHeader(event[0])){
+        if (m_decoder->IsTriggerHeader(event[0])){
           local_fragment_tag=EventTags::PhysicsTag;
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;
         }
-        if (m_decode->IsMonitoringHeader(event[0])){
+        if (m_decoder->IsMonitoringHeader(event[0])){
           local_fragment_tag=EventTags::TLBMonitoringTag;
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
         local_event_id=0xffffff; //otherwise when we get a corrupted fragment it doesn't update the L1ID and BCID
         local_bc_id=0xffff;
-        m_fragment_status=m_decode->GetL1IDandBCID(event, local_event_id, local_bc_id);
+        m_fragment_status=m_decoder->GetL1IDandBCID(event, local_event_id, local_bc_id);
         if (m_fragment_status!=0){
           m_badFragmentsCount+=1;
-          for (int j=0; j<event.size(); j++){
+          for (unsigned int j=0; j<event.size(); j++){
             DEBUG("event["<<j<<"]: "<<std::bitset<32>(event[j])<<std::endl);
           }
         }

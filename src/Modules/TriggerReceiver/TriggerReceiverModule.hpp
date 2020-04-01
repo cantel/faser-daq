@@ -38,7 +38,7 @@ class TriggerReceiverModule : public FaserProcess {
  private:
  
   FASER::TLBAccess *m_tlb;
-  FASER::TLBDecode *m_decode;
+  FASER::TLBDecode *m_decoder;
   
   std::atomic<int> m_physicsEventCount;
   std::atomic<int> m_monitoringEventCount;

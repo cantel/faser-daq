@@ -166,11 +166,11 @@ void TrackerReceiverModule::runner() {
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::TrackerSourceID;
   uint64_t local_event_id;
+  uint64_t local_bc_id;
 
   while (m_run) { 
-  
-        m_trb->GenerateL1A(m_moduleMask);
 
+    m_trb->GenerateL1A(m_moduleMask);
     vector_of_raw_events = m_trb->GetTRBEventData();
 
       if (vector_of_raw_events.size() == 0){
@@ -211,34 +211,6 @@ void TrackerReceiverModule::runner() {
           std::unique_ptr<const byteVector> bytestream(fragment->raw());
           daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
           m_connections.put(0, binData);
- 
-          //Following for-cycle is only for debugging
-          if (m_run){
-            counter += 1;
-            std::cout << "-------------- printing event " << counter << std::endl;
-            std::cout << "Data received from TRB: " << std::endl;
-            for(auto word : event){
-              std::bitset<32> y(word);
-              std::cout << "               " << y << " ";
-              if(m_ed->HasError(word, error)){std::cout << "error word";} 
-              std:: cout << std::endl;
-            }
-            std::cout << "event id: 0x"<< fragment->event_id() << std::endl;
-            std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
-            std::cout << "source id: 0x"<< fragment->source_id() << std::endl;
-            std::cout << "bc id: 0x"<< fragment->bc_id() << std::endl;
-            std::cout << "status: 0x"<< fragment->status() << std::endl;
-            std::cout << "trigger bits: 0x"<< fragment->trigger_bits() << std::endl;
-            std::cout << "size: 0x"<< fragment->size() << std::endl;
-            std::cout << "payload size: 0x"<< fragment->payload_size() << std::endl;
-            std::cout << "timestamp: 0x"<< fragment->timestamp() << std::endl;
-            std::cout << "Raw data sent further: " << std::endl;
-            auto data = fragment->raw();
-            for (int i = 0; i <  data->size(); i++){
-                std::bitset<8> y(data->at(i));
-                std::cout << "               " << y << std::endl;
-            }
-          }
         }
       }
     }   

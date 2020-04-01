@@ -170,49 +170,48 @@ void TrackerReceiverModule::runner() {
 
   while (m_run) { 
 
-    m_trb->GenerateL1A(m_moduleMask);
     vector_of_raw_events = m_trb->GetTRBEventData();
 
-      if (vector_of_raw_events.size() == 0){
-        usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
-      }
+    if (vector_of_raw_events.size() == 0){
+      usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
+    }
       else{
-      for(std::vector<uint32_t> event : vector_of_raw_events){
-        int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
-        event_size_bytes = total_size; //Monitoring data
+        for(std::vector<uint32_t> event : vector_of_raw_events){
+          int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
+          event_size_bytes = total_size; //Monitoring data
 
-        if (event.size() == 0){ continue;}
+          if (event.size() == 0){ continue;}
 
-        //TODO should we also send the EndOfDAQ trailer? Currently, we are not sending it
-        if (!(m_ed->IsEndOfDAQ(event[0]))){
-          m_ed->LoadTRBEventData(event);
-          auto decoded_event = m_ed->GetEvents(); 
+          //TODO should we also send the EndOfDAQ trailer? Currently, we are not sending it
+          if (!(m_ed->IsEndOfDAQ(event[0]))){
+            m_ed->LoadTRBEventData(event);
+            auto decoded_event = m_ed->GetEvents(); 
 
-          if (decoded_event.size() != 0){
-              local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
-              event_id = local_event_id | (m_ECRcount << 24); //Monitoring data
-              local_bc_id = decoded_event[0]->GetBCID();
-              bc_id = local_bc_id; // Monitoring data
-          }
-
-          std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, event.data(), total_size));
-          
-          uint16_t error;
-          fragment->set_status(0);
-          for (uint32_t frame : event){
-            if(m_ed->HasError(frame, error)){
-              //TODO Error can be specified based on the value of variable error. Status can be set accordingly - 1 for now.
-              fragment->set_status(1);
+            if (decoded_event.size() != 0){
+                local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
+                event_id = local_event_id | (m_ECRcount << 24); //Monitoring data
+                local_bc_id = decoded_event[0]->GetBCID();
+                bc_id = local_bc_id; // Monitoring data
             }
-          }
 
-          // place the raw binary event fragment on the output porti
-          std::unique_ptr<const byteVector> bytestream(fragment->raw());
-          daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
-          m_connections.put(0, binData);
-        }
-      }
+            std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
+                                                local_event_id, local_bc_id, event.data(), total_size));
+            
+            uint16_t error;
+            fragment->set_status(0);
+            for (uint32_t frame : event){
+              if(m_ed->HasError(frame, error)){
+                //TODO Error can be specified based on the value of variable error. Status can be set accordingly - 1 for now.
+                fragment->set_status(1);
+              }
+            }
+
+            // place the raw binary event fragment on the output porti
+            std::unique_ptr<const byteVector> bytestream(fragment->raw());
+            daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+            m_connections.put(0, binData);
+          }
+       }
     }   
   } 
   INFO("Runner stopped");

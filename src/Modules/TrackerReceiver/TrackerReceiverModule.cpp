@@ -139,10 +139,10 @@ void TrackerReceiverModule::sendECR()
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
-  FaserProcess::start(run_num);
   m_trb->L1CounterReset();
   m_trb->StartReadout();
   INFO("TRB --> readout started.");
+  FaserProcess::start(run_num);
 }
 
 
@@ -163,23 +163,13 @@ void TrackerReceiverModule::stop() {
 void TrackerReceiverModule::runner() {
   INFO("Running...");
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
-  //uint32_t raw_payload[MAXFRAGSIZE];
- // uint32_t* raw_payload_ptr = raw_payload;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::TrackerSourceID;
   uint64_t local_event_id;
-  uint16_t local_bc_id;
 
-  for (int i = 0; i < 3; i++){
-    m_trb->GenerateL1A(m_moduleMask);
-  }
-
-  int counter = 0;
   while (m_run) { 
   
-    for (int i = 0; i < 3; i++){
         m_trb->GenerateL1A(m_moduleMask);
-    }
 
     vector_of_raw_events = m_trb->GetTRBEventData();
 

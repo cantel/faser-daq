@@ -24,7 +24,6 @@
 #include "TrackerReadout/TRBEventDecoder.h"
 #include <string>
 #include <iostream>
-#include <bitset>
 
 using namespace DAQFormats;
 using namespace daqling::utilities;

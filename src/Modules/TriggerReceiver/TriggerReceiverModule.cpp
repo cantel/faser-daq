@@ -57,6 +57,12 @@ void TriggerReceiverModule::configure() {
   auto cfg = m_config.getSettings();
   auto cfg_LUTconfig = cfg.value("LUTConfig", "");
 
+  // fixed configs
+  cfg["Reset"] = true;
+  cfg["ECR"] = true;
+  cfg["TriggerEnable"] = false;
+  cfg["SoftwareTrigger"] = false;
+
   INFO("Configuring TLB");
   if (m_tlb->ConfigureAndVerifyTLB(cfg)){INFO("TLB Configuration OK");}
   else{

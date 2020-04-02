@@ -5,9 +5,9 @@
     {
       "name": "tlbreceiver01",
       "host": "localhost",
-      "port": 6556,
+      "port": 5556,
       "type": "TriggerReceiver",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics",      
@@ -36,7 +36,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 9102
+            "port": 8100
           }
         ]
       }
@@ -59,14 +59,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8101
-          },
-          {
-            "type": "pair",
-            "chid": 1,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8102
+            "port": 8100
           }
         ],
         "senders": [

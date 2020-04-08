@@ -17,6 +17,8 @@
 
 #include "TriggerReceiverModule.hpp"
 #include "EventFormats/DAQFormats.hpp"
+#include "EventFormats/TLBDataFragment.hpp"
+#include "EventFormats/TLBMonitoringFragment.hpp"
 
 #include <Utils/Binary.hpp>
 
@@ -146,37 +148,41 @@ void TriggerReceiverModule::runner() {
     else {
       for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
         event = vector_of_raw_events[i];
-        int total_size = event.size() * sizeof(uint32_t); //Event size in byte
+        size_t total_size = event.size() * sizeof(uint32_t); //Event size in byte
+
         if (!total_size) continue;
+
         if (m_decoder->IsTriggerHeader(event[0])){
           local_fragment_tag=EventTags::PhysicsTag;
+          TLBDataFragment tlb_fragment = TLBDataFragment(event.data(), total_size);
+          local_event_id = tlb_fragment.event_id();
+          local_bc_id = tlb_fragment.bc_id();
+          if (!tlb_fragment.valid()) m_fragment_status = EventTags::CorruptedTag;
+          DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;
         }
-        if (m_decoder->IsMonitoringHeader(event[0])){
+        else if (m_decoder->IsMonitoringHeader(event[0])){
           local_fragment_tag=EventTags::TLBMonitoringTag;
+          TLBMonitoringFragment tlb_fragment = TLBMonitoringFragment(event.data(), total_size);
+          local_event_id = tlb_fragment.event_id();
+          local_bc_id = tlb_fragment.bc_id();
+          if (!tlb_fragment.valid()) m_fragment_status = EventTags::CorruptedTag;
+          DEBUG("Monitoring fragment:\n"<<tlb_fragment<<"fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
-        local_event_id=0xffffff; //otherwise when we get a corrupted fragment it doesn't update the L1ID and BCID
-        local_bc_id=0xffff;
-        m_fragment_status=m_decoder->GetL1IDandBCID(event, local_event_id, local_bc_id);
-        if (m_fragment_status!=0){
-          m_badFragmentsCount+=1;
-          for (unsigned int j=0; j<event.size(); j++){
-            DEBUG("event["<<j<<"]: "<<std::bitset<32>(event[j])<<std::endl);
-          }
-        }
-        if (local_fragment_tag==EventTags::PhysicsTag){
-          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Trigger"<<" Status: "<<m_fragment_status<<" ECRcount: "<<m_ECRcount);
-        }
-        if (local_fragment_tag==EventTags::TLBMonitoringTag){
-          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Monitoring"<<" Status: "<<m_fragment_status<<" ECRcount: "<<m_ECRcount);
-        }
+
         local_event_id = (m_ECRcount<<24) + (local_event_id);
+
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, event.data(), total_size));
         fragment->set_status(m_fragment_status);
+
+        if (!m_fragment_status){
+          m_badFragmentsCount+=1;
+        }
+
         std::unique_ptr<const byteVector> bytestream(fragment->raw());
 
         daqling::utilities::Binary binData(bytestream->data(),bytestream->size());

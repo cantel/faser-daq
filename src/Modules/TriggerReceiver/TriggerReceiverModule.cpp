@@ -66,21 +66,17 @@ void TriggerReceiverModule::configure() {
   cfg["SoftwareTrigger"] = false;
 
   INFO("Configuring TLB");
-  if (m_tlb->ConfigureAndVerifyTLB(cfg)){INFO("TLB Configuration OK");}
-  else{
-    ERROR("TLB Configuration failed");
-    m_status=STATUS_ERROR;
-  }
-  INFO("Done.");
-  
   if ( cfg_LUTconfig.empty() ) {
     ERROR("No LUT configuration provided. TLB Configuration failed.");
     m_status=STATUS_ERROR;
   }
-  else {
-    INFO("Configuring LUT");
-    m_tlb->ConfigureLUT(cfg_LUTconfig); // TODO: catch when ConfigureLUT fails (requires modification in gpiodrivers)
+  try {
+    m_tlb->ConfigureAndVerifyTLB(cfg);
+    m_tlb->ConfigureLUT(cfg_LUTconfig);
     INFO("Done.");  
+  } catch ( TLBAccessException &e ){
+      ERROR(e.what());
+      m_status=STATUS_ERROR;
   }
 }
 
@@ -111,7 +107,7 @@ void TriggerReceiverModule::sendECR() { //run with "command ECR"
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
   auto myjson = m_config.getSettings();
-  int WhatToRead=0x0;
+  uint16_t WhatToRead=0x0;
   WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13));
   WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14));
   WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15));

@@ -49,4 +49,5 @@ class TrackerReceiverModule : public FaserProcess {
   std::atomic<int> event_size_bytes;
   std::atomic<int> event_id;
   std::atomic<int> bc_id;
+  std::atomic<int> corrupted_fragments;
 };

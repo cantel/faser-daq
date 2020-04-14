@@ -30,7 +30,9 @@ using namespace daqling::utilities;
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
-     
+    
+    corrupted_fragments = 0; //Setting this monitring variable to 0 
+    
     m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
@@ -64,6 +66,7 @@ void TrackerReceiverModule::configure() {
   registerVariable(event_id, "event_id");
   registerVariable(event_size_bytes, "event_size_bytes");
   registerVariable(bc_id, "bc_id");
+  registerVariable(corrupted_fragments, "corrupted_fragments");
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -208,6 +211,7 @@ void TrackerReceiverModule::runner() {
               if(m_ed->HasError(frame, error)){
                 //TODO If possible specify error
                 fragment->set_status(EventStatus::UnclassifiedError);
+                corrupted_fragments += 1; //Monitoring data
               }
             }
             

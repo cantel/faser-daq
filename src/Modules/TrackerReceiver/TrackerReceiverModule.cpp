@@ -206,8 +206,8 @@ void TrackerReceiverModule::runner() {
             fragment->set_status(0);
             for (uint32_t frame : event){
               if(m_ed->HasError(frame, error)){
-                //TODO Error can be specified based on the value of variable error. Status can be set accordingly - 1 for now.
-                fragment->set_status(1);
+                //TODO If possible specify error
+                fragment->set_status(EventStatus::UnclassifiedError);
               }
             }
             

@@ -251,38 +251,6 @@
           }
         ]
       }
-    },
-    {
-      "name": "trackerreceiver",
-      "host": "localhost",
-      "port": 5559, 
-      "type": "TrackerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
-      "settings": {
-        "emulation" : false,
-        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-        "TRBconfigFile": "../nonexistentpath_forTesting",
-        "moduleMask" : 3, 
-        "moduleConfigFiles": {"0" : "../configs/TemplateModuleCfg0.json",
-                              "1" : "../configs/TemplateModuleCfg1.json",
-                              "2" : "../configs/TemplateModuleCfg2.json",
-                              "3" : "../configs/TemplateModuleCfg3.json",
-                              "4" : "../configs/TemplateModuleCfg4.json",
-                              "5" : "../configs/TemplateModuleCfg5.json",
-                              "6" : "../configs/TemplateModuleCfg6.json",
-                              "7" : "../configs/TemplateModuleCfg7.json"}
-       },
-      "connections": {
-        "senders": [
-          {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "*",
-            "port": 8105
-          }
-        ]
-      }
     }
   ]
 }

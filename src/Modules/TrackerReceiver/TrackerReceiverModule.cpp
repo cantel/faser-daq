@@ -168,7 +168,8 @@ void TrackerReceiverModule::runner() {
   uint64_t local_bc_id;
 
   while (m_run) { 
-
+    //m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board - for testing purposes
+    
     vector_of_raw_events = m_trb->GetTRBEventData();
 
     if (vector_of_raw_events.size() == 0){
@@ -192,6 +193,11 @@ void TrackerReceiverModule::runner() {
                 local_bc_id = decoded_event[0]->GetBCID();
                 bc_id = local_bc_id; // Monitoring data
             }
+            else{
+                local_event_id = 0xFFFFFFFF;
+                local_bc_id = 0xFFFFFFFF;
+            }
+
 
             std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                                 local_event_id, local_bc_id, event.data(), total_size));
@@ -204,6 +210,31 @@ void TrackerReceiverModule::runner() {
                 fragment->set_status(1);
               }
             }
+            
+            //This cout can be removed later but it useful for debugging
+            /*std::cout << "-------------- printing event " << std::endl;
+            std::cout << "Data received from TRB: " << std::endl;
+            for(auto word : event){
+              std::bitset<32> y(word);
+              std::cout << "               " << y << " ";
+              if(m_ed->HasError(word, error)){std::cout << "error word";} 
+              std:: cout << std::endl;
+            }
+            std::cout << "event id: 0x"<< fragment->event_id() << std::endl;
+            std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
+            std::cout << "source id: 0x"<< fragment->source_id() << std::endl;
+            std::cout << "bc id: 0x"<< fragment->bc_id() << std::endl;
+            std::cout << "status: 0x"<< fragment->status() << std::endl;
+            std::cout << "trigger bits: 0x"<< fragment->trigger_bits() << std::endl;
+            std::cout << "size: 0x"<< fragment->size() << std::endl;
+            std::cout << "payload size: 0x"<< fragment->payload_size() << std::endl;
+            std::cout << "timestamp: 0x"<< fragment->timestamp() << std::endl;
+            std::cout << "Raw data sent further: " << std::endl;
+            auto data = fragment->raw();
+            for (int i = 0; i <  data->size(); i++){
+                std::bitset<8> y(data->at(i));
+                std::cout << "               " << y << std::endl;
+            }*/
 
             // place the raw binary event fragment on the output porti
             std::unique_ptr<const byteVector> bytestream(fragment->raw());

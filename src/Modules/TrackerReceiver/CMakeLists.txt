@@ -18,9 +18,6 @@ find_library(LIBUSB_LIBRARY
 message (${LIBUSB_LIBRARY})
 message (${LIBUSB_INCLUDE_DIR})
 
-#target_include_directories(${module_name} ${LIBUSB_INCLUDE_DIR})
-#target_link_libraries(${module_name} ${LIBUSB_LIBRARY})
-
 #include_directories(/usr/include/libusb-1.0/)
 #link_directories(/usr/lib64/)
 
@@ -29,7 +26,8 @@ target_include_directories (${module_name} PUBLIC
                             ${LIBUSB_INCLUDE_DIR}
                             "${daqling_top_SOURCE_DIR}/gpiodrivers/GPIOBase"
                             "${daqling_top_SOURCE_DIR}/gpiodrivers/TRBAccess"
-                            "${daqling_top_SOURCE_DIR}/gpiodrivers/TRBAccess/src/app")
+                            "${daqling_top_SOURCE_DIR}/gpiodrivers/TRBAccess/src/app"
+                            "${daqling_top_SOURCE_DIR}/faser-common/")
 
 #if (APPLE)
 #    target_include_directories(${module_name} PUBLIC "/usr/local/include/libusb-1.0/") 
@@ -37,11 +35,6 @@ target_include_directories (${module_name} PUBLIC
 #    target_include_directories(${module_name} PUBLIC "/usr/include/libusb-1.0/")
 #endif()
 
-#add_library(TRBAccess1 ${daqling_top_SOURCE_DIR}/gpiodrivers/TRBAccess/src/TRBAccess.cxx)
-#add_library(GPIOBasel ${daqling_top_SOURCE_DIR}/gpiodrivers/GPIOBase/src/GPIOBaseClass.cxx)
-
-# Maybe whole chain should be added. Add necessary libraries!!!
-#target_link_libraries (TRBAccess)
 target_link_libraries (${module_name} PUBLIC ${LIBUSB_LIBRARY} TRBAccess TRBEventDecoder ConfigurationHandling EventFormats)
 
 # Provide install target

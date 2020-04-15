@@ -159,6 +159,15 @@ void TrackerReceiverModule::stop() {
 }
 
 
+/****************************************  
+ *        Disable Trigger
+ ****************************************/
+void TrackerReceiverModule::disableTrigger(const std::string &arg) {
+  m_trb->StopReadout();
+  usleep(100);
+}
+
+
 /***************************************
  *        Runner of the module
  * ************************************/

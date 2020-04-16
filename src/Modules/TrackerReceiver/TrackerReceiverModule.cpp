@@ -164,6 +164,7 @@ void TrackerReceiverModule::stop() {
  ****************************************/
 void TrackerReceiverModule::disableTrigger(const std::string &arg) {
   m_trb->StopReadout();
+  INFO("TRB --> disable trigger.");
   usleep(100);
 }
 
@@ -175,7 +176,7 @@ void TrackerReceiverModule::runner() {
   INFO("Running...");
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
-  uint32_t local_source_id    = SourceIDs::TrackerSourceID;
+  uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->m_boardID;
   uint64_t local_event_id;
   uint64_t local_bc_id;
 

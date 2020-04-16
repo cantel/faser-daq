@@ -128,8 +128,7 @@ void TriggerReceiverModule::runner() {
   INFO("Running...");
   
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
-  std::vector<uint32_t> event;
-  uint8_t  local_fragment_tag = EventTags::PhysicsTag;
+  uint8_t  local_fragment_tag;
   uint32_t local_source_id    = SourceIDs::TriggerSourceID;
   uint64_t local_event_id;
   uint16_t local_bc_id;
@@ -143,36 +142,42 @@ void TriggerReceiverModule::runner() {
     }
     else {
       for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
-        event = vector_of_raw_events[i];
-        size_t total_size = event.size() * sizeof(uint32_t); //Event size in byte
-
+        size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
         if (!total_size) continue;
+        auto event = vector_of_raw_events[i].data();
 
-        if (m_decoder->IsTriggerHeader(event[0])){
+        m_fragment_status = 0;  
+     
+        if (m_decoder->IsTriggerHeader(*event)){
           local_fragment_tag=EventTags::PhysicsTag;
-          TLBDataFragment tlb_fragment = TLBDataFragment(event.data(), total_size);
+          TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
           local_bc_id = tlb_fragment.bc_id();
-          if (!tlb_fragment.valid()) m_fragment_status = EventTags::CorruptedTag;
-          DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
+          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
+          DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;
         }
-        else if (m_decoder->IsMonitoringHeader(event[0])){
+        else if (m_decoder->IsMonitoringHeader(*event)){
           local_fragment_tag=EventTags::TLBMonitoringTag;
-          TLBMonitoringFragment tlb_fragment = TLBMonitoringFragment(event.data(), total_size);
+          TLBMonitoringFragment tlb_fragment = TLBMonitoringFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
           local_bc_id = tlb_fragment.bc_id();
-          if (!tlb_fragment.valid()) m_fragment_status = EventTags::CorruptedTag;
-          DEBUG("Monitoring fragment:\n"<<tlb_fragment<<"fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
+          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
+          DEBUG("Monitoring fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
+        }
+        else { 
+         ERROR("Unrecognised event type."); // this should never happen by definition of TLB GPIO software, indicates bug in software.
+         m_status = STATUS_ERROR;
+         continue;
         }
 
         local_event_id = (m_ECRcount<<24) + (local_event_id);
 
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, event.data(), total_size));
+                                              local_event_id, local_bc_id, event, total_size));
         fragment->set_status(m_fragment_status);
 
         if (!m_fragment_status){

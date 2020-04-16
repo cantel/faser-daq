@@ -71,6 +71,7 @@
         "probMissingTrigger": 0.00,
         "probMissingFragment": 0.00,
         "probCorruptedFragment": 0.00,
+	  "monitoringInterval": 1.5,
         "triggerPort": 17001,
         "daqHost": "localhost",
         "daqPort": 18001
@@ -89,6 +90,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17002,
         "daqHost": "localhost",
         "daqPort": 18002
@@ -107,6 +109,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17003,
         "daqHost": "localhost",
         "daqPort": 18003
@@ -125,6 +128,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17004,
         "daqHost": "localhost",
         "daqPort": 18004
@@ -143,6 +147,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17005,
         "daqHost": "localhost",
         "daqPort": 18005
@@ -161,6 +166,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17006,
         "daqHost": "localhost",
         "daqPort": 18006
@@ -179,6 +185,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17007,
         "daqHost": "localhost",
         "daqPort": 18007
@@ -197,6 +204,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17008,
         "daqHost": "localhost",
         "daqPort": 18008
@@ -215,6 +223,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17009,
         "daqHost": "localhost",
         "daqPort": 18009
@@ -233,6 +242,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17010,
         "daqHost": "localhost",
         "daqPort": 18010
@@ -251,6 +261,7 @@
         "probMissingTrigger": 0,
         "probMissingFragment": 0,
         "probCorruptedFragment": 0,
+	      "monitoringInterval": 0,
         "triggerPort": 17011,
         "daqHost": "localhost",
         "daqPort": 18011
@@ -503,8 +514,12 @@
       "host": "localhost",
       "port": 6001,
       "type": "EventBuilderFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {},
+	"loglevel": {"core": "INFO", "module": "DEBUG"},
+	"settings": {
+	    "stats_uri": "tcp://localhost:7000",
+            "maxPending": 10,
+	    "timeout_ms": 1000
+	},
       "connections": {
         "receivers": [
           {
@@ -587,35 +602,121 @@
         ],
         "senders": [
           {
-            "type": "pair",
-            "chid": 11,
+            "type": "pubsub",
+            "chid": 100,
             "transport": "tcp",
             "host": "*",
-            "port": 8112
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 101,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 102,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 103,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 116,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 117,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 118,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8218
           }
         ]
       }
     },
-
-
-    
     {
-      "name": "filewriter01",
+      "name": "filewriter",
       "host": "localhost",
-      "port": 7001,
-      "type": "FileWriter",
+      "port": 5558,
+      "type": "FileWriterFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "filename_pattern": "/tmp/test-%D.%r.%c.%n.bin"
+	  "stats_uri": "tcp://localhost:7000",
+	  "max_filesize": 100000,
+	  "buffer_size": 4000,
+	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
+	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
+			    "Corrupted","Incomplete","Duplicate"]
       },
       "connections": {
         "receivers": [
           {
-            "type": "pair",
+            "type": "pubsub",
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8112
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 4,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 5,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 6,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8218
           }
         ]
       }

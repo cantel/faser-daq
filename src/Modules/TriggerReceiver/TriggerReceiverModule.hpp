@@ -29,6 +29,7 @@ class TriggerReceiverModule : public FaserProcess {
   void configure(); // optional (configuration can be handled in the constructor)
   void enableTrigger(const std::string &arg);
   void disableTrigger(const std::string &arg);
+  void sendECR();
   void start(unsigned);
   void stop();
 
@@ -37,13 +38,13 @@ class TriggerReceiverModule : public FaserProcess {
  private:
  
   FASER::TLBAccess *m_tlb;
-  FASER::TLBDecode *m_decode;
+  FASER::TLBDecode *m_decoder;
   
   std::atomic<int> m_physicsEventCount;
   std::atomic<int> m_monitoringEventCount;
   std::atomic<int> m_badFragmentsCount;
   std::atomic<int> m_trigger_payload_size;
   std::atomic<int> m_monitoring_payload_size;
-  std::atomic<int> m_status;
+  std::atomic<int> m_fragment_status;
  
 };

@@ -7,14 +7,12 @@
       "host": "localhost",
       "port": 5556,
       "type": "TriggerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",      
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 6,
-        "Prescale": [1, 1, 1, 0, 0, 0],
+        "RandomTriggerRate": 7,
+        "Prescale": [3, 10, 1, 0, 3, 0],
         "TrackerDelay": 0,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
@@ -22,7 +20,7 @@
         "Deadtime": 128,
         "MonitoringRate": 11245,
         "OutputDestination": 0,
-        "Input": [true, true, true, true, true, true, true, true],
+        "Input": [true, true, false, false, false, false, false, false],
         "BusyDisable": true,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
@@ -36,7 +34,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 8100
+            "port": 8101
           }
         ]
       }
@@ -46,7 +44,7 @@
       "host": "localhost",
       "port": 5557,
       "type": "DigitizerReceiver",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "myVar": 42,
         "ip":                    "192.168.122.2", 
@@ -54,7 +52,7 @@
         "buffer_length":         "0x0A",
         "buffer_n_post_samples": "0x20",
         "internal_sawtooth":     false,
-        "global_trigger": { "lvds": 0, "external": 1, "software": 0, "polarity": "under", "coincidence": false, "nchan": 2, "timewindow": 20},
+        "global_trigger": { "lvds": 0, "external": 1, "software": 0, "polarity": "over", "coincidence": false, "nchan": 3, "timewindow": 20},
         "channel_config": [{"group" : 0, "trig_enable": 1, "trig_logic": "OnlyA", "trig_width":32,
                             "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 10000},
                             "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
@@ -96,7 +94,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 8101
+            "port": 8102
           }
         ]
       }
@@ -109,8 +107,8 @@
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
 	  "stats_uri": "tcp://localhost:7000",
-          "maxPending": 10,
-	  "timeout_ms": 1000
+          "maxPending": 50,
+	  "timeout_ms": 10000
       },
       "connections": {
         "receivers": [
@@ -119,14 +117,14 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8100
+            "port": 8101
           },
           {
             "type": "pair",
-            "chid": 0,
+            "chid": 1,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8101
+            "port": 8102
           }
         ],
         "senders": [
@@ -187,10 +185,10 @@
       "host": "localhost",
       "port": 5559,
       "type": "FileWriterFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
 	  "stats_uri": "tcp://localhost:7000",
-	  "max_filesize": 100000,
+	  "max_filesize": 1000000,
 	  "buffer_size": 4000,
 	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",

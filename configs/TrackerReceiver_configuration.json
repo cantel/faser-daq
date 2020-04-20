@@ -81,7 +81,14 @@
                               "5" : "../configs/TemplateModuleCfg5.json",
                               "6" : "../configs/TemplateModuleCfg6.json",
                               "7" : "../configs/TemplateModuleCfg7.json"},
-        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
+        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false],
+        "TLBClockSel" : false,
+        "BCREn" : false,
+        "L1AEn" : false,
+        "SoftCounterMuxEn" : false,
+        "L1CounterReset" : false,
+        "ErrCntReset" : false,
+        "FifoReset" : false
        },
       "connections": {
         "senders": [

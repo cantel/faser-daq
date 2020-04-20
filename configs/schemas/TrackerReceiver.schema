@@ -124,6 +124,41 @@
                             }
                         },
                     "format"        : "table"    
+                    },
+                "TLBClockSel" : {
+                    "type" : "boolean",
+                    "title" : "TLBClockSel",
+                    "default" : false
+                    },
+                "BCREn" : {
+                    "type" : "boolean",
+                    "title" : "BCREn",
+                    "default" : false
+                    },
+                "L1En" : {
+                    "type" : "boolean",
+                    "title" : "L1En",
+                    "default" : false
+                    },
+                "SoftCounterMuxEn" : {
+                    "type" : "boolean",
+                    "title" : "SoftCounterMuxEn",
+                    "default" : false
+                    },
+                "L1CounterReset" : {
+                    "type" : "boolean",
+                    "title" : "L1CounterReset",
+                    "default" : false
+                    },
+                ErrCntReset"" : {
+                    "type" : "boolean",
+                    "title" : "ErrCntReset",
+                    "default" : false
+                    },
+                "FifoReset" : {
+                    "type" : "boolean",
+                    "title" : "FifoReset",
+                    "default" : false
                     }
                 },
             "format"        : "table",

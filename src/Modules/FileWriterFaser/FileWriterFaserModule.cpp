@@ -17,8 +17,8 @@
 
 /// \cond
 #include <chrono>
+#include <ctime>
 #include <sstream>
-#include <string>
 /// \endcond
 
 #include "FileWriterFaserModule.hpp"
@@ -27,239 +27,308 @@
 using namespace std::chrono_literals;
 namespace daqutils = daqling::utilities;
 
-FileWriterFaserModule::FileWriterFaserModule() : m_payloads{10000}, m_bytes_sent{0}, m_bufferReady{-1}, m_fstreamFull{0}, m_stopWriters{false}
+static std::string to_zero_lead(const int value, const unsigned precision)
 {
-    INFO(__METHOD_NAME__);
-    // Set up static resources...
-    m_writeBytes = 24 * daqutils::Constant::Kilo;  // 24K buffer writes
-    auto cfg = m_config.getConfig()["settings"];
-    int l_configFileSize = cfg["maxFileSizeInGB"];
-    m_maxFileSize = l_configFileSize * daqutils::Constant::Giga; //Get the file size we want to rotate at. IMPORTANT: Size from config is in GB!
-    std::ios_base::sync_with_stdio(false);
+     std::ostringstream oss;
+     oss << std::setw(precision) << std::setfill('0') << value;
+     return oss.str();
+}
 
-    auto l_fileFormats = cfg["fileFormat"];
-    if (l_fileFormats.empty())
+std::ofstream FileWriterFaserModule::FileGenerator::next() {
+
+  const auto handle_arg = [this](char c) -> std::string {
+    switch (c) {
+    case 'D': // Full date in YYYY-MM-DD-HH:MM:SS (ISO 8601) format
     {
-        ERROR("No file format specified");
-        cfg.dump();
+      std::time_t t = std::time(nullptr);
+      char tstr[32];
+      if (!std::strftime(tstr, sizeof(tstr), "%F-%T", std::localtime(&t))) {
+        throw std::runtime_error("Failed to format timestamp");
+      }
+      return std::string(tstr);
     }
-    uint8_t l_event = 0;
-    std::string l_fileNameFormat;
-    for ( auto& fileFormat : l_fileFormats) //Opening initial file for each of the events
-    {
-        m_fileBuffers[l_event] = std::vector<daqling::utilities::Binary>(10);
-        l_fileNameFormat = fileFormat["fileName"];
-        m_fileNameFormats[l_event] = fileFormat["fileName"];
-        m_fileStreams[1][l_event].first.open(l_fileNameFormat + std::to_string(m_fileRotationCounters[l_event]),
-                                                std::ios::out | std::ios::binary);
-        m_fileStreamsReady[l_event] = 1;
-        m_fileNames[l_event] = l_fileNameFormat + std::to_string(m_fileRotationCounters[l_event]);
-        m_fileRotationCounters[l_event]++;
-        l_event++;
+    case 'n': // The nth generated output (equals the number of times called `next()`, minus 1)
+      return to_zero_lead(m_filenum++,5);
+    case 'c': // The channel id
+      return m_channel_name;
+    case 'r': // The run number
+    return to_zero_lead(m_run_number,6);
+    default:
+      std::stringstream ss;
+      ss << "Unknown output file argument '" << c << "'";
+      throw std::runtime_error(ss.str());
     }
+  };
 
-    m_badEventsDumpFile.open(cfg["badEventsFileName"], std::ios::out | std::ios::binary);
-
-    setup();
-}
-
-FileWriterFaserModule::~FileWriterFaserModule() 
-{
-    INFO(__METHOD_NAME__);
-    // Tear down resources...
-    m_stopWriters.store(true);
-    m_fileWriter->join();
-    m_bookKeeper->join();
-    for(auto & outer_map_itr : m_fileStreams) //Closing all the fstreams
-    {
-        for(auto & inner_map_itr : outer_map_itr.second)
-        {
-            if(inner_map_itr.second.first)
-                inner_map_itr.second.first.close();
-            if(inner_map_itr.second.second)    
-                inner_map_itr.second.second.close();
-        }
+  // Append every character until we hit a '%' (control character),
+  // where the next character denotes an argument.
+  std::stringstream ss;
+  for (auto c = m_pattern.cbegin(); c != m_pattern.cend(); c++) {
+    if (*c == '%' && c + 1 != m_pattern.cend()) {
+      ss << handle_arg(*(++c));
+    } else {
+      ss << *c;
     }
-    m_badEventsDumpFile.close();
-    INFO("EVERYTHING JOINED SUCCESSFULY");
+  }
+
+  DEBUG("Next generated filename is: " << ss.str());
+
+  return std::ofstream(ss.str(), std::ios::binary);
 }
 
-void FileWriterFaserModule::start(unsigned int run_num) 
-{
-    FaserProcess::start(run_num);
-    INFO(" getState: " << getState());
-    m_monitor_thread = std::make_unique<std::thread>(&FileWriterFaserModule::monitor_runner, this);
-    m_bookKeeper = std::make_unique<std::thread>(&FileWriterFaserModule::bookKeeper, this, 1); //1 is the channel
-    m_fileWriter = std::make_unique<std::thread>(&FileWriterFaserModule::writeToFile, this, 1); //1 is the channel
+bool FileWriterFaserModule::FileGenerator::yields_unique(const std::string &pattern) {
+  std::map<char, bool> fields{{'n', false}, {'c', false}, {'r', false}};
+
+  for (auto c = pattern.cbegin(); c != pattern.cend(); c++) {
+    if (*c == '%' && c + 1 != pattern.cend()) {
+      try {
+        fields.at(*(++c)) = true;
+      } catch (const std::out_of_range &) {
+        continue;
+      }
+    }
+  }
+
+  /*
+   * Just to be sure, make sure every field is specified except date.
+   */
+  return std::all_of(fields.cbegin(), fields.cend(), [](const auto &f) { return f.second; });
 }
 
-void FileWriterFaserModule::stop() 
-{
-    FaserProcess::stop();
-    INFO(" getState: " << this->getState());
-    m_monitor_thread->join();
-    INFO("Joined successfully monitor thread");
+FileWriterFaserModule::FileWriterFaserModule() : m_stopWriters{false} {
+  DEBUG("");
+
+  // Set up static resources...
+  std::ios_base::sync_with_stdio(false);
 }
 
-void FileWriterFaserModule::runner() 
-{
-    INFO(" Running...");
-    while (m_run)
-    {
+FileWriterFaserModule::~FileWriterFaserModule() { DEBUG(""); }
+
+void FileWriterFaserModule::configure() {
+  FaserProcess::configure();
+  // Read out required and optional configurations
+  m_max_filesize = m_config.getSettings().value("max_filesize", 1 * daqutils::Constant::Giga);
+  m_buffer_size = m_config.getSettings().value("buffer_size", 4 * daqutils::Constant::Kilo);
+  uint64_t ch=0;
+  for ( auto& name : m_config.getSettings()["channel_names"]) {
+    m_channel_names[ch]=name;
+    INFO("Channel "<<ch<<": "<<name);
+    ch++;
+  }
+  m_channels = m_config.getConnections()["receivers"].size();
+  if (ch<m_channels) {
+    CRITICAL("Channel names needs to be supplied for all input channels");
+    throw std::logic_error("Missing channel names");
+  }
+  m_pattern = m_config.getSettings()["filename_pattern"];
+  INFO("Configuration:");
+  INFO(" -> Maximum filesize: " << m_max_filesize << "B");
+  INFO(" -> Buffer size: " << m_buffer_size << "B");
+  INFO(" -> channels: " << m_channels);
+
+  if (!FileGenerator::yields_unique(m_pattern)) {
+    CRITICAL("Configured file name pattern '"
+             << m_pattern
+             << "' may not yield unique output file on rotation; your files may be silently "
+                "overwritten. Ensure the pattern contains all fields ('%c', '%n' and '%D').");
+    throw std::logic_error("invalid file name pattern");
+  }
+
+  DEBUG("setup finished");
+
+  // Contruct variables for metrics
+  for (uint64_t chid = 0; chid < m_channels; chid++) {
+    m_channelMetrics[chid];
+  }
+
+  if (m_statistics) {
+    // Register statistical variables
+    for (auto & [ chid, metrics ] : m_channelMetrics) {
+      m_statistics->registerMetric<std::atomic<size_t>>(&metrics.bytes_written,
+                                                        fmt::format("BytesWritten_{}",  m_channel_names[chid]),
+                                                        daqling::core::metrics::RATE);
+      m_statistics->registerMetric<std::atomic<size_t>>(
+          &metrics.payload_queue_size, fmt::format("PayloadQueueSize_{}", m_channel_names[chid]),
+          daqling::core::metrics::LAST_VALUE);
+      m_statistics->registerMetric<std::atomic<size_t>>(&metrics.payload_size,
+                                                        fmt::format("PayloadSize_{}", m_channel_names[chid]),
+                                                        daqling::core::metrics::AVERAGE);
+    }
+    DEBUG("Metrics are setup");
+  }
+}
+
+void FileWriterFaserModule::start(unsigned run_num) {
+  m_start_completed.store(false);
+  FaserProcess::start(run_num);
+  DEBUG(" getState: " << getState());
+
+  m_stopWriters.store(false);
+  unsigned int threadid = 11111;       // XXX: magic
+  constexpr size_t queue_size = 10000; // XXX: magic
+
+  for (uint64_t chid = 0; chid < m_channels; chid++) {
+    // For each channel, construct a context of a payload queue, a consumer thread, and a producer
+    // thread.
+    std::array<unsigned int, 2> tids = {threadid++, threadid++};
+    const auto & [ it, success ] =
+        m_channelContexts.emplace(chid, std::forward_as_tuple(queue_size, std::move(tids)));
+    assert(success);
+
+    // Start the context's consumer thread.
+    std::get<ThreadContext>(it->second)
+        .consumer.set_work(&FileWriterFaserModule::flusher, this, it->first,
+                           std::ref(std::get<PayloadQueue>(it->second)), m_buffer_size,
+                           FileGenerator(m_pattern, m_channel_names[chid], it->first, m_run_number));
+  }
+  assert(m_channelContexts.size() == m_channels);
+
+  m_monitor_thread = std::thread(&FileWriterFaserModule::monitor_runner, this);
+
+  m_start_completed.store(true);
+}
+
+void FileWriterFaserModule::stop() {
+  FaserProcess::stop();
+  DEBUG(" getState: " << this->getState());
+  m_stopWriters.store(true);
+  for (auto & [ chid, ctx ] : m_channelContexts) {
+    while (!std::get<ThreadContext>(ctx).consumer.get_readiness()) {
+      std::this_thread::sleep_for(1ms);
+    }
+  }
+  m_channelContexts.clear();
+
+  if (m_monitor_thread.joinable()) {
+    m_monitor_thread.join();
+  }
+}
+
+void FileWriterFaserModule::runner() {
+  DEBUG(" Running...");
+
+  while (!m_start_completed) {
+    std::this_thread::sleep_for(1ms);
+  }
+
+  // Start the producer thread of each context
+  for (auto & [ chid, ctx ] : m_channelContexts) {
+    std::get<ThreadContext>(ctx).producer.set_work([&]() {
+      auto &pq = std::get<PayloadQueue>(ctx);
+
+      while (m_run) {
         daqutils::Binary pl;
-        while (!m_connections.get(0, std::ref(pl)) && m_run)
-        {
-            std::this_thread::sleep_for(1ms);
+        while (!m_connections.get(chid, std::ref(pl)) && m_run) {
+          if (m_statistics) {
+            m_channelMetrics.at(chid).payload_queue_size = pq.sizeGuess();
+          }
+          std::this_thread::sleep_for(1ms);
         }
-	if (!m_run) break;
-	try {
-	  EventFull l_eh(pl.data<const uint8_t *>(),pl.size());
-	  m_eventTag = l_eh.event_tag(); //Extracting the current event tag (the event tag of the current payload)
-	  size_t l_eventSize = l_eh.size();
-       
-	  if(m_fileRotationCounters.find(m_eventTag) == m_fileRotationCounters.end() || l_eventSize != pl.size()) 
-	    throw std::runtime_error("Unknown or corrupted event");
-	  m_payloads.write(pl);
-	} catch (const std::runtime_error& e) {
-	  ERROR("Got corrupted fragment: "<<e.what());
-	      //handle
-	      //handleBadEvent(l_eh);
-	}
-    }
-    INFO(" Runner stopped");
+
+        DEBUG(" Received " << pl.size() << "B payload on channel: " << chid);
+        while (!pq.write(pl) && m_run)
+          ; // try until successful append
+        if (m_statistics) {
+          m_channelMetrics.at(chid).payload_size = pl.size();
+        }
+      }
+    });
+  }
+
+  while (m_run) {
+    std::this_thread::sleep_for(1ms);
+  };
+
+  DEBUG(" Runner stopped");
 }
 
-void FileWriterFaserModule::setup() {
-    // Loop through sources from config and add a file writer for each sink.
-    int tid = 1;
-    int l_bufferCounter = 0;
-    m_fileWriters[tid] = std::make_unique<daqling::utilities::ReusableThread>(11111);
+void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const size_t max_buffer_size,
+                               FileGenerator fg) const {
+  size_t bytes_written = 0;
+  std::ofstream out = fg.next();
+  auto buffer = daqutils::Binary();
 
-    m_writeFunctors[tid] = [&, tid, l_bufferCounter] () mutable
-    {
-        int ftid = tid;
-        INFO(" Spawning fileWriter for link: " << ftid);
-        while (!m_stopWriters)
-        {
-            if (m_payloads.sizeGuess() > 0)
-            {
-                DEBUG(" SIZES: Queue pop.: " << m_payloads.sizeGuess()
-                              << " loc.buff. size: " << m_fileBuffers[m_eventTag][l_bufferCounter].size()
-                              << " payload size: " << m_payloads.frontPtr()->size());
-                long sizeSum = long(m_fileBuffers[m_eventTag][l_bufferCounter].size()) + long(m_payloads.frontPtr()->size()); //Calculating current event buffer size
-                m_fileBuffers[m_eventTag][l_bufferCounter] += *(reinterpret_cast<daqling::utilities::Binary *>(m_payloads.frontPtr()));
-                m_payloads.popFront(); // Pop processed payload
-                if (sizeSum > m_writeBytes) //Writing is ready 
-                {
-                    m_bufferReady = l_bufferCounter;
-                    DEBUG(" -> " << m_fileBuffers[m_eventTag][l_bufferCounter].size() << " [Bytes] will be written.");
-                    m_bytes_sent += m_fileBuffers[m_eventTag][l_bufferCounter].size();
-                    l_bufferCounter = (l_bufferCounter+1) % m_fileBuffers[m_eventTag].size(); //Cycling through the vector
-                    m_fileBuffers[m_eventTag][l_bufferCounter] = daqutils::Binary(); //reset buffer to avoid multiple copies.
-                }
-            }
-            else //We haven't received any payloads yet
-            {
-                std::this_thread::sleep_for(1ms);
-            }
-        }
+  const auto flush = [&](daqutils::Binary &data) {
+    out.write(data.data<char *>(), static_cast<std::streamsize>(data.size()));
+    if (out.fail()) {
+      CRITICAL(" Write operation for channel " << chid << " of size " << data.size()
+                                               << "B failed!");
+      throw std::runtime_error("std::ofstream::fail()");
+    }
+    m_channelMetrics.at(chid).bytes_written += data.size();
+    bytes_written += data.size();
+    data = daqutils::Binary();
+  };
+
+  while (!m_stopWriters) {
+    while (pq.isEmpty() && !m_stopWriters) { // wait until we have something to write
+      std::this_thread::sleep_for(1ms);
     };
-    m_fileWriters[1]->set_work(m_writeFunctors[1]);
-}
-
-void FileWriterFaserModule::writeToFile(int ftid)
-{ 
-    int l_bufferReady;
-    uint8_t l_eventTag;
-    while(m_run)
-    {
-        if(m_bufferReady != -1)
-        {
-            l_eventTag = m_eventTag;
-            l_bufferReady = m_bufferReady;
-            
-            while(m_fileStreamsReady[m_eventTag] == 0 && m_run) //Waiting for the bookKeeper to open the files
-            {
-                INFO("sleeping");
-                std::this_thread::sleep_for(1ms);
-            }
-	        //access the correct fstream according to event tag and write into it
-            if(m_fstreamFull != 1)
-            {
-                m_fileStreams[ftid][l_eventTag].first.write(static_cast<char *>(m_fileBuffers[l_eventTag][l_bufferReady].data()),
-                                    m_fileBuffers[l_eventTag][l_bufferReady].size());  // write
-                if(m_fileStreams[ftid][l_eventTag].first.tellg() >= m_maxFileSize)
-                    m_fstreamFull = 1; //change atomic value if the fstream is full, next time write to the other fstream if so
-
-            }
-            else
-            {
-                m_fileStreams[ftid][l_eventTag].second.write(static_cast<char *>(m_fileBuffers[l_eventTag][l_bufferReady].data()),
-                                    m_fileBuffers[l_eventTag][l_bufferReady].size());  // write
-                if(m_fileStreams[ftid][l_eventTag].second.tellg() >= m_maxFileSize)
-                    m_fstreamFull = 2; //change atomic value if the fstream is full, next time write to the other fstream if so
-
-            }
-            m_bufferReady = -1;
-        }
-    } 
-}
-
-void FileWriterFaserModule::bookKeeper(int ftid)
-{
-    while(m_run)
-    {
-        while(m_fstreamFull == 0 && m_run) //none of the fstreams is full
-        {
-            std::this_thread::sleep_for(1ms);
-        }
-        switch(m_fstreamFull)
-        {
-            case 1: m_fileStreams[ftid][m_eventTag].first.close();
-                    m_fileStreams[ftid][m_eventTag].first.open(m_fileNameFormats[m_eventTag] + std::to_string(m_fileRotationCounters[m_eventTag]),
-                                                 std::ios::out | std::ios::binary);
-
-                    break;
-            case 2: m_fileStreams[ftid][m_eventTag].second.close();
-                    m_fileStreams[ftid][m_eventTag].second.open(m_fileNameFormats[m_eventTag] + std::to_string(m_fileRotationCounters[m_eventTag]),
-                                                 std::ios::out | std::ios::binary);
-                    break;
-            default:
-                    break;
-        }
-        m_fileNames[m_eventTag] = m_fileNameFormats[m_eventTag] + std::to_string(m_fileRotationCounters[m_eventTag]);
-        m_fileRotationCounters[m_eventTag]++;
-        m_fstreamFull = 0;
+    if (m_stopWriters) {
+      flush(buffer);
+      return;
     }
-}
-/**
-void FileWriterFaserModule::handleBadEvent(const EventHeader* badEvent)
-{
-    m_badEventsDumpFile << *badEvent;
-    m_badEventsDumpFile << "\n";
-}*/
 
-//ignore write, read and shutdown
-void FileWriterFaserModule::write() { INFO(" Should write..."); }
-
-bool FileWriterFaserModule::write(uint64_t /*keyId*/, daqling::utilities::Binary &/*payload*/) {
-    INFO(" Should write...");
-    return false;
-}
-
-
-void FileWriterFaserModule::read() {}
-
-void FileWriterFaserModule::shutdown() {}
-
-void FileWriterFaserModule::monitor_runner() 
-{
-    while (m_run)
-    {
-        std::this_thread::sleep_for(1s);
-        INFO("Write throughput: " << (double)m_bytes_sent / double(1000000) << " MBytes/s");
-        INFO("Size guess " << m_payloads.sizeGuess());
-        m_bytes_sent = 0;
+    if (bytes_written + buffer.size() > m_max_filesize) { // Rotate output files
+      INFO(" Rotating output files for channel " << chid);
+      flush(buffer);
+      out.flush();
+      out.close();
+      out = fg.next();
+      bytes_written = 0;
     }
+
+    auto payload = pq.frontPtr();
+
+    if (payload->size() + buffer.size() <= max_buffer_size) {
+      buffer += *payload;
+    } else {
+      DEBUG("Processing buffer split.");
+      const size_t split_offset = max_buffer_size - buffer.size();
+      size_t tail_len = buffer.size() + payload->size() - max_buffer_size;
+      assert(tail_len > 0);
+
+      // Split the payload into a head and a tail
+      daqutils::Binary head(payload->data(), split_offset);
+      daqutils::Binary tail(payload->data<char *>() + split_offset, tail_len);
+      DEBUG(" -> head length: " << head.size() << "; tail length: " << tail.size());
+      assert(head.size() + tail.size() == payload->size());
+
+      buffer += head;
+      flush(buffer);
+
+      // Flush the tail until it is small enough to fit in the buffer
+      while (tail_len > max_buffer_size) {
+        daqutils::Binary body(tail.data(), max_buffer_size);
+        daqutils::Binary next_tail(tail.data<char *>() + max_buffer_size,
+                                   tail_len - max_buffer_size);
+        assert(body.size() + next_tail.size() == tail.size());
+        flush(body);
+
+        tail = next_tail;
+        tail_len = next_tail.size();
+        DEBUG(" -> head of tail flushed; new tail length: " << tail_len);
+      }
+
+      buffer = std::move(tail);
+      assert(buffer.size() <= max_buffer_size);
+    }
+
+    // We are done with the payload; destruct it.
+    pq.popFront();
+  }
 }
 
+void FileWriterFaserModule::monitor_runner() {
+  std::map<uint64_t, unsigned long> prev_value;
+  while (m_run) {
+    std::this_thread::sleep_for(1s);
+    for (auto & [ chid, metrics ] : m_channelMetrics) {
+      INFO("Bytes written (channel "
+           << chid
+           << "): " << static_cast<double>(metrics.bytes_written - prev_value[chid]) / 1000000
+           << " MBytes/s");
+      prev_value[chid] = metrics.bytes_written;
+    }
+  }
+}

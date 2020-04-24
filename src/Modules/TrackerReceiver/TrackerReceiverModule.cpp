@@ -133,7 +133,8 @@ void TrackerReceiverModule::configure() {
 
 void TrackerReceiverModule::sendECR()
 {
-    m_trb->L1CounterReset();
+  INFO("TRB --> ECR.");
+  m_trb->L1CounterReset();
 }
 
 
@@ -141,8 +142,7 @@ void TrackerReceiverModule::sendECR()
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
-  m_trb->L1CounterReset();
-  m_trb->StartReadout();
+  m_trb->StartReadout(0x0380); //doing ErrCnTReset, FifoReset,L1ACounterReset
   INFO("TRB --> readout started.");
   FaserProcess::start(run_num);
 }
@@ -176,12 +176,13 @@ void TrackerReceiverModule::runner() {
   INFO("Running...");
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
-  uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->m_boardID;
+  uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->GetBoardID();
   uint64_t local_event_id;
   uint64_t local_bc_id;
+  int counter = 0;
 
   while (m_run) { 
-    //m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board - for testing purposes
+    m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board - for testing purposes
     
     vector_of_raw_events = m_trb->GetTRBEventData();
 
@@ -233,9 +234,9 @@ void TrackerReceiverModule::runner() {
               std::cout << "               " << y << " ";
               if(m_ed->HasError(word, error)){std::cout << "error word";} 
               std:: cout << std::endl;
-            }
+            }*/
             std::cout << "event id: 0x"<< fragment->event_id() << std::endl;
-            std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
+            /*std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
             std::cout << "source id: 0x"<< fragment->source_id() << std::endl;
             std::cout << "bc id: 0x"<< fragment->bc_id() << std::endl;
             std::cout << "status: 0x"<< fragment->status() << std::endl;

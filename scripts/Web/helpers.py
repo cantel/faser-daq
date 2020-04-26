@@ -121,10 +121,7 @@ def findIndex(boardName, d):
 
 def createDaqInstance(d):
         group =  d['group']
-        dir = env['DAQ_BUILD_DIR']
-        exe = "bin/daqling"
-        lib_path = 'LD_LIBRARY_PATH='+env['LD_LIBRARY_PATH']
-        dc = daqcontrol.daqcontrol(group, lib_path, dir, exe)
+        dc = daqcontrol.daqcontrol(group)
         return dc
         
 #creates a thread for the function passed on argument

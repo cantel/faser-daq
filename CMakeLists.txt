@@ -21,6 +21,8 @@ message(STATUS "Building with Boost")
 
 # Build daqling
 add_subdirectory(daqling)
+
+# Build GPIO drivers
 add_subdirectory(gpiodrivers)
 
 # Build modules

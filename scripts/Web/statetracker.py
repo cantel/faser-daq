@@ -3,6 +3,7 @@ import json
 import redis
 import threading
 import time
+from os import environ as env
 
 import helpers as h
 from routes.metric import getBoardStatus
@@ -51,7 +52,10 @@ def stateTracker(logger):
             daq = h.createDaqInstance(config)
         if daq:
             if cmd=="initialize":
-                logfiles = daq.addProcesses(config['components'])
+                daqdir = env['DAQ_BUILD_DIR']
+                exe = "bin/daqling"
+                lib_path = 'LD_LIBRARY_PATH='+env['LD_LIBRARY_PATH']
+                logfiles = daq.addComponents(config['components'],exe, daqdir, lib_path)
                 for logfile in logfiles:
                     name = logfile[1][5:].split("-")[0]
                     r1.hset("log", name, logfile[0] + logfile[1])

@@ -135,6 +135,7 @@ void TrackerReceiverModule::sendECR()
 {
   INFO("TRB --> ECR.");
   m_trb->L1CounterReset();
+  m_trb->StartReadout(0x0); //FIXME temporary workaround for USB
 }
 
 

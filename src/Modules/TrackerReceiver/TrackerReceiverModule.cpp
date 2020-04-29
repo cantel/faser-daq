@@ -32,6 +32,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
     INFO("");
      
     m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
+    m_trbReadoutParams = std::make_unique<FASER::TRBReadoutParameters>();
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
     if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
@@ -143,7 +144,7 @@ void TrackerReceiverModule::sendECR()
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
   corrupted_fragments = 0; //Setting this monitring variable to 0 
-  m_trb->StartReadout(m_trb->READOUT_L1COUNTER_RESET | m_trb->READOUT_ERRCOUNTER_RESET | m_trb->READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
+  m_trb->StartReadout(m_trbReadoutParams->READOUT_L1COUNTER_RESET | m_trbReadoutParams->READOUT_ERRCOUNTER_RESET | m_trbReadoutParams->READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
   INFO("TRB --> readout started.");
   FaserProcess::start(run_num);
 }

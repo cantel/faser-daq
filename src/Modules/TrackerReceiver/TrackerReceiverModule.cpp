@@ -30,9 +30,7 @@ using namespace daqling::utilities;
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
-    
-    corrupted_fragments = 0; //Setting this monitring variable to 0 
-    
+     
     m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
@@ -124,6 +122,7 @@ void TrackerReceiverModule::configure() {
         INFO("Configuration of module " << l_moduleNo << " finished.");
       }
       else{
+        m_status=STATUS_ERROR;
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
     }
@@ -135,7 +134,7 @@ void TrackerReceiverModule::sendECR()
 {
   INFO("TRB --> ECR.");
   m_trb->L1CounterReset();
-  m_trb->StartReadout(0x0); //FIXME temporary workaround for USB
+  m_trb->StartReadout(); //FIXME temporary workaround for USB
 }
 
 
@@ -143,7 +142,8 @@ void TrackerReceiverModule::sendECR()
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
-  m_trb->StartReadout(0x0380); //doing ErrCnTReset, FifoReset,L1ACounterReset
+  corrupted_fragments = 0; //Setting this monitring variable to 0 
+  m_trb->StartReadout(m_trb->READOUT_L1COUNTER_RESET | m_trb->READOUT_ERRCOUNTER_RESET | m_trb->READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
   INFO("TRB --> readout started.");
   FaserProcess::start(run_num);
 }
@@ -183,7 +183,9 @@ void TrackerReceiverModule::runner() {
   int counter = 0;
 
   while (m_run) { 
-    m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board - for testing purposes
+    if (m_config.getConfig()["settings"]["L1Atype"] == "internal"){
+      m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
+    }
     
     vector_of_raw_events = m_trb->GetTRBEventData();
 
@@ -211,6 +213,7 @@ void TrackerReceiverModule::runner() {
             else{
                 local_event_id = 0xFFFFFFFF;
                 local_bc_id = 0xFFFFFFFF;
+                m_status=STATUS_ERROR;
             }
 
 
@@ -235,9 +238,9 @@ void TrackerReceiverModule::runner() {
               std::cout << "               " << y << " ";
               if(m_ed->HasError(word, error)){std::cout << "error word";} 
               std:: cout << std::endl;
-            }*/
+            }
             std::cout << "event id: 0x"<< fragment->event_id() << std::endl;
-            /*std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
+            std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
             std::cout << "source id: 0x"<< fragment->source_id() << std::endl;
             std::cout << "bc id: 0x"<< fragment->bc_id() << std::endl;
             std::cout << "status: 0x"<< fragment->status() << std::endl;
@@ -251,6 +254,7 @@ void TrackerReceiverModule::runner() {
                 std::bitset<8> y(data->at(i));
                 std::cout << "               " << y << std::endl;
             }*/
+            INFO("Event ID:" << std::dec << fragment->event_id());
 
             // place the raw binary event fragment on the output porti
             std::unique_ptr<const byteVector> bytestream(fragment->raw());

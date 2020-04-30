@@ -24,14 +24,14 @@
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
+using namespace FASER;
 
 
 #define _ms 1000 // used for usleep
 
 TriggerReceiverModule::TriggerReceiverModule() {
   INFO("In TriggerReceiverModule()");
-  m_tlb = new FASER::TLBAccess();
-  m_decoder = new FASER::TLBDecode();
+  m_tlb = new TLBAccess();
   m_tlb->SetDebug(0); //Set to 0 for no debug, to 1 for debug. Changes the m_DEBUG variable
 }
 
@@ -39,7 +39,6 @@ TriggerReceiverModule::~TriggerReceiverModule() {
   INFO("In ~TriggerReceiverModule"); 
  
   delete m_tlb;
-  delete m_decoder;
 }
 
 // optional (configuration can be handled in the constructor)
@@ -64,6 +63,9 @@ void TriggerReceiverModule::configure() {
   cfg["ECR"] = true;
   cfg["TriggerEnable"] = false;
   cfg["SoftwareTrigger"] = false;
+
+  if (cfg["EnableMonitoringData"].get<bool>()) m_enable_monitoring = true;
+  else m_enable_monitoring = false;
 
   INFO("Configuring TLB");
   if ( cfg_LUTconfig.empty() ) {
@@ -106,12 +108,10 @@ void TriggerReceiverModule::sendECR() { //run with "command ECR"
 
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
-  auto myjson = m_config.getSettings();
-  uint16_t WhatToRead=0x0;
-  WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13));
-  WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14));
-  WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15));
-  m_tlb->StartReadout(WhatToRead);
+  uint16_t readout_param = TLBReadoutParameters::EnableTriggerData;
+  readout_param |=  TLBReadoutParameters::ReadoutFIFOReset;
+  if ( m_enable_monitoring ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
+  m_tlb->StartReadout( readout_param );
   usleep(100*_ms);//temporary - wait for all modules
   m_tlb->EnableTrigger(true,true); //sends ECR and Reset
 }
@@ -148,7 +148,7 @@ void TriggerReceiverModule::runner() {
 
         m_fragment_status = 0;  
      
-        if (m_decoder->IsTriggerHeader(*event)){
+        if (TLBDecode::IsTriggerHeader(*event)){
           local_fragment_tag=EventTags::PhysicsTag;
           TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
@@ -158,7 +158,7 @@ void TriggerReceiverModule::runner() {
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;
         }
-        else if (m_decoder->IsMonitoringHeader(*event)){
+        else if (TLBDecode::IsMonitoringHeader(*event)){
           local_fragment_tag=EventTags::TLBMonitoringTag;
           TLBMonitoringFragment tlb_fragment = TLBMonitoringFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();

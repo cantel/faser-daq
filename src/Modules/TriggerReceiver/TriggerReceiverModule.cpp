@@ -24,7 +24,6 @@
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
-using namespace FASER;
 
 
 #define _ms 1000 // used for usleep
@@ -56,6 +55,10 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
   
   auto cfg = m_config.getSettings();
+
+  auto log_level = (m_config.getConfig())["loglevel"]["module"];
+  m_tlb->SetDebug((log_level=="TRACE"?1:0)); //Set to 0 for no debug, to 1 for debug
+
   auto cfg_LUTconfig = cfg.value("LUTConfig", "");
 
   // fixed configs

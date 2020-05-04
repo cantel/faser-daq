@@ -144,6 +144,7 @@ void TrackerReceiverModule::sendECR()
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
   corrupted_fragments = 0; //Setting this monitring variable to 0 
+  m_triggerEnabled = true;
   m_trb->StartReadout(m_trbReadoutParams->READOUT_L1COUNTER_RESET | m_trbReadoutParams->READOUT_ERRCOUNTER_RESET | m_trbReadoutParams->READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
   INFO("TRB --> readout started.");
   FaserProcess::start(run_num);
@@ -165,11 +166,21 @@ void TrackerReceiverModule::stop() {
  *        Disable Trigger
  ****************************************/
 void TrackerReceiverModule::disableTrigger(const std::string &arg) {
+  m_triggerEnabled = false;
   m_trb->StopReadout();
   INFO("TRB --> disable trigger.");
   usleep(100);
 }
 
+/****************************************  
+ *        Enable Trigger
+ ****************************************/
+void TrackerReceiverModule::enableTrigger(const std::string &arg) {
+  m_triggerEnabled = true; 
+  m_trb->StartReadout();
+  INFO("TRB --> enable trigger.");
+  usleep(100);
+}
 
 /***************************************
  *        Runner of the module
@@ -184,7 +195,7 @@ void TrackerReceiverModule::runner() {
   int counter = 0;
 
   while (m_run) { 
-    if (m_config.getConfig()["settings"]["L1Atype"] == "internal"){
+    if (m_config.getConfig()["settings"]["L1Atype"] == "internal" && m_triggerEnabled == true){
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
     

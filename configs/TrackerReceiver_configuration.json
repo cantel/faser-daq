@@ -25,11 +25,11 @@
         ],
         "senders": [
           {
-            "type": "pair",
-            "chid": 1,
+            "type": "pubsub",
+            "chid": 100,
             "transport": "tcp",
             "host": "*",
-            "port": 8103
+            "port": 8200
           }
         ]
       }
@@ -51,11 +51,11 @@
       "connections": {
         "receivers": [
           {
-            "type": "pair",
+            "type": "pubsub",
             "chid": 0, 
             "transport": "tcp",
             "host": "localhost",
-            "port": 8103
+            "port": 8200
           }
         ]
       }

@@ -164,8 +164,8 @@ void TrackerReceiverModule::stop() {
  *        Disable Trigger
  ****************************************/
 void TrackerReceiverModule::disableTrigger(const std::string &arg) {
-  m_triggerEnabled = false;
   m_trb->StopReadout();
+  m_triggerEnabled = false;
   INFO("TRB --> disable trigger.");
   usleep(100);
 }
@@ -174,8 +174,8 @@ void TrackerReceiverModule::disableTrigger(const std::string &arg) {
  *        Enable Trigger
  ****************************************/
 void TrackerReceiverModule::enableTrigger(const std::string &arg) {
-  m_triggerEnabled = true; 
   m_trb->StartReadout();
+  m_triggerEnabled = true; 
   INFO("TRB --> enable trigger.");
   usleep(100);
 }

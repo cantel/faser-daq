@@ -190,7 +190,6 @@ void TrackerReceiverModule::runner() {
   uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->GetBoardID();
   uint64_t local_event_id;
   uint64_t local_bc_id;
-  int counter = 0;
 
   while (m_run) { 
     if (m_config.getConfig()["settings"]["L1Atype"] == "internal" && m_triggerEnabled == true){

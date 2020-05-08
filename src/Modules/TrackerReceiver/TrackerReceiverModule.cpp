@@ -32,7 +32,6 @@ TrackerReceiverModule::TrackerReceiverModule() {
     INFO("");
      
     m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
-    m_trbReadoutParams = std::make_unique<FASER::TRBReadoutParameters>();
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
     if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
@@ -133,9 +132,8 @@ void TrackerReceiverModule::configure() {
 
 void TrackerReceiverModule::sendECR()
 {
-  INFO("TRB --> ECR.");
+  INFO("TRB --> ECR." << " ECRcount: " << m_ECRcount);
   m_trb->L1CounterReset();
-  m_trb->StartReadout(); //FIXME temporary workaround for USB
 }
 
 
@@ -145,8 +143,8 @@ void TrackerReceiverModule::sendECR()
 void TrackerReceiverModule::start(unsigned run_num) {
   corrupted_fragments = 0; //Setting this monitring variable to 0 
   m_triggerEnabled = true;
-  m_trb->StartReadout(m_trbReadoutParams->READOUT_L1COUNTER_RESET | m_trbReadoutParams->READOUT_ERRCOUNTER_RESET | m_trbReadoutParams->READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
-  INFO("TRB --> readout started.");
+  m_trb->StartReadout(FASER::TRBReadoutParameters::READOUT_L1COUNTER_RESET | FASER::TRBReadoutParameters::READOUT_ERRCOUNTER_RESET | FASER::TRBReadoutParameters::READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
+  INFO("TRB --> readout started." );
   FaserProcess::start(run_num);
 }
 
@@ -243,30 +241,28 @@ void TrackerReceiverModule::runner() {
             }
             
             //This cout can be removed later but it useful for debugging
-            /*std::cout << "-------------- printing event " << std::endl;
-            std::cout << "Data received from TRB: " << std::endl;
+            DEBUG("-------------- printing new event ---------------- ");
+            DEBUG("Data received from TRB: ");
             for(auto word : event){
               std::bitset<32> y(word);
-              std::cout << "               " << y << " ";
-              if(m_ed->HasError(word, error)){std::cout << "error word";} 
-              std:: cout << std::endl;
+              if(m_ed->HasError(word, error)){DEBUG("               " << y << " error word");}
+              else{DEBUG("               " << y);}
             }
-            std::cout << "event id: 0x"<< fragment->event_id() << std::endl;
-            std::cout << "fragment tag: 0x"<< fragment->fragment_tag() << std::endl;
-            std::cout << "source id: 0x"<< fragment->source_id() << std::endl;
-            std::cout << "bc id: 0x"<< fragment->bc_id() << std::endl;
-            std::cout << "status: 0x"<< fragment->status() << std::endl;
-            std::cout << "trigger bits: 0x"<< fragment->trigger_bits() << std::endl;
-            std::cout << "size: 0x"<< fragment->size() << std::endl;
-            std::cout << "payload size: 0x"<< fragment->payload_size() << std::endl;
-            std::cout << "timestamp: 0x"<< fragment->timestamp() << std::endl;
-            std::cout << "Raw data sent further: " << std::endl;
+            INFO("event id: 0x"<< fragment->event_id());
+            DEBUG("fragment tag: 0x"<< fragment->fragment_tag());
+            DEBUG("source id: 0x"<< fragment->source_id());
+            DEBUG("bc id: 0x"<< fragment->bc_id());
+            DEBUG("status: 0x"<< fragment->status());
+            DEBUG("trigger bits: 0x"<< fragment->trigger_bits());
+            DEBUG("size: 0x"<< fragment->size());
+            DEBUG("payload size: 0x"<< fragment->payload_size());
+            DEBUG("timestamp: 0x"<< fragment->timestamp());
+            DEBUG("Raw data sent further: ");
             auto data = fragment->raw();
             for (int i = 0; i <  data->size(); i++){
                 std::bitset<8> y(data->at(i));
-                std::cout << "               " << y << std::endl;
-            }*/
-            INFO("Event ID:" << std::dec << fragment->event_id());
+                DEBUG("               " << y);
+            }
 
             // place the raw binary event fragment on the output porti
             std::unique_ptr<const byteVector> bytestream(fragment->raw());

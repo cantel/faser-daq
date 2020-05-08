@@ -39,7 +39,7 @@
       "host": "localhost",
       "port": 5558,
       "type": "FileWriterFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
       "stats_uri": "tcp://localhost:7000",
       "max_filesize": 100000,

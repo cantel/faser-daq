@@ -43,7 +43,6 @@ class TrackerReceiverModule : public FaserProcess {
   void enableTrigger(const std::string &arg) override;
   
   std::unique_ptr<FASER::TRBAccess> m_trb;
-  std::unique_ptr<FASER::TRBReadoutParameters> m_trbReadoutParams;
   std::unique_ptr<FASER::TRBEventDecoder> m_ed;
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;

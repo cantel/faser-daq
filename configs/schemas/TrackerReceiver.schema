@@ -1,0 +1,168 @@
+{
+    "type"      : "object",
+    "title"     : "TrackerReceiver",
+    "properties" : {
+        "name" : {
+            "type"          : "string",
+            "required"      : true,
+            "default"       : "trackerreceiver",
+            "readOnly"      : true,
+            "pattern"       : "^((?!XXX).)*$",
+            "propertyOrder" : 1
+            },
+        "host": {
+            "type"          : "string",
+            "required"      : true,
+            "default"       : "localhost",
+            "propertyOrder" : 2
+            },          
+        "port": {
+            "type"          : "integer",
+            "required"      : true,
+            "default"       : 0,
+            "minimum"       : 1024,
+            "maximum"       : 65535,
+            "propertyOrder" : 3
+            },
+        "type": {
+            "type"          : "string",
+            "default"       : "TrackerReceiver",
+            "readOnly"      : true,
+            "propertyOrder" : 4,
+            "options"       : { "hidden": true }
+            },
+        "settings": {
+            "type"          : "object",
+            "title"         : "Settings",
+            "properties"    : {
+                "emulation"         : {
+                    "type"          : "boolean",
+                    "title"         : "Emulate TRB",
+                    "description"   : "Enable data emulation.",
+                    "propertyOrder" : 1,
+                    "default"       : false
+                    },
+                "L1Atype"           : {
+                    "type"          : "string",
+                    "title"         : "L1A type",
+                    "propertyOrder" : 2,
+                    "description"   : "Switch between internal triggers (from TRB) and external triggers (from TLB)",
+                    "enum"          : ["internal", "external"]
+                    },
+                "emulatorFile"      : {
+                    "type"          : "string",
+                    "title"         : "File",
+                    "propertyOrder" : 3,
+                    "description"   : "File used to emulate data taking (if emulation is on)"
+                    },
+                "moduleMask"        : {
+                    "type"          : "array",
+                    "title"         : "Mask for modules",
+                    "propertyOrder" : 4,
+                    "minItems"      : 8,
+                    "maxItems"      : 8,
+                    "items"    : {
+                        "type"      : "boolean",
+                        "format"    : "row"
+                         }
+                    },
+                "moduleClkMask"        : {
+                    "type"          : "array",
+                    "title"         : "Mask for modules",
+                    "propertyOrder" : 5,
+                    "minItems"      : 8,
+                    "maxItems"      : 8,
+                    "items"    : {
+                        "type"      : "boolean",
+                        "format"    : "row"
+                         }
+                    },
+                "moduleConfigFiles" : {
+                    "type"          : "object",
+                    "title"         : "Configuration files for TRB modules",
+                    "propertyOrder" : 6,
+                    "properties"    : {
+                        "0" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 0",
+                            "default"   : "../configs/TemplateModuleCfg0.json"
+                            },
+                        "1" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 1",
+                            "default"   : "../configs/TemplateModuleCfg1.json"
+                            },
+                        "2" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 2",
+                            "default"   : "../configs/TemplateModuleCfg2.json"
+                            },
+                        "3" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 3",
+                            "default"   : "../configs/TemplateModuleCfg4.json"
+                            },
+                        "4" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 4",
+                            "default"   : "../configs/TemplateModuleCfg4.json"
+                            },
+                        "5" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 5",
+                            "default"   : "../configs/TemplateModuleCfg5.json"
+                            },
+                        "6" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 6",
+                            "default"   : "../configs/TemplateModuleCfg6.json"
+                            },
+                        "7" : {
+                            "type"      : "string",
+                            "title"     : "Module config file 7",
+                            "default"   : "../configs/TemplateModuleCfg7.json"
+                            }
+                        },
+                    "format"        : "table"    
+                    },
+                "TLBClockSel" : {
+                    "type" : "boolean",
+                    "title" : "TLBClockSel",
+                    "default" : false
+                    },
+                "BCREn" : {
+                    "type" : "boolean",
+                    "title" : "BCREn",
+                    "default" : false
+                    },
+                "L1En" : {
+                    "type" : "boolean",
+                    "title" : "L1En",
+                    "default" : false
+                    },
+                "SoftCounterMuxEn" : {
+                    "type" : "boolean",
+                    "title" : "SoftCounterMuxEn",
+                    "default" : false
+                    },
+                "L1CounterReset" : {
+                    "type" : "boolean",
+                    "title" : "L1CounterReset",
+                    "default" : false
+                    },
+                ErrCntReset"" : {
+                    "type" : "boolean",
+                    "title" : "ErrCntReset",
+                    "default" : false
+                    },
+                "FifoReset" : {
+                    "type" : "boolean",
+                    "title" : "FifoReset",
+                    "default" : false
+                    }
+                },
+            "format"        : "table",
+            "propertyOrder" : 7
+            }
+    }
+}

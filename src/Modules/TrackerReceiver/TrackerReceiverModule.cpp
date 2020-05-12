@@ -239,28 +239,32 @@ void TrackerReceiverModule::runner() {
               }
             }
             
-            //This cout can be removed later but it useful for debugging
-            DEBUG("-------------- printing new event ---------------- ");
-            DEBUG("Data received from TRB: ");
-            for(auto word : event){
-              std::bitset<32> y(word);
-              if(m_ed->HasError(word, error)){DEBUG("               " << y << " error word");}
-              else{DEBUG("               " << y);}
+            if (m_config.getConfig()["loglevel"]["module"] == "DEBUG"){
+              DEBUG("-------------- printing new event ---------------- ");
+              DEBUG("Data received from TRB: ");
+              for(auto word : event){
+                std::bitset<32> y(word);
+                if(m_ed->HasError(word, error)){DEBUG("               " << y << " error word");}
+                else{DEBUG("               " << y);}
+              }
+              DEBUG("event id: 0x"<< fragment->event_id());
+              DEBUG("fragment tag: 0x"<< fragment->fragment_tag());
+              DEBUG("source id: 0x"<< fragment->source_id());
+              DEBUG("bc id: 0x"<< fragment->bc_id());
+              DEBUG("status: 0x"<< fragment->status());
+              DEBUG("trigger bits: 0x"<< fragment->trigger_bits());
+              DEBUG("size: 0x"<< fragment->size());
+              DEBUG("payload size: 0x"<< fragment->payload_size());
+              DEBUG("timestamp: 0x"<< fragment->timestamp());
+              DEBUG("Raw data sent further: ");
+              auto data = fragment->raw();
+              for (int i = 0; i <  data->size(); i++){
+                  std::bitset<8> y(data->at(i));
+                  DEBUG("               " << y);
+              }
             }
-            INFO("event id: 0x"<< fragment->event_id());
-            DEBUG("fragment tag: 0x"<< fragment->fragment_tag());
-            DEBUG("source id: 0x"<< fragment->source_id());
-            DEBUG("bc id: 0x"<< fragment->bc_id());
-            DEBUG("status: 0x"<< fragment->status());
-            DEBUG("trigger bits: 0x"<< fragment->trigger_bits());
-            DEBUG("size: 0x"<< fragment->size());
-            DEBUG("payload size: 0x"<< fragment->payload_size());
-            DEBUG("timestamp: 0x"<< fragment->timestamp());
-            DEBUG("Raw data sent further: ");
-            auto data = fragment->raw();
-            for (int i = 0; i <  data->size(); i++){
-                std::bitset<8> y(data->at(i));
-                DEBUG("               " << y);
+            else{
+              INFO("event id: 0x"<< fragment->event_id());
             }
 
             // place the raw binary event fragment on the output porti

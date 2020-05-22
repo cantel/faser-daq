@@ -30,6 +30,7 @@ using namespace daqling::utilities;
 
 TriggerReceiverModule::TriggerReceiverModule() {
   INFO("In TriggerReceiverModule()");
+  m_status = STATUS_OK;
   m_tlb = new TLBAccess();
   m_tlb->SetDebug(0); //Set to 0 for no debug, to 1 for debug. Changes the m_DEBUG variable
 }
@@ -74,16 +75,18 @@ void TriggerReceiverModule::configure() {
 
   INFO("Configuring TLB");
   if ( cfg_LUTconfig.empty() ) {
-    ERROR("No LUT configuration provided. TLB Configuration failed.");
     m_status=STATUS_ERROR;
+    sleep(1); // wait for error state to appear in RC GUI.
+    THROW(Exceptions::BaseException,"No LUT configuration provided. TLB Configuration failed.");
   }
   try {
     m_tlb->ConfigureAndVerifyTLB(cfg);
     m_tlb->ConfigureLUT(cfg_LUTconfig);
     INFO("Done.");  
   } catch ( TLBAccessException &e ){
-      ERROR(e.what());
       m_status=STATUS_ERROR;
+      sleep(1);
+      throw e;
   }
 
 }

@@ -9,8 +9,7 @@
       "type": "TriggerReceiver",
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",      
+	"stats_uri": "tcp://localhost:7000",
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
         "RandomTriggerRate": 6,
@@ -27,7 +26,7 @@
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
         "ReadoutFIFOReset": true,
-        "LUTConfig": "/root/faser_cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt" 
+        "LUTConfig": "/home/cantel/TLBConfigFiles/LUT1.txt" 
       },
       "connections": {
         "senders": [

@@ -40,7 +40,8 @@ class TriggerReceiverModule : public FaserProcess {
  
   TLBAccess *m_tlb;
   
-  bool m_enable_monitoring;
+  bool m_enable_monitoringdata;
+  bool m_enable_triggerdata;
  
   // metrics 
   std::atomic<int> m_physicsEventCount;

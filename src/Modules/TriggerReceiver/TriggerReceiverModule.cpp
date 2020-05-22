@@ -67,8 +67,10 @@ void TriggerReceiverModule::configure() {
   cfg["TriggerEnable"] = false;
   cfg["SoftwareTrigger"] = false;
 
-  if (cfg["EnableMonitoringData"].get<bool>()) m_enable_monitoring = true;
-  else m_enable_monitoring = false;
+  if (cfg["EnableMonitoringData"].get<bool>()) m_enable_monitoringdata = true;
+  else m_enable_monitoringdata = false;
+  if (cfg["EnableTriggerData"].get<bool>()) m_enable_triggerdata = true;
+  else m_enable_triggerdata = false;
 
   INFO("Configuring TLB");
   if ( cfg_LUTconfig.empty() ) {
@@ -83,15 +85,15 @@ void TriggerReceiverModule::configure() {
       ERROR(e.what());
       m_status=STATUS_ERROR;
   }
+
 }
 
 void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   INFO("Got enableTrigger command with argument "<<arg);
   //auto myjson = m_config.getSettings(); //Temporary while using USB.
   //int WhatToRead=0x0; //Temp
-  //WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13)); //Temp
-  //WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14)); //Temp
-  //WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15)); //Temp
+  //if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
+  //if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   //m_tlb->StartReadout(WhatToRead); //Temp
   m_tlb->EnableTrigger(false,false); //Only enables trigger. Doesn't send ECR nor Reset
 }
@@ -111,9 +113,9 @@ void TriggerReceiverModule::sendECR() { //run with "command ECR"
 
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
-  uint16_t readout_param = TLBReadoutParameters::EnableTriggerData;
-  readout_param |=  TLBReadoutParameters::ReadoutFIFOReset;
-  if ( m_enable_monitoring ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
+  uint16_t readout_param = TLBReadoutParameters::ReadoutFIFOReset;
+  if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
+  if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   m_tlb->StartReadout( readout_param );
   usleep(100*_ms);//temporary - wait for all modules
   m_tlb->EnableTrigger(true,true); //sends ECR and Reset
@@ -151,17 +153,7 @@ void TriggerReceiverModule::runner() {
 
         m_fragment_status = 0;  
      
-        if (TLBDecode::IsTriggerHeader(*event)){
-          local_fragment_tag=EventTags::PhysicsTag;
-          TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
-          local_event_id = tlb_fragment.event_id();
-          local_bc_id = tlb_fragment.bc_id();
-          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
-          DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
-          m_physicsEventCount+=1;
-          m_trigger_payload_size = total_size;
-        }
-        else if (TLBDecode::IsMonitoringHeader(*event)){
+        if (TLBDecode::IsMonitoringHeader(*event)){ // tlb monitoring data event
           local_fragment_tag=EventTags::TLBMonitoringTag;
           TLBMonitoringFragment tlb_fragment = TLBMonitoringFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
@@ -171,10 +163,15 @@ void TriggerReceiverModule::runner() {
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
-        else { 
-         ERROR("Unrecognised event type."); // this should never happen by definition of TLB GPIO software, indicates bug in software.
-         m_status = STATUS_ERROR;
-         continue;
+        else { // trigger data event
+          local_fragment_tag=EventTags::PhysicsTag;
+          TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
+          local_event_id = tlb_fragment.event_id();
+          local_bc_id = tlb_fragment.bc_id();
+          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
+          DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
+          m_physicsEventCount+=1;
+          m_trigger_payload_size = total_size;
         }
 
         local_event_id = (m_ECRcount<<24) + (local_event_id);

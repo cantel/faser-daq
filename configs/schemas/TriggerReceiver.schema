@@ -55,13 +55,11 @@
           "properties"    : {
               "influxDb_uri": {
                   "type"          : "string",
-                  "title"         : "influxDb_uri",
-                  "default"       : "http://epdtdi-daqtest:8086/write?db="
+                  "title"         : "influxDb_uri"
               },
               "influxDb_name": {
                   "type"          : "string",
-                  "title"         : "influxDb_name",
-                  "default"       : "DAQlingMetrics"
+                  "title"         : "influxDb_name"
               },
               "SamplingPhase": {
                 "type"            : "array",
@@ -158,28 +156,6 @@
                   "type": "boolean"
                 }
               },
-              "Reset": {
-                  "type"          : "boolean",
-                  "title"         : "Reset",
-                  "default"       : "true",
-                  "enum"          : [false]
-              },
-              "ECR": {
-                  "type"          : "boolean",
-                  "title"         : "ECR",
-                  "default"       : "true",
-                  "enum"          : [false]
-              },
-              "TriggerEnable": {
-                  "type"          : "boolean",
-                  "title"         : "TriggerEnable",
-                  "default"       : "false",
-                  "enum"          : [false]
-              },
-              "SoftwareTrigger": {
-                  "type"          : "boolean",
-                  "title"         : "SoftwareTrigger"
-              },
               "BusyDisable": {
                   "type"          : "boolean",
                   "title"         : "BusyDisable",
@@ -188,7 +164,8 @@
               "EnableTriggerData": {
                   "type"          : "boolean",
                   "title"         : "EnableTriggerData",
-                  "default"       : "true"
+                  "default"       : "true",
+                  "options"       : { "hidden": true }
               },
               "EnableMonitoringData": {
                   "type"          : "boolean",

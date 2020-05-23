@@ -22,9 +22,6 @@ message(STATUS "Building with Boost")
 # Build daqling
 add_subdirectory(daqling)
 
-# Build GPIO drivers
-add_subdirectory(gpiodrivers)
-
 # Build modules
 include_directories(src)
 include_directories(SYSTEM ${daqling_include_dirs})
@@ -34,7 +31,9 @@ if(NOT BUILD_New)
   set(BUILD_New OFF)
 endif()
 
+# Add submodules
 add_subdirectory(faser-common)
+add_subdirectory(gpiodrivers)
 
 # Disable some CXX FLAGS for convenience
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-zero-as-null-pointer-constant -Wno-undef -Wno-sign-conversion -Wno-old-style-cast -Wno-strict-overflow")

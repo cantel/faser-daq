@@ -19,7 +19,7 @@ source ${FASERTOP}/daqling/cmake/setup.sh
 export DAQ_CONFIG_DIR=${FASERTOP}/configs/
 export DAQ_BUILD_DIR=${FASERTOP}/build/
 alias daqpy='python3 $FASERTOP/daqling/scripts/Control/daq.py'
-alias rcgui='cd $FASERTOP/scripts/Web; ./rcgui.py'
+alias rcgui='pushd $FASERTOP/scripts/Web; ./rcgui.py; popd'
 
 #add python and binary directories needed for runnings
 export PYTHONPATH=${FASERTOP}/daqling/scripts/Control:$PYTHONPATH

@@ -19,7 +19,8 @@
 
 #include "Commons/FaserProcess.hpp"
 #include "TLBAccess/TLBAccess.h"
-#include "TLBAccess/TLBDecode.h"
+
+using namespace FASER;
 
 class TriggerReceiverModule : public FaserProcess {
  public:
@@ -37,9 +38,12 @@ class TriggerReceiverModule : public FaserProcess {
   
  private:
  
-  FASER::TLBAccess *m_tlb;
-  FASER::TLBDecode *m_decode;
+  TLBAccess *m_tlb;
   
+  bool m_enable_monitoringdata;
+  bool m_enable_triggerdata;
+ 
+  // metrics 
   std::atomic<int> m_physicsEventCount;
   std::atomic<int> m_monitoringEventCount;
   std::atomic<int> m_badFragmentsCount;

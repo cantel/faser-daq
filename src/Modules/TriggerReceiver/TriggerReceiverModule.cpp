@@ -17,6 +17,8 @@
 
 #include "TriggerReceiverModule.hpp"
 #include "EventFormats/DAQFormats.hpp"
+#include "EventFormats/TLBDataFragment.hpp"
+#include "EventFormats/TLBMonitoringFragment.hpp"
 
 #include <Utils/Binary.hpp>
 
@@ -27,13 +29,17 @@ using namespace daqling::utilities;
 #define _ms 1000 // used for usleep
 
 TriggerReceiverModule::TriggerReceiverModule() {
-  INFO("");
-  m_tlb = new FASER::TLBAccess();
-  m_decode = new FASER::TLBDecode();
+  INFO("In TriggerReceiverModule()");
+  m_status = STATUS_OK;
+  m_tlb = new TLBAccess();
   m_tlb->SetDebug(0); //Set to 0 for no debug, to 1 for debug. Changes the m_DEBUG variable
 }
 
-TriggerReceiverModule::~TriggerReceiverModule() { INFO(""); }
+TriggerReceiverModule::~TriggerReceiverModule() { 
+  INFO("In ~TriggerReceiverModule"); 
+ 
+  delete m_tlb;
+}
 
 // optional (configuration can be handled in the constructor)
 void TriggerReceiverModule::configure() {
@@ -50,34 +56,47 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
   
   auto cfg = m_config.getSettings();
+
+  auto log_level = (m_config.getConfig())["loglevel"]["module"];
+  m_tlb->SetDebug((log_level=="TRACE"?1:0)); //Set to 0 for no debug, to 1 for debug
+
   auto cfg_LUTconfig = cfg.value("LUTConfig", "");
 
+  // fixed configs
+  cfg["Reset"] = true;
+  cfg["ECR"] = true;
+  cfg["TriggerEnable"] = false;
+  cfg["SoftwareTrigger"] = false;
+
+  if (cfg["EnableMonitoringData"].get<bool>()) m_enable_monitoringdata = true;
+  else m_enable_monitoringdata = false;
+  if (cfg["EnableTriggerData"].get<bool>()) m_enable_triggerdata = true;
+  else m_enable_triggerdata = false;
+
   INFO("Configuring TLB");
-  if (m_tlb->ConfigureAndVerifyTLB(cfg)){INFO("TLB Configuration OK");}
-  else{
-    ERROR("TLB Configuration failed");
-    m_status=STATUS_ERROR;
-  }
-  INFO("Done.");
-  
   if ( cfg_LUTconfig.empty() ) {
-    ERROR("No LUT configuration provided. TLB Configuration failed.");
     m_status=STATUS_ERROR;
+    sleep(1); // wait for error state to appear in RC GUI.
+    THROW(Exceptions::BaseException,"No LUT configuration provided. TLB Configuration failed.");
   }
-  else {
-    INFO("Configuring LUT");
-    m_tlb->ConfigureLUT(cfg_LUTconfig); // TO DO: catch when ConfigureLUT fails (requires modification in gpiodrivers)
+  try {
+    m_tlb->ConfigureAndVerifyTLB(cfg);
+    m_tlb->ConfigureLUT(cfg_LUTconfig);
     INFO("Done.");  
+  } catch ( TLBAccessException &e ){
+      m_status=STATUS_ERROR;
+      sleep(1);
+      throw e;
   }
+
 }
 
 void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   INFO("Got enableTrigger command with argument "<<arg);
   //auto myjson = m_config.getSettings(); //Temporary while using USB.
   //int WhatToRead=0x0; //Temp
-  //WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13)); //Temp
-  //WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14)); //Temp
-  //WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15)); //Temp
+  //if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
+  //if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   //m_tlb->StartReadout(WhatToRead); //Temp
   m_tlb->EnableTrigger(false,false); //Only enables trigger. Doesn't send ECR nor Reset
 }
@@ -97,12 +116,10 @@ void TriggerReceiverModule::sendECR() { //run with "command ECR"
 
 void TriggerReceiverModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
-  auto myjson = m_config.getSettings();
-  int WhatToRead=0x0;
-  WhatToRead=(WhatToRead|(myjson["EnableTriggerData"].get<bool>()<<13));
-  WhatToRead=(WhatToRead|(myjson["EnableMonitoringData"].get<bool>()<<14));
-  WhatToRead=(WhatToRead|(myjson["ReadoutFIFOReset"].get<bool>()<<15));
-  m_tlb->StartReadout(WhatToRead);
+  uint16_t readout_param = TLBReadoutParameters::ReadoutFIFOReset;
+  if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
+  if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
+  m_tlb->StartReadout( readout_param );
   usleep(100*_ms);//temporary - wait for all modules
   m_tlb->EnableTrigger(true,true); //sends ECR and Reset
 }
@@ -119,8 +136,7 @@ void TriggerReceiverModule::runner() {
   INFO("Running...");
   
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
-  std::vector<uint32_t> event;
-  uint8_t  local_fragment_tag = EventTags::PhysicsTag;
+  uint8_t  local_fragment_tag;
   uint32_t local_source_id    = SourceIDs::TriggerSourceID;
   uint64_t local_event_id;
   uint16_t local_bc_id;
@@ -134,38 +150,43 @@ void TriggerReceiverModule::runner() {
     }
     else {
       for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
-        event = vector_of_raw_events[i];
-        int total_size = event.size() * sizeof(uint32_t); //Event size in byte
+        size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
         if (!total_size) continue;
-        if (m_decode->IsTriggerHeader(event[0])){
-          local_fragment_tag=EventTags::PhysicsTag;
-          m_physicsEventCount+=1;
-          m_trigger_payload_size = total_size;
-        }
-        if (m_decode->IsMonitoringHeader(event[0])){
+        auto event = vector_of_raw_events[i].data();
+
+        m_fragment_status = 0;  
+     
+        if (TLBDecode::IsMonitoringHeader(*event)){ // tlb monitoring data event
           local_fragment_tag=EventTags::TLBMonitoringTag;
+          TLBMonitoringFragment tlb_fragment = TLBMonitoringFragment(event, total_size);
+          local_event_id = tlb_fragment.event_id();
+          local_bc_id = tlb_fragment.bc_id();
+          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
+          DEBUG("Monitoring fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
         }
-        local_event_id=0xffffff; //otherwise when we get a corrupted fragment it doesn't update the L1ID and BCID
-        local_bc_id=0xffff;
-        m_fragment_status=m_decode->GetL1IDandBCID(event, local_event_id, local_bc_id);
-        if (m_fragment_status!=0){
-          m_badFragmentsCount+=1;
-          for (int j=0; j<event.size(); j++){
-            DEBUG("event["<<j<<"]: "<<std::bitset<32>(event[j])<<std::endl);
-          }
+        else { // trigger data event
+          local_fragment_tag=EventTags::PhysicsTag;
+          TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
+          local_event_id = tlb_fragment.event_id();
+          local_bc_id = tlb_fragment.bc_id();
+          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
+          DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
+          m_physicsEventCount+=1;
+          m_trigger_payload_size = total_size;
         }
-        if (local_fragment_tag==EventTags::PhysicsTag){
-          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Trigger"<<" Status: "<<m_fragment_status<<" ECRcount: "<<m_ECRcount);
-        }
-        if (local_fragment_tag==EventTags::TLBMonitoringTag){
-          DEBUG(std::dec<<"L1ID: "<<local_event_id<<" BCID: "<<local_bc_id<<" Monitoring"<<" Status: "<<m_fragment_status<<" ECRcount: "<<m_ECRcount);
-        }
+
         local_event_id = (m_ECRcount<<24) + (local_event_id);
+
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                              local_event_id, local_bc_id, event.data(), total_size));
+                                              local_event_id, local_bc_id, event, total_size));
         fragment->set_status(m_fragment_status);
+
+        if (!m_fragment_status){
+          m_badFragmentsCount+=1;
+        }
+
         std::unique_ptr<const byteVector> bytestream(fragment->raw());
 
         daqling::utilities::Binary binData(bytestream->data(),bytestream->size());

@@ -22,12 +22,14 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
   auto cfg = m_config.getConfig()["settings"];
   
-  // SIS3153 IP address
+  // retrieve the ip address of the sis3153 master board
+  // this is configured via the arp and route commands on the network switch
   char  ip_addr_string[32];
   strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; 
   INFO("IP Address : "<<ip_addr_string);
 
-  // vme base address
+  // retrieval of the VME base address which is set via the physical rotary
+  // switches on the digitizer and forms the base of all register read/writes
   std::string vme_base_address_str = std::string(cfg["vme_base_address"]);
   UINT vme_base_address = std::stoi(vme_base_address_str,0,16);
   INFO("Base VME Address = 0x"<<std::setfill('0')<<std::setw(8)<<std::hex<<vme_base_address);
@@ -35,9 +37,8 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   // make a new digitizer instance
   m_digitizer = new vx1730(ip_addr_string, vme_base_address);
 
-  // test digitizer board interface
+  // test the communication line of the digitizer
   m_digitizer->TestComm();
-
 
 }
 

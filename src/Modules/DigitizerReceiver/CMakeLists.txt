@@ -15,7 +15,8 @@ target_link_libraries( ${module_name} PUBLIC
                         Helper 
                         Helper_Event 
                         Helper_sis3153 
-                        sis3153-core)
+                        sis3153-core
+                        Exceptions )
 
 # Provide install target
 daqling_target_install(${module_name})

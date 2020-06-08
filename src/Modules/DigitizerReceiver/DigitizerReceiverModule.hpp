@@ -20,7 +20,14 @@
 #include "Commons/FaserProcess.hpp"
 #include "EventFormats/DAQFormats.hpp"
 
-#include "Comm_vx1730.h"
+// helper functions that do the actual communication with the digitizer
+#include "Comm_vx1730.h" 
+
+// needed for exception handling
+#include "Exceptions/Exceptions.hpp"
+
+class DigitizerReceiverException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
+
 
 class DigitizerReceiverModule : public FaserProcess {
  public:

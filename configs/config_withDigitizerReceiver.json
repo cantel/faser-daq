@@ -1,72 +1,13 @@
 {
-  "version": 6,
+  "version": 7,
   "group": "faser",
   "components": [
     {
-      "name": "eventbuilder01",
+      "name": "digitizer01",
       "host": "localhost",
-      "port": 5557,
-      "type": "EventBuilderFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-	      "stats_uri": "tcp://*:7057",
-        "maxPending": 10
-      },
-      "connections": {
-        "receivers": [
-          {
-            "type": "pair",
-            "chid": 1,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8101
-          },
-          {
-            "type": "pair",
-            "chid": 2,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8102
-          }
-        ],
-        "senders": [
-          {
-            "type": "pair",
-            "chid": 3,
-            "transport": "tcp",
-            "host": "*",
-            "port": 8103
-          }
-        ]
-      }
-    },
-    {
-      "name": "filedatawriter01",
-      "host": "localhost",
-      "port": 5558,
-      "type": "FileDataWriter",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "filename_pattern": "/tmp/test-%D.%n.%c.bin"
-      },
-      "connections": {
-        "receivers": [
-          {
-            "type": "pair",
-            "chid": 1,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8103
-          }
-        ]
-      }
-    },
-    {
-      "name": "digitizer",
-      "host": "localhost",
-      "port": 5560,
-      "type": "Digitizer",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "port": 5556,
+      "type": "DigitizerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
           "ip":                    "192.168.122.2",
           "vme_base_address":      "0x04320000",
@@ -108,6 +49,160 @@
                              }],
           "frontpanel_config" : {"lemo" : {"trig_in" : "ttl" , "trig_out" : "ttl"}} 
       }
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8100
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventbuilder01",
+      "host": "localhost",
+      "port": 5557,
+      "type": "EventBuilderFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7000",
+          "maxPending": 10,
+	  "timeout_ms": 1000
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8100
+          }
+        ],
+        "senders": [
+          {
+            "type": "pubsub",
+            "chid": 100,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 101,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 102,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 103,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 116,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 117,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 118,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8218
+          }
+        ]
+      }
+    },
+    {
+      "name": "filewriter",
+      "host": "localhost",
+      "port": 5558,
+      "type": "FileWriterFaser",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7000",
+	  "max_filesize": 100000,
+	  "buffer_size": 4000,
+	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
+	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
+			    "Corrupted","Incomplete","Duplicate"]
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 4,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 5,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 6,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8218
+          }
+        ]
+      }
     }
   ]
 }
+

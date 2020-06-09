@@ -39,7 +39,6 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
   // test the communication line of the digitizer
   m_digitizer->TestComm();
-
 }
 
 DigitizerReceiverModule::~DigitizerReceiverModule() { INFO(""); }
@@ -86,55 +85,11 @@ void DigitizerReceiverModule::runner() {
   int count=0;  
   int trig_count=0;
   
-  while (m_run) {
-  
-  
-    /*
-    // testing the ECR
-    // send a SW trigger every 5 loop cycles
-    count+=1;    
-    INFO("Count"<<count);
-    if(count%5==0){
-      INFO("Sending SW Trigger");
-      m_digitizer->SendSWTrigger(true);
-      trig_count++;
-    }
-    
-    // every 20 cycles
-    if(count%20==0){
-      INFO("Sending 3-SW Triggers and an ECR");
-
-      m_digitizer->SendSWTrigger(true);
-      trig_count++;
-      m_digitizer->SendSWTrigger(true);
-      trig_count++;
-      m_digitizer->SendSWTrigger(true);
-      trig_count++;
-    
-      sendECR();
-    }
-    
-    // if there is an event in the buffer then send it along
-    INFO("EventCount : "<<m_digitizer->DumpEventCount());    
+  while (m_run) {    
     if(m_digitizer->DumpEventCount()){
-      std::cout<<"Header_TriggerTimeTag Count : "<<trig_count<<std::endl;
+      DEBUG("Header_TriggerTimeTag Count : "+to_string(trig_count));
       sendEvent();
     }
-    
-    Wait(1.0);
-    */
-    
-    // testing the timer reset via S-IN
-    Wait(1.0);
-    INFO("Sending SW Trigger");
-    m_digitizer->SendSWTrigger(true);
-    trig_count++;
-    
-    if(m_digitizer->DumpEventCount()){
-      std::cout<<"Header_TriggerTimeTag Count : "<<trig_count<<std::endl;
-      sendEvent();
-    }
-    
   }
   INFO("Runner stopped");
 }
@@ -170,8 +125,8 @@ void DigitizerReceiverModule::sendEvent() {
   // word[3] bits[31:0]
   unsigned int Header_TriggerTimeTag = raw_payload[3];
   
-  std::cout<<"Header_EventCounter   : "<<ConvertIntToWord(Header_EventCounter)<<std::endl;
-  std::cout<<"Header_TriggerTimeTag : "<<ConvertIntToWord(Header_TriggerTimeTag)<<std::endl;
+  DEBUG("Header_EventCounter   : "+to_string(Header_EventCounter));
+  DEBUG("Header_TriggerTimeTag : "+to_string(Header_TriggerTimeTag));
   
   // store the faser header information
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
@@ -191,7 +146,5 @@ void DigitizerReceiverModule::sendEvent() {
   std::unique_ptr<const byteVector> bytestream(fragment->raw());
   daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
 
-  
-  m_connections.put(0, binData);
-  
+  m_connections.put(0, binData);  
 }

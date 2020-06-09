@@ -48,7 +48,7 @@
                               "chanB" : {"channel": 15, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
                              }],
           "frontpanel_config" : {"lemo" : {"trig_in" : "ttl" , "trig_out" : "ttl"}} 
-      }
+      },
       "connections": {
         "senders": [
           {
@@ -68,9 +68,9 @@
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
-          "maxPending": 10,
-	  "timeout_ms": 1000
+        "stats_uri": "tcp://localhost:7000",
+        "maxPending": 10,
+        "timeout_ms": 1000
       },
       "connections": {
         "receivers": [
@@ -142,12 +142,11 @@
       "type": "FileWriterFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
-	  "max_filesize": 100000,
-	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
-	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
-			    "Corrupted","Incomplete","Duplicate"]
+      "stats_uri": "tcp://localhost:7000",
+      "max_filesize": 100000,
+      "buffer_size": 4000,
+      "filename_pattern": "/tmp/FaserDigitizerTest-%c-%r-%n.raw",
+      "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring","Corrupted","Incomplete","Duplicate"]
       },
       "connections": {
         "receivers": [

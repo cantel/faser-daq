@@ -54,7 +54,11 @@ void DigitizerReceiverModule::start(unsigned int run_num) {
   INFO("Digitizer --> Starting BEFORE");
   FaserProcess::start(run_num);
   INFO("Digitizer --> Starting");
+  INFO("CONFIG before startAcquire");
+  m_digitizer->DumpConfig();
   m_digitizer->StartAcquisition();
+  INFO("CONFIG after startAcquire");
+  m_digitizer->DumpConfig();
 }
 
 void DigitizerReceiverModule::stop() {
@@ -80,14 +84,10 @@ void DigitizerReceiverModule::sendECR() {
 
 
 void DigitizerReceiverModule::runner() {
-  INFO("Running...");
-  
-  int count=0;  
-  int trig_count=0;
-  
+  INFO("Running...");  
   while (m_run) {    
     if(m_digitizer->DumpEventCount()){
-      DEBUG("Header_TriggerTimeTag Count : "+to_string(trig_count));
+      DEBUG("Sending Event");
       sendEvent();
     }
   }

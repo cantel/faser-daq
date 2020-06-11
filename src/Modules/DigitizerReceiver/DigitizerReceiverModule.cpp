@@ -59,13 +59,15 @@ void DigitizerReceiverModule::configure() {
 
 void DigitizerReceiverModule::start(unsigned int run_num) {
   INFO("Digitizer --> Starting BEFORE");
-  FaserProcess::start(run_num);
+  
   INFO("Digitizer --> Starting");
   INFO("CONFIG before startAcquire");
   m_digitizer->DumpConfig();
   m_digitizer->StartAcquisition();
   INFO("CONFIG after startAcquire");
   m_digitizer->DumpConfig();
+  
+  FaserProcess::start(run_num);
 }
 
 void DigitizerReceiverModule::stop() {

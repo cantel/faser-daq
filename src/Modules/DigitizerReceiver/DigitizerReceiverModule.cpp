@@ -47,7 +47,14 @@ DigitizerReceiverModule::~DigitizerReceiverModule() { INFO(""); }
 void DigitizerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("Digitizer --> Configuring");
+  
+  INFO("CONFIG before configuration");
+  m_digitizer->DumpConfig();
+  
   m_digitizer->Configure(m_config.getConfig()["settings"]);
+  
+  INFO("CONFIG after configuration");
+  m_digitizer->DumpConfig();
 }
 
 void DigitizerReceiverModule::start(unsigned int run_num) {

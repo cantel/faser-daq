@@ -17,13 +17,12 @@
 
 #pragma once
 
-#include "Commons/FaserProcess.hpp"
-#include "EventFormats/DAQFormats.hpp"
-
 // helper functions that do the actual communication with the digitizer
 #include "Comm_vx1730.h" 
 
-// needed for exception handling
+// needed for external tools
+#include "Commons/FaserProcess.hpp"
+#include "EventFormats/DAQFormats.hpp"
 #include "Exceptions/Exceptions.hpp"
 
 class DigitizerReceiverException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
@@ -43,6 +42,9 @@ class DigitizerReceiverModule : public FaserProcess {
   void sendEvent();
   
   vx1730 *m_digitizer;
+  
+  // monitoring metrics
+  std::atomic<int> m_triggers;
   
   
 };

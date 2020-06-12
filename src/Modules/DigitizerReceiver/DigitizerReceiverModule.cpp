@@ -46,6 +46,13 @@ DigitizerReceiverModule::~DigitizerReceiverModule() { INFO(""); }
 // optional (configuration can be handled in the constructor)
 void DigitizerReceiverModule::configure() {
   FaserProcess::configure();
+  
+  // register the metrics for monitoring data
+  INFO("Configuring monitoring metrics");
+  registerVariable(m_triggers, "TriggeredEvents");
+  registerVariable(m_triggers, "TriggeredRate", metrics::RATE);
+  
+  // configuration of hardware
   INFO("Digitizer --> Configuring");
   
   INFO("CONFIG before configuration");
@@ -58,6 +65,12 @@ void DigitizerReceiverModule::configure() {
 }
 
 void DigitizerReceiverModule::start(unsigned int run_num) {
+
+  // register the metrics for monitoring data
+  INFO("Initializing monitoring metrics");
+  m_triggers=0;
+
+  // starting of acquisition in hardware
   INFO("Digitizer --> Starting BEFORE");
   
   INFO("Digitizer --> Starting");
@@ -85,6 +98,7 @@ void DigitizerReceiverModule::sendECR() {
   // read out the data from the buffer
   while(m_digitizer->DumpEventCount()){
     sendEvent();
+    m_triggers++;
   }
 
   // start acquisition

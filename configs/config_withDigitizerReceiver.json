@@ -9,6 +9,7 @@
       "type": "DigitizerReceiver",
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
+          "stats_uri": "tcp://localhost:7000",
           "ip":                    "192.168.122.2",
           "vme_base_address":      "0x04320000",
           "buffer_length":         "0x0A",

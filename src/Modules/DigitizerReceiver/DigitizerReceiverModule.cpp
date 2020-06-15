@@ -99,7 +99,6 @@ void DigitizerReceiverModule::sendECR() {
   while(m_digitizer->DumpEventCount()){
     sendEvent();
     m_triggers++;
-    DEBUG("Events sent : "<<m_triggers);
   }
 
   // start acquisition
@@ -113,6 +112,8 @@ void DigitizerReceiverModule::runner() {
     if(m_digitizer->DumpEventCount()){
       DEBUG("Sending Event");
       sendEvent();
+      m_triggers++;
+      DEBUG("Events sent : "<<m_triggers);
     }
   }
   INFO("Runner stopped");

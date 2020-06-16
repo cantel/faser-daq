@@ -21,9 +21,11 @@ DigitizerMonitorModule::~DigitizerMonitorModule() {
 
 void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
+  // the m_event object is populated with the event binary here
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
+  // consistency check that the event received is the type of data we are configured to take
   if ( m_event->event_tag() != m_eventTag ) {
     ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
     return;
@@ -38,17 +40,23 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
   }
   // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
 
+  // example 1 - number of errors into histogram
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
   fill_error_status_to_histogram( fragmentStatus, "h_digitizer_errorcount" );
 
+  // example 2 - size of fragment payload
   uint16_t payloadSize = m_fragment->payload_size(); 
-
   m_histogrammanager->fill("h_digitizer_payloadsize", payloadSize);
   m_metric_payload = payloadSize;
 
-  // 2D hist fill
+  // example 3 - 2D hist fill
   m_histogrammanager->fill("h_digitizer_numfrag_vs_sizefrag", m_monitoringFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
+
+  // adding digitizer specific
+  DigitizerDataFragment digitizer_data_frag = DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+  DEBUG("EventSize from Digitizer : "<<digitizer_data_frag.event_size());
+  
 }
 
 void DigitizerMonitorModule::register_hists() {
@@ -56,8 +64,10 @@ void DigitizerMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerMonitor ... " );
   
   m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
+
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
   m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, 5. );
+
   // example 2D hist
   m_histogrammanager->register2DHistogram("h_Digitizer_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20 );
 

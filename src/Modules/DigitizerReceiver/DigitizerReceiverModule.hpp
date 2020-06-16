@@ -25,6 +25,9 @@
 #include "EventFormats/DAQFormats.hpp"
 #include "Exceptions/Exceptions.hpp"
 
+// needed for sendECR() and runner() protection
+#include <mutex>
+
 class DigitizerReceiverException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
 
 
@@ -42,6 +45,8 @@ class DigitizerReceiverModule : public FaserProcess {
   void sendEvent();
   
   vx1730 *m_digitizer;
+  
+  std::mutex m_lock;
   
   // monitoring metrics
   std::atomic<int> m_triggers;

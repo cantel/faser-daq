@@ -90,16 +90,17 @@ void DigitizerReceiverModule::stop() {
 }
 
 void DigitizerReceiverModule::sendECR() {
-  // should send ECR to electronics here. In case of failure, seet m_status to STATUS_ERROR
+  // should send ECR to electronics here. In case of failure, set m_status to STATUS_ERROR
   
   // stop acquisition
   m_digitizer->StopAcquisition();
   
   // read out the data from the buffer
+  m_lock.lock();
   while(m_digitizer->DumpEventCount()){
     sendEvent();
-    m_triggers++;
   }
+  m_lock.unlock();
 
   // start acquisition
   m_digitizer->StartAcquisition();
@@ -109,12 +110,29 @@ void DigitizerReceiverModule::sendECR() {
 void DigitizerReceiverModule::runner() {
   INFO("Running...");  
   while (m_run) {    
-    if(m_digitizer->DumpEventCount()){
-      DEBUG("Sending Event");
-      sendEvent();
-      m_triggers++;
-      DEBUG("Events sent : "<<m_triggers);
+  
+    // lock to prevent accidental double reading with the sendECR() call
+    m_lock.lock();
+    
+    // polling of the hardware - if any number of events is detected
+    // then all events in the buffer are read out
+    int n_events_present = m_digitizer->DumpEventCount();
+    if(n_events_present){
+      DEBUG("Sending all events - NEvents = "<<n_events_present);
+      while(n_events_present){
+        sendEvent();
+        m_triggers++;
+      }
+      DEBUG("Total nevents sent in running : "<<m_triggers);
     }
+    else{
+      // sleep for 1.5 milliseconds. This time is chosen to ensure that the polling 
+      // happens at a rate just above the expected trigger rate in the case of no events
+      DEBUG("No events - sleeping for a short while");
+      usleep(1500); 
+    }
+    m_lock.unlock();
+  
   }
   INFO("Runner stopped");
 }

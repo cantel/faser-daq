@@ -3,7 +3,7 @@
   "group": "faser",
   "components": [
     {
-      "name": "digitizer01",
+      "name": "digitizer012",
       "host": "localhost",
       "port": 5556,
       "type": "DigitizerReceiver",

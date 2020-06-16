@@ -7,25 +7,25 @@
       "host": "localhost",
       "port": 5556,
       "type": "DigitizerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
+      "loglevel": {"core": "DEBUG", "module": "INFO"},
       "settings": {
-          "ip":                    "192.168.122.2",
-          "vme_base_address":      "0x04320000",
+          "ip":                    "128.141.151.198",
+          "vme_base_address":      "0x32000000",
           "buffer_length":         "0x0A",
           "buffer_n_post_samples": "0x20",
           "internal_sawtooth":     false,
           "global_trigger": { "lvds": 0, "external": 0, "software": 1, "polarity": "under", "coincidence": false, "nchan": 2, "timewindow": 20},
           "channel_config": [{"group" : 0, "trig_enable": 1, "trig_logic": "OnlyA", "trig_width":32,
                               "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 10000},
-                              "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                              "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 500}
                              },
                              {"group" : 1, "trig_enable": 1, "trig_logic": "OnlyA", "trig_width":32,
                               "chanA" : {"channel": 2, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 10000},
-                              "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                              "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 500}
                              },
                              {"group" : 2, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
                               "chanA" : {"channel": 4, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500},
-                              "chanB" : {"channel": 5, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                              "chanB" : {"channel": 5, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 500}
                              },
                              {"group" : 3, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
                               "chanA" : {"channel": 6, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500},
@@ -145,7 +145,7 @@
         "stats_uri": "tcp://localhost:7000",
         "max_filesize": 100000,
         "buffer_size": 4000,
-        "filename_pattern": "/tmp/FaserDigitizerTest-%c-%r-%n.raw",
+        "filename_pattern": "/tmp/meehan/FaserDigitizerTest-%c-%r-%n.raw",
         "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring","Corrupted","Incomplete","Duplicate"]
       },
       "connections": {
@@ -209,6 +209,7 @@
       "type": "DigitizerMonitor",
       "loglevel": {"core": "DEBUG", "module": "DEBUG"},
       "settings": {
+        "stats_uri": "tcp://localhost:7000",
         "fragmentID": 1000004,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"

@@ -27,6 +27,7 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
 
   // consistency check that the event received is the type of data we are configured to take
   if ( m_event->event_tag() != m_eventTag ) {
+    DEBUG("Event tag does not match filter tag. Are the module's filter settings correct?");
     ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
     return;
   }
@@ -34,6 +35,7 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
+    DEBUG("Error in unpacking");
     fill_error_status_to_metric( fragmentUnpackStatus );
     fill_error_status_to_histogram( fragmentUnpackStatus, "h_digitizer_errorcount" );
     return;

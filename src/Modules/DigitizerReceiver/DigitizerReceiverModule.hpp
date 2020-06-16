@@ -50,6 +50,8 @@ class DigitizerReceiverModule : public FaserProcess {
   
   // monitoring metrics
   std::atomic<int> m_triggers;
-  
+
+  // for SW trigger sending
+  int m_sw_count;
   
 };

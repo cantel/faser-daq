@@ -70,6 +70,9 @@ void DigitizerReceiverModule::start(unsigned int run_num) {
   INFO("Initializing monitoring metrics");
   m_triggers=0;
 
+  // initializing sw trigger counter
+  m_sw_count=0;
+
   // starting of acquisition in hardware
   INFO("Digitizer --> Starting BEFORE");
   
@@ -110,6 +113,18 @@ void DigitizerReceiverModule::sendECR() {
 void DigitizerReceiverModule::runner() {
   INFO("Running...");  
   while (m_run) {    
+
+    // hack to send software triggers for development 
+    if(true){
+      m_sw_count++;
+      INFO(m_sw_count);
+      if(m_sw_count%5000==0){
+	INFO("Sending SW Trigger");
+	m_digitizer->SendSWTrigger();
+	m_sw_count=1;
+      }
+    }
+
   
     // lock to prevent accidental double reading with the sendECR() call
     m_lock.lock();
@@ -119,7 +134,7 @@ void DigitizerReceiverModule::runner() {
     int n_events_present = m_digitizer->DumpEventCount();
     if(n_events_present){
       DEBUG("Sending all events - NEvents = "<<n_events_present);
-      while(n_events_present){
+      for(int iev=0; iev<n_events_present; iev++){
         sendEvent();
         m_triggers++;
       }

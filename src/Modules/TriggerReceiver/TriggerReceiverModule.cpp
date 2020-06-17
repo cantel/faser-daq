@@ -31,7 +31,9 @@ using namespace daqling::utilities;
 TriggerReceiverModule::TriggerReceiverModule() {
   INFO("In TriggerReceiverModule()");
   m_status = STATUS_OK;
-  m_tlb = new TLBAccess();
+  auto cfg = m_config.getSettings();
+  uint8_t usb_device_no = cfg["usb_device_no"];
+  m_tlb = new TLBAccess(usb_device_no);
   m_tlb->SetDebug(0); //Set to 0 for no debug, to 1 for debug. Changes the m_DEBUG variable
 }
 
@@ -49,7 +51,7 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
   registerVariable(m_monitoringEventCount, "MonitoringEvents");
   registerVariable(m_monitoringEventCount, "MonitoringRate", metrics::RATE);
-  registerVariable(m_badFragmentsCount, "BadFragments");
+  //registerVariable(m_badFragmentsCount, "BadFragments");
   registerVariable(m_badFragmentsCount, "BadFragmentsRate", metrics::RATE);
   registerVariable(m_fragment_status, "FragmentStatus");
   registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
@@ -120,15 +122,16 @@ void TriggerReceiverModule::start(unsigned run_num) {
   if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   m_tlb->StartReadout( readout_param );
-  usleep(100*_ms);//temporary - wait for all modules
+  usleep(10000*_ms);//temporary - wait for all modules
   m_tlb->EnableTrigger(true,true); //sends ECR and Reset
 }
 
 void TriggerReceiverModule::stop() {  
   INFO("Stopping readout.");
   m_tlb->DisableTrigger();
+  usleep(100*_ms);
   m_tlb->StopReadout();
-  usleep(100*_ms); //value to be tweaked. Should be large enough to empty the buffer.
+  usleep(5000*_ms); //value to be tweaked. Should be large enough to empty the buffer.
   FaserProcess::stop(); //this turns m_run to false
 }
 
@@ -183,7 +186,7 @@ void TriggerReceiverModule::runner() {
                                               local_event_id, local_bc_id, event, total_size));
         fragment->set_status(m_fragment_status);
 
-        if (!m_fragment_status){
+        if (m_fragment_status){
           m_badFragmentsCount+=1;
         }
 

@@ -30,11 +30,14 @@ using namespace daqling::utilities;
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
+
+    auto cfg = m_config.getSettings();
+    uint8_t usb_device_no = cfg["usb_device_no"];
      
-    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
+    m_trb = std::make_unique<FASER::TRBAccess>(usb_device_no, 0, m_config.getConfig()["settings"]["emulation"]);
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
-    if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
+    if (m_config.getConfig()["loglevel"]["module"] == "TRACE") {  
       m_trb->SetDebug(true);
     }
     else {
@@ -61,10 +64,11 @@ void TrackerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("TRB --> configuration");
 
-  registerVariable(event_id, "event_id");
+  //registerVariable(event_id, "event_id");
   registerVariable(event_size_bytes, "event_size_bytes");
-  registerVariable(bc_id, "bc_id");
-  registerVariable(corrupted_fragments, "corrupted_fragments");
+  //registerVariable(bc_id, "bc_id");
+  registerVariable(corrupted_fragments, "corrupted_fragments", metrics::RATE);
+  registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -104,7 +108,7 @@ void TrackerReceiverModule::configure() {
   m_trb->GetConfig()->Set_Global_Overflow(4095);
 
   m_trb->WriteConfigReg();
-  
+
   //Modules configuration
   //This stage causes Timeout exception in DAQling, probably because of the transfer capacity. Maybe it will disapear with USB3 or ethernet
   for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
@@ -127,6 +131,30 @@ void TrackerReceiverModule::configure() {
       }
     }
   }
+
+  m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
+
+  // give it a moment to sync with clock?
+ for(unsigned int i = 5; i >0; i--){
+   uint16_t status;
+   m_trb->ReadStatus(status);
+   if ((status & 0x4)){ // check if TLBClkSel is TRUE
+     INFO( "   TLB CLK synchronized");
+     break;
+   }
+   INFO( "    TLB clock NOT OK ...");
+   sleep(1);
+ }
+
+  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
+  m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
+  m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
+  m_trb->GetConfig()->Set_Global_Overflow(4095);
+  m_trb->WriteConfigReg();
+
+  m_trb->SetDirectParam(FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect);
+
+
 }
 
 
@@ -205,6 +233,7 @@ void TrackerReceiverModule::runner() {
         for(std::vector<uint32_t> event : vector_of_raw_events){
           int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
           event_size_bytes = total_size; //Monitoring data
+          m_physicsEventCount += 1; //Monitoring data
 
           if (event.size() == 0){ continue;}
 
@@ -217,7 +246,8 @@ void TrackerReceiverModule::runner() {
                 local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
                 event_id = local_event_id | (m_ECRcount << 24); //Monitoring data
                 local_bc_id = decoded_event[0]->GetBCID();
-                bc_id = local_bc_id; // Monitoring data
+                if ( local_bc_id - 7 < 0 ) local_bc_id = 3566 + (local_bc_id-7);
+                else local_bc_id-=7;
             }
             else{
                 local_event_id = 0xFFFFFFFF;

@@ -25,11 +25,6 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
 
-  if ( m_event->event_tag() != m_eventTag ) {
-    ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
-    return;
-  }
-
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
@@ -51,10 +46,15 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   m_metric_event_id = m_tlbmonitoringFragment->event_id();
 
  // veto counters
-  m_deadtime_veto_counter = m_tlbmonitoringFragment->deadtime_veto_counter();
-  m_busy_veto_counter = m_tlbmonitoringFragment->busy_veto_counter();
-  m_rate_limiter_veto_counter = m_tlbmonitoringFragment->rate_limiter_veto_counter();
-  m_bcr_veto_counter = m_tlbmonitoringFragment->bcr_veto_counter();
+  m_deadtime_veto_counter += m_tlbmonitoringFragment->deadtime_veto_counter();
+  m_busy_veto_counter += m_tlbmonitoringFragment->busy_veto_counter();
+  m_rate_limiter_veto_counter += m_tlbmonitoringFragment->rate_limiter_veto_counter();
+  m_bcr_veto_counter += m_tlbmonitoringFragment->bcr_veto_counter();
+
+  DEBUG("m_bcr_veto_counter = "<<m_bcr_veto_counter);
+  DEBUG("m_rate_limiter_veto_counter = "<<m_rate_limiter_veto_counter);
+  DEBUG("m_metric_event_id = "<<m_metric_event_id);
+  DEBUG("bc_id = "<<m_tlbmonitoringFragment->bc_id());
 
   m_histogrammanager->fill("h_tlb_veto_counts", "SimpleDeadtime", float(m_deadtime_veto_counter));
   m_histogrammanager->fill("h_tlb_veto_counts", "Busy", float(m_busy_veto_counter));

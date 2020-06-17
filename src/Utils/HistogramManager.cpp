@@ -4,6 +4,7 @@
 
 HistogramManager::HistogramManager(std::unique_ptr<zmq::socket_t>& statSock, unsigned interval) : m_stat_socket{statSock}, m_interval{interval} {
   m_zmq_publisher = false;  
+  m_name = m_config.getName();
 }
 
 
@@ -64,7 +65,7 @@ void HistogramManager::flushHistograms(){
 void HistogramManager::publish( HistBase * h){
 
   std::ostringstream msg;
-  msg<<h->name<<": "<<h->publish();
+  msg<<m_name+'-'+h->name<<": "<<h->publish();
   DEBUG("START_OF_MSG:" <<std::endl << msg.str());
   if(m_zmq_publisher){
      zmq::message_t message(msg.str().size());

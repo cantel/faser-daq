@@ -10,6 +10,8 @@
 
 #include "Utils/Histogram.hpp"
 #include "Utils/Logging.hpp"
+#include "Core/Configuration.hpp"
+
 using namespace boost::histogram;
 
 namespace Axis {
@@ -162,6 +164,9 @@ public:
 
   // Config
   unsigned m_interval;
+  daqling::core::Configuration &m_config = daqling::core::Configuration::instance();
+  std::string m_name; // module name
+
   std::map< std::string, HistBase * > m_histogram_map;
 
   void CheckHistograms();

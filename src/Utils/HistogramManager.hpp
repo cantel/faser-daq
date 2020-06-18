@@ -10,6 +10,8 @@
 
 #include "Utils/Histogram.hpp"
 #include "Utils/Logging.hpp"
+#include "Core/Configuration.hpp"
+
 using namespace boost::histogram;
 
 namespace Axis {
@@ -97,7 +99,7 @@ public:
   void publish( HistBase * h);
 
   template<typename X>
-  void fill( std::string name, X value ){
+  void fill( std::string name, X value, float weight=1. ){
     
     static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
                   "Cannot fill histogram with invalid value type. Value must be numeric or string based (std::string or const char *)");
@@ -105,42 +107,44 @@ public:
     if ( m_histogram_map.count(name) ) {
       HistBase * hist = m_histogram_map[name];
       if (hist->extendable)
-        static_cast<Hist<stretchy_hist_t>*>(hist)->fill(value);
+        static_cast<Hist<stretchy_hist_t>*>(hist)->fill(value, weight);
       else 
-        static_cast<Hist<hist_t>*>(hist)->fill(value);
+        static_cast<Hist<hist_t>*>(hist)->fill(value, weight);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  void fill( std::string name, std::string value )  {
+  void fill( std::string name, std::string value, float weight=1. )  {
     
     if ( m_histogram_map.count(name) ) {
-      static_cast<CategoryHist*>(m_histogram_map[name])->fill(value);
+      static_cast<CategoryHist*>(m_histogram_map[name])->fill(value, weight);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  void fill( std::string name, const char * value )  {
+  void fill( std::string name, const char * value, float weight=1. )  {
     
     if ( m_histogram_map.count(name) ) {
-      static_cast<CategoryHist*>(m_histogram_map[name])->fill(value);
+      static_cast<CategoryHist*>(m_histogram_map[name])->fill(value, weight);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  template<typename X, typename Y>
-  void fill( std::string name, X xvalue, Y yvalue ){
+  template<typename X, typename Y, typename W>
+  void fill( std::string name, X xvalue, Y yvalue, W wvalue=1. ){
     
     static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
                   "Cannot fill histogram with invalid  x value type. Value must be numeric.");
     static_assert(std::is_integral<Y>::value || std::is_floating_point<Y>::value,
                   "Cannot fill histogram with invalid  y value type. Value must be numeric.");
+    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
+                  "Cannot fill histogram with invalid  w value type. Value must be numeric.");
 
     if ( m_histogram_map.count(name) ) {
-     static_cast<Hist2D*>(m_histogram_map[name])->fill(xvalue, yvalue);
+     static_cast<Hist2D*>(m_histogram_map[name])->fill(xvalue, yvalue, wvalue);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");
@@ -160,6 +164,9 @@ public:
 
   // Config
   unsigned m_interval;
+  daqling::core::Configuration &m_config = daqling::core::Configuration::instance();
+  std::string m_name; // module name
+
   std::map< std::string, HistBase * > m_histogram_map;
 
   void CheckHistograms();

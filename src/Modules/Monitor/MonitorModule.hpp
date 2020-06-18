@@ -5,7 +5,12 @@
 
 #include "Commons/FaserProcess.hpp"
 #include "EventFormats/DAQFormats.hpp"
+// import all existing data formats
 #include "EventFormats/RawExampleFormat.hpp"
+#include "EventFormats/TLBDataFragment.hpp"
+#include "EventFormats/TLBMonitoringFragment.hpp"
+#include "EventFormats/DigitizerDataFragment.hpp"
+
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Logging.hpp"
 #include <Utils/Binary.hpp>
@@ -34,6 +39,9 @@ class MonitorModule : public FaserProcess {
   const EventFragment* m_fragment=0; // do not delete this one. Owned by m_event!
   const RawFragment * m_rawFragment = 0 ; // do not delete this one. Owned by m_event!
   const MonitoringFragment * m_monitoringFragment = 0 ; // ""
+  const TLBMonitoringFragment * m_tlbmonitoringFragment = 0 ; // ""
+  const TLBDataFragment * m_tlbdataFragment = 0 ; // ""
+  const DigitizerDataFragment * m_pmtdataFragment = 0 ; // ""
 
   // histogramming
   bool m_histogramming_on;

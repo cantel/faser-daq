@@ -20,15 +20,6 @@ MonitorModule::MonitorModule() {
    if (cfg_sourceID!="" && cfg_sourceID!=nullptr)
       m_sourceID = cfg_sourceID;
    else m_sourceID=0;
-   auto cfg_tag = m_config.getConfig()["connections"]["receivers"][0]["filter"];
-   if ((cfg_tag!="" && cfg_tag!=nullptr)){
-     m_eventTag = ((uint16_t)cfg_tag) >> 8 ;
-   }
-   else {
-     WARNING("No event tag configured. Defaulting to PhysicsTag.");
-     m_eventTag=0; //default to Physics. Should not happen if force setting or set default in schema validation..
-   }
-   DEBUG("EventTag is "<<m_eventTag<<std::endl);
 
  }
 
@@ -158,6 +149,7 @@ uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBu
     return dataStatus |= CorruptedFragment;
   }
   m_event_header_unpacked = true;
+  m_eventTag = m_event->event_tag();
   
   return  dataStatus;
 
@@ -193,10 +185,22 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
   if (dataStatus) return dataStatus;
 
   switch (m_eventTag) {
-    case PhysicsTag:
-      m_rawFragment=m_fragment->payload<const RawFragment*>();
-      DEBUG("unpacking raw fragment.");
+    case PhysicsTag:{
+      switch (sourceID) {
+        case TriggerSourceID:
+          m_tlbdataFragment = new TLBDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+          DEBUG("unpacking TLB data fragment.");
+          break;
+        case PMTSourceID:
+          m_pmtdataFragment = new DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+          DEBUG("unpacking PMT data fragment.");
+          break;
+        default:
+          m_rawFragment=m_fragment->payload<const RawFragment*>();
+          DEBUG("unpacking raw fragment.");
+      }
       break;
+    }
     case CalibrationTag:
       m_rawFragment=m_fragment->payload<const RawFragment*>();
       DEBUG("unpacking calibration fragment.");
@@ -206,7 +210,7 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
       DEBUG("unpacking monitoring fragment.");
       break;
     case TLBMonitoringTag:
-      m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>(); //to be changed once subdetector specific formats defined.
+      m_tlbmonitoringFragment= new TLBMonitoringFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
       DEBUG("unpacking TLB monitoring fragment.");
       break;
     default:

@@ -25,13 +25,31 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   // retrieve the ip address of the sis3153 master board
   // this is configured via the arp and route commands on the network switch
   char  ip_addr_string[32];
-  strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; 
-  INFO("IP Address : "<<ip_addr_string);
+  //  auto cfg_ip = std::string(cfg["ip"]).c_str();
+  auto cfg_ip = cfg["ip"];
+  if (cfg_ip!="" && cfg_ip!=nullptr){
+    //strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; 
+    strcpy(ip_addr_string, std::string(cfg_ip).c_str()); 
+  }
+  else{
+    ERROR("No IP address setting in the digitizer configuration.");
+    THROW(DigitizerHardwareException, "No valid IP address setting in your config");
+  }
+    
+  INFO("Digitizer IP Address : "<<ip_addr_string);
 
   // retrieval of the VME base address which is set via the physical rotary
   // switches on the digitizer and forms the base of all register read/writes
-  std::string vme_base_address_str = std::string(cfg["vme_base_address"]);
-  UINT vme_base_address = std::stoi(vme_base_address_str,0,16);
+  UINT vme_base_address;
+  //  auto cfg_vme_base_address = std::string(cfg["vme_base_address"]);
+  auto cfg_vme_base_address = cfg["vme_base_address"];
+  if(cfg_vme_base_address!="" && cfg_vme_base_address!=nullptr){
+    vme_base_address = std::stoi(std::string(cfg_vme_base_address),0,16);
+  }
+  else{
+    ERROR("No VME Base address setting in the digitizer configuration.");
+    THROW(DigitizerHardwareException, "No valid VME Base address setting in your config");
+  }
   INFO("Base VME Address = 0x"<<std::setfill('0')<<std::setw(8)<<std::hex<<vme_base_address);
 
   // make a new digitizer instance
@@ -39,6 +57,31 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
   // test the communication line of the digitizer
   m_digitizer->TestComm();
+
+  // store local run settings
+  auto cfg_software_trigger_enable = cfg["software_trigger"]["enable"];
+  if(cfg_software_trigger_enable==nullptr){
+    INFO("You did not specify if you wanted to send SW triggers - assuming FALSE");
+    m_software_trigger_enable = false;
+  }
+  else{
+    m_software_trigger_enable = cfg_software_trigger_enable;
+    auto global_trig_sw = cfg["global_trigger"]["software"];
+    if(global_trig_sw==0){
+      INFO("Inconsistent settings - you have enabled SW triggers but not reading in the case that there is a SW trigger.");
+      INFO("Are you sure you want this settings?");
+    }
+  }
+
+  auto cfg_software_trigger_rate = cfg["software_trigger"]["rate"];
+  if(cfg_software_trigger_rate==nullptr){
+    INFO("You did not specify a SW trigger rate");
+    cfg_software_trigger_rate = 1;
+  }
+  else{
+    m_software_trigger_rate = cfg_software_trigger_rate;
+  }
+
 }
 
 DigitizerReceiverModule::~DigitizerReceiverModule() { INFO(""); }
@@ -53,42 +96,30 @@ void DigitizerReceiverModule::configure() {
   registerVariable(m_triggers, "TriggeredRate", metrics::RATE);
   
   // configuration of hardware
-  INFO("Digitizer --> Configuring");
-  
-  INFO("CONFIG before configuration");
-  m_digitizer->DumpConfig();
-  
+  INFO("Configuring ...");  
   m_digitizer->Configure(m_config.getConfig()["settings"]);
   
-  INFO("CONFIG after configuration");
+  INFO("Finished configuring - the settings of the digitizer are :");
   m_digitizer->DumpConfig();
 }
 
 void DigitizerReceiverModule::start(unsigned int run_num) {
+  INFO("Starting ...");
 
   // register the metrics for monitoring data
   INFO("Initializing monitoring metrics");
   m_triggers=0;
-
-  // initializing sw trigger counter
   m_sw_count=0;
 
   // starting of acquisition in hardware
-  INFO("Digitizer --> Starting BEFORE");
-  
-  INFO("Digitizer --> Starting");
-  INFO("CONFIG before startAcquire");
-  m_digitizer->DumpConfig();
   m_digitizer->StartAcquisition();
-  INFO("CONFIG after startAcquire");
-  m_digitizer->DumpConfig();
   
   FaserProcess::start(run_num);
 }
 
 void DigitizerReceiverModule::stop() {
   FaserProcess::stop();
-  INFO("Digitizer --> Stopping");
+  INFO("Stopping ...");
   m_digitizer->StopAcquisition();
 }
 
@@ -114,15 +145,13 @@ void DigitizerReceiverModule::runner() {
   INFO("Running...");  
   while (m_run) {    
 
-    // hack to send software triggers for development 
-    if(true){
+    // send software triggers for development if enabled
+    // these are sent with a pause after the sending to have a rate limit
+    if(m_software_trigger_enable){
       m_sw_count++;
-      INFO(m_sw_count);
-      if(m_sw_count%5000==0){
-	INFO("Sending SW Trigger");
-	m_digitizer->SendSWTrigger();
-	m_sw_count=1;
-      }
+      INFO("Software trigger sending : "<<m_sw_count);
+      m_digitizer->SendSWTrigger();
+      usleep((1.0/m_software_trigger_rate)*1000000);
     }
 
   
@@ -138,15 +167,17 @@ void DigitizerReceiverModule::runner() {
         sendEvent();
         m_triggers++;
       }
+      m_lock.unlock();
       DEBUG("Total nevents sent in running : "<<m_triggers);
     }
     else{
       // sleep for 1.5 milliseconds. This time is chosen to ensure that the polling 
       // happens at a rate just above the expected trigger rate in the case of no events
       DEBUG("No events - sleeping for a short while");
+      m_lock.unlock();
       usleep(1500); 
     }
-    m_lock.unlock();
+    
   
   }
   INFO("Runner stopped");

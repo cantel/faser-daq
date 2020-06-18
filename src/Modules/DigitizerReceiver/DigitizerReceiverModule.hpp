@@ -53,5 +53,7 @@ class DigitizerReceiverModule : public FaserProcess {
 
   // for SW trigger sending
   int m_sw_count;
+  bool m_software_trigger_enable;
+  float m_software_trigger_rate;
   
 };

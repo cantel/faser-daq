@@ -47,7 +47,7 @@ TriggerReceiverModule::~TriggerReceiverModule() {
 void TriggerReceiverModule::configure() {
   FaserProcess::configure();
 
-  registerVariable(m_physicsEventCount, "PhysicsEvents");
+  //registerVariable(m_physicsEventCount, "PhysicsEvents");
   registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
   registerVariable(m_monitoringEventCount, "MonitoringEvents");
   registerVariable(m_monitoringEventCount, "MonitoringRate", metrics::RATE);
@@ -97,16 +97,17 @@ void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   INFO("Got enableTrigger command with argument "<<arg);
   //auto myjson = m_config.getSettings(); //Temporary while using USB.
   //int WhatToRead=0x0; //Temp
-  //if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
-  //if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
-  //m_tlb->StartReadout(WhatToRead); //Temp
+  uint16_t readout_param = 0;
+  if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
+  if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
+  m_tlb->StartReadout(readout_param); //Temp
   m_tlb->EnableTrigger(false,false); //Only enables trigger. Doesn't send ECR nor Reset
 }
 
 void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with "command disableTrigger"
   INFO("Got disableTrigger command with argument "<<arg);
   m_tlb->DisableTrigger();
-  //m_tlb->StopReadout(); //Temporary while using USB. Should empty USB buffer.
+  m_tlb->StopReadout(); //Temporary while using USB. Should empty USB buffer.
   usleep(100); //Once ethernet is implemented you should either check if data is pushed or if timeout (100musec).  
 }
 

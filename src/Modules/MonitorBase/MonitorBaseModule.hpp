@@ -17,10 +17,10 @@
 
 using namespace DAQFormats;
 
-class MonitorModule : public FaserProcess {
+class MonitorBaseModule : public FaserProcess {
  public:
-  MonitorModule();
-  virtual ~MonitorModule();
+  MonitorBaseModule();
+  virtual ~MonitorBaseModule();
 
   void configure();
   void start(unsigned int);

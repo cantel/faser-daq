@@ -11,7 +11,7 @@ target_include_directories(${module_name} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../
 # Add source file to library
 daqling_target_sources(${module_name}
     DigitizerMonitorModule.cpp
-    ../Monitor/MonitorModule.cpp
+    ../MonitorBase/MonitorBaseModule.cpp
     ../../Utils/HistogramManager.cpp
 )
 

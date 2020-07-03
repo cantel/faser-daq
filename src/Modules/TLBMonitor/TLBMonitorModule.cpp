@@ -8,6 +8,8 @@
 
 #include "TLBMonitorModule.hpp"
 
+#define MAX_TRIG_LINES 5
+
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
@@ -29,56 +31,67 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
-    fill_error_status_to_histogram( fragmentUnpackStatus, "h_tlb_errorcount" );
+    //fill_error_status_to_histogram( fragmentUnpackStatus, "tlb_errorcount" );
     return;
   }
   // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
 
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
-  fill_error_status_to_histogram( fragmentStatus, "h_tlb_errorcount" );
 
   uint16_t payloadSize = m_fragment->payload_size(); 
 
-  m_histogrammanager->fill("h_tlb_payloadsize", payloadSize);
-  m_metric_payload = payloadSize;
+  // trigger counts
+  // --- 
+  m_tbp0 += m_tlbmonitoringFragment->tbp(0);
+  m_tbp1 += m_tlbmonitoringFragment->tbp(1);
+  m_tbp2 += m_tlbmonitoringFragment->tbp(2);
+  m_tbp3 += m_tlbmonitoringFragment->tbp(3);
+  m_tbp4 += m_tlbmonitoringFragment->tbp(4);
+  // --- 
+  m_tap0 += m_tlbmonitoringFragment->tap(0);
+  m_tap1 += m_tlbmonitoringFragment->tap(1);
+  m_tap2 += m_tlbmonitoringFragment->tap(2);
+  m_tap3 += m_tlbmonitoringFragment->tap(3);
+  m_tap4 += m_tlbmonitoringFragment->tap(4);
+  // -- 
+  m_tav0 += m_tlbmonitoringFragment->tav(0);
+  m_tav1 += m_tlbmonitoringFragment->tav(1);
+  m_tav2 += m_tlbmonitoringFragment->tav(2);
+  m_tav3 += m_tlbmonitoringFragment->tav(3);
+  m_tav4 += m_tlbmonitoringFragment->tav(4);
 
-  m_metric_event_id = m_tlbmonitoringFragment->event_id();
+  for ( uint8_t i = 0; i < MAX_TRIG_LINES; i++ ){
+    m_histogrammanager->fill("tlb_tbp_counts", i, float(m_tlbmonitoringFragment->tbp(i)));
+    m_histogrammanager->fill("tlb_tap_counts", i, float(m_tlbmonitoringFragment->tap(i)));
+    m_histogrammanager->fill("tlb_tav_counts", i, float(m_tlbmonitoringFragment->tav(i)));
+  };
 
  // veto counters
-  m_deadtime_veto_counter += m_tlbmonitoringFragment->deadtime_veto_counter();
-  m_busy_veto_counter += m_tlbmonitoringFragment->busy_veto_counter();
-  m_rate_limiter_veto_counter += m_tlbmonitoringFragment->rate_limiter_veto_counter();
-  m_bcr_veto_counter += m_tlbmonitoringFragment->bcr_veto_counter();
+  m_deadtime_veto += m_tlbmonitoringFragment->deadtime_veto_counter();
+  m_busy_veto += m_tlbmonitoringFragment->busy_veto_counter();
+  m_rate_limiter_veto += m_tlbmonitoringFragment->rate_limiter_veto_counter();
+  m_bcr_veto += m_tlbmonitoringFragment->bcr_veto_counter();
 
-  DEBUG("m_bcr_veto_counter = "<<m_bcr_veto_counter);
-  DEBUG("m_rate_limiter_veto_counter = "<<m_rate_limiter_veto_counter);
-  DEBUG("m_metric_event_id = "<<m_metric_event_id);
-  DEBUG("bc_id = "<<m_tlbmonitoringFragment->bc_id());
+  m_histogrammanager->fill("tlb_veto_counts", "SimpleDeadtime", float(m_tlbmonitoringFragment->deadtime_veto_counter()));
+  m_histogrammanager->fill("tlb_veto_counts", "Busy", float(m_tlbmonitoringFragment->busy_veto_counter()));
+  m_histogrammanager->fill("tlb_veto_counts", "RateLimiter", float(m_tlbmonitoringFragment->rate_limiter_veto_counter()));
+  m_histogrammanager->fill("tlb_veto_counts", "BCR", float(m_tlbmonitoringFragment->bcr_veto_counter()));
 
-  m_histogrammanager->fill("h_tlb_veto_counts", "SimpleDeadtime", float(m_deadtime_veto_counter));
-  m_histogrammanager->fill("h_tlb_veto_counts", "Busy", float(m_busy_veto_counter));
-  m_histogrammanager->fill("h_tlb_veto_counts", "RateLimiter", float(m_rate_limiter_veto_counter));
-  m_histogrammanager->fill("h_tlb_veto_counts", "BCR", float(m_bcr_veto_counter));
-
-  // 2D hist fill
-  //m_histogrammanager->fill("h_tlb_numfrag_vs_sizefrag", m_monitoringFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
 }
 
 void TLBMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TLBMonitor ... " );
-  
-  m_histogrammanager->registerHistogram("h_tlb_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, 3.);
-  std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
-  m_histogrammanager->registerHistogram("h_tlb_errorcount", "error type", categories, 5. );
+ 
+  // trigger counts 
+  m_histogrammanager->registerHistogram("tlb_tbp_counts", "TBP idx", 0, 4, 4 );
+  m_histogrammanager->registerHistogram("tlb_tap_counts", "TAP idx", 0, 4, 4 );
+  m_histogrammanager->registerHistogram("tlb_tav_counts", "TAV idx", 0, 4, 4 );
 
+  //veto counts
   std::vector<std::string> veto_categories = {"SimpleDeadtime", "Busy", "RateLimiter", "BCR"};
-  m_histogrammanager->registerHistogram("h_tlb_veto_counts", "veto type", veto_categories, 5. );
-
-
-  // example 2D hist
-  //m_histogrammanager->register2DHistogram("h_tlb_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20, 5 );
+  m_histogrammanager->registerHistogram("tlb_veto_counts", "veto type", veto_categories, 5. );
 
   INFO(" ... done registering histograms ... " );
   return;
@@ -91,21 +104,34 @@ void TLBMonitorModule::register_metrics() {
 
   register_error_metrics();
 
-  m_metric_payload = 0;
-  m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
-
-  m_metric_event_id = 0;
-  m_statistics->registerMetric(&m_metric_event_id, "eventID", daqling::core::metrics::LAST_VALUE);
+  //TBP rates
+  registerVariable(m_tbp0, "TBP0", daqling::core::metrics::RATE);
+  registerVariable(m_tbp1, "TBP1", daqling::core::metrics::RATE);
+  registerVariable(m_tbp2, "TBP2", daqling::core::metrics::RATE);
+  registerVariable(m_tbp3, "TBP3", daqling::core::metrics::RATE);
+  registerVariable(m_tbp4, "TBP4", daqling::core::metrics::RATE);
+  //TAP rates
+  registerVariable(m_tap0, "TAP0", daqling::core::metrics::RATE);
+  registerVariable(m_tap1, "TAP1", daqling::core::metrics::RATE);
+  registerVariable(m_tap2, "TAP2", daqling::core::metrics::RATE);
+  registerVariable(m_tap3, "TAP3", daqling::core::metrics::RATE);
+  registerVariable(m_tap4, "TAP4", daqling::core::metrics::RATE);
+  //TAV rates
+  registerVariable(m_tav0, "TAV0", daqling::core::metrics::RATE);
+  registerVariable(m_tav1, "TAV1", daqling::core::metrics::RATE);
+  registerVariable(m_tav2, "TAV2", daqling::core::metrics::RATE);
+  registerVariable(m_tav3, "TAV3", daqling::core::metrics::RATE);
+  registerVariable(m_tav4, "TAV4", daqling::core::metrics::RATE);
 
   //veto counters
-  m_deadtime_veto_counter = 0;
-  m_statistics->registerMetric(&m_deadtime_veto_counter, "deadtimeVetoCounter", daqling::core::metrics::ACCUMULATE);
-  m_busy_veto_counter = 0;
-  m_statistics->registerMetric(&m_busy_veto_counter, "busyVetoCounter", daqling::core::metrics::ACCUMULATE);
-  m_rate_limiter_veto_counter = 0;
-  m_statistics->registerMetric(&m_rate_limiter_veto_counter, "ratelimiterVetoCounter", daqling::core::metrics::ACCUMULATE);
-  m_bcr_veto_counter = 0;
-  m_statistics->registerMetric(&m_bcr_veto_counter, "BCRVetoCounter", daqling::core::metrics::ACCUMULATE);
+  registerVariable(m_deadtime_veto, "deadtimeVetoRate", daqling::core::metrics::RATE);
+  registerVariable(m_busy_veto, "busyVetoRate", daqling::core::metrics::RATE);
+  registerVariable(m_rate_limiter_veto, "ratelimiterVetoRate", daqling::core::metrics::RATE);
+  registerVariable(m_bcr_veto, "BCRVetoRate", daqling::core::metrics::RATE);
+  registerVariable(m_deadtime_veto, "deadtimeVetoCounter");
+  registerVariable(m_busy_veto, "busyVetoCounter");
+  registerVariable(m_rate_limiter_veto, "ratelimiterVetoCounter");
+  registerVariable(m_bcr_veto, "BCRVetoCounter");
 
 
   return;

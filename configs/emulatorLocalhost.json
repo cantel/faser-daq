@@ -251,6 +251,28 @@
           }
         ]
       }
+    },
+    {
+      "name": "emulateddatamonitor01",
+      "host": "localhost",
+      "port": 5559,
+      "type": "EmulatedDataMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	"stats_uri": "tcp://localhost:7000",
+        "fragmentID": 1000001
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8202
+          }
+        ]
+      }
     }
   ]
 }

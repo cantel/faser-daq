@@ -133,15 +133,13 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  template<typename X, typename Y, typename W>
-  void fill( std::string name, X xvalue, Y yvalue, W wvalue=1. ){
+  template<typename X, typename Y>
+  void fill2D( std::string name, X xvalue, Y yvalue, float wvalue=1. ){
     
     static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
                   "Cannot fill histogram with invalid  x value type. Value must be numeric.");
     static_assert(std::is_integral<Y>::value || std::is_floating_point<Y>::value,
                   "Cannot fill histogram with invalid  y value type. Value must be numeric.");
-    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
-                  "Cannot fill histogram with invalid  w value type. Value must be numeric.");
 
     if ( m_histogram_map.count(name) ) {
      static_cast<Hist2D*>(m_histogram_map[name])->fill(xvalue, yvalue, wvalue);

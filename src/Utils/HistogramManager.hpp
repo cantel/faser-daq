@@ -98,11 +98,13 @@ public:
 
   void publish( HistBase * h);
 
-  template<typename X>
-  void fill( std::string name, X value, float weight=1. ){
+  template<typename X, typename W = int>
+  void fill( std::string name, X value, W weight=1 ){
     
     static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
                   "Cannot fill histogram with invalid value type. Value must be numeric or string based (std::string or const char *)");
+    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
+                  "Cannot fill histogram with invalid weight value type. Value must be numeric.");
 
     if ( m_histogram_map.count(name) ) {
       HistBase * hist = m_histogram_map[name];
@@ -115,7 +117,11 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  void fill( std::string name, std::string value, float weight=1. )  {
+  template<typename X, typename W = int>
+  void fill( std::string name, std::string value, W weight=1 )  {
+
+    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
+                  "Cannot fill histogram with invalid weight value type. Value must be numeric.");
     
     if ( m_histogram_map.count(name) ) {
       static_cast<CategoryHist*>(m_histogram_map[name])->fill(value, weight);
@@ -124,7 +130,11 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  void fill( std::string name, const char * value, float weight=1. )  {
+  template<typename W = int>
+  void fill( std::string name, const char * value, W weight=1 )  {
+
+    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
+                  "Cannot fill histogram with invalid weight value type. Value must be numeric.");
     
     if ( m_histogram_map.count(name) ) {
       static_cast<CategoryHist*>(m_histogram_map[name])->fill(value, weight);
@@ -133,16 +143,18 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  template<typename X, typename Y>
-  void fill2D( std::string name, X xvalue, Y yvalue, float wvalue=1. ){
+  template<typename X, typename Y, typename W = int>
+  void fill2D( std::string name, X xvalue, Y yvalue, W weight=1 ){
     
     static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
-                  "Cannot fill histogram with invalid  x value type. Value must be numeric.");
+                  "Cannot fill histogram with invalid x value type. Value must be numeric.");
     static_assert(std::is_integral<Y>::value || std::is_floating_point<Y>::value,
-                  "Cannot fill histogram with invalid  y value type. Value must be numeric.");
+                  "Cannot fill histogram with invalid y value type. Value must be numeric.");
+    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
+                  "Cannot fill histogram with invalid weight value type. Value must be numeric.");
 
     if ( m_histogram_map.count(name) ) {
-     static_cast<Hist2D*>(m_histogram_map[name])->fill(xvalue, yvalue, wvalue);
+     static_cast<Hist2D*>(m_histogram_map[name])->fill(xvalue, yvalue, weight);
     }
     else 
       WARNING("Histogram with name "<<name<<" does not exist.");

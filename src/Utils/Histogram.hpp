@@ -67,9 +67,8 @@ class Hist : public HistBase {
   }
   ~Hist(){}
   template <typename X, typename W>
-  void fill(X x, W w = 1.)   { hist_object(x, weight(w)); }
+  void fill(X x, W w = 1)   { hist_object(x, weight(w)); }
   std::string publish() {
-      std::ostringstream os;
       auto this_axis = hist_object.axis();
       std::vector<int> yvalues;
       for (auto y : indexed(hist_object, coverage::all ) ) {
@@ -84,9 +83,7 @@ class Hist : public HistBase {
       }
       jsonupdate["yvalues"] = yvalues;
       json_object.update(jsonupdate);
-      std::string json_str = json_object.dump();
-      os << json_str;
-      return os.str();
+      return json_object.dump();
   }
   private:
   T hist_object;
@@ -118,10 +115,11 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
      configure();
   }
   ~CategoryHist(){}
-  void fill(std::string x, float w = 1.)  { hist_object(x, weight(w));}
-  void fill(const char * x, float w = 1.)  { hist_object(x, weight(w));}
+  template <typename W>
+  void fill(std::string x, W w = 1)  { hist_object(x, weight(w));}
+  template <typename W>
+  void fill(const char * x, W w = 1)  { hist_object(x, weight(w));}
   std::string publish() override {
-      std::ostringstream os;
       auto this_axis = hist_object.axis();
       std::vector<int> yvalues;
       for (auto y : indexed(hist_object, coverage::inner ) ) { // no under/overflows for boost hist objects of axis type category.
@@ -130,9 +128,7 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
       json jsonupdate;
       jsonupdate["yvalues"] = yvalues;
       json_object.update(jsonupdate);
-      std::string json_str = json_object.dump();
-      os << json_str;
-      return os.str();
+      return json_object.dump();
   }
   private:
   categoryhist_t hist_object;
@@ -173,7 +169,6 @@ class Hist2D : public HistBase {
   template <typename X, typename Y, typename W>
   void fill( X x, Y y, W w=1) { hist_object(x,y, weight(w));}
   std::string publish() {
-      std::ostringstream os;
       auto this_axis = hist_object.axis();
       std::vector<int> zvalues;
       for (auto z : indexed(hist_object, coverage::all ) ) {
@@ -182,9 +177,7 @@ class Hist2D : public HistBase {
       json jsonupdate;
       jsonupdate["zvalues"] = zvalues;
       json_object.update(jsonupdate);
-      std::string json_str = json_object.dump();
-      os << json_str;
-      return os.str();
+      return json_object.dump();
   }
   private:
   hist2d_t hist_object;

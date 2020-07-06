@@ -39,8 +39,6 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
 
-  uint16_t payloadSize = m_fragment->payload_size(); 
-
   // trigger counts
   // --- 
   m_tbp0 += m_tlbmonitoringFragment->tbp(0);
@@ -73,10 +71,10 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   m_rate_limiter_veto += m_tlbmonitoringFragment->rate_limiter_veto_counter();
   m_bcr_veto += m_tlbmonitoringFragment->bcr_veto_counter();
 
-  m_histogrammanager->fill("tlb_veto_counts", "SimpleDeadtime", float(m_tlbmonitoringFragment->deadtime_veto_counter()));
-  m_histogrammanager->fill("tlb_veto_counts", "Busy", float(m_tlbmonitoringFragment->busy_veto_counter()));
-  m_histogrammanager->fill("tlb_veto_counts", "RateLimiter", float(m_tlbmonitoringFragment->rate_limiter_veto_counter()));
-  m_histogrammanager->fill("tlb_veto_counts", "BCR", float(m_tlbmonitoringFragment->bcr_veto_counter()));
+  m_histogrammanager->fill("tlb_veto_counts", "SimpleDeadtime", m_tlbmonitoringFragment->deadtime_veto_counter());
+  m_histogrammanager->fill("tlb_veto_counts", "Busy", m_tlbmonitoringFragment->busy_veto_counter());
+  m_histogrammanager->fill("tlb_veto_counts", "RateLimiter", m_tlbmonitoringFragment->rate_limiter_veto_counter());
+  m_histogrammanager->fill("tlb_veto_counts", "BCR", m_tlbmonitoringFragment->bcr_veto_counter());
 
 }
 
@@ -132,7 +130,6 @@ void TLBMonitorModule::register_metrics() {
   registerVariable(m_busy_veto, "busyVetoCounter");
   registerVariable(m_rate_limiter_veto, "ratelimiterVetoCounter");
   registerVariable(m_bcr_veto, "BCRVetoCounter");
-
 
   return;
 }

@@ -47,10 +47,12 @@ void EmulatedDataMonitorModule::monitor(daqling::utilities::Binary &eventBuilder
   m_histogrammanager->fill("payloadsize", payloadSize);
   m_metric_payload = payloadSize;
 
+  m_histogrammanager->fill("sizefrag", m_monitoringFragment->size_fragments_sent/1000.);
+
   // 2D hist fill
-  DEBUG("m_monitoringFragment->num_fragments_sent/1000. = "<<m_monitoringFragment->num_fragments_sent/1000.);
+  DEBUG("m_monitoringFragment->num_fragments_sent = "<<m_monitoringFragment->num_fragments_sent);
   DEBUG("m_monitoringFragment->size_fragments_sent/1000. = "<<m_monitoringFragment->size_fragments_sent/1000.);
-  m_histogrammanager->fill2D("numfrag_vs_sizefrag", m_monitoringFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
+  m_histogrammanager->fill2D("numfrag_vs_sizefrag", m_monitoringFragment->num_fragments_sent, m_monitoringFragment->size_fragments_sent/1000.);
 
 }
 
@@ -63,8 +65,12 @@ void EmulatedDataMonitorModule::register_hists() {
   // example of 1D histogram with extendable x-axis, publishing interval of every 30 seconds.
   m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 349.5, 175, Axis::Range::EXTENDABLE, 30);
 
+  // example 1D histogram with non-extendable axis and resetting after each publish
+  m_histogrammanager->registerHistogram("sizefrag", "size of sent fragments [kB]","count/2kB", -0.5, 349.5, 175, Axis::Range::NONEXTENDABLE);
+  m_histogrammanager->resetOnPublish("sizefrag", true);
+
   // example 2D hist
-  m_histogrammanager->register2DHistogram("numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20, 30 );
+  m_histogrammanager->register2DHistogram("numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 100.5, 101, "size of sent fragments [kB]", -0.5, 9.5, 20, 30 );
 
   INFO(" ... done registering histograms ... " );
 

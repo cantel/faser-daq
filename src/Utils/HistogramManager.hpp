@@ -160,6 +160,8 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
+  void resetOnPublish(std::string, bool);
+
   private:
 
   // Thread control
@@ -181,6 +183,5 @@ public:
 
   void CheckHistograms();
   void flushHistograms();
-
 
 };

@@ -6,6 +6,7 @@
 #include <ctime>
 #include <iostream>
 #include <nlohmann/json.hpp> // dump Hist as json structure
+#include <algorithm> // std::fill
 
 using namespace boost::histogram;
 using json = nlohmann::json;
@@ -38,14 +39,12 @@ class HistBase {
   HistBase(std::string name, std::string xlabel, std::string ylabel, unsigned int xbins, bool extendable, float delta_t) : name(name), title(name), xlabel(xlabel), ylabel(ylabel), xbins(xbins), extendable(extendable), delta_t(delta_t) { timestamp = std::time(nullptr); }
   virtual ~HistBase(){}
   //define hist
-  std::string name;
-  std::string title;
-  std::string xlabel;
-  std::string ylabel;
+  std::string name, title, xlabel, ylabel;
   float xmin = -1.;
   float xmax = -1.;
   unsigned int xbins;
   bool extendable;
+  bool b_reset = false;
   //define published msg
   std::string type = "num_fixedwidth";
   std::ostringstream msg_head;
@@ -55,6 +54,7 @@ class HistBase {
   unsigned int delta_t;
   //public functions
   virtual std::string publish() { return "nothing";}
+  void reset_on_publish(bool reset=true){ b_reset=reset;}
 };
 
 
@@ -83,6 +83,10 @@ class Hist : public HistBase {
       }
       jsonupdate["yvalues"] = yvalues;
       json_object.update(jsonupdate);
+      if (b_reset) {
+       //auto ind = indexed(hist_object, coverage::all);
+       std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
+      }
       return json_object.dump();
   }
   private:
@@ -128,6 +132,10 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
       json jsonupdate;
       jsonupdate["yvalues"] = yvalues;
       json_object.update(jsonupdate);
+      if (b_reset) {
+       //auto ind = indexed(hist_object, coverage::all);
+       std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
+      }
       return json_object.dump();
   }
   private:
@@ -177,6 +185,10 @@ class Hist2D : public HistBase {
       json jsonupdate;
       jsonupdate["zvalues"] = zvalues;
       json_object.update(jsonupdate);
+      if (b_reset) {
+       //auto ind = indexed(hist_object, coverage::all);
+       std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
+      }
       return json_object.dump();
   }
   private:

@@ -73,6 +73,8 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
     }
   }
 
+  INFO("Are software triggers enabled? : "<<m_software_trigger_enable);
+
   auto cfg_software_trigger_rate = cfg["software_trigger"]["rate"];
   if(cfg_software_trigger_rate==nullptr){
     INFO("You did not specify a SW trigger rate");
@@ -81,6 +83,21 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   else{
     m_software_trigger_rate = cfg_software_trigger_rate;
   }
+
+  if(cfg_software_trigger_enable){
+    INFO("Trigger rate for SW triggers at : "<<m_software_trigger_rate);
+  }
+
+
+  // for the TLB conversion factor on the trigger time tag
+  auto cfg_ttt_converter = cfg["ttt_converter"];
+  if(cfg_ttt_converter==nullptr){
+    INFO("You did not specify the TTT converter, setting it to the LHC 40.08 MHze");
+    cfg_ttt_converter = "40.08";
+  }
+  m_ttt_converter = std::atof(std::string(cfg_ttt_converter).c_str());  // perhaps there is a better way to do this
+
+  INFO("Setting TLB-Digitizer TTT clock to : "<<m_ttt_converter);
 
 }
 
@@ -153,7 +170,9 @@ void DigitizerReceiverModule::runner() {
       m_digitizer->SendSWTrigger();
       usleep((1.0/m_software_trigger_rate)*1000000);
     }
-
+    else{
+      DEBUG("You are not sending random triggers");
+    }
   
     // lock to prevent accidental double reading with the sendECR() call
     m_lock.lock();
@@ -196,6 +215,8 @@ void DigitizerReceiverModule::sendEvent() {
   int payload_size = Payload_GetEventSize( raw_payload );
   const int total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
 
+  DEBUG("PayloadSize : nwords="<<payload_size<<"  total_size="<<total_size);
+
   // the event ID is what should be used, in conjunction with the ECR to give a unique event tag
   // word[2] bits[23:0]
   // need to blank out the top bits because these are the channel masks
@@ -221,7 +242,7 @@ void DigitizerReceiverModule::sendEvent() {
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::PMTSourceID;
   uint64_t local_event_id     = (m_ECRcount<<24) + (Header_EventCounter+1); // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
-  uint16_t local_bc_id        = Header_TriggerTimeTag*(40.0/62.5);      // trigger time tag corrected by LHCClock/TrigClock = 40/62.5
+  uint16_t local_bc_id        = Header_TriggerTimeTag*(40.08/125);      // trigger time tag corrected by LHCClock/TrigClock = 40.00/125
 
   // create the event fragment
   std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, raw_payload, total_size ));

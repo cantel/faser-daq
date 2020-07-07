@@ -162,6 +162,8 @@ public:
 
   void resetOnPublish(std::string, bool);
 
+  void reset(std::string);
+
   private:
 
   // Thread control

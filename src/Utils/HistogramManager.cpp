@@ -88,3 +88,13 @@ void HistogramManager::resetOnPublish(std::string name, bool reset = true){
  
   return;
 }
+
+void HistogramManager::reset(std::string name){
+  if ( m_histogram_map.count(name) ) {
+    m_histogram_map[name]->reset();
+  }
+  else 
+      WARNING("Histogram with name "<<name<<" does not exist.");
+ 
+  return;
+}

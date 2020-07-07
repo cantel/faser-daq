@@ -54,6 +54,7 @@ class HistBase {
   unsigned int delta_t;
   //public functions
   virtual std::string publish() { return "nothing";}
+  virtual void reset() {}
   void reset_on_publish(bool reset=true){ b_reset=reset;}
 };
 
@@ -88,6 +89,9 @@ class Hist : public HistBase {
        std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
       }
       return json_object.dump();
+  }
+  void reset(){
+       std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
   }
   private:
   T hist_object;
@@ -137,6 +141,9 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
        std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
       }
       return json_object.dump();
+  }
+  void reset(){
+       std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
   }
   private:
   categoryhist_t hist_object;
@@ -190,6 +197,9 @@ class Hist2D : public HistBase {
        std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
       }
       return json_object.dump();
+  }
+  void reset(){
+       std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
   }
   private:
   hist2d_t hist_object;

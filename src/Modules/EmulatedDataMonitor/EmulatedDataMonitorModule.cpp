@@ -11,6 +11,8 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
+#define PI 3.14
+
 EmulatedDataMonitorModule::EmulatedDataMonitorModule() { 
 
    INFO("");
@@ -49,6 +51,15 @@ void EmulatedDataMonitorModule::monitor(daqling::utilities::Binary &eventBuilder
 
   m_histogrammanager->fill("sizefrag", m_monitoringFragment->size_fragments_sent/1000.);
 
+  m_histogrammanager->reset("pulse");
+  short adc(0.);
+  short amp = rand()%10+1;
+  float phase = (PI/2.)*(rand()%10)/10.;
+  for ( unsigned short i = 1; i <= 5; i++) {
+    adc = amp*sin( i*(PI/5.) + phase);
+    m_histogrammanager->fill("pulse", i, adc);
+  }
+
   // 2D hist fill
   DEBUG("m_monitoringFragment->num_fragments_sent = "<<m_monitoringFragment->num_fragments_sent);
   DEBUG("m_monitoringFragment->size_fragments_sent/1000. = "<<m_monitoringFragment->size_fragments_sent/1000.);
@@ -68,6 +79,9 @@ void EmulatedDataMonitorModule::register_hists() {
   // example 1D histogram with non-extendable axis and resetting after each publish
   m_histogrammanager->registerHistogram("sizefrag", "size of sent fragments [kB]","count/2kB", -0.5, 349.5, 175, Axis::Range::NONEXTENDABLE);
   m_histogrammanager->resetOnPublish("sizefrag", true);
+
+  // example pulse reset
+   m_histogrammanager->registerHistogram("pulse", "pulse in magic adc", 1, 6, 5, 10);
 
   // example 2D hist
   m_histogrammanager->register2DHistogram("numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 100.5, 101, "size of sent fragments [kB]", -0.5, 9.5, 20, 30 );

@@ -37,13 +37,18 @@ TrackerReceiverModule::TrackerReceiverModule() {
     m_trb = std::make_unique<FASER::TRBAccess>(usb_device_no, 0, m_config.getConfig()["settings"]["emulation"]);
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
+    auto log_level = m_config.getConfig()["loglevel"]["module"];
+    m_debug = (log_level=="DEBUG"?1:0);
     if (m_config.getConfig()["loglevel"]["module"] == "TRACE") {  
       m_trb->SetDebug(true);
     }
     else {
       m_trb->SetDebug(false);    
     }
-    
+
+    m_trb->SetupStorageStream("rawData.daq"); //FIXME: Outputting for now.
+    //m_ed->SetEventInfoVerbosity(5);
+
     //Setting up the emulated interface
     if (m_config.getConfig()["settings"]["emulation"] == true) {
       std::string l_TRBconfigFile = m_config.getConfig()["settings"]["emulatorFile"];
@@ -90,20 +95,28 @@ void TrackerReceiverModule::configure() {
     ERROR("We have at most 8 modules per TRB, but you specified 0x" <<std::hex<<m_moduleMask<< " as moduleClkCmdMask!");
     return;
   }
+
+  m_trb->GetPhaseConfig()->SetFinePhase_Clk0(0);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led0(45);
+  m_trb->GetPhaseConfig()->SetFinePhase_Clk1(0);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led1(45);
+  m_trb->WritePhaseConfigReg();
+  m_trb->ApplyPhaseConfig();
   
   if (m_config.getConfig()["settings"]["L1Atype"] == "internal"){
     m_trb->GetConfig()->Set_Module_L1En(0x0);
     m_trb->GetConfig()->Set_Global_L2SoftL1AEn(true);
   }
   else {
-    m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
+    m_trb->GetConfig()->Set_Module_L1En(0); 
+    m_trb->GetConfig()->Set_Module_BCREn(0); 
     m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
   }
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
-  m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
-  m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
+  m_trb->GetConfig()->Set_Module_LedRXEn(0);
+  m_trb->GetConfig()->Set_Module_LedxRXEn(0);
 
-  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
+  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(false);
   m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
   m_trb->GetConfig()->Set_Global_Overflow(4095);
 
@@ -130,7 +143,7 @@ void TrackerReceiverModule::configure() {
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
     }
-  }
+    }
 
   m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
 
@@ -146,11 +159,19 @@ void TrackerReceiverModule::configure() {
    sleep(1);
  }
 
-  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
+  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(false);
   m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
   m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
   m_trb->GetConfig()->Set_Global_Overflow(4095);
+  m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
+  m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
+  m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
+  m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
+  m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
+  m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
   m_trb->WriteConfigReg();
+  m_trb->SCT_EnableDataTaking(m_moduleMask);
+  m_trb->GenerateSoftReset(m_moduleMask);
 
   m_trb->SetDirectParam(FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect);
 
@@ -219,7 +240,7 @@ void TrackerReceiverModule::runner() {
   uint64_t local_event_id;
   uint64_t local_bc_id;
 
-  while (m_run) { 
+  while (m_run || vector_of_raw_events.size()) { 
     if (m_config.getConfig()["settings"]["L1Atype"] == "internal" && m_triggerEnabled == true){
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
@@ -246,6 +267,14 @@ void TrackerReceiverModule::runner() {
                 local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
                 local_event_id = local_event_id | (m_ECRcount << 24);
                 local_bc_id = decoded_event[0]->GetBCID();
+                if (m_debug){
+	  	  DEBUG("N modules present = "<<decoded_event[0]->GetNModulesPresent());
+	  	  if(decoded_event[0]->GetNModulesPresent()>0){
+	  	     auto ourSCTevent = decoded_event[0]->GetModule(0);
+	  	     DEBUG("BCID = "<<ourSCTevent->GetBCID());
+	  	     DEBUG("L1ID = "<<ourSCTevent->GetL1ID());
+	  	  }
+                }
                 int corr_bc_id = local_bc_id;
                 if ( corr_bc_id - 7 < 0 ) { local_bc_id = 3564 + (corr_bc_id-7);}
                 else local_bc_id-=7;
@@ -270,7 +299,7 @@ void TrackerReceiverModule::runner() {
               }
             }
             
-            if (m_config.getConfig()["loglevel"]["module"] == "DEBUG"){
+            if (m_debug){
               DEBUG("-------------- printing new event ---------------- ");
               DEBUG("Data received from TRB: ");
               for(auto word : event){

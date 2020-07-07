@@ -26,10 +26,10 @@
         "BusyDisable": true,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
-        "Derandomize": false,
+        "Derandomize": true,
         "ReadoutFIFOReset": false,
-        "LUTConfig": "/home/cantel/TLBConfigFiles/LUT1.txt", 
-        "usb_device_no": 42
+        "LUTConfig": "../gpiodrivers/TLBAccess/config/LUT1.txt", 
+        "usb_device_no": 48
       },
       "connections": {
         "senders": [
@@ -72,7 +72,7 @@
         "L1CounterReset" : false,
         "ErrCntReset" : false,
         "FifoReset" : false,
-        "usb_device_no": 43
+        "usb_device_no": 2
        },
       "connections": {
         "senders": [
@@ -91,20 +91,24 @@
       "host": "localhost",
       "port": 5558,
       "type": "DigitizerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
           "stats_uri": "tcp://localhost:7000",
+          "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+	  "influxDb_name": "DAQlingMetrics",
           "ip":                    "192.168.122.2",
           "vme_base_address":      "0x04320000",
           "buffer_length":         "0x0A",
-          "buffer_n_post_samples": "0x20",
+          "buffer_n_post_samples": "0x0",
           "internal_sawtooth":     false,
-          "global_trigger": { "lvds": 0, "external": 0, "software": 1, "polarity": "under", "coincidence": false, "nchan": 2, "timewindow": 20},
-          "channel_config": [{"group" : 0, "trig_enable": 1, "trig_logic": "OnlyA", "trig_width":32,
+	  "software_trigger":  {"enable": false, "rate": 3},
+          "global_trigger": { "lvds": 0, "external": 1, "software": 0, "polarity": "under", "coincidence": false, "nchan": 2, "timewindow": 20},
+	  "ttt_converter": "39.90",
+          "channel_config": [{"group" : 0, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
                               "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 10000},
                               "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
                              },
-                             {"group" : 1, "trig_enable": 1, "trig_logic": "OnlyA", "trig_width":32,
+                             {"group" : 1, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
                               "chanA" : {"channel": 2, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 10000},
                               "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
                              },
@@ -177,7 +181,7 @@
           },
           {
             "type": "pair",
-            "chid": 3,
+            "chid": 2,
             "transport": "tcp",
             "host": "localhost",
             "port": 8102
@@ -246,7 +250,7 @@
 	  "stats_uri": "tcp://localhost:7000",
 	  "max_filesize": 500000,
 	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/cantel/Faser-tlbtrbdigi-test--%c-%r-%n.raw",
+	  "filename_pattern": "/tmp/meehan/Faser-tlbtrbdigi-test--%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
 			    "Corrupted","Incomplete","Duplicate"]
       },

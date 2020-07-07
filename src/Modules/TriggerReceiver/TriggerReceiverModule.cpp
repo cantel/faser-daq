@@ -123,7 +123,7 @@ void TriggerReceiverModule::start(unsigned run_num) {
   if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   m_tlb->StartReadout( readout_param );
-  usleep(10000*_ms);//temporary - wait for all modules
+  usleep(2000*_ms);//temporary - wait for all modules
   m_tlb->EnableTrigger(true,true); //sends ECR and Reset
 }
 

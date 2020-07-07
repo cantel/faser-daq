@@ -47,6 +47,8 @@ class DigitizerReceiverModule : public FaserProcess {
   vx1730 *m_digitizer;
   
   std::mutex m_lock;
+
+  float m_ttt_converter;
   
   // monitoring metrics
   std::atomic<int> m_triggers;

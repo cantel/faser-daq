@@ -56,6 +56,14 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
   m_histogrammanager->fill("h_digitizer_payloadsize", payloadSize);
   m_metric_payload = payloadSize;
 
+
+  // unpack and get full pulse shape from channel 0 into histogram
+  INFO("NSamp(0) : "<<m_pmtdataFragment->channel_adc_counts(0).size());
+  
+  for(int isamp=0; isamp<m_pmtdataFragment->channel_adc_counts(0).size(); isamp++){
+    m_histogrammanager->fill("h_pulse_chan0",isamp,m_pmtdataFragment->channel_adc_counts(0).at(isamp));
+  }
+
   // example 3 - 2D hist fill
   //m_histogrammanager->fill("h_digitizer_numfrag_vs_sizefrag", m_pmtdataFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
   
@@ -70,8 +78,12 @@ void DigitizerMonitorModule::register_hists() {
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
   m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, 5. );
 
+
+  // print out raw pulse for channel 0
+  m_histogrammanager->registerHistogram("h_pulse_chan0","channel pulse [0]",0,1000,1000);
+
   // example 2D hist
-  m_histogrammanager->register2DHistogram("h_Digitizer_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20 );
+  //m_histogrammanager->register2DHistogram("h_Digitizer_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20 );
 
   INFO(" ... done registering histograms ... " );
   return;

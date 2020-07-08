@@ -17,6 +17,8 @@
 
 #include "DigitizerReceiverModule.hpp"
 
+#define HOSTNAME_MAX_LENGTH 100
+
 DigitizerReceiverModule::DigitizerReceiverModule() { INFO(""); 
   INFO("DigitizerReceiverModule Constructor");
 
@@ -24,12 +26,36 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   
   // retrieve the ip address of the sis3153 master board
   // this is configured via the arp and route commands on the network switch
-  char  ip_addr_string[32];
-  //  auto cfg_ip = std::string(cfg["ip"]).c_str();
+  INFO("Getting IP Address");
+  char  ip_addr_string[HOSTNAME_MAX_LENGTH];
   auto cfg_ip = cfg["ip"];
   if (cfg_ip!="" && cfg_ip!=nullptr){
-    //strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; 
-    strcpy(ip_addr_string, std::string(cfg_ip).c_str()); 
+    char input_ip_location[HOSTNAME_MAX_LENGTH];
+    
+    // check to make sure you can copy over the config 
+    int length = strlen(std::string(cfg_ip).c_str());
+    if(length>HOSTNAME_MAX_LENGTH){
+      ERROR("This is too long of a name : "<<std::string(cfg_ip));
+      ERROR("Max length of IP hostname : "<<HOSTNAME_MAX_LENGTH);
+      THROW(DigitizerHardwareException, "IP address or hostname is too long");
+    }
+
+    // lookup the IP address dynamically 
+    // determines if its an IP address or a hostname
+    strcpy(input_ip_location, std::string(cfg["ip"]).c_str() ) ;
+    INFO("Input locale : "<<input_ip_location);
+    std::string ip_str = std::string(GetIPAddress(input_ip_location));
+    strcpy(ip_addr_string, ip_str.c_str()); 
+    INFO("Input address/host  : "<<cfg["ip"]);
+    INFO("Returned IP Address : "<<ip_addr_string);
+
+    // check to make sure the thing is an IP address
+    if(IsIPAddress(ip_addr_string)==false){
+      strcpy(ip_addr_string,"0.0.0.0");
+      ERROR("This is not an IP address : "<<ip_addr_string);
+      THROW(DigitizerHardwareException, "Invalid IP address");
+    }
+
   }
   else{
     ERROR("No IP address setting in the digitizer configuration.");
@@ -40,8 +66,8 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
   // retrieval of the VME base address which is set via the physical rotary
   // switches on the digitizer and forms the base of all register read/writes
+  INFO("Getting VME digitizer HW address");
   UINT vme_base_address;
-  //  auto cfg_vme_base_address = std::string(cfg["vme_base_address"]);
   auto cfg_vme_base_address = cfg["vme_base_address"];
   if(cfg_vme_base_address!="" && cfg_vme_base_address!=nullptr){
     vme_base_address = std::stoi(std::string(cfg_vme_base_address),0,16);

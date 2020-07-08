@@ -9,7 +9,7 @@
       "type": "DigitizerReceiver",
       "loglevel": {"core": "DEBUG", "module": "INFO"},
       "settings": {
-          "ip":                    "128.141.151.198",
+          "ip":                    "faser-vme-controller-00.cern.ch", 
           "vme_base_address":      "0x32000000",
           "buffer_length":         "0x0A",
           "buffer_n_post_samples": "0x20",

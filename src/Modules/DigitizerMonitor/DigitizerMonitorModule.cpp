@@ -59,7 +59,10 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
 
   // unpack and get full pulse shape from channel 0 into histogram
   INFO("NSamp(0) : "<<m_pmtdataFragment->channel_adc_counts(0).size());
-  
+
+  //int temp = m_histogrammanager->m_histogram_map["h_pulse_chan0"]->second.at(2);
+  //INFO("Content Bin 2 : "<<temp);
+  m_histogrammanager->clear("h_pulse_chan0");
   for(int isamp=0; isamp<m_pmtdataFragment->channel_adc_counts(0).size(); isamp++){
     m_histogrammanager->fill("h_pulse_chan0",isamp,m_pmtdataFragment->channel_adc_counts(0).at(isamp));
   }

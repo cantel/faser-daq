@@ -39,6 +39,14 @@
 	    "type": "string",
 	    "format": "uri"
 	  },
+          "influxDb_uri": {
+              "type"          : "string",
+              "title"         : "influxDb_uri"
+          },
+          "influxDb_name": {
+              "type"          : "string",
+              "title"         : "influxDb_name"
+          },
           "sourceID": {
 	    "type": "integer",
 	    "minimum": 0,

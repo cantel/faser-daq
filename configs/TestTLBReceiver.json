@@ -21,15 +21,15 @@
         "LHC_CLK": false,
         "OrbitDelay": 0,
         "Deadtime": 500,
-        "MonitoringRate": 674700,
+        "MonitoringRate": 11233,
         "OutputDestination": 0,
         "Input": [false, false, false, false, false, false, false, false],
         "BusyDisable": true,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
-        "Derandomize": true,
+        "Derandomize": false,
         "ReadoutFIFOReset": true,
-        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt", 
+        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
       },
       "connections": {
         "senders": [
@@ -184,14 +184,16 @@
       }
     },
     {
-      "name": "triggerratemonitor01",
+      "name": "ratemonitor01",
       "host": "localhost",
       "port": 5559,
       "type": "TriggerRateMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 131072,
-	"stats_uri": "tcp://localhost:7000"
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [
@@ -213,7 +215,9 @@
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 131072,
-	"stats_uri": "tcp://localhost:7000"
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
       },
       "connections": {
         "receivers": [

@@ -21,7 +21,7 @@
         "LHC_CLK": false,
         "OrbitDelay": 0,
         "Deadtime": 500,
-        "MonitoringRate": 674700,
+        "MonitoringRate": 11233,
         "OutputDestination": 0,
         "Input": [false, false, false, false, false, false, false, false],
         "BusyDisable": false,
@@ -29,8 +29,7 @@
         "EnableMonitoringData": true,
         "Derandomize": true,
         "ReadoutFIFOReset": true,
-        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt", 
-        "usb_device_no": 40
+        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
       },
       "connections": {
         "senders": [
@@ -46,7 +45,7 @@
     },
     {
       "name": "trackerreceiver",
-      "host": "localhost",
+      "host": "sahigashlinux",
       "port": 5557, 
       "type": "TrackerReceiver",
       "loglevel": {"core": "INFO", "module": "INFO"},
@@ -58,14 +57,14 @@
         "emulation" : false,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
         "moduleMask" : [true, true, true, true, true, true, true, true], 
-        "moduleConfigFiles": {"0" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module0.json",
-                              "1" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module1.json",
-                              "2" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module2.json",
-                              "3" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module3.json",
-                              "4" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module4.json",
-                              "5" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module5.json",
-                              "6" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module6.json",
-                              "7" : "/home/shifter/cernbox/ehn1/DAQ_Data/Plane100/config/Module7.json"},
+        "moduleConfigFiles": {"0" : "/home/lbrenner/configModules/Module0.json",
+                              "1" : "/home/lbrenner/configModules/Module1.json",
+                              "2" : "/home/lbrenner/configModules/Module2.json",
+                              "3" : "/home/lbrenner/configModules/Module3.json",
+                              "4" : "/home/lbrenner/configModules/Module4.json",
+                              "5" : "/home/lbrenner/configModules/Module5.json",
+                              "6" : "/home/lbrenner/configModules/Module6.json",
+                              "7" : "/home/lbrenner/configModules/Module7.json"},
         "moduleClkCmdMask" : [false, false, false, false, false, false, false, false],
         "TLBClockSel" : true,
         "BCREn" : true,
@@ -73,8 +72,7 @@
         "SoftCounterMuxEn" : false,
         "L1CounterReset" : false,
         "ErrCntReset" : false,
-        "FifoReset" : false,
-        "usb_device_no": 39
+        "FifoReset" : false
        },
       "connections": {
         "senders": [
@@ -114,7 +112,7 @@
             "type": "pair",
             "chid": 1,
             "transport": "tcp",
-            "host": "localhost",
+            "host": "sahigashlinux",
             "port": 8101
           }
         ],
@@ -235,6 +233,54 @@
             "transport": "tcp",
             "host": "localhost",
             "port": 8218
+          }
+        ]
+      }
+    },
+    {
+      "name": "ratemonitor01",
+      "host": "localhost",
+      "port": 5559,
+      "type": "TriggerRateMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 131072,
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          }
+        ]
+      }
+    },
+    {
+      "name": "triggermonitor01",
+      "host": "localhost",
+      "port": 5560,
+      "type": "TriggerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 131072,
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
           }
         ]
       }

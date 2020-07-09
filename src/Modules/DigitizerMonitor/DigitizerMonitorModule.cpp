@@ -60,12 +60,19 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
   // unpack and get full pulse shape from channel 0 into histogram
   INFO("NSamp(0) : "<<m_pmtdataFragment->channel_adc_counts(0).size());
 
-  //int temp = m_histogrammanager->m_histogram_map["h_pulse_chan0"]->second.at(2);
-  //INFO("Content Bin 2 : "<<temp);
-  m_histogrammanager->clear("h_pulse_chan0");
+  /*
+  // need to be able to clear a histogram to output the pulse
   for(int isamp=0; isamp<m_pmtdataFragment->channel_adc_counts(0).size(); isamp++){
     m_histogrammanager->fill("h_pulse_chan0",isamp,m_pmtdataFragment->channel_adc_counts(0).at(isamp));
   }
+  */
+
+  float mean = GetMean(m_pmtdataFragment->channel_adc_counts(0), 0, 100);
+  float rms  = GetRMS(m_pmtdataFragment->channel_adc_counts(0), 0, 100);
+
+  m_histogrammanager->fill("mean_chan0", mean);
+  m_histogrammanager->fill("rms_chan0", rms);
+
 
   // example 3 - 2D hist fill
   //m_histogrammanager->fill("h_digitizer_numfrag_vs_sizefrag", m_pmtdataFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
@@ -85,6 +92,10 @@ void DigitizerMonitorModule::register_hists() {
   // print out raw pulse for channel 0
   m_histogrammanager->registerHistogram("h_pulse_chan0","channel pulse [0]",0,1000,1000);
 
+  // mean and rms of first 100 samples
+  m_histogrammanager->registerHistogram("mean_chan0","mean_chan0",0,20000,200);
+  m_histogrammanager->registerHistogram("rms_chan0","rms_chan0",0,1000,100);
+
   // example 2D hist
   //m_histogrammanager->register2DHistogram("h_Digitizer_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20 );
 
@@ -103,4 +114,40 @@ void DigitizerMonitorModule::register_metrics() {
   m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
   return;
+}
+
+float GetMean(std::vector<uint16_t> input, int start, int end){
+
+  float sum=0.0;
+  float count=0;
+
+  for(int i=start; i<end; i++){
+    sum += input.at(i);
+    count++;
+  }
+
+  if(count<=0)
+    return -1;
+
+  return sum/count;
+}
+
+float GetRMS(std::vector<uint16_t> input, int start, int end){
+
+
+  float mean = GetMean(input, start, end);
+
+  float sum_rms = 0;
+  int count=0;
+
+  for(int i=start; i<end; i++){
+    sum_rms += pow(input.at(i)-mean , 2.0);
+    count++;
+  }
+
+  if(count<=0)
+    return -1;
+
+  return pow(sum_rms/count, 0.5);
+
 }

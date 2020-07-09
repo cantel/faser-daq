@@ -7,6 +7,10 @@ class DigitizerMonitorModule : public MonitorModule {
   DigitizerMonitorModule();
   ~DigitizerMonitorModule();
 
+  float GetMean(std::vector<uint16_t> input, int start, int end);
+  float GetRMS(std::vector<uint16_t> input, int start, int end);
+
+
  protected:
 
   void monitor(daqling::utilities::Binary &eventBuilderBinary);

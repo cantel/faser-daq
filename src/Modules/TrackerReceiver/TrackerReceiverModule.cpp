@@ -32,9 +32,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
     INFO("");
 
     auto cfg = m_config.getSettings();
-    uint8_t usb_device_no = cfg["usb_device_no"];
      
-    m_trb = std::make_unique<FASER::TRBAccess>(usb_device_no, 0, m_config.getConfig()["settings"]["emulation"]);
+    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
     auto log_level = m_config.getConfig()["loglevel"]["module"];

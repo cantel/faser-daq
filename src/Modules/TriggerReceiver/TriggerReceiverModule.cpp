@@ -32,8 +32,7 @@ TriggerReceiverModule::TriggerReceiverModule() {
   INFO("In TriggerReceiverModule()");
   m_status = STATUS_OK;
   auto cfg = m_config.getSettings();
-  uint8_t usb_device_no = cfg["usb_device_no"];
-  m_tlb = new TLBAccess(usb_device_no);
+  m_tlb = new TLBAccess();
   m_tlb->SetDebug(0); //Set to 0 for no debug, to 1 for debug. Changes the m_DEBUG variable
 }
 

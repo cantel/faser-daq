@@ -2,10 +2,10 @@
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
-class TLBMonitorModule : public MonitorBaseModule {
+class TriggerRateMonitorModule : public MonitorBaseModule {
  public:
-  TLBMonitorModule();
-  ~TLBMonitorModule();
+  TriggerRateMonitorModule();
+  ~TriggerRateMonitorModule();
 
  protected:
 

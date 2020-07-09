@@ -2,10 +2,10 @@
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
-class TriggerEventMonitorModule : public MonitorBaseModule {
+class TriggerMonitorModule : public MonitorBaseModule {
  public:
-  TriggerEventMonitorModule();
-  ~TriggerEventMonitorModule();
+  TriggerMonitorModule();
+  ~TriggerMonitorModule();
 
  protected:
 

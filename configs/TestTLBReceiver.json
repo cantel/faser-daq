@@ -180,10 +180,10 @@
       }
     },
     {
-      "name": "tlbmonitor01",
+      "name": "triggerratemonitor01",
       "host": "localhost",
       "port": 5559,
-      "type": "TLBMonitor",
+      "type": "TriggerRateMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 131072,
@@ -202,10 +202,10 @@
       }
     },
     {
-      "name": "triggereventmonitor01",
+      "name": "triggermonitor01",
       "host": "localhost",
       "port": 5560,
-      "type": "TriggerEventMonitor",
+      "type": "TriggerMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
         "fragmentID": 131072,

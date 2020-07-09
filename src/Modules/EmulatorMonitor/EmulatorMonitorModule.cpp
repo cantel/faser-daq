@@ -6,23 +6,23 @@
 #include <fstream>      // std::ofstream
 /// \endcond
 
-#include "EmulatedDataMonitorModule.hpp"
+#include "EmulatorMonitorModule.hpp"
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
 #define PI 3.14
 
-EmulatedDataMonitorModule::EmulatedDataMonitorModule() { 
+EmulatorMonitorModule::EmulatorMonitorModule() { 
 
    INFO("");
  }
 
-EmulatedDataMonitorModule::~EmulatedDataMonitorModule() { 
+EmulatorMonitorModule::~EmulatorMonitorModule() { 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void EmulatedDataMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void EmulatorMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
@@ -67,9 +67,9 @@ void EmulatedDataMonitorModule::monitor(daqling::utilities::Binary &eventBuilder
 
 }
 
-void EmulatedDataMonitorModule::register_hists() {
+void EmulatorMonitorModule::register_hists() {
 
-  INFO(" ... registering histograms in EmulatedDataMonitor ... " );
+  INFO(" ... registering histograms in EmulatorMonitor ... " );
 
   // example of 1D histogram: default is ylabel="counts" non-extendable axes (Axis::Range::NONEXTENDABLE & 60 second publishing interval.
   //m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
@@ -92,9 +92,9 @@ void EmulatedDataMonitorModule::register_hists() {
 
 }
 
-void EmulatedDataMonitorModule::register_metrics() {
+void EmulatorMonitorModule::register_metrics() {
 
-  INFO( "... registering metrics in EmulatedDataMonitorModule ... " );
+  INFO( "... registering metrics in EmulatorMonitorModule ... " );
 
   return;
 }

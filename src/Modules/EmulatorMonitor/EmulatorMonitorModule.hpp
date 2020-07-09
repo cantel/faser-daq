@@ -2,10 +2,10 @@
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
-class EmulatedDataMonitorModule : public MonitorBaseModule {
+class EmulatorMonitorModule : public MonitorBaseModule {
  public:
-  EmulatedDataMonitorModule();
-  ~EmulatedDataMonitorModule();
+  EmulatorMonitorModule();
+  ~EmulatorMonitorModule();
 
  protected:
 

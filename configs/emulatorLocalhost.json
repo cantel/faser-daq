@@ -253,10 +253,10 @@
       }
     },
     {
-      "name": "emulateddatamonitor01",
+      "name": "emulatormonitor01",
       "host": "localhost",
       "port": 5559,
-      "type": "EmulatedDataMonitor",
+      "type": "EmulatorMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
 	"stats_uri": "tcp://localhost:7000",

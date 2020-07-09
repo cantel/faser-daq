@@ -6,23 +6,23 @@
 #include <fstream>      // std::ofstream
 /// \endcond
 
-#include "TLBMonitorModule.hpp"
+#include "TriggerRateMonitorModule.hpp"
 
 #define MAX_TRIG_LINES 5
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-TLBMonitorModule::TLBMonitorModule() { 
+TriggerRateMonitorModule::TriggerRateMonitorModule() { 
 
    INFO("");
  }
 
-TLBMonitorModule::~TLBMonitorModule() { 
+TriggerRateMonitorModule::~TriggerRateMonitorModule() { 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
@@ -78,9 +78,9 @@ void TLBMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
 }
 
-void TLBMonitorModule::register_hists() {
+void TriggerRateMonitorModule::register_hists() {
 
-  INFO(" ... registering histograms in TLBMonitor ... " );
+  INFO(" ... registering histograms in TriggerRateMonitor ... " );
  
   // trigger counts 
   m_histogrammanager->registerHistogram("tlb_tbp_counts", "TBP idx", 0, 4, 4 );
@@ -96,9 +96,9 @@ void TLBMonitorModule::register_hists() {
 
 }
 
-void TLBMonitorModule::register_metrics() {
+void TriggerRateMonitorModule::register_metrics() {
 
-  INFO( "... registering metrics in TLBMonitorModule ... " );
+  INFO( "... registering metrics in TriggerRateMonitorModule ... " );
 
   register_error_metrics();
 

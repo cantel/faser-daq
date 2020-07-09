@@ -7,7 +7,7 @@
 #include <cmath> // std::copysign
 /// \endcond
 
-#include "TriggerEventMonitorModule.hpp"
+#include "TriggerMonitorModule.hpp"
 
 #define MAX_TRIG_LINES 5
 
@@ -16,18 +16,18 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-TriggerEventMonitorModule::TriggerEventMonitorModule() { 
+TriggerMonitorModule::TriggerMonitorModule() { 
 
-  INFO("In TriggerEventMonitorModule contructor");
+  INFO("In TriggerMonitorModule contructor");
   m_previous_orbit = 0;
   m_previous_bcid = 0;
  }
 
-TriggerEventMonitorModule::~TriggerEventMonitorModule() { 
+TriggerMonitorModule::~TriggerMonitorModule() { 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
  }
 
-void TriggerEventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void TriggerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
@@ -57,9 +57,9 @@ void TriggerEventMonitorModule::monitor(daqling::utilities::Binary &eventBuilder
 
 }
 
-void TriggerEventMonitorModule::register_hists() {
+void TriggerMonitorModule::register_hists() {
 
-  INFO(" ... registering histograms in TriggerEventMonitor ... " );
+  INFO(" ... registering histograms in TriggerMonitor ... " );
  
   // trigger counts 
   m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 3600);
@@ -70,9 +70,9 @@ void TriggerEventMonitorModule::register_hists() {
 
 }
 
-void TriggerEventMonitorModule::register_metrics() {
+void TriggerMonitorModule::register_metrics() {
 
-  INFO( "... registering metrics in TriggerEventMonitorModule ... " );
+  INFO( "... registering metrics in TriggerMonitorModule ... " );
 
   register_error_metrics();
 

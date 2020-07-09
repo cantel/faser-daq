@@ -5,7 +5,7 @@ target_link_libraries(${module_name} EventFormats)
 
 # Add source file to library
 daqling_target_sources(${module_name}
-    TLBMonitorModule.cpp
+    TriggerRateMonitorModule.cpp
     ../MonitorBase/MonitorBaseModule.cpp
     ../../Utils/HistogramManager.cpp
 )

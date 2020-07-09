@@ -2,15 +2,15 @@
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
-class DigitizerMonitorModule : public MonitorBaseModule {
+class EmulatorMonitorModule : public MonitorBaseModule {
  public:
-  DigitizerMonitorModule();
-  ~DigitizerMonitorModule();
+  EmulatorMonitorModule();
+  ~EmulatorMonitorModule();
 
  protected:
 
   void monitor(daqling::utilities::Binary &eventBuilderBinary);
-  void register_hists();
+  void register_hists( );
   void register_metrics();
 
 };

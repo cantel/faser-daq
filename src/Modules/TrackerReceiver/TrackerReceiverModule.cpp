@@ -122,7 +122,8 @@ void TrackerReceiverModule::configure() {
   m_trb->WriteConfigReg();
 
   //Modules configuration
-  //This stage causes Timeout exception in DAQling, probably because of the transfer capacity. Maybe it will disapear with USB3 or ethernet
+  //This stage causes Timeout exception in DAQling, probably because of the transfer capacity. Maybe it will disapear with USB3 or ethernet]
+  /*
   for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
   
     if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
@@ -142,7 +143,7 @@ void TrackerReceiverModule::configure() {
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
     }
-    }
+    }*/
 
   m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
 

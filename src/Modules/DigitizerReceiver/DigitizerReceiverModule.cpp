@@ -118,7 +118,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   // for the TLB conversion factor on the trigger time tag
   auto cfg_ttt_converter = cfg["ttt_converter"];
   if(cfg_ttt_converter==nullptr){
-    INFO("You did not specify the TTT converter, setting it to the LHC 40.08 MHze");
+    INFO("You did not specify the TTT converter, setting it to the LHC 40.08 MHz");
     cfg_ttt_converter = "40.08";
   }
   m_ttt_converter = std::atof(std::string(cfg_ttt_converter).c_str());  // perhaps there is a better way to do this
@@ -268,7 +268,7 @@ void DigitizerReceiverModule::sendEvent() {
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::PMTSourceID;
   uint64_t local_event_id     = (m_ECRcount<<24) + (Header_EventCounter+1); // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
-  uint16_t local_bc_id        = Header_TriggerTimeTag*(40.08/125);      // trigger time tag corrected by LHCClock/TrigClock = 40.00/125
+  uint16_t local_bc_id        = Header_TriggerTimeTag*(m_ttt_converter/125);      // trigger time tag corrected by LHCClock/TrigClock = m_ttt_converter/125, where m_ttt_converter is configurable but by default is 40.08
 
   // create the event fragment
   std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, raw_payload, total_size ));

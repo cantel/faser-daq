@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Modules/Monitor/MonitorModule.hpp"
+#include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
-class DigitizerMonitorModule : public MonitorModule {
+class DigitizerMonitorModule : public MonitorBaseModule {
  public:
   DigitizerMonitorModule();
   ~DigitizerMonitorModule();

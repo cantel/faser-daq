@@ -9,12 +9,9 @@
       "type": "TriggerReceiver",
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
-	"stats_uri": "tcp://localhost:7000",
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 6,
+        "RandomTriggerRate": 3,
         "Prescale": [0, 0, 0, 0, 1, 0],
         "TrackerDelay": 0,
         "DigitizerDelay": 0,
@@ -49,9 +46,8 @@
       "host": "localhost",
       "port": 5557,
       "type": "EventBuilderFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
           "maxPending": 10,
 	  "timeout_ms": 1000
       },
@@ -123,12 +119,11 @@
       "host": "localhost",
       "port": 5558,
       "type": "FileWriterFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
 	  "max_filesize": 100000,
 	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
+	  "filename_pattern": "/tmp/Faser-TEST-%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
 			    "Corrupted","Incomplete","Duplicate"]
       },
@@ -182,6 +177,50 @@
             "transport": "tcp",
             "host": "localhost",
             "port": 8218
+          }
+        ]
+      }
+    },
+    {
+      "name": "triggerratemonitor01",
+      "host": "localhost",
+      "port": 5559,
+      "type": "TriggerRateMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 131072,
+	"stats_uri": "tcp://localhost:7000"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          }
+        ]
+      }
+    },
+    {
+      "name": "triggermonitor01",
+      "host": "localhost",
+      "port": 5560,
+      "type": "TriggerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 131072,
+	"stats_uri": "tcp://localhost:7000"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
           }
         ]
       }

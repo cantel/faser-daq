@@ -2,10 +2,10 @@
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
-class TrackerMonitorModule : public MonitorBaseModule {
+class EmulatorMonitorModule : public MonitorBaseModule {
  public:
-  TrackerMonitorModule();
-  ~TrackerMonitorModule();
+  EmulatorMonitorModule();
+  ~EmulatorMonitorModule();
 
  protected:
 

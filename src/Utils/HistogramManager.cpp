@@ -78,3 +78,23 @@ void HistogramManager::publish( HistBase * h){
  
   return;
 }
+
+void HistogramManager::resetOnPublish(std::string name, bool reset = true){
+  if ( m_histogram_map.count(name) ) {
+    m_histogram_map[name]->reset_on_publish(reset);
+  }
+  else 
+      WARNING("Histogram with name "<<name<<" does not exist.");
+ 
+  return;
+}
+
+void HistogramManager::reset(std::string name){
+  if ( m_histogram_map.count(name) ) {
+    m_histogram_map[name]->reset();
+  }
+  else 
+      WARNING("Histogram with name "<<name<<" does not exist.");
+ 
+  return;
+}

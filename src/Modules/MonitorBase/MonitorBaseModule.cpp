@@ -6,13 +6,13 @@
 #include <fstream>      // std::ofstream
 /// \endcond
 
-#include "MonitorModule.hpp"
+#include "MonitorBaseModule.hpp"
 #include "Core/Statistics.hpp"
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-MonitorModule::MonitorModule() { 
+MonitorBaseModule::MonitorBaseModule() { 
    INFO("");
 
    auto cfg = m_config.getSettings();
@@ -23,14 +23,14 @@ MonitorModule::MonitorModule() {
 
  }
 
-MonitorModule::~MonitorModule() { 
+MonitorBaseModule::~MonitorBaseModule() { 
 
   delete m_event;
 
   INFO("With config: " << m_config.dump() << " getState: " << this->getState());
 }
 
-void MonitorModule::configure() {
+void MonitorBaseModule::configure() {
   INFO("Configuring...");
 
   FaserProcess::configure();
@@ -43,7 +43,7 @@ void MonitorModule::configure() {
   return;
 }
 
-void MonitorModule::start(unsigned int run_num) {
+void MonitorBaseModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
   INFO("getState: " << this->getState());
 
@@ -51,7 +51,7 @@ void MonitorModule::start(unsigned int run_num) {
 
 }
 
-void MonitorModule::stop() {
+void MonitorBaseModule::stop() {
   FaserProcess::stop();
 
   INFO("... finalizing ...");
@@ -59,7 +59,7 @@ void MonitorModule::stop() {
   INFO("getState: " << this->getState());
 }
 
-void MonitorModule::runner() {
+void MonitorBaseModule::runner() {
   INFO("Running...");
 
   m_event_header_unpacked = false;
@@ -87,16 +87,16 @@ void MonitorModule::runner() {
 
 }
 
-void MonitorModule::monitor(daqling::utilities::Binary&) {
+void MonitorBaseModule::monitor(daqling::utilities::Binary&) {
 }
 
-void MonitorModule::register_metrics() {
+void MonitorBaseModule::register_metrics() {
 
- INFO("... registering metrics in base MonitorModule class ... " );
+ INFO("... registering metrics in base MonitorBaseModule class ... " );
 
 }
 
-void MonitorModule::register_error_metrics() {
+void MonitorBaseModule::register_error_metrics() {
 
    m_metric_payload=0;
    m_metric_error_ok=0;
@@ -131,14 +131,14 @@ void MonitorModule::register_error_metrics() {
 
 }
 
-void MonitorModule::register_hists() {
+void MonitorBaseModule::register_hists() {
 
  INFO(" ... No histograms to register. Will not start histogram service. " );
  m_histogramming_on = false;
 
 }
 
-uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorBaseModule::unpack_event_header( daqling::utilities::Binary &eventBuilderBinary ) {
 
   uint16_t dataStatus(0);
   try {
@@ -155,7 +155,7 @@ uint16_t MonitorModule::unpack_event_header( daqling::utilities::Binary &eventBu
 
 }
 
-uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
+uint16_t MonitorBaseModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
@@ -172,12 +172,12 @@ uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &even
   return dataStatus;
 }
 
-uint16_t MonitorModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorBaseModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
   auto dataStatus = unpack_fragment_header(eventBuilderBinary, m_sourceID);
   return dataStatus;
 }
 
-uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
+uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
@@ -221,12 +221,12 @@ uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventB
   return dataStatus;
 }
 
-uint16_t MonitorModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary) {
+uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary) {
   auto dataStatus = unpack_full_fragment(eventBuilderBinary, m_sourceID);
   return dataStatus;
 }
 
-void MonitorModule::setupHistogramManager() {
+void MonitorBaseModule::setupHistogramManager() {
 
   INFO("Setting up HistogramManager.");
 
@@ -248,7 +248,7 @@ void MonitorModule::setupHistogramManager() {
 
 }
 
-void MonitorModule::fill_error_status_to_metric( uint32_t fragmentStatus ) {
+void MonitorBaseModule::fill_error_status_to_metric( uint32_t fragmentStatus ) {
 
   if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
   else {
@@ -268,7 +268,7 @@ void MonitorModule::fill_error_status_to_metric( uint32_t fragmentStatus ) {
 
 }
 
-void MonitorModule::fill_error_status_to_histogram( uint32_t fragmentStatus, std::string hist_name ) {
+void MonitorBaseModule::fill_error_status_to_histogram( uint32_t fragmentStatus, std::string hist_name ) {
 
   if ( fragmentStatus == 0 ) m_histogrammanager->fill(hist_name, "Ok");
   else {

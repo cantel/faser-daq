@@ -70,8 +70,8 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
   float mean = GetMean(m_pmtdataFragment->channel_adc_counts(0), 0, 100);
   float rms  = GetRMS(m_pmtdataFragment->channel_adc_counts(0), 0, 100);
 
-  m_histogrammanager->fill("mean_chan0", mean);
-  m_histogrammanager->fill("rms_chan0", rms);
+  m_histogrammanager->fill("h_mean_chan0", mean);
+  m_histogrammanager->fill("h_rms_chan0", rms);
 
 
   // example 3 - 2D hist fill
@@ -93,8 +93,8 @@ void DigitizerMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("h_pulse_chan0","channel pulse [0]",0,1000,1000);
 
   // mean and rms of first 100 samples
-  m_histogrammanager->registerHistogram("mean_chan0","mean_chan0",0,20000,200);
-  m_histogrammanager->registerHistogram("rms_chan0","rms_chan0",0,1000,100);
+  m_histogrammanager->registerHistogram("h_mean_chan0","mean_chan0",0,20000,200);
+  m_histogrammanager->registerHistogram("h_rms_chan0","rms_chan0",0,1000,100);
 
   // example 2D hist
   //m_histogrammanager->register2DHistogram("h_Digitizer_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20 );
@@ -116,7 +116,7 @@ void DigitizerMonitorModule::register_metrics() {
   return;
 }
 
-float GetMean(std::vector<uint16_t> input, int start, int end){
+float DigitizerMonitorModule::GetMean(std::vector<uint16_t> input, int start, int end){
 
   float sum=0.0;
   float count=0;
@@ -132,7 +132,7 @@ float GetMean(std::vector<uint16_t> input, int start, int end){
   return sum/count;
 }
 
-float GetRMS(std::vector<uint16_t> input, int start, int end){
+float DigitizerMonitorModule::GetRMS(std::vector<uint16_t> input, int start, int end){
 
 
   float mean = GetMean(input, start, end);

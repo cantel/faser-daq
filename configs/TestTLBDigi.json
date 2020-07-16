@@ -14,17 +14,17 @@
         "influxDb_name": "DAQlingMetrics",
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 7,
+        "RandomTriggerRate": 6,
         "Prescale": [0, 0, 1, 0, 0, 0],
-        "TrackerDelay": 100,
+        "TrackerDelay": 0,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
         "OrbitDelay": 0,
         "Deadtime": 500,
         "MonitoringRate": 11233,
         "OutputDestination": 0,
-        "Input": [true, true, false, false, false, false, false, false],
-        "BusyDisable": false,
+        "Input": [true, true, true, true, true, true, true, true],
+        "BusyDisable": true,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
         "Derandomize": true,
@@ -44,52 +44,9 @@
       }
     },
     {
-      "name": "trackerreceiver",
-      "host": "sahigashlinux",
-      "port": 5557, 
-      "type": "TrackerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
-      "settings": {
-	"stats_uri": "tcp://localhost:7000",
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",
-        "L1Atype" : "external",  
-        "emulation" : false,
-        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-        "moduleMask" : [false, true, true, true, true, true, true, true], 
-        "moduleConfigFiles": {"0" : "/home/cantel/config/modules/Module0.json",
-                              "1" : "/home/cantel/config/modules/Module1.json",
-                              "2" : "/home/cantel/config/modules/Module2.json",
-                              "3" : "/home/cantel/config/modules/Module3.json",
-                              "4" : "/home/cantel/config/modules/Module4.json",
-                              "5" : "/home/cantel/config/modules/Module5.json",
-                              "6" : "/home/cantel/config/modules/Module6.json",
-                              "7" : "/home/cantel/config/modules/Module7.json"},
-        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false],
-        "TLBClockSel" : true,
-        "BCREn" : true,
-        "L1AEn" : true,
-        "SoftCounterMuxEn" : false,
-        "L1CounterReset" : false,
-        "ErrCntReset" : false,
-        "FifoReset" : false
-       },
-      "connections": {
-        "senders": [
-          {
-            "type": "pair",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "*",
-            "port": 8101
-          }
-        ]
-      }
-    },
-    {
       "name": "digitizer01",
       "host": "localhost",
-      "port": 5558,
+      "port": 5557,
       "type": "DigitizerReceiver",
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
@@ -145,7 +102,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 8102
+            "port": 8101
           }
         ]
       }
@@ -155,7 +112,7 @@
       "host": "localhost",
       "port": 5559,
       "type": "EventBuilderFaser",
-      "loglevel": {"core": "INFO", "module": "INFO"},
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
 	  "stats_uri": "tcp://localhost:7000",
           "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
@@ -176,7 +133,7 @@
             "type": "pair",
             "chid": 1,
             "transport": "tcp",
-            "host": "sahigashlinux",
+            "host": "localhost",
             "port": 8101
           }
         ],
@@ -243,7 +200,7 @@
 	  "stats_uri": "tcp://localhost:7000",
 	  "max_filesize": 500000,
 	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/Faser-trkdelay100-TEST-%c-%r-%n.raw",
+	  "filename_pattern": "/tmp/Faser-tlbdigi-test--%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
 			    "Corrupted","Incomplete","Duplicate"]
       },

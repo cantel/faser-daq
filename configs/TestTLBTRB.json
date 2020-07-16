@@ -7,16 +7,16 @@
       "host": "localhost",
       "port": 5556,
       "type": "TriggerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
 	"stats_uri": "tcp://localhost:7000",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics",
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-        "RandomTriggerRate": 6,
+        "RandomTriggerRate": 5,
         "Prescale": [0, 0, 0, 0, 1, 0],
-        "TrackerDelay": 0,
+        "TrackerDelay": 100,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
         "OrbitDelay": 0,
@@ -27,7 +27,7 @@
         "BusyDisable": false,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
-        "Derandomize": true,
+        "Derandomize": false,
         "ReadoutFIFOReset": true,
         "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
       },
@@ -56,15 +56,15 @@
         "L1Atype" : "external",  
         "emulation" : false,
         "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-        "moduleMask" : [true, true, true, true, true, true, true, true], 
-        "moduleConfigFiles": {"0" : "/home/lbrenner/configModules/Module0.json",
-                              "1" : "/home/lbrenner/configModules/Module1.json",
-                              "2" : "/home/lbrenner/configModules/Module2.json",
-                              "3" : "/home/lbrenner/configModules/Module3.json",
-                              "4" : "/home/lbrenner/configModules/Module4.json",
-                              "5" : "/home/lbrenner/configModules/Module5.json",
-                              "6" : "/home/lbrenner/configModules/Module6.json",
-                              "7" : "/home/lbrenner/configModules/Module7.json"},
+        "moduleMask" : [false, true, true, true, true, true, true, true], 
+        "moduleConfigFiles": {"0" : "/home/cantel/config/modules/Module0.json",
+                              "1" : "/home/cantel/config/modules/Module1.json",
+                              "2" : "/home/cantel/config/modules/Module2.json",
+                              "3" : "/home/cantel/config/modules/Module3.json",
+                              "4" : "/home/cantel/config/modules/Module4.json",
+                              "5" : "/home/cantel/config/modules/Module5.json",
+                              "6" : "/home/cantel/config/modules/Module6.json",
+                              "7" : "/home/cantel/config/modules/Module7.json"},
         "moduleClkCmdMask" : [false, false, false, false, false, false, false, false],
         "TLBClockSel" : true,
         "BCREn" : true,
@@ -97,7 +97,7 @@
           "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
           "influxDb_name": "DAQlingMetrics",
           "maxPending": 10,
-	  "timeout_ms": 1000
+	  "timeout_ms": 10000
       },
       "connections": {
         "receivers": [
@@ -179,7 +179,7 @@
 	  "stats_uri": "tcp://localhost:7000",
 	  "max_filesize": 100000,
 	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/Faser-tlbtrb-test-%c-%r-%n.raw",
+	  "filename_pattern": "/home/cantel/filewriter/Faser-tlbtrb-TEST-%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
 			    "Corrupted","Incomplete","Duplicate"]
       },
@@ -240,7 +240,7 @@
     {
       "name": "ratemonitor01",
       "host": "localhost",
-      "port": 5559,
+      "port": 5560,
       "type": "TriggerRateMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
@@ -264,7 +264,7 @@
     {
       "name": "triggermonitor01",
       "host": "localhost",
-      "port": 5560,
+      "port": 5561,
       "type": "TriggerMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {

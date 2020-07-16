@@ -7,7 +7,7 @@
       "host": "localhost",
       "port": 5556,
       "type": "TriggerReceiver",
-      "loglevel": {"core": "INFO", "module": "INFO"},
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
 	"stats_uri": "tcp://localhost:7000",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
@@ -112,121 +112,6 @@
             "transport": "tcp",
             "host": "*",
             "port": 8218
-          }
-        ]
-      }
-    },
-    {
-      "name": "filewriter",
-      "host": "localhost",
-      "port": 5558,
-      "type": "FileWriterFaser",
-      "loglevel": {"core": "INFO", "module": "INFO"},
-      "settings": {
-	  "max_filesize": 100000,
-	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/Faser-TEST-%c-%r-%n.raw",
-	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
-			    "Corrupted","Incomplete","Duplicate"]
-      },
-      "connections": {
-        "receivers": [
-          {
-            "type": "pubsub",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8200
-          },
-          {
-            "type": "pubsub",
-            "chid": 1,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8201
-          },
-          {
-            "type": "pubsub",
-            "chid": 2,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8202
-          },
-          {
-            "type": "pubsub",
-            "chid": 3,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8203
-          },
-          {
-            "type": "pubsub",
-            "chid": 4,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8216
-          },
-          {
-            "type": "pubsub",
-            "chid": 5,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8217
-          },
-          {
-            "type": "pubsub",
-            "chid": 6,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8218
-          }
-        ]
-      }
-    },
-    {
-      "name": "ratemonitor01",
-      "host": "localhost",
-      "port": 5559,
-      "type": "TriggerRateMonitor",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "fragmentID": 131072,
-	"stats_uri": "tcp://localhost:7000",
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics"
-      },
-      "connections": {
-        "receivers": [
-          {
-            "type": "pubsub",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8203
-          }
-        ]
-      }
-    },
-    {
-      "name": "triggermonitor01",
-      "host": "localhost",
-      "port": 5560,
-      "type": "TriggerMonitor",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-        "fragmentID": 131072,
-	"stats_uri": "tcp://localhost:7000",
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics"
-      },
-      "connections": {
-        "receivers": [
-          {
-            "type": "pubsub",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8200
           }
         ]
       }

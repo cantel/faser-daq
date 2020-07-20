@@ -72,7 +72,6 @@ class MonitorBaseModule : public FaserProcess {
   uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID);
   uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary);
   void fill_error_status_to_metric(uint32_t fragmentStatus);
-  void fill_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name);
 
  private:
 

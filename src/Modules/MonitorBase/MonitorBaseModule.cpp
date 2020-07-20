@@ -189,29 +189,29 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
       switch (sourceID) {
         case TriggerSourceID:
           m_tlbdataFragment = new TLBDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
-          DEBUG("unpacking TLB data fragment.");
+          TRACE("unpacking TLB data fragment.");
           break;
         case PMTSourceID:
           m_pmtdataFragment = new DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
-          DEBUG("unpacking PMT data fragment.");
+          TRACE("unpacking PMT data fragment.");
           break;
         default:
           m_rawFragment=m_fragment->payload<const RawFragment*>();
-          DEBUG("unpacking raw fragment.");
+          TRACE("unpacking raw fragment.");
       }
       break;
     }
     case CalibrationTag:
       m_rawFragment=m_fragment->payload<const RawFragment*>();
-      DEBUG("unpacking calibration fragment.");
+      TRACE("unpacking calibration fragment.");
       break;
     case MonitoringTag:
       m_monitoringFragment=m_fragment->payload<const MonitoringFragment*>();
-      DEBUG("unpacking monitoring fragment.");
+      TRACE("unpacking monitoring fragment.");
       break;
     case TLBMonitoringTag:
       m_tlbmonitoringFragment= new TLBMonitoringFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
-      DEBUG("unpacking TLB monitoring fragment.");
+      TRACE("unpacking TLB monitoring fragment.");
       break;
     default:
       ERROR("Specified tag not found.");
@@ -262,26 +262,6 @@ void MonitorBaseModule::fill_error_status_to_metric( uint32_t fragmentStatus ) {
       if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing += 1;
       if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty += 1;
       if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate += 1;
-  }
-  
-  return ;
-
-}
-
-void MonitorBaseModule::fill_error_status_to_histogram( uint32_t fragmentStatus, std::string hist_name ) {
-
-  if ( fragmentStatus == 0 ) m_histogrammanager->fill(hist_name, "Ok");
-  else {
-      if ( fragmentStatus  &  UnclassifiedError ) m_histogrammanager->fill(hist_name, "Unclassified");
-      if ( fragmentStatus  &  BCIDMismatch ) m_histogrammanager->fill(hist_name, "BCIDMismatch");
-      if ( fragmentStatus  &  TagMismatch ) m_histogrammanager->fill(hist_name, "TagMismatch");
-      if ( fragmentStatus  &  Timeout ) m_histogrammanager->fill(hist_name, "Timeout");
-      if ( fragmentStatus  &  Overflow ) m_histogrammanager->fill(hist_name, "Overflow");
-      if ( fragmentStatus  &  CorruptedFragment ) m_histogrammanager->fill(hist_name, "CorruptedFragment");
-      if ( fragmentStatus  &  DummyFragment ) m_histogrammanager->fill(hist_name, "Dummy");
-      if ( fragmentStatus  &  MissingFragment ) m_histogrammanager->fill(hist_name, "Missing");
-      if ( fragmentStatus  &  EmptyFragment ) m_histogrammanager->fill(hist_name, "Empty");
-      if ( fragmentStatus  &  DuplicateFragment ) m_histogrammanager->fill(hist_name, "Duplicate");
   }
   
   return ;

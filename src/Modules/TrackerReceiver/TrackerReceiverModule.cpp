@@ -30,11 +30,30 @@ using namespace daqling::utilities;
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
-     
-    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
+    
+    auto cfg_boardIP = m_config.getConfig()["settings"]["boardIP"];
+    if (cfg_boardIP!="" && cfg_boardIP!=nullptr) {
+      INFO("Board IP found in configurations. Running with UDP interface.");
+      std::string SCIP("10.11.65.6");
+      std::string DAQIP("10.11.65.6");
+      auto cfg_SCIP = m_config.getConfig()["settings"]["SCIP"];
+      if (cfg_SCIP!="" && cfg_SCIP!=nullptr) SCIP = cfg_SCIP;
+      auto cfg_DAQIP = m_config.getConfig()["settings"]["DAQIP"];
+      if (cfg_DAQIP!="" && cfg_DAQIP!=nullptr) DAQIP = cfg_DAQIP;
+      INFO("\n board IP : "<<cfg_boardIP<<std::endl<<
+           "    SC IP : "<<SCIP<<std::endl<< 
+           "   DAQ IP : "<<DAQIP);
+      m_trb = std::make_unique<FASER::TRBAccess>(SCIP, DAQIP, cfg_boardIP, m_config.getConfig()["settings"]["emulation"]);
+    } else {
+      INFO("No IP configurations found. Running with USB interface");
+      uint8_t boardID = -1; // any board
+      auto cfg_boardID = m_config.getConfig()["settings"]["boardID"];
+      if (cfg_boardID!="" && cfg_boardID!=nullptr) boardID = cfg_boardID;
+      m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"], boardID);
+    }
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
-    if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
+    if (m_config.getConfig()["loglevel"]["module"] == "TRACE") {  
       m_trb->SetDebug(true);
     }
     else {
@@ -193,6 +212,7 @@ void TrackerReceiverModule::runner() {
 
   while (m_run) { 
     if (m_config.getConfig()["settings"]["L1Atype"] == "internal" && m_triggerEnabled == true){
+      usleep(100);
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
     

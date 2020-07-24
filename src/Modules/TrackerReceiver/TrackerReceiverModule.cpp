@@ -215,6 +215,7 @@ void TrackerReceiverModule::stop() {
 void TrackerReceiverModule::disableTrigger(const std::string &arg) {
   m_trb->StopReadout();
   m_triggerEnabled = false;
+  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
   INFO("TRB --> disable trigger.");
   usleep(100);
 }

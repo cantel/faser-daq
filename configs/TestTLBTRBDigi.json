@@ -44,7 +44,7 @@
       }
     },
     {
-      "name": "trackerreceiver",
+      "name": "trackerreceiver00",
       "host": "sahigashlinux",
       "port": 5557, 
       "type": "TrackerReceiver",
@@ -161,7 +161,7 @@
           "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
           "influxDb_name": "DAQlingMetrics",
           "maxPending": 10,
-	  "timeout_ms": 10000
+	  "timeout_ms": 50000
       },
       "connections": {
         "receivers": [
@@ -243,7 +243,7 @@
 	  "stats_uri": "tcp://localhost:7000",
 	  "max_filesize": 500000,
 	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/Faser-trkdelay100-TEST-%c-%r-%n.raw",
+	  "filename_pattern": "/home/cantel/overnight/Faser-trkdelay100-25072020-%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
 			    "Corrupted","Incomplete","Duplicate"]
       },
@@ -336,6 +336,28 @@
 	"stats_uri": "tcp://localhost:7000",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackermonitor00",
+      "host": "localhost",
+      "port": 5563,
+      "type": "TrackerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 196608,
+	"stats_uri": "tcp://localhost:7000"
       },
       "connections": {
         "receivers": [

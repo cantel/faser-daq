@@ -5,3 +5,6 @@ build
 */**/*.swp
 __pycache__
 *~
+*.out
+*.log
+*.txt

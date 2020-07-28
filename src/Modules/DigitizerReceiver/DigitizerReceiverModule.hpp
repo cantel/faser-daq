@@ -46,7 +46,11 @@ class DigitizerReceiverModule : public FaserProcess {
   
   vx1730 *m_digitizer;
   
+  // used to protect against the ECR and runner() from reading out at the same time
   std::mutex m_lock;
+
+  // used for the trigger time to BCID conversion
+  float m_ttt_converter;
   
   // monitoring metrics
   std::atomic<int> m_triggers;

@@ -17,6 +17,8 @@
 
 #include "DigitizerReceiverModule.hpp"
 
+#define HOSTNAME_MAX_LENGTH 100
+
 DigitizerReceiverModule::DigitizerReceiverModule() { INFO(""); 
   INFO("DigitizerReceiverModule Constructor");
 
@@ -24,12 +26,36 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   
   // retrieve the ip address of the sis3153 master board
   // this is configured via the arp and route commands on the network switch
-  char  ip_addr_string[32];
-  //  auto cfg_ip = std::string(cfg["ip"]).c_str();
+  INFO("Getting IP Address");
+  char  ip_addr_string[HOSTNAME_MAX_LENGTH];
   auto cfg_ip = cfg["ip"];
   if (cfg_ip!="" && cfg_ip!=nullptr){
-    //strcpy(ip_addr_string, std::string(cfg["ip"]).c_str() ) ; 
-    strcpy(ip_addr_string, std::string(cfg_ip).c_str()); 
+    // temporary location for IP name
+    char input_ip_location[HOSTNAME_MAX_LENGTH];
+
+    // check to make sure you can copy over the config
+    int length = strlen(std::string(cfg_ip).c_str());
+    if(length>HOSTNAME_MAX_LENGTH){
+      ERROR("This is too long of a name : "<<std::string(cfg_ip));
+      ERROR("Max length of IP hostname : "<<HOSTNAME_MAX_LENGTH);
+      THROW(DigitizerHardwareException, "IP address or hostname is too long");
+    }
+
+    // lookup the IP address dynamically
+    // determines if its an IP address or a hostname
+    strcpy(input_ip_location, std::string(cfg["ip"]).c_str() ) ;
+    INFO("Input locale : "<<input_ip_location);
+    std::string ip_str = std::string(GetIPAddress(input_ip_location));
+    strcpy(ip_addr_string, ip_str.c_str());
+    INFO("Input address/host  : "<<cfg["ip"]);
+    INFO("Returned IP Address : "<<ip_addr_string);
+
+    // check to make sure the thing is an IP address
+    if(IsIPAddress(ip_addr_string)==false){
+      strcpy(ip_addr_string,"0.0.0.0");
+      ERROR("This is not an IP address : "<<ip_addr_string);
+      THROW(DigitizerHardwareException, "Invalid IP address");
+    }
   }
   else{
     ERROR("No IP address setting in the digitizer configuration.");
@@ -40,8 +66,8 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
   // retrieval of the VME base address which is set via the physical rotary
   // switches on the digitizer and forms the base of all register read/writes
+  INFO("Getting VME digitizer HW address");
   UINT vme_base_address;
-  //  auto cfg_vme_base_address = std::string(cfg["vme_base_address"]);
   auto cfg_vme_base_address = cfg["vme_base_address"];
   if(cfg_vme_base_address!="" && cfg_vme_base_address!=nullptr){
     vme_base_address = std::stoi(std::string(cfg_vme_base_address),0,16);
@@ -72,6 +98,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
       INFO("Are you sure you want this settings?");
     }
   }
+  INFO("Are software triggers enabled? : "<<m_software_trigger_enable);
 
   auto cfg_software_trigger_rate = cfg["software_trigger"]["rate"];
   if(cfg_software_trigger_rate==nullptr){
@@ -81,6 +108,22 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   else{
     m_software_trigger_rate = cfg_software_trigger_rate;
   }
+
+  if(cfg_software_trigger_enable){
+    INFO("Trigger rate for SW triggers at : "<<m_software_trigger_rate);
+  }
+  
+  // for the TLB conversion factor on the trigger time tag
+  auto cfg_ttt_converter = cfg["ttt_converter"];
+  if(cfg_ttt_converter==nullptr){
+    INFO("You did not specify the TTT converter, setting it to the LHC 40.08 MHz");
+    cfg_ttt_converter = "40.08";
+  }
+  m_ttt_converter = std::atof(std::string(cfg_ttt_converter).c_str());  // perhaps there is a better way to do this
+
+  INFO("Setting TLB-Digitizer TTT clock to : "<<m_ttt_converter);
+  
+
 
 }
 
@@ -153,8 +196,11 @@ void DigitizerReceiverModule::runner() {
       m_digitizer->SendSWTrigger();
       usleep((1.0/m_software_trigger_rate)*1000000);
     }
+    else{
+      DEBUG("You are not sending random triggers");
+    }
+    
 
-  
     // lock to prevent accidental double reading with the sendECR() call
     m_lock.lock();
     
@@ -196,6 +242,8 @@ void DigitizerReceiverModule::sendEvent() {
   int payload_size = Payload_GetEventSize( raw_payload );
   const int total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
 
+  DEBUG("PayloadSize : nwords="<<payload_size<<"  total_size="<<total_size);
+
   // the event ID is what should be used, in conjunction with the ECR to give a unique event tag
   // word[2] bits[23:0]
   // need to blank out the top bits because these are the channel masks
@@ -221,7 +269,8 @@ void DigitizerReceiverModule::sendEvent() {
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::PMTSourceID;
   uint64_t local_event_id     = (m_ECRcount<<24) + (Header_EventCounter+1); // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
-  uint16_t local_bc_id        = Header_TriggerTimeTag*(40.0/62.5);      // trigger time tag corrected by LHCClock/TrigClock = 40/62.5
+  uint16_t local_bc_id        = Header_TriggerTimeTag*(m_ttt_converter/125);      // trigger time tag corrected by LHCClock/TrigClock = m_ttt_converter/125, where m_ttt_converter is configurable but by default is 40.08
+
 
   // create the event fragment
   std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, raw_payload, total_size ));

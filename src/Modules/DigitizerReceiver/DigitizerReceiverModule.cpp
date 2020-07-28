@@ -68,7 +68,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   // switches on the digitizer and forms the base of all register read/writes
   INFO("Getting VME digitizer HW address");
   UINT vme_base_address;
-  auto cfg_vme_base_address = cfg["vme_base_address"];
+  auto cfg_vme_base_address = cfg["digitizer_hw_address"];
   if(cfg_vme_base_address!="" && cfg_vme_base_address!=nullptr){
     vme_base_address = std::stoi(std::string(cfg_vme_base_address),0,16);
   }
@@ -85,7 +85,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   m_digitizer->TestComm();
 
   // store local run settings
-  auto cfg_software_trigger_enable = cfg["software_trigger"]["enable"];
+  auto cfg_software_trigger_enable = cfg["trigger_software"]["enable"];
   if(cfg_software_trigger_enable==nullptr){
     INFO("You did not specify if you wanted to send SW triggers - assuming FALSE");
     m_software_trigger_enable = false;
@@ -94,13 +94,13 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
     m_software_trigger_enable = cfg_software_trigger_enable;
     auto global_trig_sw = cfg["global_trigger"]["software"];
     if(global_trig_sw==0){
-      INFO("Inconsistent settings - you have enabled SW triggers but not reading in the case that there is a SW trigger.");
+      INFO("Inconsistent settings - you have enabled SW triggers to be sent but not acquiring on SW triggers.");
       INFO("Are you sure you want this settings?");
     }
   }
   INFO("Are software triggers enabled? : "<<m_software_trigger_enable);
 
-  auto cfg_software_trigger_rate = cfg["software_trigger"]["rate"];
+  auto cfg_software_trigger_rate = cfg["trigger_software"]["rate"];
   if(cfg_software_trigger_rate==nullptr){
     INFO("You did not specify a SW trigger rate");
     cfg_software_trigger_rate = 1;

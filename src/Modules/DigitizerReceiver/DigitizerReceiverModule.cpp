@@ -28,7 +28,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   // this is configured via the arp and route commands on the network switch
   INFO("Getting IP Address");
   char  ip_addr_string[HOSTNAME_MAX_LENGTH];
-  auto cfg_ip = cfg["ip"];
+  auto cfg_ip = cfg["host_pc"];
   if (cfg_ip!="" && cfg_ip!=nullptr){
     // temporary location for IP name
     char input_ip_location[HOSTNAME_MAX_LENGTH];
@@ -43,11 +43,11 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
     // lookup the IP address dynamically
     // determines if its an IP address or a hostname
-    strcpy(input_ip_location, std::string(cfg["ip"]).c_str() ) ;
+    strcpy(input_ip_location, std::string(cfg["host_pc"]).c_str() ) ;
     INFO("Input locale : "<<input_ip_location);
     std::string ip_str = std::string(GetIPAddress(input_ip_location));
     strcpy(ip_addr_string, ip_str.c_str());
-    INFO("Input address/host  : "<<cfg["ip"]);
+    INFO("Input address/host  : "<<cfg["host_pc"]);
     INFO("Returned IP Address : "<<ip_addr_string);
 
     // check to make sure the thing is an IP address

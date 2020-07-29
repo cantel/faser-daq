@@ -32,8 +32,15 @@ TrackerReceiverModule::TrackerReceiverModule() {
     INFO("");
 
     auto cfg = m_config.getSettings();
+
+    if ( cfg.contains("boardID")) {
+      m_userBoardID = cfg["boardID"];
+    }
+    else m_userBoardID = -1; //don't care
+
+    INFO("Will connect to TRB with board id "<<m_userBoardID);
      
-    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
+    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"], m_userBoardID );
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
     auto log_level = m_config.getConfig()["loglevel"]["module"];
@@ -95,6 +102,8 @@ void TrackerReceiverModule::configure() {
     return;
   }
 
+  m_trb->SetDirectParam(FASER::TRBDirectParameter::FifoReset | FASER::TRBDirectParameter::ErrCntReset); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+
   m_trb->GetPhaseConfig()->SetFinePhase_Clk0(0);
   m_trb->GetPhaseConfig()->SetFinePhase_Led0(45);
   m_trb->GetPhaseConfig()->SetFinePhase_Clk1(0);
@@ -143,7 +152,8 @@ void TrackerReceiverModule::configure() {
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
     }
-    }*/
+    }
+    */
 
   m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
 
@@ -204,6 +214,7 @@ void TrackerReceiverModule::start(unsigned run_num) {
 void TrackerReceiverModule::stop() {
   m_trb->StopReadout();
   usleep(100);
+  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
   FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }
@@ -215,7 +226,6 @@ void TrackerReceiverModule::stop() {
 void TrackerReceiverModule::disableTrigger(const std::string &arg) {
   m_trb->StopReadout();
   m_triggerEnabled = false;
-  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
   INFO("TRB --> disable trigger.");
   usleep(100);
 }
@@ -276,9 +286,7 @@ void TrackerReceiverModule::runner() {
 	  	     DEBUG("L1ID = "<<ourSCTevent->GetL1ID());
 	  	  }
                 }
-                int corr_bc_id = local_bc_id;
-                if ( corr_bc_id - 7 < 0 ) { local_bc_id = 3564 + (corr_bc_id-7);}
-                else local_bc_id-=7;
+                // local_bc_id = (local_bc_id-7)%3564
             }
             else{
                 local_event_id = 0xFFFFFFFF;

@@ -18,6 +18,7 @@
 #include "DigitizerReceiverModule.hpp"
 
 #define HOSTNAME_MAX_LENGTH 100
+#define NCHANNELS 16
 
 DigitizerReceiverModule::DigitizerReceiverModule() { INFO(""); 
   INFO("DigitizerReceiverModule Constructor");
@@ -138,6 +139,23 @@ void DigitizerReceiverModule::configure() {
   registerVariable(m_triggers, "TriggeredEvents");
   registerVariable(m_triggers, "TriggeredRate", metrics::RATE);
   
+  registerVariable(m_temp_ch00, "ADC Temperature CH00");
+  registerVariable(m_temp_ch01, "ADC Temperature CH01");
+  registerVariable(m_temp_ch02, "ADC Temperature CH02");
+  registerVariable(m_temp_ch03, "ADC Temperature CH03");
+  registerVariable(m_temp_ch04, "ADC Temperature CH04");
+  registerVariable(m_temp_ch05, "ADC Temperature CH05");
+  registerVariable(m_temp_ch06, "ADC Temperature CH06");
+  registerVariable(m_temp_ch07, "ADC Temperature CH07");
+  registerVariable(m_temp_ch08, "ADC Temperature CH08");
+  registerVariable(m_temp_ch09, "ADC Temperature CH09");
+  registerVariable(m_temp_ch10, "ADC Temperature CH10");
+  registerVariable(m_temp_ch11, "ADC Temperature CH11");
+  registerVariable(m_temp_ch12, "ADC Temperature CH12");
+  registerVariable(m_temp_ch13, "ADC Temperature CH13");
+  registerVariable(m_temp_ch14, "ADC Temperature CH14");
+  registerVariable(m_temp_ch15, "ADC Temperature CH15");
+  
   // configuration of hardware
   INFO("Configuring ...");  
   m_digitizer->Configure(m_config.getConfig()["settings"]);
@@ -224,6 +242,29 @@ void DigitizerReceiverModule::runner() {
       usleep(1500); 
     }
     
+    // monitoring of temperature on ADCs
+    std::vector<int> adc_temp = m_digitizer->GetADCTemperature(false);
+    if(adc_temp.size()==NCHANNELS){
+      m_temp_ch00 = adc_temp.at(0);
+      m_temp_ch01 = adc_temp.at(1);
+      m_temp_ch02 = adc_temp.at(2);
+      m_temp_ch03 = adc_temp.at(3);
+      m_temp_ch04 = adc_temp.at(4);
+      m_temp_ch05 = adc_temp.at(5);
+      m_temp_ch06 = adc_temp.at(6);
+      m_temp_ch07 = adc_temp.at(7);
+      m_temp_ch08 = adc_temp.at(8);
+      m_temp_ch09 = adc_temp.at(9);
+      m_temp_ch10 = adc_temp.at(10);
+      m_temp_ch11 = adc_temp.at(11);
+      m_temp_ch12 = adc_temp.at(12);
+      m_temp_ch13 = adc_temp.at(13);
+      m_temp_ch14 = adc_temp.at(14);
+      m_temp_ch15 = adc_temp.at(15);
+    }
+    else{
+      ERROR("Temperature monitoring picked up incorrect number of channels : "<<NCHANNELS);
+    }
   
   }
   INFO("Runner stopped");

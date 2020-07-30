@@ -54,6 +54,24 @@ class DigitizerReceiverModule : public FaserProcess {
   
   // monitoring metrics
   std::atomic<int> m_triggers;
+  
+  std::atomic<int> m_temp_ch00;
+  std::atomic<int> m_temp_ch01;
+  std::atomic<int> m_temp_ch02;
+  std::atomic<int> m_temp_ch03;
+  std::atomic<int> m_temp_ch04;
+  std::atomic<int> m_temp_ch05;
+  std::atomic<int> m_temp_ch06;
+  std::atomic<int> m_temp_ch07;
+  std::atomic<int> m_temp_ch08;
+  std::atomic<int> m_temp_ch09;
+  std::atomic<int> m_temp_ch10;
+  std::atomic<int> m_temp_ch11;
+  std::atomic<int> m_temp_ch12;
+  std::atomic<int> m_temp_ch13;
+  std::atomic<int> m_temp_ch14;
+  std::atomic<int> m_temp_ch15;
+
 
   // for SW trigger sending
   int m_sw_count;

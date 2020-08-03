@@ -1,0 +1,278 @@
+{
+  "type": "object",
+  "title": "DigitizerReceiver",
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "default": "digitizerreceiver",
+      "readOnly": true,
+      "pattern": "^((?!XXX).)*$",
+      "propertyOrder": 1
+    },
+    "host": {
+      "type": "string",
+      "required": true,
+      "default": "localhost",
+      "propertyOrder": 2
+    },
+    "port": {
+      "type": "integer",
+      "required": true,
+      "default": 0,
+      "minimum": 1024,
+      "maximum": 65535,
+      "propertyOrder": 3
+    },
+    "type": {
+      "type": "string",
+      "default": "DigitizerReceiver",
+      "readOnly": true,
+      "propertyOrder": 4,
+      "options": {
+        "hidden": true
+      }
+    },
+    "settings": {
+      "type": "object",
+      "title": "Settings",
+      "properties": {
+        "host_pc": {
+          "type": "string",
+          "title": "DAQ PC Host Address",
+          "description": "Can be the host address or IP address of the PC on which faser/daq is running.",
+          "propertyOrder": 1,
+          "default": false
+        },
+        "digitizer_hw_address": {
+          "type": "string",
+          "title": "Digitizer VME Base Address",
+          "propertyOrder": 2,
+          "description": "The rotary-switch configured physical address of the digitizer board in the VME crate.",
+          "enum": ["internal", "external"]
+        },
+        "buffer_length": {
+          "type": "number",
+          "title": "Readout Window Size",
+          "propertyOrder": 3,
+          "description": "The number of samples for the buffer acquisition window. The possible values are limited."
+        },
+        "buffer_n_post_samples": {
+          "type": "number",
+          "title": "Readout Window Post Samples",
+          "propertyOrder": 4,
+          "description": "The number of samples acquired following a trigger."
+        },
+        "trigger_acquisition": {
+          "type": "object",
+          "title": "Acquisition Configuration",
+          "propertyOrder": 5,
+          "description": "Specifies which trigger inputs cause for data to be acquired and written to the buffer.  For faser/daq running, only external should be enabled.",
+          "properties": {
+            "external": {
+              "type": "bool",
+              "title": "External",
+              "description": "Acquire data upon external trigger to TRG-IN",
+              "default": "false"
+            },
+            "software": {
+              "type": "bool",
+              "title": "Internal",
+              "description": "Acquire data upon software trigger",
+              "default": "false"
+            },
+            "internal": {
+              "type": "bool",
+              "title": "Software",
+              "description": "Acquire data upon internal generation of trigger by one of the trigger groups",
+              "default": "false"
+            }
+          }
+        },
+        "trigger_software": {
+          "type": "object",
+          "title": "Software based trigger generation",
+          "description": "",
+          "propertyOrder": 6,
+          "properties": {
+            "enable": {
+              "type": "bool",
+              "title": "SW Trigger Enable",
+              "description": "Enable the generation and sending of software triggers at the specified rate.  For this to be meaningful, you also need to specify the acquisition method with software triggers.",
+              "default": "false"
+            },
+            "rate": {
+              "type": "number",
+              "title": "SW Trigger Rate",
+              "description": "Rate of software triggers sent for data acquisition if this capability is enabled.",
+              "default": 3
+            }
+          }
+        },
+        "trigger_internal": {
+          "type": "array",
+          "title": "Internal Trigger Settings",
+          "description": "The settings upon which each trigger group will generate a trigger sent for either acquisition (if enabled) or out of LVDS to the TLB.",
+          "propertyOrder": 7,
+          "minItems": 8,
+          "maxItems": 8,
+          "items": {
+            "anyOf": [{
+              "type": "object",
+              "title": "The first anyOf schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": {},
+              "examples": [{
+                "group": 0,
+                "enable": 0,
+                "logic": "OnlyA",
+                "threshold_ch0": 8000,
+                "threshold_ch1": 8000,
+                "output_width": 32
+              }],
+              "required": [
+                "group",
+                "enable",
+                "logic",
+                "threshold_ch0",
+                "threshold_ch1",
+                "output_width"
+              ],
+              "properties": {
+                "group": {
+                  "type": "integer",
+                  "title": "The group schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0,
+                  "examples": [
+                    0
+                  ]
+                },
+                "enable": {
+                  "type": "integer",
+                  "title": "The enable schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0,
+                  "examples": [
+                    0
+                  ]
+                },
+                "logic": {
+                  "type": "string",
+                  "title": "The logic schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": "",
+                  "examples": [
+                    "OnlyA"
+                  ]
+                },
+                "threshold_ch0": {
+                  "type": "integer",
+                  "title": "The threshold_ch0 schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0,
+                  "examples": [
+                    8000
+                  ]
+                },
+                "threshold_ch1": {
+                  "type": "integer",
+                  "title": "The threshold_ch1 schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0,
+                  "examples": [
+                    8000
+                  ]
+                },
+                "output_width": {
+                  "type": "integer",
+                  "title": "The output_width schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0,
+                  "examples": [
+                    32
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }]
+          }
+        },
+        "trigger_internal_polarity": {
+          "type": "string",
+          "title": "Internal Trigger Polarity",
+          "description": "The direction in which the signal on a given channel must be going when it breaches the threshold set for a given channel.  This is global for all channels and so is not included in the channel trigger settings.",
+          "propertyOrder": 8,
+          "default": "over"
+        },
+        "channel_readout": {
+          "type": "array",
+          "title": "Channel Readout",
+          "description": "Which channels are read out and what are the specifics in terms of the dynamic range and DC offset.",
+          "propertyOrder": 8,
+          "minItems": 16,
+          "maxItems": 16,
+          "items": {
+            "anyOf": [{
+              "type": "object",
+              "title": "The first anyOf schema",
+              "description": "An explanation about the purpose of this instance.",
+              "default": {},
+              "examples": [{
+                "channel": 0,
+                "enable": 1,
+                "dynamic_range": 2.0,
+                "dc_offset": 0.0
+              }],
+              "required": [
+                "channel",
+                "enable",
+                "dynamic_range",
+                "dc_offset"
+              ],
+              "properties": {
+                "channel": {
+                  "type": "integer",
+                  "title": "The channel schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0,
+                  "examples": [
+                    0
+                  ]
+                },
+                "enable": {
+                  "type": "integer",
+                  "title": "The enable schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0,
+                  "examples": [
+                    1
+                  ]
+                },
+                "dynamic_range": {
+                  "type": "number",
+                  "title": "The dynamic_range schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0.0,
+                  "examples": [
+                    2.0
+                  ]
+                },
+                "dc_offset": {
+                  "type": "number",
+                  "title": "The dc_offset schema",
+                  "description": "An explanation about the purpose of this instance.",
+                  "default": 0.0,
+                  "examples": [
+                    0.0
+                  ]
+                }
+              },
+              "additionalProperties": true
+            }]
+          }
+        }
+      }
+    }
+  }
+}

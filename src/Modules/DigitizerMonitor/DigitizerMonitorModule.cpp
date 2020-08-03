@@ -11,6 +11,8 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
+#define NCHANNELS 16
+
 DigitizerMonitorModule::DigitizerMonitorModule() { 
   INFO("Instantiating ...");
 }
@@ -20,8 +22,7 @@ DigitizerMonitorModule::~DigitizerMonitorModule() {
 }
 
 void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
-
-  INFO("InternalMonitor");
+  INFO("Digitizer monitoring");
 
   // the m_event object is populated with the event binary here
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
@@ -29,7 +30,6 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
 
   // consistency check that the event received is the type of data we are configured to take
   if ( m_event->event_tag() != m_eventTag ) {
-    DEBUG("Event tag does not match filter tag. Are the module's filter settings correct?");
     ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
     return;
   }
@@ -37,73 +37,63 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
-    DEBUG("Error in unpacking");
+    ERROR("Error in unpacking");
     fill_error_status_to_metric( fragmentUnpackStatus );
     fill_error_status_to_histogram( fragmentUnpackStatus, "h_digitizer_errorcount" );
     return;
   }
   // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
 
-  DEBUG("EventSize from Claire : "<<m_pmtdataFragment->event_size());
+  DEBUG("EventSize : "<<m_pmtdataFragment->event_size());
 
-  // example 1 - number of errors into histogram
+  // number of errors into histogram
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
   fill_error_status_to_histogram( fragmentStatus, "h_digitizer_errorcount" );
 
-  // example 2 - size of fragment payload
+  // size of fragment payload
   uint16_t payloadSize = m_fragment->payload_size(); 
   m_histogrammanager->fill("h_digitizer_payloadsize", payloadSize);
   m_metric_payload = payloadSize;
 
-  // unpack and get full pulse shape from channel 0 into histogram
-  INFO("NSamp(0) : "<<m_pmtdataFragment->channel_adc_counts(0).size());
-
-  /*
-  // need to be able to clear a histogram to output the pulse
-  for(int isamp=0; isamp<m_pmtdataFragment->channel_adc_counts(0).size(); isamp++){
-    m_histogrammanager->fill("h_pulse_chan0",isamp,m_pmtdataFragment->channel_adc_counts(0).at(isamp));
-  }
-  */
-
-  float mean = GetMean(m_pmtdataFragment->channel_adc_counts(0), 0, 100);
-  float rms  = GetRMS(m_pmtdataFragment->channel_adc_counts(0), 0, 100);
-
-  m_histogrammanager->fill("h_mean_chan0", mean);
-  m_histogrammanager->fill("h_rms_chan0", rms);
-
-  // example 3 - 2D hist fill
-  //m_histogrammanager->fill("h_digitizer_numfrag_vs_sizefrag", m_pmtdataFragment->num_fragments_sent/1000., m_monitoringFragment->size_fragments_sent/1000.);
+  // anything worth doing to all channels
+  for(int iChan=0; iChan<NCHANNELS; iChan++){
   
+    // example pulse
+    FillChannelPulse("h_pulse_ch"+std::to_string(iChan), iChan);
+    
+    // mean and rms for monitoring a channel that goes out of wack
+    float avg = GetPedestalMean(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
+    float rms = GetPedestalRMS(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
+
+    m_histogrammanager->fill("h_avg_ch"+std::to_string(iChan), avg);
+    m_histogrammanager->fill("h_rms_ch"+std::to_string(iChan), rms);    
+  }
 }
 
 void DigitizerMonitorModule::register_hists() {
-
   INFO(" ... registering histograms in DigitizerMonitor ... " );
   
+  // payload size
   m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
 
+  // payload status
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
   m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, 5. );
 
-  // print out raw pulse for channel 0
-  m_histogrammanager->registerHistogram("h_pulse_chan0","channel pulse [0]",0,1000,1000);
-
-  // mean and rms of first 100 samples
-  m_histogrammanager->registerHistogram("h_mean_chan0","mean_chan0",0,20000,200);
-  m_histogrammanager->registerHistogram("h_rms_chan0","rms_chan0",0,1000,100);
-  
-
-  // example 2D hist
-  //m_histogrammanager->register2DHistogram("h_Digitizer_numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 30.5, 31, "size of sent fragments [kB]", -0.5, 9.5, 20 );
+  // synthesis common for all channels
+  int buffer_length = (int)m_config.getConfig()["settings"]["buffer_length"];
+  for(int iChan=0; iChan<NCHANNELS; iChan++){
+    m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan), 0, buffer_length, buffer_length);
+    m_histogrammanager->registerHistogram("h_avg_ch"+std::to_string(iChan),"Average of Baseline Start : ch"+std::to_string(iChan),0,20000,200);
+    m_histogrammanager->registerHistogram("h_rms_ch"+std::to_string(iChan),"RMS of Baseline Start : ch"+std::to_string(iChan),0,1000,100);
+  }
 
   INFO(" ... done registering histograms ... " );
   return;
-
 }
 
 void DigitizerMonitorModule::register_metrics() {
-
   INFO( "... registering metrics in DigitizerMonitorModule ... " );
 
   register_error_metrics();
@@ -114,7 +104,9 @@ void DigitizerMonitorModule::register_metrics() {
   return;
 }
 
-float DigitizerMonitorModule::GetMean(std::vector<uint16_t> input, int start, int end){
+float DigitizerMonitorModule::GetPedestalMean(std::vector<uint16_t> input, int start, int end){
+
+  CheckBounds(input, start, end);
 
   float sum=0.0;
   float count=0;
@@ -130,10 +122,11 @@ float DigitizerMonitorModule::GetMean(std::vector<uint16_t> input, int start, in
   return sum/count;
 }
 
-float DigitizerMonitorModule::GetRMS(std::vector<uint16_t> input, int start, int end){
+float DigitizerMonitorModule::GetPedestalRMS(std::vector<uint16_t> input, int start, int end){
 
+  CheckBounds(input, start, end);
 
-  float mean = GetMean(input, start, end);
+  float mean = GetPedestalMean(input, start, end);
 
   float sum_rms = 0;
   int count=0;
@@ -147,5 +140,27 @@ float DigitizerMonitorModule::GetRMS(std::vector<uint16_t> input, int start, int
     return -1;
 
   return pow(sum_rms/count, 0.5);
+}
 
+void CheckBounds(std::vector<uint16_t> input, int& start, int& end){
+  // if the number of samples is less than the desired pedestal sampling length, then take the full duration
+  if(start>=end){
+    WARNING("Pedestal calculation has a start after and end : ["<<start<<","<<end<<"]");
+    end = start;
+  }
+  
+  // if the number of samples is less than the desired pedestal sampling length, then take the full duration
+  if(end>input.size()){
+    WARNING("The pulse length is not long enough for a pedestal calculation of : ["<<start<<","<<end<<"]");
+    end = input.size();
+  }
+}
+
+void DigitizerMonitorModule::FillChannelPulse(std::string histogram_name, int channel){
+  DEBUG("Filling pulse for : "<<histogram_name<<"  "<<channel);
+
+  m_histogrammanager->reset(histogram_name);
+  for(int isamp=0; isamp<m_pmtdataFragment->channel_adc_counts(channel).size(); isamp++){
+    m_histogrammanager->fill(histogram_name,isamp,m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
+  }
 }

@@ -7,8 +7,11 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   DigitizerMonitorModule();
   ~DigitizerMonitorModule();
 
-  float GetMean(std::vector<uint16_t> input, int start, int end);
-  float GetRMS(std::vector<uint16_t> input, int start, int end);
+  float GetPedestalMean(std::vector<uint16_t> input, int start, int end);
+  float GetPedestalRMS(std::vector<uint16_t> input, int start, int end);
+  void CheckBounds(std::vector<uint16_t> input, int& start, int& end);
+  
+  void FillChannelPulse(std::string histogram_name, int channel);
 
  protected:
 

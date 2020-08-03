@@ -13,8 +13,7 @@
         "digitizer_hw_address":  "0x04320000",
         "buffer_length":         630,
         "buffer_n_post_samples": 120,
-        "internal_sawtooth":     false,
-        "trigger_acquisition": {"external": 0, "software": 1, "internal": 0},
+        "trigger_acquisition": {"external": false, "software": true, "internal": false},
         "trigger_software": {"enable": true, "rate": 1},
         "trigger_internal": [{"group" : 0, "enable": 0, "logic": "OnlyA", "threshold_ch0": 8000, "threshold_ch1": 8000, "output_width":32},
                              {"group" : 1, "enable": 0, "logic": "OnlyA", "threshold_ch0": 500,  "threshold_ch1": 500,  "output_width":32},
@@ -205,7 +204,8 @@
         "stats_uri": "tcp://localhost:7000",
         "fragmentID": 262144,
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics"
+        "influxDb_name": "DAQlingMetrics",
+        "buffer_length": 630
       },
       "connections": {
         "receivers": [

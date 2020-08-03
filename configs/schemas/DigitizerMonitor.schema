@@ -1,0 +1,53 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://gitlab.cern.ch/faser/daq/-/tree/master/configs/schemas/DigitizerReceiver.schema",
+  "title": "DigitizerMonitor",
+  "description": "This is the schema for the running of the DigitizerMonitor within a faser/daq setup.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "default": "digitizerreceiver",
+      "readOnly": true,
+      "pattern": "^((?!XXX).)*$",
+      "propertyOrder": 1
+    },
+    "host": {
+      "type": "string",
+      "required": true,
+      "default": "localhost",
+      "propertyOrder": 2
+    },
+    "port": {
+      "type": "integer",
+      "required": true,
+      "default": 0,
+      "minimum": 1024,
+      "maximum": 65535,
+      "propertyOrder": 3
+    },
+    "type": {
+      "type": "string",
+      "default": "DigitizerReceiver",
+      "readOnly": true,
+      "propertyOrder": 4,
+      "options": {
+        "hidden": true
+      }
+    },
+    "settings": {
+      "type": "object",
+      "title": "Settings",
+      "properties": {
+        "buffer_length": {
+          "type": "number",
+          "title": "Readout Window Size",
+          "propertyOrder": 3,
+          "description": "This configures the axis range of the example pulse monitoring histogram and should match what you have configured for the buffer length in the DigitizerReceiver.",
+          "default": 630
+        }
+      }
+    }
+  }
+}

@@ -1,83 +1,83 @@
 {
-    "type": "object",
-    "title": "FileWriterFaser",
-    "properties": {
-      "name": {
+  "type": "object",
+  "title": "FileWriterFaser",
+  "properties": {
+    "name": {
+      "type": "string",
+      "required": true,
+      "default": "filewriter",
+      "pattern": "^((?!XXX).)*$",
+      "propertyOrder": 1
+    },
+    "host": {
+      "type": "string",
+      "required": true,
+      "default": "localhost",
+      "propertyOrder": 2
+    },          
+    "port": {
+      "type": "integer",
+      "required": true,
+      "default": 0,
+      "minimum": 1024,
+      "maximum": 65535,
+      "propertyOrder": 3
+    },
+    "type": {
+      "type": "string",
+      "default": "FileWriterFaser",
+      "readOnly": true,
+      "propertyOrder": 4,
+      "options": { "hidden": true }
+    },
+    "settings": {
+      "type": "object",
+      "title": "Settings",
+      "properties": {
+        "stats_uri": {
         "type": "string",
-	"required": true,
-	"default": "filewriter",
-	"pattern": "^((?!XXX).)*$",
-	"propertyOrder": 1
+        "format": "uri"
       },
-      "host": {
-        "type": "string",
-	"required": true,
-	"default": "localhost",
-	"propertyOrder": 2
-      },          
-      "port": {
+      "max_filesize": {
+        "propertyOrder": 102,
         "type": "integer",
-	"required": true,
-	"default": 0,
-        "minimum": 1024,
-	"maximum": 65535,
-	"propertyOrder": 3
+        "default": 500000000,
+        "minimum": 100000,
+        "maximum": 2000000000,
+        "required": true,
+        "options": {
+          "infoText": "Maximum file size"
+        }
       },
-      "type": {
-        "type": "string",
-	"default": "FileWriterFaser",
-	"readOnly": true,
-	"propertyOrder": 4,
-	"options": { "hidden": true }
+      "buffer_size": {
+        "propertyOrder": 103,
+        "type": "integer",
+        "default": 4000,
+        "minimum": 100,
+        "maximum": 50000,
+        "required": true,
+        "options": {
+          "infoText": "Buffer size for output streams"
+        }
       },
-      "settings": {
-        "type": "object",
-        "title": "Settings",
-        "properties": {
-          "stats_uri": {
-	    "type": "string",
-	    "format": "uri"
-	  },
-	  "max_filesize": {
-   	    "propertyOrder": 102,
-            "type": "integer",
-	    "default": 500000000,
-	    "minimum": 100000,
-	    "maximum": 2000000000,
-	    "required": true,
-	    "options": {
-	      "infoText": "Maximum file size"
-	    }
-	  },
-	  "buffer_size": {
-   	    "propertyOrder": 103,
-            "type": "integer",
-	    "default": 4000,
-	    "minimum": 100,
-	    "maximum": 50000,
-	    "required": true,
-	    "options": {
-	      "infoText": "Buffer size for output streams"
-	    }
-	  },
-	  "filename_pattern": {
-   	    "propertyOrder": 101,
-            "type": "string"		      
-	  },
-	  "channel_names": {
-   	    "propertyOrder": 100,
-            "type": "array",
-	    "options": { "infoText": "Base name for each output stream" },
-	    "format": "table",
-	    "title": "Channel Names",
-	    "uniqueItems": true,
-	    "items": { "type": "string" }
-	  }
-	},
-	"format": "grid",
-	"propertyOrder": 5
+      "filename_pattern": {
+        "propertyOrder": 101,
+        "type": "string"      
+      },
+      "channel_names": {
+        "propertyOrder": 100,
+        "type": "array",
+        "options": { "infoText": "Base name for each output stream" },
+        "format": "table",
+        "title": "Channel Names",
+        "uniqueItems": true,
+        "items": { "type": "string" }
       }
+    },
+    "format": "grid",
+    "propertyOrder": 5
     }
+  }
 }
 
 

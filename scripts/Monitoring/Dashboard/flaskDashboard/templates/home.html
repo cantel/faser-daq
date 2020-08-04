@@ -1,110 +1,30 @@
-<html>
+{% extends "layout.html" %}
 
-<head lang="en">
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-	<title>
-		Faser Dashboard
-	</title>
-	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-		integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+{% block titletab %} Faser Dashboard {% endblock %}
 
-
-
-
-</head>
-
-
-<body>
-	<header>
-		<nav class="navbar navbar-expand-lg navbar-light bg-light">
-			<div>
-				<img src="{{ url_for('static', filename = 'img/faser.png') }}" width="120" height="40" alt=""
-					loading="lazy">
-				<label class="navbar-brand mx-2">Dashboard</label>
-			</div>
-			<div class="mx-auto" id="module-choice">
-				<form class="form-inline my-auto" method='POST' action="{{ url_for('home') }}">
-					<label class="mx-2"> Module:</label>
-					<select name="module_select" class="selectpicker form-control mx-2">
-
-						{% if not selectedModule %}
-						<option value "none"> </option>
-						{% endif %}
-						{% if modules %}
-						{% if not selectedModule %}
-						{% for module in modules %}
-						<option value="{{ module }}"> {{ module }}</option>
-						{% endfor %}
-						{% else %}
-						{% for module in modules %}
-
-						{% if module == selectedModule.name %}
-						<option value="{{ module }}" selected> {{ module }}</option>
-						{% else %}
-						<option value="{{ module }}"> {{ module }}</option>
-						{% endif %}
-
-						{% endfor %}
-						{% endif %}
-						{% endif %}
-					</select>
-					<button type="submit" class="btn btn-primary mx-2">select</button>
-				</form>
-			</div>
-			<div class="" id="sort-div">
-				<input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-			</div>
-
-		</nav>
-	</header>
-	{% if selectedModule %}
-	<div class="container" id="graphs-top_container">
-		{% for histo in selectedModule["info"] %}
-		<div class="card m-2">
-			<figure id="{{ histo }}">
-				<div id="timestamp_{{ histo }}"></div>
-				<div id="graph_{{ histo }}"></div>
-			</figure>
-		</div>
-		{% endfor %}
-	</div>
-	{% endif %}
-
-	{% if selectedModule and selectedModule["info"] %}
-	<script>
-		var source = new EventSource('/{{ selectedModule["name"] }}/{{ selectedModule["info"] | join("-") }}');
-		source.onmessage = function (event) {
-			//console.log(keys);
-			var data = event.data;
-			var datapacket = JSON.parse(data);
-
-			for (const hist in datapacket) {
-				Plotly.react("graph_" + hist, datapacket[hist].figure)
-			}
-		}
-	</script>
-	{% endif %}
-
-
-
-
-	<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-		integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-		crossorigin="anonymous"></script>
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-		integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-		crossorigin="anonymous"></script>
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
-		integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
-		crossorigin="anonymous"></script>
-
-</body>
-
-
-
-
-
-</html>
+{% block navbar %}
+<div>
+	<img src="{{ url_for('static', filename = 'img/faser.png') }}" width="120" height="40" alt="" loading="lazy">
+	<label class="navbar-brand mx-2">Dashboard</label>
+</div>
+<div class="mx-auto" id="module-choice">
+	<form class="form-inline my-auto" method='POST' action="{{ url_for('home') }}">
+		<label class="mx-2"> Module:</label>
+		<select name="module_select" class="selectpicker form-control mx-2">
+			<option value="none" selected> </option>
+			{% if modules %}
+			{% for module in modules %}
+			<option value="{{ module }}"> {{ module }}</option>
+			{% endfor %}
+			{% endif %}
+		</select>
+		<button type="submit" class="btn btn-primary mx-2">select</button>
+	</form>
+</div>
+{% endblock %}
+		
+{% block content %}
+<div class = "container-fluid my-auto">
+		<p class = "text-center align-middle display-4">  No Module chosen </p>
+</div>
+{% endblock %}

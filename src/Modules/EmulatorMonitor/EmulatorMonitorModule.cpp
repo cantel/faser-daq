@@ -74,17 +74,17 @@ void EmulatorMonitorModule::register_hists() {
   // example of 1D histogram: default is ylabel="counts" non-extendable axes (Axis::Range::NONEXTENDABLE & 60 second publishing interval.
   //m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
   // example of 1D histogram with extendable x-axis, publishing interval of every 30 seconds.
-  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 349.5, 175, Axis::Range::EXTENDABLE, 30);
+  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 349.5, 175, Axis::Range::EXTENDABLE, 5);
 
   // example 1D histogram with non-extendable axis and resetting after each publish
-  m_histogrammanager->registerHistogram("sizefrag", "size of sent fragments [kB]","count/2kB", -0.5, 349.5, 175, Axis::Range::NONEXTENDABLE);
+  m_histogrammanager->registerHistogram("sizefrag", "size of sent fragments [kB]","count/2kB", -0.5, 349.5, 175, Axis::Range::NONEXTENDABLE, 5);
   m_histogrammanager->resetOnPublish("sizefrag", true);
 
   // example pulse reset
-   m_histogrammanager->registerHistogram("pulse", "pulse in magic adc", 1, 6, 5, 10);
+   m_histogrammanager->registerHistogram("pulse", "pulse in magic adc", 1, 6, 5, 3);
 
   // example 2D hist
-  m_histogrammanager->register2DHistogram("numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 100.5, 101, "size of sent fragments [kB]", -0.5, 9.5, 20, 30 );
+  m_histogrammanager->register2DHistogram("numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 100.5, 101, "size of sent fragments [kB]", -0.5, 9.5, 20, 5 );
 
   INFO(" ... done registering histograms ... " );
 

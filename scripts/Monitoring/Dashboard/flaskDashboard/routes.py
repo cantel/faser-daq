@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, request, Response, jsonify
+from flask import render_template, url_for, flash, redirect, request, Response, jsonify, session
 from flaskDashboard import app
 import plotly
 import plotly.graph_objs as go
@@ -11,17 +11,20 @@ import plotly.graph_objects as go
 import time
 import requests
 
-plotly_types = {'num_fixedwidth': "bar", '2d_num_fixedwidth': "histogram2d"}
+def getselectedModuleInfoFUNCTION(module):
+  data = r.hgetall(module)
+  keys = []
+  for key in data.keys():
+    if data[key].find('{') == -1:
+      continue
+    else:
+      keys.append(key)
+  packet = {'name': module, 'info': keys}
+  return packet
 
-r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
-global dataModules
-
-@app.route("/getcurrentModules", methods=["GET", "POST"])
-def getcurrentModules():
+def getcurrentModulesFUNCTION():
   database_modules = r.scan() ##returns the number of the database and the modules in it
   modules = [] 
-  # valid_keys = {}
-
 # Add only modules with hash data
   for module in database_modules[1]:
     try: 
@@ -31,55 +34,36 @@ def getcurrentModules():
       continue
     modules.append(module)
   packet = {"data": modules}
-  return jsonify(packet)
+  return packet
 
-  # for i in modules:
-  #   data = r.hgetall(i)
-  #   keys = []
-  #   for j in data.keys():
-  #     if data[j].find('{') == -1:
-  #       continue
-  #     else:
-  #       keys.append(j)
-    
-  #   valid_keys[i]= keys
-  #   keys = []
-  # # packet = json.loads(valid_keys)
-  # return jsonify(valid_keys)
-
-@app.route("/getselectedModuleInfo",  methods=["GET", "POST"])
-def getselectedModuleInfo():
-  module = request.args.get("selectedModule")
-  data = r.hgetall(module)
-  # print(data)
-  keys = []
-  for key in data.keys():
-    if data[key].find('{') == -1:
-      continue
-    else:
-      # print(key)
-      keys.append(key)
-  packet = {'name': module, 'info': keys}
-  return jsonify(packet)
+plotly_types = {'num_fixedwidth': "bar", '2d_num_fixedwidth': "histogram2d"}
+r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 
 @app.route("/", methods=["GET", "POST"])
 def home():
-  global dataModules
-  if request.method != 'POST':
+  if not request.form.get('module_select'):
     print("Doing the busy stuff")
-    dataModules = json.loads(requests.get(f"{request.base_url}{url_for('getcurrentModules')}").content.decode())
+    dataModules = getcurrentModulesFUNCTION()
+    session['modules'] = dataModules
     return render_template('home.html', modules = dataModules["data"])
 
   elif request.method == 'POST':
     selectedModule = request.form.get('module_select')
-    selectedModuleData = json.loads(requests.get(f"{request.base_url}{url_for('getselectedModuleInfo')}", params = {'selectedModule': selectedModule}).content.decode())
-    return render_template('home.html', modules = dataModules["data"], selectedModule = selectedModuleData)
+    return redirect(url_for('monitormodule', module = selectedModule))
 
-@app.route("/<string:sourceid>/<string:nameshistos>")
-def lastHistogram(sourceid, nameshistos):
+
+@app.route('/monitor/<string:module>', methods=["GET", "POST"])
+def monitormodule(module):
+  moduleData = getselectedModuleInfoFUNCTION(module)
+  modules = session.get('modules')
+  return render_template('module.html', modules = modules, selected_module = moduleData)
+
+  
+@app.route("/<string:sourceid>/<string:nameshisto>")
+def lastHistogram(sourceid, nameshisto):
   def getHistogram():
     source = sourceid
-    histnames = nameshistos.split("-")
+    histnames = nameshisto.split("-")
     # print(histnames)
     while True:
       packet = {}
@@ -140,27 +124,3 @@ def lastHistogram(sourceid, nameshistos):
       yield f"data:{json.dumps(packet)}\n\n"
       time.sleep(10)
   return Response(getHistogram(), mimetype='text/event-stream')
-
-
-
-   
-
-
-# database_modules = r.scan() ##returns the number of the database and the modules in it
-# modules = [] 
-# valid_keys = {}
-
-# # Add only modules with hash data
-# for module in database_modules[1]:
-#   try: 
-#     r.hgetall(module)
-  
-#   except redis.exceptions.ResponseError:
-#     print(f"{module} doesn't contain hash data")
-#     continue
-#   modules.append(module)
-
-# for i in modules:
-#   data = r.hgetall(i)
-#   keys = []
-#   for j in data.keys():

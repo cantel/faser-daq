@@ -150,7 +150,7 @@
                     "title" : "L1CounterReset",
                     "default" : false
                     },
-                ErrCntReset"" : {
+                "ErrCntReset" : {
                     "type" : "boolean",
                     "title" : "ErrCntReset",
                     "default" : false

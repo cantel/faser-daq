@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
+#include "TrackerReadout/TRBEventDecoder.h"
 
 class TrackerMonitorModule : public MonitorBaseModule {
  public:
@@ -12,5 +13,8 @@ class TrackerMonitorModule : public MonitorBaseModule {
   void monitor(daqling::utilities::Binary &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
+ 
+ private:
+  FASER::TRBEventDecoder * m_decoder;
 
 };

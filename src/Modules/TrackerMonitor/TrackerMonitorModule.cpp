@@ -14,6 +14,7 @@ using namespace std::chrono;
 TrackerMonitorModule::TrackerMonitorModule() { 
 
    INFO("");
+   m_decoder = new FASER::TRBEventDecoder();
  }
 
 TrackerMonitorModule::~TrackerMonitorModule() { 
@@ -42,6 +43,26 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
 
   m_histogrammanager->fill("bcid", m_fragment->bc_id()); 
 
+  // ----- Get module data using TRB event decoder ---- 
+  //
+
+  std::vector<uint32_t> rawpayload = m_fragment->rawPayload();
+  if (!(m_decoder->IsEndOfDAQ(rawpayload.at(0)))){
+  m_decoder->LoadTRBEventData(rawpayload);
+  std::vector<FASER::TRBEvent*> decoded_event = m_decoder->GetEvents(); 
+  if (decoded_event.size() != 0){
+      auto local_event_id = decoded_event[0]->GetL1ID();
+      auto trb_bc_id = decoded_event[0]->GetBCID();
+      unsigned int nmodules = decoded_event[0]->GetNModulesPresent();
+      for ( unsigned int i = 0; i < nmodules; i++ ){
+        FASER::SCTEvent* sctevent= decoded_event[0]->GetModule(i);
+        if (sctevent != nullptr){
+          m_histogrammanager->fill2D("trbbcid_vs_modulebcid", trb_bc_id, sctevent->GetBCID());
+         } // sct event valid
+       } // module loop
+    } // event exists.
+  } // data is not EndOfDAQ (shouldn't be ncessary)
+
 }
 
 void TrackerMonitorModule::register_hists() {
@@ -49,6 +70,8 @@ void TrackerMonitorModule::register_hists() {
   INFO(" ... registering histograms in TrackerMonitor ... " );
 
   m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 3600);
+
+  m_histogrammanager->register2DHistogram("trbbcid_vs_modulebcid", "TRB BCID", -0.5, 3564.5, 3565, "SCT module BCID", -0.5, 255.5, 256, 3600);
 
   INFO(" ... done registering histograms ... " );
 

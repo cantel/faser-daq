@@ -4,7 +4,8 @@ daqling_module(module_name)
 #target_link_libraries(${module_name} DaqlingModuleMonitor)
 #target_sources(${module_name} PRIVATE ../Monitor/MonitorModule.cpp)
 
-target_link_libraries(${module_name} EventFormats)
+target_link_libraries(${module_name} EventFormats TRBEventDecoder)
+target_include_directories(${module_name} PRIVATE ../../../gpiodrivers/TRBAccess)
 
 # Add source file to library
 daqling_target_sources(${module_name}

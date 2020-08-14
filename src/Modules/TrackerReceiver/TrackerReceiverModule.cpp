@@ -31,17 +31,49 @@ using namespace daqling::utilities;
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
 
+    bool ethernetComms(true);
+
     auto cfg = m_config.getSettings();
 
     if ( cfg.contains("boardID")) {
       m_userBoardID = cfg["boardID"];
     }
-    else m_userBoardID = -1; //don't care
+    //else m_userBoardID = -1; //don't care
+    else {
+      ERROR("No board ID specified.");
+      throw std::runtime_error("No board ID specified.");
+    }
+
+    if ( cfg.contains("SCIP")) {
+      m_SCIP = cfg["SCIP"];
+      if ( cfg.contains("DAQIP")) {
+        m_DAQIP = cfg["DAQIP"];
+      }
+      else {
+        ERROR("No DAQ IP specified.");
+        throw std::runtime_error("No DAQ IP specified.");
+      }
+      INFO("SC and DAQ IPs have been specified. Assuming we're communicating via ethernet!");
+    }
+    else {
+       INFO("**NO** SC and DAQ IPs have been specified. Assuming we're communicating via USB!");
+       ethernetComms = false;
+    }
+
+
+    if ( cfg.contains("ReadoutMode")) {
+      m_ABCD_ReadoutMode = cfg["ReadoutMode"];
+    }
+    else m_ABCD_ReadoutMode = FASER::TRBAccess::ABCD_ReadoutMode::LEVEL;
 
     INFO("Will connect to TRB with board id "<<m_userBoardID);
+    INFO("Will set chip read out mode to "<<m_ABCD_ReadoutMode);
      
+    //if (ethernetComms) m_trb = std::make_unique<FASER::TRBAccess>(m_SCIP, m_DAQIP, 0, m_config.getConfig()["settings"]["emulation"], m_userBoardID );
     m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"], m_userBoardID );
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
+
+    //m_trb->SetReadoutMode( m_ABCD_ReadoutMode );
 
     auto log_level = m_config.getConfig()["loglevel"]["module"];
     m_debug = (log_level=="DEBUG"?1:0);
@@ -105,9 +137,9 @@ void TrackerReceiverModule::configure() {
   m_trb->SetDirectParam(FASER::TRBDirectParameter::FifoReset | FASER::TRBDirectParameter::ErrCntReset); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
 
   m_trb->GetPhaseConfig()->SetFinePhase_Clk0(0);
-  m_trb->GetPhaseConfig()->SetFinePhase_Led0(45);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led0(m_finePhaseDelay);
   m_trb->GetPhaseConfig()->SetFinePhase_Clk1(0);
-  m_trb->GetPhaseConfig()->SetFinePhase_Led1(45);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led1(m_finePhaseDelay);
   m_trb->WritePhaseConfigReg();
   m_trb->ApplyPhaseConfig();
   
@@ -132,7 +164,6 @@ void TrackerReceiverModule::configure() {
 
   //Modules configuration
   //This stage causes Timeout exception in DAQling, probably because of the transfer capacity. Maybe it will disapear with USB3 or ethernet]
-  /*
   for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
   
     if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
@@ -143,6 +174,7 @@ void TrackerReceiverModule::configure() {
         std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
         if (l_moduleConfigFile != ""){
             l_cfg->ReadFromFile(l_moduleConfigFile);
+            l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
         }
         m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
         INFO("Configuration of module " << l_moduleNo << " finished.");
@@ -153,7 +185,6 @@ void TrackerReceiverModule::configure() {
       }
     }
     }
-    */
 
   m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
 
@@ -250,11 +281,15 @@ void TrackerReceiverModule::runner() {
   uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->GetBoardID();
   uint64_t local_event_id;
   uint64_t local_bc_id;
+  unsigned int errcount(0);
 
   while (m_run || vector_of_raw_events.size()) { 
     if (m_config.getConfig()["settings"]["L1Atype"] == "internal" && m_triggerEnabled == true){
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
+
+    //INFO("Checking error count ..." );
+    //m_trb->ReadErrorCounter(errcount);
     
     vector_of_raw_events = m_trb->GetTRBEventData();
 

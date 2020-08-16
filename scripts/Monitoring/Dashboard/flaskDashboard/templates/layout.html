@@ -1,39 +1,110 @@
 <html>
-
 <head lang="en">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>
-        {% block titletab %} {% endblock %}
-    </title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-        integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    Faser-Monitoring
+  </title>
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+    integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+  <script src="{{ url_for('static', filename = 'js/jquery.json-tag-editor.min.js') }}"></script>
+  <script src="{{ url_for('static', filename = 'js/jquery.caret.min.js') }}"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery.json-tag-editor.css') }}">
+
+
+
 
 </head>
 
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-light">
-            {% block navbar %}{% endblock %}
-        </nav>
-    </header>
+  <header>
+    <nav class="navbar navbar-light bg-light">
+      <div>
+        <img src="{{ url_for('static', filename = 'img/faser.png') }}" width="120" height="40" alt="" loading="lazy">
+        <a class="navbar-brand mx-2" href="{{ url_for('home') }}">Monitoring</a>
+      </div>
 
-    {% block content %}{% endblock %}
+      <form class="form-inline my-auto" method='GET' action="{{ url_for('monitor') }}">
 
-   
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-        crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js"
-        integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo"
-        crossorigin="anonymous"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"
-        integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI"
-        crossorigin="anonymous"></script>
+        <label class="mx-2"> Module:</label>
+        <select name="selected_module" class="selectpicker form-control mx-2">
+          {% if not selected_module %}
+          <option value="none"> </option>
+          {% endif %}
+          {% if modules %}
+
+          {% if selected_module %}
+
+          {% for module in modules %}
+          {% if module == selected_module %}
+          <option value="{{ module }}" selected> {{ module }}</option>
+          {% else %}
+          <option value="{{ module }}"> {{ module }}</option>
+          {% endif %}
+          {% endfor %}
+
+          {% else %}
+          {% for module in modules %}
+          <option value="{{ module }}"> {{ module }}</option>
+          {% endfor %}
+
+          {% endif %}
+
+          {% endif %}
+        </select>
+        <button type="submit" class="btn btn-primary mx-2">select</button>
+
+      </form>
+
+      <div class="ml-0">
+        <form class="form-inline my-auto" id="sort-div" method="GET" action="{{ url_for('monitor') }}">
+          <div class="d-flex justify-content-between">
+            <!-- <input class="form-control mr-sm-2" name="tags" type="search" placeholder="Search" id="search"> -->
+            <select class='form-control' style="padding: 100%;" name="selected_tags" multiple="multiple"
+              id="tags_selection" >
+              {% for tag in tags %}
+              <option value="{{ tag }}">{{ tag }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-outline-success my-auto mx-3 " type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+
+    </nav>
+  </header>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }}">
+    {{ message }}
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+
+
+  <script>
+    $('[class*=alert]').delay(2000).fadeOut(400);
+
+  </script>
+  <script>
+    $(document).ready(function () {
+      $("#tags_selection").select2(
+      );
+    });
+  </script>
+
 </body>
 
 </html>

@@ -1,30 +1,9 @@
 {% extends "layout.html" %}
 
-{% block titletab %} Faser Dashboard {% endblock %}
-
-{% block navbar %}
-<div>
-	<img src="{{ url_for('static', filename = 'img/faser.png') }}" width="120" height="40" alt="" loading="lazy">
-	<label class="navbar-brand mx-2">Dashboard</label>
-</div>
-<div class="mx-auto" id="module-choice">
-	<form class="form-inline my-auto" method='POST' action="{{ url_for('home') }}">
-		<label class="mx-2"> Module:</label>
-		<select name="module_select" class="selectpicker form-control mx-2">
-			<option value="none" selected> </option>
-			{% if modules %}
-			{% for module in modules %}
-			<option value="{{ module }}"> {{ module }}</option>
-			{% endfor %}
-			{% endif %}
-		</select>
-		<button type="submit" class="btn btn-primary mx-2">select</button>
-	</form>
-</div>
-{% endblock %}
-		
 {% block content %}
-<div class = "container-fluid my-auto">
-		<p class = "text-center align-middle display-4">  No Module chosen </p>
+<div class ="mx-5">
+<div class="container-fluid">
+
+</div>
 </div>
 {% endblock %}

@@ -146,7 +146,7 @@
         "stats_uri": "tcp://localhost:7000",
         "max_filesize": 100000,
         "buffer_size": 4000,
-        "filename_pattern": "/tmp/meehan/FaserDigitizerTest-%c-%r-%n.raw",
+        "filename_pattern": "/tmp/lfalcone/FaserDigitizerTest-%c-%r-%n.raw",
         "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring","Corrupted","Incomplete","Duplicate"]
       },
       "connections": {

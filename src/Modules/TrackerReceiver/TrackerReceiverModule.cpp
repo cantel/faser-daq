@@ -69,8 +69,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
     INFO("Will connect to TRB with board id "<<m_userBoardID);
     INFO("Will set chip read out mode to "<<m_ABCD_ReadoutMode);
      
-    //if (ethernetComms) m_trb = std::make_unique<FASER::TRBAccess>(m_SCIP, m_DAQIP, 0, m_config.getConfig()["settings"]["emulation"], m_userBoardID );
-    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"], m_userBoardID );
+    if (ethernetComms) m_trb = std::make_unique<FASER::TRBAccess>(m_SCIP, m_DAQIP, 0, m_config.getConfig()["settings"]["emulation"], m_userBoardID );
+    else m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"], m_userBoardID );
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
 
     //m_trb->SetReadoutMode( m_ABCD_ReadoutMode );

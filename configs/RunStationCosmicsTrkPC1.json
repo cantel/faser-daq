@@ -1,0 +1,535 @@
+{
+  "version": 7,
+  "group": "faser",
+  "components": [
+    {
+      "name": "tlbreceiver01",
+      "host": "localhost",
+      "port": 5556,
+      "type": "TriggerReceiver",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "SamplingPhase": [false, false, false, false, false, false, false, false],
+        "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+        "RandomTriggerRate": 4,
+        "Prescale": [0, 0, 1, 0, 0, 0],
+        "TrackerDelay": 100,
+        "DigitizerDelay": 0,
+        "LHC_CLK": false,
+        "OrbitDelay": 0,
+        "Deadtime": 500,
+        "MonitoringRate": 11233,
+        "OutputDestination": 0,
+        "Input": [true, true, false, false, false, false, false, false],
+        "BusyDisable": false,
+        "EnableTriggerData": true,
+        "EnableMonitoringData": true,
+        "Derandomize": false,
+        "ReadoutFIFOReset": true,
+        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8100
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackerreceiver00",
+      "host": "sahigashlinux",
+      "port": 5557, 
+      "type": "TrackerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "boardID" : 0,
+        "StupidSWDelay": 0,
+        "ReadoutMode": 0,
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "L1Atype" : "external",  
+        "emulation" : false,
+        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+        "moduleMask" : [true, true, true, true, true, true, true, true], 
+        "moduleConfigFiles": {"0" : "/home/cantel/config/Station/Layer0/Module0_080820_2042.json",
+                              "1" : "/home/cantel/config/Station/Layer0/Module1_080820_2042.json",
+                              "2" : "/home/cantel/config/Station/Layer0/Module2_080820_2042.json",
+                              "3" : "/home/cantel/config/Station/Layer0/Module3_080820_2042.json",
+                              "4" : "/home/cantel/config/Station/Layer0/Module4_080820_2042.json",
+                              "5" : "/home/cantel/config/Station/Layer0/Module5_080820_2042.json",
+                              "6" : "/home/cantel/config/Station/Layer0/Module6_080820_2042.json",
+                              "7" : "/home/cantel/config/Station/Layer0/Module7_080820_2042.json"},
+        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false],
+        "TLBClockSel" : true,
+        "BCREn" : true,
+        "L1AEn" : true,
+        "SoftCounterMuxEn" : false,
+        "L1CounterReset" : false,
+        "ErrCntReset" : false,
+        "FifoReset" : false
+       },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8101
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackerreceiver01",
+      "host": "sahigashlinux",
+      "port": 5558, 
+      "type": "TrackerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "boardID" : 1,
+        "StupidSWDelay": 10,
+        "ReadoutMode": 0,
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "L1Atype" : "external",  
+        "emulation" : false,
+        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+        "moduleMask" : [true, true, true, true, true, true, true, true], 
+        "moduleConfigFiles": {"0" : "/home/cantel/config/Station/Layer1/Module0_080820_2035.json",
+                              "1" : "/home/cantel/config/Station/Layer1/Module1_080820_2035.json",
+                              "2" : "/home/cantel/config/Station/Layer1/Module2_080820_2035.json",
+                              "3" : "/home/cantel/config/Station/Layer1/Module3_080820_2035.json",
+                              "4" : "/home/cantel/config/Station/Layer1/Module4_080820_2035.json",
+                              "5" : "/home/cantel/config/Station/Layer1/Module5_080820_2035.json",
+                              "6" : "/home/cantel/config/Station/Layer1/Module6_080820_2035.json",
+                              "7" : "/home/cantel/config/Station/Layer1/Module7_080820_2035.json"},
+        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false],
+        "TLBClockSel" : true,
+        "BCREn" : true,
+        "L1AEn" : true,
+        "SoftCounterMuxEn" : false,
+        "L1CounterReset" : false,
+        "ErrCntReset" : false,
+        "FifoReset" : false
+       },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8102
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackerreceiver02",
+      "host": "sahigashlinux",
+      "port": 5559, 
+      "type": "TrackerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "boardID" : 2,
+        "StupidSWDelay": 20,
+        "ReadoutMode": 0,
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "L1Atype" : "external",  
+        "emulation" : false,
+        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+        "moduleMask" : [true, true, true, true, true, true, true, true], 
+        "moduleConfigFiles": {"0" : "/home/cantel/config/Station/Layer2/Module0_080820_2231.json",
+                              "1" : "/home/cantel/config/Station/Layer2/Module1_080820_2231.json",
+                              "2" : "/home/cantel/config/Station/Layer2/Module2_080820_2231.json",
+                              "3" : "/home/cantel/config/Station/Layer2/Module3_080820_2231.json",
+                              "4" : "/home/cantel/config/Station/Layer2/Module4_080820_2231.json",
+                              "5" : "/home/cantel/config/Station/Layer2/Module5_080820_2231.json",
+                              "6" : "/home/cantel/config/Station/Layer2/Module6_080820_2231.json",
+                              "7" : "/home/cantel/config/Station/Layer2/Module7_080820_2231.json"},
+        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false],
+        "TLBClockSel" : true,
+        "BCREn" : true,
+        "L1AEn" : true,
+        "SoftCounterMuxEn" : false,
+        "L1CounterReset" : false,
+        "ErrCntReset" : false,
+        "FifoReset" : false
+       },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8103
+          }
+        ]
+      }
+    },
+    {
+      "name": "digitizer01",
+      "host": "localhost",
+      "port": 5560,
+      "type": "DigitizerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+          "stats_uri": "tcp://localhost:7000",
+          "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+	  "influxDb_name": "DAQlingMetrics",
+          "ip":                    "128.141.151.198",
+          "vme_base_address":      "0x32000000",
+          "buffer_length":         "0x09",
+          "buffer_n_post_samples": "0x0",
+          "internal_sawtooth":     false,
+	  "software_trigger":  {"enable": false, "rate": 3},
+          "global_trigger": { "lvds": 0, "external": 1, "software": 0, "polarity": "over", "coincidence": false, "nchan": 2, "timewindow": 20},
+	  "ttt_converter": "40.0",
+          "channel_config": [{"group" : 0, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
+                              "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 8000},
+                              "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                             },
+                             {"group" : 1, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
+                              "chanA" : {"channel": 2, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 8000},
+                              "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                             },
+                             {"group" : 2, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 4, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500},
+                              "chanB" : {"channel": 5, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                             },
+                             {"group" : 3, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 6, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500},
+                              "chanB" : {"channel": 7, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                             },
+                             {"group" : 4, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 8, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
+                              "chanB" : {"channel": 9, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             },
+                             {"group" : 5, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 10, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
+                              "chanB" : {"channel": 11, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             },
+                             {"group" : 6, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 12, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
+                              "chanB" : {"channel": 13, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             },
+                             {"group" : 7, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 14, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
+                              "chanB" : {"channel": 15, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             }],
+          "frontpanel_config" : {"lemo" : {"trig_in" : "ttl" , "trig_out" : "ttl"}} 
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8104
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventbuilder01",
+      "host": "localhost",
+      "port": 5561,
+      "type": "EventBuilderFaser",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7000",
+          "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+          "influxDb_name": "DAQlingMetrics",
+          "maxPending": 10,
+	  "timeout_ms": 30000
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8100
+          },
+          {
+            "type": "pair",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "sahigashlinux",
+            "port": 8101
+          },
+          {
+            "type": "pair",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "sahigashlinux",
+            "port": 8102
+          },
+          {
+            "type": "pair",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "sahigashlinux",
+            "port": 8103
+          },
+          {
+            "type": "pair",
+            "chid": 4,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8104
+          }
+        ],
+        "senders": [
+          {
+            "type": "pubsub",
+            "chid": 100,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 101,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 102,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 103,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 116,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 117,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 118,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8218
+          }
+        ]
+      }
+    },
+    {
+      "name": "filewriter",
+      "host": "localhost",
+      "port": 5562,
+      "type": "FileWriterFaser",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+	  "stats_uri": "tcp://localhost:7000",
+	  "max_filesize": 500000,
+	  "buffer_size": 4000,
+	  "filename_pattern": "/home/cantel/test/Faser-test-%c-%r-%n.raw",
+	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
+			    "Corrupted","Incomplete","Duplicate"]
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          },
+          {
+            "type": "pubsub",
+            "chid": 1,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8201
+          },
+          {
+            "type": "pubsub",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8202
+          },
+          {
+            "type": "pubsub",
+            "chid": 3,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          },
+          {
+            "type": "pubsub",
+            "chid": 4,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8216
+          },
+          {
+            "type": "pubsub",
+            "chid": 5,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8217
+          },
+          {
+            "type": "pubsub",
+            "chid": 6,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8218
+          }
+        ]
+      }
+    },
+    {
+      "name": "ratemonitor01",
+      "host": "localhost",
+      "port": 5563,
+      "type": "TriggerRateMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 131072,
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          }
+        ]
+      }
+    },
+    {
+      "name": "triggermonitor01",
+      "host": "localhost",
+      "port": 5564,
+      "type": "TriggerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 131072,
+	"stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackermonitor00",
+      "host": "localhost",
+      "port": 5565,
+      "type": "TrackerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 196608,
+	"stats_uri": "tcp://localhost:7000"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackermonitor01",
+      "host": "localhost",
+      "port": 5566,
+      "type": "TrackerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 196609,
+	"stats_uri": "tcp://localhost:7000"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackermonitor02",
+      "host": "localhost",
+      "port": 5567,
+      "type": "TrackerMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+        "fragmentID": 196610,
+	"stats_uri": "tcp://localhost:7000"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -15,7 +15,7 @@
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
         "RandomTriggerRate": 6,
-        "Prescale": [0, 0, 1, 0, 1, 0],
+        "Prescale": [0, 0, 1, 0, 0, 0],
         "TrackerDelay": 100,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
@@ -259,7 +259,7 @@
           "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
           "influxDb_name": "DAQlingMetrics",
           "maxPending": 10,
-	  "timeout_ms": 30000
+	  "timeout_ms": 60000
       },
       "connections": {
         "receivers": [

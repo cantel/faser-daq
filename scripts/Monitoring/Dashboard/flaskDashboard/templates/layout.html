@@ -19,7 +19,7 @@
   <script src="{{ url_for('static', filename = 'js/jquery.json-tag-editor.min.js') }}"></script>
   <script src="{{ url_for('static', filename = 'js/jquery.caret.min.js') }}"></script>
   <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery.json-tag-editor.css') }}">
-
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
 
 
 
@@ -52,8 +52,7 @@
           {% endif %}
           {% endfor %}
 
-          {% else %}
-          {% for module in modules %}
+          {% else %}          {% for module in modules %}
           <option value="{{ module }}"> {{ module }}</option>
           {% endfor %}
 

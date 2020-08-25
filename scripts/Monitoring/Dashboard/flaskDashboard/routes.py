@@ -67,6 +67,7 @@ def getTagsByID(ids):
 @app.route("/getModules", methods=["GET"])
 def getModules():
     modules = r.keys("*monitor*")
+    modules = [module for module in modules if r.type(module) == "hash"]
     return jsonify(modules)
 
 

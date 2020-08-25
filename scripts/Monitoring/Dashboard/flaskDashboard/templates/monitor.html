@@ -1,142 +1,161 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="container-fluid" id="graphs-top_container">
-    <div class="row">
-        {% for ID in ids %}
-        <div class="col">
-            <div class="card mx-auto my-3 carte" id="card_{{ ID }}">
-                <div class="card-header">
-                    <div class="d-flex justify-content-between">
-                        <h5 id="title">{{ ID }} </h5>
-                        <span class="font-italic text-muted" id="updatetime_{{ ID }}">loading...</span>
-                    </div>
-                </div>
-
-                <div class="m-auto graphique" id="graph_{{ ID }}">
-                </div>
-                <div class="card-body">
-                    <input class="tagsContainer" id="tags_{{ ID }}">
-                    </input>
-                </div>
-            </div>
-
+  <div class="row">
+    {% for ID in ids %}
+    <div class="col">
+      <div class="card mx-auto my-3 carte" id="card_{{ ID }}">
+        <div class="card-header">
+          <div class="d-flex justify-content-between">
+            <h5 id="title">{{ ID }} </h5>
+            <a href ="{{ url_for('timeView',id = ID ) }}" class = "material-icons"> history </a>
+            <span class="font-italic text-muted" id="updatetime_{{ ID }}">loading...</span>
+          </div>
         </div>
-        {% if loop.index is even %}
-        <div class="w-100"></div>
-        {% endif %}
-        {% endfor %}
+
+        <div class="m-auto graphique" id="graph_{{ ID }}">
+        </div>
+        <div class="card-body">
+          <input class="tagsContainer" id="tags_{{ ID }}">
+          </input>
+          <div class="my-2" id = "automatic_tags_{{ ID }}">
+          </div>
+        </div>
+      </div>
 
     </div>
+    {% if loop.index is even %}
+    <div class="w-100"></div>
+    {% endif %}
+    {% endfor %}
+
+  </div>
 </div>
 
 <script>
-    $(function () {
-        {% for ID in ids %}
-        $("#tags_{{ ID }}").jsonTagEditor({
-            initialTags: {{ tagsByID[ID] | safe }},
-        delimiter: ' ', /* space and comma */
-        placeholder: 'Add tags ...',
-        clickDelete: true,
-        animateDelete: 50,
-        noSelect: true,
-        beforeTagSave: function (field, editor, tags, tag, val) {
-            if (tag === "") {
-                console.log("Le tag " + val + " a été ajouté ");
-                $.ajax({
-                    url: "{{ url_for('addTag') }}",
-                    type: "GET",
-                    contentType: 'application/json;charset=UTF-8',
-                    data: {
-                        'tag': "{{ ID }}," + val
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        var exists = false;
-                        $('#tags_selection option').each(function () {
-                            if (this.value === val) {
-                                exists = true;
-                                return false;
+  $(function () {
+      {% for ID in ids %}
+      $("#tags_{{ ID }}").jsonTagEditor({
+          initialTags: {{ tagsByID[ID] | safe }},
+          delimiter: ' ', /* space and comma */
+          placeholder: 'Add tags ...',
+          clickDelete: true,
+          animateDelete: 50,
+          noSelect: true,
+          beforeTagSave: function (field, editor, tags, tag, val) {
+              if (tag === "") {
+
+                  $.ajax({
+                      url: "{{ url_for('addTag') }}",
+                      type: "GET",
+                      contentType: 'application/json;charset=UTF-8',
+                      data: {
+                          'tag': "{{ ID }}," + val
+                        },
+                      dataType: "json",
+                      success: function (data) {
+                          if (!data) {
+                              $("#tags_selection").append(new Option(val, val));
+                              console.log("Le tag " + val + " a été ajouté dans la liste déroulante ");
                             }
-                        });
-                        if (exists === false) {
-                            $("#tags_selection").append(new Option(val, val));
                         }
-
-                    }
-
-                });
-            }
-
-            else {
-                console.log("Le tag a été changé")
-                $.ajax({
-                    url: "{{ url_for('renameTag') }}",
-                    type: "GET",
-                    contentType: 'application/json;charset=UTF-8',
-                    data: {
-                        'tag': "{{ ID }}," + tag +"," + val
-                    },
-                    dataType: "json",
-                    success: function (data) {
-                        var exists = false;
-                        $('#tags_selection option').each(function () {
-                            if (this.value === val) {
-                                exists = true;
-                                return false;
-                            }
-                        });
-                        if (exists === false) {
-                            $("#tags_selection").append(new Option(val, val));
-                        }
-                    }
-                });
-         
-            }
-        },
-        beforeTagDelete: function (field, editor, tags, val) {
-            console.log("Le tag " + val + " a été supprimé ");
-            $.ajax({
-                url: "{{ url_for('removeTag') }}",
-                type: "GET",
-                contentType: 'application/json;charset=UTF-8',
-                data: {
-                    'tag': "{{ ID }}," + val
-                },
-                dataType: "json",
-                success: function (data) {
-                   // $("#tags_selection option[value=" + val + "]").remove();
+                    });
                 }
 
-            });
+              else {
+                  console.log("Le tag a été changé")
+                  $.ajax({
+                      url: "{{ url_for('renameTag') }}",
+                      type: "GET",
+                      contentType: 'application/json;charset=UTF-8',
+                      data: {
+                          'tag': "{{ ID }}," + tag + "," + val
+                        },
+                      dataType: "json",
+                      success: function (data) {
 
-        }
+                          console.log(data)
+
+                          if (data.oldtagexists === "false" ) {
+
+                              $("#tags_selection option[value=" + tag + "]").remove();
+                              console.log("Le tag"+ tag + "a été enlevé de la liste déroulante")
+
+
+                            }
+                          if (data.newtagexists === "false") {
+                              $("#tags_selection").append(new Option(val, val));
+                              console.log("Le tag " + val + " a été ajouté dans la liste déroulante ");
+                            }
+
+                        },
+                      error: function () {
+                          console.log("Erreur")
+                        }
+                    });
+
+                }
+            },
+          beforeTagDelete: function (field, editor, tags, val) {
+              console.log("Le tag " + val + " a été supprimé ");
+              $.ajax({
+                  url: "{{ url_for('removeTag') }}",
+                  type: "GET",
+                  contentType: 'application/json;charset=UTF-8',
+                  data: {
+                      'tag': "{{ ID }}," + val
+                    },
+                  dataType: "json",
+                  success: function (data) {
+                      if (!data) {
+                          $("#tags_selection option[value=" + val + "]").remove();
+                          console.log("Le tag a été enlevé de la liste déroulante")
+                        }
+                      //
+                    }
+
+                });
+
+            }
 
         });
-    {% endfor %}
+      {% endfor %}
     });
 </script>
 
 {% if ids %}
 <script>
-    var datapacket
-    var source = new EventSource('/source/{{ ids  | join("/") }}');
-    source.onmessage = function (event) {
-        var data = event.data;
-        var datapacket = JSON.parse(data);
-        for (const ID in datapacket) {
-            Plotly.react("graph_" + ID, datapacket[ID].figure);
+  var datapacket
+  var source = new EventSource('/source/{{ ids  | join("/") }}');
+  source.onmessage = function (event) {
+      var data = event.data;
+      var datapacket = JSON.parse(data);
+      for (const ID in datapacket) {
+          Plotly.react("graph_" + ID, datapacket[ID].figure);
+
+          datapacket[ID].autotags.forEach(function(item,index){
+
+            });
+          //for (const autotag in datapacket[ID].autotags){
+          //  console.log(ID)
+          //  console.log(autotag)
+          //}
+
+          var date = new Date(datapacket[ID].time * 1000);
+          var hr = date.getHours();
+          var m = "0" + date.getMinutes();
+          var s = "0" + date.getSeconds();
+          var time = hr + ':' + m.substr(-2) + ':' + s.substr(-2);
+          $('#updatetime_' + ID).text("Updated at " + time);
 
 
-            var date = new Date(datapacket[ID].time * 1000);
-            var hr = date.getHours();
-            var m = "0" + date.getMinutes();
-            var s = "0" + date.getSeconds();
-            var time = hr + ':' + m.substr(-2) + ':' + s.substr(-2);
-            $('#updatetime_' + ID).text("Updated at " + time);
+
 
         }
     }
 </script>
+
+
 
 
 {% endif %}

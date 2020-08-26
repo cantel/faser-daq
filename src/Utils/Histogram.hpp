@@ -98,6 +98,7 @@ class Hist : public HistBase {
   void configure() {
     if (extendable){
       hist_object = make_histogram(stretchy_axis_t(xbins, xmin, xmax, xlabel));
+      type.append("_ext");
       set_base_info(); 
     }
     else {

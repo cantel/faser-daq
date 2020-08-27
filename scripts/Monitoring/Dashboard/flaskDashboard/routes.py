@@ -4,6 +4,7 @@ import redis
 from flask import render_template
 from flask import url_for, redirect, request, Response, jsonify
 from flaskDashboard import app
+import numpy as np
 
 # from tags_conditions import *
 
@@ -145,16 +146,12 @@ def lastHistogram(path):
             for ID in ids:
                 autotags = []
                 source, histname = ID.split("-")
-                histobj = r.hget(
-                    source, f"h_{histname}"
-                )  # lrange: one value: the first in the list.
+                histobj = r.hget(source, f"h_{histname}")
 
                 if histobj is not None:
                     timestamp = histobj[: histobj.find(":")]
                     # print(timestamp)
                     histobj = json.loads(histobj[histobj.find("{") :])
-
-                    # print("histobj = ",histobj)
 
                     xaxis = dict(title=dict(text=histobj["xlabel"]))
                     yaxis = dict(title=dict(text=histobj["ylabel"]))
@@ -176,35 +173,123 @@ def lastHistogram(path):
                         data = [dict(x=xarray, y=yarray, type="bar")]
 
                     elif "2d" in hist_type:
-                        zarray = histobj["zvalues"]
+
+                        zarray = np.array(histobj["zvalues"])
                         xmin = float(histobj["xmin"])
                         xmax = float(histobj["xmax"])
                         xbins = int(histobj["xbins"])
                         xstep = (xmax - xmin) / float(xbins)
-                        xarray = [xmin + xstep * xbin for xbin in range(xbins)]
                         ymin = float(histobj["ymin"])
                         ymax = float(histobj["ymax"])
                         ybins = int(histobj["ybins"])
                         ystep = (ymax - ymin) / float(ybins)
-                        yarray = [ymin + ystep * ybin for ybin in range(ybins)]
-                        # data = [dict(xbins=dict(start=xmin, end=xmax,size=xstep), ybins=dict(start=ymin, end=ymax,size=ystep), z=zarray[106:], type="heatmap")]
-                        # data = [dict(x0 = xmin, dx = xstep, y0 = ymin, dy = ystep, z = zarray, type="heatmap")]
-                        data = [dict(x=xarray, y=yarray, z=zarray, type=" heatmap")]
-                    #  print("xbins = ", xbins)
-                    #  print("ybins = ", ybins)
-                    #  print("len(zvalues) = ", len(zarray))
+                        xmin -= xstep
+                        ymin -= ystep
+                        xbins += 2
+                        ybins += 2
+                        xarray = [xmin + xbin * xstep for xbin in range(xbins)]
+                        yarray = [ymin + ybin * ystep for ybin in range(ybins)]
+                        print(
+                            "xmin = %f, xbins = %i, len(xarray) = %i"
+                            % (xmin, xbins, len(xarray))
+                        )
+                        print(
+                            "ymin = %f, ybins = %i, len(yarray) = %i"
+                            % (ymin, ybins, len(yarray))
+                        )
+                        print("len(zarray) = %i" % (len(zarray)))
+
+                        print("zarray.shape = ", zarray.shape)
+                        zmatrix = zarray.reshape(len(yarray), len(xarray))
+                        print("zmatrix.shape = ", zmatrix.shape)
+                        data = [
+                            dict(
+                                x=xarray, y=yarray, z=zmatrix.tolist(), type="heatmap",
+                            )
+                        ]
+
+                        # elif "2d" in hist_type:
+                        # zarray = histobj["zvalues"]
+                        # xmin = float(histobj["xmin"])
+                        # xmax = float(histobj["xmax"])
+                        # xbins = int(histobj["xbins"])
+                        # xstep = (xmax - xmin) / float(xbins + 2)
+                        # xarray = [xmin + xstep * xbin for xbin in range(xbins)]
+                        # xmin -= xstep
+
+                        # ymin = float(histobj["ymin"])
+                        # ymax = float(histobj["ymax"])
+
+                        # ybins = int(histobj["ybins"])
+                        # ystep = (ymax - ymin) / float(ybins + 2)
+
+                        # ymin -= ystep
+                        # yarray = [ymin + ystep * ybin for ybin in range(ybins)]
+                        # # data = [dict(xbins=dict(start=xmin, end=xmax,size=xstep), ybins=dict(start=ymin, end=ymax,size=ystep), z=zarray[106:], type="heatmap")]
+                        # data = [
+                        # dict(
+                        # x0=xmin,
+                        # dx=xstep,
+                        # y0=ymin,
+                        # dy=ystep,
+                        # z=zarray,
+                        # type="heatmap",
+                        # )
+                        # ]
+                        # data = [dict(x=xarray, y=yarray, z=zarray, type="heatmap")]
+
+                        # print(histname)
+                        # print("xbins = ", xbins)
+                        # print("len(xarray) =", len(xarray))
+                        # print("ybins = ", ybins)
+                        # print("len(yarray) =", len(yarray))
+                        # print("len(zvalues) = ", len(zarray))
+                        # print("\n")
                     else:
-                        xmin = float(histobj["xmin"])
-                        xmax = float(histobj["xmax"])
-                        xbins = int(histobj["xbins"])
-                        step = (xmax - xmin) / float(xbins)
-                        xarray = [xmin + step * xbin for xbin in range(xbins)]
-                        yarray = histobj["yvalues"]
-                        data = [dict(x0=xmin, dx=step, y=yarray, type="bar")]
+
+                        if "_ext" in hist_type:
+                            print("ext hist")
+                            xmin = float(histobj["xmin"])
+                            xmax = float(histobj["xmax"])
+                            xbins = int(histobj["xbins"])
+                            step = (xmax - xmin) / float(xbins)
+                            xarray = [xmin + step * xbin for xbin in range(xbins)]
+                            yarray = histobj["yvalues"]
+                            # data = [dict(x0=xmin, dx=step, y=yarray, type="bar")]
+                            data = [dict(x=xarray, y=yarray, type="bar")]
+                            print(histname)
+                            print("xbins = ", xbins)
+                            print("len(xarray) =", len(xarray))
+                            # print("ybins = ", ybins)
+                            print("len(yarray) =", len(yarray))
+                            # print("len(zvalues) = ", len(zarray))
+                            print("\n")
+
+                        else:  # histogram with underflow and overflow
+                            print("Overflow")
+                            xmin = float(histobj["xmin"])
+                            xmax = float(histobj["xmax"])
+                            xbins = int(histobj["xbins"])
+                            step = (xmax - xmin) / float(xbins + 2)
+                            xmin -= step
+                            xmax += step
+                            xarray = [xmin + step * xbin for xbin in range(xbins + 2)]
+                            yarray = histobj["yvalues"]
+
+                            # if len(xarray) != len(yarray):  # check if overflow or not
+                            # autotags.append("overflow,danger")
+                            # yarray = yarray.pop()
+                            # data = [dict(x0=xmin, dx=step, y=yarray, type="bar")]
+                            data = [dict(x=xarray, y=yarray, type="bar")]
+                            print(histname)
+                            print("xbins = ", xbins)
+                            print("len(xarray) =", len(xarray))
+                            # print("ybins = ", ybins)
+                            print("len(yarray) =", len(yarray))
+                            # print("len(zvalues) = ", len(zarray))
+                            print("\n")
 
                     # print(ID,len(xarray))
-                    if len(xarray) > 2000:
-                        autotags.append("overflow,danger")
 
                     fig = dict(data=data, layout=layout, config={"responsive": True})
                     packet[ID] = {

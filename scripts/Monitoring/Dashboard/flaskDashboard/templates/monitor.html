@@ -9,10 +9,9 @@
           <div class="d-flex justify-content-between">
             <h5 id="title">{{ ID }} </h5>
             <a href ="{{ url_for('timeView',id = ID ) }}" class = "material-icons"> history </a>
-            <span class="font-italic text-muted" id="updatetime_{{ ID }}">loading...</span>
+            <span class="font-italic text-muted" id="updatetime_{{ ID }}">Loading...</span>
           </div>
         </div>
-
         <div class="m-auto graphique" id="graph_{{ ID }}">
         </div>
         <div class="card-body">

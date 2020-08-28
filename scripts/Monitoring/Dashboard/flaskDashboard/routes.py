@@ -24,7 +24,9 @@ def getIDs():
     for module in modules:
         histnames = r.hkeys(module)
         for histname in histnames:
+            print(module, histname)
             if "h_" in histname:
+                print(histname)
                 keys.append(f"{module}-{histname[2:]}")
 
     return jsonify(keys)
@@ -189,19 +191,19 @@ def lastHistogram(path):
                         ybins += 2
                         xarray = [xmin + xbin * xstep for xbin in range(xbins)]
                         yarray = [ymin + ybin * ystep for ybin in range(ybins)]
-                        print(
-                            "xmin = %f, xbins = %i, len(xarray) = %i"
-                            % (xmin, xbins, len(xarray))
-                        )
-                        print(
-                            "ymin = %f, ybins = %i, len(yarray) = %i"
-                            % (ymin, ybins, len(yarray))
-                        )
-                        print("len(zarray) = %i" % (len(zarray)))
+                        # print(
+                        # "xmin = %f, xbins = %i, len(xarray) = %i"
+                        # % (xmin, xbins, len(xarray))
+                        # )
+                        # print(
+                        # "ymin = %f, ybins = %i, len(yarray) = %i"
+                        # % (ymin, ybins, len(yarray))
+                        # )
+                        # print("len(zarray) = %i" % (len(zarray)))
 
-                        print("zarray.shape = ", zarray.shape)
+                        # print("zarray.shape = ", zarray.shape)
                         zmatrix = zarray.reshape(len(yarray), len(xarray))
-                        print("zmatrix.shape = ", zmatrix.shape)
+                        # print("zmatrix.shape = ", zmatrix.shape)
                         data = [
                             dict(
                                 x=xarray, y=yarray, z=zmatrix.tolist(), type="heatmap",
@@ -248,7 +250,7 @@ def lastHistogram(path):
                     else:
 
                         if "_ext" in hist_type:
-                            print("ext hist")
+                            # print("ext hist")
                             xmin = float(histobj["xmin"])
                             xmax = float(histobj["xmax"])
                             xbins = int(histobj["xbins"])
@@ -257,16 +259,16 @@ def lastHistogram(path):
                             yarray = histobj["yvalues"]
                             # data = [dict(x0=xmin, dx=step, y=yarray, type="bar")]
                             data = [dict(x=xarray, y=yarray, type="bar")]
-                            print(histname)
-                            print("xbins = ", xbins)
-                            print("len(xarray) =", len(xarray))
-                            # print("ybins = ", ybins)
-                            print("len(yarray) =", len(yarray))
-                            # print("len(zvalues) = ", len(zarray))
-                            print("\n")
+                            # print(histname)
+                            # print("xbins = ", xbins)
+                            # print("len(xarray) =", len(xarray))
+                            # # print("ybins = ", ybins)
+                            # print("len(yarray) =", len(yarray))
+                            # # print("len(zvalues) = ", len(zarray))
+                            # print("\n")
 
                         else:  # histogram with underflow and overflow
-                            print("Overflow")
+                            # print("Overflow")
                             xmin = float(histobj["xmin"])
                             xmax = float(histobj["xmax"])
                             xbins = int(histobj["xbins"])
@@ -281,13 +283,13 @@ def lastHistogram(path):
                             # yarray = yarray.pop()
                             # data = [dict(x0=xmin, dx=step, y=yarray, type="bar")]
                             data = [dict(x=xarray, y=yarray, type="bar")]
-                            print(histname)
-                            print("xbins = ", xbins)
-                            print("len(xarray) =", len(xarray))
-                            # print("ybins = ", ybins)
-                            print("len(yarray) =", len(yarray))
-                            # print("len(zvalues) = ", len(zarray))
-                            print("\n")
+                            # print(histname)
+                            # print("xbins = ", xbins)
+                            # print("len(xarray) =", len(xarray))
+                            # # print("ybins = ", ybins)
+                            # print("len(yarray) =", len(yarray))
+                            # # print("len(zvalues) = ", len(zarray))
+                            # print("\n")
 
                     # print(ID,len(xarray))
 

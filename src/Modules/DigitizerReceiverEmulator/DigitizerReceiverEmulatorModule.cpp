@@ -226,10 +226,10 @@ void DigitizerReceiverEmulatorModule::sendEvent() {
   
   // store the faser header information
   
-  uint8_t  local_fragment_tag = 1;
-  uint32_t local_source_id    = 2;
-  uint64_t local_event_id     = 3; // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
-  uint16_t local_bc_id        = 4;      // trigger time tag corrected by LHCClock/TrigClock = 40/62.5
+  uint8_t  local_fragment_tag = EventTags::PhysicsTag;
+  uint32_t local_source_id    = SourceIDs::PMTSourceID;
+  uint64_t local_event_id     = (m_ECRcount<<24) + (Header_EventCounter+1); // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
+  uint16_t local_bc_id        = Header_TriggerTimeTag*(40/62.5);      // trigger time tag corrected by LHCClock/TrigClock = 40/62.5
   
   DEBUG("local_fragment_tag   : "+to_string(local_fragment_tag));
   DEBUG("local_source_id : "+to_string(local_source_id));

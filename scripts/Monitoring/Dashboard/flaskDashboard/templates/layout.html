@@ -30,9 +30,9 @@
       <nav class="navbar navbar-light bg-light">
         <div>
           <img src="{{ url_for('static', filename = 'img/faser.png') }}" width="120" height="40" alt="" loading="lazy">
-          <a class="navbar-brand mx-2" href="{{ url_for('home') }}">Monitoring</a>
+          <span class="navbar-brand mx-2">Monitoring</span>
         </div>
-
+	<a  href="{{ url_for('load') }}"> Refresh </a>
         <form class="form-inline my-auto" method='GET' action="{{ url_for('monitor') }}">
 
           <label class="mx-2"> Module:</label>
@@ -67,7 +67,6 @@
         <div class="ml-0">
           <form class="form-inline my-auto" id="sort-div" method="GET" action="{{ url_for('monitor') }}">
             <div class="d-flex justify-content-between">
-              <!-- <input class="form-control mr-sm-2" name="tags" type="search" placeholder="Search" id="search"> -->
               <select class='form-control' style="padding: 100%;" name="selected_tags" multiple="multiple"
                                                                                        id="tags_selection" >
                                                                                        {% for tag in tags %}

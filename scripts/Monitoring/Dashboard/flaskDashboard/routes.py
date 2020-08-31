@@ -20,9 +20,11 @@ r5 = redis.Redis(
 @app.route("/getIDs", methods=["GET"])
 def getIDs():
     modules = getModules().get_json()
+
     keys = []
     for module in modules:
         histnames = r.hkeys(module)
+        print("histnames: ", histnames)
         for histname in histnames:
             print(module, histname)
             if "h_" in histname:
@@ -35,6 +37,7 @@ def getIDs():
 @app.route("/storeDefaultTagsAndIDs", methods=["GET"])
 def storeDefaultTagsAndIDs():
     ids = getIDs().get_json()
+    print(f"func: storeDefaultTagsAndIDs/ ids: {ids}")
     for ID in ids:
         module, histname = ID.split("-")
         r5.sadd(f"tag:{module}", ID)
@@ -71,6 +74,7 @@ def getTagsByID(ids):
 def getModules():
     modules = r.keys("*monitor*")
     modules = [module for module in modules if r.type(module) == "hash"]
+    print(f"func: getModules/ modules : {modules}")
     return jsonify(modules)
 
 
@@ -310,6 +314,7 @@ def monitor():
     if request.method == "GET":
         if request.args.get("selected_module"):
             selected_module = request.args.get("selected_module")
+            print(selected_module)
             ids = r5.smembers(f"tag:{selected_module}")
             tagsbyID = getTagsByID(ids)
             return render_template(
@@ -330,7 +335,7 @@ def monitor():
 def timeView(id):
     # return render_template("time_view")
 
-    return f"{id}"
+    return f"{id}  ---> Browse previous histograms, in developpement... <--- "
 
 
 @app.context_processor

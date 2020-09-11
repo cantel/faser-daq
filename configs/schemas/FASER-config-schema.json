@@ -1,0 +1,931 @@
+{
+  "title": "DAQ Configuration",
+  "type": "object",
+  "required": [
+    "version",
+    "group",
+    "components"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "Configuration version",
+      "minimum": 1,
+      "maximum": 999
+    },
+    "group": {
+      "type": "string"
+    },
+    "components": {
+      "type": "array",
+      "format": "table",
+      "title": "Components",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "title": "Component",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "EmulatorMonitor",
+              "EventBuilderFaser",
+              "FileWriterFaser",
+              "FrontEndEmulator",
+              "FrontEndReceiver",
+              "TrackerMonitor",
+              "TrackerReceiver",
+              "TriggerGenerator",
+              "TriggerMonitor",
+              "TriggerRateMonitor",
+              "TriggerReceiver"
+            ]
+          },
+          "loglevel": {
+            "type": "object",
+            "title": "Log Levels",
+            "options": {
+              "collapsed": true
+             },
+            "properties": {
+              "core": {
+                "type": "string",
+                "enum": [
+                  "DEBUG",
+                  "INFO",
+                  "WARNING"
+                ]
+              },
+              "module": {
+                "type": "string",
+                "enum": [
+                  "DEBUG",
+                  "INFO",
+                  "WARNING"
+                ]
+              }
+            },
+            "required": [
+              "core",
+              "module"
+            ]
+          },
+          "settings": {
+            "title": "Settings",
+            "options": {
+              "collapsed": true
+             },
+            "oneOf": [
+              {
+                "$ref": "#/definitions/Monitor"
+              },
+              {
+                "$ref": "#/definitions/EventBuilderFaser"
+              },
+              {
+                "$ref": "#/definitions/FileWriterFaser"
+              },
+              {
+                "$ref": "#/definitions/FrontEndEmulator"
+              },
+              {
+                "$ref": "#/definitions/FrontEndReceiver"
+              },
+              {
+                "$ref": "#/definitions/TrackerReceiver"
+              },
+              {
+                "$ref": "#/definitions/TriggerGenerator"
+              },
+              {
+                "$ref": "#/definitions/TriggerReceiver"
+              }
+            ]
+          },
+          "connections": {
+            "type": "object",
+            "title": "Connections",
+            "options": {
+              "collapsed": true
+             },
+            "properties": {
+              "receivers": {
+                "type": "array",
+                "format": "table",
+                "title": "Receivers",
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "oneOf": [
+                    {
+                      "title": "tcp",
+                      "type": "object",
+                      "properties": {
+                        "transport": {
+                          "type": "string",
+                          "enum": [
+                            "tcp"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "pair",
+                            "pubsub"
+                          ]
+                        },
+                        "chid": {
+                          "type": "integer"
+                        },
+                        "host": {
+                          "type": "string"
+                        },
+                        "port": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "transport",
+                        "type",
+                        "chid",
+                        "host",
+                        "port"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "title": "tcp pubsub w/ filter",
+                      "type": "object",
+                      "properties": {
+                        "transport": {
+                          "type": "string",
+                          "enum": [
+                            "tcp"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "pubsub"
+                          ]
+                        },
+                        "chid": {
+                          "type": "integer"
+                        },
+                        "host": {
+                          "type": "string"
+                        },
+                        "port": {
+                          "type": "integer"
+                        },
+                        "filter": {
+                          "type": "integer"
+                        },
+                        "filter_size": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "transport",
+                        "type",
+                        "chid",
+                        "host",
+                        "port",
+                        "filter",
+                        "filter_size"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "title": "ipc",
+                      "type": "object",
+                      "properties": {
+                        "transport": {
+                          "type": "string",
+                          "enum": [
+                            "ipc"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "pair",
+                            "pubsub"
+                          ]
+                        },
+                        "chid": {
+                          "type": "integer"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "chid",
+                        "path",
+                        "transport"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "title": "ipc pubsub w/ filter",
+                      "type": "object",
+                      "properties": {
+                        "transport": {
+                          "type": "string",
+                          "enum": [
+                            "ipc"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "pubsub"
+                          ]
+                        },
+                        "chid": {
+                          "type": "integer"
+                        },
+                        "path": {
+                          "type": "string"
+                        },
+                        "filter": {
+                          "type": "integer"
+                        },
+                        "filter_size": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "chid",
+                        "path",
+                        "transport",
+                        "filter",
+                        "filter_size"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              },
+              "senders": {
+                "type": "array",
+                "format": "table",
+                "title": "Senders",
+                "uniqueItems": true,
+                "items": {
+                  "type": "object",
+                  "oneOf": [
+                    {
+                      "title": "tcp",
+                      "type": "object",
+                      "properties": {
+                        "transport": {
+                          "type": "string",
+                          "enum": [
+                            "tcp"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "pair",
+                            "pubsub"
+                          ]
+                        },
+                        "chid": {
+                          "type": "integer"
+                        },
+                        "host": {
+                          "type": "string"
+                        },
+                        "port": {
+                          "type": "integer"
+                        }
+                      },
+                      "required": [
+                        "transport",
+                        "type",
+                        "chid",
+                        "host",
+                        "port"
+                      ],
+                      "additionalProperties": false
+                    },
+                    {
+                      "title": "ipc",
+                      "type": "object",
+                      "properties": {
+                        "transport": {
+                          "type": "string",
+                          "enum": [
+                            "ipc"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "pair",
+                            "pubsub"
+                          ]
+                        },
+                        "chid": {
+                          "type": "integer"
+                        },
+                        "path": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "chid",
+                        "path",
+                        "transport"
+                      ],
+                      "additionalProperties": false
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "name",
+          "host",
+          "port",
+          "type",
+          "loglevel"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Monitor": {
+      "title": "Monitor",
+      "type": "object",
+      "properties": {
+        "stats_uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "influxDb_uri": {
+            "type"          : "string",
+            "title"         : "influxDb_uri"
+        },
+        "influxDb_name": {
+            "type"          : "string",
+            "title"         : "influxDb_name"
+        },
+        "sourceID": {
+          "type": "integer",
+          "minimum": 0
+        }
+      },
+          "required": [
+            "stats_uri",
+            "influxDb_uri",
+            "influxDb_name"
+          ],
+        "additionalProperties": false
+    },
+    "EventBuilderFaser": {
+      "title": "EventBuilderFaser",
+      "type": "object",
+      "properties": {
+        "stats_uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "maxPending": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 1000,
+          "options": {
+            "infoText": "Maximum number of pending fragments before starting time outs"
+          }
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "default": 1000,
+          "minimum": 100,
+          "maximum": 100000,
+          "options": {
+            "infoText": "Maximum time an event is pending before starting time outs"
+          }
+        }
+      },
+          "required": [
+            "maxPending",
+            "timeout_ms"
+          ],
+        "additionalProperties": false
+    },
+    "FileWriterFaser": {
+      "title": "FileWriterFaser",
+      "type": "object",
+      "properties": {
+        "stats_uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "max_filesize": {
+            "propertyOrder": 102,
+                "type": "integer",
+          "default": 500000000,
+          "minimum": 100000,
+          "maximum": 2000000000,
+          "required": true,
+          "options": {
+            "infoText": "Maximum file size"
+          }
+        },
+        "buffer_size": {
+            "propertyOrder": 103,
+                "type": "integer",
+          "default": 4000,
+          "minimum": 100,
+          "maximum": 50000,
+          "required": true,
+          "options": {
+            "infoText": "Buffer size for output streams"
+          }
+        },
+        "filename_pattern": {
+            "propertyOrder": 101,
+                "type": "string"
+        },
+        "channel_names": {
+            "propertyOrder": 100,
+                "type": "array",
+          "options": { "infoText": "Base name for each output stream" },
+          "format": "table",
+          "title": "Channel Names",
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "FrontEndEmulator": {
+      "title": "FrontEndEmulator",
+      "type": "object",
+      "properties": {
+        "stats_uri": {
+    "type": "string",
+    "format": "uri"
+  },
+"meanSize": {
+    "type": "integer",
+    "default": 0,
+    "minimum": 10,
+    "maximum": 60000,
+    "required": true,
+    "options": {
+      "infoText": "Mean data size to send"
+           }
+  },
+  "rmsSize": {
+    "type": "integer",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 10000,
+    "required": true,
+     "options": {
+     "infoText": "RMS of data size to send"
+       }
+  },
+  "fragmentID": {
+    "type": "integer",
+    "default": 0,
+    "required": true,
+     "options": {
+               "infoText": "Fragment identifier"
+           }
+  },
+  "probMissingTrigger": {
+    "type": "number",
+    "title": "P(Miss Trig.)",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 1,
+    "required": true,
+       "options": {
+               "infoText":  "Probability to miss trigger signal"
+
+           }
+  },
+  "probMissingFragment": {
+    "title": "P(Miss Frag.)",
+    "type": "number",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 1,
+    "required": true,
+          "options": {
+               "infoText":  "Probability to not send fragment on trigger"
+
+           }
+  },
+  "probCorruptedFragment": {
+    "title": "P(Corrupt Frag.)",
+    "type": "number",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 1,
+    "required": true,
+   "options": {
+               "infoText": "Probability to send corrupted fragment"
+
+           }
+  },
+  "monitoringInterval": {
+    "type": "number",
+    "default": 0,
+    "minimum": 0,
+    "maximum": 1000,
+    "required": true,
+   "options": {
+               "infoText": "Time in seconds between monitoring fragments"
+
+           }
+  },
+        "triggerPort": {
+          "type": "integer",
+            "required": true,
+            "default": 0,
+              "minimum": 1024,
+          "maximum": 65535,
+        "options": {
+                 "infoText":  "Port for incoming triggers"
+
+         }
+        },
+  "daqHost": {
+          "type": "string",
+    "required": true,
+    "default": "localhost"
+        },
+        "daqPort": {
+          "type": "integer",
+           "required": true,
+           "default": 0,
+           "minimum": 1024,
+           "maximum": 65535,
+    "options": {
+       "infoText": "Port for sending data fragments"
+   }
+         }
+      },
+      "additionalProperties": false
+    },
+    "FrontEndReceiver": {
+      "title": "FrontEndReceiver",
+      "type": "object",
+      "properties": {
+        "stats_uri": {
+    "type": "string",
+    "format": "uri"
+  },
+  "dataPort": {
+    "type": "integer",
+    "default": 0,
+    "minimum": 1024,
+    "maximum": 65535,
+    "required": true,
+         "options": {
+              "infoText": "Port for receiving data from frontend"
+          }
+  }
+      },
+      "additionalProperties": false
+    },
+    "TrackerReceiver": {
+      "title": "TrackerReceiver",
+      "type": "object",
+      "properties": {
+        "emulation"         : {
+            "type"          : "boolean",
+            "title"         : "Emulate TRB",
+            "description"   : "Enable data emulation.",
+            "propertyOrder" : 1,
+            "default"       : false
+            },
+        "L1Atype"           : {
+            "type"          : "string",
+            "title"         : "L1A type",
+            "propertyOrder" : 2,
+            "description"   : "Switch between internal triggers (from TRB) and external triggers (from TLB)",
+            "enum"          : ["internal", "external"]
+            },
+        "emulatorFile"      : {
+            "type"          : "string",
+            "title"         : "File",
+            "propertyOrder" : 3,
+            "description"   : "File used to emulate data taking (if emulation is on)"
+            },
+        "moduleMask"        : {
+            "type"          : "array",
+            "title"         : "Mask for modules",
+            "propertyOrder" : 4,
+            "minItems"      : 8,
+            "maxItems"      : 8,
+            "items"    : {
+                "type"      : "boolean",
+                "format"    : "row"
+                 }
+            },
+        "moduleClkMask"        : {
+            "type"          : "array",
+            "title"         : "Mask for modules",
+            "propertyOrder" : 5,
+            "minItems"      : 8,
+            "maxItems"      : 8,
+            "items"    : {
+                "type"      : "boolean",
+                "format"    : "row"
+                 }
+            },
+        "moduleConfigFiles" : {
+            "type"          : "object",
+            "title"         : "Configuration files for TRB modules",
+            "propertyOrder" : 6,
+            "properties"    : {
+                "0" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 0",
+                    "default"   : "../configs/TemplateModuleCfg0.json"
+                    },
+                "1" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 1",
+                    "default"   : "../configs/TemplateModuleCfg1.json"
+                    },
+                "2" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 2",
+                    "default"   : "../configs/TemplateModuleCfg2.json"
+                    },
+                "3" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 3",
+                    "default"   : "../configs/TemplateModuleCfg4.json"
+                    },
+                "4" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 4",
+                    "default"   : "../configs/TemplateModuleCfg4.json"
+                    },
+                "5" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 5",
+                    "default"   : "../configs/TemplateModuleCfg5.json"
+                    },
+                "6" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 6",
+                    "default"   : "../configs/TemplateModuleCfg6.json"
+                    },
+                "7" : {
+                    "type"      : "string",
+                    "title"     : "Module config file 7",
+                    "default"   : "../configs/TemplateModuleCfg7.json"
+                    }
+                },
+            "format"        : "table"
+            },
+        "TLBClockSel" : {
+            "type" : "boolean",
+            "title" : "TLBClockSel",
+            "default" : false
+            },
+        "BCREn" : {
+            "type" : "boolean",
+            "title" : "BCREn",
+            "default" : false
+            },
+        "L1En" : {
+            "type" : "boolean",
+            "title" : "L1En",
+            "default" : false
+            },
+        "SoftCounterMuxEn" : {
+            "type" : "boolean",
+            "title" : "SoftCounterMuxEn",
+            "default" : false
+            },
+        "L1CounterReset" : {
+            "type" : "boolean",
+            "title" : "L1CounterReset",
+            "default" : false
+            },
+        "ErrCntReset" : {
+            "type" : "boolean",
+            "title" : "ErrCntReset",
+            "default" : false
+            },
+        "FifoReset" : {
+            "type" : "boolean",
+            "title" : "FifoReset",
+            "default" : false
+            }
+      },
+      "additionalProperties": false
+    },
+    "TriggerGenerator": {
+      "title": "TriggerGenerator",
+      "type": "object",
+      "properties": {
+        "stats_uri": {
+    "type": "string",
+    "format": "uri"
+  },
+  "rateInHz": {
+    "type": "integer",
+    "default": 0,
+    "minimum": 1,
+    "maximum": 5000,
+    "required": true,
+         "options": {
+              "infoText": "Rate of triggers to generate"
+          }
+  },
+  "frontendApps": {
+    "type": "array",
+         "options": {
+              "infoText": "Applications that should receive triggers"
+          },
+          "format": "table",
+          "title": "Receivers",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "properties": {
+              "host": {
+                "type":"string",
+    "required": true,
+    "default": "localhost"
+              },
+              "port": {
+    "type":"integer",
+    "required": true,
+    "default": 0,
+          "minimum": 1024,
+    "maximum": 65535
+  }
+            }
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "TriggerReceiver": {
+      "title": "TriggerReceiver",
+      "type": "object",
+      "properties": {
+        "influxDb_uri": {
+            "type"          : "string",
+            "title"         : "influxDb_uri"
+        },
+        "influxDb_name": {
+            "type"          : "string",
+            "title"         : "influxDb_name"
+        },
+        "SamplingPhase": {
+          "type"            : "array",
+          "title"           : "SamplingPhase",
+          "minItems"        : "8",
+          "maxItems"        : "8",
+          "items": {
+            "type": "boolean"
+          }
+        },
+        "InputDelay": {
+          "type"            : "array",
+          "title"           : "InputDelay",
+          "minItems"        : "8",
+          "maxItems"        : "8",
+          "items": {
+            "type": "integer",
+            "default": "0",
+            "minimum": "0",
+            "maximum": "3"
+          }
+        },
+        "RandomTriggerRate": {
+            "type"          : "integer",
+            "title"         : "RandomTriggerRate",
+            "default"       : "0",
+            "minimum"       : "0",
+            "maximum"       : "7"
+        },
+        "Prescale": {
+          "type"            : "array",
+          "title"           : "Prescale",
+          "minItems"        : "8",
+          "maxItems"        : "8",
+          "items": {
+            "type": "integer",
+            "default": "0",
+            "minimum": "0",
+            "maximum": "255"
+          }
+        },
+        "TrackerDelay": {
+            "type"          : "integer",
+            "title"         : "TrackerDelay",
+            "default"       : "0",
+            "minimum"       : "0",
+            "maximum"       : "127"
+        },
+        "DigitizerDelay": {
+            "type"          : "integer",
+            "title"         : "DigitizerDelay",
+            "default"       : "0",
+            "minimum"       : "0",
+            "maximum"       : "127"
+        },
+        "LHC_CLK": {
+            "type"          : "boolean",
+            "title"         : "LHC CLK"
+        },
+        "OrbitDelay": {
+            "type"          : "integer",
+            "title"         : "OrbitDelay",
+            "default"       : "0",
+            "minimum"       : "0",
+            "maximum"       : "4095"
+        },
+        "Deadtime": {
+            "type"          : "integer",
+            "title"         : "Deadtime",
+            "default"       : "0",
+            "minimum"       : "128",
+            "maximum"       : "4095"
+        },
+        "MonitoringRate": {
+            "type"          : "integer",
+            "title"         : "MonitoringRate",
+            "default"       : "11245",
+            "minimum"       : "0",
+            "maximum"       : "1048575"
+        },
+        "OutputDestination": {
+            "type"          : "integer",
+            "title"         : "OutputDestination",
+            "default"       : "0",
+            "minimum"       : "0",
+            "maximum"       : "4294967295"
+        },
+        "Input": {
+          "type"            : "array",
+          "title"           : "Input",
+          "minItems"        : "8",
+          "maxItems"        : "8",
+          "items": {
+            "type": "boolean"
+          }
+        },
+        "BusyDisable": {
+            "type"          : "boolean",
+            "title"         : "BusyDisable",
+            "default"       : "true"
+        },
+        "EnableTriggerData": {
+            "type"          : "boolean",
+            "title"         : "EnableTriggerData",
+            "default"       : "true",
+            "options"       : { "hidden": true }
+        },
+        "EnableMonitoringData": {
+            "type"          : "boolean",
+            "title"         : "EnableMonitoringData",
+            "default"       : "true"
+        },
+        "ReadoutFIFOReset": {
+            "type"          : "boolean",
+            "title"         : "ReadoutFIFOReset",
+            "default"       : "true"
+        },
+        "LUTConfig": {
+            "type"          : "string",
+            "title"         : "LUTConfig",
+            "required"       : true
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

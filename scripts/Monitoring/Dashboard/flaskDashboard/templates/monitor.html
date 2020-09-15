@@ -8,7 +8,8 @@
         <div class="card-header">
           <div class="d-flex justify-content-between">
             <h5 id="title">{{ ID }} </h5>
-            <a href ="{{ url_for('timeView',id = ID ) }}" class = "material-icons"> history </a>
+            <a href ="{{ url_for('timeView',ID= ID ) }}" target = "_blank" class = "material-icons"> history </a>
+            <a href ="{{ url_for('single_view',ID= ID ) }}" target = "_blank" class = "material-icons"> open_in_new</a>
             <span class="font-italic text-muted" id="updatetime_{{ ID }}">Loading...</span>
           </div>
         </div>
@@ -131,20 +132,7 @@
       var datapacket = JSON.parse(data);
       for (const ID in datapacket) {
           Plotly.react("graph_" + ID, datapacket[ID].figure);
-
-          datapacket[ID].autotags.forEach(function(item,index){
-
-            });
-          //for (const autotag in datapacket[ID].autotags){
-          //  console.log(ID)
-          //  console.log(autotag)
-          //}
-
-          var date = new Date(datapacket[ID].time * 1000);
-          var hr = date.getHours();
-          var m = "0" + date.getMinutes();
-          var s = "0" + date.getSeconds();
-          var time = hr + ':' + m.substr(-2) + ':' + s.substr(-2);
+          var time = moment(datapacket[ID].time * 1000).format('h:mm:ss a (MM/DD/YY)');
           $('#updatetime_' + ID).text("Updated at " + time);
 
 

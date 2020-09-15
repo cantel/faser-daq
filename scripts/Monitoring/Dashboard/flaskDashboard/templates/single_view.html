@@ -1,0 +1,29 @@
+{% extends "basic.html" %}
+
+{% block title %}
+{{ ID }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 style="text-align: center;">Single view</h2>
+    <div id="graph" style="text-align:center;"></div>
+    <h5 id="time"></h5>
+</div>
+
+<script>
+    var datapacket
+    var source = new EventSource('/source/{{ ID }}');
+    source.onmessage = function (event) {
+        var data = event.data;
+        var datapacket = JSON.parse(data);
+        for (const ID in datapacket) {
+            datapacket[ID].figure.layout.autosize = true;
+            Plotly.react("graph", datapacket[ID].figure);
+            var time = moment(datapacket[ID].time * 1000).format('h:mm:ss a (MM/DD/YY)');
+            $('#time').text("Updated at " + time);
+        }
+    }
+</script>
+
+{% endblock %}

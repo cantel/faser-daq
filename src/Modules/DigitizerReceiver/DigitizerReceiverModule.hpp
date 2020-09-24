@@ -42,9 +42,38 @@ class DigitizerReceiverModule : public FaserProcess {
   void sendECR();
   void runner();
 
-  void sendEvent();
+  // send a singleEvent from the front of the buffer 
+  void sendEventSingle();
   
+  // send a batch of events
+  // this is more efficient and sendEventSingle() is saved here for completeness
+  // we should strive to be rid of it once we are more confident
+  void sendEventBatchSpaceSaver(uint32_t raw_payload[], int software_buffer, std::map<std::string, float>& monitoring, int nevents, int nchannels_enabled, int buffer_size, std::string readout_method, int events_to_readout, bool debug=false);
+
+  // used for parsing the software buffer after reading from digitizer
+  // stores a single event in single_event_raw_payload and gives you the starting point of the next event as a return value
+  int getSingleEvent( uint32_t raw_payload[], uint32_t single_event_raw_payload[], int eventLocation, int eventSize);
+  
+  // the digitizer hardware accessor object
   vx1730 *m_digitizer;
+  
+  // raw data payload
+  //unsigned int* m_raw_payload;
+  int m_software_buffer;
+  
+  // channel and buffer info
+  int m_nchannels_enabled;
+  int m_buffer_size;
+
+  // picked up in config and used elsewhere  
+  std::string m_readout_method;
+  int         m_readout_blt;
+  
+  // the maximum number of events to read out
+  int m_n_events_requested;
+
+  // stores monitoring information to be written to histograms/rates
+  std::map<std::string, float> m_monitoring;
   
   // used to protect against the ECR and runner() from reading out at the same time
   std::mutex m_lock;

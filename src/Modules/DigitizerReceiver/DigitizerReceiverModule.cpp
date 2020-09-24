@@ -81,9 +81,37 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
   // make a new digitizer instance
   m_digitizer = new vx1730(ip_addr_string, vme_base_address);
+  
+  // test digitizer board interface
+  m_digitizer->TestCommInterface();  
+  
+  // test digitizer board interface
+  m_digitizer->TestCommDigitizer();
+  
+  // configuring ethernet transmission settings for interface board  
+  // NOTE : you also need to ensure that the utm setting on ifconfig is sufficiently high for jumbo frames to work
+  bool set_interface_jumbo = (bool)cfg["interface_jumbo"];
+  m_digitizer->SetInterfaceEthernetJumboFrames(set_interface_jumbo);
+  
+  unsigned int set_interface_packet_gap = (unsigned int)cfg["interface_packet_gap"];
+  m_digitizer->SetInterfaceEthernetGap(set_interface_packet_gap);
 
-  // test the communication line of the digitizer
-  m_digitizer->TestComm();
+  unsigned int set_interface_max_packets = (unsigned int)cfg["interface_max_packets"];
+  m_digitizer->SetInterfaceEthernetMaxPackets(set_interface_max_packets);
+
+  // ethernet speed test
+  // these can be removed if the bootup is too slow
+  // gives nwords/second --> need to translate to MB/s
+  float interface_rate     = m_digitizer->PerformInterfaceSpeedTest(4);
+  //float vme_interface_rate = m_digitizer->PerformInterfaceVMESpeedTest(4); // NOTE : if there is no data in this buffer this messes things up for good
+
+  // show the words/s
+  DEBUG("Speed(interface)     [words/s]: "<<interface_rate    );
+  //DEBUG("Speed(interface+vme) [words/s]: "<<vme_interface_rate);
+  
+  // show the MB/s
+  INFO("Speed(interface)     [MB/s]: "<<(interface_rate*4)/1000000.     );
+  //INFO("Speed(interface+vme) [MB/s]: "<<(vme_interface_rate*4)/1000000. );
 
   // store local run settings
   auto cfg_software_trigger_enable = cfg["trigger_software"]["enable"];
@@ -123,12 +151,12 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   m_ttt_converter = std::atof(std::string(cfg_ttt_converter).c_str());  // perhaps there is a better way to do this
 
   INFO("Setting TLB-Digitizer TTT clock to : "<<m_ttt_converter);
-  
-
 
 }
 
-DigitizerReceiverModule::~DigitizerReceiverModule() { INFO(""); }
+DigitizerReceiverModule::~DigitizerReceiverModule() { 
+  INFO("DigitizerReceiverModule::Destructor"); 
+}
 
 // optional (configuration can be handled in the constructor)
 void DigitizerReceiverModule::configure() {
@@ -162,6 +190,7 @@ void DigitizerReceiverModule::configure() {
   
   INFO("Finished configuring - the settings of the digitizer are :");
   m_digitizer->DumpConfig();
+  INFO("End of configure()");
 }
 
 void DigitizerReceiverModule::start(unsigned int run_num) {
@@ -186,16 +215,60 @@ void DigitizerReceiverModule::stop() {
 
 void DigitizerReceiverModule::sendECR() {
   // should send ECR to electronics here. In case of failure, set m_status to STATUS_ERROR
-  
+  DEBUG("Sending ECR");
   // stop acquisition
   m_digitizer->StopAcquisition();
   
+  auto cfg = m_config.getConfig()["settings"];
+  
+  // for reading the buffer
+  m_readout_method = (std::string)cfg["readout_method"];
+  m_readout_blt    = (int)cfg["readout_blt"];
+
+  // dynamically allocate the array for the raw payload
+  // guidance : http://www.fredosaurus.com/notes-cpp/newdelete/50dynamalloc.html#:~:text=Allocate%20an%20array%20with%20code,and%20allocates%20that%20size%20array.
+  DEBUG("Allocating software buffer ...");
+  unsigned int* m_raw_payload = NULL;   
+  m_software_buffer = (int)cfg["software_buffer"];           
+  DEBUG("NBuffer ..."<<std::dec<<m_software_buffer);
+  m_raw_payload = new unsigned int[m_software_buffer];  
+  
+  // number of channels enabled
+  m_nchannels_enabled = 0;
+  for(int iChan=0; iChan<16; iChan++){
+    if((int)cfg["channel_readout"].at(iChan)["enable"]==1)
+      m_nchannels_enabled++;
+  }
+  
+  // size of the buffer in samples for a single channel
+  DEBUG("Getting buffer size");
+  m_buffer_size = m_digitizer->RetrieveBufferLength();
+  
+  // maximum number of events to be requested
+  DEBUG("Getting readout request size");
+  m_n_events_requested = m_readout_blt;
+  
   // read out the data from the buffer
   m_lock.lock();
-  while(m_digitizer->DumpEventCount()){
-    sendEvent();
+  int n_events_present = m_digitizer->DumpEventCount();
+  if(n_events_present){
+      DEBUG("Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
+      
+      // clear the monitoring map which will retrieve the info to pass to monitoring metrics
+      m_monitoring.clear();
+      
+      // request to get a batch of events 
+      // - m_n_events_requested : number of events you should read back
+      // - raw_payload : the data allocation of the software buffer
+      // - software_buffer : the length of that software buffer
+      sendEventBatchSpaceSaver(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested);
+      DEBUG("Total nevents sent in running : "<<m_triggers);
   }
   m_lock.unlock();
+  
+  // delete the memory that was allocated
+  delete [] m_raw_payload;  
+  m_raw_payload = NULL;     
 
   // start acquisition
   m_digitizer->StartAcquisition();
@@ -204,6 +277,37 @@ void DigitizerReceiverModule::sendECR() {
 
 void DigitizerReceiverModule::runner() {
   INFO("Running...");  
+  
+  auto cfg = m_config.getConfig()["settings"];
+  
+  // for reading the buffer
+  m_readout_method = (std::string)cfg["readout_method"];
+  m_readout_blt    = (int)cfg["readout_blt"];
+
+  // dynamically allocate the array for the raw payload
+  // guidance : http://www.fredosaurus.com/notes-cpp/newdelete/50dynamalloc.html#:~:text=Allocate%20an%20array%20with%20code,and%20allocates%20that%20size%20array.
+  DEBUG("Allocating software buffer ...");
+  unsigned int* m_raw_payload = NULL;   
+  m_software_buffer = (int)cfg["software_buffer"];           
+  DEBUG("NBuffer ..."<<std::dec<<m_software_buffer);
+  m_raw_payload = new unsigned int[m_software_buffer];  
+  
+  // number of channels enabled
+  m_nchannels_enabled = 0;
+  for(int iChan=0; iChan<16; iChan++){
+    if((int)cfg["channel_readout"].at(iChan)["enable"]==1)
+      m_nchannels_enabled++;
+  }
+  
+  // size of the buffer in samples for a single channel
+  DEBUG("Getting buffer size");
+  m_buffer_size = m_digitizer->RetrieveBufferLength();
+  
+  // maximum number of events to be requested
+  DEBUG("Getting readout request size");
+  m_n_events_requested = m_readout_blt;
+  
+  // the polling loop
   while (m_run) {    
 
     // send software triggers for development if enabled
@@ -218,19 +322,24 @@ void DigitizerReceiverModule::runner() {
       DEBUG("You are not sending random triggers");
     }
     
-
     // lock to prevent accidental double reading with the sendECR() call
     m_lock.lock();
-    
+  
     // polling of the hardware - if any number of events is detected
     // then all events in the buffer are read out
     int n_events_present = m_digitizer->DumpEventCount();
     if(n_events_present){
-      DEBUG("Sending all events - NEvents = "<<n_events_present);
-      for(int iev=0; iev<n_events_present; iev++){
-        sendEvent();
-        m_triggers++;
-      }
+      DEBUG("Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
+      
+      // clear the monitoring map which will retrieve the info to pass to monitoring metrics
+      m_monitoring.clear();
+      
+      // request to get a batch of events 
+      // - m_n_events_requested : number of events you should read back
+      // - raw_payload : the data allocation of the software buffer
+      // - software_buffer : the length of that software buffer
+      sendEventBatchSpaceSaver(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, (bool)cfg["print_event"]);
+
       m_lock.unlock();
       DEBUG("Total nevents sent in running : "<<m_triggers);
     }
@@ -239,8 +348,20 @@ void DigitizerReceiverModule::runner() {
       // happens at a rate just above the expected trigger rate in the case of no events
       DEBUG("No events - sleeping for a short while");
       m_lock.unlock();
-      usleep(1500); 
+      usleep(100); 
     }
+           
+    DEBUG("Time read    : "<<m_monitoring["time_read_time"]);
+    DEBUG("Time parse   : "<<m_monitoring["time_parse_time"]);
+    DEBUG("Time header  : "<<m_monitoring["time_header_time"]);
+    DEBUG("Time filler  : "<<m_monitoring["time_filler_time"]);
+    
+    float total_batch = m_monitoring["time_read_time"]+m_monitoring["time_parse_time"]+m_monitoring["time_header_time"]+m_monitoring["time_filler_time"];
+    
+    DEBUG("Parse/Read   : "<<m_monitoring["time_parse_time"]/m_monitoring["time_read_time"]);
+    
+    DEBUG("Total batch  : "<<total_batch);
+    DEBUG("Time looping : "<<m_monitoring["time_looping_time"]<<"   ("<<total_batch/m_monitoring["time_looping_time"]<<")");
     
     // monitoring of temperature on ADCs
     std::vector<int> adc_temp = m_digitizer->GetADCTemperature(false);
@@ -265,15 +386,24 @@ void DigitizerReceiverModule::runner() {
     else{
       ERROR("Temperature monitoring picked up incorrect number of channels : "<<NCHANNELS);
     }
-  
   }
+  
+  // delete the memory that was allocated
+  delete [] m_raw_payload;  
+  m_raw_payload = NULL;     
+  
   INFO("Runner stopped");
 }
 
 
 
-void DigitizerReceiverModule::sendEvent() {
-  INFO("Sending Event...");
+void DigitizerReceiverModule::sendEventSingle() {
+
+  int print_rate=10;
+
+  if(m_triggers%print_rate==0){
+    INFO("Sending Digitizer Event ... N(trigger)="<<m_triggers);
+  }  
   
   // get the event
   uint32_t raw_payload[MAXFRAGSIZE];
@@ -283,8 +413,9 @@ void DigitizerReceiverModule::sendEvent() {
   int payload_size = Payload_GetEventSize( raw_payload );
   const int total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
 
-  DEBUG("PayloadSize : nwords="<<payload_size<<"  total_size="<<total_size);
-
+  if(m_triggers%print_rate==0){
+    INFO("PayloadSize : nwords="<<payload_size<<"  total_size="<<total_size);
+  }  
   // the event ID is what should be used, in conjunction with the ECR to give a unique event tag
   // word[2] bits[23:0]
   // need to blank out the top bits because these are the channel masks
@@ -326,4 +457,218 @@ void DigitizerReceiverModule::sendEvent() {
   daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
 
   m_connections.put(0, binData);  
+}
+
+void DigitizerReceiverModule::sendEventBatchSpaceSaver(uint32_t raw_payload[], int software_buffer, std::map<std::string, float>& monitoring, int nevents, int nchannels_enabled, int buffer_size, std::string readout_method, int events_to_readout, bool debug) {
+  //INFO("Sending full buffer ...");
+  
+// system time before
+  auto start_header_time = chrono::high_resolution_clock::now(); 
+  
+  std::memset(raw_payload, 0, software_buffer);
+  
+  // can predict the size of the buffer that will be read out
+  // [1] number of events in buffer
+  // [2] known event size (nchannels enabled, buffer size)
+    
+  DEBUG("nevents              : "<<std::dec<<nevents);
+  DEBUG("nchannels_enabled    : "<<std::dec<<nchannels_enabled);
+  DEBUG("buffer_size          : "<<std::dec<<buffer_size);
+  DEBUG("readout_method       : "<<std::dec<<readout_method);
+  DEBUG("events_to_readout          : "<<std::dec<<events_to_readout);
+
+  int event_size = (nchannels_enabled*(buffer_size/2.0) + 4);  
+  
+  // get the full event buffer from the digitizer board
+  //uint32_t raw_payload[MAXFRAGSIZE];
+  int nwords=-1;
+  DEBUG("Prepping to read buffer");
+  
+  int nevents_to_transfer = events_to_readout;
+  
+  if(nevents_to_transfer>nevents)
+    nevents_to_transfer = nevents;
+    
+    
+// system time before
+  auto end_header_time = chrono::high_resolution_clock::now(); 
+  float time_header_time = chrono::duration_cast<chrono::nanoseconds>(end_header_time - start_header_time).count() * 1e-9; 
+  DEBUG("Time taken by header is : " << fixed << time_header_time << setprecision(5) << " sec ");
+    
+
+// system time before
+  auto start_read_time = chrono::high_resolution_clock::now(); 
+
+  nwords = m_digitizer->ReadFullBufferSpaceSaver(raw_payload, software_buffer, monitoring, nevents, nchannels_enabled, buffer_size, readout_method, nevents_to_transfer);
+
+// system time before
+  auto end_read_time = chrono::high_resolution_clock::now(); 
+  float time_read_time = chrono::duration_cast<chrono::nanoseconds>(end_read_time - start_read_time).count() * 1e-9; 
+  DEBUG("Time taken by buffer_readout is : " << fixed << time_read_time << setprecision(5) << " sec ");
+  
+  
+  // system time before
+  auto start_filler_time = chrono::high_resolution_clock::now(); 
+
+  DEBUG("Buffer has been read");
+  
+  DEBUG("Monitoring size : "<<monitoring.size());
+  std::map<std::string, float>::iterator it;
+  for (it = monitoring.begin(); it != monitoring.end(); it++) {
+    DEBUG(" - "<<it->first << "   :   " << it->second);
+  }
+  
+  int nevents_after     = m_digitizer->DumpEventCount();
+  
+  DEBUG(">>>>>>> NEv Before      : "<<std::dec<<nevents);
+  DEBUG(">>>>>>> NEv After       : "<<std::dec<<nevents_after);
+  DEBUG(">>>>>>> NEv Requested   : "<<std::dec<<nevents_to_transfer);
+  
+  int nwords_expected = nevents_to_transfer *  event_size;
+  
+  // these don't necessarily have to line up 
+  // perhaps an event appeared just before reading
+  // trust the words you obtain and divide by evnet size to know the number
+  // of events you will have to parse
+  DEBUG("Words expected : "<<nwords_expected);
+  DEBUG("Words obtained : "<<nwords);
+  
+  int nevents_obtained = nwords/event_size;
+  
+  // ToDo : implement check to make sure it divides
+   
+  uint32_t single_event_raw_payload[10000];
+  int eventLocation=0;
+  
+  // system time before
+  auto end_filler_time = chrono::high_resolution_clock::now(); 
+  float time_filler_time = chrono::duration_cast<chrono::nanoseconds>(end_filler_time - start_filler_time).count() * 1e-9; 
+  DEBUG("Time taken by buffer_fillerout is : " << fixed << time_filler_time << setprecision(5) << " sec ");
+  
+  // system time before
+  auto start_parse_time = chrono::high_resolution_clock::now(); 
+  
+  DEBUG("Sending NEvents : "<<nevents_obtained);
+  
+  // initialize variables only once
+  unsigned int Header_TriggerTimeTag = 0;
+  
+  uint8_t  local_fragment_tag = 0;
+  uint32_t local_source_id    = 0;
+  uint64_t local_event_id     = 0;
+  uint16_t local_bc_id        = 0;
+  uint16_t status             = 0;
+
+  int payload_size = 0;
+  
+  unsigned int Header_EventCounter = 0;
+  
+  int total_size = 0;
+
+  // perform transfer for every event that was read out in the buffer
+  for(int iev=0; iev<nevents_obtained; iev++){
+  
+    //DEBUG("Moving event : "<<iev<<"  "<<eventLocation<<"  "<<event_size);
+  
+    // saves one event starting in eventLocation to single_event_raw_payload
+    //DEBUG("Retrieve event : location="<<eventLocation<<"  size="<<event_size);
+    eventLocation = getSingleEvent(raw_payload, single_event_raw_payload, eventLocation, event_size);
+  
+  
+    if(debug){
+      // to check the eventCounter to be sure
+      DEBUG("header[0] : "<<ConvertIntToWord(single_event_raw_payload[0]));
+      DEBUG("header[1] : "<<ConvertIntToWord(single_event_raw_payload[1]));
+      DEBUG("header[2] : "<<ConvertIntToWord(single_event_raw_payload[2]));
+      DEBUG("header[3] : "<<ConvertIntToWord(single_event_raw_payload[3]));
+    
+      int nsampwords = ((event_size-4)/nchannels_enabled);
+      int print_chan = 6;
+    
+      //DEBUG("NData : "<<nsampwords);
+    
+      //xint idat = 50;
+      //DEBUG("data["<<idat  <<"]   : "<<std::dec<< ((single_event_raw_payload[4+(nsampwords*print_chan)+idat]>>16) & 0x0000FFFF) );
+      //DEBUG("data["<<idat+1<<"]   : "<<std::dec<< ((single_event_raw_payload[4+(nsampwords*print_chan)+idat] & 0xFFFF0000)>>16) );
+
+
+    
+      for(int idat=0; idat<nsampwords; idat++){
+        DEBUG("data["<<(idat*2)  <<"]   : "<<std::dec<< ((single_event_raw_payload[4+(nsampwords*print_chan)+idat])& 0x0000FFFF) );
+        DEBUG("data["<<(idat*2)+1<<"]   : "<<std::dec<< ((single_event_raw_payload[4+(nsampwords*print_chan)+idat] & 0xFFFF0000)>>16) );
+      }
+    }
+    
+    // do the following for each of the events that has been parsed
+    // creating the payload
+    //int payload_size = Payload_GetEventSize( single_event_raw_payload );
+    payload_size = raw_payload[0] & 0x0FFFFFF;
+    total_size = sizeof(uint32_t) * payload_size;  // size of my payload in bytes
+
+    //DEBUG("PayloadSize : nwords="<<payload_size<<"  total_size="<<total_size);
+
+    // the event ID is what should be used, in conjunction with the ECR to give a unique event tag
+    // word[2] bits[23:0]
+    // need to blank out the top bits because these are the channel masks
+    Header_EventCounter   = (single_event_raw_payload[2] & 0xFF000000);
+    //SetBit(Header_EventCounter, 31, 0); 
+    //SetBit(Header_EventCounter, 30, 0);
+    //SetBit(Header_EventCounter, 29, 0);
+    //SetBit(Header_EventCounter, 28, 0);
+    //SetBit(Header_EventCounter, 27, 0);
+    //SetBit(Header_EventCounter, 26, 0);
+    //SetBit(Header_EventCounter, 25, 0);
+    //SetBit(Header_EventCounter, 24, 0);
+  
+    // the trigger time tag is used to give a "verification" of the event ID if that fails
+    // it is nominally the LHC BCID but we need to do a conversion from our clock to the LHC clock
+    // word[3] bits[31:0]
+    Header_TriggerTimeTag = single_event_raw_payload[3];
+  
+    //DEBUG("Header_EventCounter   : "+to_string(Header_EventCounter));
+    //DEBUG("Header_TriggerTimeTag : "+to_string(Header_TriggerTimeTag));
+  
+    // store the faser header information
+    local_fragment_tag = EventTags::PhysicsTag;
+    local_source_id    = SourceIDs::PMTSourceID;
+    local_event_id     = (m_ECRcount<<24) + (Header_EventCounter+1); // from the header and the ECR from sendECR() counting m_ECRcount [ECR]+[EID]
+    local_bc_id        = Header_TriggerTimeTag*(m_ttt_converter/125);      // trigger time tag corrected by LHCClock/TrigClock = m_ttt_converter/125, where m_ttt_converter is configurable but by default is 40.08
+
+ 
+    // create the event fragment
+    std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, local_event_id, local_bc_id, single_event_raw_payload, total_size ));
+
+    // ToDo : What is the status supposed to be?
+    status=0;
+    fragment->set_status( status );
+
+    // place the raw binary event fragment on the output port
+    std::unique_ptr<const byteVector> bytestream(fragment->raw());
+    daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+
+    // only necessary for the real module
+    m_connections.put(0, binData); 
+  
+  
+  } 
+  
+  // system time after
+  auto end_parse_time = chrono::high_resolution_clock::now(); 
+  
+  float time_parse_time = chrono::duration_cast<chrono::nanoseconds>(end_parse_time - start_parse_time).count() * 1e-9; 
+  DEBUG("Time taken by event parsing is : " << fixed << time_parse_time << setprecision(5) << " sec ");
+    
+  monitoring["time_header_time"]   = time_header_time;  
+  monitoring["time_filler_time"]   = time_filler_time;  
+  monitoring["time_read_time"]     = time_read_time;
+  monitoring["time_parse_time"]    = time_parse_time;
+
+}
+
+
+
+int DigitizerReceiverModule::getSingleEvent( uint32_t raw_payload[], uint32_t single_event_raw_payload[], int eventLocation, int eventSize){
+  //DEBUG("getSingleEvent : "<<eventLocation<<"  "<<eventSize);
+  std::copy(raw_payload+eventLocation, raw_payload+eventLocation+eventSize, single_event_raw_payload);
+  return eventLocation+eventSize;
 }

@@ -142,7 +142,7 @@ float DigitizerMonitorModule::GetPedestalRMS(std::vector<uint16_t> input, int st
   return pow(sum_rms/count, 0.5);
 }
 
-void CheckBounds(std::vector<uint16_t> input, int& start, int& end){
+void DigitizerMonitorModule::CheckBounds(std::vector<uint16_t> input, int& start, int& end){
   // if the number of samples is less than the desired pedestal sampling length, then take the full duration
   if(start>=end){
     WARNING("Pedestal calculation has a start after and end : ["<<start<<","<<end<<"]");

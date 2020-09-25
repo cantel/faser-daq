@@ -9,8 +9,8 @@
 <div id="commands" style = "text-align: center;">
 <button id = "previous" class= "btn btn-secondary"> < </button>
   <select id="timestamps">
-    {% if historic_timestamps %}
-    {% for timestamp in timestamps%}
+    {% if timestamps %}
+    {% for timestamp in timestamps %}
     <option value="{{ timestamp }}"> {{ timestamp | ctime }} </option>
     {% endfor %}
     {% for historic_timestamp in historic_timestamps | reverse %}
@@ -26,19 +26,11 @@
 </div>
 <h5 id = "time"></h6> 
 
-{% if historic_timestamps %}
+{% if timestamps %}
 <script>
   var histo = {{ lastHisto | safe }};
+  histo.figure.layout.autosize = true;
   Plotly.plot("graph", histo.figure);
-
-
-  // $('#time').text("Updated at " +  moment(histo.timestamp).format('LTS') );
-
-//  var date = new Date(histo.timestamp * 1000);
-//  var hr = date.getHours();
-//  var m = "0" + date.getMinutes();
-//  var s = "0" + date.getSeconds();
-//  var time = hr + ':' + m.substr(-2) + ':' + s.substr(-2);
   var time = moment(histo.timestamp* 1000).format('h:mm:ss a (MM/DD/YY)');
   $('#time').text("State at  " + time);
 
@@ -79,7 +71,6 @@
       dataType: "json",
       success: function (data) {
         var data = JSON.parse(data);
-        console.log(data);
         data.figure.layout.autosize = true;
         Plotly.react('graph', data.figure);
         var time = moment(data.timestamp* 1000).format('h:mm:ss a (MM/DD/YY)');

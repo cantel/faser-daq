@@ -2,7 +2,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Danger, cannot be undone ! </h5>
+        <h5 class="modal-title" id="exampleModalLabel">Danger, this operation cannot be cancelled ! </h5>
         <button type="button" class="close" data-dismiss="modal">
         </button>
       </div>
@@ -20,23 +20,18 @@
 <div class="modal fade" id="modal_copy_paste_json" tabindex="-1" role="dialog">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel"> Choose your backup file (JSON)  
-          </h5>
-          <button type="button" class="close" data-dismiss="modal">
-          </button>
-        </div>
-        <div class="modal-body" style="width: auto;">
-          <form action="{{ url_for('load_tags_from_file') }}" method = "POST" enctype="multipart/form-data">
-            <input type="file" id="myFile" name="filename" class = "btn btn-secondary">
-            <input type="submit" class = "btn btn-success" value = "Load">
-          </form>
-        </div>
-        <!-- <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-          <button id="confirmation_upload_tags" type="button" class="btn btn-success">Save</button>
-        </div>
-     -->
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel"> Choose your backup file (JSON)
+        </h5>
+        <button type="button" class="close" data-dismiss="modal">
+        </button>
+      </div>
+      <div class="modal-body" style="width: auto;">
+        <form action="{{ url_for('load_tags_from_file') }}" method="POST" enctype="multipart/form-data">
+          <input type="file" id="myFile" name="filename" class="btn btn-secondary">
+          <input type="submit" class="btn btn-success" value="Load">
+        </form>
+      </div>
     </div>
   </div>
 </div>

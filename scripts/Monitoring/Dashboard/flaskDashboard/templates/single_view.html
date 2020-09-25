@@ -17,12 +17,12 @@
     source.onmessage = function (event) {
         var data = event.data;
         var datapacket = JSON.parse(data);
-        for (const ID in datapacket) {
-            datapacket[ID].figure.layout.autosize = true;
-            Plotly.react("graph", datapacket[ID].figure);
-            var time = moment(datapacket[ID].time * 1000).format('h:mm:ss a (MM/DD/YY)');
-            $('#time').text("Updated at " + time);
-        }
+
+        datapacket.figure.layout.autosize = true;
+        Plotly.react("graph", datapacket.figure);
+        var time = moment(datapacket.time * 1000).format('h:mm:ss a (MM/DD/YY)');
+        $('#time').text("Updated at " + time);
+
     }
 </script>
 

@@ -3,11 +3,10 @@ import json
 from flask.helpers import flash
 import redis
 from flask import render_template
-from flask import url_for, redirect, request, Response, jsonify, g
+from flask import url_for, redirect, request, Response, jsonify
 from flaskDashboard import app
 import numpy as np
 import atexit
-import requests
 
 from apscheduler.schedulers.background import BackgroundScheduler
 
@@ -25,11 +24,9 @@ r6 = redis.Redis(
     host="localhost", port=6379, db=6, charset="utf-8", decode_responses=True
 )
 
-
 def recent_histograms_save():
     with app.app_context():
         IDs = getAllIDs().get_json()
-    #(f"Recent Histograms saved at {time.strftime('%x %X',time.localtime())}")
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
@@ -45,7 +42,6 @@ def recent_histograms_save():
 def historic_histograms_save():
     with app.app_context():
         IDs = getAllIDs().get_json()
-    #print(f"Historic Histogram saved at {time.localtime()}")
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
@@ -60,13 +56,11 @@ scheduler = BackgroundScheduler()
 
 scheduler.add_job(func=recent_histograms_save, trigger="interval", seconds=60)
 scheduler.add_job(func=historic_histograms_save, trigger="interval", seconds=1800)
-
 scheduler.start()
-
 atexit.register(lambda: scheduler.shutdown())
 
 
-# pas fini
+
 @app.route("/getIDs", methods=["GET"])
 def getIDs():
     modules = getModules().get_json()
@@ -74,44 +68,14 @@ def getIDs():
     keys = []
     for module in modules:
         histnames = r.hkeys(module)
-        # print("histnames: ", histnames)
         for histname in histnames:
-            # print(module, histname)
             if "h_" in histname:
-                # print(histname)
                 keys.append(f"{module}-{histname[2:]}")
 
     keys.sort()
     return jsonify(keys)
 
-
-@app.route("/storeDefaultTagsAndIDs", methods=["GET"])
-def storeDefaultTagsAndIDs():
-    ids = getIDs().get_json()
-    # print(f"func: storeDefaultTagsAndIDs/ ids: {ids}")
-    for ID in ids:
-        module, histname = ID.split("-")
-        r5.sadd(f"tag:{module}", ID)
-        r5.sadd(f"tag:{histname}", ID)
-        r5.sadd(f"id:{ID}", module, histname)
-    return "true"
-
-
-@app.route("/getAllTags", methods=["GET"])
-def getAllTags():
-    tags = r5.keys("tag*")
-    tags = [s.replace("tag:", "") for s in tags]
-    tags.sort()
-    return jsonify(tags)
-
-
-@app.route("/getAllIDs")
-def getAllIDs():
-    ids = r5.keys("id:*")
-    ids = [s.replace("id:", "") for s in ids]
-    ids.sort()
-    return jsonify(ids)
-
+#### tags section ###
 
 def getTagsByID(ids):
     packet = {}
@@ -124,14 +88,15 @@ def getTagsByID(ids):
 
     return packet
 
-
-@app.route("/getModules", methods=["GET"])
-def getModules():
-    modules = r.keys("*monitor*")
-    modules = [module for module in modules if r.type(module) == "hash"]
- 
-    modules.sort()
-    return jsonify(modules)
+@app.route("/storeDefaultTagsAndIDs", methods=["GET"])
+def storeDefaultTagsAndIDs():
+    ids = getIDs().get_json()
+    for ID in ids:
+        module, histname = ID.split("-")
+        r5.sadd(f"tag:{module}", ID)
+        r5.sadd(f"tag:{histname}", ID)
+        r5.sadd(f"id:{ID}", module, histname)
+    return "true"
 
 
 @app.route("/addTag", methods=["GET"])
@@ -143,7 +108,6 @@ def addTag():
         exists = "true"
     r5.sadd(f"id:{ID}", tag)
     r5.sadd(f"tag:{ tag }", ID)
-
     return exists
 
 
@@ -177,6 +141,32 @@ def renameTag():
     packet = dict(oldtagexists=oldtagexists, newtagexists=newtagexists)
     return jsonify(packet)
 
+@app.route("/getAllTags", methods=["GET"])
+def getAllTags():
+    tags = r5.keys("tag*")
+    tags = [s.replace("tag:", "") for s in tags]
+    tags.sort()
+    return jsonify(tags)
+
+
+@app.route("/getAllIDs")
+def getAllIDs():
+    ids = r5.keys("id:*")
+    ids = [s.replace("id:", "") for s in ids]
+    ids.sort()
+    return jsonify(ids)
+
+
+@app.route("/getModules", methods=["GET"])
+def getModules():
+    modules = r.keys("*monitor*")
+    modules = [module for module in modules if r.type(module) == "hash"]
+ 
+    modules.sort()
+    return jsonify(modules)
+
+
+## Time_view ###
 @app.route("/delete_histos", methods=["GET"])
 def delete_histos():
     r6.flushdb()
@@ -195,55 +185,16 @@ def change_histo():
 
     return jsonify(newGraph[0])
 
-@app.route("/home")
-def home():
-    return render_template("home.html")
-
-
 @app.route("/")
 def load():
     print("Doing the busy stuff")
     storeDefaultTagsAndIDs()  # puts the basic tags module and histname
     return redirect(url_for("home"))
 
-@app.route("/load_tags_from_file", methods = ["POST"])
-def load_tags_from_file():
-    if request.method == 'POST':
-            file = request.files['filename']
-            if file:
-                if file.filename.split(".")[1] == "json":
-                    content = file.read()
-                    content  = json.loads(content.decode("utf-8"))
-                    for key in content.keys():
-                        r5.sadd(f"id:{key}", *content[key])
-                        for tag in content[key]:
-                            r5.sadd(f"tag:{tag}", key)
-                else:
-                    flash("Wrong filetype, upload a .json file", category = "danger")
-            else: 
-                flash("No chosen file", category =  "danger")
-    return redirect(url_for("home"))
 
-@app.route("/source/<path:path>")
-def lastHistogram(path):
-    def getHistogram():
-        while True:
-            packet = {}
-            ids = path.split("/")
-            for ID in ids:
-                source, histname = ID.split("-")
-                histobj = r.hget(source, f"h_{histname}")
-
-                if histobj is not None:
-                    data, layout, timestamp = convert_to_plotly(histobj)
-                    fig = dict(data=data, layout=layout, config={"responsive": True})
-                    packet[ID] = {
-                        "figure": fig,
-                        "time": float(timestamp)}
-            yield f"data:{json.dumps(packet)}\n\n"
-            time.sleep(3)
-
-    return Response(getHistogram(), mimetype="text/event-stream")
+@app.route("/home")
+def home():
+    return render_template("home.html")
 
 
 @app.route("/monitor", methods=["GET", "POST"])
@@ -269,17 +220,12 @@ def monitor():
 
 @app.route("/time_view/<string:ID>")
 def timeView(ID):
-
     data = r6.zrangebyscore(ID, "-inf", "inf", withscores=True)
-    
     if len(data) == 0: 
         return render_template("time_view.html", ID = ID)
-    data.reverse()
     timestamps = [element[1] for element in data]
     lastHisto = data[0][0]
-
     historic_data = r6.zrangebyscore(f"historic:{ID}", "-inf", "inf", withscores=True)
-    
     historic_timestamps = [element[1] for element in historic_data]
     
     return render_template(
@@ -290,9 +236,11 @@ def timeView(ID):
         ID = ID
     )
 
+
 @app.route("/single_view/<string:ID>")
 def single_view(ID):
     return render_template("single_view.html", ID = ID)
+
 
 @app.route("/download_tags_json")
 def download_tags_json():
@@ -308,11 +256,43 @@ def download_tags_json():
                  "attachment; filename=tags.json"})
 
 
-@app.context_processor
-def context_processor():
-    modules = getModules().get_json()
-    tags = getAllTags().get_json()
-    return dict(modules=modules, tags=tags)
+@app.route("/load_tags_from_file", methods = ["POST"])
+def load_tags_from_file():
+    if request.method == 'POST':
+            file = request.files['filename']
+            if file:
+                if file.filename.split(".")[1] == "json":
+                    content = file.read()
+                    content  = json.loads(content.decode("utf-8"))
+                    for key in content.keys():
+                        r5.sadd(f"id:{key}", *content[key])
+                        for tag in content[key]:
+                            r5.sadd(f"tag:{tag}", key)
+                else:
+                    flash("Wrong filetype, upload a .json file", category = "danger")
+            else: 
+                flash("No chosen file", category =  "danger")
+    return redirect(url_for("home"))
+
+
+@app.route("/source/<string:ID>")
+def lastHistogram(ID):
+    def getHistogram():
+        while True:
+            packet = {}
+            source, histname = ID.split("-")
+            histobj = r.hget(source, f"h_{histname}")
+            if histobj is not None:
+                data, layout, timestamp = convert_to_plotly(histobj)
+                fig = dict(data=data, layout=layout, config={"responsive": True})
+                packet = {
+                    "figure": fig,
+                    "time": float(timestamp)}
+            yield f"data:{json.dumps(packet)}\n\n"
+
+            time.sleep(3)
+
+    return Response(getHistogram(), mimetype="text/event-stream")
 
 
 def convert_to_plotly(histobj):
@@ -325,8 +305,6 @@ def convert_to_plotly(histobj):
     layout = dict(
         autosize=False,
         uirevision=True,
-        # width = 1024,
-        # height = 600,
         xaxis=xaxis,
         yaxis=yaxis,
         margin=dict(l=50, r=50, b=50, t=50, pad=4),
@@ -339,7 +317,6 @@ def convert_to_plotly(histobj):
         data = [dict(x=xarray, y=yarray, type="bar")]
 
     elif "2d" in hist_type:
-
         zarray = np.array(histobj["zvalues"])
         xmin = float(histobj["xmin"])
         xmax = float(histobj["xmax"])
@@ -382,6 +359,11 @@ def convert_to_plotly(histobj):
             data = [dict(x=xarray, y=yarray, type="bar")]
     return data, layout, timestamp
 
+@app.context_processor
+def context_processor():
+    modules = getModules().get_json()
+    tags = getAllTags().get_json()
+    return dict(modules=modules, tags=tags)
 
 @app.template_filter("ctime")
 def timectime(s):

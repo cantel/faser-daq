@@ -150,7 +150,7 @@ void DigitizerMonitorModule::CheckBounds(std::vector<uint16_t> input, int& start
   }
   
   // if the number of samples is less than the desired pedestal sampling length, then take the full duration
-  if(end>input.size()){
+  if(end>(int)input.size()){
     WARNING("The pulse length is not long enough for a pedestal calculation of : ["<<start<<","<<end<<"]");
     end = input.size();
   }
@@ -160,7 +160,7 @@ void DigitizerMonitorModule::FillChannelPulse(std::string histogram_name, int ch
   DEBUG("Filling pulse for : "<<histogram_name<<"  "<<channel);
 
   m_histogrammanager->reset(histogram_name);
-  for(int isamp=0; isamp<m_pmtdataFragment->channel_adc_counts(channel).size(); isamp++){
+  for(int isamp=0; isamp<(int)m_pmtdataFragment->channel_adc_counts(channel).size(); isamp++){
     m_histogrammanager->fill(histogram_name,isamp,m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
   }
 }

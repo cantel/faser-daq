@@ -83,10 +83,10 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   m_digitizer = new vx1730(ip_addr_string, vme_base_address);
   
   // test digitizer board interface
-  m_digitizer->TestCommInterface();  
+  m_digitizer->TestCommInterface(cfg);  
   
   // test digitizer board interface
-  m_digitizer->TestCommDigitizer();
+  m_digitizer->TestCommDigitizer(cfg);
   
   // configuring ethernet transmission settings for interface board  
   // NOTE : you also need to ensure that the utm setting on ifconfig is sufficiently high for jumbo frames to work
@@ -327,6 +327,7 @@ void DigitizerReceiverModule::runner() {
     int n_events_present = m_digitizer->DumpEventCount();
     if(n_events_present){
       DEBUG("Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
+      DEBUG("With m_ECRcount : "<<m_ECRcount);
       
       // clear the monitoring map which will retrieve the info to pass to monitoring metrics
       m_monitoring.clear();
@@ -355,7 +356,7 @@ void DigitizerReceiverModule::runner() {
       // pass the group of events on in faser/daq
       // NOTE : this should only exist in the DigitizerReceiver module due to access
       //        of the DAQling methods and such
-      passEventBatch(fragments); // defined in the Digitizer
+      this->PassEventBatch(fragments); // defined in the Digitizer
       
       //release the lock - not after the conditional due to the ECR method
       m_lock.unlock();
@@ -415,8 +416,8 @@ void DigitizerReceiverModule::runner() {
   INFO("Runner stopped");
 }
 
-void DigitizerReceiverModule::passEventBatch(std::vector<EventFragment> fragments){
-  INFO("passEventBatch()");
+void DigitizerReceiverModule::PassEventBatch(std::vector<EventFragment> fragments){
+  DEBUG("passEventBatch()");
   DEBUG("Passing NFrag : "<<fragments.size());
 
   for(int ifrag=0; ifrag<(int)fragments.size(); ifrag++){

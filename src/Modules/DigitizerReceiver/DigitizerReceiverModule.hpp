@@ -36,13 +36,19 @@ class DigitizerReceiverModule : public FaserProcess {
   DigitizerReceiverModule();
   ~DigitizerReceiverModule();
 
+  ///////////////////////////////////////////
+  // Methods needed for FASER/DAQ
+  ///////////////////////////////////////////
   void configure(); // optional (configuration can be handled in the constructor)
   void start(unsigned int);
   void stop();
   void sendECR();
   void runner();
 
-  void passEventBatch(std::vector<EventFragment> fragments);
+  ///////////////////////////////////////////
+  // Digitizer specific methods and members
+  ///////////////////////////////////////////
+  void PassEventBatch(std::vector<EventFragment> fragments);
 
   // the digitizer hardware accessor object
   vx1730 *m_digitizer;
@@ -90,7 +96,6 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<int> m_temp_ch13;
   std::atomic<int> m_temp_ch14;
   std::atomic<int> m_temp_ch15;
-
 
   // for SW trigger sending
   int m_sw_count;

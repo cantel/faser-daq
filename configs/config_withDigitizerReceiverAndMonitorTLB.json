@@ -38,7 +38,7 @@
               "chid": 0,
               "transport": "tcp",
               "host": "*",
-              "port": 8101
+              "port": 8100
             }
           ]
         }
@@ -54,6 +54,7 @@
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics",
         "host_pc": "192.168.122.2",
+        "board_type": "v0",
         "digitizer_hw_address":  "0x04320000",  
         "buffer": {"custom": true, "length": 630, "n_post_samples": 120},
         "trigger_acquisition": {"external": true, "software": false, "internal": false},
@@ -98,7 +99,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 8102
+            "port": 8101
           }
         ]
       }
@@ -137,7 +138,7 @@
       "settings": {
         "stats_uri": "tcp://localhost:7000",
         "maxPending": 10,
-        "timeout_ms": 1000
+        "timeout_ms": 60000
       },
       "connections": {
         "receivers": [
@@ -146,14 +147,14 @@
             "chid": 0,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8101
+            "port": 8100
           },
           {
             "type": "pair",
             "chid": 1,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8102
+            "port": 8101
           }
         ],
         "senders": [

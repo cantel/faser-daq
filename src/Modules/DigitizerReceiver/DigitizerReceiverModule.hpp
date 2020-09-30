@@ -77,6 +77,9 @@ class DigitizerReceiverModule : public FaserProcess {
   // used for the trigger time to BCID conversion
   float m_ttt_converter;
   
+  // software BCID fix for the digitizer
+  float m_bcid_ttt_fix;
+  
   // monitoring metrics
   std::atomic<int> m_triggers;
   
@@ -96,6 +99,9 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<int> m_temp_ch13;
   std::atomic<int> m_temp_ch14;
   std::atomic<int> m_temp_ch15;
+  
+  std::atomic<int> m_hw_buffer_space;
+  std::atomic<int> m_hw_buffer_occupancy;
 
   // for SW trigger sending
   int m_sw_count;

@@ -2,7 +2,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Danger, this operation cannot be cancelled ! </h5>
+        <h5 class="modal-title">Danger, this operation cannot be cancelled ! </h5>
         <button type="button" class="close" data-dismiss="modal">
         </button>
       </div>
@@ -21,7 +21,7 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel"> Choose your backup file (JSON)
+        <h5 class="modal-title" > Choose your backup file (JSON)
         </h5>
         <button type="button" class="close" data-dismiss="modal">
         </button>
@@ -31,6 +31,26 @@
           <input type="file" id="myFile" name="filename" class="btn btn-secondary">
           <input type="submit" class="btn btn-success" value="Load">
         </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="modal_new_experiment" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">This operation cannot be cancelled ! </h5>
+        <button type="button" class="close" data-dismiss="modal">
+        </button>
+      </div>
+      <div class="modal-body">
+        This will delete the current tags and the current histograms.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button id="confirmation_new_experiment" type="button" class="btn btn-danger">Delete</button>
       </div>
     </div>
   </div>

@@ -1,4 +1,5 @@
-<html>
+
+<html lang= "en">
 
 <head lang="en">
   <meta charset="utf-8">
@@ -22,7 +23,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery.json-tag-editor.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/style.css') }}">
+
 
 
 
@@ -39,7 +40,7 @@
             Monitoring
           </a>
           <div class="dropdown-menu">
-            <a class="dropdown-item" href="{{ url_for('load') }}"> Refresh </a>
+            <a class="dropdown-item" href="{{ url_for('home') }}"> Refresh </a>
             <a class="dropdown-item" href="{{ url_for('download_tags_json') }}">
               <p class="d-inline text-center">Download tags </p>
             </a>
@@ -47,9 +48,14 @@
               href="#">Upload tags</a>
 
             <div class="dropdown-divider"></div>
+            <a id="new_experiment" class="dropdown-item" data-toggle="modal" data-target="#modal_new_experiment"
+              href="#">New experiment</a>
+              
             <a id="delete_previous_histos" class="dropdown-item" data-toggle="modal"
-              data-target="#modal_confirmation_delete_previous_histos" href="#" style="color:red;">Delete all previous
+              data-target="#modal_confirmation_delete_previous_histos" href="#">Delete all previous
               histos</a>
+
+
 
           </div>
         </span>
@@ -125,27 +131,47 @@
 
 
   <script>
-    $(document).ready(function () {
-      $("#tags_selection").select2({ placeholder: "Select tags" });
+    $("#tags_selection").select2({ placeholder: "Select tags" });
+  </script>
 
-      $('#confirmation_delete_previous_histos').on('click', function () {
-        $.ajax({
-          url: "{{ url_for('delete_histos') }}",
-          type: "GET",
-          contentType: 'application/json;charset=UTF-8',
-          data: {
-            'state': 'yes'
-          },
-          dataType: "json",
-          success: function () {
-            $('#modal_confirmation_delete_previous_histos').modal('toggle');
+  <script>
+    $('#confirmation_delete_previous_histos').on('click', function () {
+      $.ajax({
+        url: "{{ url_for('delete_histos') }}",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+          'state': 'yes'
+        },
+        dataType: "json",
+        success: function () {
+          $('#modal_confirmation_delete_previous_histos').modal('toggle');
 
-          }
-        });
-
+        }
       });
-      $('[class*=alert]').delay(2000).fadeOut(400);
+
     });
+
+    $('#confirmation_new_experiment').on('click', function () {
+      $.ajax({
+        url: "{{ url_for('new_experiment') }}",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+          'state': 'yes'
+        },
+        dataType: "json",
+        success: function () {
+          $('#modal_new_experiment').modal('toggle');
+          
+        }
+      });
+
+      window.location.href = "{{ url_for('home') }}";
+
+    });
+
+    $('[class*=alert]').delay(2000).fadeOut(400);
   </script>
 
 

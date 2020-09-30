@@ -165,12 +165,20 @@ def getModules():
     modules.sort()
     return jsonify(modules)
 
+@app.route("/new_experiment", methods=["GET"])
+def new_experiment():
+    #r.flushdb()
+    r5.flushdb()
+    return "true"
+
 
 ## Time_view ###
 @app.route("/delete_histos", methods=["GET"])
 def delete_histos():
     r6.flushdb()
     return "true"
+
+
 
 @app.route("/change_histo", methods = ["GET"])
 def change_histo():
@@ -185,16 +193,23 @@ def change_histo():
 
     return jsonify(newGraph[0])
 
+# def  check_redis_connection():
+#     if not r.ping():
+#         print("\n \n REDIS SERVER IS NOT RUNNING \n \n ")
+#         exit(0)
+#     return redirect(url_for("home"))
+
+
 @app.route("/")
-def load():
-    print("Doing the busy stuff")
-    storeDefaultTagsAndIDs()  # puts the basic tags module and histname
-    return redirect(url_for("home"))
-
-
 @app.route("/home")
 def home():
+    print("Doing the busy stuff")
+
+    storeDefaultTagsAndIDs()  # puts the basic tags module and histname
     return render_template("home.html")
+
+
+
 
 
 @app.route("/monitor", methods=["GET", "POST"])

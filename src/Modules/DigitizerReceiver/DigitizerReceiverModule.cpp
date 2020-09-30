@@ -140,11 +140,25 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   auto cfg_ttt_converter = cfg["ttt_converter"];
   if(cfg_ttt_converter==nullptr){
     INFO("You did not specify the TTT converter, setting it to the LHC 40.08 MHz");
-    cfg_ttt_converter = "40.08";
+    m_ttt_converter = 40.08;
   }
-  m_ttt_converter = std::atof(std::string(cfg_ttt_converter).c_str());  // perhaps there is a better way to do this
-
+  else{
+    m_ttt_converter = (float)cfg_ttt_converter;  // perhaps there is a better way to do this
+  }
   INFO("Setting TLB-Digitizer TTT clock to : "<<m_ttt_converter);
+  
+  // BCID matching parameter performs a software "delay" on the calculated BCID
+  // by delaying the TriggerTimeTag by some fixed amount.  This "delay" can be positive
+  // or negative and is tuned to match the BCID from the TLB
+  auto cfg_bcid_ttt_fix = cfg["bcid_ttt_fix"];
+  if(cfg_ttt_converter==nullptr){
+    INFO("You did not specify the BCID fix, setting it to 0.");
+    m_bcid_ttt_fix = 0;
+  }
+  else{
+    m_bcid_ttt_fix = (float)cfg_bcid_ttt_fix;  // perhaps there is a better way to do this
+  }
+  INFO("Setting Digitizer BCID fix to : "<<m_bcid_ttt_fix);
 
 }
 
@@ -161,22 +175,26 @@ void DigitizerReceiverModule::configure() {
   registerVariable(m_triggers, "TriggeredEvents");
   registerVariable(m_triggers, "TriggeredRate", metrics::RATE);
   
-  registerVariable(m_temp_ch00, "ADC Temperature CH00");
-  registerVariable(m_temp_ch01, "ADC Temperature CH01");
-  registerVariable(m_temp_ch02, "ADC Temperature CH02");
-  registerVariable(m_temp_ch03, "ADC Temperature CH03");
-  registerVariable(m_temp_ch04, "ADC Temperature CH04");
-  registerVariable(m_temp_ch05, "ADC Temperature CH05");
-  registerVariable(m_temp_ch06, "ADC Temperature CH06");
-  registerVariable(m_temp_ch07, "ADC Temperature CH07");
-  registerVariable(m_temp_ch08, "ADC Temperature CH08");
-  registerVariable(m_temp_ch09, "ADC Temperature CH09");
-  registerVariable(m_temp_ch10, "ADC Temperature CH10");
-  registerVariable(m_temp_ch11, "ADC Temperature CH11");
-  registerVariable(m_temp_ch12, "ADC Temperature CH12");
-  registerVariable(m_temp_ch13, "ADC Temperature CH13");
-  registerVariable(m_temp_ch14, "ADC Temperature CH14");
-  registerVariable(m_temp_ch15, "ADC Temperature CH15");
+  registerVariable(m_hw_buffer_space, "BufferSpace");
+  
+  registerVariable(m_hw_buffer_occupancy, "HWBufferOccupancy");
+  
+  registerVariable(m_temp_ch00, "temp_ch00");
+  registerVariable(m_temp_ch01, "temp_ch01");
+  registerVariable(m_temp_ch02, "temp_ch02");
+  registerVariable(m_temp_ch03, "temp_ch03");
+  registerVariable(m_temp_ch04, "temp_ch04");
+  registerVariable(m_temp_ch05, "temp_ch05");
+  registerVariable(m_temp_ch06, "temp_ch06");
+  registerVariable(m_temp_ch07, "temp_ch07");
+  registerVariable(m_temp_ch08, "temp_ch08");
+  registerVariable(m_temp_ch09, "temp_ch09");
+  registerVariable(m_temp_ch10, "temp_ch10");
+  registerVariable(m_temp_ch11, "temp_ch11");
+  registerVariable(m_temp_ch12, "temp_ch12");
+  registerVariable(m_temp_ch13, "temp_ch13");
+  registerVariable(m_temp_ch14, "temp_ch14");
+  registerVariable(m_temp_ch15, "temp_ch15");
   
   // configuration of hardware
   INFO("Configuring ...");  
@@ -246,21 +264,55 @@ void DigitizerReceiverModule::sendECR() {
   m_lock.lock();
   int n_events_present = m_digitizer->DumpEventCount();
   if(n_events_present){
-    DEBUG("Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
-    
-    // clear the monitoring map which will retrieve the info to pass to monitoring metrics
-    m_monitoring.clear();
-    
-    // count triggers sent
-    m_triggers += m_n_events_requested;
-    
-    // request to get a batch of events 
-    // - m_n_events_requested : number of events you should read back
-    // - raw_payload : the data allocation of the software buffer
-    // - software_buffer : the length of that software buffer
-    m_digitizer->sendEventBatch(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_ECRcount, m_ttt_converter, m_n_events_requested);
-    DEBUG("Total nevents sent in running : "<<m_triggers);
+    DEBUG("[sendECR] - Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
+
+      // clear the monitoring map which will retrieve the info to pass to monitoring metrics
+      m_monitoring.clear();
+              
+      // get the data from the board into the software buffer        
+      int nevents_obtained = 0;
+      nevents_obtained = m_digitizer->RetrieveEventBatch(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter);
+
+      // count triggers sent
+      m_triggers += nevents_obtained;
+      DEBUG("Total nevents sent in running : "<<m_triggers);
+
+      // parse the events and decorate them with a FASER header
+      std::vector<EventFragment> fragments;
+      fragments = m_digitizer->ParseEventBatch(m_raw_payload, m_software_buffer, nevents_obtained, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter, m_bcid_ttt_fix);
+      
+      DEBUG("NEventsParsed : "<<fragments.size());
+      
+      // ToDo : write a method to print one full event
+      //if((bool)myConfig["print_event"]){
+      //  if(fragments.size()>=1){
+      //    const EventFragment frag = fragments.at(0);
+      //    DigitizerDataFragment digitizer_data_frag = DigitizerDataFragment(frag.payload<const uint32_t*>(), frag.payload_size());
+      //    std::cout<<"Digitizer data fragment:"<<std::endl;
+      //    std::cout<<digitizer_data_frag<<std::endl;
+      //  }
+      //}
+      
+      // pass the group of events on in faser/daq
+      // NOTE : this should only exist in the DigitizerReceiver module due to access
+      //        of the DAQling methods and such
+      this->PassEventBatch(fragments); // defined in the Digitizer
+      
+      m_lock.unlock();
+      
+      DEBUG("Time read    : "<<m_monitoring["time_read_time"]);
+      DEBUG("Time parse   : "<<m_monitoring["time_parse_time"]);
+      DEBUG("Time header  : "<<m_monitoring["time_header_time"]);
+      DEBUG("Time filler  : "<<m_monitoring["time_filler_time"]);
+      
+      float total_batch = m_monitoring["time_read_time"]+m_monitoring["time_parse_time"]+m_monitoring["time_header_time"]+m_monitoring["time_filler_time"];
+      
+      DEBUG("Parse/Read   : "<<m_monitoring["time_parse_time"]/m_monitoring["time_read_time"]);
+      
+      DEBUG("Total batch  : "<<total_batch);
+      DEBUG("Time looping : "<<m_monitoring["time_looping_time"]<<"   ("<<total_batch/m_monitoring["time_looping_time"]<<")");
   }
+  //release the lock - not after the conditional due to the ECR method
   m_lock.unlock();
   
   // delete the memory that was allocated
@@ -325,21 +377,30 @@ void DigitizerReceiverModule::runner() {
     // polling of the hardware - if any number of events is detected
     // then all events in the buffer are read out
     int n_events_present = m_digitizer->DumpEventCount();
+    
+    // how much space is left in the buffer
+    m_hw_buffer_space = 1024-n_events_present;
+    m_hw_buffer_occupancy = n_events_present;
+    
     if(n_events_present){
-      DEBUG("Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
+      DEBUG("[Running] - Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
       DEBUG("With m_ECRcount : "<<m_ECRcount);
       
       // clear the monitoring map which will retrieve the info to pass to monitoring metrics
       m_monitoring.clear();
               
-      // new method        
       // get the data from the board into the software buffer        
       int nevents_obtained = 0;
-      nevents_obtained = m_digitizer->retrieveEventBatch(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter);
+      nevents_obtained = m_digitizer->RetrieveEventBatch(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter);
+
+      // count triggers sent
+      m_triggers += nevents_obtained;
+      DEBUG("Total nevents sent in running : "<<m_triggers);
 
       // parse the events and decorate them with a FASER header
+      DEBUG("tttConverter : "<<m_ttt_converter);
       std::vector<EventFragment> fragments;
-      fragments = m_digitizer->parseEventBatch(m_raw_payload, m_software_buffer, nevents_obtained, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter);
+      fragments = m_digitizer->ParseEventBatch(m_raw_payload, m_software_buffer, nevents_obtained, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter, m_bcid_ttt_fix);
       
       DEBUG("NEventsParsed : "<<fragments.size());
       
@@ -360,30 +421,32 @@ void DigitizerReceiverModule::runner() {
       
       //release the lock - not after the conditional due to the ECR method
       m_lock.unlock();
-      DEBUG("Total nevents sent in running : "<<m_triggers);
+      
+      DEBUG("Time read    : "<<m_monitoring["time_read_time"]);
+      DEBUG("Time parse   : "<<m_monitoring["time_parse_time"]);
+      DEBUG("Time header  : "<<m_monitoring["time_header_time"]);
+      DEBUG("Time filler  : "<<m_monitoring["time_filler_time"]);
+      
+      float total_batch = m_monitoring["time_read_time"]+m_monitoring["time_parse_time"]+m_monitoring["time_header_time"]+m_monitoring["time_filler_time"];
+      
+      DEBUG("Parse/Read   : "<<m_monitoring["time_parse_time"]/m_monitoring["time_read_time"]);
+      
+      DEBUG("Total batch  : "<<total_batch);
+      DEBUG("Time looping : "<<m_monitoring["time_looping_time"]<<"   ("<<total_batch/m_monitoring["time_looping_time"]<<")");
+    
     }
     else{
       // sleep for 1.5 milliseconds. This time is chosen to ensure that the polling 
       // happens at a rate just above the expected trigger rate in the case of no events
-      DEBUG("No events - sleeping for a short while");
-      
+      //DEBUG("No events - sleeping for a short while");
       //release the lock - not after the conditional due to the ECR method
       m_lock.unlock();
       usleep(100); 
     }
            
-    DEBUG("Time read    : "<<m_monitoring["time_read_time"]);
-    DEBUG("Time parse   : "<<m_monitoring["time_parse_time"]);
-    DEBUG("Time header  : "<<m_monitoring["time_header_time"]);
-    DEBUG("Time filler  : "<<m_monitoring["time_filler_time"]);
+
     
-    float total_batch = m_monitoring["time_read_time"]+m_monitoring["time_parse_time"]+m_monitoring["time_header_time"]+m_monitoring["time_filler_time"];
-    
-    DEBUG("Parse/Read   : "<<m_monitoring["time_parse_time"]/m_monitoring["time_read_time"]);
-    
-    DEBUG("Total batch  : "<<total_batch);
-    DEBUG("Time looping : "<<m_monitoring["time_looping_time"]<<"   ("<<total_batch/m_monitoring["time_looping_time"]<<")");
-    
+
     // monitoring of temperature on ADCs
     std::vector<int> adc_temp = m_digitizer->GetADCTemperature(false);
     if(adc_temp.size()==NCHANNELS){

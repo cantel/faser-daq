@@ -7,7 +7,7 @@
         "host": "localhost",
         "port": 5556,
         "type": "TriggerReceiver",
-        "loglevel": {"core": "INFO", "module": "DEBUG"},
+        "loglevel": {"core": "INFO", "module": "INFO"},
         "settings": {
           "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
           "influxDb_name": "DAQlingMetrics",
@@ -48,7 +48,7 @@
       "host": "localhost",
       "port": 5557,
       "type": "DigitizerReceiver",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "stats_uri": "tcp://localhost:7000",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
@@ -56,7 +56,7 @@
         "host_pc": "192.168.122.2",
         "board_type": "v0",
         "digitizer_hw_address":  "0x04320000",  
-        "buffer": {"custom": true, "length": 630, "n_post_samples": 120},
+        "buffer": {"custom": true, "length": 630, "n_post_samples": 0},
         "trigger_acquisition": {"external": true, "software": false, "internal": false},
         "trigger_software": {"enable": false, "rate": 1},
         "trigger_internal": [{"group" : 0, "enable": 0, "logic": "OR", "threshold_ch0": 100000,   "threshold_ch1": 10000,  "output_width":32},
@@ -90,7 +90,9 @@
         "interface_max_packets": 2,
         "interface_packet_gap": 0,
         "software_buffer": 2000000,
-        "print_event": false
+        "print_event": false,
+        "ttt_converter": 40.08,
+        "bcid_ttt_fix": -36.76
       },
       "connections": {
         "senders": [
@@ -109,7 +111,7 @@
       "host": "localhost",
       "port": 5558,
       "type": "DigitizerMonitor",
-      "loglevel": {"core": "DEBUG", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "stats_uri": "tcp://localhost:7000",
         "fragmentID": 262144,
@@ -130,11 +132,35 @@
       }
     },
     {
+      "name": "eventmonitor01",
+      "host": "localhost",
+      "port": 5601,
+      "type": "EventMonitor",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "stats_uri": "tcp://localhost:7000",
+        "fragmentID": 262144,
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
       "name": "eventbuilder01",
       "host": "localhost",
       "port": 5559,
       "type": "EventBuilderFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "stats_uri": "tcp://localhost:7000",
         "maxPending": 10,
@@ -215,7 +241,7 @@
       "host": "localhost",
       "port": 5560,
       "type": "FileWriterFaser",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "stats_uri": "tcp://localhost:7000",
         "max_filesize": 100000,

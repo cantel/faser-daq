@@ -11,7 +11,8 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-#define NCHANNELS 16
+// only monitoring the first two channels
+#define NCHANNELS 2
 
 DigitizerMonitorModule::DigitizerMonitorModule() { 
   INFO("Instantiating ...");
@@ -84,10 +85,13 @@ void DigitizerMonitorModule::register_hists() {
   // synthesis common for all channels
   int buffer_length = (int)m_config.getConfig()["settings"]["buffer_length"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
-    m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan), 0, buffer_length, buffer_length);
+    m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan), 0, buffer_length, 100);
     m_histogrammanager->registerHistogram("h_avg_ch"+std::to_string(iChan),"Average of Baseline Start : ch"+std::to_string(iChan),0,20000,200);
     m_histogrammanager->registerHistogram("h_rms_ch"+std::to_string(iChan),"RMS of Baseline Start : ch"+std::to_string(iChan),0,1000,100);
   }
+  
+  // for the sample pulses
+  m_pulse_sample_space = std::floor(buffer_length/100);
 
   INFO(" ... done registering histograms ... " );
   return;
@@ -161,6 +165,10 @@ void DigitizerMonitorModule::FillChannelPulse(std::string histogram_name, int ch
 
   m_histogrammanager->reset(histogram_name);
   for(int isamp=0; isamp<(int)m_pmtdataFragment->channel_adc_counts(channel).size(); isamp++){
-    m_histogrammanager->fill(histogram_name,isamp,m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
+    if(isamp%m_pulse_sample_space==0){
+      int ibin = (int)isamp/m_pulse_sample_space;
+      DEBUG("Filling : "<<ibin<<"  "<<m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
+      m_histogrammanager->fill(histogram_name,ibin,m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
+    }
   }
 }

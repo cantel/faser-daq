@@ -167,7 +167,7 @@ def getModules():
 
 @app.route("/new_experiment", methods=["GET"])
 def new_experiment():
-    #r.flushdb()
+    r.flushdb()
     r5.flushdb()
     return "true"
 

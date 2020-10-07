@@ -235,43 +235,49 @@ void TrackerReceiverModule::runner() {
             uint32_t checksum;
             uint32_t L1ID;
             fragment->set_status(0);
-            for (uint32_t frame : event){
-              if (m_ed->IsTrailer(frame, checksum)){
-                if (checksum != m_checksum->ReturnChecksum()){
-                  WARNING("Checksum mismatch for L1ID " << L1ID);                 
-                  //TODO: Set error flag to the event
-                }
-                else {DEBUG("Checksum matches for L1ID " << L1ID);}  
-              }
-              else{
-                if (m_ed->IsHeader(frame, L1ID)){
-                  m_checksum->InitialiseChecksum();
-                }
-                m_checksum->AddData(frame);
-                if(m_ed->HasError(frame, error)){
-                  //TODO If possible specify error
-                  fragment->set_status(EventStatus::UnclassifiedError);
-                  corrupted_fragments += 1; //Monitoring data
-                }
-              }
-            }
             
             if (m_config.getConfig()["loglevel"]["module"] == "DEBUG"){
+              DEBUG("event id: 0x"<< std::hex << fragment->event_id());
+              DEBUG("fragment tag: 0x"<< std::hex << fragment->fragment_tag());
+              DEBUG("source id: 0x"<< std::hex << fragment->source_id());
+              DEBUG("bc id: 0x"<< std::hex << fragment->bc_id());
+              DEBUG("status: 0x"<< std::hex << fragment->status());
+              DEBUG("trigger bits: 0x"<< std::hex << fragment->trigger_bits());
+              DEBUG("size: 0x"<< std::hex << fragment->size());
+              DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
+              DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
+              
+              for (uint32_t frame : event){
+                if (m_ed->IsTrailer(frame, checksum)){
+                  if (checksum != m_checksum->ReturnChecksum()){
+                    WARNING("Checksum mismatch for L1 ID " << L1ID);                 
+                    fragment->set_status(EventStatus::CorruptedFragment);
+                  }
+                  else {
+                    DEBUG("checksum: 0x" << std::hex << checksum);
+                    DEBUG("Checksums match for this event.");
+                  }  
+                }
+                else{
+                  if (m_ed->IsHeader(frame, L1ID)){
+                    m_checksum->InitialiseChecksum();
+                  }
+                  m_checksum->AddData(frame);
+                  if(m_ed->HasError(frame, error)){
+                    //TODO If possible specify error
+                    fragment->set_status(EventStatus::UnclassifiedError);
+                    corrupted_fragments += 1; //Monitoring data
+                  }
+                }
+              }
+
               DEBUG("Data received from TRB: ");
               for(auto word : event){
                 std::bitset<32> y(word);
                 if(m_ed->HasError(word, error)){DEBUG("               " << y << " error word");}
                 else{DEBUG("               " << y);}
               }
-              DEBUG("event id: 0x"<< fragment->event_id());
-              DEBUG("fragment tag: 0x"<< fragment->fragment_tag());
-              DEBUG("source id: 0x"<< fragment->source_id());
-              DEBUG("bc id: 0x"<< fragment->bc_id());
-              DEBUG("status: 0x"<< fragment->status());
-              DEBUG("trigger bits: 0x"<< fragment->trigger_bits());
-              DEBUG("size: 0x"<< fragment->size());
-              DEBUG("payload size: 0x"<< fragment->payload_size());
-              DEBUG("timestamp: 0x"<< fragment->timestamp());
+
               DEBUG("Raw data sent further: ");
               const DAQFormats::byteVector *data = fragment->raw();
               for (int i = 0; i <  data->size(); i++){

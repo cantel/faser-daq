@@ -25,6 +25,7 @@
 //#include "Commons/RawExampleFormat.hpp"
 #include "TrackerReadout/ConfigurationHandling.h"
 #include "TrackerReadout/TRBEventDecoder.h"
+#include "TrackerReadout/FletcherChecksum.h"
 #include <string>
 #include <iostream>
 #include <bitset>
@@ -44,6 +45,7 @@ class TrackerReceiverModule : public FaserProcess {
   
   std::unique_ptr<FASER::TRBAccess> m_trb;
   std::unique_ptr<FASER::TRBEventDecoder> m_ed;
+  std::unique_ptr<FASER::FletcherChecksum> m_checksum;
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;
   bool m_triggerEnabled;

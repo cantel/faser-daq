@@ -33,6 +33,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
      
     m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
+    m_checksum = std::make_unique<FASER::FletcherChecksum>();
 
     if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
       m_trb->SetDebug(true);
@@ -203,6 +204,7 @@ void TrackerReceiverModule::runner() {
     }
       else{
         for(std::vector<uint32_t> event : vector_of_raw_events){
+          DEBUG("-------------- printing new event ---------------- ");
           int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
           event_size_bytes = total_size; //Monitoring data
 
@@ -230,17 +232,31 @@ void TrackerReceiverModule::runner() {
                                                 local_event_id, local_bc_id, event.data(), total_size));
             
             uint16_t error;
+            uint32_t checksum;
+            uint32_t L1ID;
             fragment->set_status(0);
             for (uint32_t frame : event){
-              if(m_ed->HasError(frame, error)){
-                //TODO If possible specify error
-                fragment->set_status(EventStatus::UnclassifiedError);
-                corrupted_fragments += 1; //Monitoring data
+              if (m_ed->IsTrailer(frame, checksum)){
+                if (checksum != m_checksum->ReturnChecksum()){
+                  WARNING("Checksum mismatch for L1ID " << L1ID);                 
+                  //TODO: Set error flag to the event
+                }
+                else {DEBUG("Checksum matches for L1ID " << L1ID);}  
+              }
+              else{
+                if (m_ed->IsHeader(frame, L1ID)){
+                  m_checksum->InitialiseChecksum();
+                }
+                m_checksum->AddData(frame);
+                if(m_ed->HasError(frame, error)){
+                  //TODO If possible specify error
+                  fragment->set_status(EventStatus::UnclassifiedError);
+                  corrupted_fragments += 1; //Monitoring data
+                }
               }
             }
             
             if (m_config.getConfig()["loglevel"]["module"] == "DEBUG"){
-              DEBUG("-------------- printing new event ---------------- ");
               DEBUG("Data received from TRB: ");
               for(auto word : event){
                 std::bitset<32> y(word);
@@ -257,17 +273,18 @@ void TrackerReceiverModule::runner() {
               DEBUG("payload size: 0x"<< fragment->payload_size());
               DEBUG("timestamp: 0x"<< fragment->timestamp());
               DEBUG("Raw data sent further: ");
-              auto data = fragment->raw();
+              const DAQFormats::byteVector *data = fragment->raw();
               for (int i = 0; i <  data->size(); i++){
                   std::bitset<8> y(data->at(i));
                   DEBUG("               " << y);
               }
+              delete data;
             }
             else{
               INFO("event id: 0x"<< fragment->event_id());
             }
 
-            // place the raw binary event fragment on the output porti
+            // place the raw binary event fragment on the output port
             std::unique_ptr<const byteVector> bytestream(fragment->raw());
             daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
             m_connections.put(0, binData);

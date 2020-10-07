@@ -8,6 +8,8 @@ historyLength=9                         # this should be configurable
 
 r = redis.Redis(host='localhost', port=6379, db=0,
                 charset="utf-8", decode_responses=True)
+r1 = redis.Redis(host='localhost', port=6379, db=1,
+                charset="utf-8", decode_responses=True)
 
 def metricsHandler(stopEvent,logger):
     context = zmq.Context()
@@ -24,7 +26,10 @@ def metricsHandler(stopEvent,logger):
             source,rest=data.decode().split("-",1)
             name,value=rest.split(': ')
             val=str(time.time())+":"+value
-            r.hset(source,name,val)
+            if name.startswith("h_"): # FIXME Maybe can think of better way of identifying histograms
+              r1.hset(source,name,val)
+            else:
+              r.hset(source,name,val)
             if "Rate" in name: # this should be configurable
                 metric="History:"+source+"_"+name
                 r.lpush(metric,val)

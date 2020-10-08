@@ -66,6 +66,9 @@ void TrackerReceiverModule::configure() {
   registerVariable(event_size_bytes, "event_size_bytes");
   registerVariable(bc_id, "bc_id");
   registerVariable(corrupted_fragments, "corrupted_fragments");
+  registerVariable(checksum_mismatches, "checksum_mismatches");
+  registerVariable(checksum_mismatches_rate, "checksum_mismatches_rate");
+  registerVariable(number_of_decoded_events, "number_of_decoded_events");
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -227,7 +230,6 @@ void TrackerReceiverModule::runner() {
                 m_status=STATUS_ERROR;
             }
 
-
             std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                                 local_event_id, local_bc_id, event.data(), total_size));
             
@@ -248,10 +250,15 @@ void TrackerReceiverModule::runner() {
             if (decoded_event.size() != 0){
               if (decoded_event[0]->m_IsChecksumValid == true){
                 DEBUG("Checksums match for this event.");
+                number_of_decoded_events += 1; //Monitoring data
+                checksum_mismatches_rate = checksum_mismatches/number_of_decoded_events; //Monitoring data
               }
               else { 
                 WARNING("Checksum mismatch.");
                 fragment->set_status(EventStatus::CorruptedFragment);
+                checksum_mismatches += 1; //Monitoring data
+                number_of_decoded_events += 1; //Monitoring data
+                checksum_mismatches_rate = checksum_mismatches/number_of_decoded_events; //Monitoring data
               }         
             }
   

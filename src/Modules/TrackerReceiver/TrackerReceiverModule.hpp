@@ -54,4 +54,7 @@ class TrackerReceiverModule : public FaserProcess {
   std::atomic<int> event_id;
   std::atomic<int> bc_id;
   std::atomic<int> corrupted_fragments;
+  std::atomic<int> checksum_mismatches;
+  std::atomic<float> checksum_mismatches_rate;
+  std::atomic<int> number_of_decoded_events;
 };

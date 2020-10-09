@@ -7,14 +7,13 @@ from flask import url_for, redirect, request, Response, jsonify
 from flaskDashboard import app
 import numpy as np
 import atexit
-
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
 INTERVAL_TASK_ID = "interval-task-id"
 
 r = redis.Redis(
-    host="localhost", port=6379, db=0, charset="utf-8", decode_responses=True
+    host="localhost", port=6379, db=0, charset="utf-8", decode_responses=True 
 )
 r5 = redis.Redis(
     host="localhost", port=6379, db=5, charset="utf-8", decode_responses=True
@@ -23,8 +22,8 @@ r5 = redis.Redis(
 r6 = redis.Redis(
     host="localhost", port=6379, db=6, charset="utf-8", decode_responses=True
 )
-
 def recent_histograms_save():
+
     with app.app_context():
         IDs = getAllIDs().get_json()
     for ID in IDs:
@@ -85,7 +84,6 @@ def getTagsByID(ids):
         packet[ID].sort()
         packet[ID].pop(packet[ID].index(module))
         packet[ID].pop(packet[ID].index(histname))
-
     return packet
 
 @app.route("/storeDefaultTagsAndIDs", methods=["GET"])
@@ -98,7 +96,6 @@ def storeDefaultTagsAndIDs():
         r5.sadd(f"id:{ID}", module, histname)
     return "true"
 
-
 @app.route("/addTag", methods=["GET"])
 def addTag():
     exists = "false"
@@ -110,7 +107,6 @@ def addTag():
     r5.sadd(f"tag:{ tag }", ID)
     return exists
 
-
 @app.route("/removeTag", methods=["GET"])
 def removeTag():
     exists = "true"
@@ -121,7 +117,6 @@ def removeTag():
     if not r5.exists(f"tag:{tag}"):
         exists = "false"
     return exists
-
 
 @app.route("/renameTag", methods=["GET"])
 def renameTag():
@@ -137,7 +132,6 @@ def renameTag():
     r5.sadd(f"tag:{ newname }", ID)
     if not r5.exists(f"tag:{oldname}"):
         oldtagexists = "false"
-
     packet = dict(oldtagexists=oldtagexists, newtagexists=newtagexists)
     return jsonify(packet)
 
@@ -156,7 +150,6 @@ def getAllIDs():
     ids.sort()
     return jsonify(ids)
 
-
 @app.route("/getModules", methods=["GET"])
 def getModules():
     modules = r.keys("*monitor*")
@@ -171,14 +164,11 @@ def new_experiment():
     r5.flushdb()
     return "true"
 
-
 ## Time_view ###
 @app.route("/delete_histos", methods=["GET"])
 def delete_histos():
     r6.flushdb()
     return "true"
-
-
 
 @app.route("/change_histo", methods = ["GET"])
 def change_histo():
@@ -188,29 +178,15 @@ def change_histo():
     if "old" in timestamp:
         newGraph = r6.zrangebyscore(f"historic:{ID}",(timestamp.replace("old:","")),(timestamp.replace("old:","")))
     else:
-
         newGraph = r6.zrangebyscore(f"{ID}",timestamp, (timestamp))
-
     return jsonify(newGraph[0])
-
-# def  check_redis_connection():
-#     if not r.ping():
-#         print("\n \n REDIS SERVER IS NOT RUNNING \n \n ")
-#         exit(0)
-#     return redirect(url_for("home"))
-
 
 @app.route("/")
 @app.route("/home")
 def home():
     print("Doing the busy stuff")
-
     storeDefaultTagsAndIDs()  # puts the basic tags module and histname
     return render_template("home.html")
-
-
-
-
 
 @app.route("/monitor", methods=["GET", "POST"])
 def monitor():
@@ -218,6 +194,7 @@ def monitor():
         if request.args.get("selected_module"):
             selected_module = request.args.get("selected_module")
             ids = r5.smembers(f"tag:{selected_module}")
+            ids = list(ids)
             tagsbyID = getTagsByID(ids)
             return render_template(
                 "monitor.html",
@@ -229,9 +206,12 @@ def monitor():
             selected_tags = request.args.getlist("selected_tags")
             selected_tags = [f"tag:{s}" for s in selected_tags]
             ids = r5.sunion(selected_tags)
+            ids = list(ids)
             tagsbyID = getTagsByID(ids)
             return render_template("monitor.html", tagsByID=tagsbyID, ids=ids)
 
+        else: 
+            return render_template("home.html")
 
 @app.route("/time_view/<string:ID>")
 def timeView(ID):
@@ -251,11 +231,9 @@ def timeView(ID):
         ID = ID
     )
 
-
 @app.route("/single_view/<string:ID>")
 def single_view(ID):
     return render_template("single_view.html", ID = ID)
-
 
 @app.route("/download_tags_json")
 def download_tags_json():
@@ -289,25 +267,19 @@ def load_tags_from_file():
                 flash("No chosen file", category =  "danger")
     return redirect(url_for("home"))
 
-
-@app.route("/source/<string:ID>")
-def lastHistogram(ID):
-    def getHistogram():
-        while True:
-            packet = {}
-            source, histname = ID.split("-")
-            histobj = r.hget(source, f"h_{histname}")
-            if histobj is not None:
-                data, layout, timestamp = convert_to_plotly(histobj)
-                fig = dict(data=data, layout=layout, config={"responsive": True})
-                packet = {
-                    "figure": fig,
-                    "time": float(timestamp)}
-            yield f"data:{json.dumps(packet)}\n\n"
-
-            time.sleep(3)
-
-    return Response(getHistogram(), mimetype="text/event-stream")
+@app.route("/source",methods=["GET"])
+def lastHistogram():
+    ID = request.args.get("ID")
+    packet = {}
+    source, histname = ID.split("-")
+    histobj = r.hget(source, f"h_{histname}")
+    if histobj is not None:
+        data, layout, timestamp = convert_to_plotly(histobj)
+        fig = dict(data=data, layout=layout, config={"responsive": True})
+        packet = {
+                "figure": fig,
+                "time": float(timestamp)}
+    return jsonify(packet)
 
 
 def convert_to_plotly(histobj):

@@ -1,5 +1,4 @@
-
-<html lang= "en">
+<html lang="en">
 
 <head lang="en">
   <meta charset="utf-8">
@@ -16,17 +15,12 @@
     crossorigin="anonymous"></script>
 
 
-
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
     integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery.json-tag-editor.css') }}">
-
-
-
-
 </head>
 
 <body>
@@ -50,13 +44,10 @@
             <div class="dropdown-divider"></div>
             <a id="new_experiment" class="dropdown-item" data-toggle="modal" data-target="#modal_new_experiment"
               href="#">New experiment</a>
-              
+
             <a id="delete_previous_histos" class="dropdown-item" data-toggle="modal"
               data-target="#modal_confirmation_delete_previous_histos" href="#">Delete all previous
               histos</a>
-
-
-
           </div>
         </span>
       </span>
@@ -128,8 +119,6 @@
 
   {% include 'layout_modals.html' %}
 
-
-
   <script>
     $("#tags_selection").select2({ placeholder: "Select tags" });
   </script>
@@ -163,7 +152,7 @@
         dataType: "json",
         success: function () {
           $('#modal_new_experiment').modal('toggle');
-          
+
         }
       });
 

@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
+
 <div class="container-fluid" id="graphs-top_container">
   <div class="row">
     {% for ID in ids %}
@@ -28,7 +29,6 @@
     <div class="w-100"></div>
     {% endif %}
     {% endfor %}
-
   </div>
 </div>
 
@@ -121,22 +121,52 @@
 
 {% if ids %}
 <script>
+  var updateTime = 3000;
+  $(document).ready(function () {
   {% for ID in ids %}
-  var source = new EventSource('/source/{{ ID | safe }}');
-  source.onmessage = function (event) {
-    var data = event.data;
-    var datapacket = JSON.parse(data);
-    Plotly.react("graph_{{ ID }}", datapacket.figure);
-    var time = moment(datapacket.time * 1000).format('h:mm:ss a (MM/DD/YY)');
-    $('#updatetime_{{ ID }}').text("Updated at " + time);
-  }
+  $.ajax({
+    url: "{{ url_for('lastHistogram') }}",
+    type: "GET",
+    contentType: 'application/json;charset=UTF-8',
+    data: {
+      'ID': "{{ ID }}"
+    },
+    dataType: "json",
+    success: function (data) {
+      Plotly.react("graph_{{ ID }}", data.figure);
+      var time = moment(data.time * 1000).format('h:mm:ss a (MM/DD/YY)');
+      $('#updatetime_{{ ID }}').text("Updated at " + time);
+    }
+  });
   {% endfor %}
+
+  window.setInterval(function () {
+
+    {% for ID in ids %}
+    $.ajax({
+      url: "{{ url_for('lastHistogram') }}",
+      type: "GET",
+      contentType: 'application/json;charset=UTF-8',
+      data: {
+        'ID': "{{ ID }}"
+      },
+      dataType: "json",
+      success: function (data) {
+        Plotly.react("graph_{{ ID }}", data.figure);
+        var time = moment(data.time * 1000).format('h:mm:ss a (MM/DD/YY)');
+        $('#updatetime_{{ ID }}').text("Updated at " + time);
+      }
+    });
+    {% endfor %}
+    console.log("Hello")
+    }, 3000);
+  });
 </script>
 
 {% endif %}
 
 {% if not ids %}
-<h3 class = "my-4" style = "text-align: center;"> No histograms to display! </h3>
+<h3 class="my-4" style="text-align: center;"> No histograms to display! </h3>
 {% endif %}
 
 {% endblock %}

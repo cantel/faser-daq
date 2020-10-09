@@ -37,7 +37,7 @@ public:
 
   void stop();
   
-  void registerHistogram( std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, Axis::Range extendable, unsigned int delta_t = 60) {
+  void registerHistogram( std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, Axis::Range extendable, unsigned int delta_t = 5) {
     INFO("Registering histogram "<<name);
 
     auto interval_in_s = m_interval/1000.;
@@ -57,17 +57,17 @@ public:
     return;
   }
 
-  void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, unsigned int delta_t = 60 ) {
+  void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, unsigned int delta_t = 5 ) {
     registerHistogram( name, xlabel, "counts", xmin, xmax, xbins, Axis::Range::NONEXTENDABLE, delta_t); 
     return;
   }
 
-  void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, Axis::Range extendable, unsigned int delta_t = 60 ) {
+  void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, Axis::Range extendable, unsigned int delta_t = 5 ) {
     registerHistogram( name, xlabel, "counts", xmin, xmax, xbins, extendable, delta_t); 
     return;
   }
 
-  void registerHistogram( std::string name, std::string xlabel, std::string ylabel, std::vector<std::string> categories, unsigned int delta_t = 60 ){
+  void registerHistogram( std::string name, std::string xlabel, std::string ylabel, std::vector<std::string> categories, unsigned int delta_t = 5 ){
     INFO("Registering histogram "<<name);
 
     HistBase * hist = new CategoryHist(name, xlabel, ylabel, categories, delta_t);
@@ -76,12 +76,12 @@ public:
     return;
   }
 
-  void registerHistogram( std::string name, std::string xlabel, std::vector<std::string> categories, unsigned int delta_t = 60 ){
+  void registerHistogram( std::string name, std::string xlabel, std::vector<std::string> categories, unsigned int delta_t = 5 ){
     registerHistogram( name, xlabel, "counts", categories, delta_t);
     return;
   }
 
-  void register2DHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, std::string ylabel, float ymin, float ymax, unsigned int ybins, unsigned int delta_t = 60. ) {
+  void register2DHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, std::string ylabel, float ymin, float ymax, unsigned int ybins, unsigned int delta_t = 5 ) {
     INFO("Registering histogram "<<name);
     
     auto interval_in_s = m_interval/1000.;

@@ -34,7 +34,7 @@ def recent_histograms_save():
         hist = dict(timestamp=timestamp, figure=figure)
         entry = {json.dumps(hist): float(timestamp)}
         r6.zadd(ID, entry)
-        if r6.zcard(ID) >= 6:  # Should be 31
+        if r6.zcard(ID) >= 31:
             r6.zremrangebyrank(ID, 0, 0)
 
 
@@ -52,7 +52,6 @@ def historic_histograms_save():
 
 
 scheduler = BackgroundScheduler()
-
 scheduler.add_job(func=recent_histograms_save, trigger="interval", seconds=60)
 scheduler.add_job(func=historic_histograms_save, trigger="interval", seconds=1800)
 scheduler.start()

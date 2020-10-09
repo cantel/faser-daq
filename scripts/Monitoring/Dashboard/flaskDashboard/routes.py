@@ -13,7 +13,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 INTERVAL_TASK_ID = "interval-task-id"
 
 r = redis.Redis(
-    host="localhost", port=6379, db=0, charset="utf-8", decode_responses=True 
+    host="localhost", port=6379, db=1, charset="utf-8", decode_responses=True 
 )
 r5 = redis.Redis(
     host="localhost", port=6379, db=5, charset="utf-8", decode_responses=True

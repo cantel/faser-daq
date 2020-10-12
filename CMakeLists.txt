@@ -36,7 +36,8 @@ add_subdirectory(faser-common)
 add_subdirectory(gpiodrivers)
 add_subdirectory(digitizer-readout)
 
-# Disable some CXX FLAGS for convenience
+# Disable some CXX FLAGS for convenience  (if needed)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-zero-as-null-pointer-constant -Wno-undef -Wno-sign-conversion -Wno-old-style-cast -Wno-strict-overflow")
+
 
 add_subdirectory(src/Modules)

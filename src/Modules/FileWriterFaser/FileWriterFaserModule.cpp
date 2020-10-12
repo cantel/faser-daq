@@ -218,7 +218,7 @@ void FileWriterFaserModule::runner() {
 
       while (m_run) {
         daqutils::Binary pl;
-        while (!m_connections.get(chid, std::ref(pl)) && m_run) {
+        while (!m_connections.receive(chid, std::ref(pl)) && m_run) {
           if (m_statistics) {
             m_channelMetrics.at(chid).payload_queue_size = pq.sizeGuess();
           }

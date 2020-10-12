@@ -190,7 +190,7 @@ void TriggerReceiverModule::runner() {
         std::unique_ptr<const byteVector> bytestream(fragment->raw());
 
         daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
-        m_connections.put(0,binData); // place the raw binary event fragment on the output port
+        m_connections.send(0,binData); // place the raw binary event fragment on the output port
       }
     } 
   }

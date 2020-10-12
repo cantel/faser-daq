@@ -19,7 +19,7 @@ EventBuilderFaserModule::EventBuilderFaserModule() {
   m_maxPending = cfg.value("maxPending",10);
   m_timeout = 1000*cfg.value("timeout_ms",1000);
 
-  m_numChannels=m_config.getConnections()["receivers"].size();
+  m_numChannels=m_config.getNumReceiverConnections();
 
 }
 
@@ -65,11 +65,11 @@ void EventBuilderFaserModule::stop() {
 
 
 bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,EventFull *event) {
-  int channel=event_tag+100; 
+  int channel=event_tag; 
   INFO("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
   daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
-  m_connections.put(channel,binData);
+  m_connections.send(channel,binData);
   delete bytestream;
   return true;
 }
@@ -139,7 +139,7 @@ void EventBuilderFaserModule::runner() {
 
     noData=true;
     for(unsigned int channel=0;channel<m_numChannels;channel++) {
-      if (m_connections.get(channel, blob)) {
+      if (m_connections.receive(channel, blob)) {
 	noData=false;
 	EventFragment* fragment;
 	try {

@@ -55,7 +55,7 @@ It then allows to control the components via standard commands such as `start` (
     stop
     down
 
-An example configuration (`demo.json`) and schema (`config-schema.json`) can be found in `daqling/configs/`. It is necessary to copy these files to the `configs/` folder and adapt them to describe the desired configuration.
+An example configuration (`demo.json`) and schema (`schemas/validation-schema.json`) can be found in `daqling/configs/`. It is necessary to copy these files to the `configs/` folder and adapt them to describe the desired configuration.
 
 `daqpy -h` shows the help menu.
 

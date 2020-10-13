@@ -10,7 +10,7 @@
 <button id = "previous" class= "btn btn-secondary"> < </button>
   <select id="timestamps">
     {% if timestamps %}
-    {% for timestamp in timestamps %}
+    {% for timestamp in timestamps | reverse %}
     <option value="{{ timestamp }}"> {{ timestamp | ctime }} </option>
     {% endfor %}
     {% for historic_timestamp in historic_timestamps | reverse %}
@@ -83,7 +83,7 @@
 </script>
 {% endif %}
 
-{% if not historic_timestamps %}
+{% if not timestamps %}
 <p> No Previous histograms</p>
 {% endif %}
 

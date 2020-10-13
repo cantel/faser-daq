@@ -23,7 +23,6 @@ r6 = redis.Redis(
     host="localhost", port=6379, db=6, charset="utf-8", decode_responses=True
 )
 def recent_histograms_save():
-
     with app.app_context():
         IDs = getAllIDs().get_json()
     for ID in IDs:

@@ -28,14 +28,14 @@ def recent_histograms_save():
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
-        data, layout, timestamp = convert_to_plotly(histobj)
-        figure = dict(data=data, layout=layout)
-        hist = dict(timestamp=timestamp, figure=figure)
-        entry = {json.dumps(hist): float(timestamp)}
-        r6.zadd(ID, entry)
-        if r6.zcard(ID) >= 31:
-            r6.zremrangebyrank(ID, 0, 0)
-
+        if histobj !=None:
+            data, layout, timestamp = convert_to_plotly(histobj)
+            figure = dict(data=data, layout=layout)
+            hist = dict(timestamp=timestamp, figure=figure)
+            entry = {json.dumps(hist): float(timestamp)}
+            r6.zadd(ID, entry)
+            if r6.zcard(ID) >= 31:
+                r6.zremrangebyrank(ID, 0, 0)
 
 def historic_histograms_save():
     with app.app_context():
@@ -43,11 +43,12 @@ def historic_histograms_save():
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
-        data, layout, timestamp = convert_to_plotly(histobj)
-        figure = dict(data=data, layout=layout)
-        hist = dict(timestamp=timestamp, figure=figure)
-        entry = {json.dumps(hist): float(timestamp)}
-        r6.zadd(f"historic:{ID}", entry)
+        if histobj !=None:
+            data, layout, timestamp = convert_to_plotly(histobj)
+            figure = dict(data=data, layout=layout)
+            hist = dict(timestamp=timestamp, figure=figure)
+            entry = {json.dumps(hist): float(timestamp)}
+            r6.zadd(f"historic:{ID}", entry)
 
 
 scheduler = BackgroundScheduler()

@@ -42,12 +42,14 @@
               href="#">Upload tags</a>
 
             <div class="dropdown-divider"></div>
-            <a id="new_experiment" class="dropdown-item" data-toggle="modal" data-target="#modal_new_experiment"
-              href="#">New experiment</a>
+   
 
+            <a id="flush_current_histograms" class="dropdown-item" data-toggle="modal" data-target="#modal_flush_current_histograms"
+              href="#" style = "color: red;">Delete current histograms</a>
+            <a id="flush_current_tags" class="dropdown-item" data-toggle="modal" data-target="#modal_flush_current_tags"
+              href="#" style = "color: red;">Delete current tags</a>
             <a id="delete_previous_histos" class="dropdown-item" data-toggle="modal"
-              data-target="#modal_confirmation_delete_previous_histos" href="#">Delete all previous
-              histos</a>
+              data-target="#modal_confirmation_delete_previous_histos" href="#" style = "color: red;">Delete previous histograms</a>
           </div>
         </span>
       </span>
@@ -141,9 +143,9 @@
 
     });
 
-    $('#confirmation_new_experiment').on('click', function () {
+    $('#confirmation_flush_current_histograms').on('click', function () {
       $.ajax({
-        url: "{{ url_for('new_experiment') }}",
+        url: "{{ url_for('flush_current_histograms') }}",
         type: "GET",
         contentType: 'application/json;charset=UTF-8',
         data: {
@@ -151,7 +153,7 @@
         },
         dataType: "json",
         success: function () {
-          $('#modal_new_experiment').modal('toggle');
+          $('#modal_flush_current_histograms').modal('toggle');
 
         }
       });
@@ -159,6 +161,26 @@
       window.location.href = "{{ url_for('home') }}";
 
     });
+
+    $('#confirmation_flush_current_tags').on('click', function () {
+      $.ajax({
+        url: "{{ url_for('flush_tags') }}",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+          'state': 'yes'
+        },
+        dataType: "json",
+        success: function () {
+          $('#modal_flush_current_tags').modal('toggle');
+
+        }
+      });
+
+      window.location.href = "{{ url_for('home') }}";
+
+    });
+
 
     $('[class*=alert]').delay(2000).fadeOut(400);
   </script>

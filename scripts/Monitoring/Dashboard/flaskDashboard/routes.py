@@ -157,10 +157,14 @@ def getModules():
     modules.sort()
     return jsonify(modules)
 
-@app.route("/new_experiment", methods=["GET"])
-def new_experiment():
-    r.flushdb()
+@app.route("/flush_tags", methods=["GET"])
+def flush_tags():
     r5.flushdb()
+    return "true"
+
+@app.route("/flush_current_histograms", methods=["GET"])
+def flush_current_histograms():
+    r.flushdb()
     return "true"
 
 ## Time_view ###

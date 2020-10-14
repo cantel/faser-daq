@@ -56,14 +56,14 @@
           success: function (data) {
             if (!data) {
               $("#tags_selection").append(new Option(val, val));
-              console.log("Le tag " + val + " a été ajouté dans la liste déroulante ");
+              //console.log("Le tag " + val + " a été ajouté dans la liste déroulante ");
             }
           }
         });
       }
 
       else {
-        console.log("Le tag a été changé")
+        //console.log("Le tag a été changé")
         $.ajax({
           url: "{{ url_for('renameTag') }}",
           type: "GET",
@@ -74,30 +74,30 @@
           dataType: "json",
           success: function (data) {
 
-            console.log(data)
+            
 
             if (data.oldtagexists === "false") {
 
               $("#tags_selection option[value=" + tag + "]").remove();
-              console.log("Le tag" + tag + "a été enlevé de la liste déroulante")
+              //console.log("Le tag" + tag + "a été enlevé de la liste déroulante")
 
 
             }
             if (data.newtagexists === "false") {
               $("#tags_selection").append(new Option(val, val));
-              console.log("Le tag " + val + " a été ajouté dans la liste déroulante ");
+              //console.log("Le tag " + val + " a été ajouté dans la liste déroulante ");
             }
 
           },
           error: function () {
-            console.log("Erreur")
+            //console.log("Erreur")
           }
         });
 
       }
     },
     beforeTagDelete: function (field, editor, tags, val) {
-      console.log("Le tag " + val + " a été supprimé ");
+      //console.log("Le tag " + val + " a été supprimé ");
       $.ajax({
         url: "{{ url_for('removeTag') }}",
         type: "GET",
@@ -109,7 +109,7 @@
         success: function (data) {
           if (!data) {
             $("#tags_selection option[value=" + val + "]").remove();
-            console.log("Le tag a été enlevé de la liste déroulante")
+            //console.log("Le tag a été enlevé de la liste déroulante")
           }
         }
       });

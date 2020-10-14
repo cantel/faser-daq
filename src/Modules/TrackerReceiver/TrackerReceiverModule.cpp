@@ -33,9 +33,12 @@ TrackerReceiverModule::TrackerReceiverModule() {
      
     m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
-    m_checksum = std::make_unique<FASER::FletcherChecksum>();
+    
+    if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") { 
+      m_debug = true;
+    }
 
-    if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") {  
+    if (m_debug) {  
       m_trb->SetDebug(true);
     }
     else {
@@ -235,20 +238,9 @@ void TrackerReceiverModule::runner() {
             
             uint16_t error;
             fragment->set_status(0);
-            
-            if (m_config.getConfig()["loglevel"]["module"] == "DEBUG"){
-              DEBUG("event id: 0x"<< std::hex << fragment->event_id());
-              DEBUG("fragment tag: 0x"<< std::hex << fragment->fragment_tag());
-              DEBUG("source id: 0x"<< std::hex << fragment->source_id());
-              DEBUG("bc id: 0x"<< std::hex << fragment->bc_id());
-              DEBUG("status: 0x"<< std::hex << fragment->status());
-              DEBUG("trigger bits: 0x"<< std::hex << fragment->trigger_bits());
-              DEBUG("size: 0x"<< std::hex << fragment->size());
-              DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
-              DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
-            
+   
             if (decoded_event.size() != 0){
-              if (decoded_event[0]->m_IsChecksumValid == true){
+              if (decoded_event[0]->GetIsChecksumValid() == true){ 
                 DEBUG("Checksums match for this event.");
                 number_of_decoded_events += 1; //Monitoring data
                 checksum_mismatches_rate = checksum_mismatches/number_of_decoded_events; //Monitoring data
@@ -261,7 +253,18 @@ void TrackerReceiverModule::runner() {
                 checksum_mismatches_rate = checksum_mismatches/number_of_decoded_events; //Monitoring data
               }         
             }
-  
+
+            if (m_debug){
+              DEBUG("event id: 0x"<< std::hex << fragment->event_id());
+              DEBUG("fragment tag: 0x"<< std::hex << fragment->fragment_tag());
+              DEBUG("source id: 0x"<< std::hex << fragment->source_id());
+              DEBUG("bc id: 0x"<< std::hex << fragment->bc_id());
+              DEBUG("status: 0x"<< std::hex << fragment->status());
+              DEBUG("trigger bits: 0x"<< std::hex << fragment->trigger_bits());
+              DEBUG("size: 0x"<< std::hex << fragment->size());
+              DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
+              DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
+             
             for (uint32_t frame : event){
               if(m_ed->HasError(frame, error)){
                 //TODO If possible specify error

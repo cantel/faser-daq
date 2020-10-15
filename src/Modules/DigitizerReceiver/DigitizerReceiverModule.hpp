@@ -102,6 +102,12 @@ class DigitizerReceiverModule : public FaserProcess {
   
   std::atomic<int> m_hw_buffer_space;
   std::atomic<int> m_hw_buffer_occupancy;
+  
+  std::atomic<float> m_time_read;
+  std::atomic<float> m_time_parse;
+  std::atomic<float> m_time_overhead;
+  
+  
 
   // for SW trigger sending
   int m_sw_count;

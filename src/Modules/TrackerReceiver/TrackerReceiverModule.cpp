@@ -285,7 +285,7 @@ void TrackerReceiverModule::stop() {
 /****************************************  
  *        Disable Trigger
  ****************************************/
-void TrackerReceiverModule::disableTrigger(const std::string &arg) {
+void TrackerReceiverModule::disableTrigger(const std::string &) {
   //m_trb->StopReadout();
   m_triggerEnabled = false;
   INFO("TRB --> disable trigger.");
@@ -295,7 +295,7 @@ void TrackerReceiverModule::disableTrigger(const std::string &arg) {
 /****************************************  
  *        Enable Trigger
  ****************************************/
-void TrackerReceiverModule::enableTrigger(const std::string &arg) {
+void TrackerReceiverModule::enableTrigger(const std::string &) {
   //m_trb->StartReadout();
   m_triggerEnabled = true; 
   INFO("TRB --> enable trigger.");
@@ -405,7 +405,7 @@ void TrackerReceiverModule::runner() {
 
               DEBUG("Raw data sent further: ");
               const DAQFormats::byteVector *data = fragment->raw();
-              for (int i = 0; i <  data->size(); i++){
+              for (unsigned i = 0; i <  (unsigned)data->size(); i++){
                   std::bitset<8> y(data->at(i));
                   DEBUG("               " << y);
               }

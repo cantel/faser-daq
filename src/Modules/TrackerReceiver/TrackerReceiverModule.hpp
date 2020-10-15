@@ -45,12 +45,21 @@ class TrackerReceiverModule : public FaserProcess {
   std::unique_ptr<FASER::TRBAccess> m_trb;
   std::unique_ptr<FASER::TRBEventDecoder> m_ed;
   std::unique_ptr<FASER::FletcherChecksum> m_checksum;
+  static const uint8_t m_finePhaseDelay_Led = 55;
+  uint8_t m_finePhaseDelay_Clk;
+  unsigned int m_userBoardID;
+  std::string m_SCIP;
+  std::string m_DAQIP;
+  bool m_extClkSelect;
+  FASER::TRBAccess::ABCD_ReadoutMode m_ABCD_ReadoutMode;
+  bool m_configureModules;
+  bool m_RxTimeoutDisable;
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;
   bool m_triggerEnabled;
 
   std::atomic<int> event_size_bytes;
-  std::atomic<int> event_id;
+  std::atomic<int> m_physicsEventCount;
   std::atomic<int> bc_id;
   std::atomic<int> corrupted_fragments;
   std::atomic<int> checksum_mismatches;

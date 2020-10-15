@@ -47,10 +47,17 @@
           "propertyOrder": 1,
           "default": "faser-vme-controller-00.cern.ch"
         },
+        "board_type": {
+          "type": "string",
+          "title": "Digitizer HW Type",
+          "description": "This validates the HW layout and firmware versions against hardcoded expectations.",
+          "propertyOrder": 2,
+          "default": "faser-vme-controller-00.cern.ch"
+        },
         "digitizer_hw_address": {
           "type": "string",
           "title": "Digitizer VME Base Address",
-          "propertyOrder": 2,
+          "propertyOrder": 3,
           "description": "The rotary-switch configured physical address of the digitizer board in the VME crate.",
           "enum": ["internal", "external", "software"],
           "default": "external"
@@ -58,21 +65,21 @@
         "buffer_length": {
           "type": "number",
           "title": "Readout Window Size",
-          "propertyOrder": 3,
+          "propertyOrder": 4,
           "description": "The number of samples for the buffer acquisition window. The possible values are limited.",
           "default": 630
         },
         "buffer_n_post_samples": {
           "type": "number",
           "title": "Readout Window Post Samples",
-          "propertyOrder": 4,
+          "propertyOrder": 5,
           "description": "The minimum number of samples acquired following a trigger. Note that there is a board minimum, so this cannot be reduced to 0 and the value you enter here will be increased by approximately 70 samples.",
           "default": 120
         },
         "trigger_acquisition": {
           "type": "object",
           "title": "Acquisition Configuration",
-          "propertyOrder": 5,
+          "propertyOrder": 6,
           "description": "Specifies which trigger inputs cause for data to be acquired and written to the buffer.  For faser/daq running, only external should be enabled.",
           "properties": {
             "external": {
@@ -99,7 +106,7 @@
           "type": "object",
           "title": "Software-based Trigger Generation",
           "description": "",
-          "propertyOrder": 6,
+          "propertyOrder": 7,
           "properties": {
             "enable": {
               "type": "boolean",
@@ -119,7 +126,7 @@
           "type": "array",
           "title": "Internal Trigger Settings",
           "description": "The settings upon which each trigger group will generate a trigger sent for either acquisition (if enabled) or out of LVDS to the TLB.",
-          "propertyOrder": 7,
+          "propertyOrder": 8,
           "minItems": 8,
           "maxItems": 8,
           "items": {
@@ -195,7 +202,7 @@
           "type": "string",
           "title": "Internal Trigger Polarity",
           "description": "The direction in which the signal on a given channel must be going when it breaches the threshold set for a given channel.  This is global for all channels and so is not included in the channel trigger settings.",
-          "propertyOrder": 8,
+          "propertyOrder": 9,
           "default": "over",
           "enum": ["over","under"]
         },
@@ -203,56 +210,132 @@
           "type": "array",
           "title": "Channel Readout",
           "description": "Which channels are read out and what are the specifics in terms of the dynamic range and DC offset.",
-          "propertyOrder": 8,
+          "propertyOrder": 10,
           "minItems": 16,
           "maxItems": 16,
           "items": {
-              "type": "object",
-              "title": "Channel",
-              "description": "The specific configurations for a given channel.",
-              "default": {},
-              "examples": [{
-                "channel": 0,
-                "enable": 1,
-                "dynamic_range": 2.0,
-                "dc_offset": 0.0
-              }],
-              "required": [
-                "channel",
-                "enable",
-                "dynamic_range",
-                "dc_offset"
-              ],
-              "properties": {
-                "channel": {
-                  "type": "integer",
-                  "title": "Channel",
-                  "description": "Which channel is being configured by this portion of the configuration.  Note that there are 16 channels, which must all be given a unique configuration to be read by faser/daq.",
-                  "default": 0,
-                  "enum": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
-                },
-                "enable": {
-                  "type": "boolean",
-                  "title": "Enable",
-                  "description": "Flag that will configure for readout the data from this channel when a global acquisition trigger is registered.",
-                  "default": false,
-                  "enum": [true, false]
-                },
-                "dynamic_range": {
-                  "type": "number",
-                  "title": "Dynamic Range",
-                  "description": "The dynamic range over which the 14 bit ADC performs the digitization.  It can be set to a swing of [-0.5,0.5] volts or [-2.0,+2.0] volts.",
-                  "default": 2.0,
-                  "enum": [0.5,2.0]
-                },
-                "dc_offset": {
-                  "type": "number",
-                  "title": "DC Offset",
-                  "description": "The DC voltage offset of the channel.  This is intended to effectively change the ADC value at which 0 volts is registered.  At at DC offset of 0.0, the baseline voltage registers as ~8200 ADC counts [midway in the full 14 bit range].  The input here is the number of volts by which you want to shift this value up or down and is limited by the configured dynamic range.",
-                  "default": 0.0
-                }
+            "type": "object",
+            "title": "Channel",
+            "description": "The specific configurations for a given channel.",
+            "default": {},
+            "examples": [{
+              "channel": 0,
+              "enable": 1,
+              "dynamic_range": 2.0,
+              "dc_offset": 0.0
+            }],
+            "required": [
+              "channel",
+              "enable",
+              "dynamic_range",
+              "dc_offset"
+            ],
+            "properties": {
+              "channel": {
+                "type": "integer",
+                "title": "Channel",
+                "description": "Which channel is being configured by this portion of the configuration.  Note that there are 16 channels, which must all be given a unique configuration to be read by faser/daq.",
+                "default": 0,
+                "enum": [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
               },
-              "additionalProperties": true
+              "enable": {
+                "type": "boolean",
+                "title": "Enable",
+                "description": "Flag that will configure for readout the data from this channel when a global acquisition trigger is registered.",
+                "default": false,
+                "enum": [true, false]
+              },
+              "dynamic_range": {
+                "type": "number",
+                "title": "Dynamic Range",
+                "description": "The dynamic range over which the 14 bit ADC performs the digitization.  It can be set to a swing of [-0.5,0.5] volts or [-2.0,+2.0] volts.",
+                "default": 2.0,
+                "enum": [0.5,2.0]
+              },
+              "dc_offset": {
+                "type": "number",
+                "title": "DC Offset",
+                "description": "The DC voltage offset of the channel.  This is intended to effectively change the ADC value at which 0 volts is registered.  At at DC offset of 0.0, the baseline voltage registers as ~8200 ADC counts [midway in the full 14 bit range].  The input here is the number of volts by which you want to shift this value up or down and is limited by the configured dynamic range.",
+                "default": 0.0
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "readout": {
+          "type": "object",
+          "title": "Readout Flow",
+          "description": "",
+          "propertyOrder": 11,
+          "properties": {
+            "readout_blt": {
+              "type": "number",
+              "title": "Event Readout Number",
+              "description": "Maximum number of events read out in one polling of digitizer.",
+              "default": 2000
+            },
+            "readout_method": {
+              "type": "string",
+              "title": "VME Readout Method",
+              "description": "Protocol for VME transfer",
+              "default": "2ESST320FIFO"
+            },
+            "interface_jumbo": {
+              "type": "boolean",
+              "title": "Enable Jumbo Packets",
+              "description": "Switch to enable jumbo ethernet packets from interface to PC. Ensure that the ethernet is configured properly to handle more than 1500 data frames per transfer or this will have no effect.",
+              "default": true
+            },
+            "interface_max_packets": {
+              "type": "number",
+              "title": "Max Packets",
+              "description": "Maximum number of packets to transfer in an single transfer.",
+              "default": 1
+            },
+            "interface_packet_gap": {
+              "type": "number",
+              "title": "Inter-packet Pause",
+              "description": "Time to wait between transfer of packets",
+              "default": 0
+            },
+            "software_buffer": {
+              "type": "number",
+              "title": "SW Buffer Size",
+              "description": "Size of software buffer that holds events in PC before transfer to EventBuilder.  In units of int32.",
+              "default": 2000000
+            },
+            "print_event": {
+              "type": "boolean",
+              "title": "Print Event",
+              "description": "Will print events to the log file.  This is largely for debugging of the readout.",
+              "default": false
+            },
+            "n_busy_level": {
+              "type": "number",
+              "title": "Busy Level",
+              "description": "This is the level against which the number of events stored in the digitizer HW buffer is compared.  If this level is breached, then the digitizer will assert busy by setting LVDS bit[8] to active.  The maximum number of events that can be stored in the HW buffer is 1024 and if this is set to a value greater than that, then 1024 is used.",
+              "default": 1000
+            }
+          }
+        },
+        "parsing": {
+          "type": "object",
+          "title": "Readout Flow",
+          "description": "",
+          "propertyOrder": 12,
+          "properties": {
+            "ttt_converter": {
+              "type": "numer",
+              "title": "BCID Converter",
+              "description": "This is the clock frequency (presumably of the LHC clock) at which events are being recorded.  This is used to convert the internal trigger clock counter at 125 MHz to the BCID for our reconstruction needs.",
+              "default": 40.08
+            },
+            "bcid_ttt_fix": {
+              "type": "number",
+              "title": "BCID Fix",
+              "description": "This is a tuneable parameter that is subtracted from the digitizer clock counter before conversion to BCID.  This should be tuned to align the BCID's of the digitizer with those of the TLB.",
+              "default": 0
+            }
           }
         }
       }

@@ -18,6 +18,23 @@ using namespace std::chrono;
 
 EventMonitorModule::EventMonitorModule() { 
   INFO("In EventMonitorModule contructor");
+  
+  auto cfg = m_config.getConfig()["settings"];
+  
+  // determine which systems are configured for monitoring
+  m_enable_digitizer = (bool)cfg["enable_digitizer"];
+  m_enable_tlb       = (bool)cfg["enable_tlb"];
+  
+  int n_trb = (int)cfg["enable_trb"].size();
+  
+  if(n_trb<9){
+    WARNING("It appears you have fewer TRB planes than expected : "<<(int)cfg["enable_trb"].size());
+  }
+  
+  for(int itrb=0; itrb<n_trb; itrb++){
+    m_enable_trb[itrb] = (bool)cfg["enable_trb"].at(itrb);
+  }
+  
 }
 
 EventMonitorModule::~EventMonitorModule() { 
@@ -64,9 +81,6 @@ void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary)
   //if ( std::abs(diff_tlb_trb_bcid) < 5000 ) m_histogrammanager->fill("h_diff_tlb_trb_bcid", diff_tlb_trb_bcid );
   //else WARNING("difference between tlb bcid = "<<m_tlb_bcid<<" and trb bcid = "<<m_trb_bcid<<" too big.");
   //if ( (m_tlb_bcid < 5000) && (m_trb_bcid < 5000) ) m_histogrammanager->fill2D("h_trbbcid_vs_tlbbcid", m_trb_bcid, m_tlb_bcid );
-//
-  //short random = rand()%100+1;
-  //m_histogrammanager->fill2D("h_test_2d", random, random);
 
 
 }
@@ -81,9 +95,6 @@ void EventMonitorModule::register_hists() {
   
   m_histogrammanager->register2DHistogram("h_trbbcid_vs_tlbbcid", "TRB BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
   m_histogrammanager->register2DHistogram("h_digibcid_vs_tlbbcid", "DIGI BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
-
-  // dummy
-  m_histogrammanager->register2DHistogram("h_test_2d", "x", 0, 100, 100, "y", 0, 100, 100, 600);
 
   INFO(" ... done registering histograms ... " );
   return;

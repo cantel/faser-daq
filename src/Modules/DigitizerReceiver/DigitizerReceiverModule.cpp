@@ -90,13 +90,13 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   
   // configuring ethernet transmission settings for interface board  
   // NOTE : you also need to ensure that the utm setting on ifconfig is sufficiently high for jumbo frames to work
-  bool set_interface_jumbo = (bool)cfg["interface_jumbo"];
+  bool set_interface_jumbo = (bool)cfg["readout"]["interface_jumbo"];
   m_digitizer->SetInterfaceEthernetJumboFrames(set_interface_jumbo);
   
-  unsigned int set_interface_packet_gap = (unsigned int)cfg["interface_packet_gap"];
+  unsigned int set_interface_packet_gap = (unsigned int)cfg["readout"]["interface_packet_gap"];
   m_digitizer->SetInterfaceEthernetGap(set_interface_packet_gap);
 
-  unsigned int set_interface_max_packets = (unsigned int)cfg["interface_max_packets"];
+  unsigned int set_interface_max_packets = (unsigned int)cfg["readout"]["interface_max_packets"];
   m_digitizer->SetInterfaceEthernetMaxPackets(set_interface_max_packets);
 
   // ethernet speed test
@@ -137,7 +137,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   }
   
   // for the TLB conversion factor on the trigger time tag
-  auto cfg_ttt_converter = cfg["ttt_converter"];
+  auto cfg_ttt_converter = cfg["parsing"]["ttt_converter"];
   if(cfg_ttt_converter==nullptr){
     INFO("You did not specify the TTT converter, setting it to the LHC 40.08 MHz");
     m_ttt_converter = 40.08;
@@ -150,7 +150,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   // BCID matching parameter performs a software "delay" on the calculated BCID
   // by delaying the TriggerTimeTag by some fixed amount.  This "delay" can be positive
   // or negative and is tuned to match the BCID from the TLB
-  auto cfg_bcid_ttt_fix = cfg["bcid_ttt_fix"];
+  auto cfg_bcid_ttt_fix = cfg["parsing"]["bcid_ttt_fix"];
   if(cfg_ttt_converter==nullptr){
     INFO("You did not specify the BCID fix, setting it to 0.");
     m_bcid_ttt_fix = 0;
@@ -196,6 +196,11 @@ void DigitizerReceiverModule::configure() {
   registerVariable(m_temp_ch14, "temp_ch14");
   registerVariable(m_temp_ch15, "temp_ch15");
   
+  registerVariable(m_time_read,     "time_RetrieveEvents");
+  registerVariable(m_time_parse,    "time_ParseEvents");
+  registerVariable(m_time_overhead, "time_Overhead");
+
+  
   // configuration of hardware
   INFO("Configuring ...");  
   m_digitizer->Configure(m_config.getConfig()["settings"]);
@@ -234,14 +239,14 @@ void DigitizerReceiverModule::sendECR() {
   auto cfg = m_config.getConfig()["settings"];
   
   // for reading the buffer
-  m_readout_method = (std::string)cfg["readout_method"];
-  m_readout_blt    = (int)cfg["readout_blt"];
+  m_readout_method = (std::string)cfg["readout"]["readout_method"];
+  m_readout_blt    = (int)cfg["readout"]["readout_blt"];
 
   // dynamically allocate the array for the raw payload
   // guidance : http://www.fredosaurus.com/notes-cpp/newdelete/50dynamalloc.html#:~:text=Allocate%20an%20array%20with%20code,and%20allocates%20that%20size%20array.
   DEBUG("Allocating software buffer ...");
   unsigned int* m_raw_payload = NULL;   
-  m_software_buffer = (int)cfg["software_buffer"];           
+  m_software_buffer = (int)cfg["readout"]["software_buffer"];           
   DEBUG("NBuffer ..."<<std::dec<<m_software_buffer);
   m_raw_payload = new unsigned int[m_software_buffer];  
   
@@ -284,7 +289,7 @@ void DigitizerReceiverModule::sendECR() {
       DEBUG("NEventsParsed : "<<fragments.size());
       
       // ToDo : write a method to print one full event
-      //if((bool)myConfig["print_event"]){
+      //if((bool)myConfig["readout"]["print_event"]){
       //  if(fragments.size()>=1){
       //    const EventFragment frag = fragments.at(0);
       //    DigitizerDataFragment digitizer_data_frag = DigitizerDataFragment(frag.payload<const uint32_t*>(), frag.payload_size());
@@ -330,14 +335,14 @@ void DigitizerReceiverModule::runner() {
   auto cfg = m_config.getConfig()["settings"];
   
   // for reading the buffer
-  m_readout_method = (std::string)cfg["readout_method"];
-  m_readout_blt    = (int)cfg["readout_blt"];
+  m_readout_method = (std::string)cfg["readout"]["readout_method"];
+  m_readout_blt    = (int)cfg["readout"]["readout_blt"];
 
   // dynamically allocate the array for the raw payload
   // guidance : http://www.fredosaurus.com/notes-cpp/newdelete/50dynamalloc.html#:~:text=Allocate%20an%20array%20with%20code,and%20allocates%20that%20size%20array.
   DEBUG("Allocating software buffer ...");
   unsigned int* m_raw_payload = NULL;   
-  m_software_buffer = (int)cfg["software_buffer"];           
+  m_software_buffer = (int)cfg["readout"]["software_buffer"];           
   DEBUG("NBuffer ..."<<std::dec<<m_software_buffer);
   m_raw_payload = new unsigned int[m_software_buffer];  
   
@@ -405,7 +410,7 @@ void DigitizerReceiverModule::runner() {
       DEBUG("NEventsParsed : "<<fragments.size());
       
       // ToDo : write a method to print one full event
-      //if((bool)myConfig["print_event"]){
+      //if((bool)myConfig["readout"]["print_event"]){
       //  if(fragments.size()>=1){
       //    const EventFragment frag = fragments.at(0);
       //    DigitizerDataFragment digitizer_data_frag = DigitizerDataFragment(frag.payload<const uint32_t*>(), frag.payload_size());
@@ -426,6 +431,11 @@ void DigitizerReceiverModule::runner() {
       DEBUG("Time parse   : "<<m_monitoring["time_parse_time"]);
       DEBUG("Time header  : "<<m_monitoring["time_header_time"]);
       DEBUG("Time filler  : "<<m_monitoring["time_filler_time"]);
+      
+      m_time_read      = m_monitoring["time_read_time"]; 
+      m_time_parse     = m_monitoring["time_parse_time"];  
+      m_time_overhead  = m_monitoring["time_header_time"] + m_monitoring["time_filler_time"];   
+
       
       float total_batch = m_monitoring["time_read_time"]+m_monitoring["time_parse_time"]+m_monitoring["time_header_time"]+m_monitoring["time_filler_time"];
       

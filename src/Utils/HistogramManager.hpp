@@ -62,6 +62,11 @@ public:
     return;
   }
 
+  void registerHistogram( std::string name, std::string xlabel, std::string ylabel, float xmin, float xmax, unsigned int xbins, unsigned int delta_t = 60 ) {
+    registerHistogram( name, xlabel, ylabel, xmin, xmax, xbins, Axis::Range::NONEXTENDABLE, delta_t); 
+    return;
+  }
+
   void registerHistogram( std::string name, std::string xlabel, float xmin, float xmax, unsigned int xbins, Axis::Range extendable, unsigned int delta_t = 60 ) {
     registerHistogram( name, xlabel, "counts", xmin, xmax, xbins, extendable, delta_t); 
     return;

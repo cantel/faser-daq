@@ -23,7 +23,7 @@ DigitizerMonitorModule::~DigitizerMonitorModule() {
 }
 
 void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
-  INFO("Digitizer monitoring");
+  DEBUG("Digitizer monitoring");
 
   // the m_event object is populated with the event binary here
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
@@ -66,29 +66,40 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
     // mean and rms for monitoring a channel that goes out of wack
     float avg = GetPedestalMean(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
     float rms = GetPedestalRMS(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
+    
+    INFO("Digitizer monitoring : "<<iChan<<" - "<<avg<<" , "<<rms);
 
-    m_histogrammanager->fill("h_avg_ch"+std::to_string(iChan), avg);
-    m_histogrammanager->fill("h_rms_ch"+std::to_string(iChan), rms);    
+    m_histogrammanager->fill("h_avg_ch"+std::to_string(iChan), avg, 1.0);
+    m_histogrammanager->fill("h_rms_ch"+std::to_string(iChan), rms, 1.0);    
   }
+  
 }
 
 void DigitizerMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerMonitor ... " );
   
+  double publish_interval = (double)m_config.getConfig()["settings"]["publish_interval"];;
+  
   // payload size
-  m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
+  m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, publish_interval);
 
   // payload status
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
-  m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, 5. );
+  m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, publish_interval );
 
   // synthesis common for all channels
   int buffer_length = (int)m_config.getConfig()["settings"]["buffer_length"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
-    m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan), 0, buffer_length, 100);
-    m_histogrammanager->registerHistogram("h_avg_ch"+std::to_string(iChan),"Average of Baseline Start : ch"+std::to_string(iChan),0,20000,200);
-    m_histogrammanager->registerHistogram("h_rms_ch"+std::to_string(iChan),"RMS of Baseline Start : ch"+std::to_string(iChan),0,1000,100);
+    // example pulse
+    m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, publish_interval);
+  
+    // average of channel signal pedestal
+    m_histogrammanager->registerHistogram("h_avg_ch"+std::to_string(iChan),"Pedestal Average ch"+std::to_string(iChan), 0, 20000, 200, publish_interval);
+  
+    // rms of channel signal pedestal
+    m_histogrammanager->registerHistogram("h_rms_ch"+std::to_string(iChan),"Pedestal RMS ch"+std::to_string(iChan), 0, 1000, 100, publish_interval);
   }
+  
   
   // for the sample pulses
   m_pulse_sample_space = std::floor(buffer_length/100);
@@ -165,10 +176,6 @@ void DigitizerMonitorModule::FillChannelPulse(std::string histogram_name, int ch
 
   m_histogrammanager->reset(histogram_name);
   for(int isamp=0; isamp<(int)m_pmtdataFragment->channel_adc_counts(channel).size(); isamp++){
-    if(isamp%m_pulse_sample_space==0){
-      int ibin = (int)isamp/m_pulse_sample_space;
-      DEBUG("Filling : "<<ibin<<"  "<<m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
-      m_histogrammanager->fill(histogram_name,ibin,m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
-    }
+    m_histogrammanager->fill(histogram_name,isamp,m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
   }
 }

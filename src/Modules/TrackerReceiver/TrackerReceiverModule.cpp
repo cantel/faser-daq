@@ -206,32 +206,44 @@ void TrackerReceiverModule::configure() {
   }
 
   if ( m_extClkSelect ) {
-    m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
-    // give it a moment to sync with clock?
-    for(unsigned int i = 5; i >0; i--){
-      uint16_t status;
-      m_trb->ReadStatus(status);
-      if ((status & 0x4)){ // check if TLBClkSel is TRUE
-        INFO( "   TLB CLK synchronized");
-        break;
+    bool retry(true);
+    int8_t nRetries(3);
+    while (retry && nRetries--) {
+      m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
+      // give it a moment to sync with clock?
+      for(unsigned int i = 5; i >0; i--){
+        uint16_t status;
+        m_trb->ReadStatus(status);
+        if ((status & 0x4)){ // check if TLBClkSel is TRUE
+          INFO( "   TLB CLK synchronized");
+          break;
+        }
+        INFO( "    TLB clock NOT OK ...");
+        sleep(1);
       }
-      INFO( "    TLB clock NOT OK ...");
-      sleep(1);
+      try {
+        m_trb->GenerateSoftReset(m_moduleMask);
+        m_trb->GetConfig()->Set_Global_RxTimeoutDisable(m_RxTimeoutDisable);
+        m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
+        m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
+        m_trb->GetConfig()->Set_Global_Overflow(4095);
+        m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
+        m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
+        m_trb->GetConfig()->Set_Global_TLBClockSel(m_extClkSelect);
+        m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
+        m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
+        m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
+        m_trb->WriteConfigReg();
+        m_trb->SCT_EnableDataTaking(m_moduleMask);
+        m_trb->SetDirectParam(FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect);
+      } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
+         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw e; };
+         ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
+         m_trb->SetDirectParam(0);
+         continue;
+      }
+      retry = false;
     }
-    m_trb->GenerateSoftReset(m_moduleMask);
-    m_trb->GetConfig()->Set_Global_RxTimeoutDisable(m_RxTimeoutDisable);
-    m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
-    m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
-    m_trb->GetConfig()->Set_Global_Overflow(4095);
-    m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
-    m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
-    m_trb->GetConfig()->Set_Global_TLBClockSel(m_extClkSelect);
-    m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
-    m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
-    m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
-    m_trb->WriteConfigReg();
-    m_trb->SCT_EnableDataTaking(m_moduleMask);
-    m_trb->SetDirectParam(FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect);
   }
   else { //running on internal clock
     m_trb->GenerateSoftReset(m_moduleMask);

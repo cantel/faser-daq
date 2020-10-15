@@ -1,0 +1,53 @@
+{% extends "basic.html" %}
+
+{% block title %}
+{{ ID }}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 style="text-align: center;">Single view</h2>
+    <div style = "margin:auto;">
+        <div id="graph" style="width:100%;"></div>
+        <h5 id="time"></h5>
+    </div>
+</div>
+
+<script>
+    var updateTime = 3000;
+    $.ajax({
+        url: "{{ url_for('lastHistogram') }}",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+            'ID': "{{ ID }}"
+        },
+        dataType: "json",
+        success: function (data) {
+            data.figure.layout.autosize = true;
+            Plotly.react("graph", data.figure);
+            var time = moment(data.time * 1000).format('h:mm:ss a (MM/DD/YY)');
+            $('#time').text("Updated at " + time);
+        }
+    });
+
+    window.setInterval(function () {
+        $.ajax({
+            url: "{{ url_for('lastHistogram') }}",
+            type: "GET",
+            contentType: 'application/json;charset=UTF-8',
+            data: {
+                'ID': "{{ ID }}"
+            },
+            dataType: "json",
+            success: function (data) {
+                data.figure.layout.autosize = true;
+                Plotly.react("graph", data.figure);
+                var time = moment(data.time * 1000).format('h:mm:ss a (MM/DD/YY)');
+                $('#time').text("Updated at " + time);
+            }
+        });
+    }, updateTime);
+</script>
+
+{% endblock %}

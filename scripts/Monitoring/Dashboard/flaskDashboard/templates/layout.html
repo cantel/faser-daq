@@ -1,0 +1,208 @@
+<html lang="en">
+
+<head lang="en">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>
+    Faser-Monitoring
+  </title>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.27.0/moment.min.js"
+    integrity="sha512-rmZcZsyhe0/MAjquhTgiUcb4d9knaFc7b5xAfju483gbEXTkeJRUMIPk6s3ySZMYUHEcjKbjLjyddGWMrNEvZg=="
+    crossorigin="anonymous"></script>
+
+
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/css/select2.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename = 'css/jquery.json-tag-editor.css') }}">
+</head>
+
+<body>
+  <header>
+    <nav class="navbar navbar-light bg-light">
+      <span class="navbar-brand">
+        <img src="{{ url_for('static', filename = 'img/faser.png') }}" width="120" height="40" alt="" loading="lazy">
+        <span class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle navbar-brand mx-2" href="#" id="navbarDropdown" role="button"
+            data-toggle="dropdown">
+            Monitoring
+          </a>
+          <div class="dropdown-menu">
+            <a class="dropdown-item" href="{{ url_for('home') }}"> Refresh </a>
+            <a class="dropdown-item" href="{{ url_for('download_tags_json') }}">
+              <p class="d-inline text-center">Download tags </p>
+            </a>
+            <a id="upload_json_file" class="dropdown-item" data-toggle="modal" data-target="#modal_copy_paste_json"
+              href="#">Upload tags</a>
+
+            <div class="dropdown-divider"></div>
+   
+
+            <a id="flush_current_histograms" class="dropdown-item" data-toggle="modal" data-target="#modal_flush_current_histograms"
+              href="#" style = "color: red;">Delete current histograms</a>
+            <a id="flush_current_tags" class="dropdown-item" data-toggle="modal" data-target="#modal_flush_current_tags"
+              href="#" style = "color: red;">Delete current tags</a>
+            <a id="delete_previous_histos" class="dropdown-item" data-toggle="modal"
+              data-target="#modal_confirmation_delete_previous_histos" href="#" style = "color: red;">Delete previous histograms</a>
+          </div>
+        </span>
+      </span>
+
+
+      <form class="form-inline my-auto" method='GET' action="{{ url_for('monitor') }}">
+
+        <label class="mx-2"> Module:</label>
+        <select name="selected_module" class="selectpicker form-control mx-2">
+          {% if not selected_module %}
+          <option value="none"> </option>
+          {% endif %}
+          {% if modules %}
+
+          {% if selected_module %}
+
+          {% for module in modules %}
+          {% if module == selected_module %}
+          <option value="{{ module }}" selected> {{ module }}</option>
+          {% else %}
+          <option value="{{ module }}"> {{ module }}</option>
+          {% endif %}
+          {% endfor %}
+
+          {% else %} {% for module in modules %}
+          <option value="{{ module }}"> {{ module }}</option>
+          {% endfor %}
+
+          {% endif %}
+
+          {% endif %}
+        </select>
+        <button type="submit" class="btn btn-primary mx-2">select</button>
+
+      </form>
+      <span class="navbar-text">
+        or
+      </span>
+      <div class="ml-0">
+        <form class="form-inline my-auto" id="sort-div" method="GET" action="{{ url_for('monitor') }}">
+          <div class="d-flex justify-content-between">
+            <select class='form-control' style="padding: 100%;" name="selected_tags" multiple="multiple"
+              id="tags_selection">
+              {% for tag in tags %}
+              <option value="{{ tag }}">{{ tag }}</option>
+              {% endfor %}
+            </select>
+            <button class="btn btn-outline-success my-auto mx-3 " type="submit">Search</button>
+          </div>
+        </form>
+      </div>
+
+    </nav>
+  </header>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  {% for category, message in messages %}
+  <div class="alert alert-{{ category }}">
+    <h3>{{ message }}</h3>
+  </div>
+  {% endfor %}
+  {% endif %}
+  {% endwith %}
+
+
+
+
+  {% block content %}{% endblock %}
+
+  {% include 'layout_modals.html' %}
+
+  <script>
+    $("#tags_selection").select2({ placeholder: "Select tags" });
+  </script>
+
+  <script>
+    $('#confirmation_delete_previous_histos').on('click', function () {
+      $.ajax({
+        url: "{{ url_for('delete_histos') }}",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+          'state': 'yes'
+        },
+        dataType: "json",
+        success: function () {
+          $('#modal_confirmation_delete_previous_histos').modal('toggle');
+
+        }
+      });
+
+    });
+
+    $('#confirmation_flush_current_histograms').on('click', function () {
+      $.ajax({
+        url: "{{ url_for('flush_current_histograms') }}",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+          'state': 'yes'
+        },
+        dataType: "json",
+        success: function () {
+          $('#modal_flush_current_histograms').modal('toggle');
+
+        }
+      });
+
+      window.location.href = "{{ url_for('home') }}";
+
+    });
+
+    $('#confirmation_flush_current_tags').on('click', function () {
+      $.ajax({
+        url: "{{ url_for('flush_tags') }}",
+        type: "GET",
+        contentType: 'application/json;charset=UTF-8',
+        data: {
+          'state': 'yes'
+        },
+        dataType: "json",
+        success: function () {
+          $('#modal_flush_current_tags').modal('toggle');
+
+        }
+      });
+
+      window.location.href = "{{ url_for('home') }}";
+
+    });
+
+
+    $('[class*=alert]').delay(2000).fadeOut(400);
+  </script>
+
+
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
+    integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU=" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+    integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.min.js"></script>
+  <script src="{{ url_for('static', filename = 'js/jquery.caret.min.js') }}"></script>
+
+
+
+
+  <script src="{{ url_for('static', filename = 'js/jquery.json-tag-editor.min.js') }}"></script>
+</body>
+
+</html>

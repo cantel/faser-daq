@@ -1,0 +1,92 @@
+{% extends "basic.html" %}
+
+{% block title %}
+{{ ID }}
+{% endblock %}
+
+{% block content %}
+<h2 style = "text-align: center;"> Historic View </h2>
+<div id="commands" style = "text-align: center;">
+<button id = "previous" class= "btn btn-secondary"> < </button>
+  <select id="timestamps">
+    {% if timestamps %}
+    {% for timestamp in timestamps | reverse %}
+    <option value="{{ timestamp }}"> {{ timestamp | ctime }} </option>
+    {% endfor %}
+    {% for historic_timestamp in historic_timestamps | reverse %}
+    <option value="old:{{ historic_timestamp }}"> old:{{ historic_timestamp | ctime }} </option>
+    {% endfor %}
+    {% endif %}
+  </select>
+<button id = "next" class= "btn btn-secondary"> > </button>
+</div>
+
+<div id="graph">
+
+</div>
+<h5 id = "time"></h6> 
+
+{% if timestamps %}
+<script>
+  var histo = {{ lastHisto | safe }};
+  histo.figure.layout.autosize = true;
+  Plotly.plot("graph", histo.figure);
+  var time = moment(histo.timestamp* 1000).format('h:mm:ss a (MM/DD/YY)');
+  $('#time').text("State at  " + time);
+
+</script>
+
+
+<script>
+  var number_elements = $("#timestamps option").length;
+
+  $("#previous").on('click', function(){
+    var nextIndex = $("#timestamps").prop('selectedIndex')+1;
+    if (nextIndex <= number_elements-1){
+      $("#timestamps").prop('selectedIndex', nextIndex);
+      $("#timestamps").trigger("change")
+    }
+  });
+  $("#next").on('click', function(){
+    var previousIndex = $("#timestamps").prop('selectedIndex')-  1;
+    if (previousIndex >= 0){
+      $("#timestamps").prop('selectedIndex', previousIndex);
+      $("#timestamps").trigger("change")
+    }
+  });
+
+  $("#timestamps").on('change', function () {
+  
+    var selectedIndex = $("#timestamps").prop('selectedIndex');
+    var value = $("#timestamps").val();
+
+    $.ajax({
+      url: "{{ url_for('change_histo') }}",
+      type: "GET",
+      contentType: 'application/json;charset=UTF-8',
+      data: {
+        'selected': value,
+        'ID': "{{ ID | safe }}"
+      },
+      dataType: "json",
+      success: function (data) {
+        var data = JSON.parse(data);
+        data.figure.layout.autosize = true;
+        Plotly.react('graph', data.figure);
+        var time = moment(data.timestamp* 1000).format('h:mm:ss a (MM/DD/YY)');
+        $('#time').text("State at  " + time);
+
+      }
+    });
+  });
+
+  
+
+</script>
+{% endif %}
+
+{% if not timestamps %}
+<h3 class="my-4" style="text-align: center;"> No histograms to display! </h3>
+{% endif %}
+
+{% endblock %}

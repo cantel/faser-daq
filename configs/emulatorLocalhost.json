@@ -29,8 +29,8 @@
       "type": "FrontEndEmulator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {
-        "meanSize": 25,
-        "rmsSize": 0,
+        "meanSize": 400,
+        "rmsSize": 50,
         "fragmentID": 1000001,
         "probMissingTrigger": 0.00,
         "probMissingFragment": 0.00,
@@ -253,9 +253,31 @@
       }
     },
     {
-      "name": "emulatormonitor01",
+      "name": "frontendmonitor01",
       "host": "localhost",
       "port": 5559,
+      "type": "FrontEndMonitor",
+      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "settings": {
+	"stats_uri": "tcp://localhost:7000",
+        "fragmentID": 1000001
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
+      "name": "emulatormonitor01",
+      "host": "localhost",
+      "port": 5560,
       "type": "EmulatorMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
       "settings": {

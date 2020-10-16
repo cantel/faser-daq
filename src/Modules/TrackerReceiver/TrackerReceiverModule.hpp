@@ -44,6 +44,7 @@ class TrackerReceiverModule : public FaserProcess {
   
   std::unique_ptr<FASER::TRBAccess> m_trb;
   std::unique_ptr<FASER::TRBEventDecoder> m_ed;
+  std::unique_ptr<FASER::FletcherChecksum> m_checksum;
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;
   bool m_triggerEnabled;
@@ -52,4 +53,10 @@ class TrackerReceiverModule : public FaserProcess {
   std::atomic<int> event_id;
   std::atomic<int> bc_id;
   std::atomic<int> corrupted_fragments;
+  std::atomic<int> checksum_mismatches;
+  std::atomic<float> checksum_mismatches_rate;
+  std::atomic<int> number_of_decoded_events;
+
+  private:
+  bool m_debug = false;
 };

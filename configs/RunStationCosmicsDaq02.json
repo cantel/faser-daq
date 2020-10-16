@@ -15,7 +15,7 @@
         "SamplingPhase": [false, false, false, false, false, false, false, false],
         "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
         "RandomTriggerRate": 5,
-        "Prescale": [0, 0, 0, 0, 1, 0],
+        "Prescale": [1, 1, 1, 1, 0, 0],
         "TrackerDelay": 100,
         "DigitizerDelay": 0,
         "LHC_CLK": false,
@@ -23,13 +23,14 @@
         "Deadtime": 500,
         "MonitoringRate": 11245,
         "OutputDestination": 0,
-        "Input": [true, true, false, false, false, false, false, false],
-        "BusyDisable": false,
+        "Input": [false, false, true, true, true, true, true, false],
+        "Busy0Disable": true,
+        "Busy1Disable": false,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
         "Derandomize": false,
         "ReadoutFIFOReset": true,
-        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
+        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmics.txt"
       },
       "connections": {
         "senders": [
@@ -54,7 +55,7 @@
         "SCIP" : "10.11.65.8",
         "DAQIP" : "10.11.65.8",
         "ReadoutMode": 0,
-        "ConfigureModules": true, 
+        "ConfigureModules": false, 
         "FinePhaseClk": 0,
         "RxTimeoutDisable": false,
 	"stats_uri": "tcp://localhost:7000",
@@ -97,7 +98,7 @@
         "SCIP" : "10.11.65.8",
         "DAQIP" : "10.11.65.8",
         "ReadoutMode": 0,
-        "ConfigureModules": true, 
+        "ConfigureModules": false, 
         "RxTimeoutDisable": false,
 	"stats_uri": "tcp://localhost:7000",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
@@ -139,7 +140,7 @@
         "SCIP" : "10.11.65.8",
         "DAQIP" : "10.11.65.8",
         "ReadoutMode": 0,
-        "ConfigureModules": true, 
+        "ConfigureModules": false, 
         "RxTimeoutDisable": false,
 	"stats_uri": "tcp://localhost:7000",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
@@ -189,36 +190,36 @@
           "global_trigger": { "lvds": 0, "external": 1, "software": 0, "polarity": "over", "coincidence": false, "nchan": 2, "timewindow": 20},
 	  "ttt_converter": "40.0",
           "channel_config": [{"group" : 0, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
-                              "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 8000},
-                              "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                              "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000},
+                              "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000}
                              },
                              {"group" : 1, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
-                              "chanA" : {"channel": 2, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 8000},
-                              "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                              "chanA" : {"channel": 2, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000},
+                              "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000}
                              },
-                             {"group" : 2, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
-                              "chanA" : {"channel": 4, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500},
-                              "chanB" : {"channel": 5, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                             {"group" : 2, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
+                              "chanA" : {"channel": 4, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7000},
+                              "chanB" : {"channel": 5, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7000}
                              },
-                             {"group" : 3, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
-                              "chanA" : {"channel": 6, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500},
-                              "chanB" : {"channel": 7, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 500}
+                             {"group" : 3, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
+                              "chanA" : {"channel": 6, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7000},
+                              "chanB" : {"channel": 7, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7000}
                              },
-                             {"group" : 4, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
-                              "chanA" : {"channel": 8, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
-                              "chanB" : {"channel": 9, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             {"group" : 4, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
+                              "chanA" : {"channel": 8, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 7000},
+                              "chanB" : {"channel": 9, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 7000}
                              },
-                             {"group" : 5, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
-                              "chanA" : {"channel": 10, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
-                              "chanB" : {"channel": 11, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             {"group" : 5, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
+                              "chanA" : {"channel": 10, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 7000},
+                              "chanB" : {"channel": 11, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 7000}
                              },
-                             {"group" : 6, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
-                              "chanA" : {"channel": 12, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
-                              "chanB" : {"channel": 13, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             {"group" : 6, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
+                              "chanA" : {"channel": 12, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 7000},
+                              "chanB" : {"channel": 13, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 7000}
                              },
-                             {"group" : 7, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
-                              "chanA" : {"channel": 14, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500},
-                              "chanB" : {"channel": 15, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 500}
+                             {"group" : 7, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
+                              "chanA" : {"channel": 14, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 7000},
+                              "chanB" : {"channel": 15, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 7000}
                              }],
           "frontpanel_config" : {"lemo" : {"trig_in" : "ttl" , "trig_out" : "ttl"}} 
       },
@@ -346,9 +347,9 @@
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
 	  "stats_uri": "tcp://localhost:7000",
-	  "max_filesize": 1000000,
+	  "max_filesize": 10000000,
 	  "buffer_size": 4000,
-	  "filename_pattern": "/tmp/cantel/Faser-test-%c-%r-%n.raw",
+	  "filename_pattern": "/data/Faser-test-%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
 			    "Corrupted","Incomplete","Duplicate"]
       },

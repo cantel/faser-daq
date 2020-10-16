@@ -108,7 +108,7 @@ public:
   void fill( std::string name, X value, W weight=1 ){
     
     static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
-                  "Cannot fill histogram with invalid value type. Value must be numeric or string based (std::string or const char *)");
+                  "Cannot fill histogram with invalid value type. Value must be numeric.");
     static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
                   "Cannot fill histogram with invalid weight value type. Value must be numeric.");
 
@@ -123,7 +123,7 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  template<typename X, typename W = int>
+  template<typename W = int>
   void fill( std::string name, std::string value, W weight=1 )  {
 
     static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,

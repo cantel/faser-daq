@@ -188,11 +188,11 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
     case PhysicsTag:{
       switch (sourceID) {
         case TriggerSourceID:
-          m_tlbdataFragment = new TLBDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+          m_tlbdataFragment = std::make_unique<TLBDataFragment>(TLBDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size()));
           DEBUG("unpacking TLB data fragment.");
           break;
         case PMTSourceID:
-          m_pmtdataFragment = new DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+          m_pmtdataFragment = std::make_unique<DigitizerDataFragment>(DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size()));
           DEBUG("unpacking PMT data fragment.");
           break;
         default:
@@ -210,7 +210,7 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
       DEBUG("unpacking monitoring fragment.");
       break;
     case TLBMonitoringTag:
-      m_tlbmonitoringFragment= new TLBMonitoringFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+      m_tlbmonitoringFragment= std::make_unique<TLBMonitoringFragment>(TLBMonitoringFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size()));
       DEBUG("unpacking TLB monitoring fragment.");
       break;
     default:

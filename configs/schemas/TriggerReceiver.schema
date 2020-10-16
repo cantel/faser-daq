@@ -156,9 +156,14 @@
                   "type": "boolean"
                 }
               },
-              "BusyDisable": {
+              "Busy0Disable": {
                   "type"          : "boolean",
-                  "title"         : "BusyDisable",
+                  "title"         : "Busy0Disable",
+                  "default"       : "true"
+              },
+              "Busy1Disable": {
+                  "type"          : "boolean",
+                  "title"         : "Busy1Disable",
                   "default"       : "true"
               },
               "EnableTriggerData": {

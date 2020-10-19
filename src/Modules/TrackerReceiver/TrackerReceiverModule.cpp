@@ -75,12 +75,19 @@ TrackerReceiverModule::TrackerReceiverModule() {
     else m_configureModules = true;
 
     if ( cfg.contains("FinePhaseClk")) {
-       m_finePhaseDelay_Clk = cfg.contains("FinePhaseClk");
+       m_finePhaseDelay_Clk = cfg["FinePhaseClk"];
+       INFO("Found FinePhaseClk config : "<<m_finePhaseDelay_Clk);
     }
-    else m_finePhaseDelay_Clk = 0;
+    else {WARNING("No clock fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Clk = 0;}
+
+    if ( cfg.contains("FinePhaseLed")) {
+       m_finePhaseDelay_Led = cfg["FinePhaseLed"];
+       INFO("Found FinePhaseLed config : "<<m_finePhaseDelay_Led);
+    }
+    else {WARNING("No Led fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Led = 0;}
 
     if ( cfg.contains("RxTimeoutDisable")) {
-       m_RxTimeoutDisable = cfg.contains("RxTimeoutDisable");
+       m_RxTimeoutDisable = cfg["RxTimeoutDisable"];
     }
     else m_RxTimeoutDisable = false;
 
@@ -153,6 +160,8 @@ void TrackerReceiverModule::configure() {
 
   m_trb->SetDirectParam(FASER::TRBDirectParameter::FifoReset | FASER::TRBDirectParameter::ErrCntReset); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
 
+  INFO("Setting clock fine phase delay for CLK/CMD line to "<<m_finePhaseDelay_Clk);
+  INFO("Setting clock fine phase delay for LED/LEDX line to "<<m_finePhaseDelay_Led);
   m_trb->GetPhaseConfig()->SetFinePhase_Clk0(m_finePhaseDelay_Clk);
   m_trb->GetPhaseConfig()->SetFinePhase_Led0(m_finePhaseDelay_Led);
   m_trb->GetPhaseConfig()->SetFinePhase_Clk1(m_finePhaseDelay_Clk);

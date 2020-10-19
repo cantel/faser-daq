@@ -45,8 +45,8 @@ class TrackerReceiverModule : public FaserProcess {
   std::unique_ptr<FASER::TRBAccess> m_trb;
   std::unique_ptr<FASER::TRBEventDecoder> m_ed;
   std::unique_ptr<FASER::FletcherChecksum> m_checksum;
-  static const uint8_t m_finePhaseDelay_Led = 55;
-  uint8_t m_finePhaseDelay_Clk;
+  unsigned int m_finePhaseDelay_Led;
+  unsigned int m_finePhaseDelay_Clk;
   unsigned int m_userBoardID;
   std::string m_SCIP;
   std::string m_DAQIP;

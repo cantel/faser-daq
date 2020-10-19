@@ -74,7 +74,13 @@
                 "FinePhaseClk"         : {
                     "type"          : "integer",
                     "title"         : "fine phase delay for clock line",
-                    "description"   : "fine pahse delay for input clock",
+                    "description"   : "fine phase delay for input clock",
+                    "default"       : 0
+                    },
+                "FinePhaseLed"         : {
+                    "type"          : "integer",
+                    "title"         : "fine phase delay for led(x) line",
+                    "description"   : "fine phase delay for led(x) line",
                     "default"       : 0
                     },
                 "RxTimeoutDisable"         : {

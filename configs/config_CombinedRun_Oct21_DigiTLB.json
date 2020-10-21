@@ -14,8 +14,8 @@
             "influxDb_name": "DAQlingMetrics",
             "SamplingPhase": [false, false, false, false, false, false, false, false],
             "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-            "RandomTriggerRate": 5,
-            "Prescale": [0, 0, 0, 0, 1, 0],
+            "RandomTriggerRate": 0,
+            "Prescale": [0, 0, 0, 0, 20, 0],
             "TrackerDelay": 100,
             "DigitizerDelay": 0,
             "LHC_CLK": false,
@@ -28,9 +28,9 @@
             "Busy1Disable": false,
             "EnableTriggerData": true,
             "EnableMonitoringData": true,
-            "Derandomize": false,
+            "Derandomize": true,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "LUT_CombinedRun_Oct21.txt",
+            "LUTConfig": "/home/meehan/combined-run/configs/LUT_CombinedRun_Oct21.txt",
             "usb_device_no": 48
         },
         "connections": {
@@ -58,7 +58,7 @@
         "host_pc": "128.141.151.198",
         "board_type": "v0",
         "digitizer_hw_address":  "0x32000000",  
-        "buffer": {"custom": true, "length": 600, "n_post_samples": 0},
+        "buffer": {"custom": true, "length": 630, "n_post_samples": 0},
         "trigger_acquisition": {"external": true, "software": false, "internal": false},
         "trigger_software": {"enable": false, "rate": 1},
         "trigger_internal": [{"group" : 0, "enable": 0, "logic": "OR", "threshold_ch0": 10000,   "threshold_ch1": 10000,  "output_width":32},
@@ -88,10 +88,10 @@
                             {"channel": 15, "enable": 1, "dynamic_range": 2.0,  "dc_offset": 0.0}],
         "readout": {"readout_blt": 2000,
                     "readout_method": "2ESST320FIFO",
-                    "interface_jumbo": true,
-                    "interface_max_packets": 2,
+                    "interface_jumbo": false,
+                    "interface_max_packets": 1,
                     "interface_packet_gap": 0,
-                    "software_buffer": 2000000,
+                    "software_buffer": 20000000,
                     "print_event": false,
                     "n_busy_level": 500},
         "parsing": {"ttt_converter": 40.08,
@@ -133,7 +133,7 @@
           },
           {
             "type": "pair",
-            "chid": 4,
+            "chid": 1,
             "transport": "tcp",
             "host": "localhost",
             "port": 8104
@@ -253,7 +253,7 @@
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "stats_uri": "tcp://localhost:7000",
-        "max_filesize": 100000,
+        "max_filesize": 10000000,
         "buffer_size": 400000,
         "filename_pattern": "/tmp/meehan/FaserDigitizerTest-%c-%r-%n.raw",
         "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring","Corrupted","Incomplete","Duplicate"]

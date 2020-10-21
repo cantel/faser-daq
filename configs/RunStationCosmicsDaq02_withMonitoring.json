@@ -13,7 +13,7 @@
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics",
         "SamplingPhase": [false, false, false, false, false, false, false, false],
-        "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+        "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
         "RandomTriggerRate": 5,
         "Prescale": [1, 1, 1, 1, 0, 0],
         "TrackerDelay": 100,
@@ -23,14 +23,14 @@
         "Deadtime": 500,
         "MonitoringRate": 11245,
         "OutputDestination": 0,
-        "Input": [false, false, true, true, true, true, true, false],
+        "Input": [true, true, true, true, true, true, true, false],
         "Busy0Disable": true,
         "Busy1Disable": false,
         "EnableTriggerData": true,
         "EnableMonitoringData": true,
         "Derandomize": false,
         "ReadoutFIFOReset": true,
-        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmics.txt"
+        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmics_withcalo.txt"
       },
       "connections": {
         "senders": [
@@ -188,19 +188,19 @@
           "influxDb_name": "DAQlingMetrics",
           "ip":                    "128.141.151.198",
           "vme_base_address":      "0x32000000",
-          "buffer_length":         "0x09",
+          "buffer_length":         "0x0A",
           "buffer_n_post_samples": "0x0",
           "internal_sawtooth":     false,
 	  "software_trigger":  {"enable": false, "rate": 3},
           "global_trigger": { "lvds": 0, "external": 1, "software": 0, "polarity": "under", "coincidence": false, "nchan": 2, "timewindow": 20},
 	  "ttt_converter": "40.079",
-          "channel_config": [{"group" : 0, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
-                              "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000},
-                              "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000}
+          "channel_config": [{"group" : 0, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 0, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7800},
+                              "chanB" : {"channel": 1, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7800}
                              },
-                             {"group" : 1, "trig_enable": 0, "trig_logic": "OnlyA", "trig_width":32,
-                              "chanA" : {"channel": 2, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000},
-                              "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 0, "dc_offset": 0.0, "trig_threshold": 12000}
+                             {"group" : 1, "trig_enable": 0, "trig_logic": "OR", "trig_width":32,
+                              "chanA" : {"channel": 2, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7800},
+                              "chanB" : {"channel": 3, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7800}
                              },
                              {"group" : 2, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
                               "chanA" : {"channel": 4, "dynamic_range": 2.0, "enable_read": 1, "dc_offset": 0.0, "trig_threshold": 7800},
@@ -223,8 +223,8 @@
                               "chanB" : {"channel": 13, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 7800}
                              },
                              {"group" : 7, "trig_enable": 0, "trig_logic": "AND", "trig_width":32,
-                              "chanA" : {"channel": 14, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 7800},
-                              "chanB" : {"channel": 15, "dynamic_range": 0.5, "enable_read": 0, "dc_offset": 0, "trig_threshold": 7800}
+                              "chanA" : {"channel": 14, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0, "trig_threshold": 0},
+                              "chanB" : {"channel": 15, "dynamic_range": 0.5, "enable_read": 1, "dc_offset": 0.9, "trig_threshold": 0}
                              }],
           "frontpanel_config" : {"lemo" : {"trig_in" : "ttl" , "trig_out" : "ttl"}} 
       },
@@ -354,7 +354,7 @@
 	  "stats_uri": "tcp://localhost:7000",
 	  "max_filesize": 100000000,
 	  "buffer_size": 4000,
-	  "filename_pattern": "/data/Faser-cosmics-backbone-%c-%r-%n.raw",
+	  "filename_pattern": "/home/data/Faser-cosmics-backbone-%c-%r-%n.raw",
 	  "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring",
 			    "Corrupted","Incomplete","Duplicate"]
       },
@@ -417,7 +417,7 @@
       "host": "localhost",
       "port": 5564,
       "type": "TriggerRateMonitor",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "fragmentID": 131072,
         "stats_uri": "tcp://localhost:7000",

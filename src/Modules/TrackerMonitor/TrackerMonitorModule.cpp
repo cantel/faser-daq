@@ -30,16 +30,15 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
     return;
   }
 
- /*auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
+ auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
  if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;
   }
  if (m_tlbdataFragment->tbp() & 0x10) return; // ignore random triggered events
- */
 
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
-  auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;
@@ -80,7 +79,7 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
           auto hitsPerChip2 = allHits[kCHIPS_PER_MODULE - 1 - chipIdx];
           for (auto hit2 : hitsPerChip2){ // hit is an std::pair<uint8 strip, uint8 pattern>
             if ( hit2.second == 7 ) continue;
-            auto strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
+            auto strip2 = kSTRIPS_PER_CHIP-1-hit2.second; // invert
             if ( std::abs(strip1-strip2) > kSTRIPDIFFTOLERANCE ) continue;
             // good physics hits
             std::bitset<3> bitset_hitp1(hit1.second);

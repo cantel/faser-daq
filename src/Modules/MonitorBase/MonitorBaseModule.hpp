@@ -10,6 +10,7 @@
 #include "EventFormats/TLBDataFragment.hpp"
 #include "EventFormats/TLBMonitoringFragment.hpp"
 #include "EventFormats/DigitizerDataFragment.hpp"
+#include "EventFormats/TrackerDataFragment.hpp"
 
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Logging.hpp"
@@ -42,6 +43,7 @@ class MonitorBaseModule : public FaserProcess {
   std::unique_ptr<TLBMonitoringFragment> m_tlbmonitoringFragment;
   std::unique_ptr<TLBDataFragment> m_tlbdataFragment;
   std::unique_ptr<DigitizerDataFragment> m_pmtdataFragment;
+  const TrackerDataFragment * m_trackerdataFragment = 0;
 
   // histogramming
   bool m_histogramming_on;

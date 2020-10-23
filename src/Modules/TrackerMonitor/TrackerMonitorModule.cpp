@@ -79,7 +79,7 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
           auto hitsPerChip2 = allHits[kCHIPS_PER_MODULE - 1 - chipIdx];
           for (auto hit2 : hitsPerChip2){ // hit is an std::pair<uint8 strip, uint8 pattern>
             if ( hit2.second == 7 ) continue;
-            auto strip2 = kSTRIPS_PER_CHIP-1-hit2.second; // invert
+            auto strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
             if ( std::abs(strip1-strip2) > kSTRIPDIFFTOLERANCE ) continue;
             // good physics hits
             std::bitset<3> bitset_hitp1(hit1.second);

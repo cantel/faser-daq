@@ -42,6 +42,7 @@ class TrackerReceiverModule : public FaserProcess {
   void disableTrigger(const std::string &) override;
   void enableTrigger(const std::string &) override;
   
+ private:
   std::unique_ptr<FASER::TRBAccess> m_trb;
   std::unique_ptr<FASER::TRBEventDecoder> m_ed;
   std::unique_ptr<FASER::FletcherChecksum> m_checksum;
@@ -58,14 +59,12 @@ class TrackerReceiverModule : public FaserProcess {
   unsigned int m_moduleClkCmdMask;
   bool m_triggerEnabled;
 
-  std::atomic<int> event_size_bytes;
+  std::atomic<int> m_event_size_bytes;
   std::atomic<int> m_physicsEventCount;
-  std::atomic<int> bc_id;
-  std::atomic<int> corrupted_fragments;
-  std::atomic<int> checksum_mismatches;
-  std::atomic<float> checksum_mismatches_rate;
-  std::atomic<int> number_of_decoded_events;
+  std::atomic<int> m_corrupted_fragments;
+  std::atomic<int> m_checksum_mismatches;
+  std::atomic<float> m_checksum_mismatches_rate;
+  std::atomic<int> m_number_of_decoded_events;
 
-  private:
   bool m_debug = false;
 };

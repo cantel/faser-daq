@@ -114,11 +114,14 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   INFO("Trigger rate for SW triggers at : "<<m_software_trigger_rate);
   
   // check for consistency of SW triggers and acquisition
+  m_software_trigger_enable = false;
   if(m_software_trigger_rate!=0){
     auto trig_acquisition_sw = cfg["trigger_acquisition"]["software"];
     if(trig_acquisition_sw==0){
       INFO("Inconsistent settings - you have enabled SW triggers to be sent but not acquiring on SW triggers.");
       INFO("Are you sure you want this settings?");
+    } else {
+      m_software_trigger_enable = true;
     }
   }
 

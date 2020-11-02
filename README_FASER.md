@@ -41,6 +41,12 @@ and tried out at:
 
 One can check the schema without starting the gui by running:
   ./json-validate.py <jsonFile.json> [ModuleType]
+  
+Furthermore, a very nice online GUI editor to create and modify your starting
+json schema file to get something useable is the [https://github.com/rjsf-team/react-jsonschema-form](https://github.com/rjsf-team/react-jsonschema-form)
+which subsequently points you to [https://rjsf-team.github.io/react-jsonschema-form/](https://rjsf-team.github.io/react-jsonschema-form/). This 
+one is also pretty good [https://github.com/jdorn/json-editor](https://github.com/jdorn/json-editor) which has an
+online editor as well as [https://www.jeremydorn.com/json-editor](https://www.jeremydorn.com/json-editor).
 
 
 ## Run 

@@ -162,7 +162,7 @@ if __name__ == '__main__':
     print("   > sudo firewall-cmd --list-ports")
     from werkzeug.serving import run_simple
     run_simple("0.0.0.0",port,app,threaded=True)
-    #app.run(host="0.0.0.0",port=5002,threaded=True)
+    #app.run(host="0.0.0.0",port=5000,threaded=True)
     print("The end! Wrapping up remaining threads, please standby ")
     state.stop()
     metrics.stop()

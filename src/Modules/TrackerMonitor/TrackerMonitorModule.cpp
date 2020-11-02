@@ -30,15 +30,16 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
     return;
   }
 
- auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
+ /*auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
  if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;
   }
  if (m_tlbdataFragment->tbp() & 0x10) return; // ignore random triggered events
+ */
 
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
-  fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;

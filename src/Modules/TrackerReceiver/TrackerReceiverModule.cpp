@@ -205,12 +205,12 @@ void TrackerReceiverModule::configure() {
       for(unsigned int i = 5; i >0; i--){
         uint16_t status;
         m_trb->ReadStatus(status);
-        if ((status & 0x4)){ // check if TLBClkSel is TRUE
+        if ((status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL)){ 
           INFO( "   TLB CLK synchronized");
           break;
         }
         INFO( "    TLB clock NOT OK ...");
-        usleep(100*1000);
+        usleep(1e5); // 100 ms
       }
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
@@ -234,12 +234,12 @@ void TrackerReceiverModule::configure() {
          for(unsigned int i = 5; i >0; i--){
            uint16_t status;
            m_trb->ReadStatus(status);
-           if (!(status & 0x4)){ // check if TLBClkSel is FALSE
+           if (status & FASER::TRBStatusParameters::STATUS_LOCALCLKSEL){
              INFO( "   Fell back to internal CLK");
              break;
             }
             INFO( "    Still falling back to internal CLK ...");
-            usleep(100*1000);
+            usleep(1e5); // 100 ms
           }
           continue;
       }

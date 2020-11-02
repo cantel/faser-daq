@@ -66,7 +66,8 @@ void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary)
   int diff_tlb_digi_bcid = m_tlb_bcid - m_digi_bcid;
   if ( std::abs(diff_tlb_digi_bcid) < 5000 ) m_histogrammanager->fill("h_diff_tlb_digi_bcid", diff_tlb_digi_bcid );
   else WARNING("difference between tlb bcid = "<<m_tlb_bcid<<" and trb bcid = "<<m_digi_bcid<<" too big.");
-  if ( (m_tlb_bcid < 5000) && (m_digi_bcid < 5000) ) m_histogrammanager->fill2D("h_digibcid_vs_tlbbcid", m_digi_bcid, m_tlb_bcid );
+  
+  // if ( (m_tlb_bcid < 5000) && (m_digi_bcid < 5000) ) m_histogrammanager->fill2D("h_digibcid_vs_tlbbcid", m_digi_bcid, m_tlb_bcid );
 
   //// TRB BCID
   //fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::TrackerSourceID+1);
@@ -93,8 +94,9 @@ void EventMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("h_diff_tlb_trb_bcid", "TLB BCID - TRB0 BCID", -20, 20, 40, Axis::Range::EXTENDABLE, 7200);
   m_histogrammanager->registerHistogram("h_diff_tlb_digi_bcid", "TLB BCID - Digi BCID", -20, 20, 40, Axis::Range::EXTENDABLE, 7200);
   
-  m_histogrammanager->register2DHistogram("h_trbbcid_vs_tlbbcid", "TRB BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
-  m_histogrammanager->register2DHistogram("h_digibcid_vs_tlbbcid", "DIGI BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
+  // ToDo : Figure out a way to display 2D info to be able to examine the correlation of the BCID matches
+  // m_histogrammanager->register2DHistogram("h_trbbcid_vs_tlbbcid", "TRB BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
+  // m_histogrammanager->register2DHistogram("h_digibcid_vs_tlbbcid", "DIGI BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
 
   INFO(" ... done registering histograms ... " );
   return;

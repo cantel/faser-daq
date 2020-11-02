@@ -31,9 +31,6 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   char  ip_addr_string[HOSTNAME_MAX_LENGTH];
   auto cfg_ip = cfg["host_pc"];
   if (cfg_ip!="" && cfg_ip!=nullptr){
-    // temporary location for IP name
-    char input_ip_location[HOSTNAME_MAX_LENGTH];
-
     // check to make sure you can copy over the config
     int length = strlen(std::string(cfg_ip).c_str());
     if(length>HOSTNAME_MAX_LENGTH){
@@ -44,9 +41,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
 
     // lookup the IP address dynamically
     // determines if its an IP address or a hostname
-    strcpy(input_ip_location, std::string(cfg["host_pc"]).c_str() ) ;
-    INFO("Input locale : "<<input_ip_location);
-    std::string ip_str = std::string(GetIPAddress(input_ip_location));
+    std::string ip_str = std::string(GetIPAddress(std::string(cfg["host_pc"]).c_str()));
     strcpy(ip_addr_string, ip_str.c_str());
     INFO("Input address/host  : "<<cfg["host_pc"]);
     INFO("Returned IP Address : "<<ip_addr_string);
@@ -108,34 +103,26 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   INFO("Speed(interface)     [MB/s]: "<<(interface_rate*4)/1000000.     );
 
   // store local run settings
-  auto cfg_software_trigger_enable = cfg["trigger_software"]["enable"];
-  if(cfg_software_trigger_enable==nullptr){
-    INFO("You did not specify if you wanted to send SW triggers - assuming FALSE");
-    m_software_trigger_enable = false;
-  }
-  else{
-    m_software_trigger_enable = cfg_software_trigger_enable;
-    auto global_trig_sw = cfg["global_trigger"]["software"];
-    if(global_trig_sw==0){
-      INFO("Inconsistent settings - you have enabled SW triggers to be sent but not acquiring on SW triggers.");
-      INFO("Are you sure you want this settings?");
-    }
-  }
-  INFO("Are software triggers enabled? : "<<m_software_trigger_enable);
-
   auto cfg_software_trigger_rate = cfg["trigger_software"]["rate"];
   if(cfg_software_trigger_rate==nullptr){
-    INFO("You did not specify a SW trigger rate");
-    cfg_software_trigger_rate = 1;
+    INFO("You did not specify a SW trigger rate - we will set it to 0 to be safe.");
+    m_software_trigger_rate = 0;
   }
   else{
     m_software_trigger_rate = cfg_software_trigger_rate;
   }
-
-  if(cfg_software_trigger_enable){
-    INFO("Trigger rate for SW triggers at : "<<m_software_trigger_rate);
-  }
+  INFO("Trigger rate for SW triggers at : "<<m_software_trigger_rate);
   
+  // check for consistency of SW triggers and acquisition
+  if(m_software_trigger_rate!=0){
+    auto trig_acquisition_sw = cfg["trigger_acquisition"]["software"];
+    if(trig_acquisition_sw==0){
+      INFO("Inconsistent settings - you have enabled SW triggers to be sent but not acquiring on SW triggers.");
+      INFO("Are you sure you want this settings?");
+    }
+  }
+
+
   // for the TLB conversion factor on the trigger time tag
   auto cfg_ttt_converter = cfg["parsing"]["ttt_converter"];
   if(cfg_ttt_converter==nullptr){
@@ -361,6 +348,10 @@ void DigitizerReceiverModule::runner() {
   DEBUG("Getting readout request size");
   m_n_events_requested = m_readout_blt;
   
+  // start time
+  auto time_start = chrono::high_resolution_clock::now();
+  int last_check_count = 0;
+
   // the polling loop
   while (m_run) {    
 
@@ -446,40 +437,47 @@ void DigitizerReceiverModule::runner() {
     
     }
     else{
-      // sleep for 1.5 milliseconds. This time is chosen to ensure that the polling 
+      // sleep for 1 milliseconds. This time is chosen to ensure that the polling 
       // happens at a rate just above the expected trigger rate in the case of no events
       //DEBUG("No events - sleeping for a short while");
       //release the lock - not after the conditional due to the ECR method
       m_lock.unlock();
-      usleep(100); 
+      usleep(1000); 
     }
            
 
-    
+    // only get the temperatures once per second to cut down on the VME data rate
+    // amount of time in loop in milliseconds
+    int time_now   = (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - time_start).count() * 1e-6)/1000;
+    if(time_now > last_check_count){
+      // update where you are in time counting
+      last_check_count = time_now;
+        
+      // monitoring of temperature on ADCs
+      std::vector<int> adc_temp = m_digitizer->GetADCTemperature(false);
+      if(adc_temp.size()==NCHANNELS){
+	m_temp_ch00 = adc_temp.at(0);
+	m_temp_ch01 = adc_temp.at(1);
+	m_temp_ch02 = adc_temp.at(2);
+	m_temp_ch03 = adc_temp.at(3);
+	m_temp_ch04 = adc_temp.at(4);
+	m_temp_ch05 = adc_temp.at(5);
+	m_temp_ch06 = adc_temp.at(6);
+	m_temp_ch07 = adc_temp.at(7);
+	m_temp_ch08 = adc_temp.at(8);
+	m_temp_ch09 = adc_temp.at(9);
+	m_temp_ch10 = adc_temp.at(10);
+	m_temp_ch11 = adc_temp.at(11);
+	m_temp_ch12 = adc_temp.at(12);
+	m_temp_ch13 = adc_temp.at(13);
+	m_temp_ch14 = adc_temp.at(14);
+	m_temp_ch15 = adc_temp.at(15);
+      }
+      else{
+	ERROR("Temperature monitoring picked up incorrect number of channels : "<<NCHANNELS);
+      }
+    }
 
-    // monitoring of temperature on ADCs
-    std::vector<int> adc_temp = m_digitizer->GetADCTemperature(false);
-    if(adc_temp.size()==NCHANNELS){
-      m_temp_ch00 = adc_temp.at(0);
-      m_temp_ch01 = adc_temp.at(1);
-      m_temp_ch02 = adc_temp.at(2);
-      m_temp_ch03 = adc_temp.at(3);
-      m_temp_ch04 = adc_temp.at(4);
-      m_temp_ch05 = adc_temp.at(5);
-      m_temp_ch06 = adc_temp.at(6);
-      m_temp_ch07 = adc_temp.at(7);
-      m_temp_ch08 = adc_temp.at(8);
-      m_temp_ch09 = adc_temp.at(9);
-      m_temp_ch10 = adc_temp.at(10);
-      m_temp_ch11 = adc_temp.at(11);
-      m_temp_ch12 = adc_temp.at(12);
-      m_temp_ch13 = adc_temp.at(13);
-      m_temp_ch14 = adc_temp.at(14);
-      m_temp_ch15 = adc_temp.at(15);
-    }
-    else{
-      ERROR("Temperature monitoring picked up incorrect number of channels : "<<NCHANNELS);
-    }
   }
   
   // delete the memory that was allocated
@@ -505,8 +503,6 @@ void DigitizerReceiverModule::PassEventBatch(std::vector<EventFragment> fragment
 
     // place the raw binary event fragment on the output port
     std::unique_ptr<const byteVector> bytestream(fragments.at(ifrag).raw());
-    
-    // only necessary for the real module
     daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
     m_connections.put(0, binData); 
   }

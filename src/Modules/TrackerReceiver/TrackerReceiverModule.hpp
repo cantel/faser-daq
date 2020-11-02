@@ -67,4 +67,5 @@ class TrackerReceiverModule : public FaserProcess {
   std::atomic<int> m_number_of_decoded_events;
 
   bool m_debug = false;
+  bool m_trace = false;
 };

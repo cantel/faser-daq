@@ -99,6 +99,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
     auto log_level = m_config.getConfig()["loglevel"]["module"];
     m_debug = (log_level=="DEBUG"?1:0);
     if (log_level == "TRACE") {  
+      m_debug = true;
+      m_trace = true;
       m_trb->SetDebug(true);
     }
     else {
@@ -374,7 +376,7 @@ void TrackerReceiverModule::runner() {
                                                 local_event_id, local_bc_id, event.data(), total_size));
             
             uint16_t error;
-            fragment->set_status(0);
+            uint16_t status(0);
    
             if (decoded_event.size() != 0){
               m_number_of_decoded_events += 1; //Monitoring data
@@ -384,20 +386,22 @@ void TrackerReceiverModule::runner() {
               }
               else { 
                 WARNING("Checksum mismatch.");
-                fragment->set_status(EventStatus::CorruptedFragment);
+                status |= EventStatus::CorruptedFragment;
                 m_corrupted_fragments += 1; //Monitoring data
                 m_checksum_mismatches += 1; //Monitoring data
                 m_checksum_mismatches_rate = m_checksum_mismatches/m_number_of_decoded_events; //Monitoring data
               }         
             }
-
+            
             for (uint32_t frame : event){
               if(m_ed->HasError(frame, error)){
                 //TODO If possible specify error
-                fragment->set_status(EventStatus::UnclassifiedError);
+                if ( status & EventStatus::UnclassifiedError ) continue;
+                status |= EventStatus::UnclassifiedError;
                 m_corrupted_fragments += 1; //Monitoring data
               }
             }
+            fragment->set_status(status);
 
             if (m_debug){
               DEBUG("event id: 0x"<< std::hex << fragment->event_id());
@@ -409,7 +413,9 @@ void TrackerReceiverModule::runner() {
               DEBUG("size: 0x"<< std::hex << fragment->size());
               DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
               DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
-             
+            }
+
+            if (m_trace) {
               DEBUG("Data received from TRB: ");
               for(auto word : event){
                 std::bitset<32> y(word);

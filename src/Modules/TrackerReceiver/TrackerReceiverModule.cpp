@@ -187,7 +187,13 @@ void TrackerReceiverModule::configure() {
             l_cfg->ReadFromFile(l_moduleConfigFile);
             l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
         }
-        m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
+        try {
+          m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
+        } catch ( TRBConfigurationException &e) {
+           m_status=STATUS_ERROR;
+           sleep(1);
+           throw e;
+        }
         INFO("Configuration of module " << l_moduleNo << " finished.");
       }
       else{

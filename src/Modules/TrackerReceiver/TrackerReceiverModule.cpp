@@ -75,23 +75,44 @@ TrackerReceiverModule::TrackerReceiverModule() {
     }
     else m_configureModules = true;
 
-    if ( cfg.contains("FinePhaseClk")) {
-       m_finePhaseDelay_Clk = cfg["FinePhaseClk"];
+    if ( cfg.contains("FinePhaseClk0")) {
+       m_finePhaseDelay_Clk0 = cfg["FinePhaseClk0"];
     }
-    else {WARNING("No clock fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Clk = 0;}
+    else {WARNING("No CLK0 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Clk0 = 0;}
 
-    if ( cfg.contains("FinePhaseLed")) {
-       m_finePhaseDelay_Led = cfg["FinePhaseLed"];
+    if ( cfg.contains("FinePhaseClk1")) {
+       m_finePhaseDelay_Clk1 = cfg["FinePhaseClk1"];
     }
-    else {WARNING("No Led fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Led = 0;}
+    else {WARNING("No CLK1 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Clk1 = 0;}
+
+    if ( cfg.contains("FinePhaseLed0")) {
+       m_finePhaseDelay_Led0 = cfg["FinePhaseLed0"];
+    }
+    else {WARNING("No LED0 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Led0 = 0;}
+
+    if ( cfg.contains("FinePhaseLed1")) {
+       m_finePhaseDelay_Led1 = cfg["FinePhaseLed1"];
+    }
+    else {WARNING("No LED1 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Led1 = 0;}
 
     if ( cfg.contains("RxTimeoutDisable")) {
        m_RxTimeoutDisable = cfg["RxTimeoutDisable"];
     }
     else m_RxTimeoutDisable = false;
 
-    INFO("\n*** Configurations for TrackerReceiver module *** \n emulation mode: "<<(runEmulation?"TRUE":"FALSE")<<"\n Running on CLK: "<<(m_extClkSelect?"TLB CLK":"INTERNAL CLK")<<"\n TRB board ID: "<<m_userBoardID<<"\n using USB: "<<(usingUSB?"TRUE (No SC/DAQ IP required)":"FALSE")<<"\n SC IP: "<<m_SCIP<<"\n DAQ IP: "<<m_DAQIP<<"\n chip readout mode: "<<m_ABCD_ReadoutMode<<" \n CLK fine phase delay: "<<m_finePhaseDelay_Clk<<"\n LED(X) fine phase delay: "<<m_finePhaseDelay_Led<<"\n Configure modules: "<<(m_configureModules?"TRUE":"FALSE")<<"\n RxTimeoutDisable: "<<(m_RxTimeoutDisable?"TRUE":"FALSE")<<"\n debug mode: "<<(m_debug?"TRUE":"FALSE")<<"\n");
-    
+    INFO("\n\n*** Configurations for TrackerReceiver module *** \n emulation mode: "<<
+          (runEmulation?"TRUE":"FALSE")<<
+          "\n Running on CLK: "<<(m_extClkSelect?"TLB CLK":"INTERNAL CLK")<<
+          "\n TRB board ID: "<<m_userBoardID<<
+          "\n using USB: "<<(usingUSB?"TRUE (No SC/DAQ IP required)":"FALSE")<<
+          "\n SC IP: "<<m_SCIP<<"\n DAQ IP: "<<m_DAQIP<<
+          "\n chip readout mode: "<<m_ABCD_ReadoutMode<<
+          " \n CLK0 fine phase delay: "<<m_finePhaseDelay_Clk0<<" \n CLK1 fine phase delay: "<<m_finePhaseDelay_Clk1<<
+          "\n LED(X)0 fine phase delay: "<<m_finePhaseDelay_Led0<<"\n LED(X)1 fine phase delay: "<<m_finePhaseDelay_Led1<<
+          "\n Configure modules: "<<(m_configureModules?"TRUE":"FALSE")<<
+          "\n RxTimeoutDisable: "<<(m_RxTimeoutDisable?"TRUE":"FALSE")<<
+          "\n debug mode: "<<(m_debug?"TRUE":"FALSE")<<"\n");
+
     if (usingUSB) m_trb = std::make_unique<FASER::TRBAccess>(0, runEmulation, m_userBoardID );
     else m_trb = std::make_unique<FASER::TRBAccess>(m_SCIP, m_DAQIP, 0, runEmulation, m_userBoardID );
     m_ed = std::make_unique<FASER::TRBEventDecoder>();
@@ -165,10 +186,10 @@ void TrackerReceiverModule::configure() {
   m_trb->GetConfig()->Set_Module_LedxRXEn(0);
   m_trb->WriteConfigReg();
 
-  m_trb->GetPhaseConfig()->SetFinePhase_Clk0(m_finePhaseDelay_Clk);
-  m_trb->GetPhaseConfig()->SetFinePhase_Led0(m_finePhaseDelay_Led);
-  m_trb->GetPhaseConfig()->SetFinePhase_Clk1(m_finePhaseDelay_Clk);
-  m_trb->GetPhaseConfig()->SetFinePhase_Led1(m_finePhaseDelay_Led);
+  m_trb->GetPhaseConfig()->SetFinePhase_Clk0(m_finePhaseDelay_Clk0);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led0(m_finePhaseDelay_Led0);
+  m_trb->GetPhaseConfig()->SetFinePhase_Clk1(m_finePhaseDelay_Clk1);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led1(m_finePhaseDelay_Led1);
   m_trb->WritePhaseConfigReg();
   m_trb->ApplyPhaseConfig();
  

@@ -71,16 +71,28 @@
                     "description"   : "if true will configure modules using given module configuration files.",
                     "default"       : true
                     },
-                "FinePhaseClk"         : {
+                "FinePhaseClk0"         : {
                     "type"          : "integer",
-                    "title"         : "fine phase delay for clock line",
-                    "description"   : "fine phase delay for input clock",
+                    "title"         : "fine phase delay for CLK0  line",
+                    "description"   : "fine phase delay for input clock 0 (modules 0-3)",
                     "default"       : 0
                     },
-                "FinePhaseLed"         : {
+                "FinePhaseClk1"         : {
                     "type"          : "integer",
-                    "title"         : "fine phase delay for led(x) line",
-                    "description"   : "fine phase delay for led(x) line",
+                    "title"         : "fine phase delay for CLK1 line",
+                    "description"   : "fine phase delay for input clock 1 (modules 4-7)",
+                    "default"       : 0
+                    },
+                "FinePhaseLed0"         : {
+                    "type"          : "integer",
+                    "title"         : "fine phase delay for LED0 line",
+                    "description"   : "fine phase delay for LED0 line with input clock 0",
+                    "default"       : 0
+                    },
+                "FinePhaseLed1"         : {
+                    "type"          : "integer",
+                    "title"         : "fine phase delay for LED1 line",
+                    "description"   : "fine phase delay for LED1 line with input clock 1",
                     "default"       : 0
                     },
                 "RxTimeoutDisable"         : {

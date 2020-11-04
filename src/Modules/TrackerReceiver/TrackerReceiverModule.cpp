@@ -90,7 +90,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
     }
     else m_RxTimeoutDisable = false;
 
-    INFO("\n*** Configurations for TrackerReceiver module *** \n emulation mode: "<<(runEmulation?"TRUE":"FALSE")<<"\n TRB board ID: "<<m_userBoardID<<"\n using USB: "<<(usingUSB?"TRUE (No SC/DAQ IP required)":"FALSE")<<"\n SC IP: "<<m_SCIP<<"\n DAQ IP: "<<m_DAQIP<<"\n chip readout mode: "<<m_ABCD_ReadoutMode<<" \n CLK fine phase delay: "<<m_finePhaseDelay_Clk<<"\n LED(X) fine phase delay: "<<m_finePhaseDelay_Led<<"\n Configure modules: "<<(m_configureModules?"TRUE":"FALSE")<<"\n RxTimeoutDisable: "<<(m_RxTimeoutDisable?"TRUE":"FALSE")<<"\n debug mode: "<<(m_debug?"TRUE":"FALSE")<<"\n");
+    INFO("\n*** Configurations for TrackerReceiver module *** \n emulation mode: "<<(runEmulation?"TRUE":"FALSE")<<"\n Running on CLK: "<<(m_extClkSelect?"TLB CLK":"INTERNAL CLK")<<"\n TRB board ID: "<<m_userBoardID<<"\n using USB: "<<(usingUSB?"TRUE (No SC/DAQ IP required)":"FALSE")<<"\n SC IP: "<<m_SCIP<<"\n DAQ IP: "<<m_DAQIP<<"\n chip readout mode: "<<m_ABCD_ReadoutMode<<" \n CLK fine phase delay: "<<m_finePhaseDelay_Clk<<"\n LED(X) fine phase delay: "<<m_finePhaseDelay_Led<<"\n Configure modules: "<<(m_configureModules?"TRUE":"FALSE")<<"\n RxTimeoutDisable: "<<(m_RxTimeoutDisable?"TRUE":"FALSE")<<"\n debug mode: "<<(m_debug?"TRUE":"FALSE")<<"\n");
     
     if (usingUSB) m_trb = std::make_unique<FASER::TRBAccess>(0, runEmulation, m_userBoardID );
     else m_trb = std::make_unique<FASER::TRBAccess>(m_SCIP, m_DAQIP, 0, runEmulation, m_userBoardID );
@@ -216,31 +216,35 @@ void TrackerReceiverModule::configure() {
   uint16_t running_params;
   if ( m_extClkSelect ) { // running on TLB clock
     running_params = FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect;
+    m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
+    m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
     bool retry(true);
     int8_t nRetries(3);
     while (retry && nRetries--) {
       m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
       // give it a moment to sync with clock
+      uint16_t status;
       for(unsigned int i = 5; i >0; i--){
-        uint16_t status;
         m_trb->ReadStatus(status);
-        if ((status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL)){ 
+        if (status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL){ 
           INFO( "   TLB CLK synchronized");
           break;
         }
-        INFO( "    TLB clock NOT OK ...");
+        INFO( "    Waiting to sync to TLB CLK ...");
         usleep(1e5); // 100 ms
       }
-      m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
-      m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
+      if ( !(status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL) ) {
+        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
+        continue;
+      } 
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
       } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
          if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw e; };
          ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
          m_trb->SetDirectParam(0);
+         uint16_t status;
          for(unsigned int i = 5; i >0; i--){
-           uint16_t status;
            m_trb->ReadStatus(status);
            if (status & FASER::TRBStatusParameters::STATUS_LOCALCLKSEL){
              INFO( "   Fell back to internal CLK");
@@ -414,6 +418,9 @@ void TrackerReceiverModule::runner() {
               DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
               DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
             }
+            else{
+              INFO("event id: 0x"<< fragment->event_id());
+            }
 
             if (m_trace) {
               DEBUG("Data received from TRB: ");
@@ -430,9 +437,6 @@ void TrackerReceiverModule::runner() {
                   DEBUG("               " << y);
               }
               delete data;
-            }
-            else{
-              INFO("event id: 0x"<< fragment->event_id());
             }
 
             // place the raw binary event fragment on the output port

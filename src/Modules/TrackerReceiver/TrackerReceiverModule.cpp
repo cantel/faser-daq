@@ -157,7 +157,7 @@ void TrackerReceiverModule::configure() {
   }
 
   // disable all before configuring 
-  m_trb->SetDirectParam(FASER::TRBDirectParameter::FifoReset | FASER::TRBDirectParameter::ErrCntReset); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
   m_trb->GetConfig()->Set_Module_L1En(0); 
   m_trb->GetConfig()->Set_Module_BCREn(0); 
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
@@ -213,9 +213,9 @@ void TrackerReceiverModule::configure() {
   m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
   m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
-  uint16_t running_params;
+  uint16_t running_params = FASER::TRBDirectParameter::FifoReset | FASER::TRBDirectParameter::ErrCntReset;
   if ( m_extClkSelect ) { // running on TLB clock
-    running_params = FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect;
+    running_params |= FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect;
     m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
     m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
     bool retry(true);
@@ -259,7 +259,6 @@ void TrackerReceiverModule::configure() {
     }
   }
   else { //running on internal clock
-    running_params = FASER::TRBDirectParameter::SoftCounterMuxEn;
     m_trb->GenerateSoftReset(m_moduleMask);
   }
   m_trb->WriteConfigReg();

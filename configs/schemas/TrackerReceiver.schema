@@ -125,7 +125,7 @@
                     },
                 "moduleClkMask"        : {
                     "type"          : "array",
-                    "title"         : "Mask for modules",
+                    "title"         : "Mask for Clk/Cmd",
                     "minItems"      : 8,
                     "maxItems"      : 8,
                     "items"    : {

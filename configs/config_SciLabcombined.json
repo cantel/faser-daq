@@ -3,62 +3,102 @@
   "group": "faser",
   "components": [
     {
-        "name": "tlbreceiver01",
-        "host": "localhost",
-        "port": 5556,
-        "type": "TriggerReceiver",
-        "loglevel": {"core": "INFO", "module": "DEBUG"},
-        "settings": {
-            "stats_uri": "tcp://localhost:7000",
-            "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-            "influxDb_name": "DAQlingMetrics",
-            "SamplingPhase": [false, false, false, false, false, false, false, false],
-            "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
-            "RandomTriggerRate": 0,
-            "Prescale": [0, 0, 0, 0, 20, 0],
-            "TrackerDelay": 100,
-            "DigitizerDelay": 0,
-            "LHC_CLK": false,
-            "OrbitDelay": 0,
-            "Deadtime": 500,
-            "MonitoringRate": 11245,
-            "OutputDestination": 0,
-            "Input": [false, false, true, true, true, true, true, false],
-            "Busy0Disable": true,
-            "Busy1Disable": false,
-            "EnableTriggerData": true,
-            "EnableMonitoringData": true,
-            "Derandomize": true,
-            "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/meehan/combined-run/configs/LUT_CombinedRun_Oct21.txt",
-            "usb_device_no": 48
-        },
-        "connections": {
-          "senders": [
-            {
-              "type": "pair",
-              "chid": 0,
-              "transport": "tcp",
-              "host": "*",
-              "port": 8100
-            }
-          ]
-        }
+      "name": "tlbreceiver01",
+      "host": "localhost",
+      "port": 5556,
+      "type": "TriggerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "SamplingPhase": [false, false, false, false, false, false, false, false],
+        "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+        "RandomTriggerRate": 6,
+        "Prescale": [0, 0, 0, 0, 1, 0],
+        "TrackerDelay": 100,
+        "DigitizerDelay": 0,
+        "LHC_CLK": false,
+        "OrbitDelay": 0,
+        "Deadtime": 500,
+        "MonitoringRate": 11233,
+        "OutputDestination": 0,
+        "Input": [false, false, false, false, false, false, false, false],
+        "Busy0Disable": true,
+        "Busy1Disable": false,
+        "EnableTriggerData": true,
+        "EnableMonitoringData": true,
+        "Derandomize": false,
+        "ReadoutFIFOReset": true,
+        "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
+      },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8100
+          }
+        ]
+      }
+    },
+    {
+      "name": "trackerreceiver07",
+      "host": "localhost",
+      "port": 5557,
+      "type": "TrackerReceiver",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "boardID": 7,
+        "stats_uri": "tcp://localhost:7000",
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "L1Atype" : "external",
+        "emulation" : false,
+        "SCIP" : "10.11.65.6",
+        "DAQIP" : "10.11.65.6",
+        "RxTimeoutDisable": true,
+        "ConfigureModules": false,
+        "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+        "moduleMask" : [false, false, false, false, false, false, false, false],
+        "moduleConfigFiles": {"0" : "/home/cantel/daq/configs/Module0.json",
+                              "1" : "/home/cantel/daq/configs/TemplateModuleCfg1.json",
+                              "2" : "/home/cantel/daq/configs/TemplateModuleCfg2.json",
+                              "3" : "/home/cantel/daq/configs/TemplateModuleCfg3.json",
+                              "4" : "/home/cantel/daq/configs/TemplateModuleCfg4.json",
+                              "5" : "/home/cantel/daq/configs/TemplateModuleCfg5.json",
+                              "6" : "/home/cantel/daq/configs/TemplateModuleCfg6.json",
+                              "7" : "/home/cantel/daq/configs/TemplateModuleCfg7.json"},
+        "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
+       },
+      "connections": {
+        "senders": [
+          {
+            "type": "pair",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "*",
+            "port": 8101
+          }
+        ]
+      }
     },
     {
       "name": "digitizer01",
       "host": "localhost",
-      "port": 5560,
+      "port": 5558,
       "type": "DigitizerReceiver",
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "stats_uri": "tcp://localhost:7000",
         "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
         "influxDb_name": "DAQlingMetrics",
-        "host_pc": "128.141.151.198",
+        "host_pc": "192.168.122.2",
         "board_type": "v0",
-        "digitizer_hw_address":  "0x32000000",  
-        "buffer": {"custom": true, "length": 630, "n_post_samples": 0},
+        "digitizer_hw_address":  "0x04320000",  
+        "buffer": {"custom": true, "length": 600, "n_post_samples": 0},
         "trigger_acquisition": {"external": true, "software": false, "internal": false},
         "trigger_software": {"enable": false, "rate": 1},
         "trigger_internal": [{"group" : 0, "enable": 0, "logic": "OR", "threshold_ch0": 10000,   "threshold_ch1": 10000,  "output_width":32},
@@ -88,10 +128,10 @@
                             {"channel": 15, "enable": 1, "dynamic_range": 2.0,  "dc_offset": 0.0}],
         "readout": {"readout_blt": 2000,
                     "readout_method": "2ESST320FIFO",
-                    "interface_jumbo": false,
-                    "interface_max_packets": 1,
+                    "interface_jumbo": true,
+                    "interface_max_packets": 2,
                     "interface_packet_gap": 0,
-                    "software_buffer": 20000000,
+                    "software_buffer": 2000000,
                     "print_event": false,
                     "n_busy_level": 500},
         "parsing": {"ttt_converter": 40.08,
@@ -104,7 +144,7 @@
             "chid": 0,
             "transport": "tcp",
             "host": "*",
-            "port": 8104
+            "port": 8102
           }
         ]
       }
@@ -112,15 +152,15 @@
     {
       "name": "eventbuilder01",
       "host": "localhost",
-      "port": 5561,
+      "port": 5559,
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
-          "stats_uri": "tcp://localhost:7000",
+	  "stats_uri": "tcp://localhost:7000",
           "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
           "influxDb_name": "DAQlingMetrics",
           "maxPending": 10,
-          "timeout_ms": 120000
+	  "timeout_ms": 120000
       },
       "connections": {
         "receivers": [
@@ -136,7 +176,14 @@
             "chid": 1,
             "transport": "tcp",
             "host": "localhost",
-            "port": 8104
+            "port": 8101
+          },
+          {
+            "type": "pair",
+            "chid": 2,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8102
           }
         ],
         "senders": [
@@ -193,69 +240,16 @@
       }
     },
     {
-      "name": "digitizermonitor01",
+      "name": "filewriter",
       "host": "localhost",
-      "port": 5562,
-      "type": "DigitizerMonitor",
-      "loglevel": {"core": "INFO", "module": "INFO"},
-      "settings": {
-        "stats_uri": "tcp://localhost:7000",
-        "fragmentID": 262144,
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",
-        "buffer_length": 600,
-        "publish_interval": 20
-      },
-      "connections": {
-        "receivers": [
-          {
-            "type": "pubsub",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8200
-          }
-        ]
-      }
-    },
-    {
-      "name": "eventmonitor01",
-      "host": "localhost",
-      "port": 5563,
-      "type": "EventMonitor",
-      "loglevel": {"core": "INFO", "module": "INFO"},
-      "settings": {
-        "stats_uri": "tcp://localhost:7000",
-        "fragmentID": 262144,
-        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
-        "influxDb_name": "DAQlingMetrics",
-        "enable_digitizer": true,
-        "enable_tlb": true,
-        "enable_trb": [true, false, false, false, false, false, false, false, false]
-      },
-      "connections": {
-        "receivers": [
-          {
-            "type": "pubsub",
-            "chid": 0,
-            "transport": "tcp",
-            "host": "localhost",
-            "port": 8200
-          }
-        ]
-      }
-    },
-    {
-      "name": "filewriter01",
-      "host": "localhost",
-      "port": 5564,
+      "port": 5560,
       "type": "FileWriterFaser",
       "loglevel": {"core": "INFO", "module": "INFO"},
       "settings": {
         "stats_uri": "tcp://localhost:7000",
-        "max_filesize": 10000000,
+        "max_filesize": 100000,
         "buffer_size": 400000,
-        "filename_pattern": "/tmp/meehan/FaserDigitizerTest-%c-%r-%n.raw",
+        "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
         "channel_names": ["Physics","Calibration","Monitoring","TLBMonitoring","Corrupted","Incomplete","Duplicate"]
       },
       "connections": {
@@ -308,6 +302,105 @@
             "transport": "tcp",
             "host": "localhost",
             "port": 8218
+          }
+        ]
+      }
+    },
+    {
+      "name": "eventmonitor01",
+      "host": "localhost",
+      "port": 5561,
+      "type": "EventMonitor",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "stats_uri": "tcp://localhost:7000",
+        "fragmentID": 262144,
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "enable_digitizer": true,
+        "enable_tlb": true,
+        "enable_trb": [false, false, false, false, false, false, false, true, false]
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
+      "name": "ratemonitor01",
+      "host": "localhost",
+      "port": 5562,
+      "type": "TriggerRateMonitor",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "fragmentID": 131072,
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+	"stats_uri": "tcp://localhost:7000"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8203
+          }
+        ]
+      }
+    },
+    {
+      "name": "triggermonitor01",
+      "host": "localhost",
+      "port": 5563,
+      "type": "TriggerMonitor",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "fragmentID": 131072,
+	"stats_uri": "tcp://localhost:7000"
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    {
+      "name": "digitizermonitor01",
+      "host": "localhost",
+      "port": 5564,
+      "type": "DigitizerMonitor",
+      "loglevel": {"core": "INFO", "module": "INFO"},
+      "settings": {
+        "stats_uri": "tcp://localhost:7000",
+        "fragmentID": 262144,
+        "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+        "influxDb_name": "DAQlingMetrics",
+        "buffer_length": 600,
+        "publish_interval": 20
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
           }
         ]
       }

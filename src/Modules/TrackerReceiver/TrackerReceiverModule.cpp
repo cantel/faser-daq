@@ -30,26 +30,108 @@ using namespace daqling::utilities;
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
-     
-    m_trb = std::make_unique<FASER::TRBAccess>(0, m_config.getConfig()["settings"]["emulation"]);
-    m_ed = std::make_unique<FASER::TRBEventDecoder>();
-    
-    if (m_config.getConfig()["loglevel"]["module"] == "DEBUG") { 
-      m_debug = true;
+
+    auto cfg = m_config.getSettings();
+
+    bool runEmulation = m_config.getConfig()["settings"]["emulation"]; 
+
+    if ( cfg.contains("boardID")) {
+      m_userBoardID = cfg["boardID"];
+    }
+    else if (!runEmulation) {
+      ERROR("No board ID specified.");
+      throw std::runtime_error("No board ID specified.");
     }
 
-    if (m_debug) {  
+    bool usingUSB(false);
+    if ( cfg.contains("SCIP")) {
+      m_SCIP = cfg["SCIP"];
+      if ( cfg.contains("DAQIP")) {
+        m_DAQIP = cfg["DAQIP"];
+      }
+      else {
+        ERROR("No DAQ IP specified.");
+        throw std::runtime_error("No DAQ IP specified.");
+      }
+      INFO("SC and DAQ IPs have been specified. Assuming we're communicating through the ether!");
+    }
+    else {
+       INFO("**NO** SC and DAQ IPs have been specified. Assuming we're communicating via USB!");
+       usingUSB = true;
+    }
+
+    m_extClkSelect = true;
+    if ( cfg.contains("L1Atype")) {
+      if (cfg["L1Atype"] == "internal" ) m_extClkSelect = false;
+    }
+
+    if ( cfg.contains("ReadoutMode")) {
+      m_ABCD_ReadoutMode = cfg["ReadoutMode"];
+    }
+    else m_ABCD_ReadoutMode = FASER::TRBAccess::ABCD_ReadoutMode::LEVEL;
+
+    if ( cfg.contains("ConfigureModules")) {
+      m_configureModules = cfg["ConfigureModules"];
+    }
+    else m_configureModules = true;
+
+    if ( cfg.contains("FinePhaseClk0")) {
+       m_finePhaseDelay_Clk0 = cfg["FinePhaseClk0"];
+    }
+    else {WARNING("No CLK0 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Clk0 = 0;}
+
+    if ( cfg.contains("FinePhaseClk1")) {
+       m_finePhaseDelay_Clk1 = cfg["FinePhaseClk1"];
+    }
+    else {WARNING("No CLK1 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Clk1 = 0;}
+
+    if ( cfg.contains("FinePhaseLed0")) {
+       m_finePhaseDelay_Led0 = cfg["FinePhaseLed0"];
+    }
+    else {WARNING("No LED0 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Led0 = 0;}
+
+    if ( cfg.contains("FinePhaseLed1")) {
+       m_finePhaseDelay_Led1 = cfg["FinePhaseLed1"];
+    }
+    else {WARNING("No LED1 fine phase delay setting provided. Setting to 0."); m_finePhaseDelay_Led1 = 0;}
+
+    if ( cfg.contains("RxTimeoutDisable")) {
+       m_RxTimeoutDisable = cfg["RxTimeoutDisable"];
+    }
+    else m_RxTimeoutDisable = false;
+
+    INFO("\n\n*** Configurations for TrackerReceiver module *** \n emulation mode: "<<
+          (runEmulation?"TRUE":"FALSE")<<
+          "\n Running on CLK: "<<(m_extClkSelect?"TLB CLK":"INTERNAL CLK")<<
+          "\n TRB board ID: "<<m_userBoardID<<
+          "\n using USB: "<<(usingUSB?"TRUE (No SC/DAQ IP required)":"FALSE")<<
+          "\n SC IP: "<<m_SCIP<<"\n DAQ IP: "<<m_DAQIP<<
+          "\n chip readout mode: "<<m_ABCD_ReadoutMode<<
+          " \n CLK0 fine phase delay: "<<m_finePhaseDelay_Clk0<<" \n CLK1 fine phase delay: "<<m_finePhaseDelay_Clk1<<
+          "\n LED(X)0 fine phase delay: "<<m_finePhaseDelay_Led0<<"\n LED(X)1 fine phase delay: "<<m_finePhaseDelay_Led1<<
+          "\n Configure modules: "<<(m_configureModules?"TRUE":"FALSE")<<
+          "\n RxTimeoutDisable: "<<(m_RxTimeoutDisable?"TRUE":"FALSE")<<
+          "\n debug mode: "<<(m_debug?"TRUE":"FALSE")<<"\n");
+
+    if (usingUSB) m_trb = std::make_unique<FASER::TRBAccess>(0, runEmulation, m_userBoardID );
+    else m_trb = std::make_unique<FASER::TRBAccess>(m_SCIP, m_DAQIP, 0, runEmulation, m_userBoardID );
+    m_ed = std::make_unique<FASER::TRBEventDecoder>();
+    
+    auto log_level = m_config.getConfig()["loglevel"]["module"];
+    m_debug = (log_level=="DEBUG"?1:0);
+    if (log_level == "TRACE") {  
+      m_debug = true;
+      m_trace = true;
       m_trb->SetDebug(true);
     }
     else {
       m_trb->SetDebug(false);    
     }
-    
+
     //Setting up the emulated interface
-    if (m_config.getConfig()["settings"]["emulation"] == true) {
+    if (runEmulation) {
       std::string l_TRBconfigFile = m_config.getConfig()["settings"]["emulatorFile"];
       static_cast<FASER::dummyInterface*>(m_trb->m_interface)->SetInputFile(l_TRBconfigFile); //file to read events from
-      m_trb->SetupStorageStream("TestEmulatorOutFile.daq");
     }
 }    
 
@@ -65,13 +147,14 @@ void TrackerReceiverModule::configure() {
   FaserProcess::configure();
   INFO("TRB --> configuration");
 
-  registerVariable(event_id, "event_id");
-  registerVariable(event_size_bytes, "event_size_bytes");
-  registerVariable(bc_id, "bc_id");
-  registerVariable(corrupted_fragments, "corrupted_fragments");
-  registerVariable(checksum_mismatches, "checksum_mismatches");
-  registerVariable(checksum_mismatches_rate, "checksum_mismatches_rate");
-  registerVariable(number_of_decoded_events, "number_of_decoded_events");
+  registerVariable(m_physicsEventCount, "TriggeredEvents");
+  registerVariable(m_physicsEventCount, "PhysicsRate", metrics::RATE);
+  registerVariable(m_event_size_bytes, "event_size_bytes");
+  registerVariable(m_corrupted_fragments, "BadFragments");
+  registerVariable(m_corrupted_fragments, "BadFragmentsRate", metrics::RATE);
+  registerVariable(m_checksum_mismatches, "checksum_mismatches");
+  registerVariable(m_checksum_mismatches_rate, "checksum_mismatches_rate");
+  registerVariable(m_number_of_decoded_events, "number_of_decoded_events");
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -93,27 +176,26 @@ void TrackerReceiverModule::configure() {
     ERROR("We have at most 8 modules per TRB, but you specified 0x" <<std::hex<<m_moduleMask<< " as moduleClkCmdMask!");
     return;
   }
-  
-  if (m_config.getConfig()["settings"]["L1Atype"] == "internal"){
-    m_trb->GetConfig()->Set_Module_L1En(0x0);
-    m_trb->GetConfig()->Set_Global_L2SoftL1AEn(true);
-  }
-  else {
-    m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
-    m_trb->GetConfig()->Set_Global_L2SoftL1AEn(false);
-  }
+
+  // disable all before configuring 
+  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+  m_trb->GetConfig()->Set_Module_L1En(0); 
+  m_trb->GetConfig()->Set_Module_BCREn(0); 
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
-  m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
-  m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
-
-  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(true);
-  m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
-  m_trb->GetConfig()->Set_Global_Overflow(4095);
-
+  m_trb->GetConfig()->Set_Module_LedRXEn(0);
+  m_trb->GetConfig()->Set_Module_LedxRXEn(0);
   m_trb->WriteConfigReg();
-  
+
+  m_trb->GetPhaseConfig()->SetFinePhase_Clk0(m_finePhaseDelay_Clk0);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led0(m_finePhaseDelay_Led0);
+  m_trb->GetPhaseConfig()->SetFinePhase_Clk1(m_finePhaseDelay_Clk1);
+  m_trb->GetPhaseConfig()->SetFinePhase_Led1(m_finePhaseDelay_Led1);
+  m_trb->WritePhaseConfigReg();
+  m_trb->ApplyPhaseConfig();
+ 
+
+  if ( m_configureModules ) {
   //Modules configuration
-  //This stage causes Timeout exception in DAQling, probably because of the transfer capacity. Maybe it will disapear with USB3 or ethernet
   for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
   
     if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
@@ -124,8 +206,15 @@ void TrackerReceiverModule::configure() {
         std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
         if (l_moduleConfigFile != ""){
             l_cfg->ReadFromFile(l_moduleConfigFile);
+            l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
         }
-        m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
+        try {
+          m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
+        } catch ( TRBConfigurationException &e) {
+           m_status=STATUS_ERROR;
+           sleep(1);
+           throw e;
+        }
         INFO("Configuration of module " << l_moduleNo << " finished.");
       }
       else{
@@ -133,7 +222,73 @@ void TrackerReceiverModule::configure() {
         ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
       }
     }
+    }
   }
+
+  // first common configs
+  m_trb->GetConfig()->Set_Global_RxTimeoutDisable(m_RxTimeoutDisable);
+  m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
+  m_trb->GetConfig()->Set_Global_Overflow(4095);
+  m_trb->GetConfig()->Set_Global_TLBClockSel(m_extClkSelect);
+  m_trb->GetConfig()->Set_Global_L2SoftL1AEn(!m_extClkSelect);
+  m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
+  m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
+  m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
+  uint16_t running_params = FASER::TRBDirectParameter::FifoReset | FASER::TRBDirectParameter::ErrCntReset;
+  if ( m_extClkSelect ) { // running on TLB clock
+    running_params |= FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect;
+    m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
+    m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
+    bool retry(true);
+    int8_t nRetries(3);
+    while (retry && nRetries--) {
+      m_trb->SetDirectParam(FASER::TRBDirectParameter::TLBClockSelect);
+      // give it a moment to sync with clock
+      uint16_t status;
+      for(unsigned int i = 5; i >0; i--){
+        m_trb->ReadStatus(status);
+        if (status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL){ 
+          INFO( "   TLB CLK synchronized");
+          break;
+        }
+        INFO( "    Waiting to sync to TLB CLK ...");
+        usleep(1e5); // 100 ms
+      }
+      if ( !(status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL) ) {
+        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
+        continue;
+      } 
+      try {
+        m_trb->GenerateSoftReset(m_moduleMask);
+      } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
+         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw e; };
+         ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
+         m_trb->SetDirectParam(0);
+         uint16_t status;
+         for(unsigned int i = 5; i >0; i--){
+           m_trb->ReadStatus(status);
+           if (status & FASER::TRBStatusParameters::STATUS_LOCALCLKSEL){
+             INFO( "   Fell back to internal CLK");
+             break;
+            }
+            INFO( "    Still falling back to internal CLK ...");
+            usleep(1e5); // 100 ms
+          }
+          continue;
+      }
+      retry = false;
+    }
+  }
+  else { //running on internal clock
+    m_trb->GenerateSoftReset(m_moduleMask);
+  }
+  m_trb->WriteConfigReg();
+  m_trb->SCT_EnableDataTaking(m_moduleMask);
+  m_trb->SetDirectParam(running_params);
+
+  m_trb->PrintStatus();
+
+
 }
 
 
@@ -148,7 +303,6 @@ void TrackerReceiverModule::sendECR()
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
-  corrupted_fragments = 0; //Setting this monitring variable to 0 
   m_triggerEnabled = true;
   m_trb->StartReadout(FASER::TRBReadoutParameters::READOUT_L1COUNTER_RESET | FASER::TRBReadoutParameters::READOUT_ERRCOUNTER_RESET | FASER::TRBReadoutParameters::READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
   INFO("TRB --> readout started." );
@@ -162,6 +316,7 @@ void TrackerReceiverModule::start(unsigned run_num) {
 void TrackerReceiverModule::stop() {
   m_trb->StopReadout();
   usleep(100);
+  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
   FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }
@@ -170,8 +325,8 @@ void TrackerReceiverModule::stop() {
 /****************************************  
  *        Disable Trigger
  ****************************************/
-void TrackerReceiverModule::disableTrigger(const std::string &arg) {
-  m_trb->StopReadout();
+void TrackerReceiverModule::disableTrigger(const std::string &) {
+  //m_trb->StopReadout();
   m_triggerEnabled = false;
   INFO("TRB --> disable trigger.");
   usleep(100);
@@ -180,8 +335,8 @@ void TrackerReceiverModule::disableTrigger(const std::string &arg) {
 /****************************************  
  *        Enable Trigger
  ****************************************/
-void TrackerReceiverModule::enableTrigger(const std::string &arg) {
-  m_trb->StartReadout();
+void TrackerReceiverModule::enableTrigger(const std::string &) {
+  //m_trb->StartReadout();
   m_triggerEnabled = true; 
   INFO("TRB --> enable trigger.");
   usleep(100);
@@ -198,11 +353,11 @@ void TrackerReceiverModule::runner() {
   uint64_t local_event_id;
   uint64_t local_bc_id;
 
-  while (m_run) { 
-    if (m_config.getConfig()["settings"]["L1Atype"] == "internal" && m_triggerEnabled == true){
+  while (m_run || vector_of_raw_events.size()) { 
+    if (!m_extClkSelect && m_triggerEnabled == true){
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
-    
+
     vector_of_raw_events = m_trb->GetTRBEventData();
 
     if (vector_of_raw_events.size() == 0){
@@ -212,7 +367,8 @@ void TrackerReceiverModule::runner() {
         for(std::vector<uint32_t> event : vector_of_raw_events){
           DEBUG("-------------- printing new event ---------------- ");
           int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
-          event_size_bytes = total_size; //Monitoring data
+          m_event_size_bytes = total_size; //Monitoring data
+          m_physicsEventCount += 1; //Monitoring data
 
           if (event.size() == 0){ continue;}
 
@@ -223,9 +379,16 @@ void TrackerReceiverModule::runner() {
 
             if (decoded_event.size() != 0){
                 local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
-                event_id = local_event_id | (m_ECRcount << 24); //Monitoring data
-                local_bc_id = decoded_event[0]->GetBCID();
-                bc_id = local_bc_id; // Monitoring data
+                local_event_id = local_event_id | (m_ECRcount << 24);
+                local_bc_id = (decoded_event[0]->GetBCID()-6)%3564; // software correction to agree with TLB.
+                if (m_debug){
+	  	  DEBUG("N modules present = "<<decoded_event[0]->GetNModulesPresent());
+	  	  if(decoded_event[0]->GetNModulesPresent()>0){
+	  	     auto ourSCTevent = decoded_event[0]->GetModule(0);
+	  	     DEBUG("BCID = "<<ourSCTevent->GetBCID());
+	  	     DEBUG("L1ID = "<<ourSCTevent->GetL1ID());
+	  	  }
+                }
             }
             else{
                 local_event_id = 0xFFFFFFFF;
@@ -237,22 +400,32 @@ void TrackerReceiverModule::runner() {
                                                 local_event_id, local_bc_id, event.data(), total_size));
             
             uint16_t error;
-            fragment->set_status(0);
+            uint16_t status(0);
    
             if (decoded_event.size() != 0){
+              m_number_of_decoded_events += 1; //Monitoring data
               if (decoded_event[0]->GetIsChecksumValid() == true){ 
                 DEBUG("Checksums match for this event.");
-                number_of_decoded_events += 1; //Monitoring data
-                checksum_mismatches_rate = checksum_mismatches/number_of_decoded_events; //Monitoring data
+                m_checksum_mismatches_rate = m_checksum_mismatches/m_number_of_decoded_events; //Monitoring data
               }
               else { 
                 WARNING("Checksum mismatch.");
-                fragment->set_status(EventStatus::CorruptedFragment);
-                checksum_mismatches += 1; //Monitoring data
-                number_of_decoded_events += 1; //Monitoring data
-                checksum_mismatches_rate = checksum_mismatches/number_of_decoded_events; //Monitoring data
+                status |= EventStatus::CorruptedFragment;
+                m_corrupted_fragments += 1; //Monitoring data
+                m_checksum_mismatches += 1; //Monitoring data
+                m_checksum_mismatches_rate = m_checksum_mismatches/m_number_of_decoded_events; //Monitoring data
               }         
             }
+            
+            for (uint32_t frame : event){
+              if(m_ed->HasError(frame, error)){
+                //TODO If possible specify error
+                if ( status & EventStatus::UnclassifiedError ) continue;
+                status |= EventStatus::UnclassifiedError;
+                m_corrupted_fragments += 1; //Monitoring data
+              }
+            }
+            fragment->set_status(status);
 
             if (m_debug){
               DEBUG("event id: 0x"<< std::hex << fragment->event_id());
@@ -264,32 +437,26 @@ void TrackerReceiverModule::runner() {
               DEBUG("size: 0x"<< std::hex << fragment->size());
               DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
               DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
-             
-            for (uint32_t frame : event){
-              if(m_ed->HasError(frame, error)){
-                //TODO If possible specify error
-                fragment->set_status(EventStatus::UnclassifiedError);
-                corrupted_fragments += 1; //Monitoring data
-              }
-            }
-
-            DEBUG("Data received from TRB: ");
-            for(auto word : event){
-              std::bitset<32> y(word);
-              if(m_ed->HasError(word, error)){DEBUG("               " << y << " error word");}
-              else{DEBUG("               " << y);}
-            }
-
-            DEBUG("Raw data sent further: ");
-            const DAQFormats::byteVector *data = fragment->raw();
-            for (int i = 0; i <  data->size(); i++){
-                std::bitset<8> y(data->at(i));
-                DEBUG("               " << y);
-            }
-            delete data;
             }
             else{
               INFO("event id: 0x"<< fragment->event_id());
+            }
+
+            if (m_trace) {
+              DEBUG("Data received from TRB: ");
+              for(auto word : event){
+                std::bitset<32> y(word);
+                if(m_ed->HasError(word, error)){DEBUG("               " << y << " error word");}
+                else{DEBUG("               " << y);}
+              }
+
+              DEBUG("Raw data sent further: ");
+              const DAQFormats::byteVector *data = fragment->raw();
+              for (unsigned i = 0; i <  (unsigned)data->size(); i++){
+                  std::bitset<8> y(data->at(i));
+                  DEBUG("               " << y);
+              }
+              delete data;
             }
 
             // place the raw binary event fragment on the output port

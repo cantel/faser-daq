@@ -63,17 +63,14 @@ void MonitorBaseModule::runner() {
   INFO("Running...");
 
   m_event_header_unpacked = false;
-  bool noData(true);
   daqling::utilities::Binary eventBuilderBinary;
 
   while (m_run) {
 
       if ( !m_connections.get(0, eventBuilderBinary)){
-          if ( !noData ) std::this_thread::sleep_for(10ms);
-          noData=true;
+          std::this_thread::sleep_for(10ms);
           continue;
       }
-      noData=false;
 
       monitor(eventBuilderBinary);
 

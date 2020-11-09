@@ -325,7 +325,7 @@
           "propertyOrder": 12,
           "properties": {
             "ttt_converter": {
-              "type": "numer",
+              "type": "number",
               "title": "BCID Converter",
               "description": "This is the clock frequency (presumably of the LHC clock) at which events are being recorded.  This is used to convert the internal trigger clock counter at 125 MHz to the BCID for our reconstruction needs.",
               "default": 40.08

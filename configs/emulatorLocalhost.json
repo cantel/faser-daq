@@ -1,5 +1,5 @@
 {
-  "version": 7,
+  "version": 9,
   "group": "faser",
   "components": [
     {
@@ -134,49 +134,49 @@
         "senders": [
           {
             "type": "pubsub",
-            "chid": 100,
+            "chid": 0,
             "transport": "tcp",
             "host": "*",
             "port": 8200
           },
           {
             "type": "pubsub",
-            "chid": 101,
+            "chid": 1,
             "transport": "tcp",
             "host": "*",
             "port": 8201
           },
           {
             "type": "pubsub",
-            "chid": 102,
+            "chid": 2,
             "transport": "tcp",
             "host": "*",
             "port": 8202
           },
           {
             "type": "pubsub",
-            "chid": 103,
+            "chid": 3,
             "transport": "tcp",
             "host": "*",
             "port": 8203
           },
           {
             "type": "pubsub",
-            "chid": 116,
+            "chid": 6,
             "transport": "tcp",
             "host": "*",
             "port": 8216
           },
           {
             "type": "pubsub",
-            "chid": 117,
+            "chid": 7,
             "transport": "tcp",
             "host": "*",
             "port": 8217
           },
           {
             "type": "pubsub",
-            "chid": 118,
+            "chid": 8,
             "transport": "tcp",
             "host": "*",
             "port": 8218

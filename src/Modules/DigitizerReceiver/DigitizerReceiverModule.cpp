@@ -507,8 +507,6 @@ void DigitizerReceiverModule::PassEventBatch(std::vector<EventFragment> fragment
     // place the raw binary event fragment on the output port
     std::unique_ptr<const byteVector> bytestream(fragments.at(ifrag).raw());
     daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
-    m_connections.put(0, binData); 
+    m_connections.send(0, binData);  
   }
-
-  DEBUG("Finished passing fragments");
 }

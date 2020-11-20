@@ -67,7 +67,7 @@ void MonitorBaseModule::runner() {
 
   while (m_run) {
 
-      if ( !m_connections.get(0, eventBuilderBinary)){
+      if ( !m_connections.receive(0, eventBuilderBinary)){
           std::this_thread::sleep_for(10ms);
           continue;
       }

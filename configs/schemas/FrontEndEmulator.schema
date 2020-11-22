@@ -34,11 +34,7 @@
         "type": "object",
         "title": "Settings",
         "properties": {
-          "stats_uri": {
-	    "type": "string",
-	    "format": "uri"
-	  },
-	"meanSize": {
+	  "meanSize": {
 	    "type": "integer",
 	    "default": 0,
 	    "minimum": 10,

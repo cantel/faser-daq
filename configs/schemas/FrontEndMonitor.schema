@@ -34,20 +34,8 @@
       "settings": {
         "type": "object",
         "title": "Settings",
-        "properties": {
-          "stats_uri": {
-	    "type": "string",
-	    "format": "uri"
-	  },
-          "influxDb_uri": {
-              "type"          : "string",
-              "title"         : "influxDb_uri"
-          },
-          "influxDb_name": {
-              "type"          : "string",
-              "title"         : "influxDb_name"
-          },
-          "sourceID": {
+ 	"properties": {
+          "fragmentID": {
 	    "type": "integer",
 	    "minimum": 0,
             "required": false

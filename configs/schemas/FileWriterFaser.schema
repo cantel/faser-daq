@@ -34,11 +34,7 @@
       "type": "object",
       "title": "Settings",
       "properties": {
-        "stats_uri": {
-        "type": "string",
-        "format": "uri"
-      },
-      "max_filesize": {
+        "max_filesize": {
         "propertyOrder": 102,
         "type": "integer",
         "default": 500000000,

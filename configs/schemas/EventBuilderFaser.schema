@@ -35,10 +35,6 @@
         "type": "object",
         "title": "Settings",
         "properties": {
-          "stats_uri": {
-	    "type": "string",
-	    "format": "uri"
-	  },
 	  "maxPending": {
 	    "type": "integer",
 	    "default": 10,

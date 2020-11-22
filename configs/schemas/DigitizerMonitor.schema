@@ -46,8 +46,21 @@
           "propertyOrder": 3,
           "description": "This configures the axis range of the example pulse monitoring histogram and should match what you have configured for the buffer length in the DigitizerReceiver.",
           "default": 630
-        }
-      }
+        },
+	"fragmentID": {
+	   "type": "integer",
+	   "minimum": 0,
+           "required": false
+	},
+	"publish_interval": {
+	   "type": "integer",
+	   "minimum": 1,
+           "required": false
+	}
+	
+      },
+      "format":"grid",
+      "propertyOrder": 5
     }
   }
 }

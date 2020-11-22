@@ -338,7 +338,9 @@
             }
           }
         }
-      }
+      },
+      "format":"grid",
+      "propertyOrder": 5
     }
   }
 }

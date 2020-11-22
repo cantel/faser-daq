@@ -226,13 +226,13 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
 void MonitorBaseModule::setupHistogramManager() {
 
   INFO("Setting up HistogramManager.");
-  INFO("Socket: "<<m_connections.getStatSocket());
+  //INFO("Socket: "<<m_connections.getStatSocket());
 
   m_histogrammanager = std::make_unique<HistogramManager>(m_connections.getStatSocket());
 
   m_histogramming_on = true;
 
-  auto statsURI = m_config.getConfig()["settings"]["stats_uri"];
+  auto statsURI = m_config.getConfig()["metrics_settings"]["stats_uri"];
   if (statsURI != "" && statsURI != nullptr) {
     INFO("Stats uri provided. Will publish histograms via the stats connection.");
     m_histogrammanager->setZMQpublishing(true);

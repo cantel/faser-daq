@@ -1,0 +1,37 @@
+{
+  "configuration": {
+    "version": 10,
+    "group": "faser",
+    "components": [
+      { "$ref" : "Templates/TLB.json#TLBReceiverEHN1" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver00" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver01" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver02" },
+      { "$ref" : "Templates/digitizer.json#DigitizerEHN1" },
+      {
+        "name": "eventbuilder01",
+        "host": "localhost",
+        "port": 5500,
+        "type": "EventBuilderFaser",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+        "connections": {
+          "receivers": [
+            { "chid": 0,"port": 8100, "host": "localhost", "type": "pair", "transport": "tcp" },
+            { "chid": 1,"port": 8101, "host": "localhost", "type": "pair", "transport": "tcp" },
+            { "chid": 2,"port": 8110, "host": "localhost", "type": "pair", "transport": "tcp" },
+            { "chid": 3,"port": 8111, "host": "localhost", "type": "pair", "transport": "tcp" },
+            { "chid": 4,"port": 8112, "host": "localhost", "type": "pair", "transport": "tcp" }
+          ],
+          "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
+	}
+      },
+      { "$ref": "Templates/fileWriter.json#FileWriter" },
+      { "$ref": "Templates/monitor.json#EventMonitor" },
+      { "$ref": "Templates/TLB.json#RateMonitor" },
+      { "$ref": "Templates/TLB.json#TriggerMonitor" },
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" }
+    ]
+  }
+}

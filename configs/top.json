@@ -1,0 +1,10 @@
+{
+  "loglevel": {
+      "core": "WARNING",
+      "module": "INFO"
+  },
+  "metrics_settings": {
+    "stats_uri": "tcp://localhost:7000"
+  },
+  "filename_pattern": "/home/data/Faser-%c-%r-%n.raw"
+}

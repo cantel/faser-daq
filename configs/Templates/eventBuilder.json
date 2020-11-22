@@ -1,0 +1,61 @@
+{
+  "EventBuilder": {
+      "settings": {
+          "maxPending": 10,
+          "timeout_ms": 1000
+        },
+      "connections": {
+	  "senders": [
+            {
+              "type": "pubsub",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8200
+            },
+            {
+              "type": "pubsub",
+              "chid": 1,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8201
+            },
+            {
+              "type": "pubsub",
+              "chid": 2,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8202
+            },
+            {
+              "type": "pubsub",
+              "chid": 3,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8203
+            },
+            {
+              "type": "pubsub",
+              "chid": 6,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8216
+            },
+            {
+              "type": "pubsub",
+              "chid": 7,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8217
+            },
+            {
+              "type": "pubsub",
+              "chid": 8,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8218
+            }
+          ]
+	  }
+  }
+}

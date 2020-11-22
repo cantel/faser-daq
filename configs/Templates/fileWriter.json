@@ -1,0 +1,78 @@
+{ 
+    "FileWriter": 
+        {
+        "name": "filewriter",
+        "host": "localhost",
+        "port": 5501,
+        "type": "FileWriterFaser",
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+          "max_filesize": 1000000000,
+          "buffer_size": 4000,
+          "filename_pattern": { "$ref": "top.json#filename_pattern" },
+          "channel_names": [
+            "Physics",
+            "Calibration",
+            "Monitoring",
+            "TLBMonitoring",
+            "Corrupted",
+            "Incomplete",
+            "Duplicate"
+          ]
+        },
+        "connections": {
+          "receivers": [
+            {
+              "type": "pubsub",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8200
+            },
+            {
+              "type": "pubsub",
+              "chid": 1,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8201
+            },
+            {
+              "type": "pubsub",
+              "chid": 2,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8202
+            },
+            {
+              "type": "pubsub",
+              "chid": 3,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8203
+            },
+            {
+              "type": "pubsub",
+              "chid": 4,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8216
+            },
+            {
+              "type": "pubsub",
+              "chid": 5,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8217
+            },
+            {
+              "type": "pubsub",
+              "chid": 6,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8218
+            }
+          ]
+        }
+      }
+}

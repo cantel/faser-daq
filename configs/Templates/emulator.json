@@ -1,0 +1,151 @@
+{
+    "TriggerGenerator": {
+        "name": "triggergenerator",
+        "host": "localhost",
+        "port": 5540,
+        "type": "TriggerGenerator",
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+          "rateInHz": 15,
+          "frontendApps": [
+            {
+              "host": "localhost",
+              "port": 17001
+            },
+            {
+              "host": "localhost",
+              "port": 17002
+            }
+          ]
+        }
+    },
+    "FrontendEmulator01": {
+        "name": "frontendemulator01",
+        "host": "localhost",
+        "port": 5541,
+        "type": "FrontEndEmulator",
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+          "meanSize": 25,
+          "rmsSize": 0,
+          "fragmentID": 1000001,
+          "probMissingTrigger": 0.00,
+          "probMissingFragment": 0.00,
+          "probCorruptedFragment": 0.00,
+          "monitoringInterval": 1.5,
+          "triggerPort": 17001,
+          "daqHost": "localhost",
+          "daqPort": 18001
+        }
+    },
+    "FrontendEmulator02": {
+        "name": "frontendemulator02",
+        "host": "localhost",
+        "port": 5542,
+        "type": "FrontEndEmulator",
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+          "meanSize": 250,
+          "rmsSize": 20,
+          "fragmentID": 1000002,
+          "probMissingTrigger": 0,
+          "probMissingFragment": 0,
+          "probCorruptedFragment": 0,
+          "monitoringInterval": 0,
+          "triggerPort": 17002,
+          "daqHost": "localhost",
+          "daqPort": 18002
+        }
+      },
+    "FrontendReceiver01": {
+        "name": "frontendreceiver01",
+        "host": "localhost",
+        "port": 5551,
+        "type": "FrontEndReceiver",
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+          "dataPort": 18001
+        },
+        "connections": {
+          "senders": [
+            {
+              "type": "pair",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8101
+            }
+          ]
+        }
+    },
+    "FrontendReceiver02": {
+        "name": "frontendreceiver02",
+        "host": "localhost",
+        "port": 5552,
+        "type": "FrontEndReceiver",
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+          "dataPort": 18002
+        },
+        "connections": {
+          "senders": [
+            {
+              "type": "pair",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8102
+            }
+          ]
+        }
+    },
+    "FrontEndMonitor01": {
+      "name": "frontendmonitor01",
+      "host": "localhost",
+      "port": 5561,
+      "type": "FrontEndMonitor",
+      "loglevel": { "$ref": "top.json#loglevel" },
+      "metrics_settings": { "$ref": "top.json#metrics_settings" },
+      "settings": {
+        "fragmentID": 1000001
+      },
+      "connections": {
+        "receivers": [
+          {
+            "type": "pubsub",
+            "chid": 0,
+            "transport": "tcp",
+            "host": "localhost",
+            "port": 8200
+          }
+        ]
+      }
+    },
+    "EmulatorMonitor": {
+        "name": "emulatormonitor01",
+        "host": "localhost",
+        "port": 5560,
+        "type": "EmulatorMonitor",
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+          "fragmentID": 1000001
+        },
+        "connections": {
+          "receivers": [
+            {
+              "type": "pubsub",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8202
+            }
+          ]
+        }
+      }
+}

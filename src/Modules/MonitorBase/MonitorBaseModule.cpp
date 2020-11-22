@@ -226,6 +226,7 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
 void MonitorBaseModule::setupHistogramManager() {
 
   INFO("Setting up HistogramManager.");
+  INFO("Socket: "<<m_connections.getStatSocket());
 
   m_histogrammanager = std::make_unique<HistogramManager>(m_connections.getStatSocket());
 

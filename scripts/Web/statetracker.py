@@ -59,9 +59,10 @@ def stateTracker(logger):
                 for logfile in logfiles:
                     name = logfile[1][5:].split("-")[0]
                     r1.hset("log", name, logfile[0] + logfile[1])
+                time.sleep(0.5)
                 h.spawnJoin(config['components'], daq.configureProcess)
             elif cmd=="start":
-                h.spawnJoin(config['components'], functools.partial(daq.startProcess,arg=runNumber))
+                h.spawnJoin(config['components'], functools.partial(daq.startProcess,run_num=runNumber))
             elif cmd=="pause":
                 h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="disableTrigger"))
             elif cmd=="ECR":
@@ -72,14 +73,20 @@ def stateTracker(logger):
             elif cmd=="stop":
                 h.spawnJoin(config['components'], daq.stopProcess)
             elif cmd=="shutdown":
+                logger.info("Calling shutdown")
                 h.spawnJoin(config['components'], daq.shutdownProcess)
-                #daq.removeProcesses(config['components']) # was too slow since it is serialized
-                h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
+                logger.info("Sleep for a bit")
+                time.sleep(2)
+                logger.info("Calling remove components")
+                daq.removeProcesses(config['components']) # was too slow since it is serialized
+                logger.info("Shutdown down")
+                #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
             overallState=None
             if not config['components']: overallState="DOWN"
             for comp in config['components']:       
-                rawStatus, timeout = daq.getStatus(comp)
+                rawStatus = daq.getStatus(comp)
+                timeout = None
                 state = str(h.translateStatus(rawStatus, timeout))
                 if not overallState:
                     overallState=state
@@ -192,6 +199,15 @@ class State:
             sys.exit(1)
         if not r1.exists("runningFile"):    
             r1.hset("runningFile", "fileName", "current.json")
+        else:
+            runState=r1.hgetall("runningFile")
+            logger.info("runState: %s",runState)
+            name=r1.hget("runningFile","fileName")
+            logger.info("Running with: %s",name)
+            data=h.read(name)
+            if not data:
+                logger.warn("Can't find valid input data - resetting")
+                r1.hset("runningFile", "fileName", "current.json")
         if not r1.exists("runNumber"):
             r1.set("runNumber",99)
             r1.set("runStart",0)

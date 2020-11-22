@@ -1,10 +1,10 @@
-
 import os
 from os import environ as env
 import threading
 import sys
-from jsonschema import validate
+import jsonschema
 import json
+import jsonref
 import daqcontrol
 import statetracker
 
@@ -13,19 +13,29 @@ def read(fileName):
         if(os.path.exists(env['DAQ_CONFIG_DIR'] + fileName)):
                 with open(env['DAQ_CONFIG_DIR'] + fileName) as f:
                         try:
-                                data = json.load(f)
-
-                                f.close()       
-                                if(os.path.exists(env['DAQ_CONFIG_DIR'] + "json-config.schema")):
-                                        with open(env['DAQ_CONFIG_DIR'] + "json-config.schema") as f:
+                                refobj = jsonref.load(f)
+                                if "configuration" in refobj:
+                                        data = daqcontrol.jsonref_to_json(refobj)["configuration"]
+                                        #print(json.dumps(data, sort_keys=True, indent=4))
+                                else:
+                                        data = refobj
+                                f.close()
+                                schema=env['DAQ_CONFIG_DIR'] + "schemas/validation-schema.json"
+                                if(os.path.exists(schema)):
+                                        with open(schema) as f:
                                                 try:
                                                         schema = json.load(f)
                                                 
                                                         try:
-                                                                validate(instance=data, schema=schema)
-                                                        except:
+                                                                jsonschema.validate(instance=data, schema=schema)
+                                                        except jsonschema.exceptions.ValidationError as e:
+                                                                print(e)
                                                                 data= "NOTCOMP"
+                                                        except:
+                                                                print("Unexpected error:", sys.exc_info())
+                                                                raise
                                                 except:
+                                                        print("Unexpected error 2:", sys.exc_info())
                                                         data= "BADSCHEMA"
                                         f.close()
 
@@ -73,19 +83,21 @@ def readGeneral():
 
 
 def translateStatus(rawStatus, timeout):
-        translatedStatus = rawStatus
+        translatedStatus = str(rawStatus)
         if(timeout):
                 translatedStatus = "TIMEOUT"
         else:
-                if(rawStatus == b'not_added'):
+                if(rawStatus == 'not_added'):
                         translatedStatus = "DOWN"
-                elif(rawStatus == b'added'):
+                elif(rawStatus == 'added'):
                         translatedStatus = "ADDED"
-                elif(rawStatus == b'ready'):    
+                elif(rawStatus == 'booted'):
+                        translatedStatus = "BOOTED"
+                elif(rawStatus == 'ready'):    
                         translatedStatus = "READY"
-                elif(rawStatus == b'running'):  
+                elif(rawStatus == 'running'):  
                         translatedStatus = "RUN"
-                elif(rawStatus == b'paused'):   
+                elif(rawStatus == 'paused'):   
                         translatedStatus = "PAUSED"
         return translatedStatus
 

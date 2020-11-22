@@ -4,7 +4,9 @@
       "core": "WARNING",
       "module": "INFO"
     },
+  "metrics_settings": {
     "stats_uri": "tcp://localhost:7000"
+    }
   },
   "configuration": {
     "version": 10,
@@ -15,9 +17,8 @@
         "host": "localhost",
         "port": 5540,
         "type": "TriggerGenerator",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
           "rateInHz": 15,
           "frontendApps": [
@@ -37,9 +38,8 @@
         "host": "localhost",
         "port": 5541,
         "type": "FrontEndEmulator",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
           "meanSize": 25,
           "rmsSize": 0,
@@ -58,9 +58,8 @@
         "host": "localhost",
         "port": 5542,
         "type": "FrontEndEmulator",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
           "meanSize": 250,
           "rmsSize": 20,
@@ -79,11 +78,9 @@
         "host": "localhost",
         "port": 5555,
         "type": "FrontEndReceiver",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
-          "stats_uri": {"$ref": "#/common/stats_uri"},
           "dataPort": 18001
         },
         "connections": {
@@ -103,9 +100,8 @@
         "host": "localhost",
         "port": 5556,
         "type": "FrontEndReceiver",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
           "dataPort": 18002
         },
@@ -126,11 +122,9 @@
         "host": "localhost",
         "port": 5557,
         "type": "EventBuilderFaser",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
-          "stats_uri": {"$ref": "#/common/stats_uri"},
           "maxPending": 10,
           "timeout_ms": 1000
         },
@@ -209,11 +203,9 @@
         "host": "localhost",
         "port": 5558,
         "type": "FileWriterFaser",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
-          "stats_uri": {"$ref": "#/common/stats_uri"},
           "max_filesize": 100000,
           "buffer_size": 4000,
           "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
@@ -286,11 +278,9 @@
         "host": "localhost",
         "port": 5559,
         "type": "EmulatorMonitor",
-        "loglevel": {
-          "$ref": "#/common/loglevel"
-        },
+        "loglevel": { "$ref": "#/common/loglevel" },
+	"metrics_settings": { "$ref": "#/common/metrics_settings" },
         "settings": {
-          "stats_uri": {"$ref": "#/common/stats_uri"},
           "fragmentID": 1000001
         },
         "connections": {

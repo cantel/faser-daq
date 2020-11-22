@@ -8,6 +8,9 @@
       "port": 5540,
       "type": "TriggerGenerator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
         "rateInHz": 15,
         "frontendApps": [
@@ -28,6 +31,9 @@
       "port": 5541,
       "type": "FrontEndEmulator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
         "meanSize": 400,
         "rmsSize": 50,
@@ -47,6 +53,9 @@
       "port": 5542,
       "type": "FrontEndEmulator",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
         "meanSize": 250,
         "rmsSize": 20,
@@ -66,8 +75,10 @@
       "port": 5555,
       "type": "FrontEndReceiver",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
           "dataPort": 18001
       },
       "connections": {
@@ -88,6 +99,9 @@
       "port": 5556,
       "type": "FrontEndReceiver",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
         "dataPort": 18002
       },
@@ -109,8 +123,10 @@
       "port": 5557,
       "type": "EventBuilderFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
           "maxPending": 10,
 	  "timeout_ms": 1000
       },
@@ -190,8 +206,10 @@
       "port": 5558,
       "type": "FileWriterFaser",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
-	  "stats_uri": "tcp://localhost:7000",
 	  "max_filesize": 100000,
 	  "buffer_size": 4000,
 	  "filename_pattern": "/tmp/Faser-%c-%r-%n.raw",
@@ -258,8 +276,10 @@
       "port": 5559,
       "type": "FrontEndMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
-	"stats_uri": "tcp://localhost:7000",
         "fragmentID": 1000001
       },
       "connections": {
@@ -280,8 +300,10 @@
       "port": 5560,
       "type": "EmulatorMonitor",
       "loglevel": {"core": "INFO", "module": "DEBUG"},
+      "metrics_settings": {
+	"stats_uri": "tcp://localhost:7000"
+      },
       "settings": {
-	"stats_uri": "tcp://localhost:7000",
         "fragmentID": 1000001
       },
       "connections": {

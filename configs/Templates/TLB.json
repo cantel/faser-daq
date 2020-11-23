@@ -1,0 +1,128 @@
+{
+    "TLBReceiverB21": {
+	"name": "tlbreceiver01",
+	"host": "localhost",
+	"port": 5520,
+	"type": "TriggerReceiver",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "SamplingPhase": [false, false, false, false, false, false, false, false],
+            "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+            "RandomTriggerRate": 6,
+            "Prescale": [0, 0, 0, 0, 1, 0],
+            "TrackerDelay": 100,
+            "DigitizerDelay": 0,
+            "LHC_CLK": false,
+            "OrbitDelay": 0,
+            "Deadtime": 500,
+            "MonitoringRate": 11233,
+            "OutputDestination": 0,
+            "Input": [false, false, false, false, false, false, false, false],
+            "Busy0Disable": true,
+            "Busy1Disable": false,
+            "EnableTriggerData": true,
+            "EnableMonitoringData": true,
+            "Derandomize": false,
+            "ReadoutFIFOReset": true,
+            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
+	},
+	"connections": {
+            "senders": [
+		{
+		    "type": "pair",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "*",
+		    "port": 8100
+		}
+            ]
+	}
+    },
+    "TLBReceiverEHN1": {
+	"name": "tlbreceiver01",
+	"host": "localhost",
+	"port": 5520,
+	"type": "TriggerReceiver",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "SamplingPhase": [false, false, false, false, false, false, false, false],
+            "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+            "RandomTriggerRate": 7,
+            "Prescale": [0, 0, 1, 0, 0, 0],
+            "TrackerDelay": 103,
+            "DigitizerDelay": 0,
+            "LHC_CLK": false,
+            "OrbitDelay": 0,
+            "Deadtime": 500,
+            "MonitoringRate": 11245,
+            "OutputDestination": 0,
+            "Input": [true, true, false, false, false, false, false, false],
+            "Busy0Disable": false,
+            "Busy1Disable": true,
+            "EnableTriggerData": true,
+            "EnableMonitoringData": true,
+            "Derandomize": false,
+            "ReadoutFIFOReset": true,
+            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmicsstand.txt"
+	},
+	"connections": {
+            "senders": [
+		{
+		    "type": "pair",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "*",
+		    "port": 8100
+		}
+            ]
+	}
+    },
+    "RateMonitor": {
+	"name": "ratemonitor01",
+	"host": "localhost",
+	"port": 5521,
+	"type": "TriggerRateMonitor",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "fragmentID": 131072
+	},
+	"connections": {
+            "receivers": [
+		{
+		    "type": "pubsub",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "localhost",
+		    "port": 8203
+		}
+            ]
+	}
+    },
+    "TriggerMonitor": {
+	"name": "triggermonitor01",
+	"host": "localhost",
+	"port": 5522,
+	"type": "TriggerMonitor",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "fragmentID": 131072
+	},
+	"connections": {
+            "receivers": [
+		{
+		    "type": "pubsub",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "localhost",
+		    "port": 8200
+		}
+            ]
+	}
+    }
+}
+
+    

@@ -10,11 +10,41 @@
     "version": {
       "type": "integer",
       "description": "Configuration version",
-      "minimum": 6,
-      "maximum": 999
+      "minimum": 9,
+      "maximum": 10,
+      "default": 10
     },
     "group": {
-      "type": "string"
+      "type": "string",
+      "default": "faser"
+    },
+   "scripts": {
+      "type": "array",
+      "format": "table",
+      "title": "Scripts",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "title": "Script",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "executable": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "directory": {
+            "type": "string"
+          }
+        },
+        "required": ["name", "host", "executable", "command", "directory"]
+      }
     },
     "components": {
       "type": "array",
@@ -56,20 +86,38 @@
             "properties": {
               "core": {
                 "type": "string",
-                "enum": ["DEBUG", "INFO", "TRACE"]
+                "enum": ["DEBUG", "INFO", "WARNING", "TRACE"]
               },
               "module": {
                 "type": "string",
-                "enum": ["DEBUG", "INFO", "TRACE"]
+                "enum": ["DEBUG", "INFO", "WARNING", "TRACE"]
               }
             },
             "required": ["core", "module"]
+          },
+          "metrics_settings": {
+            "title": "Metrics Settings",
+            "propertyOrder": 5,
+            "properties": {
+		"stats_uri": {
+		    "type": "string",
+		    "format": "uri"
+		},
+		"influxDb_uri": {
+		    "type"          : "string",
+		    "title"         : "influxDb_uri"
+		},
+		"influxDb_name": {
+		    "type"          : "string",
+		    "title"         : "influxDb_name"
+		}
+	    }
           },
           "settings": {
             "type": "object",
             "title": "Settings",
              "propertyOrder": 10
-         },
+          },
           "connections": {
             "type": "object",
             "title": "Connections",

@@ -51,7 +51,7 @@ function addRateGraph(dataName,tabName){
 
 function addRates() {
     // Create the charts
-    var rateTypes=["Physics","Calibration","Monitoring"];
+    var rateTypes=["Physics","Calibration","TLBMonitoring"];
     var series=[];
     var graphs=[];
     for (ii = 0; ii<rateTypes.length; ii++) {

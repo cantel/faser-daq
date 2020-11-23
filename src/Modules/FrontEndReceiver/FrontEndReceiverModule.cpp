@@ -85,7 +85,7 @@ void FrontEndReceiverModule::runner() {
     std::unique_ptr<const byteVector> bytestream(fragment->raw());
     daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
 
-    m_connections.put(0,binData);
+    m_connections.send(0,binData);
 
   }
 

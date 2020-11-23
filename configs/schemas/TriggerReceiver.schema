@@ -53,14 +53,6 @@
         "type"     : "object",
         "title"         : "Settings",
           "properties"    : {
-              "influxDb_uri": {
-                  "type"          : "string",
-                  "title"         : "influxDb_uri"
-              },
-              "influxDb_name": {
-                  "type"          : "string",
-                  "title"         : "influxDb_name"
-              },
               "SamplingPhase": {
                 "type"            : "array",
                 "title"           : "SamplingPhase",
@@ -182,62 +174,19 @@
                   "title"         : "ReadoutFIFOReset",
                   "default"       : "true"
               },
-              "LUTConfig": {
+              "Derandomize": {
+                  "type"          : "boolean",
+                  "title"         : "Derandomize",
+                  "default"       : "true"
+              },
+               "LUTConfig": {
                   "type"          : "string",
                   "title"         : "LUTConfig",
                   "required"       : true
               }
-          }
-      },
-      "connections": {
-        "type": "object",
-        "title": "connections",
-        "properties": {
-          "senders":{
-            "type": "array",
-            "title": "senders",
-            "minItems": "1",
-            "maxItems": "1",
-            "items": {
-              "type": "object",
-              "title": "items",
-              "required": [
-              "type",
-              "chid",
-              "transport",
-              "host",
-              "port"
-              ],
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "title": "type",
-                  "default": "pair"
-                },
-                "chid": {
-                  "type": "integer",
-                  "title": "chid",
-                  "default": 0
-                },
-                "transport": {
-                  "type": "string",
-                  "title": "transport",
-                  "default": "tcp"
-                },
-                "host": {
-                  "type": "string",
-                  "title": "host",
-                  "default": "*"
-                },
-                "port": {
-                  "type": "integer",
-                  "title": "port",
-                  "default": 9102
-                }
-              }
-            }
-          }
-        }
+          },
+      "format":"grid",
+      "propertyOrder": 5
       }
-  }
+   }
 }

@@ -68,7 +68,7 @@ def data(metric):
 
 @metric_blueprint.route("/lastRates/<float:sleeptime>")
 def lastRates(sleeptime):
-  types=["Physics","Calibration","Monitoring"]
+  types=["Physics","Calibration","TLBMonitoring"]
   def getRates():
     prevValues={}
     while True:

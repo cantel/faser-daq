@@ -31,6 +31,7 @@ private:
   unsigned int m_numChannels;
   unsigned int m_numOutChannels;
   unsigned int m_timeout; //in milliseconds
+  unsigned int m_stopTimeout; //in milliseconds
   std::atomic<int> m_run_number;
   std::atomic<int> m_run_start;
   std::atomic<int> m_corruptFragmentCount;

@@ -50,6 +50,7 @@ def stateTracker(logger):
             daq=None
         if not daq and type(config)==dict:
             daq = h.createDaqInstance(config)
+        h.checkThreads()
         if daq:
             if cmd=="initialize":
                 daqdir = env['DAQ_BUILD_DIR']
@@ -59,27 +60,45 @@ def stateTracker(logger):
                 for logfile in logfiles:
                     name = logfile[1][5:].split("-")[0]
                     r1.hset("log", name, logfile[0] + logfile[1])
+                time.sleep(0.5)
+                logger.info("Calling configure")
                 h.spawnJoin(config['components'], daq.configureProcess)
+                logger.info("Configure done")
             elif cmd=="start":
-                h.spawnJoin(config['components'], functools.partial(daq.startProcess,arg=runNumber))
+                h.spawnJoin(config['components'], functools.partial(daq.startProcess,run_num=runNumber))
             elif cmd=="pause":
-                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="disableTrigger"))
+                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="disableTrigger",arg=""))
             elif cmd=="ECR":
-                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="ECR"))
+                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="ECR",arg=""))
                 update=True
             elif cmd=="unpause":
-                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="enableTrigger"))
+                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="enableTrigger",arg=""))
             elif cmd=="stop":
+                logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)
+                logger.info("Stop done")
             elif cmd=="shutdown":
+                logger.info("Calling shutdown")
                 h.spawnJoin(config['components'], daq.shutdownProcess)
-                #daq.removeProcesses(config['components']) # was too slow since it is serialized
-                h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
+                logger.info("Sleep for a bit")
+                cnt=20
+                while cnt:
+                    time.sleep(0.1)
+                    if h.checkThreads()==0: break
+                    cnt-=1
+                logger.info("Calling remove components")
+                try:
+                    daq.removeProcesses(config['components']) # was too slow since it is serialized
+                except:
+                    logger.warning("Got exceptions during removal")
+                logger.info("Shutdown down")
+                #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
             overallState=None
             if not config['components']: overallState="DOWN"
             for comp in config['components']:       
-                rawStatus, timeout = daq.getStatus(comp)
+                rawStatus = daq.getStatus(comp)
+                timeout = None
                 state = str(h.translateStatus(rawStatus, timeout))
                 if not overallState:
                     overallState=state
@@ -192,6 +211,15 @@ class State:
             sys.exit(1)
         if not r1.exists("runningFile"):    
             r1.hset("runningFile", "fileName", "current.json")
+        else:
+            runState=r1.hgetall("runningFile")
+            logger.info("runState: %s",runState)
+            name=r1.hget("runningFile","fileName")
+            logger.info("Running with: %s",name)
+            data=h.read(name)
+            if not data:
+                logger.warn("Can't find valid input data - resetting")
+                r1.hset("runningFile", "fileName", "current.json")
         if not r1.exists("runNumber"):
             r1.set("runNumber",99)
             r1.set("runStart",0)

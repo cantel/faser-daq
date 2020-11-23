@@ -1,7 +1,3 @@
 build
 .vscode
 *.code-workspace
-*/*.swp
-*/**/*.swp
-__pycache__
-*~

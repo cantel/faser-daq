@@ -34,10 +34,6 @@
         "type": "object",
         "title": "Settings",
         "properties": {
-          "stats_uri": {
-	    "type": "string",
-	    "format": "uri"
-	  },
 	  "dataPort": {
 	    "type": "integer",
 	    "default": 0,

@@ -37,6 +37,7 @@ function closeWindow(){
 function improveSchema(generalSchema, schema){
 
 	generalSchema = generalSchema.properties.components.items;
+    console.log(generalSchema);
 	//return generalSchema;
 	var improvedSchema = generalSchema;
 	//console.log("schema properties name", schema.properties.name);	
@@ -45,7 +46,7 @@ function improveSchema(generalSchema, schema){
 	improvedSchema.properties.type = schema.properties.type;
 	improvedSchema.properties.settings = schema.properties.settings;
         improvedSchema.title = schema.title;
-        improvedSchema.required = improvedSchema.required + ["components"];
+        improvedSchema.required = improvedSchema.required + [",components"];
 	//console.log("the improved schema: ",improvedSchema);
 	return improvedSchema;
 }

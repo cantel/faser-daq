@@ -29,7 +29,7 @@ def getConfigFileNames():
 	#print(entries)
 	fileNames = []
 	for e in entries:
-		if(e.endswith(".json")):
+		if(e.endswith(".json") and not e=="top.json"):
 			fileNames.append({'name': e})
 	return jsonify({'configFileNames' : fileNames})
 		

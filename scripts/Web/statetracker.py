@@ -60,7 +60,9 @@ def stateTracker(logger):
                     name = logfile[1][5:].split("-")[0]
                     r1.hset("log", name, logfile[0] + logfile[1])
                 time.sleep(0.5)
+                logger.info("Calling configure")
                 h.spawnJoin(config['components'], daq.configureProcess)
+                logger.info("Configure done")
             elif cmd=="start":
                 h.spawnJoin(config['components'], functools.partial(daq.startProcess,run_num=runNumber))
             elif cmd=="pause":
@@ -71,7 +73,9 @@ def stateTracker(logger):
             elif cmd=="unpause":
                 h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="enableTrigger"))
             elif cmd=="stop":
+                logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)
+                logger.info("Stop done")
             elif cmd=="shutdown":
                 logger.info("Calling shutdown")
                 h.spawnJoin(config['components'], daq.shutdownProcess)

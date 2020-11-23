@@ -67,12 +67,12 @@ def stateTracker(logger):
             elif cmd=="start":
                 h.spawnJoin(config['components'], functools.partial(daq.startProcess,run_num=runNumber))
             elif cmd=="pause":
-                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="disableTrigger"))
+                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="disableTrigger",arg=""))
             elif cmd=="ECR":
-                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="ECR"))
+                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="ECR",arg=""))
                 update=True
             elif cmd=="unpause":
-                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="enableTrigger"))
+                h.spawnJoin(config['components'], functools.partial(daq.customCommandProcess,command="enableTrigger",arg=""))
             elif cmd=="stop":
                 logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)

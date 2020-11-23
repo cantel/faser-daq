@@ -142,12 +142,26 @@ def createDaqInstance(d):
     return dc
     
 #creates a thread for the function passed on argument
-def spawnJoin(list, func):
-    threads = []
-    for p in list:
+#quick hack to maintain threads
+threads = []
+
+def spawnJoin(plist, func):
+    global threads
+    for p in plist:
         t = threading.Thread(target=func, args=(p,))
         t.start()
         threads.append(t)
-    for t in threads:
-        t.join()
 
+def checkThreads():
+    global threads
+    numThreads=len(threads)
+    newThreads=[]
+    for t in threads:
+        if not t.is_alive():
+            t.join()
+        else:
+            newThreads.append(t)
+    threads=newThreads
+    if numThreads:
+        print(f"Had {numThreads} running threads, now {len(newThreads)}")
+    return len(newThreads)

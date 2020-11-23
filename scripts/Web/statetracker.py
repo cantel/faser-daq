@@ -50,6 +50,7 @@ def stateTracker(logger):
             daq=None
         if not daq and type(config)==dict:
             daq = h.createDaqInstance(config)
+        h.checkThreads()
         if daq:
             if cmd=="initialize":
                 daqdir = env['DAQ_BUILD_DIR']
@@ -80,9 +81,16 @@ def stateTracker(logger):
                 logger.info("Calling shutdown")
                 h.spawnJoin(config['components'], daq.shutdownProcess)
                 logger.info("Sleep for a bit")
-                time.sleep(2)
+                cnt=20
+                while cnt:
+                    time.sleep(0.1)
+                    if h.checkThreads()==0: break
+                    cnt-=1
                 logger.info("Calling remove components")
-                daq.removeProcesses(config['components']) # was too slow since it is serialized
+                try:
+                    daq.removeProcesses(config['components']) # was too slow since it is serialized
+                except:
+                    logger.warning("Got exceptions during removal")
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]

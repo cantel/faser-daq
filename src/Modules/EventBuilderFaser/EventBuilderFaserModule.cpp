@@ -13,12 +13,11 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 
 EventBuilderFaserModule::EventBuilderFaserModule() {
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
   auto cfg = m_config.getSettings();
 
   m_maxPending = cfg.value("maxPending",10);
   m_timeout = 1000*cfg.value("timeout_ms",1000);
-
+  m_stopTimeout = 1000*cfg.value("stopTimeout_ms",1000);
   m_numChannels=m_config.getNumReceiverConnections();
 
 }
@@ -58,7 +57,7 @@ void EventBuilderFaserModule::start(unsigned int run_num) {
 }
 
 void EventBuilderFaserModule::stop() {
-  std::this_thread::sleep_for(std::chrono::microseconds(2*m_timeout)); //wait for events to for sure be timed out
+  std::this_thread::sleep_for(std::chrono::microseconds(m_stopTimeout)); //wait for events 
   FaserProcess::stop();
   INFO("getState: " << this->getState());
 }

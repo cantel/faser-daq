@@ -2,7 +2,8 @@
   "EventBuilder": {
       "settings": {
           "maxPending": 10,
-          "timeout_ms": 120000
+          "timeout_ms": 120000,
+          "stopTimeout_ms": 1000
         },
       "connections": {
 	  "senders": [

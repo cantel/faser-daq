@@ -54,6 +54,16 @@
   	    "options": {
     		"infoText": "Maximum time an event is pending before starting time outs"
   	    }
+	  },
+	  "stopTimeout_ms": {
+	    "type": "integer",
+	    "default": 1000,
+	    "minimum": 100,
+	    "maximum": 100000,
+	    "required": true,
+  	    "options": {
+    		"infoText": "Time to wait on stop for events to be processed"
+  	    }
 	  }
 	},
 	"format":"grid",

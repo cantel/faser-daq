@@ -4,9 +4,9 @@
     "group": "faser",
     "components": [
       { "$ref" : "Templates/TLB.json#TLBReceiverEHN1" },
-      { "$ref" : "Templates/TRB.json#TRBReceiver00" },
-      { "$ref" : "Templates/TRB.json#TRBReceiver01" },
-      { "$ref" : "Templates/TRB.json#TRBReceiver02" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver03" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver04" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver05" },
       { "$ref" : "Templates/digitizer.json#DigitizerEHN1" },
       {
         "name": "eventbuilder01",
@@ -20,9 +20,9 @@
           "receivers": [
             { "chid": 0,"port": 8100, "host": "localhost", "type": "pair", "transport": "tcp" },
             { "chid": 1,"port": 8101, "host": "localhost", "type": "pair", "transport": "tcp" },
-            { "chid": 2,"port": 8110, "host": "localhost", "type": "pair", "transport": "tcp" },
-            { "chid": 3,"port": 8111, "host": "localhost", "type": "pair", "transport": "tcp" },
-            { "chid": 4,"port": 8112, "host": "localhost", "type": "pair", "transport": "tcp" }
+            { "chid": 2,"port": 8113, "host": "localhost", "type": "pair", "transport": "tcp" },
+            { "chid": 3,"port": 8114, "host": "localhost", "type": "pair", "transport": "tcp" },
+            { "chid": 4,"port": 8115, "host": "localhost", "type": "pair", "transport": "tcp" }
           ],
           "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
 	}
@@ -31,7 +31,10 @@
       { "$ref": "Templates/monitor.json#EventMonitor" },
       { "$ref": "Templates/TLB.json#RateMonitor" },
       { "$ref": "Templates/TLB.json#TriggerMonitor" },
-      { "$ref": "Templates/digitizer.json#DigitizerMonitor" }
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor03" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor04" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor05" }
     ]
   }
 }

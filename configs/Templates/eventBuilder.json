@@ -2,7 +2,7 @@
   "EventBuilder": {
       "settings": {
           "maxPending": 10,
-          "timeout_ms": 1000
+          "timeout_ms": 120000
         },
       "connections": {
 	  "senders": [
@@ -36,21 +36,21 @@
             },
             {
               "type": "pubsub",
-              "chid": 6,
+              "chid": 16,
               "transport": "tcp",
               "host": "*",
               "port": 8216
             },
             {
               "type": "pubsub",
-              "chid": 7,
+              "chid": 17,
               "transport": "tcp",
               "host": "*",
               "port": 8217
             },
             {
               "type": "pubsub",
-              "chid": 8,
+              "chid": 18,
               "transport": "tcp",
               "host": "*",
               "port": 8218

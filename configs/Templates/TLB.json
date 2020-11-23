@@ -48,24 +48,24 @@
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
             "SamplingPhase": [false, false, false, false, false, false, false, false],
-            "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
-            "RandomTriggerRate": 1,
-            "Prescale": [1, 1, 1, 1, 1, 0],
-            "TrackerDelay": 100,
+            "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+            "RandomTriggerRate": 7,
+            "Prescale": [0, 0, 1, 0, 0, 0],
+            "TrackerDelay": 103,
             "DigitizerDelay": 0,
             "LHC_CLK": false,
             "OrbitDelay": 0,
             "Deadtime": 500,
             "MonitoringRate": 11245,
             "OutputDestination": 0,
-            "Input": [true, true, true, true, true, true, true, false],
-            "Busy0Disable": true,
-            "Busy1Disable": false,
+            "Input": [true, true, false, false, false, false, false, false],
+            "Busy0Disable": false,
+            "Busy1Disable": true,
             "EnableTriggerData": true,
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmics_withcalo.txt"
+            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmicsstand.txt"
 	},
 	"connections": {
             "senders": [

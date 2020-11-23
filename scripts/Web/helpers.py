@@ -1,3 +1,4 @@
+from copy import deepcopy
 import os
 from os import environ as env
 import threading
@@ -18,7 +19,7 @@ def read(fileName):
             try:
                 refobj = jsonref.load(f,base_uri=Path(inName).as_uri(),loader=jsonref.JsonLoader())
                 if "configuration" in refobj:
-                    data = daqcontrol.jsonref_to_json(refobj)["configuration"]
+                    data = deepcopy(refobj)["configuration"]
                     #print(json.dumps(data, sort_keys=True, indent=4))
                 else:
                     data = refobj

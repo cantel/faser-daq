@@ -8,7 +8,7 @@ class FaserProcess: public daqling::core::DAQProcess {
 public:
   enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 
-  FaserProcess() {}
+  FaserProcess() {  INFO("Booting with config: " << m_config.getConfig().dump(4)); }
 
   virtual ~FaserProcess() {}
 

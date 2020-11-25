@@ -72,6 +72,19 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
       std::string hname_hitp = m_prefix_hname_hitp+std::to_string(sctEvent->GetModuleID());
       m_histogrammanager->fill("diff_trb_sct_bcid", ((m_bcid%256)-sctEvent->GetBCID()));
       auto allHits = sctEvent->GetHits();
+      unsigned int number;
+      unsigned int module;
+      module = sctEvent->GetModuleID();
+      number = sctEvent->GetNHits();
+      m_histogrammanager->fill("total_hit_multiplicity",number);
+      for ( unsigned chipIdx = 0; chipIdx < 12; chipIdx++) {
+           auto hitsPerChip = allHits[chipIdx];
+           for (auto hit : hitsPerChip){
+               if ( hit.second == 7 ) continue;
+                   m_histogrammanager->fill2D("chip_occupancy_layer0",module,chipIdx,1 );
+         }
+       }
+     // m_histogrammanager->fill2D("my2dhist", sctEvent->GetModuleID(),, );
       for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
         auto hitsPerChip1 = allHits[chipIdx];
         for (auto hit1 : hitsPerChip1){ // hit is an std::pair<uint8 strip, uint8 pattern>
@@ -83,6 +96,7 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
             auto strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
             if ( std::abs(strip1-strip2) > kSTRIPDIFFTOLERANCE ) continue;
             // good physics hits
+        //    m_histogrammanager->fill2D("chip_occupancy_layer0",module,chipIdx,1 );
             std::bitset<3> bitset_hitp1(hit1.second);
             m_histogrammanager->fill(hname_hitp, bitset_hitp1.to_string());
             std::bitset<3> bitset_hitp2(hit2.second);
@@ -101,8 +115,9 @@ void TrackerMonitorModule::register_hists() {
 
   m_histogrammanager->registerHistogram("bcid", "BCID", 0, 3564, 3564, 30);
   m_histogrammanager->registerHistogram("diff_trb_sct_bcid", "TRB BCID - SCT BCID", 10, -5, 5, Axis::Range::EXTENDABLE, 10);
-
-  // per module
+  m_histogrammanager->registerHistogram("total_hit_multiplicity", "total_hit_multiplicity", 0, 30, 30, 30);
+  m_histogrammanager->register2DHistogram("chip_occupancy_layer0", "module_number",  0, kTOTAL_MODULES, 8, "chip_number", 0, kCHIPS_PER_MODULE, 12);  
+// per module
   std::vector<std::string> hitp_categories = { "000", "001", "010", "011", "100", "110", "111" };
   for ( unsigned i = 0; i < 8; i++ ){
     std::string hname_hitp = m_prefix_hname_hitp+std::to_string(i);

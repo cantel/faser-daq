@@ -60,7 +60,7 @@ void TriggerReceiverModule::configure() {
   auto log_level = (m_config.getConfig())["loglevel"]["module"];
   m_tlb->SetDebug((log_level=="TRACE"?1:0)); //Set to 0 for no debug, to 1 for debug
 
-  auto cfg_LUTconfig = cfg.value("LUTConfig", "");
+  json cfg_LUTconfig = cfg["LUTConfig"];
 
   // fixed configs
   cfg["Reset"] = true;
@@ -73,12 +73,15 @@ void TriggerReceiverModule::configure() {
   if (cfg["EnableTriggerData"].get<bool>()) m_enable_triggerdata = true;
   else m_enable_triggerdata = false;
 
+  // check for existence of the LUT configuration parameter 
   INFO("Configuring TLB");
-  if ( cfg_LUTconfig.empty() ) {
+  if ( cfg_LUTconfig==nullptr ) {
     m_status=STATUS_ERROR;
     sleep(1); // wait for error state to appear in RC GUI.
     THROW(Exceptions::BaseException,"No LUT configuration provided. TLB Configuration failed.");
   }
+
+  // attempt configuration with cfg and appropriate LUT
   try {
     m_tlb->ConfigureAndVerifyTLB(cfg);
     m_tlb->ConfigureLUT(cfg_LUTconfig);

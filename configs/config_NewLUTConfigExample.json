@@ -1,0 +1,52 @@
+{
+    "configuration": {
+	"version": 10,
+	"group": "faser",
+	"components": [
+	    {
+		"name": "tlbreceiver01",
+		"host": "localhost",
+		"port": 5520,
+		"type": "TriggerReceiver",
+		"loglevel":         { "$ref": "top.json#loglevel" },
+		"metrics_settings": { "$ref": "top.json#metrics_settings" },
+		"settings": {
+	            "SamplingPhase": [false, false, false, false, false, false, false, false],
+	            "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+	            "RandomTriggerRate": 7,
+	            "Prescale": [0, 0, 1, 0, 0, 0],
+	            "TrackerDelay": 103,
+	            "DigitizerDelay": 0,
+	            "LHC_CLK": false,
+	            "OrbitDelay": 0,
+	            "Deadtime": 500,
+	            "MonitoringRate": 11245,
+	            "OutputDestination": 0,
+	            "Input": [true, true, false, false, false, false, false, false],
+	            "Busy0Disable": false,
+	            "Busy1Disable": true,
+	            "EnableTriggerData": true,
+	            "EnableMonitoringData": true,
+	            "Derandomize": false,
+	            "ReadoutFIFOReset": true,
+	            "LUTConfig": { "Trig0": "Tin0||Tin1",
+				   "Trig1": "0",
+				   "Trig2": "0",
+				   "Trig3": "0"
+		    }
+		},
+		"connections": {
+	            "senders": [
+			{
+			    "type": "pair",
+			    "chid": 0,
+			    "transport": "tcp",
+			    "host": "*",
+			    "port": 8100
+			}
+		    ]
+		}
+	    }
+	]
+    }
+}

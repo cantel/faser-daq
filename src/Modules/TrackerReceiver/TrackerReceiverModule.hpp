@@ -47,8 +47,10 @@ class TrackerReceiverModule : public FaserProcess {
   std::unique_ptr<FASER::TRBEventDecoder> m_ed;
   unsigned int m_finePhaseDelay_Led0;
   unsigned int m_finePhaseDelay_Clk0;
+  unsigned int m_hwDelay_Clk0;
   unsigned int m_finePhaseDelay_Led1;
   unsigned int m_finePhaseDelay_Clk1;
+  unsigned int m_hwDelay_Clk1;
   unsigned int m_userBoardID;
   std::string m_SCIP;
   std::string m_DAQIP;

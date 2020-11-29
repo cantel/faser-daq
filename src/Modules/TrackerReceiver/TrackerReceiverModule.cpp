@@ -75,6 +75,16 @@ TrackerReceiverModule::TrackerReceiverModule() {
     }
     else m_configureModules = true;
 
+    if ( cfg.contains("HWDelayClk0")) {
+       m_hwDelay_Clk0 = cfg["HWDelayClk0"];
+    }
+    else {WARNING("No Clk0 hardware delay setting provided. Setting to 0."); m_hwDelay_Clk0 = 0;}
+
+    if ( cfg.contains("HWDelayClk1")) {
+       m_hwDelay_Clk1 = cfg["HWDelayClk1"];
+    }
+    else {WARNING("No Clk1 hardware delay setting provided. Setting to 0."); m_hwDelay_Clk1 = 0;}
+
     if ( cfg.contains("FinePhaseClk0")) {
        m_finePhaseDelay_Clk0 = cfg["FinePhaseClk0"];
     }
@@ -179,6 +189,7 @@ void TrackerReceiverModule::configure() {
 
   // disable all before configuring 
   m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+  m_trb->GetConfig()->Set_Global_L2SoftL1AEn(0);
   m_trb->GetConfig()->Set_Module_L1En(0); 
   m_trb->GetConfig()->Set_Module_BCREn(0); 
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
@@ -231,6 +242,8 @@ void TrackerReceiverModule::configure() {
   m_trb->GetConfig()->Set_Global_Overflow(4095);
   m_trb->GetConfig()->Set_Global_TLBClockSel(m_extClkSelect);
   m_trb->GetConfig()->Set_Global_L2SoftL1AEn(!m_extClkSelect);
+  m_trb->GetConfig()->Set_Global_HardwareDelay0(m_hwDelay_Clk0);
+  m_trb->GetConfig()->Set_Global_HardwareDelay1(m_hwDelay_Clk1);
   m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
   m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
@@ -287,6 +300,7 @@ void TrackerReceiverModule::configure() {
   m_trb->SetDirectParam(running_params);
 
   m_trb->PrintStatus();
+  m_trb->GetConfig()->Print();
 
 
 }
@@ -355,6 +369,7 @@ void TrackerReceiverModule::runner() noexcept {
 
   while (m_run || vector_of_raw_events.size()) { 
     if (!m_extClkSelect && m_triggerEnabled == true){
+      usleep(1e5);
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
 
@@ -410,6 +425,7 @@ void TrackerReceiverModule::runner() noexcept {
               }
               else { 
                 WARNING("Checksum mismatch.");
+                m_status = STATUS_WARN;
                 status |= EventStatus::CorruptedFragment;
                 m_corrupted_fragments += 1; //Monitoring data
                 m_checksum_mismatches += 1; //Monitoring data
@@ -437,9 +453,6 @@ void TrackerReceiverModule::runner() noexcept {
               DEBUG("size: 0x"<< std::hex << fragment->size());
               DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
               DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
-            }
-            else{
-              INFO("event id: 0x"<< fragment->event_id());
             }
 
             if (m_trace) {

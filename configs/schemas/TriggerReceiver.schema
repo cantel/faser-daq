@@ -180,9 +180,35 @@
                   "default"       : "true"
               },
                "LUTConfig": {
-                  "type"          : "string",
+                  "type"          : "object",
                   "title"         : "LUTConfig",
-                  "required"       : true
+                  "required"       : true,
+		  "properties": {	  
+		     "Trig0": {
+                      	"type"          : "string",
+                 	"title"         : "Trigger Combination 0",
+                  	"default"       : "0",
+			"required"      : false,
+              	     },
+		     "Trig1": {
+                      	"type"          : "string",
+                 	"title"         : "Trigger Combination 1",
+                 	"default"       : "0",
+			"required"      : false,
+              	     },
+		     "Trig2": {
+                      	"type"          : "string",
+                 	"title"         : "Trigger Combination 2",
+                 	"default"       : "0",
+			"required"      : false,
+              	     },
+		     "Trig3": {
+                      	"type"          : "string",
+                 	"title"         : "Trigger Combination 3",
+                 	"default"       : "0",
+			"required"      : false,
+              	     }		  
+		  }
               }
           },
       "format":"grid",

@@ -1,14 +1,20 @@
 import functools
 import json
 import redis
+import requests
+import subprocess
 import threading
 import time
 from os import environ as env
 
 import helpers as h
-from routes.metric import getBoardStatus
+from routes.metric import getBoardStatus,getEventCounts
 
 r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
+
+cfg=json.load(open("../RunService/runservice.config"))
+run_user=cfg['user']
+run_pw=cfg["pw"]
 
 #FIXME: this should probably be in daqcontrol
 import supervisor_wrapper
@@ -76,6 +82,13 @@ def stateTracker(logger):
             elif cmd=="stop":
                 logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)
+                runinfo={}
+                runinfo["eventCounts"]=getEventCounts()
+                r = requests.post(f'http://faser-daq-001:5002/AddRunInfo/{runNumber}',
+                                  auth=(run_user,run_pw),
+                                  json = {"runinfo": runinfo })
+                if r.status_code!=200:
+                    log.error("Failed to register end of run information: "+r.text)
                 logger.info("Stop done")
             elif cmd=="shutdown":
                 logger.info("Calling shutdown")
@@ -138,9 +151,26 @@ def stateTracker(logger):
                     logger.warn("Tried to start run in state: "+overallState)
                     cmd=""
                 else:
-                    runNumber=int(runNumber)+1
-                    r1.set("runNumber",runNumber)
-                    r1.set("runStart",time.time())
+                    version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
+                    r= requests.post('http://faser-daq-001:5002/NewRunNumber',
+                                     auth=(run_user,run_pw),
+                                     json = {
+                                         'version':version,
+                                         'type':'physics',
+                                         'configName':configName,
+                                         'configuration': config
+                                     })
+                    if r.status_code!=201:
+                        log.error("Failed to get run number: "+r.text)
+                        cmd=""
+                    else:
+                        try:
+                            runNumber=int(r.text)
+                            r1.set("runNumber",runNumber)
+                            r1.set("runStart",time.time())
+                        except ValueError:
+                            log.error("Failed to get run number: "+r.text)
+                            cmd=""
             elif cmd=="pause":
                 if overallState!="RUN":
                     logger.warn("Tried to pause run in state: "+overallState)

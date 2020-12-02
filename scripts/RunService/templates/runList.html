@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>FASER Run List
+  </title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@latest/dist/css/select2.min.css">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+<table class="table table-striped">
+<tr>
+  <th>Run number</th><th>Type</th><th>Configuration</th><th>Start Time</th><th>Stop Time</th><th>Version</th>
+</tr>
+{% for run in runList %}
+  <tr>
+    <th><a href="RunInfo/{{ run['runnumber'] }}">{{ run["runnumber"] }}</a></th>
+    <td>{{ run["type"] }}</td>
+    <td>{{ run["configName"] }}</td>
+    <td>{{ run["starttime"].replace("T"," ")[:19] }}</td>
+    <td>{% if run["stoptime"]!=run["starttime"] %} {{  run["stoptime"].replace("T"," ")[:19] }}{% else %} N/A {% endif %}</td>
+    <td>{{ run["version"] }}</td>
+  </tr>
+{% endfor %}
+</table>
+</body>
+</html>

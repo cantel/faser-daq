@@ -145,10 +145,17 @@ def createDaqInstance(d):
 #quick hack to maintain threads
 threads = []
 
+def wrappedThread(func,args):
+    try:
+        func(args)
+    except Exception as e:
+        print("got exception:",e)
+
+
 def spawnJoin(plist, func):
     global threads
     for p in plist:
-        t = threading.Thread(target=func, args=(p,))
+        t = threading.Thread(target=wrappedThread, args=(func,p))
         t.start()
         threads.append(t)
 

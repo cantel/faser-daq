@@ -102,8 +102,8 @@ def stateTracker(logger):
                 logger.info("Calling remove components")
                 try:
                     daq.removeProcesses(config['components']) # was too slow since it is serialized
-                except:
-                    logger.warning("Got exceptions during removal")
+                except Exception as e:
+                    logger.error("Exception"+str(e)+": Got exception during removal")
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
@@ -116,7 +116,8 @@ def stateTracker(logger):
                 if not overallState:
                     overallState=state
                 if state!=overallState:
-                    overallState="IN TRANSITION"
+                    if state!="RUN" and overallState!="RUN":
+                        overallState="IN TRANSITION"
                 appState=getBoardStatus(comp['name'])
                 status.append({'name' : comp['name'] , 'state' : state,'infoState':appState})
             if status!=oldStatus:

@@ -100,10 +100,12 @@ def stateTracker(logger):
                     if h.checkThreads()==0: break
                     cnt-=1
                 logger.info("Calling remove components")
-                try:
-                    daq.removeProcesses(config['components']) # was too slow since it is serialized
-                except Exception as e:
-                    logger.error("Exception"+str(e)+": Got exception during removal")
+                #could not use daqling loop as it stops on first exception
+                for comp in config['components']:
+                    try:
+                        daq.removeProcess(comp['host'],comp['name'])
+                    except Exception as e:
+                        logger.error("Exception"+str(e)+": Got exception during removal of "+comp['name'])
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]

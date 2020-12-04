@@ -4,9 +4,7 @@ Template project for custom DAQling Modules, scripts, and configurations.
 
 ## Documentation
 
-Detailed documentation can be found [here][codimd].
-
-[codimd]: <https://codimd.web.cern.ch/s/B1oArin-r>
+Detailed documentation can be found at [https://daqling.docs.cern.ch](https://daqling.docs.cern.ch).
 
 Subscribe to the "daqling-users" CERN e-group for updates.
 

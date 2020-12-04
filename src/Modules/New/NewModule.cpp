@@ -37,7 +37,7 @@ void NewModule::stop() {
   INFO("");
 }
 
-void NewModule::runner() {
+void NewModule::runner() noexcept {
   INFO("Running...");
   while (m_run) {
   }

@@ -28,5 +28,5 @@ class NewModule : public FaserProcess {
   void start(unsigned);
   void stop();
 
-  void runner();
+  void runner() noexcept;
 };

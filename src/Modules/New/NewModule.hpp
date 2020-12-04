@@ -28,5 +28,5 @@ class NewModule : public daqling::core::DAQProcess {
   void start(unsigned);
   void stop();
 
-  void runner();
+  void runner() noexcept;
 };

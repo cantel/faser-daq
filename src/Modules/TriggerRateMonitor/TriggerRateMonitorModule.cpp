@@ -19,7 +19,7 @@ TriggerRateMonitorModule::TriggerRateMonitorModule() {
  }
 
 TriggerRateMonitorModule::~TriggerRateMonitorModule() { 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
  }
 
 void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {

@@ -40,15 +40,13 @@ void FrontEndReceiverModule::sendECR() {
 
 void FrontEndReceiverModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
-  INFO("getState: " << this->getState());
 }
 
 void FrontEndReceiverModule::stop() {
   FaserProcess::stop();
-  INFO("getState: " << this->getState());
 }
 
-void FrontEndReceiverModule::runner() {
+void FrontEndReceiverModule::runner() noexcept {
   INFO("Running...");
   while (m_run) {
     RawFragment buffer;

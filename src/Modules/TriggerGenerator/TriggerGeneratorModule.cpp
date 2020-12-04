@@ -50,7 +50,7 @@ void TriggerGeneratorModule::disableTrigger(const std::string &/*arg*/) {
   INFO("Disabled trigger");
 }
 
-void TriggerGeneratorModule::runner() {
+void TriggerGeneratorModule::runner() noexcept {
   INFO(" Running...");
   int msgFreq=int(m_rate);
   float sleepTime=1000000./m_rate;

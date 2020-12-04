@@ -161,7 +161,6 @@ void FileWriterFaserModule::configure() {
 void FileWriterFaserModule::start(unsigned run_num) {
   m_start_completed.store(false);
   FaserProcess::start(run_num);
-  DEBUG(" getState: " << getState());
 
   m_stopWriters.store(false);
   unsigned int threadid = 11111;       // XXX: magic
@@ -190,7 +189,6 @@ void FileWriterFaserModule::start(unsigned run_num) {
 
 void FileWriterFaserModule::stop() {
   FaserProcess::stop();
-  DEBUG(" getState: " << this->getState());
   m_stopWriters.store(true);
   for (auto & [ chid, ctx ] : m_channelContexts) {
     while (!std::get<ThreadContext>(ctx).consumer.get_readiness()) {
@@ -204,7 +202,7 @@ void FileWriterFaserModule::stop() {
   }
 }
 
-void FileWriterFaserModule::runner() {
+void FileWriterFaserModule::runner() noexcept {
   DEBUG(" Running...");
 
   while (!m_start_completed) {

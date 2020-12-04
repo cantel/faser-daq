@@ -43,7 +43,7 @@ class DigitizerReceiverModule : public FaserProcess {
   void start(unsigned int);
   void stop();
   void sendECR();
-  void runner();
+  void runner() noexcept;
 
   ///////////////////////////////////////////
   // Digitizer specific methods and members

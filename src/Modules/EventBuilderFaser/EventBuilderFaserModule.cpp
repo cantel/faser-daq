@@ -53,13 +53,11 @@ void EventBuilderFaserModule::start(unsigned int run_num) {
   m_timeoutCount=0;
   m_BCIDMismatchCount=0;
   m_status = STATUS_OK;
-  INFO("getState: " << getState());
 }
 
 void EventBuilderFaserModule::stop() {
   std::this_thread::sleep_for(std::chrono::microseconds(m_stopTimeout)); //wait for events 
   FaserProcess::stop();
-  INFO("getState: " << this->getState());
 }
 
 
@@ -127,7 +125,7 @@ void EventBuilderFaserModule::addFragment(EventFragment *fragment) {
 
 
 
-void EventBuilderFaserModule::runner() {
+void EventBuilderFaserModule::runner() noexcept {
   INFO("Running...");
 
   bool noData=true;

@@ -24,7 +24,7 @@ TriggerMonitorModule::TriggerMonitorModule() {
  }
 
 TriggerMonitorModule::~TriggerMonitorModule() { 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
  }
 
 void TriggerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {

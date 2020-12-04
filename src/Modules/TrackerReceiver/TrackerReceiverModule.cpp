@@ -345,7 +345,7 @@ void TrackerReceiverModule::enableTrigger(const std::string &) {
 /***************************************
  *        Runner of the module
  * ************************************/
-void TrackerReceiverModule::runner() {
+void TrackerReceiverModule::runner() noexcept {
   INFO("Running...");
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;

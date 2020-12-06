@@ -6,4 +6,5 @@ echo "Got: $runno"
 echo "End run and set some run data"
 curl -u FASER:HelloThere -d '{"runinfo": {"d": [3,45]}}' -H "Content-Type: application/json" -X POST http://faser-daq-001:5002/AddRunInfo/$runno
 echo "Get run information"
+curl http://faser-daq-001:5002/RunList
 curl http://faser-daq-001:5002/RunInfo/$runno

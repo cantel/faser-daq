@@ -36,6 +36,13 @@ if r.status_code!=200:
 if not "success" in r.json():
     print("Failed with:",r.text)
     sys.exit(-1)
+print("Get run list")
+r = requests.get(f'http://faser-daq-001:5002/RunList')
+if r.status_code==200:
+    print(r.json())
+else:
+    print("Failed to get run list",r.text)
+
 print("Get run information")
 r = requests.get(f'http://faser-daq-001:5002/RunInfo/{runno}')
 if r.status_code==200:

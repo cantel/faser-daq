@@ -100,9 +100,18 @@ class RunInfo(Resource):
         result["runnumber"]=runno
         return result
     
+class RunList(Resource):
+    def get(self):
+        log.debug('Got request for run list')
+        runList=dbaccess.getRunList({})
+        if not runList:
+            return { "error": "Failed in DB connection"},503
+        return runList
+
 api.add_resource(NewRunNumber, '/NewRunNumber')
-api.add_resource(RunInfo, '/RunInfo/<int:runno>')
 api.add_resource(AddRunInfo, '/AddRunInfo/<int:runno>')
+api.add_resource(RunInfo, '/RunInfo/<int:runno>')
+api.add_resource(RunList, '/RunList')
 
 if __name__ == '__main__':
     app.run(debug=True,port=config["port"],host="0.0.0.0")

@@ -133,7 +133,7 @@ void TriggerReceiverModule::stop() {
   FaserProcess::stop(); //this turns m_run to false
 }
 
-void TriggerReceiverModule::runner() {
+void TriggerReceiverModule::runner() noexcept {
   INFO("Running...");
   
   std::vector<std::vector<uint32_t>> vector_of_raw_events;

@@ -27,7 +27,7 @@ MonitorBaseModule::~MonitorBaseModule() {
 
   delete m_event;
 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
 }
 
 void MonitorBaseModule::configure() {
@@ -45,7 +45,6 @@ void MonitorBaseModule::configure() {
 
 void MonitorBaseModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
-  INFO("getState: " << this->getState());
 
   if ( m_histogramming_on ) m_histogrammanager->start();
 
@@ -56,10 +55,9 @@ void MonitorBaseModule::stop() {
 
   INFO("... finalizing ...");
   if (m_histogramming_on) m_histogrammanager->stop();
-  INFO("getState: " << this->getState());
 }
 
-void MonitorBaseModule::runner() {
+void MonitorBaseModule::runner() noexcept {
   INFO("Running...");
 
   m_event_header_unpacked = false;

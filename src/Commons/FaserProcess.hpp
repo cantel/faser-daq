@@ -16,9 +16,9 @@ public:
     DAQProcess::configure();
     registerVariable(m_status,"Status");
 
-    registerCommand("ECR","paused",&FaserProcess::ECRcommand,this,_1);
-    registerCommand("enableTrigger","running",&FaserProcess::enableTrigger,this,_1);
-    registerCommand("disableTrigger","paused",&FaserProcess::disableTrigger,this,_1);
+    registerCommand("ECR", "sendingECR","paused",&FaserProcess::ECRcommand,this,_1);
+    registerCommand("enableTrigger","enablingTrigger", "running",&FaserProcess::enableTrigger,this,_1);
+    registerCommand("disableTrigger", "pausingTrigger", "paused",&FaserProcess::disableTrigger,this,_1);
   }
 
   void ECRcommand(const std::string &arg) {

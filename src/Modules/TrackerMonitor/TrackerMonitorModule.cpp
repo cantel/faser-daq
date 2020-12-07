@@ -17,7 +17,7 @@ TrackerMonitorModule::TrackerMonitorModule() {
  }
 
 TrackerMonitorModule::~TrackerMonitorModule() { 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
  }
 
 void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {

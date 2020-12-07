@@ -19,7 +19,7 @@ DigitizerMonitorModule::DigitizerMonitorModule() {
 }
 
 DigitizerMonitorModule::~DigitizerMonitorModule() { 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
 }
 
 void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {

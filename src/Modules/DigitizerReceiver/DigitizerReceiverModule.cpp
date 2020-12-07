@@ -319,7 +319,7 @@ void DigitizerReceiverModule::sendECR() {
 }
 
 
-void DigitizerReceiverModule::runner() {
+void DigitizerReceiverModule::runner() noexcept {
   INFO("Running...");  
   
   auto cfg = m_config.getConfig()["settings"];

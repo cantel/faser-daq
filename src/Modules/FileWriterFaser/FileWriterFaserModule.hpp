@@ -41,7 +41,7 @@ public:
   void configure();
   void start(unsigned run_num);
   void stop();
-  void runner();
+  void runner() noexcept;
 
   void monitor_runner();
 

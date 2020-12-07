@@ -22,7 +22,7 @@ class EventBuilderFaserModule : public FaserProcess {
   void configure();
   void start(unsigned int run_num);
   void stop();
-  void runner();
+  void runner() noexcept;
   bool sendEvent(uint8_t event_tag,EventFull *event);
   void addFragment(EventFragment *fragment);
 

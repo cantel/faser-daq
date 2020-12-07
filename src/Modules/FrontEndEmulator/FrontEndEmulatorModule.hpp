@@ -16,7 +16,7 @@ class FrontEndEmulatorModule : public FaserProcess {
   void start(unsigned int);
   void stop();
 
-  void runner();
+  void runner() noexcept;
 private:
   int m_meanSize;
   int m_rmsSize;

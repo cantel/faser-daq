@@ -17,7 +17,7 @@ class FrontEndReceiverModule : public FaserProcess {
   void start(unsigned int);
   void stop();
 
-  void runner();
+  void runner() noexcept;
 private:
   UdpReceiver m_dataIn;
   std::atomic<int> m_recvCount;

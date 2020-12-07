@@ -25,7 +25,7 @@ class MonitorBaseModule : public FaserProcess {
   void configure();
   void start(unsigned int);
   void stop();
-  void runner();
+  void runner() noexcept;
 
 
 

@@ -159,14 +159,15 @@ def stateTracker(logger):
                     cmd=""
                 else:
                     detList=json.loads(r1.get("detList"))
+                    subInfo=json.loads(m['data'][6:])
                     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
                     r= requests.post('http://faser-daq-001:5002/NewRunNumber',
                                      auth=(run_user,run_pw),
                                      json = {
                                          'version':    version,
-                                         'type':       'physics',
+                                         'type':       subInfo['runtype'],
                                          'username':       os.getenv("USER"),
-                                         'startcomment':    'Regular run',
+                                         'startcomment':    subInfo['startcomment'],
                                          'detectors':  detList,
                                          'configName': configName,
                                          'configuration': config
@@ -215,8 +216,11 @@ def stateTracker(logger):
 def initialize(fileName):
     r1.publish("stateAction","initialize "+fileName)
 
-def start():
-    r1.publish("stateAction","start")
+def start(reqinfo):
+    info={}
+    info['startcomment']=reqinfo.get('startcomment',"")[:500]
+    info['runtype']=reqinfo.get('runtype',"Test")[:100]
+    r1.publish("stateAction","start "+json.dumps(info))
 
 def pause():
     r1.publish("stateAction","pause")

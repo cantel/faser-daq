@@ -70,7 +70,7 @@ def initialise():
 @app.route("/start")
 def start():
     app.logger.info("Start button pressed")
-    statetracker.start()
+    statetracker.start(request.args)
     return "true"
 
 @app.route("/pause")

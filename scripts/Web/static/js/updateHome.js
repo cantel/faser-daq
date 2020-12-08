@@ -132,10 +132,11 @@ function initialise(self){
 }
 
 function start(self){
-    self.children[0].style="display: inline-block";
     if (document.getElementById("ECR").disabled) {
-	$.get('/start');
+//	$.get('/start');
+	$("#startRunModal").modal();
     } else {
+        self.children[0].style="display: inline-block";
 	$.get('/unpause');
     }
 }

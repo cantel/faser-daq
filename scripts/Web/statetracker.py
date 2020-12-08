@@ -1,5 +1,6 @@
 import functools
 import json
+import os
 import redis
 import requests
 import subprocess
@@ -66,7 +67,10 @@ def stateTracker(logger):
                 for logfile in logfiles:
                     name = logfile[1][5:].split("-")[0]
                     r1.hset("log", name, logfile[0] + logfile[1])
-                time.sleep(0.5)
+                time.sleep(1.5)  #this should really check status of components
+                detList=h.detectorList(config)
+                logger.info("Included detector components: "+",".join(detList))
+                r1.set("detList",json.dumps(detList))
                 logger.info("Calling configure")
                 h.spawnJoin(config['components'], daq.configureProcess)
                 logger.info("Configure done")
@@ -88,7 +92,7 @@ def stateTracker(logger):
                                   auth=(run_user,run_pw),
                                   json = {"runinfo": runinfo })
                 if r.status_code!=200:
-                    log.error("Failed to register end of run information: "+r.text)
+                    logger.error("Failed to register end of run information: "+r.text)
                 logger.info("Stop done")
             elif cmd=="shutdown":
                 logger.info("Calling shutdown")
@@ -154,17 +158,21 @@ def stateTracker(logger):
                     logger.warn("Tried to start run in state: "+overallState)
                     cmd=""
                 else:
+                    detList=json.loads(r1.get("detList"))
                     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
                     r= requests.post('http://faser-daq-001:5002/NewRunNumber',
                                      auth=(run_user,run_pw),
                                      json = {
-                                         'version':version,
-                                         'type':'physics',
-                                         'configName':configName,
+                                         'version':    version,
+                                         'type':       'physics',
+                                         'username':       os.getenv("USER"),
+                                         'startcomment':    'Regular run',
+                                         'detectors':  detList,
+                                         'configName': configName,
                                          'configuration': config
                                      })
                     if r.status_code!=201:
-                        log.error("Failed to get run number: "+r.text)
+                        logger.error("Failed to get run number: "+r.text)
                         cmd=""
                     else:
                         try:
@@ -172,7 +180,7 @@ def stateTracker(logger):
                             r1.set("runNumber",runNumber)
                             r1.set("runStart",time.time())
                         except ValueError:
-                            log.error("Failed to get run number: "+r.text)
+                            logger.error("Failed to get run number: "+r.text)
                             cmd=""
             elif cmd=="pause":
                 if overallState!="RUN":

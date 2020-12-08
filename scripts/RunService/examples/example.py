@@ -1,13 +1,17 @@
 #!/usr/bin/env python3
 
 import requests
+import os
 import sys
 
 print("Requesting run number")
 r = requests.post('http://faser-daq-001:5002/NewRunNumber',
                   auth=("FASER","HelloThere"),
                   json = {'version':'123',
-                          'type':'physics',
+                          'type':'notphysics',
+                          'username':os.getenv("USER"),
+                          'startcomment': "This is an example",
+                          'detectors': [],
                           'configName':'ScintillatorOnly',
                           'configuration':
                           { "ch1": True,

@@ -6,6 +6,7 @@ from functools import wraps
 import json
 import logging
 import os
+import socket
 import time
 
 import dbaccess
@@ -61,14 +62,17 @@ class NewRunNumber(Resource):
         log.debug('New run number requested: ' + str(request.json))
         log.debug('Requested from: '+ request.remote_addr)
         jsonreq=request.json
-        data={}
-        for field in ["type","version","configName","configuration"]:
+        data={'host':socket.gethostbyaddr(request.remote_addr)[0]}
+        for field in ["type","version","configName","configuration","username","startcomment","detectors"]:
             if not field in jsonreq:
                 log.debug('  No "'+field+'" specified')
                 data[field]="N/A"
+                if field=="detectors": data[field]=[]
             else:
-                if len(jsonreq[field])>100 and field!="configuration":
+                if len(jsonreq[field])>100 and not field in ["configuration","detectors","startcomment"]:
                     return { "error": field+" field too long (>100 bytes)"},400
+                if len(jsonreq[field])>500 and field in ["comment"]:
+                    return { "error": field+" field too long (>500 bytes)"},400
                 data[field]=jsonreq[field]
         if data["type"]=="N/A":
             return { "error": "No type specified"},400

@@ -30,19 +30,32 @@ def initDB():
   )
     """)
 
+def updateDBConfig():
+    conn = db_pool.acquire()
+    cursor = conn.cursor()
+    cursor.execute(
+    """ALTER TABLE faser_ora_dev.RunInfoTable ADD
+  ( "USER" VARCHAR2(100 BYTE) DEFAULT 'N/A' NOT NULL ,
+    "HOST" VARCHAR2(100 BYTE) DEFAULT 'N/A' NOT NULL ,
+    "COMMENT" VARCHAR2(500 BYTE) DEFAULT 'N/A' NOT NULL ,
+    "DETECTORS" CLOB DEFAULT '[]' CHECK (DETECTORS is json)
+  )
+    """)
 
 def insertNewRun(data,first=False):
     conn = db_pool.acquire()
     cursor = conn.cursor()
     if type(data["configuration"])!=str:
         data["configuration"]=json.dumps(data["configuration"])
+    if type(data["detectors"])!=str:
+        data["detectors"]=json.dumps(data["detectors"])
     if first:
         insertQuery = """insert into RunInfoTable (RUNNUMBER, TYPE, VERSION, CONFIGNAME, START_TIME, STOP_TIME, CONFIGURATION) 
                          values (1, :type, :version, :configName, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :configuration) 
                       """
     else:
-        insertQuery = """insert into RunInfoTable (RUNNUMBER, TYPE, VERSION, CONFIGNAME, START_TIME, STOP_TIME, CONFIGURATION) 
-                         select RUNNUMBER+1, :type, :version, :configName, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :configuration from RunInfoTable
+        insertQuery = """insert into RunInfoTable (RUNNUMBER, TYPE, VERSION, CONFIGNAME, START_TIME, STOP_TIME, "USER", HOST, "COMMENT", DETECTORS, CONFIGURATION) 
+                         select RUNNUMBER+1, :type, :version, :configName, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :username, :host, :startcomment, :detectors, :configuration from RunInfoTable
                          where rownum=1 order by RUNNUMBER DESC"""
     try:
         cursor.execute(insertQuery,data)
@@ -88,15 +101,18 @@ def getRunInfo(runno):
                    'version'    value VERSION,
                    'configName' value CONFIGNAME,
                    'starttime'  value START_TIME,
-                   'stoptime'   value STOP_TIME
-                   ), configuration,RunInfo  from RunInfoTable where RUNNUMBER=:runno"""
+                   'stoptime'   value STOP_TIME,
+                   'username'   value "USER",
+                   'host'       value HOST,
+                   'startcomment' value "COMMENT"
+                   ), configuration,RunInfo,detectors  from RunInfoTable where RUNNUMBER=:runno"""
     try:
         cursor.execute(infoQuery,runno=runno)
         result=cursor.fetchone()
         if not result:
             logger.error("Did not get run information")
             return None
-        res,configuration,runinfo=result #annoyingly json_object doesn't support returning CLOBs
+        res,configuration,runinfo,detectors=result #annoyingly json_object doesn't support returning CLOBs
         try:
             data=json.loads(res)
             if runinfo:
@@ -104,6 +120,7 @@ def getRunInfo(runno):
             else:
                 data["runinfo"]=None
             data["configuration"]=json.loads(str(configuration))
+            data["detectors"]=json.loads(str(detectors))
         except json.decoder.JSONDecodeError:
             logger.error("Failed to decode json content")
             return None
@@ -125,13 +142,18 @@ def getRunList(query):
                    'version'    value VERSION,
                    'configName' value CONFIGNAME,
                    'starttime'  value START_TIME,
-                   'stoptime'   value STOP_TIME
-                   ) from RunInfoTable order by runnumber desc"""
+                   'stoptime'   value STOP_TIME,
+                   'username'       value "USER",
+                   'host'       value HOST,
+                   'startcomment'    value "COMMENT"
+                   ), detectors from RunInfoTable order by runnumber desc"""
     try:
         cursor.execute(listQuery)
         runs=[]
         for row in cursor:
-            runs.append(json.loads(row[0]))
+            data=json.loads(row[0])
+            data["detectors"]=json.loads(str(row[1]))
+            runs.append(data)
         return runs
 
     except cx_Oracle.Error as e:

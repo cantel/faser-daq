@@ -11,6 +11,9 @@ int main(int argc, char** argv) {
                   "type": "noisecalibration",
                   "configName": "threestation",
 		  "version": "v1.2.0",
+                  "user": "shifter",
+                  "startcomment": "station 1 test",
+                  "detectors": ["TRB00","TRB01","TRB02"],
 		  "configuration": 
                     { "a": "b",
                       "c": [1,2,3]

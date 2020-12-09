@@ -13,9 +13,11 @@ from routes.metric import getBoardStatus,getEventCounts
 
 r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
 
-cfg=json.load(open("../RunService/runservice.config"))
-run_user=cfg['user']
-run_pw=cfg["pw"]
+#cfg=json.load(open("../RunService/runservice.config"))
+#run_user=cfg['user']
+#run_pw=cfg["pw"]
+run_user="FASER"
+run_pw="HelloThere"
 
 #FIXME: this should probably be in daqcontrol
 import supervisor_wrapper

@@ -64,10 +64,11 @@ class NewRunNumber(Resource):
         jsonreq=request.json
         data={'host':socket.gethostbyaddr(request.remote_addr)[0]}
         for field in ["type","version","configName","configuration","username","startcomment","detectors"]:
-            if not field in jsonreq:
+            if not field in jsonreq or jsonreq[field]==None:
                 log.debug('  No "'+field+'" specified')
                 data[field]="N/A"
                 if field=="detectors": data[field]=[]
+                if field=="configuration": data[field]=[]
             else:
                 if len(jsonreq[field])>100 and not field in ["configuration","detectors","startcomment"]:
                     return { "error": field+" field too long (>100 bytes)"},400

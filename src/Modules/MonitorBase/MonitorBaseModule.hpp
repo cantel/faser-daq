@@ -16,6 +16,8 @@
 #include <Utils/Binary.hpp>
 
 using namespace DAQFormats;
+using namespace TLBDataFormat;
+using namespace TLBMonFormat;
 
 class MonitorBaseModule : public FaserProcess {
  public:

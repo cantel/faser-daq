@@ -24,14 +24,25 @@
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
-
+using namespace TLBDataFormat;
+using namespace TLBMonFormat;
 
 #define _ms 1000 // used for usleep
 
 TriggerReceiverModule::TriggerReceiverModule() {
+  auto cfg = m_config.getSettings();
+
   INFO("In TriggerReceiverModule()");
   m_status = STATUS_OK;
-  m_tlb = new TLBAccess();
+
+  if (cfg.contains("BoardID") && cfg.contains("SCIP") && cfg.contains("DAQIP")){
+    INFO("Using ethernet communication interface.");
+    m_tlb = new TLBAccess(cfg["SCIP"].get<std::string>(), cfg["DAQIP"].get<std::string>(), false, cfg["BoardID"].get<int>() );
+  }
+  else{
+    INFO("Some, or possibly all, parametrs SCIP, DAQIP, BoardID have not been specified. Assuming we're communicating via USB!"); 
+    m_tlb = new TLBAccess();
+  }
   m_tlb->DisableTrigger(); // make sure TLB not sending triggers
 }
 

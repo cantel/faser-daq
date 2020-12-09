@@ -25,7 +25,10 @@
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
+            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt",
+            "SCIP" : "10.11.65.7",
+            "DAQIP" : "10.11.65.7",
+            "BoardID" : 0
 	},
 	"connections": {
             "senders": [
@@ -59,13 +62,16 @@
             "MonitoringRate": 11245,
             "OutputDestination": 0,
             "Input": [true, true, false, false, false, false, false, false],
-            "Busy0Disable": false,
-            "Busy1Disable": true,
+            "Busy0Disable": true,
+            "Busy1Disable": false,
             "EnableTriggerData": true,
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmicsstand.txt"
+            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmicsstand.txt",
+            "SCIP" : "10.11.65.8",
+            "DAQIP" : "10.11.65.8",
+            "BoardID" : 10
 	},
 	"connections": {
             "senders": [

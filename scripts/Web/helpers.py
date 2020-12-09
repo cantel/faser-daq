@@ -116,6 +116,8 @@ def translateStatus(rawStatus, timeout):
             translatedStatus = "RUN"
         elif(rawStatus == 'paused'):     
             translatedStatus = "PAUSED"
+        elif(rawStatus == 'error'):     
+            translatedStatus = "ERROR"
     return translatedStatus
 
 

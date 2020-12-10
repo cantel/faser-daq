@@ -21,7 +21,7 @@
 #include "EventFormats/DAQFormats.hpp"
 #include <Utils/Binary.hpp>
 #include "TrackerReadout/ConfigurationHandling.h"
-#include "TrackerReadout/TRBEventDecoder.h"
+#include "EventFormats/TrackerDataFragment.hpp"
 #include <string>
 #include <iostream>
 
@@ -125,7 +125,6 @@ TrackerReceiverModule::TrackerReceiverModule() {
 
     if (usingUSB) m_trb = std::make_unique<FASER::TRBAccess>(0, runEmulation, m_userBoardID );
     else m_trb = std::make_unique<FASER::TRBAccess>(m_SCIP, m_DAQIP, 0, runEmulation, m_userBoardID );
-    m_ed = std::make_unique<FASER::TRBEventDecoder>();
     
     auto log_level = m_config.getConfig()["loglevel"]["module"];
     m_debug = (log_level=="DEBUG"?1:0);
@@ -365,7 +364,7 @@ void TrackerReceiverModule::runner() noexcept {
   uint8_t  local_fragment_tag = EventTags::PhysicsTag;
   uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->GetBoardID();
   uint64_t local_event_id;
-  uint64_t local_bc_id;
+  uint16_t local_bc_id;
 
   while (m_run || vector_of_raw_events.size()) { 
     if (!m_extClkSelect && m_triggerEnabled == true){
@@ -379,106 +378,67 @@ void TrackerReceiverModule::runner() noexcept {
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }
       else{
-        for(std::vector<uint32_t> event : vector_of_raw_events){
-          DEBUG("-------------- printing new event ---------------- ");
-          int total_size = event.size() * sizeof(uint32_t); //Event size in bytes      
+        size_t events_to_decode = vector_of_raw_events.size();
+        for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
+          size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
+          if (!total_size) continue;
+          auto event = vector_of_raw_events[i].data();
           m_event_size_bytes = total_size; //Monitoring data
           m_physicsEventCount += 1; //Monitoring data
 
-          if (event.size() == 0){ continue;}
+          TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
 
-          //TODO should we also send the EndOfDAQ trailer? Currently, we are not sending it
-          if (!(m_ed->IsEndOfDAQ(event[0]))){
-            m_ed->LoadTRBEventData(event);
-            auto decoded_event = m_ed->GetEvents(); 
+          if ( trk_data_fragment.valid()) {
+              local_event_id = trk_data_fragment.event_id();
+              local_event_id = local_event_id | (m_ECRcount << 24);
+              local_bc_id = trk_data_fragment.bc_id();
+          }
+          else{
+              local_event_id = 0xffffff;
+              local_bc_id = 0xffff;
+              m_status=STATUS_ERROR;
+          }
 
-            if (decoded_event.size() != 0){
-                local_event_id = decoded_event[0]->GetL1ID(); //we can always ask for element 0 - we are feeding only one event at the time to m_ed
-                local_event_id = local_event_id | (m_ECRcount << 24);
-                local_bc_id = (decoded_event[0]->GetBCID()-6)%3564; // software correction to agree with TLB.
-                if (m_debug){
-	  	  DEBUG("N modules present = "<<decoded_event[0]->GetNModulesPresent());
-	  	  if(decoded_event[0]->GetNModulesPresent()>0){
-	  	     auto ourSCTevent = decoded_event[0]->GetModule(0);
-	  	     DEBUG("BCID = "<<ourSCTevent->GetBCID());
-	  	     DEBUG("L1ID = "<<ourSCTevent->GetL1ID());
-	  	  }
-                }
-            }
-            else{
-                local_event_id = 0xFFFFFFFF;
-                local_bc_id = 0xFFFFFFFF;
-                m_status=STATUS_ERROR;
-            }
+          std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
+                                              local_event_id, local_bc_id, event, total_size));
+          
+          fragment->set_status(0);
+          if (trk_data_fragment.has_trb_error() || trk_data_fragment.has_module_error() ){
+              fragment->set_status(EventStatus::UnclassifiedError);
+              m_corrupted_fragments += 1; //Monitoring data
+          } // FIXME tracker decoder does not recognise errors, FIXME implement checksum check in decoder and check here.
 
-            std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
-                                                local_event_id, local_bc_id, event.data(), total_size));
-            
-            uint16_t error;
-            uint16_t status(0);
-   
-            if (decoded_event.size() != 0){
-              m_number_of_decoded_events += 1; //Monitoring data
-              if (decoded_event[0]->GetIsChecksumValid() == true){ 
-                DEBUG("Checksums match for this event.");
-                m_checksum_mismatches_rate = m_checksum_mismatches/m_number_of_decoded_events; //Monitoring data
-              }
-              else { 
-                WARNING("Checksum mismatch.");
-                m_status = STATUS_WARN;
-                status |= EventStatus::CorruptedFragment;
-                m_corrupted_fragments += 1; //Monitoring data
-                m_checksum_mismatches += 1; //Monitoring data
-                m_checksum_mismatches_rate = m_checksum_mismatches/m_number_of_decoded_events; //Monitoring data
-              }         
-            }
-            
-            for (uint32_t frame : event){
-              if(m_ed->HasError(frame, error)){
-                //TODO If possible specify error
-                if ( status & EventStatus::UnclassifiedError ) continue;
-                status |= EventStatus::UnclassifiedError;
-                m_corrupted_fragments += 1; //Monitoring data
-              }
-            }
-            fragment->set_status(status);
-
-            if (m_debug){
-              DEBUG("event id: 0x"<< std::hex << fragment->event_id());
-              DEBUG("fragment tag: 0x"<< std::hex << fragment->fragment_tag());
-              DEBUG("source id: 0x"<< std::hex << fragment->source_id());
-              DEBUG("bc id: 0x"<< std::hex << fragment->bc_id());
-              DEBUG("status: 0x"<< std::hex << fragment->status());
-              DEBUG("trigger bits: 0x"<< std::hex << fragment->trigger_bits());
-              DEBUG("size: 0x"<< std::hex << fragment->size());
-              DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
-              DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
-            }
-
-            if (m_trace) {
+          if (m_debug){
+            DEBUG("event id: 0x"<< std::hex << fragment->event_id());
+            DEBUG("fragment tag: 0x"<< std::hex << fragment->fragment_tag());
+            DEBUG("source id: 0x"<< std::hex << fragment->source_id());
+            DEBUG("bc id: 0x"<< std::hex << fragment->bc_id());
+            DEBUG("status: 0x"<< std::hex << fragment->status());
+            DEBUG("trigger bits: 0x"<< std::hex << fragment->trigger_bits());
+            DEBUG("size: 0x"<< std::hex << fragment->size());
+            DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
+            DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
+            if (m_trace){ 
               DEBUG("Data received from TRB: ");
-              for(auto word : event){
-                std::bitset<32> y(word);
-                if(m_ed->HasError(word, error)){DEBUG("               " << y << " error word");}
-                else{DEBUG("               " << y);}
-              }
-
               DEBUG("Raw data sent further: ");
               const DAQFormats::byteVector *data = fragment->raw();
               for (unsigned i = 0; i <  (unsigned)data->size(); i++){
                   std::bitset<8> y(data->at(i));
                   DEBUG("               " << y);
+
               }
               delete data;
             }
-
-            // place the raw binary event fragment on the output port
-            std::unique_ptr<const byteVector> bytestream(fragment->raw());
-            daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
-            m_connections.send(0, binData);
           }
-       }
-    }   
-  } 
+
+         // place the raw binary event fragment on the output port
+         std::unique_ptr<const byteVector> bytestream(fragment->raw());
+         daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+         m_connections.send(0, binData);
+
+         } // event loop
+       } // events retrieved
+    } // while m_run
+
   INFO("Runner stopped");
 }

@@ -24,7 +24,6 @@
 //#include "Commons/EventFormat.hpp"
 //#include "Commons/RawExampleFormat.hpp"
 #include "TrackerReadout/ConfigurationHandling.h"
-#include "TrackerReadout/TRBEventDecoder.h"
 #include <string>
 #include <iostream>
 #include <bitset>
@@ -44,7 +43,6 @@ class TrackerReceiverModule : public FaserProcess {
   
  private:
   std::unique_ptr<FASER::TRBAccess> m_trb;
-  std::unique_ptr<FASER::TRBEventDecoder> m_ed;
   unsigned int m_finePhaseDelay_Led0;
   unsigned int m_finePhaseDelay_Clk0;
   unsigned int m_hwDelay_Clk0;

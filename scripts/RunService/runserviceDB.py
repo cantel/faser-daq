@@ -27,7 +27,7 @@ log.addHandler(fh)
 log.addHandler(ch)
 
 
-dbaccess.init(config)
+dbaccess.init(config,log)
 
 app = Flask(__name__)
 api = Api(app)

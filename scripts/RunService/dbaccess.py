@@ -4,12 +4,14 @@ import cx_Oracle
 import json
 import logging
 
-logger = logging.getLogger('dbaccess')
+logger = None
 db_pool = None
 
 
-def init(config):
+def init(config,log):
     global db_pool
+    global logger
+    logger=log
     db_pool=cx_Oracle.SessionPool(config["ora_acc"],config["ora_pass"],config["ora_name"], 2, 4, 1, threaded=True)
 
 def initDB():
@@ -58,6 +60,7 @@ def insertNewRun(data,first=False):
                          select RUNNUMBER+1, :type, :version, :configName, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, :username, :host, :startcomment, :detectors, :configuration from RunInfoTable
                          where rownum=1 order by RUNNUMBER DESC"""
     try:
+        cursor.setinputsizes(configuration=cx_Oracle.CLOB) # need to set to cx_Oracle.CLOB!
         cursor.execute(insertQuery,data)
         cursor.execute("select RUNNUMBER from RunInfoTable where rownum=1 order by RUNNUMBER DESC")
         conn.commit()
@@ -65,6 +68,7 @@ def insertNewRun(data,first=False):
         if not res:
             logger.error("Did not get runnumber")
             return 0
+        logger.info("Assigned run number: "+str(res[0]))
         return res[0]
 
     except cx_Oracle.Error as e:
@@ -85,6 +89,7 @@ def addRunInfo(runno,runinfo):
     else:
         updateQuery = """update RunInfoTable set RUNINFO=:runinfo where RUNNUMBER=:runno"""
     try:
+        cursor.setinputsizes(runinfo=cx_Oracle.CLOB) # need to set to cx_Oracle.CLOB!
         cursor.execute(updateQuery,runno=runno,runinfo=runinfo)
         conn.commit()
     except cx_Oracle.Error as e:

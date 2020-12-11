@@ -20,7 +20,7 @@
             "OutputDestination": 0,
             "Input": [false, false, false, false, false, false, false, false],
             "Busy0Disable": true,
-            "Busy1Disable": false,
+            "Busy1Disable": true,
             "EnableTriggerData": true,
             "EnableMonitoringData": true,
             "Derandomize": false,

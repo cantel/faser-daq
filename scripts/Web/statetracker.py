@@ -1,14 +1,23 @@
 import functools
 import json
+import os
 import redis
+import requests
+import subprocess
 import threading
 import time
 from os import environ as env
 
 import helpers as h
-from routes.metric import getBoardStatus
+from routes.metric import getBoardStatus,getEventCounts
 
 r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
+
+#cfg=json.load(open("../RunService/runservice.config"))
+#run_user=cfg['user']
+#run_pw=cfg["pw"]
+run_user="FASER"
+run_pw="HelloThere"
 
 #FIXME: this should probably be in daqcontrol
 import supervisor_wrapper
@@ -60,7 +69,10 @@ def stateTracker(logger):
                 for logfile in logfiles:
                     name = logfile[1][5:].split("-")[0]
                     r1.hset("log", name, logfile[0] + logfile[1])
-                time.sleep(0.5)
+                time.sleep(1.5)  #this should really check status of components
+                detList=h.detectorList(config)
+                logger.info("Included detector components: "+",".join(detList))
+                r1.set("detList",json.dumps(detList))
                 logger.info("Calling configure")
                 h.spawnJoin(config['components'], daq.configureProcess)
                 logger.info("Configure done")
@@ -76,6 +88,13 @@ def stateTracker(logger):
             elif cmd=="stop":
                 logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)
+                runinfo={}
+                runinfo["eventCounts"]=getEventCounts()
+                r = requests.post(f'http://faser-daq-001:5002/AddRunInfo/{runNumber}',
+                                  auth=(run_user,run_pw),
+                                  json = {"runinfo": runinfo })
+                if r.status_code!=200:
+                    logger.error("Failed to register end of run information: "+r.text)
                 logger.info("Stop done")
             elif cmd=="shutdown":
                 logger.info("Calling shutdown")
@@ -87,10 +106,12 @@ def stateTracker(logger):
                     if h.checkThreads()==0: break
                     cnt-=1
                 logger.info("Calling remove components")
-                try:
-                    daq.removeProcesses(config['components']) # was too slow since it is serialized
-                except:
-                    logger.warning("Got exceptions during removal")
+                #could not use daqling loop as it stops on first exception
+                for comp in config['components']:
+                    try:
+                        daq.removeProcess(comp['host'],comp['name'])
+                    except Exception as e:
+                        logger.error("Exception"+str(e)+": Got exception during removal of "+comp['name'])
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
@@ -103,7 +124,8 @@ def stateTracker(logger):
                 if not overallState:
                     overallState=state
                 if state!=overallState:
-                    overallState="IN TRANSITION"
+                    if state!="RUN" and overallState!="RUN":
+                        overallState="IN TRANSITION"
                 appState=getBoardStatus(comp['name'])
                 status.append({'name' : comp['name'] , 'state' : state,'infoState':appState})
             if status!=oldStatus:
@@ -138,9 +160,31 @@ def stateTracker(logger):
                     logger.warn("Tried to start run in state: "+overallState)
                     cmd=""
                 else:
-                    runNumber=int(runNumber)+1
-                    r1.set("runNumber",runNumber)
-                    r1.set("runStart",time.time())
+                    detList=json.loads(r1.get("detList"))
+                    subInfo=json.loads(m['data'][6:])
+                    version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
+                    r= requests.post('http://faser-daq-001:5002/NewRunNumber',
+                                     auth=(run_user,run_pw),
+                                     json = {
+                                         'version':    version,
+                                         'type':       subInfo['runtype'],
+                                         'username':       os.getenv("USER"),
+                                         'startcomment':    subInfo['startcomment'],
+                                         'detectors':  detList,
+                                         'configName': configName,
+                                         'configuration': config
+                                     })
+                    if r.status_code!=201:
+                        logger.error("Failed to get run number: "+r.text)
+                        cmd=""
+                    else:
+                        try:
+                            runNumber=int(r.text)
+                            r1.set("runNumber",runNumber)
+                            r1.set("runStart",time.time())
+                        except ValueError:
+                            logger.error("Failed to get run number: "+r.text)
+                            cmd=""
             elif cmd=="pause":
                 if overallState!="RUN":
                     logger.warn("Tried to pause run in state: "+overallState)
@@ -174,8 +218,11 @@ def stateTracker(logger):
 def initialize(fileName):
     r1.publish("stateAction","initialize "+fileName)
 
-def start():
-    r1.publish("stateAction","start")
+def start(reqinfo):
+    info={}
+    info['startcomment']=reqinfo.get('startcomment',"")[:500]
+    info['runtype']=reqinfo.get('runtype',"Test")[:100]
+    r1.publish("stateAction","start "+json.dumps(info))
 
 def pause():
     r1.publish("stateAction","pause")

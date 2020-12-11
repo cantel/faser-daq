@@ -35,7 +35,7 @@ function updateCommandAvailability(data){
 	"INITIALISE": ["DOWN"],
 	"START": ["READY","PAUSED"],
 	"STOP": ["RUN","PAUSED"],
-	"SHUTDOWN": ["READY","RUN","PAUSED","IN TRANSITION"],
+	"SHUTDOWN": ["READY","RUN","PAUSED","IN TRANSITION","ERROR"],
 	"PAUSE": ["RUN"],
 	"ECR": ["PAUSED"] };
     var runningFileInfo=data.runState;
@@ -132,10 +132,11 @@ function initialise(self){
 }
 
 function start(self){
-    self.children[0].style="display: inline-block";
     if (document.getElementById("ECR").disabled) {
-	$.get('/start');
+//	$.get('/start');
+	$("#startRunModal").modal();
     } else {
+        self.children[0].style="display: inline-block";
 	$.get('/unpause');
     }
 }

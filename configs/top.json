@@ -4,6 +4,8 @@
       "module": "INFO"
   },
   "metrics_settings": {
+    "influxDb_uri": "http://epdtdi-daqtest:8086/write?db=",
+    "influxDb_name": "DAQlingMetrics",
     "stats_uri": "tcp://localhost:7000"
   },
   "filename_pattern": "/home/data/Faser-%c-%r-%n.raw"

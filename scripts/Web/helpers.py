@@ -84,6 +84,18 @@ def readGeneral():
         schema= "error"
     return schema
 
+def detectorList(config):
+    detList=[]
+    for comp in config["components"]:
+        compType=comp['type']
+        if compType=="TriggerReceiver": 
+            detList.append("TLB")
+        elif compType=="DigitizerReceiver": 
+            detList.append("DIG00")
+        elif compType=="TrackerReceiver":
+            boardID=comp['settings']['boardID']
+            detList.append(f"TRB{boardID:02}")
+    return detList
 
 
 
@@ -104,6 +116,8 @@ def translateStatus(rawStatus, timeout):
             translatedStatus = "RUN"
         elif(rawStatus == 'paused'):     
             translatedStatus = "PAUSED"
+        elif(rawStatus == 'error'):     
+            translatedStatus = "ERROR"
     return translatedStatus
 
 
@@ -145,10 +159,17 @@ def createDaqInstance(d):
 #quick hack to maintain threads
 threads = []
 
+def wrappedThread(func,args):
+    try:
+        func(args)
+    except Exception as e:
+        print("got exception:",e)
+
+
 def spawnJoin(plist, func):
     global threads
     for p in plist:
-        t = threading.Thread(target=func, args=(p,))
+        t = threading.Thread(target=wrappedThread, args=(func,p))
         t.start()
         threads.append(t)
 

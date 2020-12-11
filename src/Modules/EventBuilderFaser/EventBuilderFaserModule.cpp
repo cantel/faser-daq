@@ -35,6 +35,10 @@ void EventBuilderFaserModule::configure() {
   registerVariable(m_eventCounts[EventTags::TLBMonitoringTag], "TLBMonitoringRate", metrics::RATE);
   registerVariable(m_eventCounts[EventTags::CalibrationTag], "CalibrationEvents");
   registerVariable(m_eventCounts[EventTags::CalibrationTag], "CalibrationRate", metrics::RATE);
+  registerVariable(m_pendingCounts[EventTags::PhysicsTag], "PhysicsEventsPending");
+  registerVariable(m_pendingCounts[EventTags::MonitoringTag], "MonitoringEventsPending");
+  registerVariable(m_pendingCounts[EventTags::TLBMonitoringTag], "TLBMonitoringEventsPending");
+  registerVariable(m_pendingCounts[EventTags::CalibrationTag], "CalibrationEventsPending");
   registerVariable(m_run_number, "RunNumber");
   registerVariable(m_run_start, "RunStart");
   registerVariable(m_corruptFragmentCount, "CorruptFragmentErrors");
@@ -165,6 +169,7 @@ void EventBuilderFaserModule::runner() noexcept {
       }
       m_readyEvents[tag].clear();
       // check oldest event
+      m_pendingCounts[tag]=m_pendingEvents[tag].size();
       if (m_pendingEvents[tag].size()) {
 	auto event=m_pendingEvents[tag].begin()->second;
 	if ((now.count()-event->timestamp())>m_timeout) {

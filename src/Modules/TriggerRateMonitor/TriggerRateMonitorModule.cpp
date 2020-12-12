@@ -84,12 +84,13 @@ void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderB
   m_bcr_veto += m_tlbmonitoringFragment->bcr_veto_counter();
   m_digi_busy_veto += m_tlbmonitoringFragment->digitizer_busy_counter();
  // veto fractions
-  m_deadtime_fraction = _PERCENT*m_tlbmonitoringFragment->deadtime_veto_counter()/m_triggered_events;
-  m_busy_fraction = _PERCENT*m_tlbmonitoringFragment->busy_veto_counter()/m_triggered_events;
-  m_rate_limiter_fraction = _PERCENT*m_tlbmonitoringFragment->rate_limiter_veto_counter()/m_triggered_events;
-  m_bcr_fraction = _PERCENT*m_tlbmonitoringFragment->bcr_veto_counter()/m_triggered_events;
-  m_digi_busy_fraction = _PERCENT*m_tlbmonitoringFragment->digitizer_busy_counter()/m_triggered_events;
-
+  if (m_triggered_events){
+    m_deadtime_fraction = (float)_PERCENT*m_tlbmonitoringFragment->deadtime_veto_counter()/m_triggered_events;
+    m_busy_fraction = (float)_PERCENT*m_tlbmonitoringFragment->busy_veto_counter()/m_triggered_events;
+    m_rate_limiter_fraction = (float)_PERCENT*m_tlbmonitoringFragment->rate_limiter_veto_counter()/m_triggered_events;
+    m_bcr_fraction = (float)_PERCENT*m_tlbmonitoringFragment->bcr_veto_counter()/m_triggered_events;
+    m_digi_busy_fraction = (float)_PERCENT*m_tlbmonitoringFragment->digitizer_busy_counter()/m_triggered_events;
+  }
   m_histogrammanager->fill("tlb_veto_counts", "SimpleDeadtime", m_tlbmonitoringFragment->deadtime_veto_counter());
   m_histogrammanager->fill("tlb_veto_counts", "TrackerBusy", m_tlbmonitoringFragment->busy_veto_counter());
   m_histogrammanager->fill("tlb_veto_counts", "RateLimiter", m_tlbmonitoringFragment->rate_limiter_veto_counter());

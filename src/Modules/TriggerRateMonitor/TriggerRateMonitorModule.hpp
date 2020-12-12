@@ -25,11 +25,11 @@ class TriggerRateMonitorModule : public MonitorBaseModule {
   std::atomic<int> m_rate_limiter_veto;
   std::atomic<int> m_bcr_veto;
   std::atomic<int> m_digi_busy_veto;
-  std::atomic<int> m_deadtime_fraction;
-  std::atomic<int> m_busy_fraction;
-  std::atomic<int> m_rate_limiter_fraction;
-  std::atomic<int> m_bcr_fraction;
-  std::atomic<int> m_digi_busy_fraction;
+  std::atomic<float> m_deadtime_fraction;
+  std::atomic<float> m_busy_fraction;
+  std::atomic<float> m_rate_limiter_fraction;
+  std::atomic<float> m_bcr_fraction;
+  std::atomic<float> m_digi_busy_fraction;
 
   void monitor(daqling::utilities::Binary &eventBuilderBinary);
   void register_hists( );

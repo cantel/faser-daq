@@ -11,7 +11,7 @@ class TriggerMonitorModule : public MonitorBaseModule {
 
   uint16_t m_bcid;
   uint32_t m_orbitid;
-  unsigned int  m_l1A_spacing;
+  double m_l1A_spacing;
   uint32_t m_previous_orbit;
   uint16_t m_previous_bcid;
 

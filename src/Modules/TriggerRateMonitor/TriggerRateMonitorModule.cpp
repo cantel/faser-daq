@@ -9,6 +9,8 @@
 #include "TriggerRateMonitorModule.hpp"
 
 #define MAX_TRIG_LINES 5
+#define MASK_ECR 0xFFFFFFFFFF000000
+#define _PERCENT 100
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
@@ -16,6 +18,8 @@ using namespace std::chrono;
 TriggerRateMonitorModule::TriggerRateMonitorModule() { 
 
    INFO("");
+   m_ECR_cnt = 0;
+   m_triggered_events = 0;
  }
 
 TriggerRateMonitorModule::~TriggerRateMonitorModule() { 
@@ -38,6 +42,14 @@ void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderB
 
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
+
+  unsigned ECR_cnt = (m_fragment->event_id()&MASK_ECR)>>24;
+  if ( ECR_cnt > m_ECR_cnt){
+    m_previous_evt_cnt = 0;
+    m_ECR_cnt = ECR_cnt;
+  }
+  m_triggered_events = (m_tlbmonitoringFragment->event_id() - m_previous_evt_cnt);
+  m_previous_evt_cnt = m_tlbmonitoringFragment->event_id();
 
   // trigger counts
   // --- 
@@ -70,11 +82,19 @@ void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderB
   m_busy_veto += m_tlbmonitoringFragment->busy_veto_counter();
   m_rate_limiter_veto += m_tlbmonitoringFragment->rate_limiter_veto_counter();
   m_bcr_veto += m_tlbmonitoringFragment->bcr_veto_counter();
+  m_digi_busy_veto += m_tlbmonitoringFragment->digitizer_busy_counter();
+ // veto fractions
+  m_deadtime_fraction = _PERCENT*m_tlbmonitoringFragment->deadtime_veto_counter()/m_triggered_events;
+  m_busy_fraction = _PERCENT*m_tlbmonitoringFragment->busy_veto_counter()/m_triggered_events;
+  m_rate_limiter_fraction = _PERCENT*m_tlbmonitoringFragment->rate_limiter_veto_counter()/m_triggered_events;
+  m_bcr_fraction = _PERCENT*m_tlbmonitoringFragment->bcr_veto_counter()/m_triggered_events;
+  m_digi_busy_fraction = _PERCENT*m_tlbmonitoringFragment->digitizer_busy_counter()/m_triggered_events;
 
   m_histogrammanager->fill("tlb_veto_counts", "SimpleDeadtime", m_tlbmonitoringFragment->deadtime_veto_counter());
-  m_histogrammanager->fill("tlb_veto_counts", "Busy", m_tlbmonitoringFragment->busy_veto_counter());
+  m_histogrammanager->fill("tlb_veto_counts", "TrackerBusy", m_tlbmonitoringFragment->busy_veto_counter());
   m_histogrammanager->fill("tlb_veto_counts", "RateLimiter", m_tlbmonitoringFragment->rate_limiter_veto_counter());
   m_histogrammanager->fill("tlb_veto_counts", "BCR", m_tlbmonitoringFragment->bcr_veto_counter());
+  m_histogrammanager->fill("tlb_veto_counts", "DigiBusy", m_tlbmonitoringFragment->digitizer_busy_counter());
 
 }
 
@@ -88,7 +108,7 @@ void TriggerRateMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("tlb_tav_counts", "TAV idx", 0, 4, 4 );
 
   //veto counts
-  std::vector<std::string> veto_categories = {"SimpleDeadtime", "Busy", "RateLimiter", "BCR"};
+  std::vector<std::string> veto_categories = {"SimpleDeadtime", "TrackerBusy", "DigiBusy", "RateLimiter", "BCR"};
   m_histogrammanager->registerHistogram("tlb_veto_counts", "veto type", veto_categories, 5. );
 
   INFO(" ... done registering histograms ... " );
@@ -126,10 +146,18 @@ void TriggerRateMonitorModule::register_metrics() {
   registerVariable(m_busy_veto, "busyVetoRate", daqling::core::metrics::RATE);
   registerVariable(m_rate_limiter_veto, "ratelimiterVetoRate", daqling::core::metrics::RATE);
   registerVariable(m_bcr_veto, "BCRVetoRate", daqling::core::metrics::RATE);
+  registerVariable(m_digi_busy_veto, "digiBusyVetoRate", daqling::core::metrics::RATE);
   registerVariable(m_deadtime_veto, "deadtimeVetoCounter");
   registerVariable(m_busy_veto, "busyVetoCounter");
   registerVariable(m_rate_limiter_veto, "ratelimiterVetoCounter");
   registerVariable(m_bcr_veto, "BCRVetoCounter");
+  registerVariable(m_digi_busy_veto, "digiBusyVetoCounter");
+
+  registerVariable(m_deadtime_fraction, "deadtimeVetoPercentage");
+  registerVariable(m_busy_fraction, "busyVetoPercentage");
+  registerVariable(m_rate_limiter_fraction, "ratelimiterVetoPercentage");
+  registerVariable(m_bcr_fraction, "BCRVetoPercentage");
+  registerVariable(m_digi_busy_fraction, "digiBusyVetoPercentage");
 
   return;
 }

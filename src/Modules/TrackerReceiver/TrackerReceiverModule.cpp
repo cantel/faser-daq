@@ -240,15 +240,15 @@ void TrackerReceiverModule::configure() {
   m_trb->GetConfig()->Set_Global_L1TimeoutDisable(false);
   m_trb->GetConfig()->Set_Global_Overflow(4095);
   m_trb->GetConfig()->Set_Global_TLBClockSel(m_extClkSelect);
+  m_trb->GetConfig()->Set_Global_L1AEn(m_extClkSelect);
+  m_trb->GetConfig()->Set_Global_BCREn(m_extClkSelect);
   m_trb->GetConfig()->Set_Global_L2SoftL1AEn(!m_extClkSelect);
   m_trb->GetConfig()->Set_Global_HardwareDelay0(m_hwDelay_Clk0);
   m_trb->GetConfig()->Set_Global_HardwareDelay1(m_hwDelay_Clk1);
   m_trb->GetConfig()->Set_Module_LedRXEn(m_moduleMask);
   m_trb->GetConfig()->Set_Module_LedxRXEn(m_moduleMask);
   m_trb->GetConfig()->Set_Module_ClkCmdSelect(m_moduleClkCmdMask);
-  uint16_t running_params = FASER::TRBDirectParameter::FifoReset | FASER::TRBDirectParameter::ErrCntReset;
   if ( m_extClkSelect ) { // running on TLB clock
-    running_params |= FASER::TRBDirectParameter::L1AEn | FASER::TRBDirectParameter::BCREn | FASER::TRBDirectParameter::TLBClockSelect;
     m_trb->GetConfig()->Set_Module_L1En(m_moduleMask); 
     m_trb->GetConfig()->Set_Module_BCREn(m_moduleMask); 
     bool retry(true);
@@ -296,8 +296,7 @@ void TrackerReceiverModule::configure() {
   }
   m_trb->WriteConfigReg();
   m_trb->SCT_EnableDataTaking(m_moduleMask);
-  m_trb->SetDirectParam(running_params);
-
+  m_trb->SetDirectParam(m_trb->GetConfig()->GetGlobalDirectParam());
   m_trb->PrintStatus();
   m_trb->GetConfig()->Print();
 
@@ -339,7 +338,6 @@ void TrackerReceiverModule::stop() {
  *        Disable Trigger
  ****************************************/
 void TrackerReceiverModule::disableTrigger(const std::string &) {
-  //m_trb->StopReadout();
   m_triggerEnabled = false;
   INFO("TRB --> disable trigger.");
   usleep(100);
@@ -349,7 +347,6 @@ void TrackerReceiverModule::disableTrigger(const std::string &) {
  *        Enable Trigger
  ****************************************/
 void TrackerReceiverModule::enableTrigger(const std::string &) {
-  //m_trb->StartReadout();
   m_triggerEnabled = true; 
   INFO("TRB --> enable trigger.");
   usleep(100);
@@ -365,6 +362,7 @@ void TrackerReceiverModule::runner() noexcept {
   uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->GetBoardID();
   uint64_t local_event_id;
   uint16_t local_bc_id;
+  unsigned local_status;
 
   while (m_run || vector_of_raw_events.size()) { 
     if (!m_extClkSelect && m_triggerEnabled == true){
@@ -378,35 +376,57 @@ void TrackerReceiverModule::runner() noexcept {
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }
       else{
-        size_t events_to_decode = vector_of_raw_events.size();
         for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
           size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
           if (!total_size) continue;
           auto event = vector_of_raw_events[i].data();
           m_event_size_bytes = total_size; //Monitoring data
           m_physicsEventCount += 1; //Monitoring data
+         
+          try { 
+            TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
 
-          TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
-
-          if ( trk_data_fragment.valid()) {
-              local_event_id = trk_data_fragment.event_id();
-              local_event_id = local_event_id | (m_ECRcount << 24);
-              local_bc_id = trk_data_fragment.bc_id();
-          }
-          else{
+            if ( trk_data_fragment.valid()) {
+                local_event_id = trk_data_fragment.event_id();
+                local_event_id = local_event_id | (m_ECRcount << 24);
+                local_bc_id = trk_data_fragment.bc_id();
+                local_status = 0;
+            }
+            else{
+                local_event_id = 0xffffff;
+                local_bc_id = 0xffff;
+                local_status = EventStatus::UnclassifiedError;
+                m_status=STATUS_WARN;
+                m_corrupted_fragments += 1; //Monitoring data
+                WARNING("Corrupted tracker data fragment at triggered event count "<<m_physicsEventCount);
+                if (trk_data_fragment.has_trb_error()){
+                  WARNING("TRB error found with ID "<<(int)trk_data_fragment.trb_error_id());
+                }
+                if (trk_data_fragment.has_module_error()){
+                  for (auto mod_error : trk_data_fragment.module_error_id()){
+                    WARNING("Module error found with ID "<<(int)mod_error);
+                  }
+                } // FIXME these WARNINGs won't be shown as TRB and module errors throw exceptions instead
+                if (trk_data_fragment.has_crc_error()) {
+                  WARNING("Mismatching checksums!");
+                  m_checksum_mismatches++;
+                  m_checksum_mismatches_rate = m_checksum_mismatches/m_physicsEventCount;
+                }
+            }
+          } catch (TrackerDataException & e) {
               local_event_id = 0xffffff;
               local_bc_id = 0xffff;
-              m_status=STATUS_ERROR;
+              local_status = EventStatus::CorruptedFragment;
+              m_corrupted_fragments += 1; //Monitoring data
+              m_status=STATUS_WARN;
+              WARNING("Crashed tracker data fragment at triggered event count "<<m_physicsEventCount);
+              // FIXME identify type of error here..
           }
 
           std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, event, total_size));
           
-          fragment->set_status(0);
-          if (trk_data_fragment.has_trb_error() || trk_data_fragment.has_module_error() ){
-              fragment->set_status(EventStatus::UnclassifiedError);
-              m_corrupted_fragments += 1; //Monitoring data
-          } // FIXME tracker decoder does not recognise errors, FIXME implement checksum check in decoder and check here.
+          fragment->set_status(local_status);
 
           if (m_debug){
             DEBUG("event id: 0x"<< std::hex << fragment->event_id());

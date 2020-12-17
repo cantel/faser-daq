@@ -35,8 +35,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
 
     bool runEmulation = m_config.getConfig()["settings"]["emulation"]; 
 
-    if ( cfg.contains("boardID")) {
-      m_userBoardID = cfg["boardID"];
+    if ( cfg.contains("BoardID")) {
+      m_userBoardID = cfg["BoardID"];
     }
     else if (!runEmulation) {
       ERROR("No board ID specified.");

@@ -103,8 +103,10 @@ void EventBuilderFaserModule::addFragment(EventFragment *fragment) {
   try {
     auto status=event->addFragment(fragment);
     if (status&EventStatus::BCIDMismatch) {
-      WARNING("Mismatch in BCID for event "<<event->event_id()<<" : "<<event->bc_id()<<" != "<<fragment->bc_id());
-      m_BCIDMismatchCount++;
+      if (abs(event->bc_id()-fragment->bc_id())>10) { //allow for digitizer to be slightly out of time
+	WARNING("Mismatch in BCID for event "<<event->event_id()<<" : "<<event->bc_id()<<" != "<<fragment->bc_id());
+	m_BCIDMismatchCount++;
+      }
     }
   }
   catch (const std::runtime_error& e) {
@@ -156,9 +158,9 @@ void EventBuilderFaserModule::runner() noexcept {
 	addFragment(fragment);
       }
     }
-    if (noData) std::this_thread::sleep_for(10ms);
 
     // send any events ready or timed out
+    bool sentMissing=false;
     microseconds now;
     now = duration_cast<microseconds>(system_clock::now().time_since_epoch());
     for(unsigned int tag=0;tag<MaxAnyTag;tag++) {
@@ -179,9 +181,12 @@ void EventBuilderFaserModule::runner() noexcept {
 	  sendEvent(EventTags::IncompleteTag,event);
 	  delete event;
 	  m_pendingEvents[tag].erase(m_pendingEvents[tag].begin());
+	  sentMissing=true;
 	}
       }
     }
+    if (noData&&!sentMissing) std::this_thread::sleep_for(10ms);
+
   }
   INFO("Runner stopped");
 }

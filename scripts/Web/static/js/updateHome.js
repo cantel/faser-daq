@@ -35,7 +35,7 @@ function updateCommandAvailability(data){
 	"INITIALISE": ["DOWN"],
 	"START": ["READY","PAUSED"],
 	"STOP": ["RUN","PAUSED"],
-	"SHUTDOWN": ["READY","RUN","PAUSED","IN TRANSITION","ERROR"],
+	"SHUTDOWN": ["READY","RUN","PAUSED","IN TRANSITION","ERROR","BOOTED"],
 	"PAUSE": ["RUN"],
 	"ECR": ["PAUSED"] };
     var runningFileInfo=data.runState;

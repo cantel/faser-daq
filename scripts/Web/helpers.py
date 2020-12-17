@@ -93,7 +93,7 @@ def detectorList(config):
         elif compType=="DigitizerReceiver": 
             detList.append("DIG00")
         elif compType=="TrackerReceiver":
-            boardID=comp['settings']['boardID']
+            boardID=comp['settings']['BoardID']
             detList.append(f"TRB{boardID:02}")
     return detList
 

@@ -58,6 +58,13 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   }
   else {WARNING("Ignoring empty data fragment.");return;}
 
+  size_t payload_size = m_fragment->payload_size();
+  if ( payload_size > MAXFRAGSIZE ) {
+     WARNING(" VERY large payload size received. Payload size of "<<payload_size<<" bytes exceeds maximum allowable for histogram filling. Resetting to "<<MAXFRAGSIZE);
+     payload_size = MAXFRAGSIZE;
+  } 
+  m_histogrammanager->fill("payloadsize", payload_size);
+
   if (m_trackerdataFragment->valid()){
     m_bcid = m_trackerdataFragment->bc_id();
     m_histogrammanager->fill("bcid", m_bcid); 
@@ -70,9 +77,15 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
 
   for ( auto it = m_trackerdataFragment->cbegin(); it != m_trackerdataFragment->cend(); ++it ){
       auto sctEvent = *it;
-      if (sctEvent == nullptr) { WARNING("Invalid SCT Event. Skipping."); continue;}
+      if (sctEvent == nullptr) { 
+        WARNING("Invalid SCT Event for event "<<m_trackerdataFragment->event_id());
+        WARNING("tracker data fragment: "<<*m_trackerdataFragment);
+        m_status = STATUS_WARN;
+        m_histogrammanager->fill("track_data_error_types", "ModuleDecodeError");
+        continue;
+      }
       std::string hname_hitp = m_prefix_hname_hitp+std::to_string(sctEvent->GetModuleID());
-      m_histogrammanager->fill("diff_trb_sct_bcid", ((m_bcid%256)-sctEvent->GetBCID()));
+      m_histogrammanager->fill("diff_trb_sct_bcid", ((int)((m_bcid%256)-sctEvent->GetBCID()))%256);
       auto allHits = sctEvent->GetHits();
       module = sctEvent->GetModuleID();
       number = sctEvent->GetNHits();
@@ -130,31 +143,35 @@ void TrackerMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TrackerMonitor ... " );
 
-  m_histogrammanager->registerHistogram("bcid", "BCID", 0, 3564, 3564, 30);
-  m_histogrammanager->registerHistogram("diff_trb_sct_bcid", "TRB BCID - SCT BCID", 10, -5, 5, Axis::Range::EXTENDABLE, 10);
+  const unsigned kPUBINT = 120; // publishing interval in seconds
+
+  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", 0, MAXFRAGSIZE/50, MAXFRAGSIZE/2000,  Axis::Range::EXTENDABLE, kPUBINT*10);
+
+  m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 1800);
+  m_histogrammanager->registerHistogram("diff_trb_sct_bcid", "TRB BCID - SCT BCID", 10, -5, 5, Axis::Range::EXTENDABLE, 1800);
   m_histogrammanager->registerHistogram("total_hits_multiplicity", "total_hits_multiplicity", 0, 30, 30, 30);
   m_histogrammanager->registerHistogram("good_hits_multiplicity", "good_hits_multiplicity", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod0", "good_hits_multiplicity_Mod0", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod1", "good_hits_multiplicity_Mod1", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod2", "good_hits_multiplicity_Mod2", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod3", "good_hits_multiplicity_Mod3", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod4", "good_hits_multiplicity_Mod4", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_4to7", -130, 130, 52, 30);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_0to3", -130, 130, 52, 30);
-  m_histogrammanager->register2DHistogram("chip_occupancy_noise", "module_number",  0, 4, 4, "chip_number", 0, 24, 24);
-  m_histogrammanager->register2DHistogram("chip_occupancy_physics", "module_number",  0, 4,4,"chip_number", 0, 24 , 24);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod0", "good_hits_multiplicity_Mod0", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod1", "good_hits_multiplicity_Mod1", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod2", "good_hits_multiplicity_Mod2", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod3", "good_hits_multiplicity_Mod3", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod4", "good_hits_multiplicity_Mod4", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_4to7", -130, 130, 52, kPUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_0to3", -130, 130, 52, kPUBINT);
+  m_histogrammanager->register2DHistogram("chip_occupancy_noise", "module_number",  0, 4, 4, "chip_number", 0, 24, 24, kPUBINT);
+  m_histogrammanager->register2DHistogram("chip_occupancy_physics", "module_number",  0, 4,4,"chip_number", 0, 24 , 24, kPUBINT);
 // per module
   std::vector<std::string> hitp_categories = { "000", "001", "010", "011", "100", "110", "111" };
   for ( unsigned i = 0; i < 8; i++ ){
     std::string hname_hitp = m_prefix_hname_hitp+std::to_string(i);
-    m_histogrammanager->registerHistogram(hname_hitp, "hit pattern", hitp_categories, 10);
+    m_histogrammanager->registerHistogram(hname_hitp, "hit pattern", hitp_categories, kPUBINT);
   }
 
-  std::vector<std::string> error_categories = {"TRBError", "ModuleError", "NoEventID", "NoBCID", "NoCRC", "MissingFrames", "UnrecognizedFrames" };
-  m_histogrammanager->registerHistogram("track_data_error_types", "error type", error_categories, 10);
+  std::vector<std::string> error_categories = {"TRBError", "ModuleError", "NoEventID", "NoBCID", "NoCRC", "MissingFrames", "UnrecognizedFrames", "ModuleDecodeError"};
+  m_histogrammanager->registerHistogram("track_data_error_types", "error type", error_categories, kPUBINT);
 
   INFO(" ... done registering histograms ... " );
 
@@ -167,9 +184,6 @@ void TrackerMonitorModule::register_metrics() {
   INFO( "... registering metrics in TrackerMonitorModule ... " );
 
   register_error_metrics();
-
-  m_metric_payload = 0;
-  m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
   return;
 }

@@ -26,6 +26,7 @@ MonitorBaseModule::MonitorBaseModule() {
 MonitorBaseModule::~MonitorBaseModule() { 
 
   delete m_event;
+  if (m_trackerdataFragment) delete m_trackerdataFragment;
 
   INFO("With config: " << m_config.dump());
 }
@@ -181,7 +182,7 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
 
   switch (m_eventTag) {
     case PhysicsTag:{
-      switch (sourceID) {
+      switch (sourceID&0xFFFFFF00) {
         case TriggerSourceID:
           m_tlbdataFragment = std::make_unique<TLBDataFragment>(TLBDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size()));
           DEBUG("unpacking TLB data fragment.");
@@ -189,6 +190,11 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
         case PMTSourceID:
           m_pmtdataFragment = std::make_unique<DigitizerDataFragment>(DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size()));
           DEBUG("unpacking PMT data fragment.");
+          break;
+        case TrackerSourceID:
+          if (m_trackerdataFragment) delete m_trackerdataFragment;
+          m_trackerdataFragment = new TrackerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+          DEBUG("unpacking Tracker data fragment.");
           break;
         default:
           m_rawFragment=m_fragment->payload<const RawFragment*>();

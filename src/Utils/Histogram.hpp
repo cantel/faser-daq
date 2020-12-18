@@ -7,6 +7,7 @@
 #include <iostream>
 #include <nlohmann/json.hpp> // dump Hist as json structure
 #include <algorithm> // std::fill
+#include <mutex>
 
 using namespace boost::histogram;
 using json = nlohmann::json;
@@ -31,6 +32,8 @@ using stretchy_hist_t = decltype(make_histogram(std::declval<stretchy_axis_t>())
 using hist2d_t = decltype(make_histogram(std::declval<axis_t>(), std::declval<axis_t>()));
 using categoryaxis_t = axis::category<std::string>;
 using categoryhist_t = decltype(make_histogram(std::declval<categoryaxis_t>())); 
+
+inline std::mutex m_hist_mutex; // prevent histogram access clashes (issue of extendable histograms)
 
 class HistBase {
   public:
@@ -68,8 +71,13 @@ class Hist : public HistBase {
   }
   ~Hist(){}
   template <typename X, typename W>
-  void fill(X x, W w = 1)   { hist_object(x, weight(w)); }
+  void fill(X x, W w = 1)  { 
+      m_hist_mutex.lock();
+      hist_object(x, weight(w));
+      m_hist_mutex.unlock();
+      }
   std::string publish() {
+      m_hist_mutex.lock();
       auto this_axis = hist_object.axis();
       std::vector<int> yvalues;
       for (auto y : indexed(hist_object, coverage::all ) ) {
@@ -88,6 +96,7 @@ class Hist : public HistBase {
        //auto ind = indexed(hist_object, coverage::all);
        std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
       }
+      m_hist_mutex.unlock();
       return json_object.dump();
   }
   void reset(){
@@ -129,6 +138,7 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
   template <typename W>
   void fill(const char * x, W w = 1)  { hist_object(x, weight(w));}
   std::string publish() override {
+      m_hist_mutex.lock();
       auto this_axis = hist_object.axis();
       std::vector<int> yvalues;
       for (auto y : indexed(hist_object, coverage::inner ) ) { // no under/overflows for boost hist objects of axis type category.
@@ -141,6 +151,7 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
        //auto ind = indexed(hist_object, coverage::all);
        std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
       }
+      m_hist_mutex.unlock();
       return json_object.dump();
   }
   void reset(){
@@ -183,8 +194,13 @@ class Hist2D : public HistBase {
   float ymax;
   float ybins;
   template <typename X, typename Y, typename W>
-  void fill( X x, Y y, W w=1) { hist_object(x,y, weight(w));}
+  void fill( X x, Y y, W w=1) { 
+      m_hist_mutex.lock();
+      hist_object(x,y, weight(w));
+      m_hist_mutex.unlock();
+      }
   std::string publish() {
+      m_hist_mutex.lock();
       auto this_axis = hist_object.axis();
       std::vector<int> zvalues;
       for (auto z : indexed(hist_object, coverage::all ) ) {
@@ -197,6 +213,7 @@ class Hist2D : public HistBase {
        //auto ind = indexed(hist_object, coverage::all);
        std::fill(hist_object.begin(), hist_object.end(), 0); // FIXME: This might break with boost version > 1.70
       }
+      m_hist_mutex.unlock();
       return json_object.dump();
   }
   void reset(){

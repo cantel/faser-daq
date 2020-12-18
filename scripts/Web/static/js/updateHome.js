@@ -12,7 +12,7 @@ function updateStatus(data){
 	statusElement=document.getElementById("status" + i.toString());
 	if (statusElement==null) continue;
 	statusElement.innerHTML = data.allStatus[i].state;
-	if(data.allStatus[i].state == "TIMEOUT"){
+	if(data.allStatus[i].state == "TIMEOUT" || data.allStatus[i].state == "CRASHED"){
 	    document.getElementById("status" + i.toString()).className = "badge badge-danger";
 	} else {
 	    document.getElementById("status" + i.toString()).className = "badge badge-success";
@@ -35,7 +35,7 @@ function updateCommandAvailability(data){
 	"INITIALISE": ["DOWN"],
 	"START": ["READY","PAUSED"],
 	"STOP": ["RUN","PAUSED"],
-	"SHUTDOWN": ["READY","RUN","PAUSED","IN TRANSITION","ERROR","BOOTED"],
+	"SHUTDOWN": ["READY","RUN","PAUSED","IN TRANSITION","ERROR","CRASHED","BOOTED","TIMEOUT"],
 	"PAUSE": ["RUN"],
 	"ECR": ["PAUSED"] };
     var runningFileInfo=data.runState;

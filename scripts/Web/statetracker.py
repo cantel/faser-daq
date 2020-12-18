@@ -150,7 +150,7 @@ def stateTracker(logger):
             elif cmd=="updateConfig": configName=""
             elif cmd=="initialize":
                 if overallState!="DOWN":
-                    logger.warn("Tried to initialize in state: "+overallState)
+                    logger.warn("Tried to initialize in state: "+str(overallState))
                     cmd=""
                 else:
                     r1.hset("runningFile", "fileName", cmds[1])

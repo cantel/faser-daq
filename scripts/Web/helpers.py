@@ -107,7 +107,7 @@ def translateStatus(rawStatus, timeout):
         if(rawStatus == 'not_added'):
             translatedStatus = "DOWN"
         elif(rawStatus == 'added'):
-            translatedStatus = "ADDED"
+            translatedStatus = "CRASHED"
         elif(rawStatus == 'booted'):
             translatedStatus = "BOOTED"
         elif(rawStatus == 'ready'):        

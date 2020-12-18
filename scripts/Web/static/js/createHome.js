@@ -82,7 +82,7 @@ function createStatusBadges(i){
 	btn.innerHTML = 'UNKNOWN';
 	btn.className= "badge badge-success";
 	btn.style.fontSize= "x-large";
-	btn.style.background= "Green";
+	//btn.style.background= "Green";
 	btn.id = "status" + i.toString();
 
 	var col5 = document.createElement("th");

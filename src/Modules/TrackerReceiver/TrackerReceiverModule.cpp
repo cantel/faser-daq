@@ -307,7 +307,7 @@ void TrackerReceiverModule::configure() {
 void TrackerReceiverModule::sendECR()
 {
   INFO("TRB --> ECR." << " ECRcount: " << m_ECRcount);
-  m_trb->L1CounterReset();
+  m_trb->L1CounterReset(); // TODO need to reset SCT module counters here as well
 }
 
 
@@ -420,7 +420,6 @@ void TrackerReceiverModule::runner() noexcept {
               m_corrupted_fragments += 1; //Monitoring data
               m_status=STATUS_WARN;
               WARNING("Crashed tracker data fragment at triggered event count "<<m_physicsEventCount);
-              // FIXME identify type of error here..
           }
 
           std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 

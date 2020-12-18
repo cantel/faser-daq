@@ -246,8 +246,8 @@
             "HWDelayClk1": 0,
             "FinePhaseClk0": 0,
             "FinePhaseClk1": 0,
-            "FinePhaseLed0": 55,
-            "FinePhaseLed1": 55,
+            "FinePhaseLed0": 39,
+            "FinePhaseLed1": 38,
             "RxTimeoutDisable": false,
             "L1Atype" : "external",  
             "emulation" : false,
@@ -275,6 +275,52 @@
             ]
 	}
     },
+    "TRBReceiver06": {
+	"name": "trackerreceiver06",
+	"host": "localhost",
+	"port": 5536,
+	"type": "TrackerReceiver",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "BoardID": 6,
+            "SCIP" : "10.11.65.8",
+            "DAQIP" : "10.11.65.8",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 36,
+            "FinePhaseLed1": 36,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {"0" : "/home/cantel/config/Station1_backbone/Layer1/Module0_141020_1703.json",
+                              "1" : "/home/cantel/config/Station1_backbone/Layer1/Module1_141020_1703.json",
+                              "2" : "/home/cantel/config/Station1_backbone/Layer1/Module2_141020_1703.json",
+                              "3" : "/home/cantel/config/Station1_backbone/Layer1/Module3_141020_1703.json",
+                              "4" : "/home/cantel/config/Station1_backbone/Layer1/Module4_141020_1703.json",
+                              "5" : "/home/cantel/config/Station1_backbone/Layer1/Module5_141020_1703.json",
+                              "6" : "/home/cantel/config/Station1_backbone/Layer1/Module6_141020_1703.json",
+                              "7" : "/home/cantel/config/Station1_backbone/Layer1/Module7_141020_1703.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
+	},
+	"connections": {
+            "senders": [
+		{
+		    "type": "pair",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "*",
+		    "port": 8116
+		}
+            ]
+	}
+    },
     "TRBReceiver07": {
 	"name": "trackerreceiver07",
 	"host": "localhost",
@@ -284,22 +330,29 @@
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
             "BoardID": 7,
-            "L1Atype" : "external",
+            "SCIP" : "10.11.65.8",
+            "DAQIP" : "10.11.65.8",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 35,
+            "FinePhaseLed1": 37,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
             "emulation" : false,
-            "SCIP" : "10.11.65.6",
-            "DAQIP" : "10.11.65.6",
-            "RxTimeoutDisable": true,
-            "ConfigureModules": true,
             "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [false, false, false, false, false, false, false, false],
-            "moduleConfigFiles": {"0" : "/home/cantel/daq/configs/Module0.json",
-				  "1" : "/home/cantel/daq/configs/TemplateModuleCfg1.json",
-				  "2" : "/home/cantel/daq/configs/TemplateModuleCfg2.json",
-				  "3" : "/home/cantel/daq/configs/TemplateModuleCfg3.json",
-				  "4" : "/home/cantel/daq/configs/TemplateModuleCfg4.json",
-				  "5" : "/home/cantel/daq/configs/TemplateModuleCfg5.json",
-				  "6" : "/home/cantel/daq/configs/TemplateModuleCfg6.json",
-				  "7" : "/home/cantel/daq/configs/TemplateModuleCfg7.json"},
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {"0" : "/home/cantel/config/Station1_backbone/Layer1/Module0_141020_1703.json",
+                              "1" : "/home/cantel/config/Station1_backbone/Layer1/Module1_141020_1703.json",
+                              "2" : "/home/cantel/config/Station1_backbone/Layer1/Module2_141020_1703.json",
+                              "3" : "/home/cantel/config/Station1_backbone/Layer1/Module3_141020_1703.json",
+                              "4" : "/home/cantel/config/Station1_backbone/Layer1/Module4_141020_1703.json",
+                              "5" : "/home/cantel/config/Station1_backbone/Layer1/Module5_141020_1703.json",
+                              "6" : "/home/cantel/config/Station1_backbone/Layer1/Module6_141020_1703.json",
+                              "7" : "/home/cantel/config/Station1_backbone/Layer1/Module7_141020_1703.json"},
             "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 	},
 	"connections": {
@@ -310,6 +363,52 @@
 		    "transport": "tcp",
 		    "host": "*",
 		    "port": 8117
+		}
+            ]
+	}
+    },
+    "TRBReceiver08": {
+	"name": "trackerreceiver08",
+	"host": "localhost",
+	"port": 5538,
+	"type": "TrackerReceiver",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "BoardID": 8,
+            "SCIP" : "10.11.65.8",
+            "DAQIP" : "10.11.65.8",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 35,
+            "FinePhaseLed1": 37,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {"0" : "/home/cantel/config/Station1_backbone/Layer1/Module0_141020_1703.json",
+                              "1" : "/home/cantel/config/Station1_backbone/Layer1/Module1_141020_1703.json",
+                              "2" : "/home/cantel/config/Station1_backbone/Layer1/Module2_141020_1703.json",
+                              "3" : "/home/cantel/config/Station1_backbone/Layer1/Module3_141020_1703.json",
+                              "4" : "/home/cantel/config/Station1_backbone/Layer1/Module4_141020_1703.json",
+                              "5" : "/home/cantel/config/Station1_backbone/Layer1/Module5_141020_1703.json",
+                              "6" : "/home/cantel/config/Station1_backbone/Layer1/Module6_141020_1703.json",
+                              "7" : "/home/cantel/config/Station1_backbone/Layer1/Module7_141020_1703.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
+	},
+	"connections": {
+            "senders": [
+		{
+		    "type": "pair",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "*",
+		    "port": 8118
 		}
             ]
 	}
@@ -438,6 +537,75 @@
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
             "fragmentID": 196613,
+            "stats_uri": "tcp://localhost:7000"
+	},
+	"connections": {
+            "receivers": [
+		{
+		    "type": "pubsub",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "localhost",
+		    "port": 8200
+		}
+            ]
+	}
+    },
+    "TrackerMonitor06": {
+	"name": "trackermonitor06",
+	"host": "localhost",
+	"port": 5556,
+	"type": "TrackerMonitor",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "fragmentID": 196614,
+            "stats_uri": "tcp://localhost:7000"
+	},
+	"connections": {
+            "receivers": [
+		{
+		    "type": "pubsub",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "localhost",
+		    "port": 8200
+		}
+            ]
+	}
+    },
+    "TrackerMonitor07": {
+	"name": "trackermonitor07",
+	"host": "localhost",
+	"port": 5557,
+	"type": "TrackerMonitor",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "fragmentID": 196615,
+            "stats_uri": "tcp://localhost:7000"
+	},
+	"connections": {
+            "receivers": [
+		{
+		    "type": "pubsub",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "localhost",
+		    "port": 8200
+		}
+            ]
+	}
+    },
+    "TrackerMonitor08": {
+	"name": "trackermonitor08",
+	"host": "localhost",
+	"port": 5558,
+	"type": "TrackerMonitor",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "fragmentID": 196616,
             "stats_uri": "tcp://localhost:7000"
 	},
 	"connections": {

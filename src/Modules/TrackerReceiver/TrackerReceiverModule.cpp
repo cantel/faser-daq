@@ -381,7 +381,7 @@ void TrackerReceiverModule::runner() noexcept {
           size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
           if (!total_size) continue;
           auto event = vector_of_raw_events[i].data();
-          if (!m_run && *event == m_TRBENDOFDAQ){
+          if ( total_size == sizeof(uint32_t) && *event == m_TRBENDOFDAQ){ // End of DAQ is a single 32 bit word.
             INFO("End of DAQ received from TRB. Expect no more incoming events.");
             continue;
           }

@@ -303,6 +303,8 @@ def convert_to_plotly(histobj):
     hist_type = histobj["type"]
     if "categories" in hist_type:
         xarray = histobj["categories"]
+        if "hitpattern" in histobj["name"]:
+          xarray = ['b'+str(x) for x in histobj["categories"]] 
         yarray = histobj["yvalues"]
         data = [dict(x=xarray, y=yarray, type="bar")]
 

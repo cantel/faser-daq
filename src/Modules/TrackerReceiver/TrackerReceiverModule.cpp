@@ -30,6 +30,7 @@ using namespace daqling::utilities;
 
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
+    m_status = STATUS_OK;
 
     auto cfg = m_config.getSettings();
 
@@ -380,6 +381,10 @@ void TrackerReceiverModule::runner() noexcept {
           size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
           if (!total_size) continue;
           auto event = vector_of_raw_events[i].data();
+          if (!m_run && *event == m_TRBENDOFDAQ){
+            INFO("End of DAQ received from TRB. Expect no more incoming events.");
+            continue;
+          }
           m_event_size_bytes = total_size; //Monitoring data
           m_physicsEventCount += 1; //Monitoring data
          

@@ -70,9 +70,14 @@ class NewRunNumber(Resource):
                 if field=="detectors": data[field]=[]
                 if field=="configuration": data[field]=[]
             else:
-                if len(jsonreq[field])>100 and not field in ["configuration","detectors","startcomment"]:
+                if len(jsonreq[field])>100 and field in ["type","username"]:
+                    log.error(f"Too long field: {field}")
                     return { "error": field+" field too long (>100 bytes)"},400
+                if len(jsonreq[field])>200 and field in ["version","configName"]:
+                    log.error(f"Too long field: {field}")
+                    return { "error": field+" field too long (>200 bytes)"},400
                 if len(jsonreq[field])>500 and field in ["comment"]:
+                    log.error(f"Too long field: {field}")
                     return { "error": field+" field too long (>500 bytes)"},400
                 data[field]=jsonreq[field]
         if data["type"]=="N/A":

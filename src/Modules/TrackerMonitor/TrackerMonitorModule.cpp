@@ -110,8 +110,8 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
             if ( hit2.second == 7 ) continue;
             auto strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
             if (module<=3){
-               m_histogrammanager->fill("strip_id_difference_0to3",strip1-strip2);}
-            else {m_histogrammanager->fill("strip_id_difference_4to7",strip1-strip2);}
+               m_histogrammanager->fill("strip_id_difference_mod0to3",strip1-strip2);}
+            else {m_histogrammanager->fill("strip_id_difference_mod4to7",strip1-strip2);}
             if ( std::abs(strip1-strip2) > kSTRIPDIFFTOLERANCE ) continue;
             // good physics hits
             goodHits = goodHits + 1;
@@ -159,8 +159,8 @@ void TrackerMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 0, 30, 30, kPUBINT);
   m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 0, 30, 30, kPUBINT);
   m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_4to7", -130, 130, 52, kPUBINT);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_0to3", -130, 130, 52, kPUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_mod4to7", -130, 130, 52, kPUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_mod0to3", -130, 130, 52, kPUBINT);
   m_histogrammanager->register2DHistogram("chip_occupancy_noise", "module_number",  0, 4, 4, "chip_number", 0, 24, 24, kPUBINT);
   m_histogrammanager->register2DHistogram("chip_occupancy_physics", "module_number",  0, 4,4,"chip_number", 0, 24 , 24, kPUBINT);
 // per module

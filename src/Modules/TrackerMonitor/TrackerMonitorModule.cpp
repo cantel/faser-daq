@@ -129,14 +129,14 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
       }
   }
 m_histogrammanager->fill("good_hits_multiplicity",goodHits);
-m_histogrammanager->fill("good_hits_multiplicity_Mod0",goodHitsMod[0]);
-m_histogrammanager->fill("good_hits_multiplicity_Mod1",goodHitsMod[1]);
-m_histogrammanager->fill("good_hits_multiplicity_Mod2",goodHitsMod[2]);
-m_histogrammanager->fill("good_hits_multiplicity_Mod3",goodHitsMod[3]);
-m_histogrammanager->fill("good_hits_multiplicity_Mod4",goodHitsMod[4]);
-m_histogrammanager->fill("good_hits_multiplicity_Mod5",goodHitsMod[5]);
-m_histogrammanager->fill("good_hits_multiplicity_Mod6",goodHitsMod[6]);
-m_histogrammanager->fill("good_hits_multiplicity_Mod7",goodHitsMod[7]);
+if (goodHitsMod[0]) m_histogrammanager->fill("good_hits_multiplicity_Mod0",goodHitsMod[0]);
+if (goodHitsMod[1]) m_histogrammanager->fill("good_hits_multiplicity_Mod1",goodHitsMod[1]);
+if (goodHitsMod[2]) m_histogrammanager->fill("good_hits_multiplicity_Mod2",goodHitsMod[2]);
+if (goodHitsMod[3]) m_histogrammanager->fill("good_hits_multiplicity_Mod3",goodHitsMod[3]);
+if (goodHitsMod[4]) m_histogrammanager->fill("good_hits_multiplicity_Mod4",goodHitsMod[4]);
+if (goodHitsMod[5]) m_histogrammanager->fill("good_hits_multiplicity_Mod5",goodHitsMod[5]);
+if (goodHitsMod[6]) m_histogrammanager->fill("good_hits_multiplicity_Mod6",goodHitsMod[6]);
+if (goodHitsMod[7]) m_histogrammanager->fill("good_hits_multiplicity_Mod7",goodHitsMod[7]);
 }
 
 void TrackerMonitorModule::register_hists() {
@@ -151,14 +151,14 @@ void TrackerMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("diff_trb_sct_bcid", "TRB BCID - SCT BCID", 10, -5, 5, Axis::Range::EXTENDABLE, 1800);
   m_histogrammanager->registerHistogram("total_hits_multiplicity", "total_hits_multiplicity", 0, 30, 30, 30);
   m_histogrammanager->registerHistogram("good_hits_multiplicity", "good_hits_multiplicity", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod0", "good_hits_multiplicity_Mod0", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod1", "good_hits_multiplicity_Mod1", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod2", "good_hits_multiplicity_Mod2", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod3", "good_hits_multiplicity_Mod3", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod4", "good_hits_multiplicity_Mod4", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 0, 30, 30, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 0, 30, 30, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod0", "good_hits_multiplicity_Mod0", 1, 30, 29, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod1", "good_hits_multiplicity_Mod1", 1, 30, 29, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod2", "good_hits_multiplicity_Mod2", 1, 30, 29, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod3", "good_hits_multiplicity_Mod3", 1, 30, 29, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod4", "good_hits_multiplicity_Mod4", 1, 30, 29, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 1, 30, 29, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 1, 30, 29, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 1, 30, 29, kPUBINT);
   m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_mod4to7", -130, 130, 52, kPUBINT);
   m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_mod0to3", -130, 130, 52, kPUBINT);
   m_histogrammanager->register2DHistogram("chip_occupancy_noise", "module_number",  0, 4, 4, "chip_number", 0, 24, 24, kPUBINT);

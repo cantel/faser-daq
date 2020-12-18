@@ -30,16 +30,15 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
     return;
   }
 
- /*auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
+ auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
  if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;
   }
- if (m_tlbdataFragment->tbp() & 0x10) return; // ignore random triggered events
- */
+ bool randTrig(false);
+ if (m_tlbdataFragment->tbp() & 0x10) randTrig = true;
 
-  //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
-  auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
     return;
@@ -87,17 +86,15 @@ void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinar
                    m_histogrammanager->fill2D("chip_occupancy_noise",MAP[mapline][0],MAP[mapline][1],1 );
          }
        }
-
+      if (randTrig) continue; // only physics events
       for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
         auto hitsPerChip1 = allHits[chipIdx];
         for (auto hit1 : hitsPerChip1){ // hit is an std::pair<uint8 strip, uint8 pattern>
           if ( hit1.second == 7 ) continue;
-          if ( hit1.second & 0x4 ) continue;
           auto strip1 = hit1.first;
           auto hitsPerChip2 = allHits[kCHIPS_PER_MODULE - 1 - chipIdx];
           for (auto hit2 : hitsPerChip2){ // hit is an std::pair<uint8 strip, uint8 pattern>
             if ( hit2.second == 7 ) continue;
-            if ( hit2.second & 0x4 ) continue;
             auto strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
             if (module<=3){
                m_histogrammanager->fill("strip_id_difference_0to3",strip1-strip2);}

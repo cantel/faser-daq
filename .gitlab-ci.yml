@@ -38,6 +38,7 @@ deployment_mkdocs:
   image: python:3.8-buster
   only:
     - master
+    - add-mkdocs
   image: gitlab-registry.cern.ch/ci-tools/ci-web-deployer:latest
   script:
     - deploy-eos

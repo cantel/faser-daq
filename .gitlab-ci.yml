@@ -34,7 +34,7 @@ build_mkdocs:
 
 deployment_mkdocs:
   stage: deploy
-  dependencies: [build_mkdocs]
+  needs: [build_mkdocs]
   image: python:3.8-buster
   only:
     - master

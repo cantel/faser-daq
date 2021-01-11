@@ -1,0 +1,50 @@
+site_name: FASER Documentation
+site_description: FASER Documentation
+site_author: FASER Collaboration
+site_url: https://faserdaq.web.cern.ch/faserdaq/
+
+repo_name: GitLab
+repo_url: https://gitlab.cern.ch/meehan/faser-docs-gitlab
+edit_uri: 'blob/master/docs'
+
+theme: 
+  name: readthedocs
+    
+plugins:
+  - include-markdown
+  - search  
+  - json:
+      url: https://:@gitlab.cern.ch:8443/meehan/daqpub.git
+      schemas: [configs/schemas/TriggerReceiver.schema, configs/schemas/DigitizerReceiver.schema, configs/schemas/TrackerReceiver.schema, configs/schemas/EventBuilderFaser.schema, configs/schemas/FileWriterFaser.schema]
+      configs: {'configs/Templates/digitizer.json':'DigitizerEHN1', 'configs/Templates/TLB.json':'TLBReceiverEHN1', 'configs/Templates/TRB.json':'TRBReceiver00', 'configs/Templates/fileWriter.json':'FileWriter', 'configs/Templates/eventBuilder.json':'EventBuilder'} 
+  - doxygen:
+      tryclone: yes 
+      recursive: no
+      packages:
+        - daqling:
+            url    : ssh://git@gitlab.cern.ch:7999/ep-dt-di/daq/daqling.git
+            config : doc/Doxyfile.in
+            workdir: .
+        - faser-common:
+            url    : ssh://git@gitlab.cern.ch:7999/faser/faser-common.git
+            config : Doxyfile
+            workdir: .
+        - digitizer:
+            url    : ssh://git@gitlab.cern.ch:7999/meehan/digitizer-doxy.git
+            config : Doxyfile
+            workdir: .
+        - gpiodrivers:
+            url    : ssh://git@gitlab.cern.ch:7999/faser/gpiodrivers.git
+            config : Doxyfile
+            workdir: .
+
+nav:
+  - 'Introduction': index.md
+  - 'Setup': setup.md
+  - 'Running': running.md
+  - 'Configuration': configuration.md
+  - 'Monitoring': monitoring.md
+  - 'Output Data': outputdata.md
+  - 'For Development': developers.md
+  - 'Improving the Docs': documentation.md
+  

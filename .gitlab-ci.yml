@@ -1,5 +1,6 @@
 stages:
   - build
+  - deploy
 
 build_faser_daq:
   stage: build
@@ -16,3 +17,29 @@ build_faser_daq:
     - cd build
     - cmake3 ../
     - make -j8
+
+build_mkdocs:
+  stage: build
+  image: python:3.8-buster
+  script:
+    - apt-get update -y
+    - apt-get install -y doxygen
+    - pip install -r requirements.txt
+    - mkdir public
+    - mkdocs build --verbose --site-dir public
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+
+deployment_mkdocs:
+  stage: deploy
+  dependencies: [build_mkdocs
+  image: python:3.8-buster]
+  only:
+    - master
+  image: gitlab-registry.cern.ch/ci-tools/ci-web-deployer:latest
+  script:
+    - deploy-eos
+  before_script: []
+  after_script: []

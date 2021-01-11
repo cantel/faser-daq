@@ -21,20 +21,16 @@ plugins:
       tryclone: yes 
       recursive: yes
       packages:
-        - daqling:
-            url    : ssh://git@gitlab.cern.ch:7999/ep-dt-di/daq/daqling.git
-            config : doc/Doxyfile.in
-            workdir: .
         - faser-common:
             url    : https://:@gitlab.cern.ch:8443/faser/faser-common.git
             config : Doxyfile
             workdir: .
         - digitizer:
-            url    : ssh://git@gitlab.cern.ch:7999/meehan/digitizer-doxy.git
+            url    : https://:@gitlab.cern.ch:8443/faser/digitizer-readout.git
             config : Doxyfile
             workdir: .
         - gpiodrivers:
-            url    : ssh://git@gitlab.cern.ch:7999/faser/gpiodrivers.git
+            url    : https://gitlab.cern.ch/faser/gpiodrivers
             config : Doxyfile
             workdir: .
 

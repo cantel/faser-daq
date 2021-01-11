@@ -30,7 +30,7 @@ plugins:
             config : Doxyfile
             workdir: .
         - gpiodrivers:
-            url    : https://gitlab.cern.ch/faser/gpiodrivers
+            url    : https://:@gitlab.cern.ch:8443/faser/gpiodrivers.git
             config : Doxyfile
             workdir: .
 

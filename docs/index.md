@@ -76,12 +76,12 @@ found here - [faser-common](faser-common).
 The digitizer-readout library provides a library that can be used to control the sis3153+vx1730
 pair of VME boards and retrieve data stored upon an acquisition trigger.  This relies on
 the use of faser-common for the EventFormat and is used within the [DigitizerReceiverModule](https://gitlab.cern.ch/faser/daq/-/tree/master/src/Modules/DigitizerReceiver).
-More extensive documentation of this library can be found here - [digitizer-receiver](../faserdaq/digitizer).
+More extensive documentation of this library can be found here - [digitizer-receiver](digitizer).
 
 ### [gpiodrivers](https://gitlab.cern.ch/faser/gpiodrivers)
 The GPIO Drivers library provides an interface for communication with the GPIO board, which
 controls the TRB and the TLB.  It also provides specific functionality necessary for operation
-of each of these boards.  More extensive documentation of this library can be found here - [gpiodrivers](../gpiodrivers).
+of each of these boards.  More extensive documentation of this library can be found here - [gpiodrivers](gpiodrivers).
 
 ## System Operation
 In the fully-integrated system (shown below), the following minimal set of DAQ-ling
@@ -118,13 +118,13 @@ which you can be added by requesting to anyone on the team.  Listed here are the
 individuals who have particular expertise in a specific area and who you are recommended
 to contact if you have issues :
 
-  - Group Leaders/Organization : [Anna Sfyrla](Anna.Sfyrla@cern.ch), [Brian Petersen](Brian.Petersen@cern.ch)
-  - DAQ-ling : [Enrico Gamberini](enrico.gamberini@cern.ch)
-  - Digitizer : [Sam Meehan](samuel.meehan@cern.ch)
-  - TLB : [Claire Antel](claire.antel@cern.ch)
-  - TRB : [Ondrej Theiner](ondrej.theiner@cern.ch)
-  - gpiodrivers : [Kristof Schmieden](Kristof.Schmieden@cern.ch)
-  - faser-common : [Brian Petersen](Brian.Petersen@cern.ch)
+  - Group Leaders/Organization : [Anna Sfyrla](mailto:Anna.Sfyrla@cern.ch), [Brian Petersen](mailto:Brian.Petersen@cern.ch)
+  - DAQ-ling : [Enrico Gamberini](mailto:enrico.gamberini@cern.ch)
+  - Digitizer : [Sam Meehan](mailto:samuel.meehan@cern.ch)
+  - TLB : [Claire Antel](mailto:claire.antel@cern.ch)
+  - TRB : [Ondrej Theiner](mailto:ondrej.theiner@cern.ch)
+  - gpiodrivers : [Kristof Schmieden](mailto:Kristof.Schmieden@cern.ch)
+  - faser-common : [Brian Petersen](mailto:Brian.Petersen@cern.ch)
   
 ## Codebase
 The entry-point for the code itself is stored on the CERN instance of GitLab at

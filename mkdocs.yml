@@ -19,14 +19,14 @@ plugins:
       configs: {'configs/Templates/digitizer.json':'DigitizerEHN1', 'configs/Templates/TLB.json':'TLBReceiverEHN1', 'configs/Templates/TRB.json':'TRBReceiver00', 'configs/Templates/fileWriter.json':'FileWriter', 'configs/Templates/eventBuilder.json':'EventBuilder'} 
   - doxygen:
       tryclone: yes 
-      recursive: no
+      recursive: yes
       packages:
         - daqling:
             url    : ssh://git@gitlab.cern.ch:7999/ep-dt-di/daq/daqling.git
             config : doc/Doxyfile.in
             workdir: .
         - faser-common:
-            url    : ssh://git@gitlab.cern.ch:7999/faser/faser-common.git
+            url    : https://:@gitlab.cern.ch:8443/faser/faser-common.git
             config : Doxyfile
             workdir: .
         - digitizer:

@@ -24,6 +24,10 @@ build_mkdocs:
   needs: []
   image: python:3.8-buster
   script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get -qq update 
+    - apt-get -qq install krb5-user libpam-krb5
+    - apt-get -qq clean
     - apt-get update -y
     - apt-get install -y doxygen
     - pip install -r requirements.txt

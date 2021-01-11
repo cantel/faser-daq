@@ -28,6 +28,7 @@ build_mkdocs:
     - apt-get install -y doxygen
     - pip install -r requirements.txt
     - mkdir public
+    - echo $USER_PASS | kinit $CERN_USER@CERN.CH
     - mkdocs build --verbose --site-dir public
   artifacts:
     paths:

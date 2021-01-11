@@ -34,8 +34,8 @@ build_mkdocs:
 
 deployment_mkdocs:
   stage: deploy
-  dependencies: [build_mkdocs
-  image: python:3.8-buster]
+  dependencies: [build_mkdocs]
+  image: python:3.8-buster
   only:
     - master
   image: gitlab-registry.cern.ch/ci-tools/ci-web-deployer:latest

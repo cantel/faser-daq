@@ -70,13 +70,13 @@ online and offline communities can be developed coherently.  This includes thing
 such as the [EventFormat](https://gitlab.cern.ch/faser/faser-common/-/blob/master/EventFormats/EventFormats/DAQFormats.hpp) 
 and hardware payload specific fragments and decoders (e.g. [DigitizerDataFragment](https://gitlab.cern.ch/faser/faser-common/-/blob/master/EventFormats/EventFormats/DigitizerDataFragment.hpp)).
 More detailed documentation of the utilities in faser-common can be
-found here - [faser-common](../faser-common).
+found here - [faser-common](faser-common).
 
 ### [digitizer-readout](https://gitlab.cern.ch/faser/digitizer-readout)
 The digitizer-readout library provides a library that can be used to control the sis3153+vx1730
 pair of VME boards and retrieve data stored upon an acquisition trigger.  This relies on
 the use of faser-common for the EventFormat and is used within the [DigitizerReceiverModule](https://gitlab.cern.ch/faser/daq/-/tree/master/src/Modules/DigitizerReceiver).
-More extensive documentation of this library can be found here - [digitizer-receiver](../digitizer).
+More extensive documentation of this library can be found here - [digitizer-receiver](../faserdaq/digitizer).
 
 ### [gpiodrivers](https://gitlab.cern.ch/faser/gpiodrivers)
 The GPIO Drivers library provides an interface for communication with the GPIO board, which

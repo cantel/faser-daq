@@ -34,7 +34,6 @@ network such that you can log in with your normal CERN Computing Account credent
   up to it.  However, there is a function generator and oscilloscope available for this setup.
   - *faser-daq-002* [ENH1] : This is connected to the commissioning hardware including digitizer,
   TLB, and TRB.  
-  - *epdtdi-daq01* [???] : ???
   
 All of these machines are within the CERN network meaning that they can only be *directly*
 accessed if you computer is currently within the CERN network.  If you are at CERN, this 

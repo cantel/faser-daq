@@ -20,10 +20,12 @@ the FileWriter, as described earlier in [the documentation on configuration](./c
 
 ### Storage in EOS
 Ultimately, the files are to be written and transferred to EOS for long term storage.
+This is currently under development and how to retrieve these files will be documented
+here once complete.
 
 ## Basic Analysis
 
-### Dumping and Event
+### Dumping Event Data
 If you have a binary file and wish to inspect its contents, [faser-common](https://gitlab.cern.ch/faser/faser-common) includes
 an [eventDump](https://gitlab.cern.ch/faser/faser-common/-/blob/master/EventFormats/apps/eventDump.cxx) script which converts the data from binary to text via the set of
 decoders for each fragment type and dumps the contents to the terminal. 
@@ -93,7 +95,8 @@ and you can see that for this particular run, only channel 0 was enabled for rea
 
 ### Event Picking
 Brian Petersen has some nifty scripts that allow for more evolved presentation of the event readout 
-information.
+information.  These are currently being migrated to a more stable location and once complete, their usage
+will be documented here.
 
 ### EventFragment Decoders
 Ultimately, the binary files that are written are done so by relying on the fragment format

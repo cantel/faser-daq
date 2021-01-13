@@ -20,6 +20,7 @@ build_faser_daq:
     - make -j8
     
 check_license:
+  stage: build
   image: gitlab-registry.cern.ch/faser/docker/daq:master
   script:
     - python scripts/CheckLicense.py -directory . -extensions cpp cxx h hpp py 

@@ -19,6 +19,52 @@ In addition to the basic `mkdocs` configuration, a number of plugins are used as
 in the top level `mkdocs.yml`.  These plugins are installed upon each build in the CI from
 the locations listed on the [requirements.txt](https://gitlab.cern.ch/meehan/faser-docs-gitlab/-/blob/master/requirements.txt) file.
 
+### Secondary Codebases - [dOxygen](https://www.doxygen.nl/index.html)
+In a few places, this code links to code-base specific documentation, specifically
+when referring to the submodules on which it relies (e.g. [faser-common](), [gpiodrivers](), [digitizer-readout]()).
+This secondary documentation is built with the [dOxygen](https://www.doxygen.nl/index.html)
+application.  Many tutorials can be found on the internet about how to get up and running
+as well as the details of how this works and you are referred to find those yourself.
+
+However, in short, if you need to modify or extend this documentation, then a very rudimentary 
+understanding is as follows.
+
+[1] dOxygen will parse specifically formatted comments contained *within* your code
+to produce a more digestible HTML page.
+
+[2] These comments will most commonly go at the beginning of a file or immediately
+before a class, function, struct, or any other type of object.  
+
+[3] A comment has the form as shown below.  In this particular case, the entries are
+chosen knowing that we are documenting a function (as opposed to a class or file).
+```
+/*!
+ * \brief [brief description]
+ *
+ * [detailed description]
+ *
+ * \param[in] [name of input parameter] [its description]
+ * \param[out] [name of output parameter] [its description]
+ * \return [information about return value]
+ * \sa [see also section]
+ * \note [any note about the function you might have]
+ * \warning [any warning if necessary]
+ */
+```
+where each of the words beginning with `\` (e.g. `\brief`) signify a specific type of 
+tag that indicates to dOxygen to perform a specific type of formatting.  The stuff that 
+comes after that tag is the stuff that will get formatted into that bit of documentation.
+
+[4] The high level configuration of the documentation is controlled by the `Doxyfile`
+
+[5] The documentation can be built by calling `doxygen` in the root directory
+of your clone of that specific repository and can be viewed by openning the resulting
+`html/index.html` in any web browser.
+
+
+
+https://www.doxygen.nl/manual/commands.html
+
 ## How can I improve it?
 There are a few different ways to improve the documentation and we encourage everyone to do
 so in the manner that suits them best.

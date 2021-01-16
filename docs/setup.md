@@ -101,4 +101,42 @@ parallel build but it may cause your computer's fan to start working hard.
 Finally, if you are using this method to build the code, you will not be able to use it to
 perform a run since it is not hooked up to hardware (but perhaps this was obvious to you).
 
+## Preparing a new FASER DAQ machine
+To compile and run the FASER DAQ on a new machine (virtual or real), the machine first needs 
+to be setup. For CentOS 7 machines at CERN, this follows the DAQling procedure with a few FASER
+specific add-ons, `daqling/README.md`. Assuming the repository has been checked out, the
+procedure to follow is as follows - note that you ned SUDO rights.
+```
+#if needed setup proxy if there is no direct internet access, see below
+#From DAQling
+cd daqling
+sudo yum install -y ansible
+source cmake/setup.sh
+cd ansible/
+ansible-playbook set-up-host.yml --ask-become
+ansible-playbook install-boost-1_70.yml --ask-become
+ansible-playbook install-webdeps.yml --ask-become
+ansible-playbook install-redis.yml --ask-become
 
+#For FASER additional firewall ports need to be opened for the GPIO readout:
+sudo firewall-cmd --zone=public --add-port=50000-50005/udp --permanent
+sudo firewall-cmd --reload
+#For FASER install additional python libraries for GUI:
+sudo pip3 install requests
+```
+If running on machine without direct internet access, one has to setup a proxy on a different
+machine and point `pip`, `yum` and `git` to it before running the above scripts. 
+This can be done by adding the following to `/etc/pip.conf`:
+```
+[global]
+http_proxy=http://faser-daq-001:8888
+```
+setting the environment variables in bash:
+```
+export http_proxy=http://faser-daq-001:8888
+export https_proxy=http://faser-daq-001:8888
+```
+and setting `git` to use a proxy:
+```
+sudo git config --global http.proxy http://faser-daq-001:8888
+```

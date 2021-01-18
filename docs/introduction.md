@@ -30,6 +30,14 @@ subsequently gathered into a single event :
   
 ![Physical layout of FASER experiment](img/experiment_picture.png)
 
+<details><summary>Want to know more about how FASER operates?</summary>
+<p>
+{%
+   include-markdown "FullFaserSetup.md"
+%}
+</p>
+</details>
+<br>
 
 ### Trigger Logic Board (TLB)
  

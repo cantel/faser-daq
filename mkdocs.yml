@@ -4,7 +4,7 @@ site_author: FASER Collaboration
 site_url: https://faserdaq.web.cern.ch/faserdaq/
 
 repo_name: GitLab
-repo_url: https://gitlab.cern.ch/meehan/faser-docs-gitlab
+repo_url: https://gitlab.cern.ch/faser/daq
 edit_uri: 'blob/master/docs'
 
 theme: 
@@ -14,7 +14,7 @@ plugins:
   - include-markdown
   - search  
   - json:
-      url: https://:@gitlab.cern.ch:8443/meehan/daqpub.git
+      url: https://:@gitlab.cern.ch:8443/faser/daq.git
       schemas: [configs/schemas/TriggerReceiver.schema, configs/schemas/DigitizerReceiver.schema, configs/schemas/TrackerReceiver.schema, configs/schemas/EventBuilderFaser.schema, configs/schemas/FileWriterFaser.schema]
       configs: {'configs/Templates/digitizer.json':'DigitizerEHN1', 'configs/Templates/TLB.json':'TLBReceiverEHN1', 'configs/Templates/TRB.json':'TRBReceiver00', 'configs/Templates/fileWriter.json':'FileWriter', 'configs/Templates/eventBuilder.json':'EventBuilder'} 
   - doxygen:
@@ -35,7 +35,7 @@ plugins:
             workdir: .
 
 nav:
-  - 'Introduction': index.md
+  - 'Introduction': introduction.md
   - 'Setup': setup.md
   - 'Running': running.md
   - 'Configuration': configuration.md

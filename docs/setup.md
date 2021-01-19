@@ -37,18 +37,7 @@ network such that you can log in with your normal CERN Computing Account credent
   
 All of these machines are within the CERN network meaning that they can only be *directly*
 accessed if you computer is currently within the CERN network.  If you are at CERN, this 
-is not a problem.  If you are not at CERN, then there are two solutions :
-
-__[1]__ ssh to lxplus first and then ssh on to your desired machine
-
-__[2]__ Tunnel all of your traffic through lxplus using this sshuttle command 
-```
-sshuttle --dns -v --remote lxplus-cloud.cern.ch 128.141.0.0/16 128.142.0.0/16 137.138.0.0/16 185.249.56.0/22 188.184.0.0/15 192.65.196.0/23 192.91.242.0/24 194.12.128.0/18
-```
-This should be run in a separate terminal in the background and after entering your 
-you will be able to access the CERN-network-based computers from your machine.  Note that
-this is also the manner by which you will be able to access the Run Control GUI (described later)
-from outside the CERN network.
+is not a problem.  If you are not at CERN, then refer to the section on [remote access](remote access).
 
 After logging onto one of these machines and obtaining the code as described above, you
 can setup your build directory and build the code as :
@@ -140,4 +129,43 @@ export https_proxy=http://faser-daq-001:8888
 and setting `git` to use a proxy:
 ```
 sudo git config --global http.proxy http://faser-daq-001:8888
+```
+
+## Remote Access
+Currently, all of the PCs that we use are only accessible from within the CERN network.
+That means that only if your terminal is *within* the CERN network will you be able to
+see any of the resources we use with no problem.  If not, then you will need to 
+find a way to tunnel into the relevant machine or tunnel the traffic from that machine out.
+
+### Tunnel In
+To access the PCs from outside the network, the cleanest way is to ssh to lxplus first 
+and then ssh on to your desired machine.  At CERN, lxplus is the only externally visible
+network.
+
+### Tunnel Out
+If you need to access traffic from a specific port, then the most direct way to do this
+is specify a mapping between a port on your computer (e.g. `localhost:1234`) and the
+relevant resource on the CERN network (e.g. `faser-daq-001:5000`).  This mapping is 
+created by executing :
+```
+ssh -L 1234:faser-daq-001:5000 lxplus.cern.ch
+```
+and means that you can access what would have been accessible at `http://faser-daq-001:5000`
+on your local machine at `http://localhost:1234`.
+
+This is particularly useful in the case of running the RCGui or Grafana monitoring, which 
+which themselves
+
+### Redirect all Traffic Tunnel all of your traffic through lxplus using this sshuttle command 
+```
+sshuttle --dns -v --remote lxplus-cloud.cern.ch 128.141.0.0/16 128.142.0.0/16 137.138.0.0/16 185.249.56.0/22 188.184.0.0/15 192.65.196.0/23 192.91.242.0/24 194.12.128.0/18
+```
+This should be run in a separate terminal in the background and after entering your 
+you will be able to access the CERN-network-based computers from your machine.  Note that
+this is also the manner by which you will be able to access the Run Control GUI (described later)
+from outside the CERN network.
+v
+
+```
+ssh -L 5000:faser-daq-001:5000 lxplus.cern.ch
 ```

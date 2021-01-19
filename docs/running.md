@@ -193,6 +193,10 @@ is presented elsewhere in this document but consider exploring it at this point 
 
 ![](img/example_grafana.png)
 
+The actual instance of grafana is running
+on `http://epdtdi-daqtest:3000` which means that this is the node which will be accessed
+to view the monitoring and this link is nothing more than redirecting you there.  If you would like
+to monitor an ongoing run, you can connect directly to this node.
 If this prompts you for a username and password, they are both `admin` at the moment.  This
 should be improved in the future ...
 
@@ -214,4 +218,5 @@ The astute reader will recognize that two buttons have not been used here.
   persist in the `READY` state, therefore configured.
   - `SendECR` : This sends an Event Counter Reset (ECR) which sets the subsystem hardware 
   counters to zero.
+  
 

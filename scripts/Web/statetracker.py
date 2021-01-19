@@ -88,13 +88,14 @@ def stateTracker(logger):
             elif cmd=="stop":
                 logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)
-                runinfo={}
-                runinfo["eventCounts"]=getEventCounts()
-                r = requests.post(f'http://faser-daq-002:5002/AddRunInfo/{runNumber}',
-                                  auth=(run_user,run_pw),
-                                  json = {"runinfo": runinfo })
-                if r.status_code!=200:
-                    logger.error("Failed to register end of run information: "+r.text)
+                if int(runNumber)!=1000000000:
+                    runinfo={}
+                    runinfo["eventCounts"]=getEventCounts()
+                    r = requests.post(f'http://faser-daq-002:5002/AddRunInfo/{runNumber}',
+                                      auth=(run_user,run_pw),
+                                      json = {"runinfo": runinfo })
+                    if r.status_code!=200:
+                        logger.error("Failed to register end of run information: "+r.text)
                 logger.info("Stop done")
             elif cmd=="shutdown":
                 logger.info("Calling shutdown")
@@ -163,28 +164,30 @@ def stateTracker(logger):
                     detList=json.loads(r1.get("detList"))
                     subInfo=json.loads(m['data'][6:])
                     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
-                    r= requests.post('http://faser-daq-002:5002/NewRunNumber',
-                                     auth=(run_user,run_pw),
-                                     json = {
-                                         'version':    version,
-                                         'type':       subInfo['runtype'],
-                                         'username':       os.getenv("USER"),
-                                         'startcomment':    subInfo['startcomment'],
-                                         'detectors':  detList,
-                                         'configName': configName,
-                                         'configuration': config
-                                     })
-                    if r.status_code!=201:
-                        logger.error("Failed to get run number: "+r.text)
-                        cmd=""
-                    else:
-                        try:
-                            runNumber=int(r.text)
-                            r1.set("runNumber",runNumber)
-                            r1.set("runStart",time.time())
-                        except ValueError:
+                    runNumber=1000000000
+                    try:
+                        r= requests.post('http://faser-daq-002:5002/NewRunNumber',
+                                         auth=(run_user,run_pw),
+                                         json = {
+                                             'version':    version,
+                                             'type':       subInfo['runtype'],
+                                             'username':       os.getenv("USER"),
+                                             'startcomment':    subInfo['startcomment'],
+                                             'detectors':  detList,
+                                             'configName': configName,
+                                             'configuration': config
+                                         })
+                        if r.status_code!=201:
                             logger.error("Failed to get run number: "+r.text)
-                            cmd=""
+                        else:
+                            try:
+                                runNumber=int(r.text)
+                            except ValueError:
+                                logger.error("Failed to get run number: "+r.text)
+                    except requests.exceptions.ConnectionError:
+                        logger.error("Could not connect to run service")
+                    r1.set("runNumber",runNumber)
+                    r1.set("runStart",time.time())
             elif cmd=="pause":
                 if overallState!="RUN":
                     logger.warn("Tried to pause run in state: "+overallState)

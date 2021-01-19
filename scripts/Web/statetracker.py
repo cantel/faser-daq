@@ -90,7 +90,7 @@ def stateTracker(logger):
                 h.spawnJoin(config['components'], daq.stopProcess)
                 runinfo={}
                 runinfo["eventCounts"]=getEventCounts()
-                r = requests.post(f'http://faser-daq-001:5002/AddRunInfo/{runNumber}',
+                r = requests.post(f'http://faser-daq-002:5002/AddRunInfo/{runNumber}',
                                   auth=(run_user,run_pw),
                                   json = {"runinfo": runinfo })
                 if r.status_code!=200:
@@ -163,7 +163,7 @@ def stateTracker(logger):
                     detList=json.loads(r1.get("detList"))
                     subInfo=json.loads(m['data'][6:])
                     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
-                    r= requests.post('http://faser-daq-001:5002/NewRunNumber',
+                    r= requests.post('http://faser-daq-002:5002/NewRunNumber',
                                      auth=(run_user,run_pw),
                                      json = {
                                          'version':    version,

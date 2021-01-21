@@ -90,6 +90,18 @@ parallel build but it may cause your computer's fan to start working hard.
 Finally, if you are using this method to build the code, you will not be able to use it to
 perform a run since it is not hooked up to hardware (but perhaps this was obvious to you).
 
+## Build Optimizations
+It should be noted that when running the code, the performance depends not only on
+how the FASER modules and libraries are written, but how they are built.  In particular,
+within the daqling framework, there are a number of services that monitor the code itself
+(e.g. memory monitoring via address sanitizer).  While these are useful, they also add 
+overhead.  As such, building the code during development and testing should proceed
+differently than when building it for data taking.  
+
+The primary way to achieve this is to build the code in `Release` mode as opposed to
+in `Debug` mode (the default).  Read more about the build options and how to enable them
+in the [daqling documentation](https://gitlab.cern.ch/ep-dt-di/daq/daqling#additional-build-options).
+
 ## Preparing a new FASER DAQ machine
 To compile and run the FASER DAQ on a new machine (virtual or real), the machine first needs 
 to be setup. For CentOS 7 machines at CERN, this follows the DAQling procedure with a few FASER
@@ -153,19 +165,15 @@ ssh -L 1234:faser-daq-001:5000 lxplus.cern.ch
 and means that you can access what would have been accessible at `http://faser-daq-001:5000`
 on your local machine at `http://localhost:1234`.
 
-This is particularly useful in the case of running the RCGui or Grafana monitoring, which 
-which themselves
+This is particularly useful in the case of running the RCGui or Grafana monitoring, the details
+of which are described in the relevant sections of documentation.
 
-### Redirect all Traffic Tunnel all of your traffic through lxplus using this sshuttle command 
+### Redirect all Traffic 
+Finally, you can choose to tunnel all of your traffic through lxplus using this sshuttle command 
 ```
 sshuttle --dns -v --remote lxplus-cloud.cern.ch 128.141.0.0/16 128.142.0.0/16 137.138.0.0/16 185.249.56.0/22 188.184.0.0/15 192.65.196.0/23 192.91.242.0/24 194.12.128.0/18
 ```
 This should be run in a separate terminal in the background and after entering your 
-you will be able to access the CERN-network-based computers from your machine.  Note that
-this is also the manner by which you will be able to access the Run Control GUI (described later)
-from outside the CERN network.
-v
-
-```
-ssh -L 5000:faser-daq-001:5000 lxplus.cern.ch
-```
+you will be able to access the CERN-network-based computers from your machine.  Note that 
+this will tunnel all of your traffic, regardless of whether it is CERN-based or not
+and therefore may slow down other resources.

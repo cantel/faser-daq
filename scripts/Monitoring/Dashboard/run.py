@@ -1,3 +1,6 @@
+#
+#  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+#
 from flaskDashboard import app
 import platform
 

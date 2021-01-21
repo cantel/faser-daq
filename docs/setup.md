@@ -98,9 +98,19 @@ within the daqling framework, there are a number of services that monitor the co
 overhead.  As such, building the code during development and testing should proceed
 differently than when building it for data taking.  
 
-The primary way to achieve this is to build the code in `Release` mode as opposed to
-in `Debug` mode (the default).  Read more about the build options and how to enable them
-in the [daqling documentation](https://gitlab.cern.ch/ep-dt-di/daq/daqling#additional-build-options).
+To be able to view and toggle all build options, you can use the interactive cmake utility
+[ccmake](https://cmake.org/cmake/help/latest/manual/ccmake.1.html):
+```
+cd build
+ccmake3 ../  # yes, two cc's 
+```
+which will bring up a menu of options.  Among these, the two that are most useful
+for optimizations are
+```
+ENABLE_SANITIZE [ON, OFF]
+CMAKE_BUILD_TYPE [Debug, Release]
+```
+It is also possible to set these from the command line using the normal cmake CLI `cmake3 -DCMAKE_BUILD_TYPE=Release`.
 
 ## Preparing a new FASER DAQ machine
 To compile and run the FASER DAQ on a new machine (virtual or real), the machine first needs 

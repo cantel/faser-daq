@@ -4,7 +4,6 @@
   "properties" : {
       "name" : {
           "type"          : "string",
-          "required"      : true,
           "default"       : "tlbreceiver01",
           "readOnly"      : true,
           "pattern"       : "^((?!XXX).)*$",
@@ -12,13 +11,11 @@
       },
       "host": {
           "type"          : "string",
-          "required"      : true,
           "default"       : "localhost",
           "propertyOrder" : 2
       },          
       "port": {
           "type"          : "integer",
-          "required"      : true,
           "default"       : 6556,
           "minimum"       : 1024,
           "maximum"       : 65535,
@@ -56,8 +53,8 @@
               "SamplingPhase": {
                 "type"            : "array",
                 "title"           : "SamplingPhase",
-                "minItems"        : "8",
-                "maxItems"        : "8",
+                "minItems"        : 8,
+                "maxItems"        : 8,
                 "items": {
                   "type": "boolean"
                 }
@@ -65,47 +62,47 @@
               "InputDelay": {
                 "type"            : "array",
                 "title"           : "InputDelay",
-                "minItems"        : "8",
-                "maxItems"        : "8",
+                "minItems"        : 8,
+                "maxItems"        : 8,
                 "items": {
                   "type": "integer",
-                  "default": "0",
-                  "minimum": "0",
-                  "maximum": "3"
+                  "default": 0,
+                  "minimum": 0,
+                  "maximum": 3
                 }
               },
               "RandomTriggerRate": {
                   "type"          : "integer",
                   "title"         : "RandomTriggerRate",
-                  "default"       : "0",
-                  "minimum"       : "0",
-                  "maximum"       : "7"
+                  "default"       : 0,
+                  "minimum"       : 0,
+                  "maximum"       : 7
               },
               "Prescale": {
                 "type"            : "array",
                 "title"           : "Prescale",
-                "minItems"        : "8",
-                "maxItems"        : "8",
+                "minItems"        : 8,
+                "maxItems"        : 8,
                 "items": {
                   "type": "integer",
-                  "default": "0",
-                  "minimum": "0",
-                  "maximum": "255"
+                  "default": 0,
+                  "minimum": 0,
+                  "maximum": 255
                 }
               },
               "TrackerDelay": {
                   "type"          : "integer",
                   "title"         : "TrackerDelay",
-                  "default"       : "0",
-                  "minimum"       : "0",
-                  "maximum"       : "127"
+                  "default"       : 0,
+                  "minimum"       : 0,
+                  "maximum"       : 127
               },
               "DigitizerDelay": {
                   "type"          : "integer",
                   "title"         : "DigitizerDelay",
-                  "default"       : "0",
-                  "minimum"       : "0",
-                  "maximum"       : "127"
+                  "default"       : 0,
+                  "minimum"       : 0,
+                  "maximum"       : 127
               },
               "LHC_CLK": {
                   "type"          : "boolean",
@@ -114,36 +111,36 @@
               "OrbitDelay": {
                   "type"          : "integer",
                   "title"         : "OrbitDelay",
-                  "default"       : "0",
-                  "minimum"       : "0",
-                  "maximum"       : "4095"
+                  "default"       : 0,
+                  "minimum"       : 0,
+                  "maximum"       : 4095
               },
               "Deadtime": {
                   "type"          : "integer",
                   "title"         : "Deadtime",
-                  "default"       : "0",
-                  "minimum"       : "128",
-                  "maximum"       : "4095"
+                  "default"       : 0,
+                  "minimum"       : 128,
+                  "maximum"       : 4095
               },
               "MonitoringRate": {
                   "type"          : "integer",
                   "title"         : "MonitoringRate",
-                  "default"       : "11245",
-                  "minimum"       : "0",
-                  "maximum"       : "1048575"
+                  "default"       : 11245,
+                  "minimum"       : 0,
+                  "maximum"       : 1048575
               },
               "OutputDestination": {
                   "type"          : "integer",
                   "title"         : "OutputDestination",
-                  "default"       : "0",
-                  "minimum"       : "0",
-                  "maximum"       : "4294967295"
+                  "default"       : 0,
+                  "minimum"       : 0,
+                  "maximum"       : 4294967295
               },
               "Input": {
                 "type"            : "array",
                 "title"           : "Input",
-                "minItems"        : "8",
-                "maxItems"        : "8",
+                "minItems"        : 8,
+                "maxItems"        : 8,
                 "items": {
                   "type": "boolean"
                 }
@@ -182,37 +179,33 @@
                "LUTConfig": {
                   "type"          : "object",
                   "title"         : "LUTConfig",
-                  "required"       : true,
-		  "properties": {	  
-		     "Trig0": {
-                      	"type"          : "string",
-                 	"title"         : "Trigger Combination 0",
-                  	"default"       : "0",
-			"required"      : false,
-              	     },
-		     "Trig1": {
-                      	"type"          : "string",
-                 	"title"         : "Trigger Combination 1",
-                 	"default"       : "0",
-			"required"      : false,
-              	     },
-		     "Trig2": {
-                      	"type"          : "string",
-                 	"title"         : "Trigger Combination 2",
-                 	"default"       : "0",
-			"required"      : false,
-              	     },
-		     "Trig3": {
-                      	"type"          : "string",
-                 	"title"         : "Trigger Combination 3",
-                 	"default"       : "0",
-			"required"      : false,
-              	     }		  
-		  }
+                  "properties": {
+                     "Trig0": {
+                              "type"          : "string",
+                              "title"         : "Trigger Combination 0",
+                              "default"       : "0"
+                              },
+                     "Trig1": {
+                              "type"          : "string",
+                              "title"         : "Trigger Combination 1",
+                              "default"       : "0"
+                              },
+                     "Trig2": {
+                              "type"          : "string",
+                              "title"         : "Trigger Combination 2",
+                              "default"       : "0"
+                              },
+                     "Trig3": {
+                              "type"          : "string",
+                              "title"         : "Trigger Combination 3",
+                              "default"       : "0"
+                              }  
+                  }
               }
           },
       "format":"grid",
       "propertyOrder": 5
       }
-   }
+   },
+   "required" : ["name", "host", "port"]
 }

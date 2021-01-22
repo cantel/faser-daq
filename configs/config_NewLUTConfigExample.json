@@ -29,10 +29,10 @@
 	            "EnableMonitoringData": true,
 	            "Derandomize": false,
 	            "ReadoutFIFOReset": true,
-	            "LUTConfig": { "Trig0": "Tin0||Tin1",
-				   "Trig1": "0",
-				   "Trig2": "0",
-				   "Trig3": "0"
+	            "LUTConfig": { "Trig0": "Tin0|Tin1",
+                             "Trig1": "0",
+                             "Trig2": "0",
+                             "Trig3": "0"
 		    }
 		},
 		"connections": {

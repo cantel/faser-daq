@@ -87,5 +87,3 @@ validate_configs:
     - json-validate.py                   \
     - .placeholder                   \
     - LUT_CombinedRun_Oct21.txt                   
-    - 
-    - 

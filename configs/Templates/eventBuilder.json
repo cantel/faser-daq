@@ -6,7 +6,7 @@
           "stopTimeout_ms": 1000
         },
       "connections": {
-	  "senders": [
+        "senders": [
             {
               "type": "pubsub",
               "chid": 0,

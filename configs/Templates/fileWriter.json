@@ -6,7 +6,7 @@
         "port": 5501,
         "type": "FileWriterFaser",
         "loglevel": { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "metrics_settings": { "$ref": "top.json#metrics_settings" },
         "settings": {
           "max_filesize": 1000000000,
           "buffer_size": 4000,

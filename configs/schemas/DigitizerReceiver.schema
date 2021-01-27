@@ -7,7 +7,6 @@
   "properties": {
     "name": {
       "type": "string",
-      "required": true,
       "default": "digitizerreceiver",
       "readOnly": true,
       "pattern": "^((?!XXX).)*$",
@@ -15,13 +14,11 @@
     },
     "host": {
       "type": "string",
-      "required": true,
       "default": "localhost",
       "propertyOrder": 2
     },
     "port": {
       "type": "integer",
-      "required": true,
       "default": 0,
       "minimum": 1024,
       "maximum": 65535,
@@ -59,8 +56,7 @@
           "title": "Digitizer VME Base Address",
           "propertyOrder": 3,
           "description": "The rotary-switch configured physical address of the digitizer board in the VME crate.",
-          "enum": ["internal", "external", "software"],
-          "default": "external"
+          "default": "0x04320000"
         },
         "buffer_length": {
           "type": "number",
@@ -342,5 +338,6 @@
       "format":"grid",
       "propertyOrder": 5
     }
-  }
+  },
+  "required": ["name", "host", "port"]
 }

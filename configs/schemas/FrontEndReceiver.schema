@@ -1,23 +1,21 @@
 {
     "type": "object",
     "title": "FrontEndReceiver",
+    "required": ["name", "host", "port"],
     "properties": {
       "name": {
         "type": "string",
-	"required": true,
 	"default": "frontendreceiverXXX",
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },
       "host": {
         "type": "string",
-	"required": true,
 	"default": "localhost",
 	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
-	"required": true,
 	"default": 0,
         "minimum": 1024,
 	"maximum": 65535,
@@ -33,13 +31,13 @@
       "settings": {
         "type": "object",
         "title": "Settings",
+        "required": ["dataPort"],
         "properties": {
 	  "dataPort": {
 	    "type": "integer",
 	    "default": 0,
 	    "minimum": 1024,
 	    "maximum": 65535,
-	    "required": true,
            "options": {
                 "infoText": "Port for receiving data from frontend"
             }

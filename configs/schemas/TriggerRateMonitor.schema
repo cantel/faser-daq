@@ -1,10 +1,10 @@
 {
     "type": "object",
     "title": "Monitor",
+    "required": ["name", "host", "port"],
     "properties": {
       "name": {
         "type": "string",
-	"required": true,
 	"default": "XXmonitorXX",
 	"readOnly": true,
 	"pattern": "^((?!XXX).)*$",
@@ -12,13 +12,11 @@
       },
       "host": {
         "type": "string",
-	"required": true,
 	"default": "localhost",
 	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
-	"required": true,
 	"default": 0,
         "minimum": 1024,
 	"maximum": 65535,
@@ -37,8 +35,7 @@
         "properties": {
           "fragmentID": {
 	    "type": "integer",
-	    "minimum": 0,
-            "required": false
+	    "minimum": 0
 	  }
 	},
 	"format":"grid",

@@ -127,7 +127,4 @@ validate_configs:
     - LUT_CombinedRun_Oct16.txt                   \
     - playback.json                   \
     - json-validate.py                   \
-    - .placeholder                   \
-    - LUT_CombinedRun_Oct21.txt                   
-    - 
-    - 
+    - .placeholder                   

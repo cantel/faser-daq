@@ -1,23 +1,21 @@
 {
     "type": "object",
     "title": "TriggerGenerator",
+    "required": ["name", "host", "port"],
     "properties": {
       "name": {
         "type": "string",
-	"required": true,
 	"default": "triggergeneratorXXX",
 	"pattern": "^((?!XXX).)*$",
 	"propertyOrder": 1
       },
       "host": {
         "type": "string",
-	"required": true,
 	"default": "localhost",
 	"propertyOrder": 2
       },          
       "port": {
         "type": "integer",
-	"required": true,
 	"default": 0,
         "minimum": 1024,
 	"maximum": 65535,
@@ -33,13 +31,13 @@
       "settings": {
         "type": "object",
         "title": "Settings",
+        "required": ["rateInHz"],
         "properties": {
 	  "rateInHz": {
 	    "type": "integer",
 	    "default": 0,
 	    "minimum": 1,
 	    "maximum": 5000,
-	    "required": true,
            "options": {
                 "infoText": "Rate of triggers to generate"
             }   
@@ -54,15 +52,14 @@
             "uniqueItems": true,
             "items": {
               "type": "object",
+              "required": ["host", "port"],
               "properties": {
                 "host": {
                   "type":"string",
-		  "required": true,
 		  "default": "localhost"
                 },
                 "port": {
 		  "type":"integer",
-		  "required": true,
 		  "default": 0,
         	  "minimum": 1024,
 		  "maximum": 65535

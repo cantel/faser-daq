@@ -1,10 +1,10 @@
 {
     "type"      : "object",
     "title"     : "TrackerReceiver",
+    "required": ["name", "host", "port"],
     "properties" : {
         "name" : {
             "type"          : "string",
-            "required"      : true,
             "default"       : "trackerreceiver00",
             "readOnly"      : true,
             "pattern"       : "^((?!XXX).)*$",
@@ -12,13 +12,11 @@
             },
         "host": {
             "type"          : "string",
-            "required"      : true,
             "default"       : "localhost",
             "propertyOrder" : 2
             },          
         "port": {
             "type"          : "integer",
-            "required"      : true,
             "default"       : 0,
             "minimum"       : 1024,
             "maximum"       : 65535,
@@ -34,6 +32,7 @@
         "settings": {
             "type"          : "object",
             "title"         : "Settings",
+            "required": ["boardID","L1Atype","moduleMask"],
             "properties"    : {
                 "BoardID"         : {
                     "type"          : "integer",
@@ -46,7 +45,6 @@
                     "type"          : "string",
                     "title"         : "L1A type",
                     "description"   : "Switch between internal triggers (from TRB) and external triggers (from TLB)",
-	            "required": true,
                     "enum"          : ["internal", "external"]
                     },
                 "SCIP"         : {

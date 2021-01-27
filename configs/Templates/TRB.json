@@ -7,7 +7,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID" : 0,
+            "boardID" : 0,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -53,7 +53,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID" : 1,
+            "boardID" : 1,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -99,7 +99,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID" : 2,
+            "boardID" : 2,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -145,7 +145,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID" : 3,
+            "boardID" : 3,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -191,7 +191,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID" : 4,
+            "boardID" : 4,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -237,7 +237,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID" : 5,
+            "boardID" : 5,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -283,7 +283,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID": 6,
+            "boardID": 6,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -329,7 +329,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID": 7,
+            "boardID": 7,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,
@@ -375,7 +375,7 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "BoardID": 8,
+            "boardID": 8,
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "ReadoutMode": 0,

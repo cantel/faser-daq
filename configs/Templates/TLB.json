@@ -1,42 +1,93 @@
 {
-    "TLBReceiverB21": {
-	"name": "tlbreceiver01",
-	"host": "localhost",
-	"port": 5520,
-	"type": "TriggerReceiver",
+    "TLBReceiverTI12": {
+        "name": "tlbreceiver01",
+        "host": "localhost",
+        "port": 5520,
+        "type": "TriggerReceiver",
         "loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-	"settings": {
+        "metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
             "SamplingPhase": [false, false, false, false, false, false, false, false],
             "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
             "RandomTriggerRate": 6,
-            "Prescale": [0, 0, 0, 0, 1, 0],
-            "TrackerDelay": 100,
+            "Prescale": [1, 1, 1, 1, 1, 0],
+            "TrackerDelay": 102,
             "DigitizerDelay": 0,
             "LHC_CLK": false,
             "OrbitDelay": 0,
             "Deadtime": 500,
-            "MonitoringRate": 11233,
+            "MonitoringRate": 11245,
             "OutputDestination": 0,
-            "Input": [false, false, false, false, false, false, false, false],
+            "Input": [true, true, false, false, false, false, false, false],
             "Busy0Disable": true,
-            "Busy1Disable": false,
+            "Busy1Disable": true,
             "EnableTriggerData": true,
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt"
-	},
-	"connections": {
+            "LUTConfig": { "Trig0": "Tin0",
+                           "Trig1": "Tin1",
+                           "Trig2": "Tin0|Tin1",
+                           "Trig3": "Tin0&Tin1"            
+            },                  
+            "SCIP" : "10.11.65.37",
+            "DAQIP" : "10.11.65.37",
+            "BoardID" : 0
+        },
+        "connections": {
             "senders": [
-		{
-		    "type": "pair",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "*",
-		    "port": 8100
-		}
+              {
+                  "type": "pair",
+                  "chid": 0,
+                  "transport": "tcp",
+                  "host": "*",
+                  "port": 8100
+              }
             ]
+      }
+    },
+        "TLBReceiverB21": {
+          "name": "tlbreceiver01",
+          "host": "localhost",
+          "port": 5520,
+          "type": "TriggerReceiver",
+          "loglevel":         { "$ref": "top.json#loglevel" },
+          "metrics_settings": { "$ref": "top.json#metrics_settings" },
+          "settings": {
+        "SamplingPhase": [false, false, false, false, false, false, false, false],
+        "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+        "RandomTriggerRate": 6,
+        "Prescale": [0, 0, 0, 0, 1, 0],
+        "TrackerDelay": 100,
+        "DigitizerDelay": 0,
+        "LHC_CLK": false,
+        "OrbitDelay": 0,
+        "Deadtime": 500,
+        "MonitoringRate": 11233,
+        "OutputDestination": 0,
+        "Input": [false, false, false, false, false, false, false, false],
+        "Busy0Disable": true,
+        "Busy1Disable": false,
+        "EnableTriggerData": true,
+        "EnableMonitoringData": true,
+        "Derandomize": false,
+        "ReadoutFIFOReset": true,
+        "LUTConfig": { "Trig0": "Tin0|Tin1",
+                       "Trig1": "0",
+                       "Trig2": "0",
+                       "Trig3": "0"
+        }
+    },
+    "connections": {
+        "senders": [
+            {
+                "type": "pair",
+                "chid": 0,
+                "transport": "tcp",
+                "host": "*",
+                "port": 8100
+            }
+        ]
 	}
     },
     "TLBReceiverEHN1": {
@@ -65,7 +116,11 @@
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmicsstand.txt"
+            "LUTConfig": { "Trig0": "Tin0|Tin1",
+                           "Trig1": "0",
+                           "Trig2": "0",
+                           "Trig3": "0"
+            }
 	},
 	"connections": {
             "senders": [

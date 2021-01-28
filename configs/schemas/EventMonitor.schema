@@ -1,0 +1,49 @@
+{
+    "type": "object",
+    "title": "Monitor",
+    "required": ["name", "host", "port"],
+    "properties": {
+      "name": {
+        "type": "string",
+        "default": "XXmonitorXX",
+        "readOnly": true,
+        "pattern": "^((?!XXX).)*$",
+        "propertyOrder": 1
+      },
+      "host": {
+        "type": "string",
+        "default": "localhost",
+        "propertyOrder": 2
+      },          
+      "port": {
+        "type": "integer",
+        "default": 0,
+        "minimum": 1024,
+        "maximum": 65535,
+        "propertyOrder": 3
+      },
+      "type": {
+        "type": "string",
+        "default": "Monitor",
+        "readOnly": true,
+        "propertyOrder": 4,
+        "options": { "hidden": true }
+      },
+      "settings": {
+        "type": "object",
+        "title": "Settings",
+        "properties": {
+          "stats_uri": {
+            "type": "string",
+            "format": "uri"
+          },
+          "sourceID": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "format":"grid",
+        "propertyOrder": 5
+      }
+    }
+}

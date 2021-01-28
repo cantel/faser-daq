@@ -38,12 +38,14 @@ def main():
   
 
   # check all of the schemas for validity
+  print("\n\n >>>>>> CHECKING SCHEMAS <<<<<< \n\n")
   for path_to_schema in schemas:
     print("Checking : ",path_to_schema)
     valid = checkSchema(directory+"/"+path_to_schema)
     print(path_to_schema," -- ",valid)
     
   # check each of the templates against the schemas
+  print("\n\n >>>>>> CHECKING TEMPLATES <<<<<< \n\n")
   for path_to_template in templates:
     print("Checking : ",path_to_template)
     
@@ -66,6 +68,7 @@ def main():
       print("Config validity : ",result_config)
       
   # check each of the top level configs
+  print("\n\n >>>>>> CHECKING CONFIGS <<<<<< \n\n")
   for path_to_config in configs:
     print("Checking : ",path_to_config)
     filepath = directory+"/"+path_to_config
@@ -85,6 +88,7 @@ def main():
       print("Config validity : ",result_config)
     
   # finally, check that all files in the repository have been accounted for
+  print("\n\n >>>>>> CHECKING EXTRAS <<<<<< \n\n")
   allfiles = []
   for i in schemas:
     allfiles.append(os.path.join(directory,i))
@@ -94,20 +98,27 @@ def main():
     allfiles.append(os.path.join(directory,i))
   for i in extras:
     allfiles.append(os.path.join(directory,i))
-    
-  print(allfiles)
 
   countMissing = 0
   for root, dirs, files in os.walk(directory, topdown=False):
     for name in files:  
       filepath = os.path.join(root, name)
-      
       if filepath not in allfiles:
         print("Missing : ",filepath)
         countMissing+=1
+  
+  if countMissing==0:
+    print("Great job, you checked all the files successfully!")
         
   # if you haven't checked some file then its not acceptable
   if countMissing!=0:
+    print("There are some files in the config directory of the repo that are not accounted for")
+    print("They need to be categorized as either : ")
+    print("schemas   : These are the files that dictate the format a config should take.")
+    print("templates : These are the files that contain common configuration settings used for various subsystem processes.")
+    print("configs   : These are the top level configs that often make reference to templates.")
+    print("extras    : These are any extra files that exist in the directory. For example, they may be little json bits that are referenced by templates or just extra files (that should perhaps be deleted.)")
+    print("Go check out scripts/runConfigCheck.sh and it should be obvious what to change")
     exit(1)
   
                       
@@ -121,7 +132,7 @@ def int_or_str(value):
 
 # validate a schema against 
 def checkSchema(path_to_schema):
-
+  #print("Checking schema : ",path_to_schema)
   if type(path_to_schema) is str:
     fin_schema = open(path_to_schema,"r")
     fin_schema_str = ""
@@ -141,7 +152,7 @@ def checkSchema(path_to_schema):
   
 # validate config against schema
 def checkConfig(path_to_config, path_to_schema, directory, entry=False):
-
+  #print("Checking config : ",path_to_config," at ",directory," tunelling to location [",entry,"] with schema ", path_to_schema)
   # get the schema
   if type(path_to_schema) is str:
     fin_schema = open(path_to_schema)
@@ -177,6 +188,7 @@ def checkConfig(path_to_config, path_to_schema, directory, entry=False):
     
     
 def getConfig(path_to_config, directory):
+  print("Getting config [",path_to_config,"] from [",directory,"]")
   fin_cfg = open(path_to_config)
   cfg_init = json.load(fin_cfg)
   

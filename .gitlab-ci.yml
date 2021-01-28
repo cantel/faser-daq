@@ -68,6 +68,7 @@ validate_configs:
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
     - pip3 install jsonref
+    - pip3 install jsonschema
   script:
     - cd scripts
     - source runConfigCheck.sh 

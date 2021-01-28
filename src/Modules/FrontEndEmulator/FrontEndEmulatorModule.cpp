@@ -53,7 +53,7 @@ static microseconds timeNow() {
   return duration_cast<microseconds>(system_clock::now().time_since_epoch());
 }
 
-void FrontEndEmulatorModule::runner() {
+void FrontEndEmulatorModule::runner() noexcept {
   INFO("Running...");
   std::default_random_engine generator;
   std::normal_distribution<float> gaussian(m_meanSize,m_rmsSize);

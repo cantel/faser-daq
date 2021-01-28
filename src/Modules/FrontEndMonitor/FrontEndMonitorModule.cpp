@@ -19,7 +19,7 @@ FrontEndMonitorModule::FrontEndMonitorModule() {
  }
 
 FrontEndMonitorModule::~FrontEndMonitorModule() { 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
  }
 
 void FrontEndMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {

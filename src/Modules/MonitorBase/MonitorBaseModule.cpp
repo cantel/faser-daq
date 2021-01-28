@@ -26,8 +26,9 @@ MonitorBaseModule::MonitorBaseModule() {
 MonitorBaseModule::~MonitorBaseModule() { 
 
   delete m_event;
+  if (m_trackerdataFragment) delete m_trackerdataFragment;
 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
 }
 
 void MonitorBaseModule::configure() {
@@ -45,7 +46,6 @@ void MonitorBaseModule::configure() {
 
 void MonitorBaseModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
-  INFO("getState: " << this->getState());
 
   if ( m_histogramming_on ) m_histogrammanager->start();
 
@@ -56,10 +56,9 @@ void MonitorBaseModule::stop() {
 
   INFO("... finalizing ...");
   if (m_histogramming_on) m_histogrammanager->stop();
-  INFO("getState: " << this->getState());
 }
 
-void MonitorBaseModule::runner() {
+void MonitorBaseModule::runner() noexcept {
   INFO("Running...");
 
   m_event_header_unpacked = false;
@@ -183,7 +182,7 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
 
   switch (m_eventTag) {
     case PhysicsTag:{
-      switch (sourceID) {
+      switch (sourceID&0xFFFFFF00) {
         case TriggerSourceID:
           m_tlbdataFragment = std::make_unique<TLBDataFragment>(TLBDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size()));
           DEBUG("unpacking TLB data fragment.");
@@ -191,6 +190,11 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
         case PMTSourceID:
           m_pmtdataFragment = std::make_unique<DigitizerDataFragment>(DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size()));
           DEBUG("unpacking PMT data fragment.");
+          break;
+        case TrackerSourceID:
+          if (m_trackerdataFragment) delete m_trackerdataFragment;
+          m_trackerdataFragment = new TrackerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+          DEBUG("unpacking Tracker data fragment.");
           break;
         default:
           m_rawFragment=m_fragment->payload<const RawFragment*>();

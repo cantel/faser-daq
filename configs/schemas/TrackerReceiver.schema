@@ -71,10 +71,22 @@
                     "description"   : "if true will configure modules using given module configuration files.",
                     "default"       : true
                     },
+                "HWDelayClk0"         : {
+                    "type"          : "integer",
+                    "title"         : "hardware delay for CLK0  line",
+                    "description"   : "L1A/BCR signal delay for input clock 0 (modules 0-3)",
+                    "default"       : 0
+                    },
                 "FinePhaseClk0"         : {
                     "type"          : "integer",
                     "title"         : "fine phase delay for CLK0  line",
                     "description"   : "fine phase delay for input clock 0 (modules 0-3)",
+                    "default"       : 0
+                    },
+                "HWDelayClk1"         : {
+                    "type"          : "integer",
+                    "title"         : "hardware delay for CLK1  line",
+                    "description"   : "L1A/BCR signal delay for input clock 1 (modules 4-7)",
                     "default"       : 0
                     },
                 "FinePhaseClk1"         : {

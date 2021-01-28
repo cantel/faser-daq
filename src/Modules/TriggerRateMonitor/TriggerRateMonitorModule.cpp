@@ -9,6 +9,8 @@
 #include "TriggerRateMonitorModule.hpp"
 
 #define MAX_TRIG_LINES 5
+#define MASK_ECR 0xFFFFFFFFFF000000
+#define _PERCENT 100
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
@@ -16,10 +18,12 @@ using namespace std::chrono;
 TriggerRateMonitorModule::TriggerRateMonitorModule() { 
 
    INFO("");
+   m_ECR_cnt = 0;
+   m_triggered_events = 0;
  }
 
 TriggerRateMonitorModule::~TriggerRateMonitorModule() { 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
  }
 
 void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
@@ -31,13 +35,34 @@ void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderB
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
     fill_error_status_to_metric( fragmentUnpackStatus );
-    //fill_error_status_to_histogram( fragmentUnpackStatus, "tlb_errorcount" );
     return;
   }
-  // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
+  // m_tlbmonitoringFragment should now be filled
 
   uint32_t fragmentStatus = m_fragment->status();
   fill_error_status_to_metric( fragmentStatus );
+  
+  if (!m_tlbmonitoringFragment->valid()) {
+    WARNING("Skipping invalid tlb monitoring fragment\n"<<std::dec<<*m_tlbmonitoringFragment);
+    fill_error_status_to_metric(fragmentUnpackStatus);
+    return;
+  }
+
+  // get veto cnts for later use
+  uint32_t deadtime_veto_cnt = m_tlbmonitoringFragment->deadtime_veto_counter();
+  uint32_t busy_veto_cnt = m_tlbmonitoringFragment->busy_veto_counter();
+  uint32_t rate_limiter_veto_cnt = m_tlbmonitoringFragment->rate_limiter_veto_counter();
+  uint32_t bcr_veto_cnt = m_tlbmonitoringFragment->bcr_veto_counter();
+  uint32_t digi_busy_cnt = m_tlbmonitoringFragment->digitizer_busy_counter();
+
+  unsigned ECR_cnt = (m_fragment->event_id()&MASK_ECR)>>24;
+  if ( ECR_cnt > m_ECR_cnt){
+    m_previous_evt_cnt = 0;
+    m_ECR_cnt = ECR_cnt;
+  }
+  m_triggered_events = (m_tlbmonitoringFragment->event_id() - m_previous_evt_cnt);
+  m_triggered_events += deadtime_veto_cnt + busy_veto_cnt + rate_limiter_veto_cnt + bcr_veto_cnt + digi_busy_cnt;
+  m_previous_evt_cnt = m_tlbmonitoringFragment->event_id();
 
   // trigger counts
   // --- 
@@ -66,15 +91,24 @@ void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderB
   };
 
  // veto counters
-  m_deadtime_veto += m_tlbmonitoringFragment->deadtime_veto_counter();
-  m_busy_veto += m_tlbmonitoringFragment->busy_veto_counter();
-  m_rate_limiter_veto += m_tlbmonitoringFragment->rate_limiter_veto_counter();
-  m_bcr_veto += m_tlbmonitoringFragment->bcr_veto_counter();
-
-  m_histogrammanager->fill("tlb_veto_counts", "SimpleDeadtime", m_tlbmonitoringFragment->deadtime_veto_counter());
-  m_histogrammanager->fill("tlb_veto_counts", "Busy", m_tlbmonitoringFragment->busy_veto_counter());
-  m_histogrammanager->fill("tlb_veto_counts", "RateLimiter", m_tlbmonitoringFragment->rate_limiter_veto_counter());
-  m_histogrammanager->fill("tlb_veto_counts", "BCR", m_tlbmonitoringFragment->bcr_veto_counter());
+  m_deadtime_veto += deadtime_veto_cnt;
+  m_busy_veto += busy_veto_cnt;
+  m_rate_limiter_veto += rate_limiter_veto_cnt;
+  m_bcr_veto += bcr_veto_cnt;
+  m_digi_busy_veto += digi_busy_cnt;
+ // veto fractions
+  if (m_triggered_events){
+    m_deadtime_fraction = (float)_PERCENT*deadtime_veto_cnt/m_triggered_events;
+    m_busy_fraction = (float)_PERCENT*busy_veto_cnt/m_triggered_events;
+    m_rate_limiter_fraction = (float)_PERCENT*rate_limiter_veto_cnt/m_triggered_events;
+    m_bcr_fraction = (float)_PERCENT*bcr_veto_cnt/m_triggered_events;
+    m_digi_busy_fraction = (float)_PERCENT*digi_busy_cnt/m_triggered_events;
+  }
+  m_histogrammanager->fill("tlb_veto_counts", "SimpleDeadtime", deadtime_veto_cnt);
+  m_histogrammanager->fill("tlb_veto_counts", "TrackerBusy", busy_veto_cnt);
+  m_histogrammanager->fill("tlb_veto_counts", "RateLimiter", rate_limiter_veto_cnt);
+  m_histogrammanager->fill("tlb_veto_counts", "BCR", bcr_veto_cnt);
+  m_histogrammanager->fill("tlb_veto_counts", "DigiBusy", digi_busy_cnt);
 
 }
 
@@ -88,7 +122,7 @@ void TriggerRateMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("tlb_tav_counts", "TAV idx", 0, 4, 4 );
 
   //veto counts
-  std::vector<std::string> veto_categories = {"SimpleDeadtime", "Busy", "RateLimiter", "BCR"};
+  std::vector<std::string> veto_categories = {"SimpleDeadtime", "TrackerBusy", "DigiBusy", "RateLimiter", "BCR"};
   m_histogrammanager->registerHistogram("tlb_veto_counts", "veto type", veto_categories, 5. );
 
   INFO(" ... done registering histograms ... " );
@@ -126,10 +160,18 @@ void TriggerRateMonitorModule::register_metrics() {
   registerVariable(m_busy_veto, "busyVetoRate", daqling::core::metrics::RATE);
   registerVariable(m_rate_limiter_veto, "ratelimiterVetoRate", daqling::core::metrics::RATE);
   registerVariable(m_bcr_veto, "BCRVetoRate", daqling::core::metrics::RATE);
+  registerVariable(m_digi_busy_veto, "digiBusyVetoRate", daqling::core::metrics::RATE);
   registerVariable(m_deadtime_veto, "deadtimeVetoCounter");
   registerVariable(m_busy_veto, "busyVetoCounter");
   registerVariable(m_rate_limiter_veto, "ratelimiterVetoCounter");
   registerVariable(m_bcr_veto, "BCRVetoCounter");
+  registerVariable(m_digi_busy_veto, "digiBusyVetoCounter");
+
+  registerVariable(m_deadtime_fraction, "deadtimeVetoPercentage");
+  registerVariable(m_busy_fraction, "busyVetoPercentage");
+  registerVariable(m_rate_limiter_fraction, "ratelimiterVetoPercentage");
+  registerVariable(m_bcr_fraction, "BCRVetoPercentage");
+  registerVariable(m_digi_busy_fraction, "digiBusyVetoPercentage");
 
   return;
 }

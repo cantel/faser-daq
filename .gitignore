@@ -1,3 +1,5 @@
 build
 .vscode
 *.code-workspace
+scripts/Web/__pycache__/*.pyc
+scripts/Web/routes/__pycache__/*.pyc

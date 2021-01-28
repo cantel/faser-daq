@@ -1,0 +1,72 @@
+{
+    "type": "object",
+    "title": "EventPlayback",
+    "properties": {
+      "name": {
+        "type": "string",
+	"required": true,
+	"default": "eventbuilder01",
+	"readOnly": true,
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
+      },
+      "host": {
+        "type": "string",
+	"required": true,
+	"default": "localhost",
+	"propertyOrder": 2
+      },          
+      "port": {
+        "type": "integer",
+	"required": true,
+	"default": 0,
+        "minimum": 1024,
+	"maximum": 65535,
+	"propertyOrder": 3
+      },
+      "type": {
+        "type": "string",
+	"default": "EventBuilderFaser",
+	"readOnly": true,
+	"propertyOrder": 4,
+	"options": { "hidden": true }
+      },
+      "settings": {
+        "type": "object",
+        "title": "Settings",
+        "properties": {
+	  "maxRate": {
+	    "type": "integer",
+	    "default": 10,
+	    "minimum": 1,
+	    "maximum": 1000000,
+	    "required": true,
+  	    "options": {
+    		"infoText": "Maximum rate to send events"
+  	    }
+	  },
+	  "repeats": {
+	    "type": "integer",
+	    "default": 1,
+	    "minimum": 0,
+	    "maximum": 1000000,
+	    "required": true,
+  	    "options": {
+    		"infoText": "Number of times to repeat datasets - 0 for infinite"
+  	    }
+	  },
+	  "fileList": {
+	    "type": "array",
+            "options": { "infoText": "Full path names to input files" },
+            "format": "table",
+            "title": "File names",
+            "items": { "type": "string" }
+	  }
+	},
+	"format":"grid",
+	"propertyOrder": 5
+      }
+    }
+}
+
+

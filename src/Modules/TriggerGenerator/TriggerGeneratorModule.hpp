@@ -15,7 +15,7 @@ class TriggerGeneratorModule : public FaserProcess {
   void disableTrigger(const std::string &arg);
   void stop();
 
-  void runner();
+  void runner() noexcept;
 private:
   unsigned int m_eventCounter;
   float m_rate;

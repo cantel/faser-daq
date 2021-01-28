@@ -129,3 +129,13 @@ def getBoardStatus(boardname):
   state=r.hget(boardname,'Status')
   if not state: return -1
   return int(state.decode().split(":")[1])
+
+def getEventCounts():
+  types=["Physics","Calibration","TLBMonitoring"]
+  values={}
+  for rateType in types:
+    name=rateType+"Events"
+    value=r.hget(rateSource,name)
+    value = value.decode().split(':')
+    values[name]=int(value[1])
+  return values

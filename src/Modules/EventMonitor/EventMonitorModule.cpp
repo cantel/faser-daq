@@ -38,7 +38,7 @@ EventMonitorModule::EventMonitorModule() {
 }
 
 EventMonitorModule::~EventMonitorModule() { 
-  INFO("With config: " << m_config.dump() << " getState: " << this->getState());
+  INFO("With config: " << m_config.dump());
  }
 
 void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {

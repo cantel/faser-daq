@@ -60,14 +60,17 @@ def launch():
 @app.route("/initialise")
 def initialise():
     app.logger.info("Initialize button pressed")
-    statetracker.initialize(session.get("selectedFile"))
-            
+    selectedFile=session.get("selectedFile")
+    if not selectedFile:
+        app.logger.error("Failed to get selected file")
+        return "false"
+    statetracker.initialize(selectedFile)
     return "true"
 
 @app.route("/start")
 def start():
     app.logger.info("Start button pressed")
-    statetracker.start()
+    statetracker.start(request.args)
     return "true"
 
 @app.route("/pause")

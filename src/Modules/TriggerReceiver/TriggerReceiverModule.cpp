@@ -23,15 +23,28 @@
 #include <Utils/Binary.hpp>
 
 using namespace DAQFormats;
+using namespace TLBDataFormat;
+using namespace TLBMonFormat;
 using namespace daqling::utilities;
-
+using namespace TLBDataFormat;
+using namespace TLBMonFormat;
 
 #define _ms 1000 // used for usleep
 
 TriggerReceiverModule::TriggerReceiverModule() {
+  auto cfg = m_config.getSettings();
+
   INFO("In TriggerReceiverModule()");
   m_status = STATUS_OK;
-  m_tlb = new TLBAccess();
+
+  if (cfg.contains("BoardID") && cfg.contains("SCIP") && cfg.contains("DAQIP")){
+    INFO("Using ethernet communication interface.");
+    m_tlb = new TLBAccess(cfg["SCIP"].get<std::string>(), cfg["DAQIP"].get<std::string>(), false, cfg["BoardID"].get<int>() );
+  }
+  else{
+    INFO("Some, or possibly all, parametrs SCIP, DAQIP, BoardID have not been specified. Assuming we're communicating via USB!"); 
+    m_tlb = new TLBAccess();
+  }
   m_tlb->DisableTrigger(); // make sure TLB not sending triggers
 }
 
@@ -136,7 +149,7 @@ void TriggerReceiverModule::stop() {
   FaserProcess::stop(); //this turns m_run to false
 }
 
-void TriggerReceiverModule::runner() {
+void TriggerReceiverModule::runner() noexcept {
   INFO("Running...");
   
   std::vector<std::vector<uint32_t>> vector_of_raw_events;
@@ -165,7 +178,11 @@ void TriggerReceiverModule::runner() {
           TLBMonitoringFragment tlb_fragment = TLBMonitoringFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
           local_bc_id = tlb_fragment.bc_id();
-          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
+          if (!tlb_fragment.valid()) {
+            WARNING("Corrupted trigger monitoring data fragment at triggered event count "<<m_physicsEventCount);
+            m_fragment_status = EventStatus::CorruptedFragment;
+            m_status = STATUS_WARN;
+          }
           DEBUG("Monitoring fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_monitoringEventCount+=1;
           m_monitoring_payload_size = total_size;
@@ -175,7 +192,11 @@ void TriggerReceiverModule::runner() {
           TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
           local_bc_id = tlb_fragment.bc_id();
-          if (!tlb_fragment.valid()) m_fragment_status = EventStatus::CorruptedFragment;
+          if (!tlb_fragment.valid()) {
+            WARNING("Corrupted trigger physics data fragment at triggered event count "<<m_physicsEventCount);
+            m_fragment_status = EventStatus::CorruptedFragment;
+            m_status = STATUS_WARN;
+          }
           DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;

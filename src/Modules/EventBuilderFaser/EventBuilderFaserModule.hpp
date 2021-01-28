@@ -22,7 +22,7 @@ class EventBuilderFaserModule : public FaserProcess {
   void configure();
   void start(unsigned int run_num);
   void stop();
-  void runner();
+  void runner() noexcept;
   bool sendEvent(uint8_t event_tag,EventFull *event);
   void addFragment(EventFragment *fragment);
 
@@ -40,6 +40,7 @@ private:
   std::atomic<int> m_BCIDMismatchCount;
 
   std::atomic<int> m_eventCounts[MaxAnyTag];
+  std::atomic<int> m_pendingCounts[MaxAnyTag];
   std::map<uint64_t,EventFull*> m_pendingEvents[MaxAnyTag];
   std::set<uint64_t> m_readyEvents[MaxAnyTag];
 };

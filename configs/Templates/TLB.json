@@ -25,6 +25,7 @@
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
+<<<<<<< HEAD
             "LUTConfig": { "Trig0": "Tin0",
                            "Trig1": "Tin1",
                            "Trig2": "Tin0|Tin1",
@@ -35,6 +36,14 @@
             "BoardID" : 0
         },
         "connections": {
+=======
+            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt",
+            "SCIP" : "10.11.65.7",
+            "DAQIP" : "10.11.65.7",
+            "BoardID" : 0
+	},
+	"connections": {
+>>>>>>> origin/master
             "senders": [
               {
                   "type": "pair",
@@ -101,8 +110,8 @@
             "SamplingPhase": [false, false, false, false, false, false, false, false],
             "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
             "RandomTriggerRate": 7,
-            "Prescale": [0, 0, 1, 0, 0, 0],
-            "TrackerDelay": 103,
+            "Prescale": [0, 0, 1, 0, 1, 0],
+            "TrackerDelay": 102,
             "DigitizerDelay": 0,
             "LHC_CLK": false,
             "OrbitDelay": 0,
@@ -116,11 +125,18 @@
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
+<<<<<<< HEAD
             "LUTConfig": { "Trig0": "Tin0|Tin1",
                            "Trig1": "0",
                            "Trig2": "0",
                            "Trig3": "0"
             }
+=======
+            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmicsstand.txt",
+            "SCIP" : "10.11.65.8",
+            "DAQIP" : "10.11.65.8",
+            "BoardID" : 10
+>>>>>>> origin/master
 	},
 	"connections": {
             "senders": [

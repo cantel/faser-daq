@@ -35,6 +35,10 @@ void EventBuilderFaserModule::configure() {
   registerVariable(m_eventCounts[EventTags::TLBMonitoringTag], "TLBMonitoringRate", metrics::RATE);
   registerVariable(m_eventCounts[EventTags::CalibrationTag], "CalibrationEvents");
   registerVariable(m_eventCounts[EventTags::CalibrationTag], "CalibrationRate", metrics::RATE);
+  registerVariable(m_pendingCounts[EventTags::PhysicsTag], "PhysicsEventsPending");
+  registerVariable(m_pendingCounts[EventTags::MonitoringTag], "MonitoringEventsPending");
+  registerVariable(m_pendingCounts[EventTags::TLBMonitoringTag], "TLBMonitoringEventsPending");
+  registerVariable(m_pendingCounts[EventTags::CalibrationTag], "CalibrationEventsPending");
   registerVariable(m_run_number, "RunNumber");
   registerVariable(m_run_start, "RunStart");
   registerVariable(m_corruptFragmentCount, "CorruptFragmentErrors");
@@ -53,13 +57,11 @@ void EventBuilderFaserModule::start(unsigned int run_num) {
   m_timeoutCount=0;
   m_BCIDMismatchCount=0;
   m_status = STATUS_OK;
-  INFO("getState: " << getState());
 }
 
 void EventBuilderFaserModule::stop() {
   std::this_thread::sleep_for(std::chrono::microseconds(m_stopTimeout)); //wait for events 
   FaserProcess::stop();
-  INFO("getState: " << this->getState());
 }
 
 
@@ -101,8 +103,10 @@ void EventBuilderFaserModule::addFragment(EventFragment *fragment) {
   try {
     auto status=event->addFragment(fragment);
     if (status&EventStatus::BCIDMismatch) {
-      WARNING("Mismatch in BCID for event "<<event->event_id()<<" : "<<event->bc_id()<<" != "<<fragment->bc_id());
-      m_BCIDMismatchCount++;
+      if (abs(event->bc_id()-fragment->bc_id())>10) { //allow for digitizer to be slightly out of time
+	WARNING("Mismatch in BCID for event "<<event->event_id()<<" : "<<event->bc_id()<<" != "<<fragment->bc_id());
+	m_BCIDMismatchCount++;
+      }
     }
   }
   catch (const std::runtime_error& e) {
@@ -127,7 +131,7 @@ void EventBuilderFaserModule::addFragment(EventFragment *fragment) {
 
 
 
-void EventBuilderFaserModule::runner() {
+void EventBuilderFaserModule::runner() noexcept {
   INFO("Running...");
 
   bool noData=true;
@@ -154,9 +158,9 @@ void EventBuilderFaserModule::runner() {
 	addFragment(fragment);
       }
     }
-    if (noData) std::this_thread::sleep_for(10ms);
 
     // send any events ready or timed out
+    bool sentMissing=false;
     microseconds now;
     now = duration_cast<microseconds>(system_clock::now().time_since_epoch());
     for(unsigned int tag=0;tag<MaxAnyTag;tag++) {
@@ -167,6 +171,7 @@ void EventBuilderFaserModule::runner() {
       }
       m_readyEvents[tag].clear();
       // check oldest event
+      m_pendingCounts[tag]=m_pendingEvents[tag].size();
       if (m_pendingEvents[tag].size()) {
 	auto event=m_pendingEvents[tag].begin()->second;
 	if ((now.count()-event->timestamp())>m_timeout) {
@@ -176,9 +181,12 @@ void EventBuilderFaserModule::runner() {
 	  sendEvent(EventTags::IncompleteTag,event);
 	  delete event;
 	  m_pendingEvents[tag].erase(m_pendingEvents[tag].begin());
+	  sentMissing=true;
 	}
       }
     }
+    if (noData&&!sentMissing) std::this_thread::sleep_for(10ms);
+
   }
   INFO("Runner stopped");
 }

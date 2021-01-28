@@ -1,4 +1,4 @@
-python CheckConfigs.py \
+python3 CheckConfigs.py \
 --directory ../configs \
 --schemas   \
 schemas/DigitizerReceiver.schema \

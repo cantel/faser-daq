@@ -1,4 +1,51 @@
 {
+    "TLBReceiverTI12": {
+        "name": "tlbreceiver01",
+        "host": "localhost",
+        "port": 5520,
+        "type": "TriggerReceiver",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+        "metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+            "SamplingPhase": [false, false, false, false, false, false, false, false],
+            "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
+            "RandomTriggerRate": 6,
+            "Prescale": [1, 1, 1, 1, 1, 0],
+            "TrackerDelay": 102,
+            "DigitizerDelay": 0,
+            "LHC_CLK": false,
+            "OrbitDelay": 0,
+            "Deadtime": 500,
+            "MonitoringRate": 11245,
+            "OutputDestination": 0,
+            "Input": [true, true, false, false, false, false, false, false],
+            "Busy0Disable": true,
+            "Busy1Disable": true,
+            "EnableTriggerData": true,
+            "EnableMonitoringData": true,
+            "Derandomize": false,
+            "ReadoutFIFOReset": true,
+            "LUTConfig": { "Trig0": "Tin0",
+                           "Trig1": "Tin1",
+                           "Trig2": "Tin0|Tin1",
+                           "Trig3": "Tin0&Tin1"            
+            },                  
+            "SCIP" : "10.11.65.37",
+            "DAQIP" : "10.11.65.37",
+            "BoardID" : 0
+        },
+        "connections": {
+            "senders": [
+              {
+                  "type": "pair",
+                  "chid": 0,
+                  "transport": "tcp",
+                  "host": "*",
+                  "port": 8100
+              }
+            ]
+      }
+    },
     "TLBReceiverB21": {
 	"name": "tlbreceiver01",
 	"host": "localhost",
@@ -25,7 +72,11 @@
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT1.txt",
+            "LUTConfig": { "Trig0": "Tin0",
+                           "Trig1": "Tin1",
+                           "Trig2": "Tin0|Tin1",
+                           "Trig3": "Tin0&Tin1"            
+            },
             "SCIP" : "10.11.65.7",
             "DAQIP" : "10.11.65.7",
             "BoardID" : 0
@@ -68,7 +119,11 @@
             "EnableMonitoringData": true,
             "Derandomize": false,
             "ReadoutFIFOReset": true,
-            "LUTConfig": "/home/cantel/daq/gpiodrivers/TLBAccess/config/LUT_cosmicsstand.txt",
+            "LUTConfig": { "Trig0": "Tin0",
+                           "Trig1": "Tin1",
+                           "Trig2": "Tin0|Tin1",
+                           "Trig3": "Tin0&Tin1"            
+            },
             "SCIP" : "10.11.65.8",
             "DAQIP" : "10.11.65.8",
             "BoardID" : 10

@@ -136,6 +136,8 @@ sudo firewall-cmd --zone=public --add-port=8050/tcp --permanent
 sudo firewall-cmd --reload
 #For FASER install additional python libraries for GUI:
 sudo pip3 install requests
+#For FASER  histogram monitoring install additional python libraries:
+sudo pip3 install Flask-APScheduler
 ```
 If running on machine without direct internet access, one has to setup a proxy on a different
 machine and point `pip`, `yum` and `git` to it before running the above scripts. The last `pip3 install` command will also need to be run as root after setting up the proxy variables.

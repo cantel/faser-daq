@@ -130,14 +130,15 @@ ansible-playbook install-boost-1_70.yml --ask-become
 ansible-playbook install-webdeps.yml --ask-become
 ansible-playbook install-redis.yml --ask-become
 
-#For FASER additional firewall ports need to be opened for the GPIO readout:
+#For FASER additional firewall ports need to be opened for the GPIO readout and histogram monitoring:
 sudo firewall-cmd --zone=public --add-port=50000-50005/udp --permanent
+sudo firewall-cmd --zone=public --add-port=8050/tcp --permanent
 sudo firewall-cmd --reload
 #For FASER install additional python libraries for GUI:
 sudo pip3 install requests
 ```
 If running on machine without direct internet access, one has to setup a proxy on a different
-machine and point `pip`, `yum` and `git` to it before running the above scripts. 
+machine and point `pip`, `yum` and `git` to it before running the above scripts. The last `pip3 install` command will also need to be run as root after setting up the proxy variables.
 This can be done by adding the following to `/etc/pip.conf`:
 ```
 [global]
@@ -152,6 +153,14 @@ and setting `git` to use a proxy:
 ```
 sudo git config --global http.proxy http://faser-daq-001:8888
 ```
+
+### Installing ROOT
+For analysis and calibration software it is also required to install ROOT.
+This can be done with following command, using the default ROOT release in CentOS 7:
+```
+sudo yum install root root-tpython
+```
+
 
 ## Remote Access
 Currently, all of the PCs that we use are only accessible from within the CERN network.

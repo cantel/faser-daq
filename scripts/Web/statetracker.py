@@ -44,8 +44,9 @@ def stateTracker(logger):
     configName=""
     config={}
     oldStatus=[]
+    status=[]
     daq=None
-    overallState=None
+    overallState="DOWN"
     cmd=None
     while True:
         update=False

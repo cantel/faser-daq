@@ -140,7 +140,7 @@ sudo pip3 install requests
 sudo pip3 install Flask-APScheduler
 ```
 If running on machine without direct internet access, one has to setup a proxy on a different
-machine and point `pip`, `yum` and `git` to it before running the above scripts. The last `pip3 install` command will also need to be run as root after setting up the proxy variables.
+machine and point `pip`, `yum` and `git` to it before running the above scripts.
 This can be done by adding the following to `/etc/pip.conf`:
 ```
 [global]
@@ -154,6 +154,11 @@ export https_proxy=http://faser-daq-001:8888
 and setting `git` to use a proxy:
 ```
 sudo git config --global http.proxy http://faser-daq-001:8888
+```
+
+For `pip install`, one can set the proxy directly via command line, e.g.:
+```
+sudo pip3 --proxy http://faser-daq-001:8888 install Flask-APScheduler
 ```
 
 ### Installing ROOT

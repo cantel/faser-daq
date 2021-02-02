@@ -1,11 +1,7 @@
 stages:
-<<<<<<< HEAD
   - build
-  - config
-=======
-  - build 
+  - config 
   - deploy
->>>>>>> origin/master
 
 build_faser_daq:
   stage: build
@@ -24,7 +20,6 @@ build_faser_daq:
     - cmake3 ../
     - make -j8
     
-<<<<<<< HEAD
 validate_configs:
   stage: config
   image: gitlab-registry.cern.ch/faser/docker/daq:master
@@ -37,7 +32,7 @@ validate_configs:
   script:
     - cd scripts
     - source runConfigCheck.sh 
-=======
+
 check_license:
   stage: build
   image: gitlab-registry.cern.ch/faser/docker/daq:master
@@ -77,4 +72,3 @@ deployment_mkdocs:
     - deploy-eos
   before_script: []
   after_script: []
->>>>>>> origin/master

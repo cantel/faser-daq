@@ -79,8 +79,8 @@
                 "type"            : "array",
                 "title"           : "Sampling phase",
                 "description"     : "If true, clock sampled on falling edge instead of rising edge for input channel 0-7",
-                "minItems"        : "8",
-                "maxItems"        : "8",
+                "minItems"        : 8,
+                "maxItems"        : 8,
                 "items": {
                   "type": "boolean"
                 }

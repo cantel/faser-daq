@@ -32,7 +32,7 @@
         "settings": {
             "type"          : "object",
             "title"         : "Settings",
-            "required": ["boardID","L1Atype","moduleMask"],
+            "required": ["BoardID","L1Atype","moduleMask"],
             "properties"    : {
                 "boardID"         : {
                     "type"          : "integer",

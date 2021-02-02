@@ -36,68 +36,85 @@ def main():
   print("templates   ",templates )
   print("extras      ",extras    )
   
+  if directory==None:
+    print("You must give a base directory")
+    exit(3)
+  
 
   # check all of the schemas for validity
   print("\n\n >>>>>> CHECKING SCHEMAS <<<<<< \n\n")
-  for path_to_schema in schemas:
-    print("Checking : ",path_to_schema)
-    valid = checkSchema(directory+"/"+path_to_schema)
-    print(path_to_schema," -- ",valid)
+  if schemas==None:
+    print("None entered to check")
+  else:
+    for path_to_schema in schemas:
+      print("Checking : ",path_to_schema)
+      valid = checkSchema(directory+"/"+path_to_schema)
+      print(path_to_schema," -- ",valid)
     
   # check each of the templates against the schemas
   print("\n\n >>>>>> CHECKING TEMPLATES <<<<<< \n\n")
-  for path_to_template in templates:
-    print("Checking : ",path_to_template)
+  if templates==None:
+    print("None entered to check")
+  else:
+    for path_to_template in templates:
+      print("Checking : ",path_to_template)
     
-    filepath = directory+"/"+path_to_template
+      filepath = directory+"/"+path_to_template
 
-    # get full template
-    fin_cfg = open(filepath)
-    cfg = json.load(fin_cfg)
-    # go through each of the entries in the template
-    for key in cfg.keys():
+      # get full template
+      fin_cfg = open(filepath)
+      cfg = json.load(fin_cfg)
+      # go through each of the entries in the template
+      for key in cfg.keys():
       
-      # get config type
-      cfg_type   = cfg[key]["type"]
-      # form schema path
-      cfg_schema = directory+"/schemas/"+cfg_type+".schema"
-      print("Validating against : ",cfg_schema)                
+        # get config type
+        cfg_type   = cfg[key]["type"]
+        # form schema path
+        cfg_schema = directory+"/schemas/"+cfg_type+".schema"
+        print("Validating against : ",cfg_schema)                
       
-      print("Checking config : ",filepath, cfg_schema, directory, [key])
-      result_config = checkConfig(filepath, cfg_schema, directory, [key])
-      print("Config validity : ",result_config)
+        print("Checking config : ",filepath, cfg_schema, directory, [key])
+        result_config = checkConfig(filepath, cfg_schema, directory, [key])
+        print("Config validity : ",result_config)
       
   # check each of the top level configs
   print("\n\n >>>>>> CHECKING CONFIGS <<<<<< \n\n")
-  for path_to_config in configs:
-    print("Checking : ",path_to_config)
-    filepath = directory+"/"+path_to_config
-    cfg = getConfig(filepath, directory)
+  if configs==None:
+    print("None entered to check")
+  else:
+    for path_to_config in configs:
+      print("Checking : ",path_to_config)
+      filepath = directory+"/"+path_to_config
+      cfg = getConfig(filepath, directory)
 
-    for cfg_sub in cfg["configuration"]["components"]:
+      for cfg_sub in cfg["configuration"]["components"]:
       
-      # get config type
-      cfg_name   = cfg_sub["name"]
-      cfg_type   = cfg_sub["type"]
-      # form schema path
-      cfg_schema = directory+"/schemas/"+cfg_type+".schema"
-      print("Validating - ",cfg_name," | ",cfg_type," - against : ",cfg_schema)                
+        # get config type
+        cfg_name   = cfg_sub["name"]
+        cfg_type   = cfg_sub["type"]
+        # form schema path
+        cfg_schema = directory+"/schemas/"+cfg_type+".schema"
+        print("Validating - ",cfg_name," | ",cfg_type," - against : ",cfg_schema)                
     
-      result_config = checkConfig(cfg_sub, cfg_schema, directory)
+        result_config = checkConfig(cfg_sub, cfg_schema, directory)
     
-      print("Config validity : ",result_config)
+        print("Config validity : ",result_config)
     
   # finally, check that all files in the repository have been accounted for
   print("\n\n >>>>>> CHECKING EXTRAS <<<<<< \n\n")
   allfiles = []
-  for i in schemas:
-    allfiles.append(os.path.join(directory,i))
-  for i in templates:
-    allfiles.append(os.path.join(directory,i))
-  for i in configs:
-    allfiles.append(os.path.join(directory,i))
-  for i in extras:
-    allfiles.append(os.path.join(directory,i))
+  if schemas!=None:
+    for i in schemas:
+      allfiles.append(os.path.join(directory,i))
+  if templates!=None:    
+    for i in templates:
+      allfiles.append(os.path.join(directory,i))
+  if configs!=None:
+    for i in configs:
+      allfiles.append(os.path.join(directory,i))
+  if extras!=None:
+    for i in extras:
+      allfiles.append(os.path.join(directory,i))
 
   countMissing = 0
   for root, dirs, files in os.walk(directory, topdown=False):

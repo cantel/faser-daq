@@ -39,8 +39,9 @@ through the Look-Up-Table and prescales, or by generating triggers internally.  
 more commonly used TLB configurations can be found in the 
 [the TLB template](https://gitlab.cern.ch/faser/daq/-/blob/master/configs/Templates/TLB.json)
 
-{%
-   include-markdown "TriggerReceiver.md"
+
+{% 
+   include-markdown "TriggerReceiver.md" 
 %}
 
 <details><summary>Click to see an example TLB configuration file</summary>
@@ -51,6 +52,7 @@ more commonly used TLB configurations can be found in the
 </p>
 </details>
 <br>
+
 
 ## Digitizer Settings
 The digitizer is responsible for providing the LVDS input signals to the TLB that it uses

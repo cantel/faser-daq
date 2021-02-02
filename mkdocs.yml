@@ -13,14 +13,14 @@ theme:
 plugins:
   - include-markdown
   - search  
-  - doxygen:
-      tryclone: yes 
-      recursive: yes
-      packages:
-        - faser-common:
-            url    : https://:@gitlab.cern.ch:8443/faser/faser-common.git
-            config : Doxyfile
-            workdir: .
+#  - doxygen:
+#      tryclone: yes 
+#      recursive: yes 
+#      packages:
+#        - faser-common:
+#            url    : https://:@gitlab.cern.ch:8443/faser/faser-common.git
+#            config : Doxyfile
+#            workdir: .
 #        - digitizer:
 #            url    : https://:@gitlab.cern.ch:8443/faser/digitizer-readout.git
 #            config : Doxyfile
@@ -38,7 +38,7 @@ nav:
   - 'Introduction': introduction.md
   - 'Setup': setup.md
   - 'Running': running.md
-  - 'Configuration': configuration.md
+#  - 'Configuration': configuration.md # NOTE THAT THIS SHOULD BE UNCOMMENTED WHEN THE faser/daq repo is public
   - 'Monitoring': monitoring.md
   - 'Output Data': outputdata.md
   - 'For Development': developers.md

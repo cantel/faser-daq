@@ -215,9 +215,9 @@
                   "type"          : "integer",
                   "title"         : "Output destination",
                   "description"     : "The IP address to which DAQ and command data is sent (not used).",
-                  "default"       : "0",
-                  "minimum"       : "0",
-                  "maximum"       : "4294967295"
+                  "default"       : 0,
+                  "minimum"       : 0,
+                  "maximum"       : 4294967295
               }
           },
       "format":"grid",

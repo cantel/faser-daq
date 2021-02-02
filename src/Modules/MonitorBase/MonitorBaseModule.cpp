@@ -59,6 +59,7 @@ void MonitorBaseModule::stop() {
 
   INFO("... finalizing ...");
   if (m_histogramming_on) m_histogrammanager->stop();
+
 }
 
 void MonitorBaseModule::runner() noexcept {
@@ -235,15 +236,20 @@ void MonitorBaseModule::setupHistogramManager() {
   INFO("Setting up HistogramManager.");
   //INFO("Socket: "<<m_connections.getStatSocket());
 
-  m_histogrammanager = std::make_unique<HistogramManager>(m_connections.getStatSocket());
+  m_histogrammanager = std::make_unique<HistogramManager>();
 
-  m_histogramming_on = true;
-
-  auto statsURI = m_config.getConfig()["metrics_settings"]["stats_uri"];
+  auto statsURI = m_config.getMetricsSettings()["stats_uri"];
   if (statsURI != "" && statsURI != nullptr) {
     INFO("Stats uri provided. Will publish histograms via the stats connection.");
-    m_histogrammanager->setZMQpublishing(true);
-
+    try {
+      m_histogrammanager->configure(1, statsURI); // NOTE 1 I/O thread, and using same statsURI as for metrics. should be fine..
+    } catch (std::exception &e){
+      ERROR("Configuring the histogram manager failed.");
+      sleep(1); // wait for error state to appear in RC GUI.
+      m_status = STATUS_ERROR;
+      throw e;
+    }
+    m_histogramming_on = true;
   }
   else {
     INFO("No stats uri given. Will not be publishing histograms.");

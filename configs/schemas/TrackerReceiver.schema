@@ -34,10 +34,10 @@
             "title"         : "Settings",
             "required": ["BoardID","L1Atype","moduleMask"],
             "properties"    : {
-                "boardID"         : {
+                "BoardID"         : {
                     "type"          : "integer",
-                    "title"         : "board ID",
-                    "description"   : "specify which board to connect to (board ID set by rotary switch on board)",
+                    "title"         : "Board ID",
+                    "description"   : "ID of board to connect to (board ID set by rotary switch on board).",                    
                     "default"       : 0
                     },
                 "L1Atype"           : {
@@ -64,66 +64,67 @@
                     },
                 "ConfigureModules"         : {
                     "type"          : "boolean",
-                    "title"         : "configure modules",
-                    "description"   : "if true will configure modules using given module configuration files.",
+                    "title"         : "Configure modules",
+                    "description"   : "If true will configure modules using given module configuration files.",
                     "default"       : true
                     },
                 "HWDelayClk0"         : {
                     "type"          : "integer",
-                    "title"         : "hardware delay for CLK0  line",
+                    "title"         : "Hardware delay for CLK0  line",
                     "description"   : "L1A/BCR signal delay for input clock 0 (modules 0-3)",
                     "default"       : 0
                     },
                 "FinePhaseClk0"         : {
                     "type"          : "integer",
-                    "title"         : "fine phase delay for CLK0  line",
-                    "description"   : "fine phase delay for input clock 0 (modules 0-3)",
+                    "title"         : "Fine phase delay for CLK0  line",
+                    "description"   : "Fine phase delay for input clock 0 (modules 0-3)",
                     "default"       : 0
                     },
                 "HWDelayClk1"         : {
                     "type"          : "integer",
-                    "title"         : "hardware delay for CLK1  line",
+                    "title"         : "Hardware delay for CLK1  line",
                     "description"   : "L1A/BCR signal delay for input clock 1 (modules 4-7)",
                     "default"       : 0
                     },
                 "FinePhaseClk1"         : {
                     "type"          : "integer",
-                    "title"         : "fine phase delay for CLK1 line",
-                    "description"   : "fine phase delay for input clock 1 (modules 4-7)",
+                    "title"         : "Fine phase delay for CLK1 line",
+                    "description"   : "Fine phase delay for input clock 1 (modules 4-7)",
                     "default"       : 0
                     },
                 "FinePhaseLed0"         : {
                     "type"          : "integer",
-                    "title"         : "fine phase delay for LED0 line",
-                    "description"   : "fine phase delay for LED0 line with input clock 0",
+                    "title"         : "Fine phase delay for LED0 line",
+                    "description"   : "Fine phase delay for LED0 line with input clock 0",
                     "default"       : 0
                     },
                 "FinePhaseLed1"         : {
                     "type"          : "integer",
-                    "title"         : "fine phase delay for LED1 line",
-                    "description"   : "fine phase delay for LED1 line with input clock 1",
+                    "title"         : "Fine phase delay for LED1 line",
+                    "description"   : "Fine phase delay for LED1 line with input clock 1",
                     "default"       : 0
                     },
                 "RxTimeoutDisable"         : {
                     "type"          : "boolean",
-                    "title"         : "disable RxTimeout",
-                    "description"   : "if true will disable RxTimeout",
+                    "title"         : "Disable RxTimeout",
+                    "description"   : "If true will disable RxTimeout",
                     "default"       : 0
                     },
                 "emulation"         : {
                     "type"          : "boolean",
                     "title"         : "Emulate TRB",
-                    "description"   : "Enable data emulation.",
+                    "description"   : "Enable data emulation. An emulator (raw data) file must be provided.",
                     "default"       : false
                     },
                 "emulatorFile"      : {
                     "type"          : "string",
-                    "title"         : "File",
+                    "title"         : "File cointaining raw tracker data",
                     "description"   : "File used to emulate data taking (if emulation is on)"
                     },
                 "moduleMask"        : {
                     "type"          : "array",
-                    "title"         : "Mask for modules",
+                    "title"         : "Masks for (8) modules",
+                    "description"   : "If true, module communication will be enabled for module i.",
                     "minItems"      : 8,
                     "maxItems"      : 8,
                     "items"    : {
@@ -133,7 +134,8 @@
                     },
                 "moduleClkMask"        : {
                     "type"          : "array",
-                    "title"         : "Mask for Clk/Cmd",
+                    "title"         : "Masks for Clk/Cmd",
+                    "description"   : "If true, Clk/Cmd will be transferred via LEDx lines instead of LED lines for module i.",
                     "minItems"      : 8,
                     "maxItems"      : 8,
                     "items"    : {
@@ -144,6 +146,7 @@
                 "moduleConfigFiles" : {
                     "type"          : "object",
                     "title"         : "Configuration files for TRB modules",
+                    "description"   : "json configuration files as produced by FASER tracker calibration scans to configure module i.",
                     "properties"    : {
                         "0" : {
                             "type"      : "string",

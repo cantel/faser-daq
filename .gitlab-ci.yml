@@ -1,9 +1,15 @@
 stages:
+<<<<<<< HEAD
   - build
   - config
+=======
+  - build 
+  - deploy
+>>>>>>> origin/master
 
 build_faser_daq:
   stage: build
+  needs: []
   image: gitlab-registry.cern.ch/faser/docker/daq:master
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
@@ -18,6 +24,7 @@ build_faser_daq:
     - cmake3 ../
     - make -j8
     
+<<<<<<< HEAD
 validate_configs:
   stage: config
   image: gitlab-registry.cern.ch/faser/docker/daq:master
@@ -30,3 +37,44 @@ validate_configs:
   script:
     - cd scripts
     - source runConfigCheck.sh 
+=======
+check_license:
+  stage: build
+  image: gitlab-registry.cern.ch/faser/docker/daq:master
+  script:
+    - python scripts/CheckLicense.py -directory . -extensions cpp cxx h hpp py 
+  allow_failure: True
+
+build_mkdocs:
+  stage: build
+  needs: []
+  image: python:3.8-buster
+  script:
+    - export DEBIAN_FRONTEND=noninteractive
+    - apt-get -qq update 
+    - apt-get -qq install krb5-user libpam-krb5
+    - apt-get -qq clean
+    - apt-get update -y
+    - apt-get install -y doxygen
+    - pip install -r requirements.txt
+    - mkdir public
+    - echo $EOS_ACCOUNT_PASSWORD | kinit $EOS_ACCOUNT_USERNAME@CERN.CH
+    - mkdocs build --verbose --site-dir public
+  artifacts:
+    paths:
+      - public
+    expire_in: 1 week
+
+deployment_mkdocs:
+  stage: deploy
+  needs: [build_mkdocs]
+  image: python:3.8-buster
+  only:
+    - master
+    - add-mkdocs
+  image: gitlab-registry.cern.ch/ci-tools/ci-web-deployer:latest
+  script:
+    - deploy-eos
+  before_script: []
+  after_script: []
+>>>>>>> origin/master

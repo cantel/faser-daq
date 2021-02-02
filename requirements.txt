@@ -1,0 +1,15 @@
+# Documentation static site generator & deployment tool
+mkdocs>=1.1.2
+
+# version of plugin with recursive cloning
+git+https://github.com/smeehan12/mkdocs-doxygen-plugin
+
+# for embedding markdown
+mkdocs-include-markdown-plugin
+
+# for json parsing
+git+https://github.com/smeehan12/mkdocs-json-parser-plugin
+
+# Add your custom theme if not inside a theme_dir
+# (https://github.com/mkdocs/mkdocs/wiki/MkDocs-Themes)
+#  mkdocs-material>=5.4.0

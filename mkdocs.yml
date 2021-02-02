@@ -1,0 +1,47 @@
+site_name: FASER Documentation
+site_description: FASER Documentation
+site_author: FASER Collaboration
+site_url: https://faserdaq.web.cern.ch/faserdaq/
+
+repo_name: GitLab
+repo_url: https://gitlab.cern.ch/faser/daq
+edit_uri: 'blob/master/docs'
+
+theme: 
+  name: readthedocs
+    
+plugins:
+  - include-markdown
+  - search  
+#  - doxygen:
+#      tryclone: yes 
+#      recursive: yes 
+#      packages:
+#        - faser-common:
+#            url    : https://:@gitlab.cern.ch:8443/faser/faser-common.git
+#            config : Doxyfile
+#            workdir: .
+#        - digitizer:
+#            url    : https://:@gitlab.cern.ch:8443/faser/digitizer-readout.git
+#            config : Doxyfile
+#            workdir: .
+#        - gpiodrivers:
+#            url    : https://:@gitlab.cern.ch:8443/faser/gpiodrivers.git
+#            config : Doxyfile
+#            workdir: .
+#  - json:
+#      url: https://:@gitlab.cern.ch:8443/faser/daq.git
+#      schemas: [configs/schemas/TriggerReceiver.schema, configs/schemas/DigitizerReceiver.schema, configs/schemas/TrackerReceiver.schema, configs/schemas/EventBuilderFaser.schema, configs/schemas/FileWriterFaser.schema]
+#      configs: {'configs/Templates/digitizer.json':'DigitizerEHN1', 'configs/Templates/TLB.json':'TLBReceiverEHN1', 'configs/Templates/TRB.json':'TRBReceiver00', 'configs/Templates/fileWriter.json':'FileWriter', 'configs/Templates/eventBuilder.json':'EventBuilder'} 
+
+nav:
+  - 'Introduction': introduction.md
+  - 'Setup': setup.md
+  - 'Running': running.md
+#  - 'Configuration': configuration.md # NOTE THAT THIS SHOULD BE UNCOMMENTED WHEN THE faser/daq repo is public
+  - 'Monitoring': monitoring.md
+  - 'Output Data': outputdata.md
+  - 'For Development': developers.md
+  - 'Improving the Docs': documentation.md
+  - 'Frequently Asked Questions' : faq.md
+  

@@ -1,3 +1,6 @@
+#
+#  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+#
 #!/usr/bin/env python3
 
 # small tool to check loading of multi-file json loads fine

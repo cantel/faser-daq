@@ -1,3 +1,6 @@
+#
+#  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+#
 #!/usr/bin/env python3
 
 from flask import Flask, Response, request, render_template

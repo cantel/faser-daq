@@ -1,3 +1,6 @@
+/*
+  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+*/
 #include <cpr/cpr.h>
 #include <iostream>
 #include "json.hpp"

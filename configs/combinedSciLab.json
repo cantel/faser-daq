@@ -1,5 +1,6 @@
 {
   "configuration": {
+    "samExtra": 5,
     "version": 10,
     "group": "faser",
     "components": [

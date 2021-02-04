@@ -43,7 +43,13 @@ subsequently gathered into a single event :
  
 
 ### Tracker Readout Board (TRB)
-
+Tracker Readout Board (TRB) is a board mediating the communication between readout PC and 
+tracker modules. It is built on General Purpose Input Output (GPIO) board developed at 
+University of Geneva. The communication with the board is possible via USB or ethernet. 
+Drivers to this this board are located in [gpiodrivers](https://gitlab.cern.ch/faser/gpiodrivers) 
+repository.  Apart from the drivers repository also contains testing programs allowing to test basic
+ethernet communication between the board and PC as well as the communication between the board and 
+tracker modules.
 
 ### Digitizer 
 The digitizer hardware is based on VME and is composed of a Struck Infrastructure Systems 

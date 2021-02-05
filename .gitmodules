@@ -6,7 +6,7 @@
 	url = ../gpiodrivers.git
 [submodule "faser-common"]
 	path = faser-common
-	url = ../faser-common.git
+	url = ../../faser-common.git
 [submodule "digitizer-readout"]
 	path = digitizer-readout
 	url = ../digitizer-readout.git

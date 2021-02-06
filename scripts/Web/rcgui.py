@@ -1,7 +1,7 @@
+#!/usr/bin/env python3
 #
 #  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
 #
-#!/usr/bin/env python3
 
 import copy
 from flask import Flask, render_template, request, jsonify, send_file, abort, session, Response

@@ -28,8 +28,10 @@ Templates/monitor.json \
 Templates/eventBuilder.json \
 --configs   \
 digitizerSciLab.json \
+digiTLBSciLab.json \
 combinedEHN1.json \
 combinedSciLab.json \
+combinedTI12.json \
 playback.json              \
 emulatorLocalhost.json \
 --extras   \

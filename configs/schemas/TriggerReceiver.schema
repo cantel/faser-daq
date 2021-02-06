@@ -189,9 +189,24 @@
                   "default"       : "true"
               },
               "LUTConfig": {
-                  "type"          : "string",
+                  "type"          : "object",
                   "title"         : "LUT configuration",
-                "description"     : "Defines the mapping of the trigger Look-Up Table configuration."
+                  "description"   : "Defines the mapping of the trigger Look-Up Table configuration.",
+		  "required"      : ["Trig0","Trig1","Trig2","Trig3"],
+		  "properties": { 
+                    "Trig0": {
+		        "type": "string"
+		     },
+                    "Trig1": {
+		        "type": "string"
+		     },
+                    "Trig2": {
+		        "type": "string"
+		     },
+                    "Trig3": {
+		        "type": "string"
+		     }
+		 }
               },
               "BoardID"         : {
                     "type"          : "integer",
@@ -210,10 +225,10 @@
                     "description"   : "IP destination address for DAQ data."
               },
               "OutputDestination": {
-                  "type"          : "string",
+                  "type"          : "integer",
                   "title"         : "Output destination",
                 "description"     : "The IP address to which DAQ and command data is sent (not used).",
-                  "default"       : "0.0.0.0"
+                  "default"       : 0
               }
           },
       "format":"grid",

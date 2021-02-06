@@ -55,11 +55,17 @@
               "Input": {
                 "type"            : "array",
                 "title"           : "Input enable",
-                "description"     : "Set to true to receive signal on input channel 0-7.",
+                "description"     : "Enable to receive signal on input channel 0-7.",
                 "minItems"        : 8,
                 "maxItems"        : 8,
                 "items": {
-                  "type": "boolean"
+                  "type": "boolean",
+		  "headerTemplate"  : "Enable input {{i}}",
+		  "format": "checkbox"
+                },
+		"options": {
+                  "disable_array_reorder": true,
+                  "grid": true
                 }
               },
               "InputDelay": {
@@ -70,9 +76,12 @@
                 "maxItems"        : 8,
                 "items": {
                   "type": "integer",
+		  "headerTemplate"  : "Delay for input {{i}}",
                   "default": 0,
-                  "minimum": 0,
-                  "maximum": 3
+		  "enum": [0,1,2,3]
+                },
+		"options": {
+                  "disable_array_reorder": true
                 }
               },
    	      "SamplingPhase": {
@@ -82,7 +91,12 @@
                 "minItems"        : 8,
                 "maxItems"        : 8,
                 "items": {
-                  "type": "boolean"
+                  "type": "boolean",
+		  "headerTemplate"  : "Falling phase for channel {{i}}",
+		  "format": "checkbox"
+                },
+		"options": {
+                  "disable_array_reorder": true
                 }
               },
               "RandomTriggerRate": {
@@ -101,9 +115,13 @@
                 "maxItems"        : 6,
                 "items": {
                   "type": "integer",
+		  "headerTemplate": "Trigger line {{i}}",
                   "default": 0,
                   "minimum": 0,
                   "maximum": 255
+                },
+		"options": {
+                  "disable_array_reorder": true
                 }
               },
               "TrackerDelay": {

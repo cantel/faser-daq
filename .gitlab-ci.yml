@@ -1,5 +1,6 @@
 stages:
   - build 
+  - config
   - deploy
 
 build_faser_daq:
@@ -19,6 +20,19 @@ build_faser_daq:
     - cmake3 ../
     - make -j8
     
+validate_configs:
+  stage: config
+  image: gitlab-registry.cern.ch/faser/docker/daq:master
+  allow_failure: True
+  variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - pip3 install jsonref
+    - pip3 install jsonschema
+  script:
+    - cd scripts
+    - source runConfigCheck.sh 
+
 check_license:
   stage: build
   image: gitlab-registry.cern.ch/faser/docker/daq:master

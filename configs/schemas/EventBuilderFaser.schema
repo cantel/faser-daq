@@ -1,75 +1,71 @@
 {
-    "type": "object",
-    "title": "EventBuilderFaser",
-    "properties": {
-      "name": {
-        "type": "string",
-	"required": true,
-	"default": "eventbuilder01",
-	"readOnly": true,
-	"pattern": "^((?!XXX).)*$",
-	"propertyOrder": 1
+  "type": "object",
+  "title": "EventBuilderFaser",
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": "eventbuilder01",
+      "readOnly": true,
+      "pattern": "^((?!XXX).)*$",
+      "propertyOrder": 1
+    },
+    "host": {
+      "type": "string",
+      "default": "localhost",
+      "propertyOrder": 2
+    },          
+    "port": {
+      "type": "integer",
+      "default": 0,
+      "minimum": 1024,
+      "maximum": 65535,
+      "propertyOrder": 3
+    },
+    "type": {
+      "type": "string",
+      "default": "EventBuilderFaser",
+      "readOnly": true,
+      "propertyOrder": 4,
+      "options": { "hidden": true }
+    },
+    "settings": {
+      "type": "object",
+      "title": "Settings",
+      "properties": {
+        "maxPending": {
+          "type": "integer",
+          "default": 10,
+          "minimum": 1,
+          "maximum": 1000,
+            "options": {
+            "infoText": "Maximum number of pending fragments before starting time outs"
+            }
+        },
+        "timeout_ms": {
+          "type": "integer",
+          "default": 1000,
+          "minimum": 100,
+          "maximum": 1000000,
+            "options": {
+            "infoText": "Maximum time an event is pending before starting time outs"
+            }
+        },
+        "stopTimeout_ms": {
+          "type": "integer",
+          "default": 1000,
+          "minimum": 100,
+          "maximum": 100000,
+          "options": {
+          "infoText": "Time to wait on stop for events to be processed"
+          }
+        }
       },
-      "host": {
-        "type": "string",
-	"required": true,
-	"default": "localhost",
-	"propertyOrder": 2
-      },          
-      "port": {
-        "type": "integer",
-	"required": true,
-	"default": 0,
-        "minimum": 1024,
-	"maximum": 65535,
-	"propertyOrder": 3
-      },
-      "type": {
-        "type": "string",
-	"default": "EventBuilderFaser",
-	"readOnly": true,
-	"propertyOrder": 4,
-	"options": { "hidden": true }
-      },
-      "settings": {
-        "type": "object",
-        "title": "Settings",
-        "properties": {
-	  "maxPending": {
-	    "type": "integer",
-	    "default": 10,
-	    "minimum": 1,
-	    "maximum": 1000,
-	    "required": true,
-  	    "options": {
-    		"infoText": "Maximum number of pending fragments before starting time outs"
-  	    }
-	  },
-	  "timeout_ms": {
-	    "type": "integer",
-	    "default": 1000,
-	    "minimum": 100,
-	    "maximum": 100000,
-	    "required": true,
-  	    "options": {
-    		"infoText": "Maximum time an event is pending before starting time outs"
-  	    }
-	  },
-	  "stopTimeout_ms": {
-	    "type": "integer",
-	    "default": 1000,
-	    "minimum": 100,
-	    "maximum": 100000,
-	    "required": true,
-  	    "options": {
-    		"infoText": "Time to wait on stop for events to be processed"
-  	    }
-	  }
-	},
-	"format":"grid",
-	"propertyOrder": 5
-      }
+      "required": ["maxPending", "timeout_ms", "stopTimeout_ms"],
+      "format":"grid",
+      "propertyOrder": 5
     }
+  },
+  "required": ["name", "host", "port"]
 }
 
 

@@ -1,11 +1,18 @@
 {
   "EventBuilder": {
+      "name": "eventbuilder01",
+      "host": "localhost",
+      "port": 5500,
+      "type": "EventBuilderFaser",
+      "loglevel":         { "$ref": "top.json#loglevel" },
+      "metrics_settings": { "$ref": "top.json#metrics_settings" },
       "settings": {
           "maxPending": 10,
           "timeout_ms": 120000,
           "stopTimeout_ms": 1000
-        },
+      },
       "connections": {
+          "receivers": [],
 	  "senders": [
             {
               "type": "pubsub",

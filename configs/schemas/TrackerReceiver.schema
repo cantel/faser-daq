@@ -1,10 +1,10 @@
 {
     "type"      : "object",
     "title"     : "TrackerReceiver",
+    "required": ["name", "host", "port"],
     "properties" : {
         "name" : {
             "type"          : "string",
-            "required"      : true,
             "default"       : "trackerreceiver00",
             "readOnly"      : true,
             "pattern"       : "^((?!XXX).)*$",
@@ -12,13 +12,11 @@
             },
         "host": {
             "type"          : "string",
-            "required"      : true,
             "default"       : "localhost",
             "propertyOrder" : 2
             },          
         "port": {
             "type"          : "integer",
-            "required"      : true,
             "default"       : 0,
             "minimum"       : 1024,
             "maximum"       : 65535,
@@ -34,19 +32,18 @@
         "settings": {
             "type"          : "object",
             "title"         : "Settings",
+            "required": ["BoardID","L1Atype","moduleMask"],
             "properties"    : {
                 "BoardID"         : {
                     "type"          : "integer",
                     "title"         : "Board ID",
                     "description"   : "ID of board to connect to (board ID set by rotary switch on board).",
-	            "required": true,
                     "default"       : 0
                     },
                 "L1Atype"           : {
                     "type"          : "string",
                     "title"         : "L1A type",
                     "description"   : "Switch between internal triggers (from TRB) and external triggers (from TLB)",
-	            "required": true,
                     "enum"          : ["internal", "external"]
                     },
                 "SCIP"         : {
@@ -128,7 +125,6 @@
                     "type"          : "array",
                     "title"         : "Masks for (8) modules",
                     "description"   : "If true, module communication will be enabled for module i.",
-	            "required": true,
                     "minItems"      : 8,
                     "maxItems"      : 8,
                     "items"    : {

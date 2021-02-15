@@ -93,11 +93,14 @@ def stateTracker(logger):
                 logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)
                 if int(runNumber)!=1000000000:
+                    stopMsg=json.loads(m['data'][5:])
                     runinfo={}
                     runinfo["eventCounts"]=getEventCounts()
-                    r = requests.post(f'http://faser-daq-002:5002/AddRunInfo/{runNumber}',
+                    stopMsg["runinfo"]=runinfo
+                    r1.set("runType",stopMsg["type"])
+                    r = requests.post(f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}',
                                       auth=(run_user,run_pw),
-                                      json = {"runinfo": runinfo })
+                                      json = stopMsg)
                     if r.status_code!=200:
                         logger.error("Failed to register end of run information: "+r.text)
                 logger.info("Stop done")
@@ -140,6 +143,7 @@ def stateTracker(logger):
                                 'runState' : runState,
                                 'runNumber' : runNumber,
                                 'runStart' : runStart,
+                                'runType'  : r1.get("runType"),
                                 'globalStatus': overallState,}))
                 update=True
         if update:
@@ -169,8 +173,10 @@ def stateTracker(logger):
                     subInfo=json.loads(m['data'][6:])
                     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
                     runNumber=1000000000
+                    runType="Unspecified"
                     try:
-                        r= requests.post('http://faser-daq-002:5002/NewRunNumber',
+                        runType=subInfo['runtype']
+                        r= requests.post('http://faser-runnumber.web.cern.ch/NewRunNumber',
                                          auth=(run_user,run_pw),
                                          json = {
                                              'version':    version,
@@ -191,6 +197,7 @@ def stateTracker(logger):
                     except requests.exceptions.ConnectionError:
                         logger.error("Could not connect to run service")
                     r1.set("runNumber",runNumber)
+                    r1.set("runType",runType)
                     r1.set("runStart",time.time())
             elif cmd=="pause":
                 if overallState!="RUN":
@@ -218,6 +225,7 @@ def stateTracker(logger):
                                 'runState' : runState,
                                 'runNumber' : runNumber,
                                 'runStart' : runStart,
+                                'runType'  : r1.get("runType"),
                                 'globalStatus': overallState,}))
                 r1.publish("status","new")
                 
@@ -240,8 +248,11 @@ def ecr():
 def unpause():
     r1.publish("stateAction","unpause")
 
-def stop():
-    r1.publish("stateAction","stop")
+def stop(reqinfo):
+    info={}
+    info['endcomment']=reqinfo.get('endcomment',"")[:500]
+    info['type']=reqinfo.get('runtype',"")[:100]
+    r1.publish("stateAction","stop "+json.dumps(info))
 
 def shutdown():
     r1.publish("stateAction","shutdown")

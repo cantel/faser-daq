@@ -30,6 +30,10 @@ function updateStatus(data){
 
 function updateCommandAvailability(data){
     document.getElementById("runningState").innerHTML =data.globalStatus;
+    document.getElementById("runningType").innerHTML =data.runType;
+    if (!$('#stopRunModal').is(':visible')) {
+	document.getElementById("revisedType").value =data.runType;
+    };
     document.getElementById("runningFile").innerHTML = data.runState.fileName;
     var buttonEnableStates= {
 	"INITIALISE": ["DOWN"],
@@ -152,8 +156,9 @@ function sendECR(self){
 }
 
 function stop(self){
-    self.children[0].style="display: inline-block";
-	$.get('/stop');
+	$("#stopRunModal").modal();
+//    self.children[0].style="display: inline-block";
+//	$.get('/stop');
 }
 
 function shutdown(self){

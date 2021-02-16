@@ -16,9 +16,6 @@ from routes.metric import getBoardStatus,getEventCounts
 
 r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
 
-#cfg=json.load(open("../RunService/runservice.config"))
-#run_user=cfg['user']
-#run_pw=cfg["pw"]
 run_user="FASER"
 run_pw="HelloThere"
 
@@ -98,6 +95,7 @@ def stateTracker(logger):
                     runinfo["eventCounts"]=getEventCounts()
                     stopMsg["runinfo"]=runinfo
                     r1.set("runType",stopMsg["type"])
+                    r1.set("runOngoing",0)
                     r = requests.post(f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}',
                                       auth=(run_user,run_pw),
                                       json = stopMsg)
@@ -120,6 +118,19 @@ def stateTracker(logger):
                         daq.removeProcess(comp['host'],comp['name'])
                     except Exception as e:
                         logger.error("Exception"+str(e)+": Got exception during removal of "+comp['name'])
+                if r1.get("runOngoing")=="1" and runNumber!=1000000000:
+                    logger.info("Run was on going - register shutdown")
+                    stopMsg={}
+                    runinfo={}
+                    runinfo["eventCounts"]=getEventCounts()
+                    stopMsg["runinfo"]=runinfo
+                    stopMsg["endcomment"]="Run was shut down"
+                    r1.set("runOngoing",0)
+                    r = requests.post(f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}',
+                                      auth=(run_user,run_pw),
+                                      json = stopMsg)
+                    if r.status_code!=200:
+                        logger.error("Failed to register end of run information: "+r.text)
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
@@ -192,6 +203,7 @@ def stateTracker(logger):
                         else:
                             try:
                                 runNumber=int(r.text)
+                                r1.set("runOngoing",1)
                             except ValueError:
                                 logger.error("Failed to get run number: "+r.text)
                     except requests.exceptions.ConnectionError:

@@ -98,7 +98,7 @@ def unpause():
 @app.route("/stop")
 def stop():
     app.logger.info("stop button pressed")    
-    statetracker.stop()
+    statetracker.stop(request.args)
     return "true"
 
 @app.route("/shutdown")

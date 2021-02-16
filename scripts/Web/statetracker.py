@@ -16,9 +16,6 @@ from routes.metric import getBoardStatus,getEventCounts
 
 r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_responses=True)
 
-#cfg=json.load(open("../RunService/runservice.config"))
-#run_user=cfg['user']
-#run_pw=cfg["pw"]
 run_user="FASER"
 run_pw="HelloThere"
 
@@ -93,11 +90,15 @@ def stateTracker(logger):
                 logger.info("Calling Stop")
                 h.spawnJoin(config['components'], daq.stopProcess)
                 if int(runNumber)!=1000000000:
+                    stopMsg=json.loads(m['data'][5:])
                     runinfo={}
                     runinfo["eventCounts"]=getEventCounts()
-                    r = requests.post(f'http://faser-daq-002:5002/AddRunInfo/{runNumber}',
+                    stopMsg["runinfo"]=runinfo
+                    r1.set("runType",stopMsg["type"])
+                    r1.set("runOngoing",0)
+                    r = requests.post(f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}',
                                       auth=(run_user,run_pw),
-                                      json = {"runinfo": runinfo })
+                                      json = stopMsg)
                     if r.status_code!=200:
                         logger.error("Failed to register end of run information: "+r.text)
                 logger.info("Stop done")
@@ -117,6 +118,19 @@ def stateTracker(logger):
                         daq.removeProcess(comp['host'],comp['name'])
                     except Exception as e:
                         logger.error("Exception"+str(e)+": Got exception during removal of "+comp['name'])
+                if r1.get("runOngoing")=="1" and runNumber!=1000000000:
+                    logger.info("Run was on going - register shutdown")
+                    stopMsg={}
+                    runinfo={}
+                    runinfo["eventCounts"]=getEventCounts()
+                    stopMsg["runinfo"]=runinfo
+                    stopMsg["endcomment"]="Run was shut down"
+                    r1.set("runOngoing",0)
+                    r = requests.post(f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}',
+                                      auth=(run_user,run_pw),
+                                      json = stopMsg)
+                    if r.status_code!=200:
+                        logger.error("Failed to register end of run information: "+r.text)
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
@@ -140,6 +154,7 @@ def stateTracker(logger):
                                 'runState' : runState,
                                 'runNumber' : runNumber,
                                 'runStart' : runStart,
+                                'runType'  : r1.get("runType"),
                                 'globalStatus': overallState,}))
                 update=True
         if update:
@@ -169,8 +184,10 @@ def stateTracker(logger):
                     subInfo=json.loads(m['data'][6:])
                     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
                     runNumber=1000000000
+                    runType="Unspecified"
                     try:
-                        r= requests.post('http://faser-daq-002:5002/NewRunNumber',
+                        runType=subInfo['runtype']
+                        r= requests.post('http://faser-runnumber.web.cern.ch/NewRunNumber',
                                          auth=(run_user,run_pw),
                                          json = {
                                              'version':    version,
@@ -186,11 +203,13 @@ def stateTracker(logger):
                         else:
                             try:
                                 runNumber=int(r.text)
+                                r1.set("runOngoing",1)
                             except ValueError:
                                 logger.error("Failed to get run number: "+r.text)
                     except requests.exceptions.ConnectionError:
                         logger.error("Could not connect to run service")
                     r1.set("runNumber",runNumber)
+                    r1.set("runType",runType)
                     r1.set("runStart",time.time())
             elif cmd=="pause":
                 if overallState!="RUN":
@@ -218,6 +237,7 @@ def stateTracker(logger):
                                 'runState' : runState,
                                 'runNumber' : runNumber,
                                 'runStart' : runStart,
+                                'runType'  : r1.get("runType"),
                                 'globalStatus': overallState,}))
                 r1.publish("status","new")
                 
@@ -240,8 +260,11 @@ def ecr():
 def unpause():
     r1.publish("stateAction","unpause")
 
-def stop():
-    r1.publish("stateAction","stop")
+def stop(reqinfo):
+    info={}
+    info['endcomment']=reqinfo.get('endcomment',"")[:500]
+    info['type']=reqinfo.get('runtype',"")[:100]
+    r1.publish("stateAction","stop "+json.dumps(info))
 
 def shutdown():
     r1.publish("stateAction","shutdown")

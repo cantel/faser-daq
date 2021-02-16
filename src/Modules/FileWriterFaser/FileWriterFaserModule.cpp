@@ -309,7 +309,7 @@ void FileWriterFaserModule::monitor_runner() {
   while (m_run) {
     std::this_thread::sleep_for(1s);
     for (auto & [ chid, metrics ] : m_channelMetrics) {
-      INFO("Bytes written (channel "
+      DEBUG("Bytes written (channel "
            << chid
            << "): " << static_cast<double>(metrics.bytes_written - prev_value[chid]) / 1000000
            << " MBytes/s");

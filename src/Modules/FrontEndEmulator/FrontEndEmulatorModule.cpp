@@ -80,13 +80,13 @@ void FrontEndEmulatorModule::runner() noexcept {
       continue;
     }
     m_eventCounter++;
-    INFO("Event "<<m_eventCounter<<": "<<buffer.event_id<<" BC:"<<buffer.bc_id);
+    DEBUG("Event "<<m_eventCounter<<": "<<buffer.event_id<<" BC:"<<buffer.bc_id);
     data.type       = dataType;
     data.source_id  = m_fragID;
     data.event_id   = m_eventCounter;
     data.bc_id      = buffer.bc_id;
     data.dataLength = (std::min(std::max(int(gaussian(generator)),0),MAXFRAGSIZE)/4)*4;
-    INFO("Fragment size: "<<data.sizeBytes()<<" bytes");
+    DEBUG("Fragment size: "<<data.sizeBytes()<<" bytes");
     if (flat(generator)<m_probMissFrag) {
       INFO("Emulating missed fragment for global id:"<<buffer.event_id);
       continue;
@@ -106,7 +106,7 @@ void FrontEndEmulatorModule::runner() noexcept {
     if (m_monitoringInterval!=microseconds::zero() &&
 	((timeNow()-m_timeMonitoring)>m_monitoringInterval)) {
       m_outHandle.send(&m_monFrag,sizeof(m_monFrag));
-      INFO("Send monitoring fragment "<<m_monFrag.counter<<": "<<
+      DEBUG("Send monitoring fragment "<<m_monFrag.counter<<": "<<
 	   m_monFrag.num_fragments_sent<<" fragments with "<<m_monFrag.size_fragments_sent<<" bytes");
       m_monFrag.counter++;
       m_monFrag.num_fragments_sent=0;

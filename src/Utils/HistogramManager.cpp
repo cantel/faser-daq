@@ -5,7 +5,7 @@
 #include <type_traits>
 #include <typeinfo>
 
-HistogramManager::HistogramManager(std::unique_ptr<zmq::socket_t>& statSock, unsigned interval) : m_stat_socket{statSock}, m_interval{interval} {
+HistogramManager::HistogramManager() {
   m_zmq_publisher = false;  
   m_name = m_config.getName();
 }
@@ -19,9 +19,18 @@ HistogramManager::~HistogramManager(){
   m_histogram_map.clear();
 }
 
-bool HistogramManager::configure(unsigned interval) {
+void HistogramManager::configure(uint8_t ioT, std::string connStr, unsigned interval) {
   m_interval = interval;
-  return true; 
+  try {
+    m_histo_context = std::make_unique<zmq::context_t>(ioT); // NOTE using new context, any reason to use daqling stats context?
+    m_histo_socket = std::make_unique<zmq::socket_t>(*(m_histo_context.get()), ZMQ_PUB);
+    m_histo_socket->connect(connStr);
+    INFO(" Histograms are published on: " << connStr);
+  } catch (std::exception &e) {
+    ERROR(" Failed to add Histo publisher channel! ZMQ returned: " << e.what());
+    throw e;
+  }
+  m_zmq_publisher = true;
 }
 
 void HistogramManager::start(){
@@ -41,6 +50,12 @@ void HistogramManager::stop(){
 
   INFO("Flushing all histograms ...");
   flushHistograms();
+
+  m_histo_socket.reset();
+  m_histo_context.reset();
+  m_zmq_publisher = false;
+
+  return;
 }
 
 void HistogramManager::CheckHistograms(){
@@ -73,7 +88,7 @@ void HistogramManager::publish( HistBase * h){
   if(m_zmq_publisher){
      zmq::message_t message(msg.str().size());
      memcpy (message.data(), msg.str().data(), msg.str().size());
-     bool rc = m_stat_socket->send(message);
+     bool rc = m_histo_socket->send(message);
      if(!rc)
         WARNING("Failed to publish histogram with name "<<h->name);
    }

@@ -28,13 +28,11 @@ class HistogramManager{
 public:
 
  
-  HistogramManager(std::unique_ptr<zmq::socket_t>& statSock, unsigned interval=kMIN_INTERVAL*1000);
+  HistogramManager();
   
   ~HistogramManager();
 
-  bool configure(unsigned interval);
-
-  void setZMQpublishing(bool zmq_publisher){m_zmq_publisher = zmq_publisher;}
+  void configure(uint8_t ioT, std::string, unsigned interval = kMIN_INTERVAL*1000);
 
   void start();
 
@@ -188,7 +186,8 @@ public:
   std::atomic<bool> m_zmq_publisher;
 
   // Publish socket ref for hists
-  std::unique_ptr<zmq::socket_t>& m_stat_socket;
+  std::unique_ptr<zmq::socket_t> m_histo_socket;
+  std::unique_ptr<zmq::context_t> m_histo_context;
 
   // Config
   static const unsigned kMIN_INTERVAL = 5;

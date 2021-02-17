@@ -17,11 +17,14 @@
 
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Logging.hpp"
+#include "Exceptions/Exceptions.hpp"
 #include <Utils/Binary.hpp>
 
 using namespace DAQFormats;
 using namespace TLBDataFormat;
 using namespace TLBMonFormat;
+
+class ConfigurationException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
 
 class MonitorBaseModule : public FaserProcess {
  public:

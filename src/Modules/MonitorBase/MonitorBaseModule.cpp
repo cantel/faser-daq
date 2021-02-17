@@ -244,10 +244,9 @@ void MonitorBaseModule::setupHistogramManager() {
     try {
       m_histogrammanager->configure(1, statsURI); // NOTE 1 I/O thread, and using same statsURI as for metrics. should be fine..
     } catch (std::exception &e){
-      ERROR("Configuring the histogram manager failed.");
-      sleep(1); // wait for error state to appear in RC GUI.
       m_status = STATUS_ERROR;
-      throw e;
+      sleep(1); // wait for error state to appear in RC GUI.
+      THROW(ConfigurationException, "Configuring histogram manager failed.");
     }
     m_histogramming_on = true;
   }

@@ -28,19 +28,6 @@ def recent_histograms_save():
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
-<<<<<<< HEAD
-<<<<<<< HEAD
-        data, layout, timestamp = convert_to_plotly(histobj)
-        figure = dict(data=data, layout=layout)
-        hist = dict(timestamp=timestamp, figure=figure)
-        entry = {json.dumps(hist): float(timestamp)}
-        r6.zadd(ID, entry)
-        if r6.zcard(ID) >= 6:  # Should be 31
-            r6.zremrangebyrank(ID, 0, 0)
-
-=======
-=======
->>>>>>> c3fc897068d541db196429f211c483d2d09319de
         if histobj !=None:
             data, layout, timestamp = convert_to_plotly(histobj)
             figure = dict(data=data, layout=layout)
@@ -49,10 +36,6 @@ def recent_histograms_save():
             r6.zadd(ID, entry)
             if r6.zcard(ID) >= 31:
                 r6.zremrangebyrank(ID, 0, 0)
-<<<<<<< HEAD
->>>>>>> c3fc897068d541db196429f211c483d2d09319de
-=======
->>>>>>> c3fc897068d541db196429f211c483d2d09319de
 
 def historic_histograms_save():
     with app.app_context():
@@ -60,20 +43,6 @@ def historic_histograms_save():
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
-<<<<<<< HEAD
-<<<<<<< HEAD
-        data, layout, timestamp = convert_to_plotly(histobj)
-        figure = dict(data=data, layout=layout)
-        hist = dict(timestamp=timestamp, figure=figure)
-        entry = {json.dumps(hist): float(timestamp)}
-        r6.zadd(f"historic:{ID}", entry)
-
-
-scheduler = BackgroundScheduler()
-
-=======
-=======
->>>>>>> c3fc897068d541db196429f211c483d2d09319de
         if histobj !=None:
             data, layout, timestamp = convert_to_plotly(histobj)
             figure = dict(data=data, layout=layout)
@@ -83,10 +52,6 @@ scheduler = BackgroundScheduler()
 
 
 scheduler = BackgroundScheduler()
-<<<<<<< HEAD
->>>>>>> c3fc897068d541db196429f211c483d2d09319de
-=======
->>>>>>> c3fc897068d541db196429f211c483d2d09319de
 scheduler.add_job(func=recent_histograms_save, trigger="interval", seconds=60)
 scheduler.add_job(func=historic_histograms_save, trigger="interval", seconds=1800)
 scheduler.start()

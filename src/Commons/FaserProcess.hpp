@@ -3,9 +3,14 @@
 */
 #pragma once
 
+#include <string>
+#include <regex>
+#include <fstream>
+
 #include "Core/DAQProcess.hpp"
 
 using namespace daqling::core;
+using json = nlohmann::json;
 
 class FaserProcess: public daqling::core::DAQProcess {
 public:
@@ -16,13 +21,39 @@ public:
   virtual ~FaserProcess() {}
 
   virtual void configure() {
-    DAQProcess::configure();
+    //    DAQProcess::configure(); // replaced with local instance to allow environment variabls in influxdb string
+    setupStatistics();
+    std::string influxDbURI = m_config.getMetricsSettings()["influxDb_uri"];
+    std::ifstream secretsFile("/etc/faser-secrets.json");
+    if (secretsFile.good()) {
+      json secrets;
+      secretsFile >> secrets;
+      INFO("Original influx path: "+influxDbURI);
+      autoExpandEnvironmentVariables(influxDbURI,secrets);
+      INFO("After variable replacement: "+influxDbURI);
+    }
+    m_statistics->setInfluxDBuri(influxDbURI);
+    if (m_stats_on) {
+      m_statistics->start();
+    }
+
     registerVariable(m_status,"Status");
 
     registerCommand("ECR", "sendingECR","paused",&FaserProcess::ECRcommand,this,_1);
     registerCommand("enableTrigger","enablingTrigger", "running",&FaserProcess::enableTrigger,this,_1);
     registerCommand("disableTrigger", "pausingTrigger", "paused",&FaserProcess::disableTrigger,this,_1);
   }
+
+  void autoExpandEnvironmentVariables( std::string & text, json & vars ) {
+    static std::regex env( "\\$\\{([^}]+)\\}" );
+    std::smatch match;
+    while ( std::regex_search( text, match, env ) ) {
+        std::string var = "";
+	if (vars.contains(match[1].str())) var=vars[match[1].str()];
+        text.replace( match[0].first, match[0].second, var );
+    }
+  }
+
 
   void ECRcommand(const std::string &arg) {
     INFO("Got ECR command with argument "<<arg);

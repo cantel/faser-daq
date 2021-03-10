@@ -11,6 +11,9 @@
 #include "EventFormats/TrackerDataFragment.hpp"
 #include <string>
 #include <iostream>
+#include <ctime>
+
+#define METRIC_CHECK_INT 1 // seconds
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
@@ -151,7 +154,9 @@ void TrackerReceiverModule::configure() {
   registerVariable(m_corrupted_fragments, "BadFragmentsRate", metrics::RATE);
   registerVariable(m_checksum_mismatches, "checksum_mismatches");
   registerVariable(m_checksum_mismatches_rate, "checksum_mismatches_rate");
-  registerVariable(m_number_of_decoded_events, "number_of_decoded_events");
+  registerVariable(m_receivedEvents, "ReceivedEvents"); // events transferred from driver to tracker receiver.
+  registerVariable(m_dataRate, "DataRate", metrics::RATE); // MB/s read via network socket
+  registerVariable(m_PLLErrCnt, "PLLErrCnt");
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -351,6 +356,7 @@ void TrackerReceiverModule::runner() noexcept {
   uint64_t local_event_id;
   uint16_t local_bc_id;
   unsigned local_status;
+  float check_point(0);
 
   while (m_run || vector_of_raw_events.size()) { 
     if (!m_extClkSelect && m_triggerEnabled == true){
@@ -358,12 +364,18 @@ void TrackerReceiverModule::runner() noexcept {
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
 
+    if (std::difftime(std::time(nullptr), check_point) >= METRIC_CHECK_INT) { // only need to update occassionally. 
+      m_dataRate = static_cast<double>(m_trb->GetBytesRead())/1000.; // convert to kB, avoid weird conversions going from unsigned int to float?
+      if (m_extClkSelect) m_PLLErrCnt = m_trb->ReadPLLErrorCounter();
+      check_point = std::time(nullptr); 
+    }
     vector_of_raw_events = m_trb->GetTRBEventData();
+    m_receivedEvents = vector_of_raw_events.size();
 
     if (vector_of_raw_events.size() == 0){
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }
-      else{
+    else{
         for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
           size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
           if (!total_size) continue;

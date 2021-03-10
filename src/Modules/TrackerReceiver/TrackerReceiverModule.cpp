@@ -287,12 +287,22 @@ void TrackerReceiverModule::configure() {
   else { //running on internal clock
     m_trb->GenerateSoftReset(m_moduleMask);
   }
+
   m_trb->WriteConfigReg();
+
+  INFO("User set TRB configurations.");
+  m_trb->GetConfig()->Print();
+  try { m_trb->VerifyConfigReg(); }
+  catch ( TRBConfigurationException& e) {
+    m_status=STATUS_ERROR;
+    ERROR("Configurations read back do not much configurations sent.");
+  }
+  m_trb->ReadbackAndPrintConfig();
+
+
   m_trb->SCT_EnableDataTaking(m_moduleMask);
   m_trb->SetDirectParam(m_trb->GetConfig()->GetGlobalDirectParam());
   m_trb->PrintStatus();
-  m_trb->GetConfig()->Print();
-
 
 }
 

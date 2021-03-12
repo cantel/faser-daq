@@ -138,6 +138,8 @@ sudo firewall-cmd --reload
 sudo pip3 install requests
 #For FASER  histogram monitoring install additional python libraries:
 sudo pip3 install Flask-APScheduler
+#Installing EOS client
+sudo locmap --enable eosclient; locmap --configure eosclient
 ```
 If running on machine without direct internet access, one has to setup a proxy on a different
 machine and point `pip`, `yum` and `git` to it before running the above scripts.

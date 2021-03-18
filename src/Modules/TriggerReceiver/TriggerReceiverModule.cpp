@@ -54,6 +54,7 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_fragment_status, "FragmentStatus");
   registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
+  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10.); // kB/s read via network socket
   
   auto cfg = m_config.getSettings();
 
@@ -146,6 +147,7 @@ void TriggerReceiverModule::runner() noexcept {
 
 
   while (m_run || vector_of_raw_events.size()) {
+    m_dataRate = m_tlb->GetDataRate();
     vector_of_raw_events = m_tlb->GetTLBEventData();
       
     if (vector_of_raw_events.size()==0){

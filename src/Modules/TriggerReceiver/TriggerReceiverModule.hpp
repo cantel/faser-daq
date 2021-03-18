@@ -37,5 +37,6 @@ class TriggerReceiverModule : public FaserProcess {
   std::atomic<int> m_trigger_payload_size;
   std::atomic<int> m_monitoring_payload_size;
   std::atomic<int> m_fragment_status;
+  std::atomic<float> m_dataRate;
  
 };

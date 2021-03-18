@@ -60,4 +60,5 @@ class TrackerReceiverModule : public FaserProcess {
   bool m_debug = false;
   bool m_trace = false;
   const uint32_t m_TRBENDOFDAQ = 0x07000eee;
+  const int m_UPDATEMETRIC_INTERVAL = 10; // in seconds
 };

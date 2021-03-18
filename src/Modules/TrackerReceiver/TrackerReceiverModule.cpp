@@ -13,8 +13,6 @@
 #include <iostream>
 #include <ctime>
 
-#define METRIC_CHECK_INT 1 // seconds
-
 using namespace DAQFormats;
 using namespace daqling::utilities;
 
@@ -155,8 +153,8 @@ void TrackerReceiverModule::configure() {
   registerVariable(m_checksum_mismatches, "checksum_mismatches");
   registerVariable(m_checksum_mismatches_rate, "checksum_mismatches_rate");
   registerVariable(m_receivedEvents, "ReceivedEvents"); // events transferred from driver to tracker receiver.
-  registerVariable(m_dataRate, "DataRate", metrics::RATE); // MB/s read via network socket
-  registerVariable(m_PLLErrCnt, "PLLErrCnt");
+  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10); // kB/s read via network socket
+  registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE, m_UPDATEMETRIC_INTERVAL);
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -374,9 +372,9 @@ void TrackerReceiverModule::runner() noexcept {
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
 
-    if (std::difftime(std::time(nullptr), check_point) >= METRIC_CHECK_INT) { // only need to update occassionally. 
-      m_dataRate = static_cast<double>(m_trb->GetBytesRead())/1000.; // convert to kB, avoid weird conversions going from unsigned int to float?
-      if (m_extClkSelect) m_PLLErrCnt = m_trb->ReadPLLErrorCounter();
+    m_dataRate = m_trb->GetDataRate();
+    if (std::difftime(std::time(nullptr), check_point) > m_UPDATEMETRIC_INTERVAL) { // only need to update occassionally. this sends command to TRB.
+      if (m_extClkSelect && m_run) m_PLLErrCnt = m_trb->ReadPLLErrorCounter();
       check_point = std::time(nullptr); 
     }
     vector_of_raw_events = m_trb->GetTRBEventData();

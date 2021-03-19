@@ -293,7 +293,7 @@ void TrackerReceiverModule::configure() {
   try { m_trb->VerifyConfigReg(); }
   catch ( TRBConfigurationException& e) {
     m_status=STATUS_ERROR;
-    ERROR("Configurations read back do not much configurations sent.");
+    ERROR("Configurations read back do not match configurations sent.");
   }
   m_trb->ReadbackAndPrintConfig();
 

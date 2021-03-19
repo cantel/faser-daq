@@ -11,6 +11,7 @@
 #include "EventFormats/TrackerDataFragment.hpp"
 #include <string>
 #include <iostream>
+#include <ctime>
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
@@ -151,7 +152,9 @@ void TrackerReceiverModule::configure() {
   registerVariable(m_corrupted_fragments, "BadFragmentsRate", metrics::RATE);
   registerVariable(m_checksum_mismatches, "checksum_mismatches");
   registerVariable(m_checksum_mismatches_rate, "checksum_mismatches_rate");
-  registerVariable(m_number_of_decoded_events, "number_of_decoded_events");
+  registerVariable(m_receivedEvents, "ReceivedEvents"); // events transferred from driver to tracker receiver.
+  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10); // kB/s read via network socket
+  registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE, m_UPDATEMETRIC_INTERVAL);
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -282,12 +285,22 @@ void TrackerReceiverModule::configure() {
   else { //running on internal clock
     m_trb->GenerateSoftReset(m_moduleMask);
   }
+
   m_trb->WriteConfigReg();
+
+  INFO("User set TRB configurations.");
+  m_trb->GetConfig()->Print();
+  try { m_trb->VerifyConfigReg(); }
+  catch ( TRBConfigurationException& e) {
+    m_status=STATUS_ERROR;
+    ERROR("Configurations read back do not match configurations sent.");
+  }
+  m_trb->ReadbackAndPrintConfig();
+
+
   m_trb->SCT_EnableDataTaking(m_moduleMask);
   m_trb->SetDirectParam(m_trb->GetConfig()->GetGlobalDirectParam());
   m_trb->PrintStatus();
-  m_trb->GetConfig()->Print();
-
 
 }
 
@@ -351,6 +364,7 @@ void TrackerReceiverModule::runner() noexcept {
   uint64_t local_event_id;
   uint16_t local_bc_id;
   unsigned local_status;
+  float check_point(0);
 
   while (m_run || vector_of_raw_events.size()) { 
     if (!m_extClkSelect && m_triggerEnabled == true){
@@ -358,12 +372,18 @@ void TrackerReceiverModule::runner() noexcept {
       m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
     }
 
+    m_dataRate = m_trb->GetDataRate();
+    if (std::difftime(std::time(nullptr), check_point) > m_UPDATEMETRIC_INTERVAL) { // only need to update occassionally. this sends command to TRB.
+      if (m_extClkSelect && m_run) m_PLLErrCnt = m_trb->ReadPLLErrorCounter();
+      check_point = std::time(nullptr); 
+    }
     vector_of_raw_events = m_trb->GetTRBEventData();
+    m_receivedEvents = vector_of_raw_events.size();
 
     if (vector_of_raw_events.size() == 0){
       usleep(100); //this is to make sure we don't occupy CPU resources if no data is on output
     }
-      else{
+    else{
         for(std::vector<std::vector<uint32_t>>::size_type i=0; i<vector_of_raw_events.size(); i++){
           size_t total_size = vector_of_raw_events[i].size() * sizeof(uint32_t); //Event size in byte
           if (!total_size) continue;

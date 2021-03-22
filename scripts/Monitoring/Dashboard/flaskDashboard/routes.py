@@ -18,6 +18,7 @@ from flaskDashboard import app
 import numpy as np
 import atexit
 from apscheduler.schedulers.background import BackgroundScheduler
+from flaskDashboard import interfacePlotly 
 
 ## ID used for backround jobs (can it be deleted ?)
 INTERVAL_TASK_ID = "interval-task-id" # can be deleted ?
@@ -39,12 +40,12 @@ def recent_histograms_save():
     It saves the current histograms in the redis database 1 in the redis database 6
     """
     with app.app_context():
-        IDs = getAllIDs().get_json() # we get all the
+        IDs = getAllIDs().get_json() # we get all the IDs
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
         if histobj != None:
-            data, layout, timestamp = convert_to_plotly(histobj)
+            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
             figure = dict(data=data, layout=layout)
             hist = dict(timestamp=timestamp, figure=figure)
             entry = {json.dumps(hist): float(timestamp)}
@@ -62,7 +63,7 @@ def historic_histograms_save():
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
         if histobj != None:
-            data, layout, timestamp = convert_to_plotly(histobj)
+            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
             figure = dict(data=data, layout=layout)
             hist = dict(timestamp=timestamp, figure=figure)
             entry = {json.dumps(hist): float(timestamp)}
@@ -213,7 +214,7 @@ def getModules():
     modules = r.keys("*monitor*")
     modules = [module for module in modules if r.type(module) == "hash"]
  
-    modules.sort()
+    # modules.sort()
     return jsonify(modules)
 
 
@@ -362,7 +363,7 @@ def lastHistogram():
     source, histname = ID.split("-")
     histobj = r.hget(source, f"h_{histname}")
     if histobj is not None:
-        data, layout, timestamp = convert_to_plotly(histobj)
+        data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
         fig = dict(data=data, layout=layout, config={"responsive": True})
         packet = {
                 "figure": fig,
@@ -370,72 +371,6 @@ def lastHistogram():
     return jsonify(packet)
 
 
-def convert_to_plotly(histobj):
-    """! Converts a "FASER type" histogram to a Plotly compatible histogram."""
-    timestamp = float(histobj[: histobj.find(":")])
-    histobj = json.loads(histobj[histobj.find("{") :])
-
-    xaxis = dict(title=dict(text=histobj["xlabel"]))
-    yaxis = dict(title=dict(text=histobj["ylabel"]))
-
-    layout = dict(
-        autosize=False,
-        uirevision=True,
-        xaxis=xaxis,
-        yaxis=yaxis,
-        margin=dict(l=50, r=50, b=50, t=50, pad=4),
-    )
-    data = []
-    hist_type = histobj["type"]
-    if "categories" in hist_type:
-        xarray = histobj["categories"]
-        if "hitpattern" in histobj["name"]:
-          xarray = ['b'+str(x) for x in histobj["categories"]] 
-        yarray = histobj["yvalues"]
-        data = [dict(x=xarray, y=yarray, type="bar")]
-
-    elif "2d" in hist_type:
-        zarray = np.array(histobj["zvalues"])
-        xmin = float(histobj["xmin"])
-        xmax = float(histobj["xmax"])
-        xbins = int(histobj["xbins"])
-        xstep = (xmax - xmin) / float(xbins)
-        ymin = float(histobj["ymin"])
-        ymax = float(histobj["ymax"])
-        ybins = int(histobj["ybins"])
-        ystep = (ymax - ymin) / float(ybins)
-        xmin -= xstep
-        ymin -= ystep
-        xbins += 2
-        ybins += 2
-        xarray = [xmin + xbin * xstep for xbin in range(xbins)]
-        yarray = [ymin + ybin * ystep for ybin in range(ybins)]
-        zmatrix = zarray.reshape(len(yarray), len(xarray))
-        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(), type="heatmap",)]
-    else:
-
-        if "_ext" in hist_type:
-            xmin = float(histobj["xmin"])
-            xmax = float(histobj["xmax"])
-            xbins = int(histobj["xbins"])
-            step = (xmax - xmin) / float(xbins)
-            xarray = [xmin + step * xbin for xbin in range(xbins)]
-            yarray = histobj["yvalues"]
-            data = [dict(x=xarray, y=yarray, type="bar")]
-
-        else:  # histogram with underflow and overflow
-            xmin = float(histobj["xmin"])
-            xmax = float(histobj["xmax"])
-            xbins = int(histobj["xbins"])
-            step = (xmax - xmin) / float(xbins)
-            xmin -= step
-            xbins += 2
-
-            xarray = [xmin + step * xbin for xbin in range(xbins)]
-            yarray = histobj["yvalues"]
-
-            data = [dict(x=xarray, y=yarray, type="bar")]
-    return data, layout, timestamp
 
 
 @app.context_processor
@@ -453,8 +388,99 @@ def timectime(s):
     datestring = time.strftime("%x %X", d)
     return datestring
 
+### Migrating to Vue.js ### 
 
+@app.route("/vue_home", methods = ["GET"])
+def vue_home():
+    return render_template("vue_home.html")
+    
+@app.route("/getModulesAndTags", methods = ["GET"])
+def get_modules_and_tags():
+    packet = {}
+    modules = r.keys("*monitor*")
+    tags = r5.keys("tag*")
 
+    packet["modules"] = [module for module in modules if r.type(module) == "hash"]
+    packet["tags"] = [s.replace("tag:", "") for s in tags]
+    return jsonify(packet)
+
+@app.route("/IDs_from_tags",methods=["POST"])
+def IDs_from_tags():
+    request_data = request.get_json()
+    tags = request_data["tags"]
+    if len(tags) == 0:
+        return jsonify([])
+    else:
+        selected_tags = [f"tag:{s}" for s in tags]
+        IDs = list(r5.sunion(selected_tags))
+    return jsonify(IDs)
+
+@app.route("/histograms_from_IDs",methods=["POST"])
+def histograms_from_IDs():
+    packet={}
+    request_data = request.get_json()
+    IDs = request_data["IDs"]
+    for ID in IDs:
+        source, histname = ID.split("-")
+        histobj = r.hget(source, f"h_{histname}")
+        if histobj is not None:
+            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+            fig = dict(data=data, layout=layout, config={"responsive": True})
+            packet[ID] = dict(timestamp = timestamp,fig = fig)
+    return jsonify(packet)
+
+@app.route("/histogram_from_ID",methods=["GET"])
+def histogram_from_ID():
+    packet={}
+    ID = request.args.get("ID")
+    source, histname = ID.split("-")
+    histobj = r.hget(source, f"h_{histname}")
+    if histobj is not None:
+        data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+        fig = dict(data=data, layout=layout, config={"responsive": False})
+        tags = get_tags_by_ID(ID)
+        packet = dict(timestamp = float(timestamp), fig = fig, ID = ID, tags = tags)
+    return jsonify(packet)
+
+## Tag section 
+
+@app.route("/add_tag", methods=["POST"])
+def add_tag():
+    existed = False
+    data = request.get_json()
+    ID = data["ID"]
+    tag = data["tag"]
+    if r5.exists(f"tag:{tag}"):
+        existed = True
+    r5.sadd(f"id:{ID}", tag)
+    r5.sadd(f"tag:{ tag }", ID)
+    return jsonify({"existed": existed})
+
+@app.route("/remove_tag", methods=["POST"])
+def remove_tag():
+    """! Remove the tag sent through a GET request.
+        @return "true" if the tag exists after the delete, "false" otherwise.
+    """
+    exists = True
+    data = request.get_json()
+    ID = data["ID"]
+    tag = data["tag"]
+    r5.srem(f"id:{ID}", tag)
+    r5.srem(f"tag:{tag}", ID)
+    if not r5.exists(f"tag:{tag}"):
+        exists = False
+    return jsonify({"exists":exists})
+
+## functions 
+
+def get_tags_by_ID(ID):
+    module, histname = ID.split("-")
+    # get the members associated with the key id:<histID> in the redis database
+    tags = list(r5.smembers(f"id:{ID}"))
+    # remove the default tags of the histogram (module name and histogram name)
+    tags.pop(tags.index(module))
+    tags.pop(tags.index(histname))
+    return tags
 
 
 

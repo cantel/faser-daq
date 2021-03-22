@@ -373,6 +373,7 @@ def lastHistogram():
 
 
 
+
 @app.context_processor
 def context_processor():
     """! Returns variable that will be global for Jinja (the templating language)."""

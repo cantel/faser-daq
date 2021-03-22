@@ -280,6 +280,8 @@ void TrackerReceiverModule::configure() {
         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
         continue;
       } 
+      m_trb->WritePhaseConfigReg();
+      m_trb->ApplyPhaseConfig();
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
       } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
@@ -307,13 +309,14 @@ void TrackerReceiverModule::configure() {
 
   m_trb->WriteConfigReg();
 
-  INFO("User set TRB configurations.");
+  INFO("TRB configurations set by user:");
   m_trb->GetConfig()->Print();
   try { m_trb->VerifyConfigReg(); }
   catch ( TRBConfigurationException& e) {
     m_status=STATUS_ERROR;
     ERROR("Configurations read back do not match configurations sent.");
   }
+  INFO("TRB configured successfully. TRB configurations read back:");
   m_trb->ReadbackAndPrintConfig();
 
 

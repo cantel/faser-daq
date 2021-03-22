@@ -252,7 +252,7 @@ def change_histo():
     return jsonify(newGraph[0])
 
 
-@app.route("/")
+
 @app.route("/home")
 def home():
     """! Renders the default web page."""
@@ -390,7 +390,7 @@ def timectime(s):
     return datestring
 
 ### Migrating to Vue.js ### 
-
+@app.route("/")
 @app.route("/vue_home", methods = ["GET"])
 def vue_home():
     return render_template("vue_home.html")

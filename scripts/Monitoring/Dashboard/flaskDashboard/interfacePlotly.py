@@ -1,3 +1,7 @@
+#
+#  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+#
+
 import json
 import numpy as np
 

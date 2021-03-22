@@ -57,7 +57,18 @@ TrackerReceiverModule::TrackerReceiverModule() {
     if ( cfg.contains("ReadoutMode")) {
       m_ABCD_ReadoutMode = cfg["ReadoutMode"];
     }
-    else m_ABCD_ReadoutMode = FASER::TRBAccess::ABCD_ReadoutMode::LEVEL;
+    else {
+      WARNING("No chip readout mode selected. Setting to HIT mode by default."); 
+      m_ABCD_ReadoutMode = FASER::TRBAccess::ABCD_ReadoutMode::HIT;
+    }
+
+    if ( cfg.contains("EdgeDetect")) {
+       m_ABCD_EdgeDetect = cfg["EdgeDetect"].get<bool>();
+    }
+    else {
+      WARNING("No chip edge detect mode selected. Disabling edge detect by default."); 
+      m_ABCD_EdgeDetect = false;
+    }
 
     if ( cfg.contains("ConfigureModules")) {
       m_configureModules = cfg["ConfigureModules"];
@@ -106,7 +117,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
           "\n using USB: "<<(usingUSB?"TRUE (No SC/DAQ IP required)":"FALSE")<<
           "\n SC IP: "<<m_SCIP<<"\n DAQ IP: "<<m_DAQIP<<
           "\n chip readout mode: "<<m_ABCD_ReadoutMode<<
-          " \n CLK0 fine phase delay: "<<m_finePhaseDelay_Clk0<<" \n CLK1 fine phase delay: "<<m_finePhaseDelay_Clk1<<
+          "\n chip edge detect enabled: "<<(m_ABCD_EdgeDetect?"TRUE":"FALSE")<<
+          "\n CLK0 fine phase delay: "<<m_finePhaseDelay_Clk0<<" \n CLK1 fine phase delay: "<<m_finePhaseDelay_Clk1<<
           "\n LED(X)0 fine phase delay: "<<m_finePhaseDelay_Led0<<"\n LED(X)1 fine phase delay: "<<m_finePhaseDelay_Led1<<
           "\n Configure modules: "<<(m_configureModules?"TRUE":"FALSE")<<
           "\n RxTimeoutDisable: "<<(m_RxTimeoutDisable?"TRUE":"FALSE")<<
@@ -208,6 +220,7 @@ void TrackerReceiverModule::configure() {
           if (l_moduleConfigFile != ""){
               l_cfg->ReadFromFile(l_moduleConfigFile);
               l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
+              l_cfg->SetEdgeDetection(m_ABCD_EdgeDetect);
           }
           else { 
             m_status=STATUS_ERROR;

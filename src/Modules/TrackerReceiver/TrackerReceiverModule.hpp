@@ -41,6 +41,7 @@ class TrackerReceiverModule : public FaserProcess {
   std::string m_DAQIP;
   bool m_extClkSelect;
   FASER::TRBAccess::ABCD_ReadoutMode m_ABCD_ReadoutMode;
+  bool m_ABCD_EdgeDetect;
   bool m_configureModules;
   bool m_RxTimeoutDisable;
   unsigned int m_moduleMask;

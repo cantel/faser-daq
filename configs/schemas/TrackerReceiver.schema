@@ -60,7 +60,13 @@
                     "type"          : "integer",
                     "title"         : "Chip readout mode",
                     "description"   : "0:HIT, 1:LEVEL, 2:EDGE, 3:TEST",
-                    "default"       : 1
+                    "default"       : 0
+                    },
+                "EdgeDetect"         : {
+                    "type"          : "boolean",
+                    "title"         : "Chip edge detection enable",
+                    "description"   : "If enabled, hit bits are generated on detection of high to low transition (subsequently, read out single '1' per hit)",
+                    "default"       : 0
                     },
                 "ConfigureModules"         : {
                     "type"          : "boolean",

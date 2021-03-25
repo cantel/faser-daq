@@ -57,7 +57,18 @@ TrackerReceiverModule::TrackerReceiverModule() {
     if ( cfg.contains("ReadoutMode")) {
       m_ABCD_ReadoutMode = cfg["ReadoutMode"];
     }
-    else m_ABCD_ReadoutMode = FASER::TRBAccess::ABCD_ReadoutMode::LEVEL;
+    else {
+      WARNING("No chip readout mode selected. Setting to HIT mode by default."); 
+      m_ABCD_ReadoutMode = FASER::TRBAccess::ABCD_ReadoutMode::HIT;
+    }
+
+    if ( cfg.contains("EdgeDetect")) {
+       m_ABCD_EdgeDetect = cfg["EdgeDetect"].get<bool>();
+    }
+    else {
+      WARNING("No chip edge detect mode selected. Disabling edge detect by default."); 
+      m_ABCD_EdgeDetect = false;
+    }
 
     if ( cfg.contains("ConfigureModules")) {
       m_configureModules = cfg["ConfigureModules"];
@@ -106,7 +117,8 @@ TrackerReceiverModule::TrackerReceiverModule() {
           "\n using USB: "<<(usingUSB?"TRUE (No SC/DAQ IP required)":"FALSE")<<
           "\n SC IP: "<<m_SCIP<<"\n DAQ IP: "<<m_DAQIP<<
           "\n chip readout mode: "<<m_ABCD_ReadoutMode<<
-          " \n CLK0 fine phase delay: "<<m_finePhaseDelay_Clk0<<" \n CLK1 fine phase delay: "<<m_finePhaseDelay_Clk1<<
+          "\n chip edge detect enabled: "<<(m_ABCD_EdgeDetect?"TRUE":"FALSE")<<
+          "\n CLK0 fine phase delay: "<<m_finePhaseDelay_Clk0<<" \n CLK1 fine phase delay: "<<m_finePhaseDelay_Clk1<<
           "\n LED(X)0 fine phase delay: "<<m_finePhaseDelay_Led0<<"\n LED(X)1 fine phase delay: "<<m_finePhaseDelay_Led1<<
           "\n Configure modules: "<<(m_configureModules?"TRUE":"FALSE")<<
           "\n RxTimeoutDisable: "<<(m_RxTimeoutDisable?"TRUE":"FALSE")<<
@@ -196,33 +208,40 @@ void TrackerReceiverModule::configure() {
  
 
   if ( m_configureModules ) {
-  //Modules configuration
-  for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
+    //Modules configuration
+    for (int l_moduleNo=0; l_moduleNo < 8; l_moduleNo++){ //we have 8 modules per TRB
   
-    if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
-    INFO("Starting configuration of module number " << l_moduleNo);
-        
-      std::unique_ptr<FASER::ConfigHandlerSCT> l_cfg(new FASER::ConfigHandlerSCT());
-      if (m_config.getConfig()["settings"]["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
-        std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
-        if (l_moduleConfigFile != ""){
-            l_cfg->ReadFromFile(l_moduleConfigFile);
-            l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
+      if ((0x1 << l_moduleNo ) & m_moduleMask){ //checks if the module is active according to the module mask
+      INFO("Starting configuration of module number " << l_moduleNo);
+          
+        std::unique_ptr<FASER::ConfigHandlerSCT> l_cfg(new FASER::ConfigHandlerSCT());
+        if (m_config.getConfig()["settings"]["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
+          std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
+          if (l_moduleConfigFile != ""){
+              l_cfg->ReadFromFile(l_moduleConfigFile);
+              l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
+              l_cfg->SetEdgeDetection(m_ABCD_EdgeDetect);
+          }
+          else { 
+            m_status=STATUS_ERROR;
+            ERROR("Empty configuration file provided for module "<<l_moduleNo<<".");
+            sleep(1);
+            THROW(TRBConfigurationException, "Cannot configure module due to missing configuration file.");
+          }
+          try {
+            m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
+          } catch ( TRBConfigurationException &e) {
+             m_status=STATUS_ERROR;
+             sleep(1);
+             throw e;
+          }
+          INFO("Configuration of module " << l_moduleNo << " finished.");
         }
-        try {
-          m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
-        } catch ( TRBConfigurationException &e) {
-           m_status=STATUS_ERROR;
-           sleep(1);
-           throw e;
+        else{
+          m_status=STATUS_ERROR;
+          ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
         }
-        INFO("Configuration of module " << l_moduleNo << " finished.");
       }
-      else{
-        m_status=STATUS_ERROR;
-        ERROR("Module " << l_moduleNo << " enabled by mask but no configuration file provided!");
-      }
-    }
     }
   }
 
@@ -261,6 +280,8 @@ void TrackerReceiverModule::configure() {
         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
         continue;
       } 
+      m_trb->WritePhaseConfigReg();
+      m_trb->ApplyPhaseConfig();
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
       } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
@@ -288,13 +309,14 @@ void TrackerReceiverModule::configure() {
 
   m_trb->WriteConfigReg();
 
-  INFO("User set TRB configurations.");
+  INFO("TRB configurations set by user:");
   m_trb->GetConfig()->Print();
   try { m_trb->VerifyConfigReg(); }
   catch ( TRBConfigurationException& e) {
     m_status=STATUS_ERROR;
     ERROR("Configurations read back do not match configurations sent.");
   }
+  INFO("TRB configured successfully. TRB configurations read back:");
   m_trb->ReadbackAndPrintConfig();
 
 
@@ -377,6 +399,7 @@ void TrackerReceiverModule::runner() noexcept {
       if (m_extClkSelect && m_run) m_PLLErrCnt = m_trb->ReadPLLErrorCounter();
       check_point = std::time(nullptr); 
     }
+
     vector_of_raw_events = m_trb->GetTRBEventData();
     m_receivedEvents = vector_of_raw_events.size();
 
@@ -397,16 +420,14 @@ void TrackerReceiverModule::runner() noexcept {
          
           try { 
             TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
+            local_event_id = trk_data_fragment.event_id();
+            local_event_id = local_event_id | (m_ECRcount << 24);
+            local_bc_id = trk_data_fragment.bc_id();
 
             if ( trk_data_fragment.valid()) {
-                local_event_id = trk_data_fragment.event_id();
-                local_event_id = local_event_id | (m_ECRcount << 24);
-                local_bc_id = trk_data_fragment.bc_id();
                 local_status = 0;
             }
             else{
-                local_event_id = 0xffffff;
-                local_bc_id = 0xffff;
                 local_status = EventStatus::UnclassifiedError;
                 m_status=STATUS_WARN;
                 m_corrupted_fragments += 1; //Monitoring data
@@ -418,7 +439,7 @@ void TrackerReceiverModule::runner() noexcept {
                   for (auto mod_error : trk_data_fragment.module_error_id()){
                     WARNING("Module error found with ID "<<(int)mod_error);
                   }
-                } // FIXME these WARNINGs won't be shown as TRB and module errors throw exceptions instead
+                } 
                 if (trk_data_fragment.has_crc_error()) {
                   WARNING("Mismatching checksums!");
                   m_checksum_mismatches++;
@@ -450,8 +471,7 @@ void TrackerReceiverModule::runner() noexcept {
             DEBUG("payload size: 0x"<< std::hex << fragment->payload_size());
             DEBUG("timestamp: 0x"<< std::hex << fragment->timestamp());
             if (m_trace){ 
-              DEBUG("Data received from TRB: ");
-              DEBUG("Raw data sent further: ");
+              DEBUG("Raw data received from TRB: ");
               const DAQFormats::byteVector *data = fragment->raw();
               for (unsigned i = 0; i <  (unsigned)data->size(); i++){
                   std::bitset<8> y(data->at(i));

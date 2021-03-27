@@ -362,8 +362,17 @@ void DigitizerReceiverModule::runner() noexcept {
   
     // polling of the hardware - if any number of events is detected
     // then all events in the buffer are read out
-    int n_events_present = m_digitizer->DumpEventCount();
-    
+    int n_events_present = 0;
+    try {
+      m_digitizer->DumpEventCount();
+    } catch (DigitizerHardwareException &e) {
+      static int numErrors=100;
+      ERROR("Failed to read number of events: " << e.what());
+      if (numErrors--==0) {
+	INFO("Too many read errors - bailing out");
+	throw e;
+      }
+    }
     // how much space is left in the buffer
     m_hw_buffer_space = 1024-n_events_present;
     m_hw_buffer_occupancy = n_events_present;

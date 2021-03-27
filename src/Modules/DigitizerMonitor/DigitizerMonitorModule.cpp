@@ -70,7 +70,7 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
     float avg = GetPedestalMean(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
     float rms = GetPedestalRMS(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
     
-    INFO("Digitizer monitoring : "<<iChan<<" - "<<avg<<" , "<<rms);
+    DEBUG("Digitizer monitoring : "<<iChan<<" - "<<avg<<" , "<<rms);
 
     m_histogrammanager->fill("h_avg_ch"+std::to_string(iChan), avg, 1.0);
     m_histogrammanager->fill("h_rms_ch"+std::to_string(iChan), rms, 1.0);    

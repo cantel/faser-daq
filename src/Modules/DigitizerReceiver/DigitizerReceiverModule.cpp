@@ -489,6 +489,7 @@ void DigitizerReceiverModule::runner() noexcept {
 void DigitizerReceiverModule::PassEventBatch(std::vector<EventFragment> fragments){
   DEBUG("passEventBatch()");
   DEBUG("Passing NFrag : "<<fragments.size());
+  static uint64_t prevEventID=0;
 
   for(int ifrag=0; ifrag<(int)fragments.size(); ifrag++){
   
@@ -499,6 +500,11 @@ void DigitizerReceiverModule::PassEventBatch(std::vector<EventFragment> fragment
     // ToDo : What is the status supposed to be?
     int status = 0;
     fragments.at(ifrag).set_status( status );
+
+    if (fragments.at(ifrag).event_id()!=prevEventID+1) {
+      WARNING("Got fragment "<<fragments.at(ifrag).event_id()<<" was expecting: "<<prevEventID+1);
+    }
+    prevEventID=fragments.at(ifrag).event_id();
 
     // place the raw binary event fragment on the output port
     std::unique_ptr<const byteVector> bytestream(fragments.at(ifrag).raw());

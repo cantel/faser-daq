@@ -177,6 +177,25 @@ void DigitizerReceiverModule::configure() {
   registerVariable(m_time_parse,    "time_ParseEvents");
   registerVariable(m_time_overhead, "time_Overhead");
 
+  registerVariable(m_info_udp_receive_timeout_counter,"info_udp_receive_timeout_counter");
+  registerVariable(m_info_wrong_cmd_ack_counter,"info_wrong_cmd_ack_counter");
+  registerVariable(m_info_wrong_received_nof_bytes_counter,"info_wrong_received_nof_bytes_counter");
+  registerVariable(m_info_wrong_received_packet_id_counter,"info_wrong_received_packet_id_counter");
+
+  registerVariable(m_info_clear_UdpReceiveBuffer_counter,"info_clear_UdpReceiveBuffer_counter");
+  registerVariable(m_info_read_dma_packet_reorder_counter,"info_read_dma_packet_reorder_counter");
+
+  registerVariable(m_udp_single_read_receive_ack_retry_counter,"udp_single_read_receive_ack_retry_counter");
+  registerVariable(m_udp_single_read_req_retry_counter,"udp_single_read_req_retry_counter");
+
+  registerVariable(m_udp_single_write_receive_ack_retry_counter,"udp_single_write_receive_ack_retry_counter");
+  registerVariable(m_udp_single_write_req_retry_counter,"udp_single_write_req_retry_counter");
+
+  registerVariable(m_udp_dma_read_receive_ack_retry_counter,"udp_dma_read_receive_ack_retry_counter");
+  registerVariable(m_udp_dma_read_req_retry_counter,"udp_dma_read_req_retry_counter");
+
+  registerVariable(m_udp_dma_write_receive_ack_retry_counter,"udp_dma_write_receive_ack_retry_counter");
+  registerVariable(m_udp_dma_write_req_retry_counter,"udp_dma_write_req_retry_counter");
   
   // configuration of hardware
   INFO("Configuring ...");  
@@ -443,8 +462,29 @@ void DigitizerReceiverModule::runner() noexcept {
       m_lock.unlock();
       usleep(1000); 
     }
-           
 
+
+    m_info_udp_receive_timeout_counter=m_digitizer->m_crate->info_udp_receive_timeout_counter;
+    
+    m_info_wrong_cmd_ack_counter=m_digitizer->m_crate->info_wrong_cmd_ack_counter;
+    m_info_wrong_received_nof_bytes_counter=m_digitizer->m_crate->info_wrong_received_nof_bytes_counter;
+    m_info_wrong_received_packet_id_counter=m_digitizer->m_crate->info_wrong_received_packet_id_counter;
+
+    m_info_clear_UdpReceiveBuffer_counter=m_digitizer->m_crate->info_clear_UdpReceiveBuffer_counter;
+    m_info_read_dma_packet_reorder_counter=m_digitizer->m_crate->info_read_dma_packet_reorder_counter;
+
+    m_udp_single_read_receive_ack_retry_counter=m_digitizer->m_crate->udp_single_read_receive_ack_retry_counter;
+    m_udp_single_read_req_retry_counter=m_digitizer->m_crate->udp_single_read_req_retry_counter;
+
+    m_udp_single_write_receive_ack_retry_counter=m_digitizer->m_crate->udp_single_write_receive_ack_retry_counter;
+    m_udp_single_write_req_retry_counter=m_digitizer->m_crate->udp_single_write_req_retry_counter;
+
+    m_udp_dma_read_receive_ack_retry_counter=m_digitizer->m_crate->udp_dma_read_receive_ack_retry_counter;
+    m_udp_dma_read_req_retry_counter=m_digitizer->m_crate->udp_dma_read_req_retry_counter;
+
+    m_udp_dma_write_receive_ack_retry_counter=m_digitizer->m_crate->udp_dma_write_receive_ack_retry_counter;
+    m_udp_dma_write_req_retry_counter=m_digitizer->m_crate->udp_dma_write_req_retry_counter;
+           
     // only get the temperatures once per second to cut down on the VME data rate
     // amount of time in loop in milliseconds
     int time_now   = (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - time_start).count() * 1e-6)/1000;

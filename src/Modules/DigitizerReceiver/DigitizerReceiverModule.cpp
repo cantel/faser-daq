@@ -177,6 +177,8 @@ void DigitizerReceiverModule::configure() {
   registerVariable(m_time_parse,    "time_ParseEvents");
   registerVariable(m_time_overhead, "time_Overhead");
 
+  registerVariable(m_corrupted_events, "CorruptedEvents");
+
   registerVariable(m_info_udp_receive_timeout_counter,"info_udp_receive_timeout_counter");
   registerVariable(m_info_wrong_cmd_ack_counter,"info_wrong_cmd_ack_counter");
   registerVariable(m_info_wrong_received_nof_bytes_counter,"info_wrong_received_nof_bytes_counter");
@@ -229,99 +231,18 @@ void DigitizerReceiverModule::stop() {
 void DigitizerReceiverModule::sendECR() {
   // should send ECR to electronics here. In case of failure, set m_status to STATUS_ERROR
   DEBUG("Sending ECR");
+
+  // ensure no data readout going on in parallel
+  m_lock.lock();
+
   // stop acquisition
   m_digitizer->StopAcquisition();
   
-  auto cfg = m_config.getConfig()["settings"];
-  
-  // for reading the buffer
-  m_readout_method = (std::string)cfg["readout"]["readout_method"];
-  m_readout_blt    = (int)cfg["readout"]["readout_blt"];
-
-  // dynamically allocate the array for the raw payload
-  // guidance : http://www.fredosaurus.com/notes-cpp/newdelete/50dynamalloc.html#:~:text=Allocate%20an%20array%20with%20code,and%20allocates%20that%20size%20array.
-  DEBUG("Allocating software buffer ...");
-  unsigned int* m_raw_payload = NULL;   
-  m_software_buffer = (int)cfg["readout"]["software_buffer"];           
-  DEBUG("NBuffer ..."<<std::dec<<m_software_buffer);
-  m_raw_payload = new unsigned int[m_software_buffer];  
-  
-  // number of channels enabled
-  m_nchannels_enabled = 0;
-  for(int iChan=0; iChan<16; iChan++){
-    if((int)cfg["channel_readout"].at(iChan)["enable"]==1)
-      m_nchannels_enabled++;
-  }
-  
-  // size of the buffer in samples for a single channel
-  DEBUG("Getting buffer size");
-  m_buffer_size = m_digitizer->RetrieveBufferLength();
-  
-  // maximum number of events to be requested
-  DEBUG("Getting readout request size");
-  m_n_events_requested = m_readout_blt;
-  
-  // read out the data from the buffer
-  m_lock.lock();
-  int n_events_present = m_digitizer->DumpEventCount();
-  if(n_events_present){
-    DEBUG("[sendECR] - Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
-
-      // clear the monitoring map which will retrieve the info to pass to monitoring metrics
-      m_monitoring.clear();
-              
-      // get the data from the board into the software buffer        
-      int nevents_obtained = 0;
-      nevents_obtained = m_digitizer->RetrieveEventBatch(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter);
-
-      // count triggers sent
-      m_triggers += nevents_obtained;
-      DEBUG("Total nevents sent in running : "<<m_triggers);
-
-      // parse the events and decorate them with a FASER header
-      std::vector<EventFragment> fragments;
-      fragments = m_digitizer->ParseEventBatch(m_raw_payload, m_software_buffer, nevents_obtained, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter, m_bcid_ttt_fix);
-      
-      DEBUG("NEventsParsed : "<<fragments.size());
-      
-      // ToDo : write a method to print one full event
-      //if((bool)myConfig["readout"]["print_event"]){
-      //  if(fragments.size()>=1){
-      //    const EventFragment frag = fragments.at(0);
-      //    DigitizerDataFragment digitizer_data_frag = DigitizerDataFragment(frag.payload<const uint32_t*>(), frag.payload_size());
-      //    std::cout<<"Digitizer data fragment:"<<std::endl;
-      //    std::cout<<digitizer_data_frag<<std::endl;
-      //  }
-      //}
-      
-      // pass the group of events on in faser/daq
-      // NOTE : this should only exist in the DigitizerReceiver module due to access
-      //        of the DAQling methods and such
-      this->PassEventBatch(fragments); // defined in the Digitizer
-      
-      m_lock.unlock();
-      
-      DEBUG("Time read    : "<<m_monitoring["time_read_time"]);
-      DEBUG("Time parse   : "<<m_monitoring["time_parse_time"]);
-      DEBUG("Time header  : "<<m_monitoring["time_header_time"]);
-      DEBUG("Time filler  : "<<m_monitoring["time_filler_time"]);
-      
-      float total_batch = m_monitoring["time_read_time"]+m_monitoring["time_parse_time"]+m_monitoring["time_header_time"]+m_monitoring["time_filler_time"];
-      
-      DEBUG("Parse/Read   : "<<m_monitoring["time_parse_time"]/m_monitoring["time_read_time"]);
-      
-      DEBUG("Total batch  : "<<total_batch);
-      DEBUG("Time looping : "<<m_monitoring["time_looping_time"]<<"   ("<<total_batch/m_monitoring["time_looping_time"]<<")");
-  }
-  //release the lock - not after the conditional due to the ECR method
-  m_lock.unlock();
-  
-  // delete the memory that was allocated
-  delete [] m_raw_payload;  
-  m_raw_payload = NULL;     
-
-  // start acquisition
+  // restart acquisition to reset event counter
   m_digitizer->StartAcquisition();
+
+  //release the lock
+  m_lock.unlock();
 }
 
 
@@ -329,7 +250,8 @@ void DigitizerReceiverModule::runner() noexcept {
   INFO("Running...");  
   
   auto cfg = m_config.getConfig()["settings"];
-  
+  uint64_t prevEventID=0;
+
   // for reading the buffer
   m_readout_method = (std::string)cfg["readout"]["readout_method"];
   m_readout_blt    = (int)cfg["readout"]["readout_blt"];
@@ -352,7 +274,8 @@ void DigitizerReceiverModule::runner() noexcept {
   // size of the buffer in samples for a single channel
   DEBUG("Getting buffer size");
   m_buffer_size = m_digitizer->RetrieveBufferLength();
-  
+  int m_event_size =  ((m_buffer_size/2)*m_nchannels_enabled)+4; //should check this from digitizer
+  INFO("Expected event size: "<<m_event_size<<" words");
   // maximum number of events to be requested
   DEBUG("Getting readout request size");
   m_n_events_requested = m_readout_blt;
@@ -368,12 +291,9 @@ void DigitizerReceiverModule::runner() noexcept {
     // these are sent with a pause after the sending to have a rate limit
     if(m_software_trigger_enable){
       m_sw_count++;
-      INFO("Software trigger sending : "<<m_sw_count);
+      INFO("Software trigger sending trigger number : "<<m_sw_count);
       m_digitizer->SendSWTrigger();
       usleep((1.0/m_software_trigger_rate)*1000000);
-    }
-    else{
-      DEBUG("You are not sending random triggers");
     }
     
     // lock to prevent accidental double reading with the sendECR() call
@@ -383,7 +303,7 @@ void DigitizerReceiverModule::runner() noexcept {
     // then all events in the buffer are read out
     int n_events_present = 0;
     try {
-      m_digitizer->DumpEventCount();
+      n_events_present = m_digitizer->DumpEventCount();
     } catch (DigitizerHardwareException &e) {
       static int numErrors=100;
       ERROR("Failed to read number of events: " << e.what());
@@ -395,8 +315,10 @@ void DigitizerReceiverModule::runner() noexcept {
     // how much space is left in the buffer
     m_hw_buffer_space = 1024-n_events_present;
     m_hw_buffer_occupancy = n_events_present;
-    
-    if(n_events_present){
+    bool shouldsleep = (n_events_present==0);
+    float read_time=0;
+    float parse_time=0;
+    while(n_events_present){
       DEBUG("[Running] - Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
       DEBUG("With m_ECRcount : "<<m_ECRcount);
       
@@ -404,63 +326,49 @@ void DigitizerReceiverModule::runner() noexcept {
       m_monitoring.clear();
               
       // get the data from the board into the software buffer        
-      int nevents_obtained = 0;
-      nevents_obtained = m_digitizer->RetrieveEventBatch(m_raw_payload, m_software_buffer, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter);
+      int nwords_obtained = 0;
+      int nerrors = 0;
+      nwords_obtained = m_digitizer->ReadSingleEvent(m_raw_payload, m_event_size, m_monitoring, nerrors,
+						     m_readout_method, false);
 
+      if ((nwords_obtained!=m_event_size)&&(nerrors==0)) {
+	WARNING("Got "<<nwords_obtained<<" words while expecting "<<m_event_size<<" words, but no errors?");
+	nerrors=1;
+      }
       // count triggers sent
-      m_triggers += nevents_obtained;
+      read_time+=m_monitoring["block_readout_time"];
+      m_triggers ++;
       DEBUG("Total nevents sent in running : "<<m_triggers);
 
       // parse the events and decorate them with a FASER header
-      DEBUG("tttConverter : "<<m_ttt_converter);
-      std::vector<EventFragment> fragments;
-      fragments = m_digitizer->ParseEventBatch(m_raw_payload, m_software_buffer, nevents_obtained, m_monitoring, n_events_present, m_nchannels_enabled, m_buffer_size, m_readout_method, m_n_events_requested, m_ECRcount, m_ttt_converter, m_bcid_ttt_fix);
-      
-      DEBUG("NEventsParsed : "<<fragments.size());
-      
-      // ToDo : write a method to print one full event
-      //if((bool)myConfig["readout"]["print_event"]){
-      //  if(fragments.size()>=1){
-      //    const EventFragment frag = fragments.at(0);
-      //    DigitizerDataFragment digitizer_data_frag = DigitizerDataFragment(frag.payload<const uint32_t*>(), frag.payload_size());
-      //    std::cout<<"Digitizer data fragment:"<<std::endl;
-      //    std::cout<<digitizer_data_frag<<std::endl;
-      //  }
-      //}
-      
-      // pass the group of events on in faser/daq
-      // NOTE : this should only exist in the DigitizerReceiver module due to access
-      //        of the DAQling methods and such
-      this->PassEventBatch(fragments); // defined in the Digitizer
-      
-      //release the lock - not after the conditional due to the ECR method
-      m_lock.unlock();
-      
-      DEBUG("Time read    : "<<m_monitoring["time_read_time"]);
-      DEBUG("Time parse   : "<<m_monitoring["time_parse_time"]);
-      DEBUG("Time header  : "<<m_monitoring["time_header_time"]);
-      DEBUG("Time filler  : "<<m_monitoring["time_filler_time"]);
-      
-      m_time_read      = m_monitoring["time_read_time"]; 
-      m_time_parse     = m_monitoring["time_parse_time"];  
-      m_time_overhead  = m_monitoring["time_header_time"] + m_monitoring["time_filler_time"];   
+      auto fragment = m_digitizer->ParseEventSingle(m_raw_payload, m_event_size, m_monitoring, 
+						    m_ECRcount, m_ttt_converter, m_bcid_ttt_fix, nerrors);
 
+      parse_time+=m_monitoring["time_parse_time"];
+
+      // send vent to event builder
+      if (fragment->event_id()!=prevEventID+1) {
+	WARNING("Got fragment "<<fragment->event_id()<<" was expecting: "<<prevEventID+1);
+      }
+      prevEventID=fragment->event_id();
+      if (fragment->status()) m_corrupted_events++;
+
+      // place the raw binary event fragment on the output port
+      std::unique_ptr<const byteVector> bytestream(fragment->raw());
+      daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+      m_connections.send(0, binData);  
       
-      float total_batch = m_monitoring["time_read_time"]+m_monitoring["time_parse_time"]+m_monitoring["time_header_time"]+m_monitoring["time_filler_time"];
-      
-      DEBUG("Parse/Read   : "<<m_monitoring["time_parse_time"]/m_monitoring["time_read_time"]);
-      
-      DEBUG("Total batch  : "<<total_batch);
-      DEBUG("Time looping : "<<m_monitoring["time_looping_time"]<<"   ("<<total_batch/m_monitoring["time_looping_time"]<<")");
-    
+      n_events_present--;
     }
-    else{
-      // sleep for 1 milliseconds. This time is chosen to ensure that the polling 
-      // happens at a rate just above the expected trigger rate in the case of no events
-      //DEBUG("No events - sleeping for a short while");
-      //release the lock - not after the conditional due to the ECR method
-      m_lock.unlock();
+    m_lock.unlock();
+
+    // sleep for 1 milliseconds. This time is chosen to ensure that the polling 
+    // happens at a rate just above the expected trigger rate in the case of no events
+    if (shouldsleep) {
       usleep(1000); 
+    } else {
+      m_time_read = read_time;
+      m_time_parse = parse_time;
     }
 
 
@@ -524,31 +432,4 @@ void DigitizerReceiverModule::runner() noexcept {
   m_raw_payload = NULL;     
   
   INFO("Runner stopped");
-}
-
-void DigitizerReceiverModule::PassEventBatch(std::vector<EventFragment> fragments){
-  DEBUG("passEventBatch()");
-  DEBUG("Passing NFrag : "<<fragments.size());
-  static uint64_t prevEventID=0;
-
-  for(int ifrag=0; ifrag<(int)fragments.size(); ifrag++){
-  
-    // create the event fragment
-    //std::unique_ptr<EventFragment> fragment;
-    //fragment = fragments.at(ifrag);
-
-    // ToDo : What is the status supposed to be?
-    int status = 0;
-    fragments.at(ifrag).set_status( status );
-
-    if (fragments.at(ifrag).event_id()!=prevEventID+1) {
-      WARNING("Got fragment "<<fragments.at(ifrag).event_id()<<" was expecting: "<<prevEventID+1);
-    }
-    prevEventID=fragments.at(ifrag).event_id();
-
-    // place the raw binary event fragment on the output port
-    std::unique_ptr<const byteVector> bytestream(fragments.at(ifrag).raw());
-    daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
-    m_connections.send(0, binData);  
-  }
 }

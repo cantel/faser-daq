@@ -35,7 +35,6 @@ class DigitizerReceiverModule : public FaserProcess {
   ///////////////////////////////////////////
   // Digitizer specific methods and members
   ///////////////////////////////////////////
-  void PassEventBatch(std::vector<EventFragment> fragments);
 
   // the digitizer hardware accessor object
   vx1730 *m_digitizer;
@@ -94,6 +93,8 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<float> m_time_parse;
   std::atomic<float> m_time_overhead;
   
+  std::atomic<int> m_corrupted_events;
+
   std::atomic<int> m_info_udp_receive_timeout_counter;
   std::atomic<int> m_info_wrong_cmd_ack_counter;
   std::atomic<int> m_info_wrong_received_nof_bytes_counter;

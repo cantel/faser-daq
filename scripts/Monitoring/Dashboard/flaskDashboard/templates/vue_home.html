@@ -19,46 +19,13 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <!-- day.js manipulating timestamps -->
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
-
+ 
     <!-- Plotly library -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- custom css -->
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
     <title>Home</title>
-    <style>
-        .histograms_container {
-            max-width: 1300px;
-            display: grid;
-            grid-template-columns: repeat(2, auto);
-            gap: 10px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        .plotly_div {
-            margin-top: auto;
-            margin-bottom: auto;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .hist_title {
-
-            text-transform: uppercase;
-            font-size: 0.75em ;
-        }
-
-        .timestamp {
-            color: gray;
-            font-size: 0.75em;
-        }
-
-        @media screen and (max-width: 1130px) {
-            .histograms_container {
-                display: grid;
-                grid-template-columns: repeat(1, auto);
-
-            }
-        }
-    </style>
 
 </head>
 
@@ -66,7 +33,24 @@
     <div id="app">
         <v-app>
             <v-app-bar app>
-                <v-btn text>Monitoring</v-btn>
+                <v-menu offset-y>
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn depressed color="primary" v-bind="attrs" v-on="on">
+                            Monitoring
+                        </v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item :disabled="c_safeMode" @click="deleteHistory">
+                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete history
+                        </v-list-item>
+                        <v-list-item :disabled="c_safeMode" @click="deleteTags">
+                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete Tags
+                        </v-list-item>
+                        <v-list-item>
+                            <v-switch v-model="c_safeMode" label="Safe mode" hide-details></v-switch>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
                 <v-spacer></v-spacer>
                 <search-tool @search-tags="getIDs"></search-tool>
                 <v-spacer></v-spacer>
@@ -80,10 +64,10 @@
             </v-main>
         </v-app>
     </div>
-
+    <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
     <script>
-        ////////////// Search-bar component //////////////
         const EventBus = new Vue();
+        ////////////// Search-bar component //////////////
 
         Vue.component("search-tool", {
             delimiters: ["[[", "]]"],
@@ -92,24 +76,30 @@
             data: function () {
                 return {
                     selected_tags: [],
-                    modules_tags: []
+                    c_tags: [],
+                    c_modules_tags: [],
+                    c_selected_module: null,
+                    c_all_tags : []
+
                 }
             },
             mounted() {
                 axios.get("/getModulesAndTags").then(response => {
-                        this.modules_tags = response.data["modules"].concat(response.data["tags"])
+                        this.c_tags = response.data["modules"].concat(response.data["tags"]).sort()
+                        this.c_all_tags
+                        this.c_modules_tags = response.data["modules"].sort()
                     })
                     .catch(err => {
-                        console.log("Problem with the api");
+                        console.log("Could not get the IDs");
                     })
                 EventBus.$on("add_tag_to_dropdown", (tag) => {
-                    this.modules_tags.push(tag)
+                    this.c_tags.push(tag)
                 });
 
                 EventBus.$on("remove_tag_from_dropdown", (tag) => {
-                    const index = this.modules_tags.indexOf(tag);
+                    const index = this.c_tags.indexOf(tag);
                     if (index > -1) {
-                        this.modules_tags.splice(index, 1);
+                        this.c_tags.splice(index, 1);
                     }
 
                 });
@@ -119,12 +109,22 @@
                 emitTags: function () {
                     this.$emit('search-tags', this.selected_tags)
                 },
+                emitModule: function() {
+                const selected_module = [this.c_selected_module]
+                this.$emit('search-tags', selected_module)
+                }
             },
             template: //html
                 `
-            <span>
+            <div class="menu">
+                <div style="width:50%;">
+                    <v-select class="mx-2" dense flat hide-details solo
+                        :append-outer-icon="'mdi-toy-brick-search-outline'" @click:append-outer="emitModule"
+                        :items="c_modules_tags" v-model="c_selected_module">
+                    </v-select>
+                </div>
             <v-autocomplete v-model="selected_tags"
-            :items="modules_tags"
+            :items="c_tags"
             :append-outer-icon="'mdi-magnify'"
             @click:append-outer="emitTags"
             multiple
@@ -139,7 +139,8 @@
             flat
             :menu-props="{closeOnClick: true}"
             ></v-autocomplete>
-            </span>`,
+            </div>
+            `,
         })
 
 
@@ -181,7 +182,6 @@
             methods: {
 
                 pollData() {
-
                     axios.get('/histogram_from_ID', {
                             params: {
                                 ID: this.id
@@ -227,13 +227,15 @@
                         })
 
                 },
+                openTimeView() {
+                console.log('Appuyé sur time_view', this.id);
+                window.open("/history_view/" + this.id, "_blank", "width=600, height=455")
+                }
             },
             watch: {
                 c_tags: {
                     handler: function (newVal, oldVal) {
-                        //console.log(newVal.length, oldVal.length);
                         if (newVal.length > oldVal.length && newVal.length - oldVal.length === 1) {
-                            //console.log('Ajouté un tag');
                             var addedTag = newVal.filter(x => oldVal.indexOf(x) === -1);
                             axios.post('/add_tag', {
                                     ID: this.id,
@@ -245,10 +247,8 @@
                                     }
 
                                 })
-                        } else if (newVal.length < oldVal.length && newVal.length - oldVal.length === -1) {
-                            //console.log('Enlevé un tag');
+                        } else if (newVal.length < oldVal.length && newVal.length - oldVal.length===-1) {
                             var removedTag = oldVal.filter(x => newVal.indexOf(x) === -1);
-                            //console.log(removedTag[0])
                             axios.post('/remove_tag', {
                                     ID: this.id,
                                     tag: removedTag[0]
@@ -265,60 +265,41 @@
             template: //html
                 `
             <span>
-                <v-card width="600" class="mx-auto mt-5">
-                    <v-card-title>
-                        <span class="hist_title"> [[ id ]] </span> <v-spacer> </v-spacer><span class="timestamp"><i>[[ c_timestamp | timestampDisplay ]]</i> </span>
+                <v-card width="500" class="mx-auto mt-5">
+                    <v-card-title class="pb-1 pt-2">
+                        <span class="hist_title"> [[ id ]]</span>
+                        <v-spacer> </v-spacer>
+                        <v-btn icon @click="openTimeView">
+                            <v-icon>mdi-history</v-icon>
+                        </v-btn>
+                        <v-spacer> </v-spacer><span class="timestamp"><i>[[ c_timestamp | timestampDisplay ]]</i>
+                        </span>
                     </v-card-title>
-                      
-                    <plotly-graph v-if="c_figure" :figure="c_figure" :divID="divName"> </plotly-graph>
-                    
-                        <v-combobox v-model="c_tags" small-chips multiple solo hide-selected persistent-hint dense hide-no-data flat label="Enter tags...">
+                        <plotly-graph class="card_histo_cont mx-auto" v-if="c_figure" :figure="c_figure"
+                            :divid="divName">
+                        </plotly-graph>
+                        <v-card-actions class="pb-1">
+                            <v-combobox v-model="c_tags" small-chips multiple solo hide-selected hide-details
+                                persistent-hint dense hide-no-data flat label="Enter tags...">
                             <template v-slot:selection="{ attrs, item, select, selected }">
                                 <v-chip close pill x-small v:bind="attrs" :input-value="selected" @click="select" @click:close="removeTag(item)">
                                     [[ item ]]
-                                </v-chip>
+                                </v-chip>                            
                             </template>
                         </v-combobox>
+                    </v-card-actions>
                 </v-card>
             </span>
             `,
         })
-        ////////////// tag-bar Component //////////////
-
-        ////////////// Plotly-graph component //////////////
-
-
-        Vue.component("plotly-graph", {
-            delimiters: ["[[", "]]"],
-            props: ["figure", "divID"],
-            data: function () {
-                return {}
-            },
-            mounted() {
-                this.$watch('figure', (figure) => {
-                    this.$emit('graph_loading', true)
-                    Plotly.react(this.$refs[this.divID], figure)
-                    this.$emit('graph_loading', false)
-                }, {
-                    immediate: true,
-                    deep: true
-                });
-            },
-            template: //html
-                `
-            <div :ref ="divID" class = "plotly_div">
-            </div>
-            `,
-        })
-
         ////////////// Main Component //////////////
-
         var app = new Vue({
             el: '#app',
             vuetify: new Vuetify(),
             data: {
                 c_tags: [],
                 c_ids: [],
+                c_safeMode: true
             },
             delimiters: ["[[", "]]"],
             computed: {},
@@ -333,12 +314,18 @@
                             tags: selected_tags,
                         })
                         .then(response => {
-
-
                             this.c_ids = response.data.sort()
-                        })
-                }
+                            })
+                            },
+                            deleteHistory() {
+                            axios.get("/delete_history")
 
+                },
+
+                deleteTags() {
+                axios.get("/delete_tags")
+                window.location.reload(true)
+                }
             },
         });
     </script>

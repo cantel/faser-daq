@@ -240,7 +240,7 @@ void DigitizerReceiverModule::sendECR() {
   
   // restart acquisition to reset event counter
   m_digitizer->StartAcquisition();
-
+  m_prev_event_id = m_ECRcount<<24;
   //release the lock
   m_lock.unlock();
 }
@@ -250,7 +250,7 @@ void DigitizerReceiverModule::runner() noexcept {
   INFO("Running...");  
   
   auto cfg = m_config.getConfig()["settings"];
-  uint64_t prevEventID=0;
+  m_prev_event_id=0;
 
   // for reading the buffer
   m_readout_method = (std::string)cfg["readout"]["readout_method"];
@@ -347,11 +347,12 @@ void DigitizerReceiverModule::runner() noexcept {
       parse_time+=m_monitoring["time_parse_time"];
 
       // send vent to event builder
-      if (fragment->event_id()!=prevEventID+1) {
-	WARNING("Got fragment "<<fragment->event_id()<<" was expecting: "<<prevEventID+1);
+      if (fragment->event_id()!=m_prev_event_id+1) {
+	WARNING("Got fragment "<<fragment->event_id()<<" was expecting: "<<m_prev_event_id+1);
       }
-      prevEventID=fragment->event_id();
+      m_prev_event_id=fragment->event_id();
       if (fragment->status()) m_corrupted_events++;
+
 
       // place the raw binary event fragment on the output port
       std::unique_ptr<const byteVector> bytestream(fragment->raw());

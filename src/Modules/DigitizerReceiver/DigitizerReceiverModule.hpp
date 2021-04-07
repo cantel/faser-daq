@@ -115,6 +115,8 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<int> m_udp_dma_write_receive_ack_retry_counter;
   std::atomic<int> m_udp_dma_write_req_retry_counter;
 
+  uint64_t m_prev_event_id;
+
   // for SW trigger sending
   int m_sw_count;
   bool m_software_trigger_enable;

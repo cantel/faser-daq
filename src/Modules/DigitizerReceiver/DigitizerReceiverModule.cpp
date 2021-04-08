@@ -178,6 +178,7 @@ void DigitizerReceiverModule::configure() {
   registerVariable(m_time_overhead, "time_Overhead");
 
   registerVariable(m_corrupted_events, "CorruptedEvents");
+  registerVariable(m_empty_events, "EmptyEvents");
 
   registerVariable(m_info_udp_receive_timeout_counter,"info_udp_receive_timeout_counter");
   registerVariable(m_info_wrong_cmd_ack_counter,"info_wrong_cmd_ack_counter");
@@ -330,15 +331,18 @@ void DigitizerReceiverModule::runner() noexcept {
       int nerrors = 0;
       nwords_obtained = m_digitizer->ReadSingleEvent(m_raw_payload, m_event_size, m_monitoring, nerrors,
 						     m_readout_method, false);
+      read_time+=m_monitoring["block_readout_time"];
 
+      if (nwords_obtained==0) { //most likely reqest didn't arrive at VME card
+	m_empty_events++;
+	continue;
+      }
       if ((nwords_obtained!=m_event_size)&&(nerrors==0)) {
 	WARNING("Got "<<nwords_obtained<<" words while expecting "<<m_event_size<<" words, but no errors?");
 	nerrors=1;
       }
       // count triggers sent
-      read_time+=m_monitoring["block_readout_time"];
       m_triggers ++;
-      DEBUG("Total nevents sent in running : "<<m_triggers);
 
       // parse the events and decorate them with a FASER header
       auto fragment = m_digitizer->ParseEventSingle(m_raw_payload, m_event_size, m_monitoring, 

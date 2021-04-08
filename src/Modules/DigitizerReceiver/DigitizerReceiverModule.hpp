@@ -94,6 +94,7 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<float> m_time_overhead;
   
   std::atomic<int> m_corrupted_events;
+  std::atomic<int> m_empty_events;
 
   std::atomic<int> m_info_udp_receive_timeout_counter;
   std::atomic<int> m_info_wrong_cmd_ack_counter;

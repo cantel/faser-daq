@@ -223,7 +223,7 @@ void FileWriterFaserModule::runner() noexcept {
         DEBUG(" Received " << pl.size() << "B payload on channel: " << chid);
         while (!pq.write(pl) && m_run)
           ; // try until successful append
-        if (m_statistics) {
+        if (m_statistics && pl.size()) {
           m_channelMetrics.at(chid).payload_size = pl.size();
           m_channelMetrics.at(chid).events_received++;
         }

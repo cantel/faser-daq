@@ -15,50 +15,99 @@
           "receivers": [],
 	  "senders": [
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8300
+            },
+            {
+              "type": "pair",
+              "chid": 1,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8301
+            },
+            {
+              "type": "pair",
+              "chid": 2,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8302
+            },
+            {
+              "type": "pair",
+              "chid": 3,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8303
+            },
+            {
+              "type": "pair",
+              "chid": 16,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8316
+            },
+            {
+              "type": "pair",
+              "chid": 17,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8317
+            },
+            {
+              "type": "pair",
+              "chid": 18,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8318
+            },
+            {
+              "type": "pubsub",
+              "chid": 100,
               "transport": "tcp",
               "host": "*",
               "port": 8200
             },
             {
               "type": "pubsub",
-              "chid": 1,
+              "chid": 101,
               "transport": "tcp",
               "host": "*",
               "port": 8201
             },
             {
               "type": "pubsub",
-              "chid": 2,
+              "chid": 102,
               "transport": "tcp",
               "host": "*",
               "port": 8202
             },
             {
               "type": "pubsub",
-              "chid": 3,
+              "chid": 103,
               "transport": "tcp",
               "host": "*",
               "port": 8203
             },
             {
               "type": "pubsub",
-              "chid": 16,
+              "chid": 116,
               "transport": "tcp",
               "host": "*",
               "port": 8216
             },
             {
               "type": "pubsub",
-              "chid": 17,
+              "chid": 117,
               "transport": "tcp",
               "host": "*",
               "port": 8217
             },
             {
               "type": "pubsub",
-              "chid": 18,
+              "chid": 118,
               "transport": "tcp",
               "host": "*",
               "port": 8218

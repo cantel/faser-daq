@@ -73,7 +73,8 @@ bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,EventFull *event) {
   DEBUG("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
   daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
-  m_connections.send(channel,binData);
+  m_connections.send(channel,binData);      // to file writer
+  m_connections.send(channel+100,binData);  // to monitoring
   delete bytestream;
   return true;
 }
@@ -144,7 +145,9 @@ void EventBuilderFaserModule::runner() noexcept {
     if (m_timeoutCount>100) m_status=STATUS_ERROR;
 
     noData=true;
-    for(unsigned int channel=0;channel<m_numChannels;channel++) {
+    auto receivers = m_config.getConnections()["receivers"];
+    for (auto receiver : receivers) {
+      auto channel = receiver["chid"]; 
       if (m_connections.receive(channel, blob)) {
 	noData=false;
 	EventFragment* fragment;

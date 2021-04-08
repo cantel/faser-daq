@@ -9,7 +9,7 @@
         "metrics_settings": { "$ref": "top.json#metrics_settings" },
         "settings": {
           "max_filesize": 1000000000,
-          "buffer_size": 4000,
+          "buffer_size": 20000,
 	  "stop_timeout_ms": 1500,
           "filename_pattern": { "$ref": "top.json#filename_pattern" },
           "channel_names": [
@@ -25,53 +25,53 @@
         "connections": {
           "receivers": [
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 0,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8200
+              "port": 8300
             },
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 1,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8201
+              "port": 8301
             },
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 2,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8202
+              "port": 8302
             },
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 3,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8203
+              "port": 8303
             },
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 4,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8216
+              "port": 8316
             },
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 5,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8217
+              "port": 8317
             },
             {
-              "type": "pubsub",
+              "type": "pair",
               "chid": 6,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8218
+              "port": 8318
             }
           ]
         }

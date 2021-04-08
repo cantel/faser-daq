@@ -51,6 +51,16 @@
             "infoText": "Buffer size for output streams"
           }
         },
+        "stop_timeout_ms": {
+          "propertyOrder": 104,
+          "type": "integer",
+          "default": 1500,
+          "minimum": 100,
+          "maximum": 50000,
+          "options": {
+            "infoText": "Time to wait after stop before closing files"
+          }
+        },
         "filename_pattern": {
           "propertyOrder": 101,
           "type": "string"      

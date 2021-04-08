@@ -43,11 +43,14 @@ private:
 
   struct Metrics {
     std::atomic<size_t> bytes_written = 0;
+    std::atomic<size_t> events_received = 0;
+    std::atomic<size_t> files_written = 0;
     std::atomic<size_t> payload_queue_size = 0;
     std::atomic<size_t> payload_size = 0;
   };
 
   size_t m_buffer_size;
+  int m_stop_timeout;
   std::string m_pattern;
   std::map<int,std::string> m_channel_names;
   std::atomic<bool> m_start_completed;

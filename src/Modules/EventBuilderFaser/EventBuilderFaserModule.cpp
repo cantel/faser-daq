@@ -203,6 +203,7 @@ void EventBuilderFaserModule::runner() noexcept {
 	  sendEvent(EventTags::IncompleteTag,event);
 	  delete event;
 	  m_pendingEvents[tag].erase(m_pendingEvents[tag].begin());
+	  m_sentCounts[EventTags::IncompleteTag]++;
 	  sentMissing=true;
 	}
       }

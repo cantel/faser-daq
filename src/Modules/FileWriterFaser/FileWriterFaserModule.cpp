@@ -9,7 +9,7 @@
 /// \endcond
 
 #include "FileWriterFaserModule.hpp"
-#include "Utils/Logging.hpp"
+#include "Utils/Ers.hpp"
 
 using namespace std::chrono_literals;
 namespace daqutils = daqling::utilities;

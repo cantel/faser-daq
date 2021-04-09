@@ -16,7 +16,7 @@
 #include "EventFormats/TrackerDataFragment.hpp"
 
 #include "Utils/HistogramManager.hpp"
-#include "Utils/Logging.hpp"
+#include "Utils/Ers.hpp"
 #include "Exceptions/Exceptions.hpp"
 #include <Utils/Binary.hpp>
 

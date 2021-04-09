@@ -12,7 +12,7 @@
 #include <type_traits> // is_integral, is_floating_point, ...
 
 #include "Utils/Histogram.hpp"
-#include "Utils/Logging.hpp"
+#include "Utils/Ers.hpp"
 #include "Core/Configuration.hpp"
 
 using namespace boost::histogram;

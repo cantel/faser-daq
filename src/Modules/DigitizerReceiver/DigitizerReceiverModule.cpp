@@ -224,6 +224,7 @@ void DigitizerReceiverModule::start(unsigned int run_num) {
 }
 
 void DigitizerReceiverModule::stop() {
+  std::this_thread::sleep_for(std::chrono::microseconds(100000)); //wait for events 
   FaserProcess::stop();
   INFO("Stopping ...");
   m_digitizer->StopAcquisition();

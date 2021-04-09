@@ -3,10 +3,10 @@
 	url = https://gitlab.cern.ch/ep-dt-di/daq/daqling.git
 [submodule "gpiodrivers"]
 	path = gpiodrivers
-	url = https://gitlab.cern.ch/faser/online/gpiodrivers.git
+	url = ../gpiodrivers.git
 [submodule "faser-common"]
 	path = faser-common
-	url = https://gitlab.cern.ch/faser/faser-common.git
+	url = ../../faser-common.git
 [submodule "digitizer-readout"]
 	path = digitizer-readout
-	url = https://gitlab.cern.ch/faser/online/digitizer-readout.git
+	url = ../digitizer-readout.git

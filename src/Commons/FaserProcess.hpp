@@ -16,7 +16,7 @@ class FaserProcess: public daqling::core::DAQProcess {
 public:
   enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 
-  FaserProcess() {  INFO("Booting with config: " << m_config.getConfig().dump(4)); }
+  FaserProcess() {  ERS_INFO("Booting with config: " << m_config.getConfig().dump(4)); }
 
   virtual ~FaserProcess() {}
 
@@ -28,9 +28,9 @@ public:
     if (secretsFile.good()) {
       json secrets;
       secretsFile >> secrets;
-      INFO("Original influx path: "+influxDbURI);
+      ERS_INFO("Original influx path: "+influxDbURI);
       autoExpandEnvironmentVariables(influxDbURI,secrets);
-      INFO("After variable replacement: "+influxDbURI);
+      ERS_INFO("After variable replacement: "+influxDbURI);
     }
     m_statistics->setInfluxDBuri(influxDbURI);
     if (m_stats_on) {
@@ -56,18 +56,18 @@ public:
 
 
   void ECRcommand(const std::string &arg) {
-    INFO("Got ECR command with argument "<<arg);
+    ERS_INFO("Got ECR command with argument "<<arg);
     m_ECRcount+=1;
     sendECR();
   }
 
   virtual void enableTrigger(const std::string &arg) {
-    INFO("Got enableTrigger command with argument "<<arg);
+    ERS_INFO("Got enableTrigger command with argument "<<arg);
     // everything but the TLB process should ignore this
   }
 
   virtual void disableTrigger(const std::string &arg) {
-    INFO("Got disableTrigger command with argument "<<arg);
+    ERS_INFO("Got disableTrigger command with argument "<<arg);
     // everything but the TLB proces should ignore this
   }
 

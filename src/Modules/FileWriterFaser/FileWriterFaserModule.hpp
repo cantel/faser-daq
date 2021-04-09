@@ -16,7 +16,38 @@
 #include "Commons/FaserProcess.hpp"
 #include "Utils/Binary.hpp"
 #include "Utils/ProducerConsumerQueue.hpp"
+#include "Utils/Ers.hpp"
 
+
+/**
+ * Issues related to FileWriterFaserModule.
+ */
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  TimestampFormatFailed,                                                   // Class name
+                  "Failed to format timestamp", // Message
+                  ERS_EMPTY)                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  UnknownOutputFileArgument,                                                   // Class name
+                  "Unknown output file argument '" << c << "'", // Message
+                  ((const char *)c))                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  MissingChannelNames,                                                   // Class name
+                  "Missing channel names", // Message
+                  ERS_EMPTY)                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  InvalidFileNamePattern,                                                   // Class name
+                  "Invalid file name pattern: " << c, // Message
+                  ((const char *)c))                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  OfstreamFailed,                                                   // Class name
+                  " Write operation for channel " << chid << " of size " << size
+                                               << "B failed!", // Message
+                  ((uint_64t)chid)
+                  ((size_t)size))                      // Args
 /**
  * Module for writing your acquired data to file.
  */

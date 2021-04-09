@@ -9,11 +9,10 @@
 /// \endcond
 
 #include "FileWriterFaserModule.hpp"
-#include "Utils/Ers.hpp"
 
 using namespace std::chrono_literals;
 namespace daqutils = daqling::utilities;
-
+using namespace FileWriterIssues;
 static std::string to_zero_lead(const int value, const unsigned precision)
 {
      std::ostringstream oss;
@@ -30,7 +29,7 @@ std::ofstream FileWriterFaserModule::FileGenerator::next() {
       std::time_t t = std::time(nullptr);
       char tstr[32];
       if (!std::strftime(tstr, sizeof(tstr), "%F-%T", std::localtime(&t))) {
-        throw std::runtime_error("Failed to format timestamp");
+        throw TimestampFormatFailed(ERS_HERE);
       }
       return std::string(tstr);
     }
@@ -41,9 +40,7 @@ std::ofstream FileWriterFaserModule::FileGenerator::next() {
     case 'r': // The run number
     return to_zero_lead(m_run_number,6);
     default:
-      std::stringstream ss;
-      ss << "Unknown output file argument '" << c << "'";
-      throw std::runtime_error(ss.str());
+      throw UnknownOutputFileArgument(ERS_HERE,c);
     }
   };
 
@@ -105,7 +102,7 @@ void FileWriterFaserModule::configure() {
   m_channels = m_config.getConnections()["receivers"].size();
   if (ch<m_channels) {
     CRITICAL("Channel names needs to be supplied for all input channels");
-    throw std::logic_error("Missing channel names");
+    throw MissingChannelNames(ERS_HERE);
   }
   m_pattern = m_config.getSettings()["filename_pattern"];
   INFO("Configuration:");
@@ -118,7 +115,7 @@ void FileWriterFaserModule::configure() {
              << m_pattern
              << "' may not yield unique output file on rotation; your files may be silently "
                 "overwritten. Ensure the pattern contains all fields ('%c', '%n' and '%D').");
-    throw std::logic_error("invalid file name pattern");
+    throw InvalidFileNamePattern(ERS_HERE,m_pattern);
   }
 
   DEBUG("setup finished");
@@ -238,7 +235,7 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
     if (out.fail()) {
       CRITICAL(" Write operation for channel " << chid << " of size " << data.size()
                                                << "B failed!");
-      throw std::runtime_error("std::ofstream::fail()");
+      throw OfstreamFailed(ERS_HERE,chid,data.size());
     }
     m_channelMetrics.at(chid).bytes_written += data.size();
     bytes_written += data.size();

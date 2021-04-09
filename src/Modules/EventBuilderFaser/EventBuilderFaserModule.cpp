@@ -30,18 +30,29 @@ EventBuilderFaserModule::~EventBuilderFaserModule() { }
 
 void EventBuilderFaserModule::configure() {
   FaserProcess::configure();
-  registerVariable(m_eventCounts[EventTags::PhysicsTag], "PhysicsEvents");
-  registerVariable(m_eventCounts[EventTags::PhysicsTag], "PhysicsRate", metrics::RATE);
-  registerVariable(m_eventCounts[EventTags::MonitoringTag], "MonitoringEvents");
-  registerVariable(m_eventCounts[EventTags::MonitoringTag], "MonitoringRate", metrics::RATE);
-  registerVariable(m_eventCounts[EventTags::TLBMonitoringTag], "TLBMonitoringEvents");
-  registerVariable(m_eventCounts[EventTags::TLBMonitoringTag], "TLBMonitoringRate", metrics::RATE);
-  registerVariable(m_eventCounts[EventTags::CalibrationTag], "CalibrationEvents");
-  registerVariable(m_eventCounts[EventTags::CalibrationTag], "CalibrationRate", metrics::RATE);
-  registerVariable(m_pendingCounts[EventTags::PhysicsTag], "PhysicsEventsPending");
-  registerVariable(m_pendingCounts[EventTags::MonitoringTag], "MonitoringEventsPending");
-  registerVariable(m_pendingCounts[EventTags::TLBMonitoringTag], "TLBMonitoringEventsPending");
-  registerVariable(m_pendingCounts[EventTags::CalibrationTag], "CalibrationEventsPending");
+  registerVariable(m_eventCounts[EventTags::PhysicsTag],       "Events_received_Physics");
+  registerVariable(m_eventCounts[EventTags::PhysicsTag],       "Event_rate_Physics", metrics::RATE);
+  //registerVariable(m_eventCounts[EventTags::MonitoringTag],    "Events_received_Monitoring");
+  //registerVariable(m_eventCounts[EventTags::MonitoringTag],    "Event_rate_Monitoring", metrics::RATE);
+  registerVariable(m_eventCounts[EventTags::TLBMonitoringTag], "Events_received_TLBMonitoring");
+  registerVariable(m_eventCounts[EventTags::TLBMonitoringTag], "Event_rate_TLBMonitoring", metrics::RATE);
+  registerVariable(m_eventCounts[EventTags::CalibrationTag],   "Events_received_Calibration");
+  registerVariable(m_eventCounts[EventTags::CalibrationTag],   "Event_rate_Calibration", metrics::RATE);
+  registerVariable(m_eventCounts[EventTags::CorruptedTag],     "Events_received_Corrupted");
+  registerVariable(m_eventCounts[EventTags::CorruptedTag],     "Event_rate_Corrupted", metrics::RATE);
+  registerVariable(m_pendingCounts[EventTags::PhysicsTag],     "Events_pending_Physics");
+  //registerVariable(m_pendingCounts[EventTags::MonitoringTag], "Events_pending_Monitoring");
+  //registerVariable(m_pendingCounts[EventTags::TLBMonitoringTag], "Events_pending_TLBMonitoring");
+  //registerVariable(m_pendingCounts[EventTags::CalibrationTag], "Events_pending_Calibration");
+
+  registerVariable(m_sentCounts[EventTags::PhysicsTag],         "Events_sent_Physics");
+  //  registerVariable(m_sentCounts[EventTags::MonitoringTag],      "Events_sent_Monitoring");
+  registerVariable(m_sentCounts[EventTags::TLBMonitoringTag],   "Events_sent_TLBMonitoring");
+  registerVariable(m_sentCounts[EventTags::CalibrationTag],     "Events_sent_Calibration");
+  registerVariable(m_sentCounts[EventTags::CorruptedTag],     "Events_sent_Corrupted");
+  registerVariable(m_sentCounts[EventTags::IncompleteTag],     "Events_sent_Incomplete");
+  registerVariable(m_sentCounts[EventTags::DuplicateTag],     "Events_sent_Duplicate");
+
   registerVariable(m_run_number, "RunNumber");
   registerVariable(m_run_start, "RunStart");
   registerVariable(m_corruptFragmentCount, "CorruptFragmentErrors");
@@ -54,7 +65,11 @@ void EventBuilderFaserModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
   m_run_number = run_num; 
   m_run_start = std::time(nullptr);
-  for(int ii=0;ii<MaxAnyTag;ii++) m_eventCounts[ii]=0;
+  for(int ii=0;ii<MaxAnyTag;ii++) {
+    m_eventCounts[ii]=0;
+    m_pendingCounts[ii]=0;
+    m_sentCounts[ii]=0;
+  }
   m_corruptFragmentCount=0;
   m_duplicateSourceCount=0;
   m_timeoutCount=0;
@@ -174,6 +189,7 @@ void EventBuilderFaserModule::runner() noexcept {
 	sendEvent(tag,m_pendingEvents[tag][event_id]);
 	delete m_pendingEvents[tag][event_id];
 	m_pendingEvents[tag].erase(event_id);
+	m_sentCounts[tag]++;
       }
       m_readyEvents[tag].clear();
       // check oldest event

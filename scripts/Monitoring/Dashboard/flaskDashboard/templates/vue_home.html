@@ -19,7 +19,7 @@
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <!-- day.js manipulating timestamps -->
     <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
- 
+
     <!-- Plotly library -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <!-- custom css -->
@@ -79,7 +79,7 @@
                     c_tags: [],
                     c_modules_tags: [],
                     c_selected_module: null,
-                    c_all_tags : []
+                    c_all_tags: []
 
                 }
             },
@@ -109,9 +109,9 @@
                 emitTags: function () {
                     this.$emit('search-tags', this.selected_tags)
                 },
-                emitModule: function() {
-                const selected_module = [this.c_selected_module]
-                this.$emit('search-tags', selected_module)
+                emitModule: function () {
+                    const selected_module = [this.c_selected_module]
+                    this.$emit('search-tags', selected_module)
                 }
             },
             template: //html
@@ -228,8 +228,8 @@
 
                 },
                 openTimeView() {
-                console.log('Appuyé sur time_view', this.id);
-                window.open("/history_view/" + this.id, "_blank", "width=600, height=455")
+                    console.log('Appuyé sur time_view', this.id);
+                    window.open("/history_view/" + this.id, "_blank", "width=600, height=455")
                 }
             },
             watch: {
@@ -315,16 +315,16 @@
                         })
                         .then(response => {
                             this.c_ids = response.data.sort()
-                            })
-                            },
-                            deleteHistory() {
-                            axios.get("/delete_history")
+                        })
+                },
+                deleteHistory() {
+                    axios.get("/delete_history")
 
                 },
 
                 deleteTags() {
-                axios.get("/delete_tags")
-                window.location.reload(true)
+                    axios.get("/delete_tags")
+                    window.location.reload(true)
                 }
             },
         });

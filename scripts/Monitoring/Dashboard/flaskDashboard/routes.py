@@ -30,51 +30,11 @@ r = redis.Redis(
 r5 = redis.Redis(
     host="localhost", port=6379, db=5, charset="utf-8", decode_responses=True
 )
-## Redis database where the old histograms are stored (--> for time view).
-r6 = redis.Redis(
-    host="localhost", port=6379, db=6, charset="utf-8", decode_responses=True
-)
 
+## Redis database where the previous histograms are stored.
 r7 = redis.Redis(
     host="localhost", port=6379, db=7, charset="utf-8", decode_responses=True
 )
-
-
-def recent_histograms_save():
-    """! Defines the job that will be executed every 60 seconds
-    It saves the current histograms in the redis database 1 in the redis database 6
-    """
-    with app.app_context():
-        IDs = getAllIDs().get_json()  # we get all the IDs
-    for ID in IDs:
-        module, histname = ID.split("-")
-        histobj = r.hget(module, f"h_{histname}")
-        if histobj != None:
-            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-            figure = dict(data=data, layout=layout)
-            hist = dict(timestamp=timestamp, figure=figure)
-            entry = {json.dumps(hist): float(timestamp)}
-            r6.zadd(ID, entry)
-            if r6.zcard(ID) >= 31:
-                r6.zremrangebyrank(ID, 0, 0)
-
-
-def historic_histograms_save():
-    """! Defines the job that will be executed every 30 minutes.
-    It saves the current histograms in the redis database 1 in the redis database 6
-    """
-    with app.app_context():
-        IDs = getAllIDs().get_json()
-    for ID in IDs:
-        module, histname = ID.split("-")
-        histobj = r.hget(module, f"h_{histname}")
-        if histobj != None:
-            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-            figure = dict(data=data, layout=layout)
-            hist = dict(timestamp=timestamp, figure=figure)
-            entry = {json.dumps(hist): float(timestamp)}
-            r6.zadd(f"historic:{ID}", entry)
-
 
 def histograms_save():
     """! Defines the job that will be executed every 60 seconds
@@ -89,7 +49,7 @@ def histograms_save():
             data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
             figure = dict(data=data, layout=layout)
             hist = dict(timestamp=timestamp, figure=figure)
-            if r7.hlen(module) >= 30:
+            if r7.hlen(ID) >= 30:
                 key_to_remove = sorted(r7.hkeys(ID))[0]
                 r7.hdel(ID, key_to_remove)
             r7.hset(ID, str(timestamp), json.dumps(hist))
@@ -112,8 +72,6 @@ def old_histogram_save():
 
 # setting up the background jobs
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=recent_histograms_save, trigger="interval", seconds=60)
-scheduler.add_job(func=historic_histograms_save, trigger="interval", seconds=1800)
 scheduler.add_job(func=histograms_save, trigger="interval", seconds=60)
 scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=1800)
 scheduler.start()
@@ -140,25 +98,6 @@ def getIDs():
     return jsonify(keys)
 
 
-def getTagsByID(ids):
-    """! Returns a dict with the ID as the key, and the tags as the associated values.
-
-    @param ids The list of all IDs.
-
-    @return The dictionary which contains the ID and the set of tags.
-    """
-    packet = {}
-    for ID in ids:
-        module, histname = ID.split("-")
-        # get the members associated with the key id:<histID> in the redis database
-        packet[ID] = list(r5.smembers(f"id:{ID}"))
-        packet[ID].sort()
-        # remove the default tags of the histogram (module name and histogram name)
-        packet[ID].pop(packet[ID].index(module))
-        packet[ID].pop(packet[ID].index(histname))
-    return packet
-
-
 @app.route("/storeDefaultTagsAndIDs", methods=["GET"])
 def storeDefaultTagsAndIDs():
     """! Stores in the Redis database the default tags for all the histograms.
@@ -173,68 +112,6 @@ def storeDefaultTagsAndIDs():
         r5.sadd(f"id:{ID}", module, histname)
     return "true"
 
-
-@app.route("/addTag", methods=["GET"])
-def addTag():
-    """! Add the tag sent with a GET request from the client in the redis database.
-    @return "true" if it already exists, "false" otherwise.
-    """
-    exists = "false"
-    tag_to_add = request.args.get("tag")
-    ID, tag = tag_to_add.split(",")
-    if r5.exists(f"tag:{tag}"):
-        exists = "true"
-    r5.sadd(f"id:{ID}", tag)
-    r5.sadd(f"tag:{ tag }", ID)
-    return exists
-
-
-@app.route("/removeTag", methods=["GET"])
-def removeTag():
-    """! Remove the tag sent through a GET request.
-    @return "true" if the tag exists after the delete, "false" otherwise.
-    """
-    exists = "true"
-    tag_to_remove = request.args.get("tag")
-    ID, tag = tag_to_remove.split(",")
-    r5.srem(f"id:{ID}", tag)
-    r5.srem(f"tag:{tag}", ID)
-    if not r5.exists(f"tag:{tag}"):
-        exists = "false"
-    return exists
-
-
-@app.route("/renameTag", methods=["GET"])
-def renameTag():
-    """! Renames the tag sent through a GET request.
-    If the old tag name still exists, oldtagexists is set to "true", "false" otherwise.
-    If the new tag name already exists, "newtagexists" is set to "true", "false" otherwise.
-
-    @return JSON response: the dictionary containing oldtagexists and newtagexists.
-    """
-    oldtagexists = "true"
-    newtagexists = "false"
-    tag = request.args.get("tag")
-    ID, oldname, newname = tag.split(",")
-    if r5.exists(f"tag:{newname}"):
-        newtagexists = "true"
-    r5.srem(f"id:{ID}", oldname)
-    r5.sadd(f"id:{ID}", newname)
-    r5.srem(f"tag:{oldname}", ID)
-    r5.sadd(f"tag:{ newname }", ID)
-    if not r5.exists(f"tag:{oldname}"):
-        oldtagexists = "false"
-    packet = dict(oldtagexists=oldtagexists, newtagexists=newtagexists)
-    return jsonify(packet)
-
-
-@app.route("/getAllTags", methods=["GET"])
-def getAllTags():
-    """! Returns a JSON response with all the tags stored in the redis database."""
-    tags = r5.keys("tag*")
-    tags = [s.replace("tag:", "") for s in tags]
-    tags.sort()
-    return jsonify(tags)
 
 
 @app.route("/getAllIDs")
@@ -259,110 +136,11 @@ def getModules():
     return jsonify(modules)
 
 
-@app.route("/flush_tags", methods=["GET"])
-def flush_tags():
-    """! Flushes the tags redis database (db 5)."""
-    r5.flushdb()
-    return "true"
-
-
 @app.route("/flush_current_histograms", methods=["GET"])
 def flush_current_histograms():
     """! Flushes the last histograms redis database (db 1)."""
     r.flushdb()
     return "true"
-
-
-@app.route("/delete_histos", methods=["GET"])
-def delete_histos():
-    """! Flushes the saved histograms from the redis database (db 6). """
-    r6.flushdb()
-    return "true"
-
-
-@app.route("/change_histo", methods=["GET"])
-def change_histo():
-    """! Gets the selected histogram in the time view from a GET request and return the select."""
-    timestamp = request.args.get("selected")
-    ID = request.args.get("ID")
-    newGraph = ""  # can be removed ?
-    if "old" in timestamp:
-        newGraph = r6.zrangebyscore(
-            f"historic:{ID}",
-            (timestamp.replace("old:", "")),
-            (timestamp.replace("old:", "")),
-        )
-    else:
-        newGraph = r6.zrangebyscore(f"{ID}", timestamp, (timestamp))
-    return jsonify(newGraph[0])
-
-
-@app.route("/home")
-def home():
-    """! Renders the default web page."""
-    storeDefaultTagsAndIDs()
-    return render_template("home.html")
-
-
-@app.route("/monitor", methods=["GET", "POST"])
-def monitor():
-    """! Renders the monitor webpage for a specified module or tag(s)."""
-    if request.method == "GET":
-        if request.args.get("selected_module"):
-            selected_module = request.args.get("selected_module")
-            ids = r5.smembers(f"tag:{selected_module}")
-            ids = list(ids)
-            tagsbyID = getTagsByID(ids)
-            return render_template(
-                "monitor.html",
-                selected_module=selected_module,
-                tagsByID=tagsbyID,
-                ids=ids,
-            )
-        elif request.args.getlist("selected_tags"):
-            selected_tags = request.args.getlist("selected_tags")
-            selected_tags = [f"tag:{s}" for s in selected_tags]
-            ids = r5.sunion(selected_tags)
-            ids = list(ids)
-            tagsbyID = getTagsByID(ids)
-            return render_template("monitor.html", tagsByID=tagsbyID, ids=ids)
-
-        else:
-            return render_template("home.html")
-
-
-@app.route("/time_view/<string:ID>")
-def timeView(ID):
-    """! Renders the time view webpage for a specified histogram ID."""
-
-    data = r6.zrangebyscore(ID, "-inf", "inf", withscores=True)
-    if len(data) == 0:
-        return render_template("time_view.html", ID=ID)
-    timestamps = [element[1] for element in data]
-    lastHisto = data[0][0]
-    historic_data = r6.zrangebyscore(f"historic:{ID}", "-inf", "inf", withscores=True)
-    historic_timestamps = [element[1] for element in historic_data]
-
-    return render_template(
-        "time_view.html",
-        historic_timestamps=historic_timestamps,
-        timestamps=timestamps,
-        lastHisto=lastHisto,
-        ID=ID,
-    )
-
-
-@app.route("/single_view/<string:ID>")
-def single_view(ID):
-    """! Renders the single view webpage for a specified histogram ID. """
-    return render_template("single_view.html", ID=ID)
-
-
-# @app.route("/settings")
-# def settings():
-
-#     return render_template("")
-
 
 @app.route("/download_tags_json")
 def download_tags_json():
@@ -397,37 +175,6 @@ def load_tags_from_file():
         else:
             flash("No chosen file", category="danger")
     return redirect(url_for("home"))
-
-
-@app.route("/source", methods=["GET"])
-def lastHistogram():
-    """! Returns the last histogram associated to the ID given in the GET request as a dictionary.
-    The dictionary contains the figure dictionary compatible with the  Plotly library and its timestamp."""
-    ID = request.args.get("ID")
-    packet = {}
-    source, histname = ID.split("-")
-    histobj = r.hget(source, f"h_{histname}")
-    if histobj is not None:
-        data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-        fig = dict(data=data, layout=layout, config={"responsive": True})
-        packet = {"figure": fig, "time": float(timestamp)}
-    return jsonify(packet)
-
-
-@app.context_processor
-def context_processor():
-    """! Returns variable that will be global for Jinja (the templating language)."""
-    modules = getModules().get_json()
-    tags = getAllTags().get_json()
-    return dict(modules=modules, tags=tags)
-
-
-@app.template_filter("ctime")
-def timectime(s):
-    """! Defines a custom filter for Jinja that returns a custom timestamp format."""
-    d = time.localtime(s)
-    datestring = time.strftime("%x %X", d)
-    return datestring
 
 
 ### Migrating to Vue.js ###
@@ -508,7 +255,7 @@ def add_tag():
 
 @app.route("/remove_tag", methods=["POST"])
 def remove_tag():
-    """! Remove the tag sent through a GET request.
+    """! Remove the tag sent through a POST request.
     @return "true" if the tag exists after the delete, "false" otherwise.
     """
     exists = True

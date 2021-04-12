@@ -10,12 +10,17 @@
 // needed for external tools
 #include "Commons/FaserProcess.hpp"
 #include "EventFormats/DAQFormats.hpp"
-#include "Exceptions/Exceptions.hpp"
+#include <ers/Issue.h>
 
 // needed for sendECR() and runner() protection
 #include <mutex>
 
-class DigitizerReceiverException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
+ERS_DECLARE_ISSUE(
+DigitizerReceiver,                                                              // namespace
+    DigitizerReceiverIssue,                                                    // issue name
+  message,  // message
+    ((std::string) message)
+)
 
 
 class DigitizerReceiverModule : public FaserProcess {

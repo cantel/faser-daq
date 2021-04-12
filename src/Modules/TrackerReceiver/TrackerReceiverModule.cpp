@@ -285,7 +285,7 @@ void TrackerReceiverModule::configure() {
       m_trb->ApplyPhaseConfig();
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
-      } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
+      } catch ( ers::Issue &e ){ // FIXME figure out why it won't catch TRBAccessException
          if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw e; };
          ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
          m_trb->SetDirectParam(0);
@@ -447,7 +447,7 @@ void TrackerReceiverModule::runner() noexcept {
                   m_checksum_mismatches_rate = m_checksum_mismatches/m_physicsEventCount;
                 }
             }
-          } catch (TrackerDataException & e) {
+          } catch (TrackerDataFormat::TrackerDataIssue & e) {
               local_event_id = 0xffffff;
               local_bc_id = 0xffff;
               local_status = EventStatus::CorruptedFragment;

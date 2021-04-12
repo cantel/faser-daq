@@ -6,7 +6,7 @@
 
 #define HOSTNAME_MAX_LENGTH 100
 #define NCHANNELS 16
-
+using namespace DigitizerReceiver;
 DigitizerReceiverModule::DigitizerReceiverModule() { INFO(""); 
   INFO("DigitizerReceiverModule Constructor");
 
@@ -23,7 +23,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
     if(length>HOSTNAME_MAX_LENGTH){
       ERROR("This is too long of a name : "<<std::string(cfg_ip));
       ERROR("Max length of IP hostname : "<<HOSTNAME_MAX_LENGTH);
-      THROW(DigitizerHardwareException, "IP address or hostname is too long");
+      throw DigitizerHardwareIssue(ERS_HERE, "IP address or hostname is too long");
     }
 
     // lookup the IP address dynamically
@@ -37,12 +37,12 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
     if(IsIPAddress(ip_addr_string)==false){
       strcpy(ip_addr_string,"0.0.0.0");
       ERROR("This is not an IP address : "<<ip_addr_string);
-      THROW(DigitizerHardwareException, "Invalid IP address");
+      throw DigitizerHardwareIssue(ERS_HERE, "Invalid IP address");
     }
   }
   else{
     ERROR("No IP address setting in the digitizer configuration.");
-    THROW(DigitizerHardwareException, "No valid IP address setting in your config");
+    throw DigitizerHardwareIssue(ERS_HERE, "No valid IP address setting in your config");
   }
     
   INFO("Digitizer IP Address : "<<ip_addr_string);
@@ -57,7 +57,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   }
   else{
     ERROR("No VME Base address setting in the digitizer configuration.");
-    THROW(DigitizerHardwareException, "No valid VME Base address setting in your config");
+    throw DigitizerHardwareIssue(ERS_HERE, "No valid VME Base address setting in your config");
   }
   INFO("Base VME Address = 0x"<<std::setfill('0')<<std::setw(8)<<std::hex<<vme_base_address);
 

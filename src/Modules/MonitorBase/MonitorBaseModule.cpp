@@ -14,7 +14,7 @@
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
-
+using namespace MonitorBase;
 MonitorBaseModule::MonitorBaseModule() { 
    INFO("");
 
@@ -246,7 +246,7 @@ void MonitorBaseModule::setupHistogramManager() {
     } catch (std::exception &e){
       m_status = STATUS_ERROR;
       sleep(1); // wait for error state to appear in RC GUI.
-      THROW(ConfigurationException, "Configuring histogram manager failed.");
+      throw ConfigurationIssue(ERS_HERE, "Configuring histogram manager failed.");
     }
     m_histogramming_on = true;
   }

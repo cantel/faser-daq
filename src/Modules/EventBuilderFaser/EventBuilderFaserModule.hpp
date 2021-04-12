@@ -15,7 +15,12 @@ using namespace DAQFormats;
 
 enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 
-class EventBuilderException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
+ERS_DECLARE_ISSUE(
+EventBuilderFaser,                                                              // namespace
+    EventBuilderIssue,                                                    // issue name
+  message,  // message
+    ((std::string) message)
+)
 
 class EventBuilderFaserModule : public FaserProcess {
  public:

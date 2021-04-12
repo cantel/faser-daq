@@ -15,7 +15,7 @@ using namespace TLBMonFormat;
 using namespace daqling::utilities;
 using namespace TLBDataFormat;
 using namespace TLBMonFormat;
-
+using namespace TriggerReceiver;
 #define _ms 1000 // used for usleep
 
 TriggerReceiverModule::TriggerReceiverModule() {
@@ -78,7 +78,7 @@ void TriggerReceiverModule::configure() {
   if ( cfg_LUTconfig==nullptr ) {
     m_status=STATUS_ERROR;
     sleep(1); // wait for error state to appear in RC GUI.
-    THROW(Exceptions::BaseException,"No LUT configuration provided. TLB Configuration failed.");
+    throw TriggerReceiverIssue(ERS_HERE,"No LUT configuration provided. TLB Configuration failed.");
   }
   
   // attempt configuration with cfg and appropriate LUT
@@ -86,7 +86,7 @@ void TriggerReceiverModule::configure() {
     m_tlb->ConfigureAndVerifyTLB(cfg);
     m_tlb->ConfigureLUT(cfg_LUTconfig);
     INFO("Done.");  
-  } catch ( TLBAccessException &e ){
+  } catch ( TLBAccessIssue &e ){
       m_status=STATUS_ERROR;
       sleep(1);
       throw e;

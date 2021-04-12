@@ -14,7 +14,7 @@
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
-
+using namespace EventBuilderFaser;
 EventBuilderFaserModule::EventBuilderFaserModule() {
   auto cfg = m_config.getSettings();
 
@@ -101,7 +101,7 @@ void EventBuilderFaserModule::addFragment(EventFragment *fragment) {
   }
 
   auto event=pendingEvents[event_id];
-  if (!event) THROW(EventBuilderException,"Out of memory");
+  if (!event) throw EventBuilderIssue(ERS_HERE,"Out of memory");
   
   try {
     auto status=event->addFragment(fragment);

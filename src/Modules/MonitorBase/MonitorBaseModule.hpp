@@ -24,8 +24,13 @@ using namespace DAQFormats;
 using namespace TLBDataFormat;
 using namespace TLBMonFormat;
 
-class ConfigurationException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
 
+ERS_DECLARE_ISSUE(
+MonitorBase,                                                              // namespace
+    ConfigurationIssue,                                                    // issue name
+  message,  // message
+    ((std::string) message)
+)
 class MonitorBaseModule : public FaserProcess {
  public:
   MonitorBaseModule();

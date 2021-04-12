@@ -101,7 +101,7 @@ void FileWriterFaserModule::configure() {
   }
   m_channels = m_config.getConnections()["receivers"].size();
   if (ch<m_channels) {
-    CRITICAL("Channel names needs to be supplied for all input channels");
+    ERROR("Channel names needs to be supplied for all input channels");
     throw MissingChannelNames(ERS_HERE);
   }
   m_pattern = m_config.getSettings()["filename_pattern"];
@@ -111,7 +111,7 @@ void FileWriterFaserModule::configure() {
   INFO(" -> channels: " << m_channels);
 
   if (!FileGenerator::yields_unique(m_pattern)) {
-    CRITICAL("Configured file name pattern '"
+    ERROR("Configured file name pattern '"
              << m_pattern
              << "' may not yield unique output file on rotation; your files may be silently "
                 "overwritten. Ensure the pattern contains all fields ('%c', '%n' and '%D').");
@@ -129,13 +129,13 @@ void FileWriterFaserModule::configure() {
     // Register statistical variables
     for (auto & [ chid, metrics ] : m_channelMetrics) {
       m_statistics->registerMetric<std::atomic<size_t>>(&metrics.bytes_written,
-                                                        fmt::format("BytesWritten_{}",  m_channel_names[chid]),
+                                                        "BytesWritten_"+m_channel_names[chid],
                                                         daqling::core::metrics::RATE);
       m_statistics->registerMetric<std::atomic<size_t>>(
-          &metrics.payload_queue_size, fmt::format("PayloadQueueSize_{}", m_channel_names[chid]),
+          &metrics.payload_queue_size, "PayloadQueueSize_"+m_channel_names[chid],
           daqling::core::metrics::LAST_VALUE);
       m_statistics->registerMetric<std::atomic<size_t>>(&metrics.payload_size,
-                                                        fmt::format("PayloadSize_{}", m_channel_names[chid]),
+                                                        "PayloadSize_"+m_channel_names[chid],
                                                         daqling::core::metrics::AVERAGE);
     }
     DEBUG("Metrics are setup");
@@ -233,8 +233,6 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
   const auto flush = [&](daqutils::Binary &data) {
     out.write(data.data<char *>(), static_cast<std::streamsize>(data.size()));
     if (out.fail()) {
-      CRITICAL(" Write operation for channel " << chid << " of size " << data.size()
-                                               << "B failed!");
       throw OfstreamFailed(ERS_HERE,chid,data.size());
     }
     m_channelMetrics.at(chid).bytes_written += data.size();

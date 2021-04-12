@@ -15,7 +15,8 @@
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
-
+using namespace TrackerReceiverIssues;
+using namespace TRBAccessIssues;
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
     m_status = STATUS_OK;
@@ -29,7 +30,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
     }
     else if (!runEmulation) {
       ERROR("No board ID specified.");
-      throw std::runtime_error("No board ID specified.");
+      throw NoBoardID(ERS_HERE);
     }
 
     bool usingUSB(false);
@@ -40,7 +41,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
       }
       else {
         ERROR("No DAQ IP specified.");
-        throw std::runtime_error("No DAQ IP specified.");
+        throw NoDaqIP(ERS_HERE);
       }
       INFO("SC and DAQ IPs have been specified. Assuming we're communicating through the ether!");
     }
@@ -226,11 +227,11 @@ void TrackerReceiverModule::configure() {
             m_status=STATUS_ERROR;
             ERROR("Empty configuration file provided for module "<<l_moduleNo<<".");
             sleep(1);
-            THROW(TRBConfigurationException, "Cannot configure module due to missing configuration file.");
+            throw ModuleConfigurationFailed(ERS_HERE,std::to_string(l_moduleNo));
           }
           try {
             m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
-          } catch ( TRBConfigurationException &e) {
+          } catch ( TRBConfigurationIssue &e) {
              m_status=STATUS_ERROR;
              sleep(1);
              throw e;
@@ -277,7 +278,7 @@ void TrackerReceiverModule::configure() {
         usleep(1e5); // 100 ms
       }
       if ( !(status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL) ) {
-        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
+        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TLB_CLK_SyncFailed(ERS_HERE);}  
         continue;
       } 
       m_trb->WritePhaseConfigReg();
@@ -312,9 +313,9 @@ void TrackerReceiverModule::configure() {
   INFO("TRB configurations set by user:");
   m_trb->GetConfig()->Print();
   try { m_trb->VerifyConfigReg(); }
-  catch ( TRBConfigurationException& e) {
+  catch ( TRBConfigurationIssue& e) {
     m_status=STATUS_ERROR;
-    ERROR("Configurations read back do not match configurations sent.");
+    ERROR("Configurations read back do not match configurations sent. Reason: "<<e);
   }
   INFO("TRB configured successfully. TRB configurations read back:");
   m_trb->ReadbackAndPrintConfig();

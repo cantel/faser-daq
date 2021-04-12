@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <bitset>
+#include <ers/Issue.h>
 
 ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
                   NoBoardID,                                                   // Class name
@@ -25,12 +26,6 @@ ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                        
                   "No DAQ IP specified.", // Message
                   ERS_EMPTY)                      // Args
 
-ERS_DECLARE_ISSUE_BASE(TrackerReceiverIssues,                                          // namespace name
-      TLB_CLK_SyncFailed,                                                  // issue name
-      TRBAccessIssue,                                                // base issue name
-      "Could not sync to TLB CLK",                                 // message
-      ERS_EMPTY,            // base class attributes
-      ERS_EMPTY )                                     // this class attributes
 
 
 class TrackerReceiverModule : public FaserProcess {

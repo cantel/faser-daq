@@ -22,6 +22,13 @@ DigitizerReceiver,                                                              
     ((std::string) message)
 )
 
+ERS_DECLARE_ISSUE(
+DigitizerReceiver,                                                              // namespace
+    DigitizerHardwareIssue,                                                    // issue name
+  message,  // message
+    ((std::string) message)
+)
+
 
 class DigitizerReceiverModule : public FaserProcess {
  public:

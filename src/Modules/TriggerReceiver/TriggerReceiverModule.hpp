@@ -6,7 +6,6 @@
 
 #include "Commons/FaserProcess.hpp"
 #include "TLBAccess/TLBAccess.h"
-#include <ers/Issue.h>
 
 ERS_DECLARE_ISSUE(
 TriggerReceiver,                                                              // namespace

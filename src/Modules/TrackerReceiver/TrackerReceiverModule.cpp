@@ -16,7 +16,7 @@
 using namespace DAQFormats;
 using namespace daqling::utilities;
 using namespace TrackerReceiverIssues;
-using namespace TRBAccessIssues;
+
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
     m_status = STATUS_OK;
@@ -227,11 +227,11 @@ void TrackerReceiverModule::configure() {
             m_status=STATUS_ERROR;
             ERROR("Empty configuration file provided for module "<<l_moduleNo<<".");
             sleep(1);
-            throw ModuleConfigurationFailed(ERS_HERE,std::to_string(l_moduleNo));
+            THROW(TRBConfigurationException, "Cannot configure module due to missing configuration file.");
           }
           try {
             m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
-          } catch ( TRBConfigurationIssue &e) {
+          } catch ( TRBConfigurationException &e) {
              m_status=STATUS_ERROR;
              sleep(1);
              throw e;
@@ -278,14 +278,14 @@ void TrackerReceiverModule::configure() {
         usleep(1e5); // 100 ms
       }
       if ( !(status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL) ) {
-        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TLB_CLK_SyncFailed(ERS_HERE);}  
+        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
         continue;
       } 
       m_trb->WritePhaseConfigReg();
       m_trb->ApplyPhaseConfig();
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
-      } catch ( ers::Issue &e ){ // FIXME figure out why it won't catch TRBAccessException
+      } catch ( Exceptions::BaseException &e  ){ // FIXME figure out why it won't catch TRBAccessException
          if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw e; };
          ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
          m_trb->SetDirectParam(0);
@@ -313,9 +313,9 @@ void TrackerReceiverModule::configure() {
   INFO("TRB configurations set by user:");
   m_trb->GetConfig()->Print();
   try { m_trb->VerifyConfigReg(); }
-  catch ( TRBConfigurationIssue& e) {
+  catch ( TRBConfigurationException& e) {
     m_status=STATUS_ERROR;
-    ERROR("Configurations read back do not match configurations sent. Reason: "<<e);
+    ERROR("Configurations read back do not match configurations sent. Reason: "<<e.what());
   }
   INFO("TRB configured successfully. TRB configurations read back:");
   m_trb->ReadbackAndPrintConfig();
@@ -447,7 +447,7 @@ void TrackerReceiverModule::runner() noexcept {
                   m_checksum_mismatches_rate = m_checksum_mismatches/m_physicsEventCount;
                 }
             }
-          } catch (TrackerDataFormat::TrackerDataIssue & e) {
+          } catch (TrackerDataException & e) {
               local_event_id = 0xffffff;
               local_bc_id = 0xffff;
               local_status = EventStatus::CorruptedFragment;

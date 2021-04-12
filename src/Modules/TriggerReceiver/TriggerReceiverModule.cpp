@@ -86,7 +86,7 @@ void TriggerReceiverModule::configure() {
     m_tlb->ConfigureAndVerifyTLB(cfg);
     m_tlb->ConfigureLUT(cfg_LUTconfig);
     INFO("Done.");  
-  } catch ( TLBAccessIssue &e ){
+  } catch ( TLBAccessException &e ){
       m_status=STATUS_ERROR;
       sleep(1);
       throw e;

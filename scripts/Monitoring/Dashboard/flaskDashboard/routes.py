@@ -136,11 +136,6 @@ def getModules():
     return jsonify(modules)
 
 
-@app.route("/flush_current_histograms", methods=["GET"])
-def flush_current_histograms():
-    """! Flushes the last histograms redis database (db 1)."""
-    r.flushdb()
-    return "true"
 
 @app.route("/download_tags_json")
 def download_tags_json():
@@ -236,7 +231,6 @@ def histogram_from_ID():
         packet = dict(timestamp=float(timestamp), fig=fig, ID=ID, tags=tags)
     return jsonify(packet)
 
-
 ## Tag section
 
 
@@ -271,16 +265,7 @@ def remove_tag():
 
 @app.route("/history_view/<string:ID>")
 def history_view(ID):
-
-    #    histograms_save()
-    timestamps = sorted(r7.hkeys(ID))
-    old_timestamps = sorted(r7.hkeys(f"old:{ID}"))
-    return render_template(
-        "vue_historyView.html",
-        ID=ID,
-        timestamps=timestamps,
-        old_timestamps=old_timestamps,
-    )
+    return render_template("vue_historyView.html",ID=ID)
 
 
 @app.route("/stored_timestamps", methods=["GET"])
@@ -316,7 +301,17 @@ def delete_tags():
     """! Flushes the tags redis database (db 5)."""
     r5.flushdb()
     return jsonify({"response": "OK"})
+
+
+@app.route("/delete_current", methods=["GET"])
+def delete_current():
+    """! Flushes the current histogram redis database (db 1)."""
+    r.flushdb() 
+    return jsonify({"response": "OK"})
+
+
 ## functions
+
 
 
 def get_tags_by_ID(ID):

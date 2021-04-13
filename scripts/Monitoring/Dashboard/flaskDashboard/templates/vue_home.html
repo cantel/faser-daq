@@ -40,11 +40,14 @@
                         </v-btn>
                     </template>
                     <v-list>
+                        <v-list-item :disabled="c_safeMode" @click="deleteCurrent">
+                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete current
+                        </v-list-item>
                         <v-list-item :disabled="c_safeMode" @click="deleteHistory">
                             <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete history
                         </v-list-item>
                         <v-list-item :disabled="c_safeMode" @click="deleteTags">
-                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete Tags
+                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete tags
                         </v-list-item>
                         <v-list-item>
                             <v-switch v-model="c_safeMode" label="Safe mode" hide-details></v-switch>
@@ -325,6 +328,11 @@
                 deleteTags() {
                     axios.get("/delete_tags")
                     window.location.reload(true)
+                },
+                //api call to delete current histograms
+                deleteCurrent() {
+                axios.get("/delete_current")
+                window.location.reload(true)
                 }
             },
         });

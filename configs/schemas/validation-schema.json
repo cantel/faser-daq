@@ -123,33 +123,8 @@
             "title": "Connections",
             "propertyOrder": 100,
             "properties": {
-              "receivers": { 
-                "type": "array", 
-                "format": "table",
-                "title": "Receivers",
-                "uniqueItems": true,
-                "items": {
-                    "type": "object",
-		    "title": "",
-		    "options": {
-			"disable_collapse": true
-		    },
-		    "oneOf":[{"$ref":"refs/connection-schema.json#/definitions/receivers"}]
-		}
-	      },
-              "senders": { 
-                "type": "array", 
-                "format": "table",
-                "title": "Senders",
-                "uniqueItems": true,
-                "items": {
-                    "type": "object",
-		    "options": {
-			"disable_collapse": true
-		    },
-		    "oneOf":[{"$ref":"refs/connection-schema.json#/definitions/senders"}]
-		}
-	      }
+              "receivers": {"oneOf":[{"$ref":"refs/connection-schema.json#/definitions/receivers"}] },
+              "senders": { "oneOf":[{"$ref":"refs/connection-schema.json#/definitions/senders"}] }
             }
           }
         },

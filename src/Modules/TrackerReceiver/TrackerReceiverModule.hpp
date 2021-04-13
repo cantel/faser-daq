@@ -26,7 +26,24 @@ ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                        
                   "No DAQ IP specified.", // Message
                   ERS_EMPTY)                      // Args
 
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  MissingConfigurationFile,                                                   // Class name
+                  "Cannot configure module due to missing configuration file.", // Message
+                  ERS_EMPTY)                      // Args
 
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  TLBSyncFailed,                                                   // Class name
+                  "Could not sync to TLB CLK", // Message
+                  ERS_EMPTY)                      // Args
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  TRBConfigurationIssue,                                                   // Class name
+                  "Caught TRBConfigurationException with message:"<<std::endl<<message, // Message
+                  ((std::string)message))                      // Args
+
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  TRBAccesIssue,                                                   // Class name
+                  "Caught TRBAccesException with message:"<<std::endl<<message, // Message
+                  ((std::string)message))                      // Args
 
 class TrackerReceiverModule : public FaserProcess {
  public:

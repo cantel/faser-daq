@@ -89,7 +89,7 @@ void TriggerReceiverModule::configure() {
   } catch ( TLBAccessException &e ){
       m_status=STATUS_ERROR;
       sleep(1);
-      throw e;
+      throw TLBAccesIssue(ERS_HERE,e.what());
   }
 
 }

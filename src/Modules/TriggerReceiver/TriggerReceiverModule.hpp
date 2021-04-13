@@ -13,6 +13,12 @@ TriggerReceiver,                                                              //
   message,  // message
     ((std::string) message)
 )
+ERS_DECLARE_ISSUE(
+TriggerReceiver,                                                              // namespace
+    TLBAccesIssue,                                                    // issue name
+  "Caught TLBAccesException with message:"<<std::endl<<message,  // message
+    ((std::string) message)
+)
 using namespace FASER;
 
 class TriggerReceiverModule : public FaserProcess {

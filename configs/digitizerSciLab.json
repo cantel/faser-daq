@@ -14,7 +14,8 @@
         "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
         "connections": {
           "receivers": [
-            { "chid": 0,"port": 8101, "host": "localhost", "type": "pair", "transport": "tcp" }
+            { "chid": 0,"port": 8101, "host": "localhost", "type": "ZMQPair", "transport": "tcp",
+              "queue":{ "type":"FollyProducerConsumer", "queue_size":1000 }}
           ],
           "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
 	}

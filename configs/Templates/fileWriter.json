@@ -24,53 +24,109 @@
         "connections": {
           "receivers": [
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 0,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8200
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8200
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 1,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8201
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8201
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 2,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8202
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8202
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 3,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8203
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8203
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 4,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8216
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8216
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 5,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8217
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8217
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 6,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8218
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8218
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             }
           ]
         }

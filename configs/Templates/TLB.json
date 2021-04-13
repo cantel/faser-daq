@@ -37,11 +37,15 @@
         "connections": {
             "senders": [
               {
-                  "type": "pair",
+                  "type": "ZMQPair",
                   "chid": 0,
                   "transport": "tcp",
                   "host": "*",
-                  "port": 8100
+                  "port": 8100,
+                  "queue":{
+                    "type":"FollyProducerConsumer",
+                    "queue_size":1000
+                    }
               }
             ]
       }
@@ -84,11 +88,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8100
+		    "port": 8100,
+            "queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -131,11 +139,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8100
+		    "port": 8100,
+            "queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -153,11 +165,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
+		    "type": "ZMQPubSub",
 		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8203
+            "connections":[
+                {
+                    "transport": "tcp",
+                    "host": "localhost",
+                    "port": 8203
+                }
+            ],
+            "queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -175,11 +195,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
+		    "type": "ZMQPubSub",
 		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+            "connections":[
+                {
+                    "transport": "tcp",
+                    "host": "localhost",
+                    "port": 8200
+                }
+            ],
+            "queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}

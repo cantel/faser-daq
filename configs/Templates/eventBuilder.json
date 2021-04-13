@@ -15,53 +15,77 @@
           "receivers": [],
 	  "senders": [
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 0,
               "transport": "tcp",
               "host": "*",
-              "port": 8200
+              "port": 8200,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 1,
               "transport": "tcp",
               "host": "*",
               "port": 8201
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 2,
               "transport": "tcp",
               "host": "*",
-              "port": 8202
+              "port": 8202,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 3,
               "transport": "tcp",
               "host": "*",
-              "port": 8203
+              "port": 8203,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 16,
               "transport": "tcp",
               "host": "*",
-              "port": 8216
+              "port": 8216,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 17,
               "transport": "tcp",
               "host": "*",
-              "port": 8217
+              "port": 8217,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pubsub",
+              "type": "ZMQPubSub",
               "chid": 18,
               "transport": "tcp",
               "host": "*",
-              "port": 8218
+              "port": 8218,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             }
           ]
 	  }

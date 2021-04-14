@@ -29,7 +29,6 @@ TrackerReceiverModule::TrackerReceiverModule() {
       m_userBoardID = cfg["BoardID"];
     }
     else if (!runEmulation) {
-      ERROR("No board ID specified.");
       throw NoBoardID(ERS_HERE);
     }
 
@@ -40,7 +39,6 @@ TrackerReceiverModule::TrackerReceiverModule() {
         m_DAQIP = cfg["DAQIP"];
       }
       else {
-        ERROR("No DAQ IP specified.");
         throw NoDaqIP(ERS_HERE);
       }
       INFO("SC and DAQ IPs have been specified. Assuming we're communicating through the ether!");
@@ -225,9 +223,8 @@ void TrackerReceiverModule::configure() {
           }
           else { 
             m_status=STATUS_ERROR;
-            ERROR("Empty configuration file provided for module "<<l_moduleNo<<".");
             sleep(1);
-            throw MissingConfigurationFile(ERS_HERE);
+            throw MissingConfigurationFile(ERS_HERE,l_moduleNo);
           }
           try {
             m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module

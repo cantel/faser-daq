@@ -27,8 +27,7 @@ void HistogramManager::configure(uint8_t ioT, std::string connStr, unsigned inte
     m_histo_socket->connect(connStr);
     INFO(" Histograms are published on: " << connStr);
   } catch (std::exception &e) {
-    ERROR(" Failed to add Histo publisher channel! ZMQ returned: " << e.what());
-    throw e;
+    throw FailedToAddZMQChannel(ERS_HERE,e.what());
   }
   m_zmq_publisher = true;
 }

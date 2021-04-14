@@ -28,8 +28,8 @@ ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                        
 
 ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
                   MissingConfigurationFile,                                                   // Class name
-                  "Cannot configure module due to missing configuration file.", // Message
-                  ERS_EMPTY)                      // Args
+                  "Cannot configure module due to missing configuration file. - Empty configuration file provided for module "<<l_moduleNo<<".", // Message
+                  ((unsigned)l_moduleNo))                      // Args
 
 ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
                   TLBSyncFailed,                                                   // Class name

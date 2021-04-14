@@ -101,7 +101,6 @@ void FileWriterFaserModule::configure() {
   }
   m_channels = m_config.getConnections()["receivers"].size();
   if (ch<m_channels) {
-    ERROR("Channel names needs to be supplied for all input channels");
     throw MissingChannelNames(ERS_HERE);
   }
   m_pattern = m_config.getSettings()["filename_pattern"];
@@ -111,10 +110,6 @@ void FileWriterFaserModule::configure() {
   INFO(" -> channels: " << m_channels);
 
   if (!FileGenerator::yields_unique(m_pattern)) {
-    ERROR("Configured file name pattern '"
-             << m_pattern
-             << "' may not yield unique output file on rotation; your files may be silently "
-                "overwritten. Ensure the pattern contains all fields ('%c', '%n' and '%D').");
     throw InvalidFileNamePattern(ERS_HERE,m_pattern);
   }
 

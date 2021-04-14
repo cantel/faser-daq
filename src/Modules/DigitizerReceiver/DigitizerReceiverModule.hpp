@@ -17,17 +17,27 @@
 
 ERS_DECLARE_ISSUE(
 DigitizerReceiver,                                                              // namespace
-    DigitizerReceiverIssue,                                                    // issue name
-  message,  // message
-    ((std::string) message)
+    DigitizerHardwareIssue,                                                    // issue name
+  ERS_EMPTY,  // message
+  ERS_EMPTY
+)
+ERS_DECLARE_ISSUE_BASE(DigitizerReceiver,                                          // namespace name
+      HostNameOrIPTooLong,                                                  // issue name
+      DigitizerReceiver::DigitizerHardwareIssue,                                                // base issue name
+      "This is too long of a name: "<<ip<< "Max length of IP hostname: "<<len,                                 // message
+      ERS_EMPTY,            // base class attributes
+      ((std::string) ip)
+      ((unsigned)len)                                     // this class attributes
+)
+ERS_DECLARE_ISSUE_BASE(DigitizerReceiver,                                          // namespace name
+      InvalidIP,                                                  // issue name
+      DigitizerReceiver::DigitizerHardwareIssue,                                                // base issue name
+      "Invalid IP address: "<<ip,                                 // message
+      ERS_EMPTY,            // base class attributes
+      ((std::string) ip)                                     // this class attributes
 )
 
-ERS_DECLARE_ISSUE(
-DigitizerReceiver,                                                              // namespace
-    DigitizerHardwareIssue,                                                    // issue name
-  message,  // message
-    ((std::string) message)
-)
+
 
 
 class DigitizerReceiverModule : public FaserProcess {

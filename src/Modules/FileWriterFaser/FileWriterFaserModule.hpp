@@ -35,12 +35,13 @@ ERS_DECLARE_ISSUE(FileWriterIssues,                                             
 
 ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
                   MissingChannelNames,                                                   // Class name
-                  "Missing channel names", // Message
+                  "Missing channel names. - Channel names needs to be supplied for all input channels.", // Message
                   ERS_EMPTY)                      // Args
 
 ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
                   InvalidFileNamePattern,                                                   // Class name
-                  "Invalid file name pattern: " << c, // Message
+                  "Configured file name pattern '" << c<<"' may not yield unique output file on rotation; your files may be silently "
+                "overwritten. Ensure the pattern contains all fields ('%c', '%n' and '%D').", // Message
                   ((std::string)c))                      // Args
 
 ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace

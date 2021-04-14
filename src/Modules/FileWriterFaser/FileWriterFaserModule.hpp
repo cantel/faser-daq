@@ -18,6 +18,7 @@
 #include "folly/ProducerConsumerQueue.h"
 #include "Utils/Ers.hpp"
 #include "Utils/Common.hpp"
+#include "Utils/ReusableThread.hpp"
 
 /**
  * Issues related to FileWriterFaserModule.

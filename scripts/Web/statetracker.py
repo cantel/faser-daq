@@ -6,9 +6,11 @@ import json
 import os
 import redis
 import requests
+import socket
 import subprocess
 import threading
 import time
+import urllib3
 from os import environ as env
 
 import helpers as h
@@ -18,6 +20,12 @@ r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_respo
 
 run_user="FASER"
 run_pw="HelloThere"
+
+influxDB=None
+hostname=socket.gethostname()
+if os.access("/etc/faser-secrets.json",os.R_OK):
+    influxDB=json.load(open("/etc/faser-secrets.json"))
+    urllib3.disable_warnings()
 
 #FIXME: this should probably be in daqcontrol
 import supervisor_wrapper
@@ -101,6 +109,15 @@ def stateTracker(logger):
                                       json = stopMsg)
                     if r.status_code!=200:
                         logger.error("Failed to register end of run information: "+r.text)
+                    if influxDB:
+                        stopComment=stopMsg['endcomment'].replace('"',"'")
+                        runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{stopMsg["type"]}",runNumber={runNumber}'
+                        r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                                        auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                                        data=runData,
+                                        verify=False)
+                        if r.status_code!=204:
+                            logger.error("Failed to post end of run information to influxdb: "+r.text)
                 logger.info("Stop done")
             elif cmd=="shutdown":
                 logger.info("Calling shutdown")
@@ -131,6 +148,14 @@ def stateTracker(logger):
                                       json = stopMsg)
                     if r.status_code!=200:
                         logger.error("Failed to register end of run information: "+r.text)
+                    if influxDB:
+                        runData=f'runStatus,host={hostname} state="Shutdown",comment="Run was shut down",runNumber={runNumber}'
+                        r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                                        auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                                        data=runData,
+                                        verify=False)
+                        if r.status_code!=204:
+                            logger.error("Failed to post end of run information to influxdb: "+r.text)
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
@@ -208,6 +233,15 @@ def stateTracker(logger):
                                 logger.error("Failed to get run number: "+r.text)
                     except requests.exceptions.ConnectionError:
                         logger.error("Could not connect to run service")
+                    startMsg=subInfo['startcomment'].replace('"',"'")
+                    runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
+                    r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                                    auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                                    data=runData,
+                                    verify=False)
+                    if r.status_code!=204:
+                        logger.error("Failed to post end of run information to influxdb: "+r.text)
+
                     r1.set("runNumber",runNumber)
                     r1.set("runType",runType)
                     r1.set("runStart",time.time())

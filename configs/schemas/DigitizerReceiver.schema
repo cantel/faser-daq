@@ -58,19 +58,26 @@
           "description": "The rotary-switch configured physical address of the digitizer board in the VME crate.",
           "default": "0x04320000"
         },
-        "buffer_length": {
-          "type": "number",
-          "title": "Readout Window Size",
+        "buffer": {
+          "type": "object",
+          "title": "Acquisition Configuration",
           "propertyOrder": 4,
-          "description": "The number of samples for the buffer acquisition window. The possible values are limited.",
-          "default": 630
-        },
-        "buffer_n_post_samples": {
-          "type": "number",
-          "title": "Readout Window Post Samples",
-          "propertyOrder": 5,
-          "description": "The minimum number of samples acquired following a trigger. Note that there is a board minimum, so this cannot be reduced to 0 and the value you enter here will be increased by approximately 70 samples.",
-          "default": 120
+	  "properties": {
+	      "length": {
+		  "type": "number",
+		  "title": "Readout Window Size",
+		  "propertyOrder": 4,
+		  "description": "The number of samples for the buffer acquisition window. The possible values are limited.",
+		  "default": 600
+              },
+              "n_post_samples": {
+		  "type": "number",
+		  "title": "Readout Window Post Samples",
+		  "propertyOrder": 5,
+		  "description": "The minimum number of samples acquired following a trigger. Note that there is a board minimum, so this cannot be reduced to 0 and the value you enter here will be increased by approximately 70 samples.",
+		  "default": 0
+	      }
+	  }
         },
         "trigger_acquisition": {
           "type": "object",
@@ -98,25 +105,11 @@
             }
           }
         },
-        "trigger_software": {
-          "type": "object",
-          "title": "Software-based Trigger Generation",
-          "description": "",
-          "propertyOrder": 7,
-          "properties": {
-            "enable": {
-              "type": "boolean",
-              "title": "Enable",
-              "description": "Enable the generation and sending of software triggers at the specified rate.  For this to be meaningful, you also need to specify the acquisition method with software triggers.",
-              "default": "false"
-            },
-            "rate": {
-              "type": "number",
-              "title": "SW Trigger Rate",
-              "description": "Rate of software triggers sent for data acquisition if this capability is enabled.",
-              "default": 3
-            }
-          }
+        "trigger_software_rate": {
+            "type": "number",
+            "title": "SW Trigger Rate",
+            "description": "Rate of software triggers sent for data acquisition if this capability is enabled.",
+            "default": 3
         },
         "trigger_internal": {
           "type": "array",
@@ -268,7 +261,7 @@
               "type": "number",
               "title": "Event Readout Number",
               "description": "Maximum number of events read out in one polling of digitizer.",
-              "default": 2000
+              "default": 1
             },
             "readout_method": {
               "type": "string",
@@ -293,18 +286,6 @@
               "title": "Inter-packet Pause",
               "description": "Time to wait between transfer of packets",
               "default": 0
-            },
-            "software_buffer": {
-              "type": "number",
-              "title": "SW Buffer Size",
-              "description": "Size of software buffer that holds events in PC before transfer to EventBuilder.  In units of int32.",
-              "default": 2000000
-            },
-            "print_event": {
-              "type": "boolean",
-              "title": "Print Event",
-              "description": "Will print events to the log file.  This is largely for debugging of the readout.",
-              "default": false
             },
             "n_busy_level": {
               "type": "number",

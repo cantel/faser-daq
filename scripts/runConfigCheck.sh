@@ -3,6 +3,7 @@ python3 CheckConfigs.py \
 --schemas   \
 schemas/DigitizerReceiver.schema \
 schemas/DigitizerMonitor.schema     \
+schemas/DigitizerNoise.schema     \
 schemas/DigitizerReceiver.schema     \
 schemas/EmulatorMonitor.schema     \
 schemas/EventBuilderFaser.schema     \
@@ -26,8 +27,10 @@ Templates/emulator.json \
 Templates/fileWriter.json \
 Templates/monitor.json \
 Templates/eventBuilder.json \
+Templates/digitizerNoise.json \
 --configs   \
 digitizerSciLab.json \
+digitizerTI12.json \
 digiTLBSciLab.json \
 combinedEHN1.json \
 combinedSciLab.json \

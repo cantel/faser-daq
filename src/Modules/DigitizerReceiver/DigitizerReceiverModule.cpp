@@ -90,7 +90,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   INFO("Speed(interface)     [MB/s]: "<<(interface_rate*4)/1000000.     );
 
   // store local run settings
-  auto cfg_software_trigger_rate = cfg["trigger_software"]["rate"];
+  auto cfg_software_trigger_rate = cfg["trigger_software_rate"];
   if(cfg_software_trigger_rate==nullptr){
     INFO("You did not specify a SW trigger rate - we will set it to 0 to be safe.");
     m_software_trigger_rate = 0;
@@ -101,15 +101,11 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
   INFO("Trigger rate for SW triggers at : "<<m_software_trigger_rate);
   
   // check for consistency of SW triggers and acquisition
-  m_software_trigger_enable = false;
   if(m_software_trigger_rate!=0){
     auto trig_acquisition_sw = cfg["trigger_acquisition"]["software"];
     if(trig_acquisition_sw==0){
-      INFO("Inconsistent settings - you have enabled SW triggers to be sent but not acquiring on SW triggers.");
-      INFO("Are you sure you want this settings?");
-    } else {
-      m_software_trigger_enable = true;
-    }
+      WARNING("Inconsistent settings - you have enabled SW triggers to be sent but not acquiring on SW triggers.");
+    } 
   }
 
 
@@ -258,30 +254,22 @@ void DigitizerReceiverModule::runner() noexcept {
   m_readout_method = (std::string)cfg["readout"]["readout_method"];
   m_readout_blt    = (int)cfg["readout"]["readout_blt"];
 
-  // dynamically allocate the array for the raw payload
-  // guidance : http://www.fredosaurus.com/notes-cpp/newdelete/50dynamalloc.html#:~:text=Allocate%20an%20array%20with%20code,and%20allocates%20that%20size%20array.
-  DEBUG("Allocating software buffer ...");
-  unsigned int* m_raw_payload = NULL;   
-  m_software_buffer = (int)cfg["readout"]["software_buffer"];           
-  DEBUG("NBuffer ..."<<std::dec<<m_software_buffer);
-  m_raw_payload = new unsigned int[m_software_buffer];  
-  
   // number of channels enabled
-  m_nchannels_enabled = 0;
+  int nchannels_enabled = 0;
   for(int iChan=0; iChan<16; iChan++){
     if((int)cfg["channel_readout"].at(iChan)["enable"]==1)
-      m_nchannels_enabled++;
+      nchannels_enabled++;
   }
   
   // size of the buffer in samples for a single channel
   DEBUG("Getting buffer size");
-  m_buffer_size = m_digitizer->RetrieveBufferLength();
-  int m_event_size =  ((m_buffer_size/2)*m_nchannels_enabled)+4; //should check this from digitizer
+  int buffer_size = m_digitizer->RetrieveBufferLength();
+  int m_event_size =  ((buffer_size/2)*nchannels_enabled)+4; //should check this from digitizer
   INFO("Expected event size: "<<m_event_size<<" words");
   // maximum number of events to be requested
   DEBUG("Getting readout request size");
   m_n_events_requested = m_readout_blt;
-  
+  unsigned int* m_raw_payload = new unsigned int[m_event_size*m_n_events_requested];
   // start time
   auto time_start = chrono::high_resolution_clock::now();
   int last_check_count = 0;
@@ -291,7 +279,7 @@ void DigitizerReceiverModule::runner() noexcept {
 
     // send software triggers for development if enabled
     // these are sent with a pause after the sending to have a rate limit
-    if(m_software_trigger_enable){
+    if(m_software_trigger_rate){
       m_sw_count++;
       INFO("Software trigger sending trigger number : "<<m_sw_count);
       m_digitizer->SendSWTrigger();
@@ -321,7 +309,7 @@ void DigitizerReceiverModule::runner() noexcept {
     float read_time=0;
     float parse_time=0;
     while(n_events_present){
-      DEBUG("[Running] - Sending batch of events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
+      DEBUG("[Running] - Reading events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
       DEBUG("With m_ECRcount : "<<m_ECRcount);
       
       // clear the monitoring map which will retrieve the info to pass to monitoring metrics

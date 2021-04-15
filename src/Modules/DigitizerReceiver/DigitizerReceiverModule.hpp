@@ -39,14 +39,6 @@ class DigitizerReceiverModule : public FaserProcess {
   // the digitizer hardware accessor object
   vx1730 *m_digitizer;
   
-  // raw data payload
-  //unsigned int* m_raw_payload;
-  int m_software_buffer;
-  
-  // channel and buffer info
-  int m_nchannels_enabled;
-  int m_buffer_size;
-
   // picked up in config and used elsewhere  
   std::string m_readout_method;
   int         m_readout_blt;
@@ -120,7 +112,6 @@ class DigitizerReceiverModule : public FaserProcess {
 
   // for SW trigger sending
   int m_sw_count;
-  bool m_software_trigger_enable;
   float m_software_trigger_rate;
   
 };

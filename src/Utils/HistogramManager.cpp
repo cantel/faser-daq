@@ -12,11 +12,13 @@ HistogramManager::HistogramManager() {
 
 
 HistogramManager::~HistogramManager(){
-
+  m_histo_socket->setsockopt(ZMQ_LINGER, 1);
   for (std::map<std::string, HistBase *>::iterator hist_itr = m_histogram_map.begin(); hist_itr!=m_histogram_map.end(); hist_itr++){
     delete (hist_itr->second);
   }
   m_histogram_map.clear();
+  m_histo_socket.reset();
+  m_histo_context.reset();
 }
 
 void HistogramManager::configure(uint8_t ioT, std::string connStr, unsigned interval) {

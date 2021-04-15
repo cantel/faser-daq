@@ -52,10 +52,6 @@
            "type": "integer",
            "minimum": 1
         }
-        "display_thresh": {
-           "type": "integer",
-           "minimum": 1
-        }
       },
       "format":"grid",
       "propertyOrder": 5

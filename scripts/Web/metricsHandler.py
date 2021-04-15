@@ -33,7 +33,7 @@ def metricsHandler(stopEvent,logger):
               r1.hset(source,name,val)
             else:
               r.hset(source,name,val)
-            if "Rate" in name: # this should be configurable
+            if "rate" in name: # this should be configurable
                 metric="History:"+source+"_"+name
                 r.lpush(metric,val)
                 r.ltrim(metric,0,historyLength) 

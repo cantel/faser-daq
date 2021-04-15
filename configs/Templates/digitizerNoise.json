@@ -1,0 +1,26 @@
+{
+    "DigitizerNoise": {
+        "name": "digitizernoise",
+        "host": "localhost",
+        "port": 5561,
+        "type": "DigitizerNoise",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+        "metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings": {
+            "fragmentID": 262144,
+            "buffer_length": 600,
+            "publish_interval": 20
+        },
+        "connections": {
+            "receivers": [
+                {
+                    "type": "pubsub",
+                    "chid": 0,
+                    "transport": "tcp",
+                    "host": "localhost",
+                    "port": 8200
+                }
+            ]
+        }
+    }
+}

@@ -309,7 +309,8 @@
 	"settings": {
             "fragmentID": 262144,
             "buffer_length": 600,
-            "publish_interval": 20
+            "publish_interval": 20,
+	    "display_thresh": 50
 	},
 	"connections": {
             "receivers": [

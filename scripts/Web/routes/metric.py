@@ -124,7 +124,7 @@ def getEventCounts():
   types=["Physics","Calibration","TLBMonitoring"]
   values={}
   for rateType in types:
-    name=rateType+"Events"
+    name="Events_sent_"+rateType
     value=r.hget(rateSource,name)
     value = value.decode().split(':')
     values[name]=int(value[1])

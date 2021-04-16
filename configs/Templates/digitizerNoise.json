@@ -1,9 +1,9 @@
 {
-    "DigitizerNoise": {
+    "DigitizerNoiseMonitor": {
         "name": "digitizernoise",
         "host": "localhost",
         "port": 5561,
-        "type": "DigitizerNoise",
+        "type": "DigitizerNoiseMonitor",
         "loglevel":         { "$ref": "top.json#loglevel" },
         "metrics_settings": { "$ref": "top.json#metrics_settings" },
         "settings": {

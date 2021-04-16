@@ -9,7 +9,7 @@
 #include <fstream>      // std::ofstream
 /// \endcond
 
-#include "DigitizerNoiseModule.hpp"
+#include "DigitizerNoiseMonitorModule.hpp"
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
@@ -17,14 +17,14 @@ using namespace std::chrono;
 // only monitoring the first two channels
 #define NCHANNELS 15
 
-DigitizerNoiseModule::DigitizerNoiseModule() { 
+DigitizerNoiseMonitorModule::DigitizerNoiseMonitorModule() { 
   INFO("Instantiating ...");
 }
 
-DigitizerNoiseModule::~DigitizerNoiseModule() { 
+DigitizerNoiseMonitorModule::~DigitizerNoiseMonitorModule() { 
 }
 
-void DigitizerNoiseModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void DigitizerNoiseMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   DEBUG("Digitizer monitoring");
 
   // the m_event object is populated with the event binary here
@@ -71,15 +71,15 @@ void DigitizerNoiseModule::monitor(daqling::utilities::Binary &eventBuilderBinar
   
 }
 
-void DigitizerNoiseModule::register_hists() {
+void DigitizerNoiseMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerNoise ... " );
   
   INFO(" ... done registering histograms ... " );
   return;
 }
 
-void DigitizerNoiseModule::register_metrics() {
-  INFO( "... registering metrics in DigitizerNoiseModule ... " );
+void DigitizerNoiseMonitorModule::register_metrics() {
+  INFO( "... registering metrics in DigitizerNoiseMonitorModule ... " );
 
   register_error_metrics();
 
@@ -106,7 +106,7 @@ void DigitizerNoiseModule::register_metrics() {
   return;
 }
 
-void DigitizerNoiseModule::GetPedestalMeanRMS(std::vector<uint16_t> input, float &mean, float &rms){
+void DigitizerNoiseMonitorModule::GetPedestalMeanRMS(std::vector<uint16_t> input, float &mean, float &rms){
   int start=0;
   int end=input.size();
   float sum=0.0;
@@ -124,7 +124,7 @@ void DigitizerNoiseModule::GetPedestalMeanRMS(std::vector<uint16_t> input, float
   rms = sqrt(sumsq/count-mean*mean);
 }
 
-int DigitizerNoiseModule::CountPeaks(std::vector<uint16_t> input, float mean, float threshold){
+int DigitizerNoiseMonitorModule::CountPeaks(std::vector<uint16_t> input, float mean, float threshold){
   int start=0;
   int end=input.size();
   bool above=false;

@@ -40,12 +40,19 @@ subsequently gathered into a single event :
 <br>
 
 ### Trigger Logic Board (TLB)
- 
+
+The Trigger Logic Board is a General Purpose Input Output (GPIO) board designed at the University of Geneva.
+It acts as the central trigger processer of the FASER experiment, mapping the digitizer trigger input lines to 4 available physics trigger items, and issuing an "L1Accept" signal 
+to the digitizer and tracker readout boards to initiate readout of a triggered event. In addition to physics trigger items, there is a configurable internally generated random or fixed trigger
+item, and an LED calibration trigger item mapped to a dedicated signal input connected to the LED calibration system.
+The TLB has configurable prescales for each trigger item, and further dynamically manages the final rate by vetoing trigger items.
+The TLB software drivers are located in the [gpiodrivers](https://gitlab.cern.ch/faser/online/gpiodrivers) git repository.
+Its communication protocol covers both USB and ethernet communication.   
 
 ### Tracker Readout Board (TRB)
 Tracker Readout Board (TRB) is a board mediating the communication between readout PC and 
 tracker modules. It is built on General Purpose Input Output (GPIO) board developed at 
-University of Geneva. The communication with the board is possible via USB or ethernet. 
+University of Geneva, identical to the TLB. The communication with the board is possible via USB or ethernet. 
 Drivers to this this board are located in [gpiodrivers](https://gitlab.cern.ch/faser/online/gpiodrivers) 
 repository.  Apart from the drivers repository also contains testing programs allowing to test basic
 ethernet communication between the board and PC as well as the communication between the board and 

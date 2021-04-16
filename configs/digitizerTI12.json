@@ -20,7 +20,7 @@
         }
       },
       { "$ref": "Templates/fileWriter.json#FileWriter" },
-      { "$ref": "Templates/digitizerNoise.json#DigitizerNoise" }
+      { "$ref": "Templates/digitizerNoise.json#DigitizerNoiseMonitor" }
     ]
   }
 }

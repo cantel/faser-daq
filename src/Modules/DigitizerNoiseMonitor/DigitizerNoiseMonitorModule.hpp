@@ -7,10 +7,10 @@
 
 #include <cmath>
 
-class DigitizerNoiseModule : public MonitorBaseModule {
+class DigitizerNoiseMonitorModule : public MonitorBaseModule {
  public:
-  DigitizerNoiseModule();
-  ~DigitizerNoiseModule();
+  DigitizerNoiseMonitorModule();
+  ~DigitizerNoiseMonitorModule();
 
   void GetPedestalMeanRMS(std::vector<uint16_t> input, float &mean, float &rms);
   int CountPeaks(std::vector<uint16_t> input, float mean, float threshold);

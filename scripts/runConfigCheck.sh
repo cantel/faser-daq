@@ -3,7 +3,7 @@ python3 CheckConfigs.py \
 --schemas   \
 schemas/DigitizerReceiver.schema \
 schemas/DigitizerMonitor.schema     \
-schemas/DigitizerNoise.schema     \
+schemas/DigitizerNoiseMonitor.schema     \
 schemas/DigitizerReceiver.schema     \
 schemas/EmulatorMonitor.schema     \
 schemas/EventBuilderFaser.schema     \

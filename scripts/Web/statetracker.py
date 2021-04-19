@@ -101,6 +101,7 @@ def stateTracker(logger):
                     stopMsg=json.loads(m['data'][5:])
                     runinfo={}
                     runinfo["eventCounts"]=getEventCounts()
+                    physicsEvents=runinfo["eventCounts"]["Events_sent_Physics"]
                     stopMsg["runinfo"]=runinfo
                     r1.set("runType",stopMsg["type"])
                     r1.set("runOngoing",0)
@@ -111,7 +112,7 @@ def stateTracker(logger):
                         logger.error("Failed to register end of run information: "+r.text)
                     if influxDB:
                         stopComment=stopMsg['endcomment'].replace('"',"'")
-                        runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{stopMsg["type"]}",runNumber={runNumber}'
+                        runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{stopMsg["type"]}",runNumber={runNumber},physicsEvents={physicsEvents}'
                         r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
                                         auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
                                         data=runData,
@@ -140,6 +141,7 @@ def stateTracker(logger):
                     stopMsg={}
                     runinfo={}
                     runinfo["eventCounts"]=getEventCounts()
+                    physicsEvents=runinfo["eventCounts"]["Events_sent_Physics"]
                     stopMsg["runinfo"]=runinfo
                     stopMsg["endcomment"]="Run was shut down"
                     r1.set("runOngoing",0)
@@ -149,7 +151,7 @@ def stateTracker(logger):
                     if r.status_code!=200:
                         logger.error("Failed to register end of run information: "+r.text)
                     if influxDB:
-                        runData=f'runStatus,host={hostname} state="Shutdown",comment="Run was shut down",runNumber={runNumber}'
+                        runData=f'runStatus,host={hostname} state="Shutdown",comment="Run was shut down",runNumber={runNumber},physicsEvents={physicsEvents}'
                         r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
                                         auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
                                         data=runData,

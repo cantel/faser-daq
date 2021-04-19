@@ -33,6 +33,8 @@ if(NOT BUILD_New)
   set(BUILD_New OFF)
 endif()
 
+# Set use of DAQLING_LOGGING
+add_compile_definitions(DAQLING_LOGGING)
 # Add submodules
 add_subdirectory(faser-common)
 add_subdirectory(gpiodrivers)

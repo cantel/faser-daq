@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 
+#
+#  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+#
+
+
 import getopt
 import json
 import os

@@ -231,7 +231,7 @@ void TrackerReceiverModule::configure() {
           } catch ( TRBConfigurationException &e) {
              m_status=STATUS_ERROR;
              sleep(1);
-             throw TRBConfigurationIssue(ERS_HERE,e.what());
+             throw TRBConfigurationIssue(ERS_HERE,e);
           }
           INFO("Configuration of module " << l_moduleNo << " finished.");
         }
@@ -283,7 +283,7 @@ void TrackerReceiverModule::configure() {
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
       } catch ( Exceptions::BaseException &e  ){ // FIXME figure out why it won't catch TRBAccessException
-         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TRBAccesIssue(ERS_HERE,e.what()); };
+         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TRBAccesIssue(ERS_HERE,e); };
          ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
          m_trb->SetDirectParam(0);
          uint16_t status;
@@ -312,7 +312,7 @@ void TrackerReceiverModule::configure() {
   try { m_trb->VerifyConfigReg(); }
   catch ( TRBConfigurationException& e) {
     m_status=STATUS_ERROR;
-    ERROR("Configurations read back do not match configurations sent. Reason: "<<e.what());
+    ERROR("Configurations read back do not match configurations sent. Reason: "<<e);
   }
   INFO("TRB configured successfully. TRB configurations read back:");
   m_trb->ReadbackAndPrintConfig();

@@ -16,8 +16,8 @@ TriggerReceiver,                                                              //
 ERS_DECLARE_ISSUE(
 TriggerReceiver,                                                              // namespace
     TLBAccesIssue,                                                    // issue name
-  "Caught TLBAccesException with message:"<<std::endl<<message,  // message
-    ((std::string) message)
+  "Caught TLBAccesException with message:",  // message
+    ERS_EMPTY
 )
 using namespace FASER;
 

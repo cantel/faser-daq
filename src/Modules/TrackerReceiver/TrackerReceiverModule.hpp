@@ -37,13 +37,13 @@ ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                        
                   ERS_EMPTY)                      // Args
 ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
                   TRBConfigurationIssue,                                                   // Class name
-                  "Caught TRBConfigurationException with message:"<<std::endl<<message, // Message
-                  ((std::string)message))                      // Args
+                  "Caught TRBConfigurationException with message:", // Message
+                  ERS_EMPTY)                      // Args
 
 ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
                   TRBAccesIssue,                                                   // Class name
-                  "Caught TRBAccesException with message:"<<std::endl<<message, // Message
-                  ((std::string)message))                      // Args
+                  "Caught TRBAccesException with message:", // Message
+                  ERS_EMPTY)                      // Args
 
 class TrackerReceiverModule : public FaserProcess {
  public:

@@ -16,7 +16,7 @@
 using namespace DAQFormats;
 using namespace daqling::utilities;
 using namespace TrackerReceiverIssues;
-
+using namespace TrackerData;
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
     m_status = STATUS_OK;

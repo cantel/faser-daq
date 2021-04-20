@@ -82,6 +82,18 @@ def lastMeas(metric):
     return json.dumps([1000.*float(value[0]), float(value[1])])
   return "0"
 
+@metric_blueprint.route("/eventCounts")
+def getEventCountsNow():
+  types=["Physics","Calibration","TLBMonitoring"]
+  values={}
+  for rateType in types:
+    name="Events_sent_"+rateType
+    value=r.hget(rateSource,name)
+    value = value.decode().split(':')
+    values[name]=int(value[1])
+  return values
+
+
 @metric_blueprint.route("/info/<boardType>/<string:source>")
 def values(boardType, source):
   module=request.args.get('module','')

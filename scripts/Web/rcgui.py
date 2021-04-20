@@ -70,6 +70,13 @@ def initialise():
     statetracker.initialize(selectedFile)
     return "true"
 
+@app.route("/initialise/<selectedFile>")
+def initialiseFile(selectedFile):
+    app.logger.info("Initialize button pressed with file: "+selectedFile)
+    statetracker.initialize(selectedFile)
+    return "true"
+
+
 @app.route("/start")
 def start():
     app.logger.info("Start button pressed")
@@ -123,6 +130,11 @@ def sendState():
             m=pubsub.get_message(timeout=10)
 #            print(m)
     return Response(getState(), mimetype='text/event-stream')
+
+@app.route("/stateNow")
+def getCurrentState():
+    json_data = r1.get("status")
+    return json_data
 
 @app.route('/log/<boardName>')
 def logfile(boardName):

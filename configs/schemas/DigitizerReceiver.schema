@@ -134,8 +134,6 @@
                 "group",
                 "enable",
                 "logic",
-                "threshold_ch0",
-                "threshold_ch1",
                 "output_width"
               ],
               "properties": {
@@ -175,6 +173,22 @@
                   "default": 10000,
                   "exclusiveMinimum": 0,
                   "exclusiveMaximum": 16383
+                },
+                "threshold_ch0_mV": {
+                  "type": "integer",
+                  "title": "Threshold Channel A in mV",
+                  "description": "Threshold for asserting a trigger to this trigger group.",
+                  "default": 10000,
+                  "exclusiveMinimum": 0,
+                  "exclusiveMaximum": 2000
+                },
+                "threshold_ch1_mV": {
+                  "type": "integer",
+                  "title": "Threshold Channel B in mV",
+                  "description": "Threshold for asserting a trigger to this trigger group.",
+                  "default": 10000,
+                  "exclusiveMinimum": 0,
+                  "exclusiveMaximum": 2000
                 },
                 "output_width": {
                   "type": "integer",

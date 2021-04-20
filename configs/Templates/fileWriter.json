@@ -9,7 +9,8 @@
         "metrics_settings": { "$ref": "top.json#metrics_settings" },
         "settings": {
           "max_filesize": 1000000000,
-          "buffer_size": 4000,
+          "buffer_size": 20000,
+	  "stop_timeout_ms": 1500,
           "filename_pattern": { "$ref": "top.json#filename_pattern" },
           "channel_names": [
             "Physics",
@@ -24,105 +25,77 @@
         "connections": {
           "receivers": [
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 0,
-              "connections":[
-                {
-                  "transport": "tcp",
-                  "host": "localhost",
-                  "port": 8200
-                }
-              ],
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8300,
               "queue":{
                 "type":"FollyProducerConsumer",
                 "queue_size":1000
               }
             },
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 1,
-              "connections":[
-                {
-                  "transport": "tcp",
-                  "host": "localhost",
-                  "port": 8201
-                }
-              ],
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8301,
               "queue":{
                 "type":"FollyProducerConsumer",
                 "queue_size":1000
               }
             },
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 2,
-              "connections":[
-                {
-                  "transport": "tcp",
-                  "host": "localhost",
-                  "port": 8202
-                }
-              ],
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8302,
               "queue":{
                 "type":"FollyProducerConsumer",
                 "queue_size":1000
               }
             },
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 3,
-              "connections":[
-                {
-                  "transport": "tcp",
-                  "host": "localhost",
-                  "port": 8203
-                }
-              ],
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8303,
               "queue":{
                 "type":"FollyProducerConsumer",
                 "queue_size":1000
               }
             },
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 4,
-              "connections":[
-                {
-                  "transport": "tcp",
-                  "host": "localhost",
-                  "port": 8216
-                }
-              ],
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8316,
               "queue":{
                 "type":"FollyProducerConsumer",
                 "queue_size":1000
               }
             },
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 5,
-              "connections":[
-                {
-                  "transport": "tcp",
-                  "host": "localhost",
-                  "port": 8217
-                }
-              ],
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8317,
               "queue":{
                 "type":"FollyProducerConsumer",
                 "queue_size":1000
               }
             },
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 6,
-              "connections":[
-                {
-                  "transport": "tcp",
-                  "host": "localhost",
-                  "port": 8218
-                }
-              ],
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8318,
               "queue":{
                 "type":"FollyProducerConsumer",
                 "queue_size":1000

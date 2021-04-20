@@ -55,19 +55,19 @@ function addRates() {
     var series=[];
     var graphs=[];
     for (ii = 0; ii<rateTypes.length; ii++) {
-	graphs.push(addRateGraph('History:eventbuilder01_'+rateTypes[ii]+'Rate',rateTypes[ii]+'RateGraph'));
+	graphs.push(addRateGraph('History:eventbuilder01_Event_rate_'+rateTypes[ii],rateTypes[ii]+'RateGraph'));
 	series.push(graphs[ii].series[0]);
     }
     const source = new EventSource("/monitoring/lastRates/1.0");
     source.onmessage = function (event) {
 	const data = JSON.parse(event.data);
 	for (ii = 0; ii<rateTypes.length; ii++) {
-	    if (rateTypes[ii]+'Rate' in data) {
-		series[ii].addPoint(data[rateTypes[ii]+'Rate'],true,false);
-		document.getElementById(rateTypes[ii]+"Rate").innerHTML=data[rateTypes[ii]+'Rate'][1];
+	    if ('Event_rate_'+rateTypes[ii] in data) {
+		series[ii].addPoint(data['Event_rate_'+rateTypes[ii]],true,false);
+		document.getElementById(rateTypes[ii]+"Rate").innerHTML=data['Event_rate_'+rateTypes[ii]][1];
 	    }
-	    if (rateTypes[ii]+'Events' in data) {
-		document.getElementById(rateTypes[ii]+"Events").innerHTML=data[rateTypes[ii]+'Events'][1];
+	    if ('Events_received_'+rateTypes[ii] in data) {
+		document.getElementById(rateTypes[ii]+"Events").innerHTML=data['Events_received_'+rateTypes[ii]][1];
 	    }
 	}
     };

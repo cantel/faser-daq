@@ -57,19 +57,10 @@ class DigitizerReceiverModule : public FaserProcess {
   ///////////////////////////////////////////
   // Digitizer specific methods and members
   ///////////////////////////////////////////
-  void PassEventBatch(std::vector<EventFragment> fragments);
 
   // the digitizer hardware accessor object
   vx1730 *m_digitizer;
   
-  // raw data payload
-  //unsigned int* m_raw_payload;
-  int m_software_buffer;
-  
-  // channel and buffer info
-  int m_nchannels_enabled;
-  int m_buffer_size;
-
   // picked up in config and used elsewhere  
   std::string m_readout_method;
   int         m_readout_blt;
@@ -116,11 +107,33 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<float> m_time_parse;
   std::atomic<float> m_time_overhead;
   
-  
+  std::atomic<int> m_corrupted_events;
+  std::atomic<int> m_empty_events;
+
+  std::atomic<int> m_info_udp_receive_timeout_counter;
+  std::atomic<int> m_info_wrong_cmd_ack_counter;
+  std::atomic<int> m_info_wrong_received_nof_bytes_counter;
+  std::atomic<int> m_info_wrong_received_packet_id_counter;
+
+  std::atomic<int> m_info_clear_UdpReceiveBuffer_counter;
+  std::atomic<int> m_info_read_dma_packet_reorder_counter;
+
+  std::atomic<int> m_udp_single_read_receive_ack_retry_counter;
+  std::atomic<int> m_udp_single_read_req_retry_counter;
+
+  std::atomic<int> m_udp_single_write_receive_ack_retry_counter;
+  std::atomic<int> m_udp_single_write_req_retry_counter;
+
+  std::atomic<int> m_udp_dma_read_receive_ack_retry_counter;
+  std::atomic<int> m_udp_dma_read_req_retry_counter;
+
+  std::atomic<int> m_udp_dma_write_receive_ack_retry_counter;
+  std::atomic<int> m_udp_dma_write_req_retry_counter;
+
+  uint64_t m_prev_event_id;
 
   // for SW trigger sending
   int m_sw_count;
-  bool m_software_trigger_enable;
   float m_software_trigger_rate;
   
 };

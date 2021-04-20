@@ -6,6 +6,7 @@
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
 #include <cmath>
+#define NCHANNELS 16
 
 class DigitizerMonitorModule : public MonitorBaseModule {
  public:
@@ -17,12 +18,14 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   void CheckBounds(std::vector<uint16_t> input, int& start, int& end);
   
   void FillChannelPulse(std::string histogram_name, int channel);
-  int m_pulse_sample_space;
-
+  float m_display_thresh;
  protected:
 
   void monitor(daqling::utilities::Binary &eventBuilderBinary);
   void register_hists();
   void register_metrics();
+  std::atomic<float> m_avg[NCHANNELS];
+  std::atomic<float> m_rms[NCHANNELS];
+
 
 };

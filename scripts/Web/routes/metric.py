@@ -60,14 +60,14 @@ def lastRates(sleeptime):
     prevValues={}
     while True:
       values={}
-      for valType in ["Rate","Events"]:
+      for valType in ["Event_rate_","Events_received_"]:
         for rateType in types:
-          name=rateType+valType
+          name=valType+rateType
           value=r.hget(rateSource,name)
           if value and value!=prevValues.get(name,""):
             prevValues[name]=value
             value = value.decode().split(':')
-            values[rateType+valType]=[1000.*float(value[0]),float(value[1])]
+            values[valType+rateType]=[1000.*float(value[0]),float(value[1])]
       if values:
         yield f"data:{json.dumps(values)}\n\n"
       time.sleep(sleeptime)
@@ -101,11 +101,14 @@ def sendValues(source):
       dbVals=r.hgetall(source)
       if dbVals==oldValues: continue
       oldValues=dbVals
+      now=time.time()
       for key in sorted(dbVals):
+        vTime=float(dbVals[key].split(b':')[0])
+        if now-vTime>3600: continue  #skip old measurements
         values.append({
           'key':key.decode(),
           'value': dbVals[key].split(b':')[1].decode(),
-          'time': time.ctime(float(dbVals[key].split(b':')[0]))
+          'time': time.ctime(vTime)
         })
       yield f"data:{json.dumps(values)}\n\n"
       time.sleep(1)
@@ -121,7 +124,7 @@ def getEventCounts():
   types=["Physics","Calibration","TLBMonitoring"]
   values={}
   for rateType in types:
-    name=rateType+"Events"
+    name="Events_sent_"+rateType
     value=r.hget(rateSource,name)
     value = value.decode().split(':')
     values[name]=int(value[1])

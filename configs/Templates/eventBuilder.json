@@ -15,8 +15,85 @@
           "receivers": [],
 	  "senders": [
             {
-              "type": "ZMQPubSub",
+              "type": "ZMQPair",
               "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8300,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPair",
+              "chid": 1,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8301,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPair",
+              "chid": 2,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8302,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPair",
+              "chid": 3,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8303,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPair",
+              "chid": 16,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8316,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPair",
+              "chid": 17,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8317,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPair",
+              "chid": 18,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8318,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPubSub",
+              "chid": 100,
               "transport": "tcp",
               "host": "*",
               "port": 8200,
@@ -27,14 +104,18 @@
             },
             {
               "type": "ZMQPubSub",
-              "chid": 1,
+              "chid": 101,
               "transport": "tcp",
               "host": "*",
-              "port": 8201
+              "port": 8201,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
               "type": "ZMQPubSub",
-              "chid": 2,
+              "chid": 102,
               "transport": "tcp",
               "host": "*",
               "port": 8202,
@@ -45,7 +126,7 @@
             },
             {
               "type": "ZMQPubSub",
-              "chid": 3,
+              "chid": 103,
               "transport": "tcp",
               "host": "*",
               "port": 8203,
@@ -56,7 +137,7 @@
             },
             {
               "type": "ZMQPubSub",
-              "chid": 16,
+              "chid": 116,
               "transport": "tcp",
               "host": "*",
               "port": 8216,
@@ -67,7 +148,7 @@
             },
             {
               "type": "ZMQPubSub",
-              "chid": 17,
+              "chid": 117,
               "transport": "tcp",
               "host": "*",
               "port": 8217,
@@ -78,7 +159,7 @@
             },
             {
               "type": "ZMQPubSub",
-              "chid": 18,
+              "chid": 118,
               "transport": "tcp",
               "host": "*",
               "port": 8218,

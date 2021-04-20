@@ -110,12 +110,12 @@
               "Prescale": {
                 "type"            : "array",
                 "title"           : "Prescales",
-                "description"     : "Prescale for trigger line 0-5. Prescale idx 0-3 corresponds to 4 physics trigger lines; Prescale idx 4 corresponds to the internal trigger; Prescale idx 5 corresponds to the software or LED calibration trigger.",
+                "description"     : "Prescale for trigger item 0-5. Prescale idx 0-3 corresponds to 4 physics trigger items; Prescale idx 4 corresponds to the internal trigger; Prescale idx 5 corresponds to the software or LED calibration trigger.",
                 "minItems"        : 6,
                 "maxItems"        : 6,
                 "items": {
                   "type": "integer",
-		  "headerTemplate": "Trigger line {{i}}",
+		  "headerTemplate": "Trigger item {{i}}",
                   "default": 0,
                   "minimum": 0,
                   "maximum": 255

@@ -114,11 +114,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8101
+		    "port": 8101,
+			"queue":{
+                "queue_size":1000,
+                "type":"FollyProducerConsumer"
+              }
 		}
             ]
 	}

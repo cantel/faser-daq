@@ -14,11 +14,18 @@
         "connections": {
             "receivers": [
                 {
-                    "type": "pubsub",
+                    "type": "ZMQPubSub",
                     "chid": 0,
-                    "transport": "tcp",
-                    "host": "localhost",
-                    "port": 8200
+                    "connections":
+                    {
+                        "transport": "tcp",
+                        "host": "localhost",
+                        "port": 8200
+                    },
+                    "queue":{
+                        "queue_size":1000,
+                        "type":"FollyProducerConsumer"
+                    }
                 }
             ]
         }

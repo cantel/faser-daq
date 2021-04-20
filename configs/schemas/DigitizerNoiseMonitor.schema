@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://gitlab.cern.ch/faser/daq/-/tree/master/configs/schemas/DigitizerReceiver.schema",
-  "title": "DigitizerMonitor",
-  "description": "This is the schema for the running of the DigitizerMonitor within a faser/daq setup.",
+  "$id": "https://gitlab.cern.ch/faser/daq/-/tree/master/configs/schemas/DigitizerNoiseMonitor.schema",
+  "title": "DigitizerNoiseMonitor",
+  "description": "This is the schema for the running of the DigitizerNoiseMonitor within a faser/daq setup.",
   "type": "object",
   "properties": {
     "name": {
@@ -49,10 +49,6 @@
            "minimum": 0
         },
         "publish_interval": {
-           "type": "integer",
-           "minimum": 1
-        },
-        "display_thresh": {
            "type": "integer",
            "minimum": 1
         }

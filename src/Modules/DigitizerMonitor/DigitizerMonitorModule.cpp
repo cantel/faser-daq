@@ -14,9 +14,6 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-// only monitoring the first two channels
-#define NCHANNELS 2
-
 DigitizerMonitorModule::DigitizerMonitorModule() { 
   INFO("Instantiating ...");
 }
@@ -62,18 +59,27 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
 
   // anything worth doing to all channels
   for(int iChan=0; iChan<NCHANNELS; iChan++){
-  
-    // example pulse
-    FillChannelPulse("h_pulse_ch"+std::to_string(iChan), iChan);
+    if (!m_pmtdataFragment->channel_has_data(iChan)) continue;
     
     // mean and rms for monitoring a channel that goes out of wack
     float avg = GetPedestalMean(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
     float rms = GetPedestalRMS(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
-    
-    INFO("Digitizer monitoring : "<<iChan<<" - "<<avg<<" , "<<rms);
 
-    m_histogrammanager->fill("h_avg_ch"+std::to_string(iChan), avg, 1.0);
-    m_histogrammanager->fill("h_rms_ch"+std::to_string(iChan), rms, 1.0);    
+    m_avg[iChan]=avg;
+    m_rms[iChan]=rms;
+
+    // example pulse
+    auto v = m_pmtdataFragment->channel_adc_counts(iChan);
+    float min_value = *std::min_element(v.begin(),v.end());
+    float max_value = *std::max_element(v.begin(),v.end());
+    if ((avg-min_value)>m_display_thresh||(max_value-avg)>m_display_thresh) {
+      INFO("filling hist ch "<<iChan<<": "<<avg<<" "<<min_value<<" "<<max_value<<" "<<m_display_thresh);
+      FillChannelPulse("h_pulse_ch"+std::to_string(iChan), iChan);
+    }
+    float peak=avg-min_value;
+    if ((max_value-avg)>peak) peak=avg-max_value;
+    m_histogrammanager->fill("h_peak_ch"+std::to_string(iChan), peak/8.192, 1.0); //FIXME: assume 2V range
+
   }
   
 }
@@ -82,7 +88,7 @@ void DigitizerMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerMonitor ... " );
   
   double publish_interval = (double)m_config.getConfig()["settings"]["publish_interval"];;
-  
+  m_display_thresh=(float)m_config.getSettings()["display_thresh"];
   // payload size
   m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, publish_interval);
 
@@ -95,18 +101,11 @@ void DigitizerMonitorModule::register_hists() {
   for(int iChan=0; iChan<NCHANNELS; iChan++){
     // example pulse
     m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, publish_interval);
+    m_histogrammanager->registerHistogram("h_peak_ch"+std::to_string(iChan), "Peak signal [mV]", -200, 2000, 110, publish_interval);
   
-    // average of channel signal pedestal
-    m_histogrammanager->registerHistogram("h_avg_ch"+std::to_string(iChan),"Pedestal Average ch"+std::to_string(iChan), 0, 20000, 200, publish_interval);
-  
-    // rms of channel signal pedestal
-    m_histogrammanager->registerHistogram("h_rms_ch"+std::to_string(iChan),"Pedestal RMS ch"+std::to_string(iChan), 0, 1000, 100, publish_interval);
   }
   
   
-  // for the sample pulses
-  m_pulse_sample_space = std::floor(buffer_length/100);
-
   INFO(" ... done registering histograms ... " );
   return;
 }
@@ -118,6 +117,13 @@ void DigitizerMonitorModule::register_metrics() {
 
   m_metric_payload = 0;
   m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
+
+  for(int iChan=0; iChan<NCHANNELS; iChan++){
+    m_avg[iChan]=0;
+    m_rms[iChan]=0;
+    m_statistics->registerMetric(&m_avg[iChan], "pedestal_mean_ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
+    m_statistics->registerMetric(&m_rms[iChan], "pedestal_rms_ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
+  }
 
   return;
 }
@@ -139,6 +145,7 @@ float DigitizerMonitorModule::GetPedestalMean(std::vector<uint16_t> input, int s
 
   return sum/count;
 }
+
 
 float DigitizerMonitorModule::GetPedestalRMS(std::vector<uint16_t> input, int start, int end){
 

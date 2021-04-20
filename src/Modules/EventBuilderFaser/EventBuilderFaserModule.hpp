@@ -49,6 +49,7 @@ private:
 
   std::atomic<int> m_eventCounts[MaxAnyTag];
   std::atomic<int> m_pendingCounts[MaxAnyTag];
+  std::atomic<int> m_sentCounts[MaxAnyTag];
   std::map<uint64_t,EventFull*> m_pendingEvents[MaxAnyTag];
   std::set<uint64_t> m_readyEvents[MaxAnyTag];
 };

@@ -93,6 +93,7 @@ void FileWriterFaserModule::configure() {
   // Read out required and optional configurations
   m_max_filesize = m_config.getSettings().value("max_filesize", 1 * daqutils::Constant::Giga);
   m_buffer_size = m_config.getSettings().value("buffer_size", 4 * daqutils::Constant::Kilo);
+  m_stop_timeout = m_config.getSettings().value("stop_timeout_ms", 1500);
   uint64_t ch=0;
   for ( auto& name : m_config.getSettings()["channel_names"]) {
     m_channel_names[ch]=name;
@@ -126,6 +127,12 @@ void FileWriterFaserModule::configure() {
       m_statistics->registerMetric<std::atomic<size_t>>(&metrics.bytes_written,
                                                         "BytesWritten_"+m_channel_names[chid],
                                                         daqling::core::metrics::RATE);
+      m_statistics->registerMetric<std::atomic<size_t>>(
+          &metrics.events_received, "EventsReceived_"+m_channel_names[chid],
+          daqling::core::metrics::LAST_VALUE);
+      m_statistics->registerMetric<std::atomic<size_t>>(
+          &metrics.files_written, "FilesWritten_"+m_channel_names[chid],
+          daqling::core::metrics::LAST_VALUE);
       m_statistics->registerMetric<std::atomic<size_t>>(
           &metrics.payload_queue_size, "PayloadQueueSize_"+m_channel_names[chid],
           daqling::core::metrics::LAST_VALUE);
@@ -167,6 +174,9 @@ void FileWriterFaserModule::start(unsigned run_num) {
 }
 
 void FileWriterFaserModule::stop() {
+
+  std::this_thread::sleep_for(std::chrono::milliseconds(m_stop_timeout)); //FIXME: temporary until we have ordered transitions
+
   FaserProcess::stop();
   m_stopWriters.store(true);
   for (auto & [ chid, ctx ] : m_channelContexts) {
@@ -205,8 +215,9 @@ void FileWriterFaserModule::runner() noexcept {
         DEBUG(" Received " << pl.size() << "B payload on channel: " << chid);
         while (!pq.write(pl) && m_run)
           ; // try until successful append
-        if (m_statistics) {
+        if (m_statistics && pl.size()) {
           m_channelMetrics.at(chid).payload_size = pl.size();
+          m_channelMetrics.at(chid).events_received++;
         }
       }
     });
@@ -224,7 +235,7 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
   size_t bytes_written = 0;
   std::ofstream out = fg.next();
   auto buffer = daqutils::Binary();
-
+  m_channelMetrics.at(chid).files_written = 1;
   const auto flush = [&](daqutils::Binary &data) {
     out.write(data.data<char *>(), static_cast<std::streamsize>(data.size()));
     if (out.fail()) {
@@ -246,6 +257,7 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
 
     if (bytes_written + buffer.size() > m_max_filesize) { // Rotate output files
       INFO(" Rotating output files for channel " << chid);
+      m_channelMetrics.at(chid).files_written++;
       flush(buffer);
       out.flush();
       out.close();

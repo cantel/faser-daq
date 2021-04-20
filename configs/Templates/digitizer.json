@@ -73,7 +73,7 @@
             "buffer": {"length": 600, "n_post_samples": 0},
             "trigger_acquisition": {"external": true, "software": true, "internal": true},
             "trigger_software_rate": 0,
-            "trigger_internal": [{"group" : 0, "enable": true, "logic": "OR", "threshold_ch0": 10000,   "threshold_ch1": 10000,  "output_width":32},
+            "trigger_internal": [{"group" : 0, "enable": true, "logic": "OR", "threshold_ch0_mV": 200,   "threshold_ch1_mV": 100,  "output_width":32},
                                  {"group" : 1, "enable": false, "logic": "OR", "threshold_ch0": 10000,   "threshold_ch1": 10000,  "output_width":32},
                                  {"group" : 2, "enable": false, "logic": "OR", "threshold_ch0": 10000,   "threshold_ch1": 10000,  "output_width":32},
                                  {"group" : 3, "enable": false, "logic": "OR", "threshold_ch0": 10000,   "threshold_ch1": 10000,  "output_width":32},

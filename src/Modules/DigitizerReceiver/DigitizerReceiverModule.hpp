@@ -61,6 +61,7 @@ class DigitizerReceiverModule : public FaserProcess {
   // monitoring metrics
   std::atomic<int> m_triggers;
   
+  std::atomic<int> m_pedestal[16];
   std::atomic<int> m_temp_ch00;
   std::atomic<int> m_temp_ch01;
   std::atomic<int> m_temp_ch02;
@@ -108,10 +109,25 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<int> m_udp_dma_write_receive_ack_retry_counter;
   std::atomic<int> m_udp_dma_write_req_retry_counter;
 
+  std::atomic<int> m_bobr_statusword;
+  std::atomic<int> m_bobr_timing;
+  std::atomic<int> m_lhc_turncount;
+  std::atomic<int> m_lhc_fillnumber;
+  std::atomic<int> m_lhc_machinemode;
+  std::atomic<float> m_lhc_beamenergy;
+  std::atomic<int> m_lhc_intensity1;
+  std::atomic<int> m_lhc_intensity2;
+  std::atomic<float> m_lhc_frequency;
+
+  unsigned int m_prev_seconds;
+  int m_prev_microseconds;
+  unsigned int m_prev_turncount;
+
   uint64_t m_prev_event_id;
 
   // for SW trigger sending
   int m_sw_count;
   float m_software_trigger_rate;
-  
+
+  bool m_bobr;
 };

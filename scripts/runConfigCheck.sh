@@ -32,6 +32,8 @@ Templates/digitizerNoise.json \
 digitizerSciLab.json \
 digitizerTI12.json \
 digiTLBSciLab.json \
+tlbDigiTI12.json \
+tlbDigiTI12Cosmics.json \
 combinedEHN1.json \
 combinedSciLab.json \
 combinedTI12.json \

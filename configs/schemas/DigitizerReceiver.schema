@@ -58,6 +58,14 @@
           "description": "The rotary-switch configured physical address of the digitizer board in the VME crate.",
           "default": "0x04320000"
         },
+
+        "useBOBR": {
+          "type": "boolean",
+          "title": "Use BOBR flag",
+          "propertyOrder": 3,
+          "description": "Use BOBR to fill in LHC info",
+          "default": "false"
+        },
         "buffer": {
           "type": "object",
           "title": "Acquisition Configuration",

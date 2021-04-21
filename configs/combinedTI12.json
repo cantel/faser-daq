@@ -5,6 +5,15 @@
     "components": [
       { "$ref" : "Templates/TLB.json#TLBReceiverTI12" },
       { "$ref" : "Templates/digitizer.json#DigitizerTI12" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver00" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver01" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver02" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver03" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver04" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver05" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver06" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver07" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver08" },
       {
         "name": "eventbuilder01",
         "host": "localhost",
@@ -16,7 +25,16 @@
         "connections": {
           "receivers": [
             { "chid": 0,"port": 8100, "host": "localhost", "type": "pair", "transport": "tcp" },
-            { "chid": 1,"port": 8101, "host": "localhost", "type": "pair", "transport": "tcp" }
+            { "chid": 1,"port": 8101, "host": "localhost", "type": "pair", "transport": "tcp" },
+            { "chid": 2,"port": 8110, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 3,"port": 8111, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 4,"port": 8112, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 5,"port": 8113, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 6,"port": 8114, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 7,"port": 8115, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 8,"port": 8116, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 9,"port": 8117, "host": "faser-daq-009", "type": "pair", "transport": "tcp" },
+            { "chid": 10,"port": 8118, "host": "faser-daq-009", "type": "pair", "transport": "tcp" }
           ],
           "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
         }
@@ -24,7 +42,17 @@
       { "$ref": "Templates/fileWriter.json#FileWriter" },
       { "$ref": "Templates/TLB.json#RateMonitor" },
       { "$ref": "Templates/TLB.json#TriggerMonitor" },
-      { "$ref": "Templates/digitizer.json#DigitizerMonitor" }
+      { "$ref": "Templates/TRB.json#TrackerMonitor00" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor01" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor02" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor03" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor04" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor05" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor06" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor07" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor08" },
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" },
+      { "$ref": "Templates/monitor.json#EventMonitor" }
     ]
   }
 }

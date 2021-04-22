@@ -55,6 +55,7 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
   registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10.); // kB/s read via network socket
+  registerVariable(m_missedL1, "MissedEventIDError");
   
   auto cfg = m_config.getSettings();
 
@@ -114,6 +115,7 @@ void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with 
 void TriggerReceiverModule::sendECR() { //run with "command ECR"
   INFO("Got ECR command");
   m_tlb->SendECR();
+  m_prev_event_id = 0;
 }
 
 
@@ -145,6 +147,7 @@ void TriggerReceiverModule::runner() noexcept {
   uint64_t local_event_id;
   uint16_t local_bc_id;
   uint16_t local_trigger_bits(0);
+  m_prev_event_id = 0;
 
 
   while (m_run || vector_of_raw_events.size()) {
@@ -181,6 +184,12 @@ void TriggerReceiverModule::runner() noexcept {
           local_fragment_tag=EventTags::PhysicsTag;
           TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
+          if (local_event_id != m_prev_event_id+1){
+            WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<m_prev_event_id+1);
+            m_status = STATUS_WARN;
+            m_missedL1++;
+          }
+          m_prev_event_id = local_event_id;
           local_bc_id = tlb_fragment.bc_id();
           if (!tlb_fragment.valid()) {
             WARNING("Corrupted trigger physics data fragment at triggered event count "<<m_physicsEventCount);

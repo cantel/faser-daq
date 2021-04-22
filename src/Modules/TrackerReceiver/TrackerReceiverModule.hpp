@@ -57,6 +57,7 @@ class TrackerReceiverModule : public FaserProcess {
   std::atomic<int> m_receivedEvents;
   std::atomic<float> m_dataRate;
   std::atomic<int> m_PLLErrCnt;
+  std::atomic<int> m_missedL1;
 
   bool m_debug = false;
   bool m_trace = false;

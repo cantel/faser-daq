@@ -167,6 +167,7 @@ void TrackerReceiverModule::configure() {
   registerVariable(m_receivedEvents, "ReceivedEvents"); // events transferred from driver to tracker receiver.
   registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10); // kB/s read via network socket
   registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE, m_UPDATEMETRIC_INTERVAL);
+  registerVariable(m_missedL1, "MissedEventIDError");
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -385,6 +386,7 @@ void TrackerReceiverModule::runner() noexcept {
   uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->GetBoardID();
   uint64_t local_event_id;
   uint16_t local_bc_id;
+  static uint64_t prev_event_id(0);
   unsigned local_status;
   float check_point(0);
 
@@ -421,6 +423,12 @@ void TrackerReceiverModule::runner() noexcept {
           try { 
             TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
             local_event_id = trk_data_fragment.event_id();
+            if (local_event_id != prev_event_id+1){
+              WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<prev_event_id+1);
+              m_status = STATUS_WARN;
+              m_missedL1++;
+            }
+            prev_event_id = local_event_id;
             local_event_id = local_event_id | (m_ECRcount << 24);
             local_bc_id = trk_data_fragment.bc_id();
 

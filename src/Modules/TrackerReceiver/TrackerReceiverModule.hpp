@@ -47,6 +47,7 @@ class TrackerReceiverModule : public FaserProcess {
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;
   bool m_triggerEnabled;
+  uint64_t m_prev_event_id;
 
   std::atomic<int> m_event_size_bytes;
   std::atomic<int> m_physicsEventCount;

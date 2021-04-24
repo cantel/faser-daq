@@ -204,7 +204,6 @@ def stateTracker(logger):
                     r1.hset("runningFile", "fileName", cmds[1])
                     configName="" #force a re-read
             elif cmd=="start":
-                raise Exception("Not allowed to start run")
                 if overallState!="READY":
                     logger.warn("Tried to start run in state: "+overallState)
                     cmd=""

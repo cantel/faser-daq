@@ -54,6 +54,7 @@ def stateTracker(logger):
     overallState="DOWN"
     cmd=None
     while True:
+      try:
         update=False
         runState=r1.hgetall("runningFile")
         runNumber=r1.get("runNumber")
@@ -203,6 +204,7 @@ def stateTracker(logger):
                     r1.hset("runningFile", "fileName", cmds[1])
                     configName="" #force a re-read
             elif cmd=="start":
+                raise Exception("Not allowed to start run")
                 if overallState!="READY":
                     logger.warn("Tried to start run in state: "+overallState)
                     cmd=""
@@ -276,7 +278,9 @@ def stateTracker(logger):
                                 'runType'  : r1.get("runType"),
                                 'globalStatus': overallState,}))
                 r1.publish("status","new")
-                
+      except Exception as e:
+          logger.exception("Caught exception during running")
+          cmd=None
 
 def initialize(fileName):
     r1.publish("stateAction","initialize "+fileName)

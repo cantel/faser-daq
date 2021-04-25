@@ -102,20 +102,30 @@ void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   //if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   //if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   //m_tlb->StartReadout(WhatToRead); //Temp
-  m_tlb->EnableTrigger(false,false); //Only enables trigger. Doesn't send ECR nor Reset
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::EnableTrigger, false,false); //Only enables trigger. Doesn't send ECR nor Reset 
+  if (m_status) {
+    ERROR("Issue encountered while enabling trigger. If trigger rate remains 0, try enabling trigger again.");
+  }
 }
 
 void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with "command disableTrigger"
   INFO("Got disableTrigger command with argument "<<arg);
-  m_tlb->DisableTrigger();
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::DisableTrigger);
+  if (m_status) {
+    ERROR("Issue encountered while disabling trigger. If still see trigger rate, try disabling trigger again.");
+  }
   //m_tlb->StopReadout(); //Temporary while using USB. Should empty USB buffer.
   usleep(100); //Once ethernet is implemented you should either check if data is pushed or if timeout (100musec).  
 }
 
 void TriggerReceiverModule::sendECR() { //run with "command ECR"
-  INFO("Got ECR command");
-  m_tlb->SendECR();
+  INFO("Received ECR command.");
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::SendECR);
+  if (m_status){
+    ERROR("Issue encountered while resetting the TLB L1 counter. Try resend ECR?");
+  }
   m_prev_event_id = 0;
+  INFO("ECR successful. ECR count = " << m_ECRcount);
 }
 
 
@@ -124,16 +134,29 @@ void TriggerReceiverModule::start(unsigned run_num) {
   uint16_t readout_param = TLBReadoutParameters::ReadoutFIFOReset;
   if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
-  m_tlb->StartReadout( readout_param );
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::StartReadout, readout_param );
+  if (m_status) {
+    ERROR("Issue encountered while starting readout. Will not enable trigger.");
+    return;
+  }
   usleep(2000*_ms);//temporary - wait for all modules
-  m_tlb->EnableTrigger(true,true); //sends ECR and Reset
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::EnableTrigger, true,true); //sends ECR and Reset
+  if (m_status){
+    ERROR("Issue encountered while enabling trigger. Continuing tentatively...");
+  }
 }
 
 void TriggerReceiverModule::stop() {  
   INFO("Stopping readout.");
-  m_tlb->DisableTrigger();
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::DisableTrigger);
+  if (m_status){
+    ERROR("Issue encountered while disabling trigger. Continuing tentatively...");
+  }
   usleep(100*_ms);
-  m_tlb->StopReadout();
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::StopReadout);
+  if (m_status){
+    ERROR("Issue encountered while stopping readout. Continuing tentatively...");
+  }
   usleep(1000*_ms); //value to be tweaked. Should be large enough to empty the buffer.
   FaserProcess::stop(); //this turns m_run to false
 }

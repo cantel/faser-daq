@@ -475,7 +475,7 @@ void DigitizerReceiverModule::runner() noexcept {
 	m_bobr_timing=(data&0x0F00)==0x0F00;
 	unsigned int statusControl=data;
 	DEBUG("BOBR status: 0x"<<std::hex<<data);
-	statusControl|=1<<2|1<<7;
+	statusControl&=~(1<<7);
 	return_code = vme_crate->vme_A24D32_write (addr, statusControl);
 	if (return_code!=0) {
 	  INFO("Failed to write BOBR control code: "<<std::hex<<return_code<<std::dec);
@@ -519,7 +519,7 @@ void DigitizerReceiverModule::runner() noexcept {
 	}
 
 	addr=vme_base_address+0x10;
-	statusControl&=~(1<<7);
+	statusControl|=1<<2|1<<7;
 	return_code = vme_crate->vme_A24D32_write (addr, statusControl);
 	if (return_code!=0) {
 	  INFO("Failed to reset BOBR control code: "<<std::hex<<return_code<<std::dec);

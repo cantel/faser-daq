@@ -146,7 +146,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
 }    
 
 TrackerReceiverModule::~TrackerReceiverModule() { 
-    INFO("");
+    INFO("Shutdown");
 }
 
 
@@ -330,8 +330,13 @@ void TrackerReceiverModule::configure() {
 
 void TrackerReceiverModule::sendECR()
 {
-  INFO("TRB --> ECR." << " ECRcount: " << m_ECRcount);
-  m_trb->L1CounterReset(); // TODO need to reset SCT module counters here as well
+  INFO("Received ECR command.");
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::L1CounterReset); // TODO need to reset SCT module counters here as well
+  if (m_status) {
+    ERROR("Issue encountered while resetting the TRB L1 counter. Try resend ECR?");
+  }
+  else INFO("ECR successful.");
+  INFO("ECR count = " << m_ECRcount);
   m_prev_event_id = 0;
 }
 
@@ -340,9 +345,13 @@ void TrackerReceiverModule::sendECR()
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
-  m_triggerEnabled = true;
-  m_trb->StartReadout(FASER::TRBReadoutParameters::READOUT_L1COUNTER_RESET | FASER::TRBReadoutParameters::READOUT_ERRCOUNTER_RESET | FASER::TRBReadoutParameters::READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
+  uint16_t param = FASER::TRBReadoutParameters::READOUT_L1COUNTER_RESET | FASER::TRBReadoutParameters::READOUT_ERRCOUNTER_RESET | FASER::TRBReadoutParameters::READOUT_FIFO_RESET;
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::StartReadout, param); //doing ErrCnTReset, FifoReset,L1ACounterReset
+  if (m_status){
+    ERROR("Issue encountered when starting readout. Continuing tentatively...");
+  }
   INFO("TRB --> readout started." );
+  m_triggerEnabled = true;
   FaserProcess::start(run_num);
 }
 
@@ -351,9 +360,15 @@ void TrackerReceiverModule::start(unsigned run_num) {
  *        Stop module
  * ************************************/
 void TrackerReceiverModule::stop() {
-  m_trb->StopReadout();
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::StopReadout);
+  if (m_status){
+    ERROR("Issue encountered while stopping readout. Continuing tentatively...");
+  }
   usleep(100);
-  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::SetDirectParam, 0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+  if (m_status){
+    WARNING("Issue encountered while trying to unset direct parameters. This might cause problems during configurations next time. Continuing...");
+  }
   FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }
@@ -394,12 +409,12 @@ void TrackerReceiverModule::runner() noexcept {
   while (m_run || vector_of_raw_events.size()) { 
     if (!m_extClkSelect && m_triggerEnabled == true){
       usleep(1e5);
-      m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
+      FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::GenerateL1A,m_moduleMask, false); //Generate L1A on the board
     }
 
     m_dataRate = m_trb->GetDataRate();
     if (std::difftime(std::time(nullptr), check_point) > m_UPDATEMETRIC_INTERVAL) { // only need to update occassionally. this sends command to TRB.
-      if (m_extClkSelect && m_run) m_PLLErrCnt = m_trb->ReadPLLErrorCounter();
+      if (m_extClkSelect && m_run) m_PLLErrCnt = m_trb->ReadPLLErrorCounter(); // ReadPLLErrorCounter is done safely. Will return 0 in case of failure.
       check_point = std::time(nullptr); 
     }
 

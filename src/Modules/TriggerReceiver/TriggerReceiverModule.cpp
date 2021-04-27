@@ -36,7 +36,7 @@ TriggerReceiverModule::TriggerReceiverModule() {
 }
 
 TriggerReceiverModule::~TriggerReceiverModule() { 
-  INFO("In ~TriggerReceiverModule"); 
+  INFO("Shutdown"); 
  
   delete m_tlb;
 }
@@ -124,8 +124,9 @@ void TriggerReceiverModule::sendECR() { //run with "command ECR"
   if (m_status){
     ERROR("Issue encountered while resetting the TLB L1 counter. Try resend ECR?");
   }
+  else INFO("ECR successful.");
+  INFO("ECR count = " << m_ECRcount);
   m_prev_event_id = 0;
-  INFO("ECR successful. ECR count = " << m_ECRcount);
 }
 
 

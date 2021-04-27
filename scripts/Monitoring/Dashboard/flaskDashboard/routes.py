@@ -16,6 +16,7 @@ from flask import url_for, redirect, request, Response, jsonify
 from flaskDashboard import app
 import numpy as np
 import atexit
+import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
 from flaskDashboard import interfacePlotly
 
@@ -94,7 +95,7 @@ def getIDs():
             if "h_" in histname:
                 keys.append(f"{module}-{histname[2:]}")
 
-    keys.sort()
+    keys = sorted(keys)
     return jsonify(keys)
 
 
@@ -136,7 +137,7 @@ def getModules():
     return jsonify(modules)
 
 
-
+# not used for now
 @app.route("/download_tags_json")
 def download_tags_json():
     """! Gets all ids with their associated tags and return a Response object containing the JSON file. """
@@ -151,7 +152,7 @@ def download_tags_json():
         headers={"Content-disposition": "attachment; filename=tags.json"},
     )
 
-
+# not used for now
 @app.route("/load_tags_from_file", methods=["POST"])
 def load_tags_from_file():
     """! Gets the JSON file with a POST request, read it and store the information in the redis database (db 5). """
@@ -172,7 +173,6 @@ def load_tags_from_file():
     return redirect(url_for("home"))
 
 
-### Migrating to Vue.js ###
 @app.route("/")
 @app.route("/vue_home", methods=["GET"])
 def vue_home():
@@ -185,7 +185,6 @@ def get_modules_and_tags():
     packet = {}
     modules = r.keys("*monitor*")
     tags = r5.keys("tag*")
-
     packet["modules"] = [module for module in modules if r.type(module) == "hash"]
     packet["tags"] = [s.replace("tag:", "") for s in tags]
     return jsonify(packet)
@@ -200,22 +199,13 @@ def IDs_from_tags():
     else:
         selected_tags = [f"tag:{s}" for s in tags]
         IDs = list(r5.sunion(selected_tags))
-    return jsonify(IDs)
+        keys = r5.keys("id:*")
+        keys = [ key[3:] for key in keys ]
+        # we take the intersection of the two sets
+        valid_IDs  = list(set(keys) & set(IDs))
 
+    return jsonify(valid_IDs)
 
-@app.route("/histograms_from_IDs", methods=["POST"])
-def histograms_from_IDs():
-    packet = {}
-    request_data = request.get_json()
-    IDs = request_data["IDs"]
-    for ID in IDs:
-        source, histname = ID.split("-")
-        histobj = r.hget(source, f"h_{histname}")
-        if histobj is not None:
-            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-            fig = dict(data=data, layout=layout, config={"responsive": True})
-            packet[ID] = dict(timestamp=timestamp, fig=fig)
-    return jsonify(packet)
 
 
 @app.route("/histogram_from_ID", methods=["GET"])
@@ -284,7 +274,7 @@ def stored_histogram():
     if "old" in timestamp:
         hist = r7.hget(f"old:{ID}", timestamp)
         hist = json.loads(hist)
-    else:
+    else:   
         hist = r7.hget(ID, timestamp)
         hist = json.loads(hist)
     return jsonify(hist)
@@ -306,7 +296,14 @@ def delete_tags():
 @app.route("/delete_current", methods=["GET"])
 def delete_current():
     """! Flushes the current histogram redis database (db 1)."""
-    r.flushdb() 
+    r.flushdb() # delete current histograms 
+    # delete associated default tags 
+    ids = r5.keys("id:*")
+    m = map(delete_associated_tags, ids )
+    l = list(itertools.chain.from_iterable(m))
+    r5.delete(*l)
+
+    r5.delete(*ids) 
     return jsonify({"response": "OK"})
 
 
@@ -321,4 +318,10 @@ def get_tags_by_ID(ID):
     # remove the default tags of the histogram (module name and histogram name)
     tags.pop(tags.index(module))
     tags.pop(tags.index(histname))
+    return tags
+
+def delete_associated_tags(ID):
+    tags = ID[3:].split("-")
+    tags[0] = f"tag:{tags[0]}"
+    tags[1] = f"tag:{tags[1]}"
     return tags

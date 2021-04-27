@@ -89,7 +89,6 @@
             mounted() {
                 axios.get("/getModulesAndTags").then(response => {
                         this.c_tags = response.data["modules"].concat(response.data["tags"]).sort()
-                        this.c_all_tags
                         this.c_modules_tags = response.data["modules"].sort()
                     })
                     .catch(err => {

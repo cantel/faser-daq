@@ -158,27 +158,49 @@ void TriggerRateMonitorModule::register_metrics() {
 
   register_error_metrics();
 
+  //TBP counts
+  registerVariable(m_tbp0, "TBP0");
+  registerVariable(m_tbp1, "TBP1");
+  registerVariable(m_tbp2, "TBP2");
+  registerVariable(m_tbp3, "TBP3");
+  registerVariable(m_tbp4, "TBP4");
+  registerVariable(m_tbp5, "TBP5");
+  //TAP counts
+  registerVariable(m_tap0, "TAP0");
+  registerVariable(m_tap1, "TAP1");
+  registerVariable(m_tap2, "TAP2");
+  registerVariable(m_tap3, "TAP3");
+  registerVariable(m_tap4, "TAP4");
+  registerVariable(m_tap5, "TAP5");
+  //TAV counts
+  registerVariable(m_tav0, "TAV0");
+  registerVariable(m_tav1, "TAV1");
+  registerVariable(m_tav2, "TAV2");
+  registerVariable(m_tav3, "TAV3");
+  registerVariable(m_tav4, "TAV4");
+  registerVariable(m_tav5, "TAV5");
+
   //TBP rates
-  registerVariable(m_tbp0, "TBP0", daqling::core::metrics::RATE);
-  registerVariable(m_tbp1, "TBP1", daqling::core::metrics::RATE);
-  registerVariable(m_tbp2, "TBP2", daqling::core::metrics::RATE);
-  registerVariable(m_tbp3, "TBP3", daqling::core::metrics::RATE);
-  registerVariable(m_tbp4, "TBP4", daqling::core::metrics::RATE);
-  registerVariable(m_tbp5, "TBP5", daqling::core::metrics::RATE);
+  registerVariable(m_tbp0, "TBP0Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tbp1, "TBP1Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tbp2, "TBP2Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tbp3, "TBP3Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tbp4, "TBP4Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tbp5, "TBP5Rate", daqling::core::metrics::RATE);
   //TAP rates
-  registerVariable(m_tap0, "TAP0", daqling::core::metrics::RATE);
-  registerVariable(m_tap1, "TAP1", daqling::core::metrics::RATE);
-  registerVariable(m_tap2, "TAP2", daqling::core::metrics::RATE);
-  registerVariable(m_tap3, "TAP3", daqling::core::metrics::RATE);
-  registerVariable(m_tap4, "TAP4", daqling::core::metrics::RATE);
-  registerVariable(m_tap5, "TAP5", daqling::core::metrics::RATE);
+  registerVariable(m_tap0, "TAP0Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tap1, "TAP1Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tap2, "TAP2Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tap3, "TAP3Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tap4, "TAP4Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tap5, "TAP5Rate", daqling::core::metrics::RATE);
   //TAV rates
-  registerVariable(m_tav0, "TAV0", daqling::core::metrics::RATE);
-  registerVariable(m_tav1, "TAV1", daqling::core::metrics::RATE);
-  registerVariable(m_tav2, "TAV2", daqling::core::metrics::RATE);
-  registerVariable(m_tav3, "TAV3", daqling::core::metrics::RATE);
-  registerVariable(m_tav4, "TAV4", daqling::core::metrics::RATE);
-  registerVariable(m_tav5, "TAV5", daqling::core::metrics::RATE);
+  registerVariable(m_tav0, "TAV0Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tav1, "TAV1Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tav2, "TAV2Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tav3, "TAV3Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tav4, "TAV4Rate", daqling::core::metrics::RATE);
+  registerVariable(m_tav5, "TAV5Rate", daqling::core::metrics::RATE);
 
   //veto counters
   registerVariable(m_deadtime_veto, "deadtimeVetoRate", daqling::core::metrics::RATE);

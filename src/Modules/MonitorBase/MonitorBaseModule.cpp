@@ -99,7 +99,6 @@ void MonitorBaseModule::register_metrics() {
 void MonitorBaseModule::register_error_metrics() {
 
    m_metric_payload=0;
-   m_metric_error_ok=0;
    m_metric_error_unclassified=0;
    m_metric_error_bcidmismatch=0;
    m_metric_error_tagmismatch=0;
@@ -114,7 +113,6 @@ void MonitorBaseModule::register_error_metrics() {
 
   if ( m_stats_on ) {
     INFO("... registering error metrics ... " );
-    m_statistics->registerMetric(&m_metric_error_ok, "error_ok", daqling::core::metrics::ACCUMULATE);
     m_statistics->registerMetric(&m_metric_error_unclassified, "error_unclassified", daqling::core::metrics::ACCUMULATE);
     m_statistics->registerMetric(&m_metric_error_bcidmismatch, "error_bcidmismatch", daqling::core::metrics::ACCUMULATE);
     m_statistics->registerMetric(&m_metric_error_tagmismatch, "error_tagmismatch", daqling::core::metrics::ACCUMULATE);
@@ -260,19 +258,16 @@ void MonitorBaseModule::setupHistogramManager() {
 
 void MonitorBaseModule::fill_error_status_to_metric( uint32_t fragmentStatus ) {
 
-  if ( fragmentStatus == 0 ) m_metric_error_ok += 1;
-  else {
-      if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified += 1;
-      if ( fragmentStatus  &  BCIDMismatch ) m_metric_error_bcidmismatch += 1;
-      if ( fragmentStatus  &  TagMismatch ) m_metric_error_tagmismatch += 1;
-      if ( fragmentStatus  &  Timeout ) m_metric_error_timeout += 1;
-      if ( fragmentStatus  &  Overflow ) m_metric_error_overflow += 1;
-      if ( fragmentStatus  &  CorruptedFragment ) m_metric_error_corrupted += 1;
-      if ( fragmentStatus  &  DummyFragment ) m_metric_error_dummy += 1;
-      if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing += 1;
-      if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty += 1;
-      if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate += 1;
-  }
+  if ( fragmentStatus  &  UnclassifiedError ) m_metric_error_unclassified += 1;
+  if ( fragmentStatus  &  BCIDMismatch ) m_metric_error_bcidmismatch += 1;
+  if ( fragmentStatus  &  TagMismatch ) m_metric_error_tagmismatch += 1;
+  if ( fragmentStatus  &  Timeout ) m_metric_error_timeout += 1;
+  if ( fragmentStatus  &  Overflow ) m_metric_error_overflow += 1;
+  if ( fragmentStatus  &  CorruptedFragment ) m_metric_error_corrupted += 1;
+  if ( fragmentStatus  &  DummyFragment ) m_metric_error_dummy += 1;
+  if ( fragmentStatus  &  MissingFragment ) m_metric_error_missing += 1;
+  if ( fragmentStatus  &  EmptyFragment ) m_metric_error_empty += 1;
+  if ( fragmentStatus  &  DuplicateFragment ) m_metric_error_duplicate += 1;
   
   return ;
 
@@ -280,19 +275,16 @@ void MonitorBaseModule::fill_error_status_to_metric( uint32_t fragmentStatus ) {
 
 void MonitorBaseModule::fill_error_status_to_histogram( uint32_t fragmentStatus, std::string hist_name ) {
 
-  if ( fragmentStatus == 0 ) m_histogrammanager->fill(hist_name, "Ok");
-  else {
-      if ( fragmentStatus  &  UnclassifiedError ) m_histogrammanager->fill(hist_name, "Unclassified");
-      if ( fragmentStatus  &  BCIDMismatch ) m_histogrammanager->fill(hist_name, "BCIDMismatch");
-      if ( fragmentStatus  &  TagMismatch ) m_histogrammanager->fill(hist_name, "TagMismatch");
-      if ( fragmentStatus  &  Timeout ) m_histogrammanager->fill(hist_name, "Timeout");
-      if ( fragmentStatus  &  Overflow ) m_histogrammanager->fill(hist_name, "Overflow");
-      if ( fragmentStatus  &  CorruptedFragment ) m_histogrammanager->fill(hist_name, "CorruptedFragment");
-      if ( fragmentStatus  &  DummyFragment ) m_histogrammanager->fill(hist_name, "Dummy");
-      if ( fragmentStatus  &  MissingFragment ) m_histogrammanager->fill(hist_name, "Missing");
-      if ( fragmentStatus  &  EmptyFragment ) m_histogrammanager->fill(hist_name, "Empty");
-      if ( fragmentStatus  &  DuplicateFragment ) m_histogrammanager->fill(hist_name, "Duplicate");
-  }
+  if ( fragmentStatus  &  UnclassifiedError ) m_histogrammanager->fill(hist_name, "Unclassified");
+  if ( fragmentStatus  &  BCIDMismatch ) m_histogrammanager->fill(hist_name, "BCIDMismatch");
+  if ( fragmentStatus  &  TagMismatch ) m_histogrammanager->fill(hist_name, "TagMismatch");
+  if ( fragmentStatus  &  Timeout ) m_histogrammanager->fill(hist_name, "Timeout");
+  if ( fragmentStatus  &  Overflow ) m_histogrammanager->fill(hist_name, "Overflow");
+  if ( fragmentStatus  &  CorruptedFragment ) m_histogrammanager->fill(hist_name, "CorruptedFragment");
+  if ( fragmentStatus  &  DummyFragment ) m_histogrammanager->fill(hist_name, "Dummy");
+  if ( fragmentStatus  &  MissingFragment ) m_histogrammanager->fill(hist_name, "Missing");
+  if ( fragmentStatus  &  EmptyFragment ) m_histogrammanager->fill(hist_name, "Empty");
+  if ( fragmentStatus  &  DuplicateFragment ) m_histogrammanager->fill(hist_name, "Duplicate");
   
   return ;
 

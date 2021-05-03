@@ -12,14 +12,14 @@ class TriggerRateMonitorModule : public MonitorBaseModule {
 
  protected:
 
-  uint32_t m_triggered_events;
+  uint32_t m_total_unvetoed_events;
   uint32_t m_previous_evt_cnt;
   uint32_t m_ECR_cnt;
 
   //trigger counts
-  std::atomic<int> m_tbp0, m_tbp1, m_tbp2, m_tbp3, m_tbp4;
-  std::atomic<int> m_tap0, m_tap1, m_tap2, m_tap3, m_tap4;
-  std::atomic<int> m_tav0, m_tav1, m_tav2, m_tav3, m_tav4;
+  std::atomic<int> m_tbp0, m_tbp1, m_tbp2, m_tbp3, m_tbp4, m_tbp5;
+  std::atomic<int> m_tap0, m_tap1, m_tap2, m_tap3, m_tap4, m_tap5;
+  std::atomic<int> m_tav0, m_tav1, m_tav2, m_tav3, m_tav4, m_tav5;
 
   //veto counts
   std::atomic<int> m_metric_event_id;
@@ -33,6 +33,7 @@ class TriggerRateMonitorModule : public MonitorBaseModule {
   std::atomic<float> m_rate_limiter_fraction;
   std::atomic<float> m_bcr_fraction;
   std::atomic<float> m_digi_busy_fraction;
+  std::atomic<float> m_global_deadtime_fraction;
 
   void monitor(daqling::utilities::Binary &eventBuilderBinary);
   void register_hists( );

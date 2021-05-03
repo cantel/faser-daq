@@ -58,7 +58,6 @@ class MonitorBaseModule : public FaserProcess {
   std::unique_ptr<HistogramManager> m_histogrammanager;
 
   std::atomic<int> m_metric_payload;
-  std::atomic<int> m_metric_error_ok;
   std::atomic<int> m_metric_error_unclassified;
   std::atomic<int> m_metric_error_bcidmismatch;
   std::atomic<int> m_metric_error_tagmismatch;

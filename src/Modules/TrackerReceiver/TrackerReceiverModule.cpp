@@ -345,13 +345,15 @@ void TrackerReceiverModule::sendECR()
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
+  INFO("Starting...");
   uint16_t param = FASER::TRBReadoutParameters::READOUT_L1COUNTER_RESET | FASER::TRBReadoutParameters::READOUT_ERRCOUNTER_RESET | FASER::TRBReadoutParameters::READOUT_FIFO_RESET;
   m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::StartReadout, param); //doing ErrCnTReset, FifoReset,L1ACounterReset
   if (m_status){
-    ERROR("Issue encountered when starting readout. Continuing tentatively...");
+    THROW(TRBAccessException, "Board communication issue encountered when starting readout.");
   }
   INFO("TRB --> readout started." );
   m_triggerEnabled = true;
+  INFO("Starting software DAQ processing.");
   FaserProcess::start(run_num);
 }
 

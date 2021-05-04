@@ -131,20 +131,22 @@ void TriggerReceiverModule::sendECR() { //run with "command ECR"
 
 
 void TriggerReceiverModule::start(unsigned run_num) {
-  FaserProcess::start(run_num);
+  INFO("Starting...");
   uint16_t readout_param = TLBReadoutParameters::ReadoutFIFOReset;
   if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::StartReadout, readout_param );
   if (m_status) {
-    ERROR("Issue encountered while starting readout. Will not enable trigger.");
-    return;
+    THROW(TLBAccessException, "Board communication issue encountered while starting readout. Will not enable trigger.");
   }
   usleep(2000*_ms);//temporary - wait for all modules
+  INFO("Enabling trigger...");
   m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::EnableTrigger, true,true); //sends ECR and Reset
   if (m_status){
-    ERROR("Issue encountered while enabling trigger. Continuing tentatively...");
+    THROW(TLBAccessException, "Board communication issue encountered while enabling trigger.");
   }
+  INFO("Starting software DAQ processing.");
+  FaserProcess::start(run_num);
 }
 
 void TriggerReceiverModule::stop() {  

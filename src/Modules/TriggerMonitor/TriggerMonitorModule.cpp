@@ -156,13 +156,6 @@ void TriggerMonitorModule::register_metrics() {
   registerVariable(m_input_channel6, "Input6");
   registerVariable(m_input_channel7, "Input7");
 
-  registerVariable(m_tap0, "TAP0", metrics::RATE);
-  registerVariable(m_tap1, "TAP1", metrics::RATE);
-  registerVariable(m_tap2, "TAP2", metrics::RATE);
-  registerVariable(m_tap3, "TAP3", metrics::RATE);
-  registerVariable(m_tap4, "TAP4", metrics::RATE);
-  registerVariable(m_tap5, "TAP5", metrics::RATE);
-
   registerVariable(m_tap0, "TAP0");
   registerVariable(m_tap1, "TAP1");
   registerVariable(m_tap2, "TAP2");

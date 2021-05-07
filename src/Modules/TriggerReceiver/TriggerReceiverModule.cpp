@@ -210,26 +210,30 @@ void TriggerReceiverModule::runner() noexcept {
           local_fragment_tag=EventTags::PhysicsTag;
           TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
-          if (local_event_id != m_prev_event_id+1){
-            WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<m_prev_event_id+1);
-            m_status = STATUS_WARN;
-            m_missedL1++;
-          }
-          m_prev_event_id = local_event_id;
           local_bc_id = tlb_fragment.bc_id();
-          if (!tlb_fragment.valid()) {
+          if (tlb_fragment.valid()) {
+            auto expected_event_id = m_prev_event_id+1;
+            if (local_event_id != (expected_event_id&0xffffff)){
+              WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<expected_event_id);
+              m_missedL1+=(local_event_id-(expected_event_id&0xffffff));
+              if (m_missedL1) m_status = STATUS_WARN;
+              else m_status = STATUS_OK;
+            }
+            m_prev_event_id = local_event_id;
+            local_trigger_bits = tlb_fragment.tap();
+          }
+          else {
             WARNING("Corrupted trigger physics data fragment at triggered event count "<<m_physicsEventCount);
             m_fragment_status = EventStatus::CorruptedFragment;
             m_status = STATUS_WARN;
-          } else {
-            local_trigger_bits = tlb_fragment.tap();
+            m_prev_event_id++;
           }
           DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;
         }
 
-        local_event_id = (m_ECRcount<<24) + (local_event_id);
+        local_event_id = (m_ECRcount<<24) + local_event_id;
 
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, event, total_size));

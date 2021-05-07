@@ -362,6 +362,7 @@ void TrackerReceiverModule::start(unsigned run_num) {
  *        Stop module
  * ************************************/
 void TrackerReceiverModule::stop() {
+  std::this_thread::sleep_for(std::chrono::microseconds(100000)); //wait for events 
   m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::StopReadout);
   if (m_status){
     ERROR("Issue encountered while stopping readout. Continuing tentatively...");
@@ -441,20 +442,22 @@ void TrackerReceiverModule::runner() noexcept {
           try { 
             TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
             local_event_id = trk_data_fragment.event_id();
-            if (local_event_id != m_prev_event_id+1){
-              WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<m_prev_event_id+1);
-              m_status = STATUS_WARN;
-              m_missedL1++;
-            }
-            m_prev_event_id = local_event_id;
-            local_event_id = local_event_id | (m_ECRcount << 24);
             local_bc_id = trk_data_fragment.bc_id();
+            local_status = 0;
 
             if ( trk_data_fragment.valid()) {
-                local_status = 0;
+                auto expected_event_id = m_prev_event_id+1;
+                if (local_event_id != (expected_event_id&0xffffff)){
+                  WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<expected_event_id);
+                  m_missedL1+=(local_event_id-(expected_event_id&0xffffff));
+                  if (m_missedL1) m_status = STATUS_WARN;
+                  else m_status = STATUS_OK;
+                }
+                m_prev_event_id = local_event_id;
             }
             else{
-                local_status = EventStatus::UnclassifiedError;
+                local_status = EventStatus::CorruptedFragment;
+                m_prev_event_id++;
                 m_status=STATUS_WARN;
                 m_corrupted_fragments += 1; //Monitoring data
                 WARNING("Corrupted tracker data fragment at triggered event count "<<m_physicsEventCount);
@@ -476,10 +479,13 @@ void TrackerReceiverModule::runner() noexcept {
               local_event_id = 0xffffff;
               local_bc_id = 0xffff;
               local_status = EventStatus::CorruptedFragment;
+              m_prev_event_id++;
               m_corrupted_fragments += 1; //Monitoring data
               m_status=STATUS_WARN;
               WARNING("Crashed tracker data fragment at triggered event count "<<m_physicsEventCount);
           }
+
+          local_event_id = local_event_id | (m_ECRcount << 24);
 
           std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, event, total_size));

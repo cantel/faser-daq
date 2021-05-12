@@ -40,6 +40,9 @@
                         </v-btn>
                     </template>
                     <v-list>
+                        <v-list-item>
+                            <redis_info_dialog :redis_infos="c_redis_infos"> </redis_info_dialog>
+                        </v-list-item>
                         <v-list-item :disabled="c_safeMode" @click="deleteCurrent">
                             <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete current
                         </v-list-item>
@@ -70,6 +73,64 @@
     <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
     <script>
         const EventBus = new Vue();
+////////////// Redis info dialog //////////////
+Vue.component("redis_info_dialog", {
+delimiters: ["[[", "]]"],
+props: ["redis_infos"],
+data: function () {
+return {
+dialog: false,
+}
+},
+template : //html
+`
+
+<v-dialog v-model="dialog" width="500">
+    <template v-slot:activator="{ on, attrs }">
+        <v-btn plain v-bind="attrs" v-on="on" style="text-transform: none;">
+            Redis infos
+        </v-btn>
+
+    </template>
+
+    <v-card>
+        <v-card-title class="headline grey lighten-2">
+            Redis stats (summary)
+        </v-card-title>
+
+        <v-card-text>
+            <v-list dense>
+
+                <v-list-item two-line>
+                    <v-list-item-content>
+                        <v-list-item-title> Memory used </v-list-item-title>
+                        <v-list-item-subtitle>[[ redis_infos.used_memory_human]]</v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item two-line>
+                    <v-list-item-content>
+                        <v-list-item-title>Memory used (rss) </v-list-item-title>
+                        <v-list-item-subtitle>[[ redis_infos.used_memory_rss_human ]]</v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+
+            </v-list>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" text @click="dialog = false">
+                Close
+            </v-btn>
+        </v-card-actions>
+    </v-card>
+</v-dialog>
+`
+
+})
         ////////////// Search-bar component //////////////
 
         Vue.component("search-tool", {
@@ -301,12 +362,16 @@
             data: {
                 c_tags: [],
                 c_ids: [],
-                c_safeMode: true
+                c_safeMode: true,
+                c_redis_infos :null
             },
             delimiters: ["[[", "]]"],
             computed: {},
             mounted() {
-
+                axios.get("/redis_info").then(response => {
+                this.c_redis_infos = response.data
+                console.log(this.c_redis_infos);
+                })
             },
             methods: {
                 getIDs(selected_tags) {

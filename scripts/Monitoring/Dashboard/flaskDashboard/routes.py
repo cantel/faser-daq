@@ -306,10 +306,12 @@ def delete_current():
     r5.delete(*ids) 
     return jsonify({"response": "OK"})
 
+@app.route("/redis_info", methods=["GET"])
+def redis_info():
+    r_infos = r.info()
+    return jsonify(r_infos)
 
 ## functions
-
-
 
 def get_tags_by_ID(ID):
     module, histname = ID.split("-")

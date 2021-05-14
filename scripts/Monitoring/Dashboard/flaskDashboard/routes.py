@@ -216,7 +216,8 @@ def histogram_from_ID():
     histobj = r.hget(source, f"h_{histname}")
     if histobj is not None:
         data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-        fig = dict(data=data, layout=layout, config={"responsive": False})
+        config = {"filename":f"{ID}_{timestamp}"} 
+        fig = dict(data=data,layout=layout, config=config)
         tags = get_tags_by_ID(ID)
         packet = dict(timestamp=float(timestamp), fig=fig, ID=ID, tags=tags)
     return jsonify(packet)

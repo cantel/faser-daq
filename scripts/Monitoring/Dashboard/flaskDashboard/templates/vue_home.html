@@ -10,15 +10,23 @@
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
     <!-- use the latest vue-select release -->
 
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <!-- Vuetify dependencies-->
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
     <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
 
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <!-- day.js manipulating timestamps -->
-    <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/dayjs.min.js"
+        integrity="sha512-0fcCRl828lBlrSCa8QJY51mtNqTcHxabaXVLPgw/jPA5Nutujh6CbTdDgRzl9aSPYW/uuE7c4SffFUQFBAy6lg=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/timezone.min.js"
+        integrity="sha512-pslqxxHAYPCxaSeFSmXXxDkLejD5dbFVC66aiVq0z4v7VTJBU+wqcG1OpNh4p3MjS2D6NCwz/H2QmSc7dXxryg=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/utc.min.js"
+        integrity="sha512-m00bfmYnAl3plEBlQfeQUhw/U2uvmw29V2+jxSWpAjankMWS+zAsjezbKWDEJNXqWq9o9qQZSOiA2RKDpa4D5w=="
+        crossorigin="anonymous"></script>
 
     <!-- Plotly library -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -72,18 +80,24 @@
     </div>
     <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
     <script>
+        
+        const timezone = window.dayjs_plugin_timezone
+        const UTC = window.dayjs_plugin_utc
+        dayjs.extend(timezone)
+        dayjs.extend(UTC)
+
         const EventBus = new Vue();
-////////////// Redis info dialog //////////////
-Vue.component("redis_info_dialog", {
-delimiters: ["[[", "]]"],
-props: ["redis_infos"],
-data: function () {
-return {
-dialog: false,
-}
-},
-template : //html
-`
+        ////////////// Redis info dialog //////////////
+        Vue.component("redis_info_dialog", {
+            delimiters: ["[[", "]]"],
+            props: ["redis_infos"],
+            data: function () {
+                return {
+                    dialog: false,
+                }
+            },
+            template: //html
+                `
 
 <v-dialog v-model="dialog" width="500">
     <template v-slot:activator="{ on, attrs }">
@@ -130,7 +144,7 @@ template : //html
 </v-dialog>
 `
 
-})
+        })
         ////////////// Search-bar component //////////////
 
         Vue.component("search-tool", {
@@ -215,7 +229,7 @@ template : //html
             data: function () {
                 return {
                     c_polling: null,
-                    c_updating_rate: 5000, // updating every 5000 seconds
+                    c_updating_rate: 5000, // updating every 5 seconds
                     c_timestamp: null,
                     c_figure: null,
                     c_isLoading: false,
@@ -230,11 +244,11 @@ template : //html
                 clearInterval(this.polling)
             },
             filters: {
-                timestampDisplay: function (timestamp) {
-                    //date = new Date(timestamp * 1000)
-
-                    //result = "(" + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + ")"
+                timestampLocal: function (timestamp) {
                     return dayjs.unix(timestamp).format("HH:mm:ss (MM/DD)")
+                },
+                timestampCERN: function (timestamp) {
+                    return dayjs.tz(1613146340.4713376 * 1000, "Europe/Zurich").format("HH:mm:ss (MM/DD)")
                 }
             },
             computed: {
@@ -310,7 +324,7 @@ template : //html
                                     }
 
                                 })
-                        } else if (newVal.length < oldVal.length && newVal.length - oldVal.length===-1) {
+                        } else if (newVal.length < oldVal.length && newVal.length - oldVal.length === -1) {
                             var removedTag = oldVal.filter(x => newVal.indexOf(x) === -1);
                             axios.post('/remove_tag', {
                                     ID: this.id,
@@ -335,8 +349,16 @@ template : //html
                         <v-btn icon @click="openTimeView">
                             <v-icon>mdi-history</v-icon>
                         </v-btn>
-                        <v-spacer> </v-spacer><span class="timestamp"><i>[[ c_timestamp | timestampDisplay ]]</i>
-                        </span>
+                        <v-spacer> </v-spacer>
+
+                        <v-tooltip top transition="fade-transition">
+                            <template v-slot:activator="{ on, attrs }">
+                                <span class="timestamp" v-bind="attrs" v-on="on">
+                                    <i>[[ c_timestamp | timestampLocal ]]</i>
+                                </span>
+                            </template>
+                            <span>CERN: [[ c_timestamp | timestampCERN ]]</span>
+                            </v-tooltip>
                     </v-card-title>
                         <plotly-graph class="card_histo_cont mx-auto" v-if="c_figure" :figure="c_figure"
                             :divid="divName">
@@ -363,14 +385,14 @@ template : //html
                 c_tags: [],
                 c_ids: [],
                 c_safeMode: true,
-                c_redis_infos :null
+                c_redis_infos: null
             },
             delimiters: ["[[", "]]"],
             computed: {},
             mounted() {
                 axios.get("/redis_info").then(response => {
-                this.c_redis_infos = response.data
-                console.log(this.c_redis_infos);
+                    this.c_redis_infos = response.data
+                    //console.log(this.c_redis_infos);
                 })
             },
             methods: {
@@ -386,7 +408,6 @@ template : //html
                 },
                 deleteHistory() {
                     axios.get("/delete_history")
-
                 },
 
                 deleteTags() {
@@ -395,8 +416,8 @@ template : //html
                 },
                 //api call to delete current histograms
                 deleteCurrent() {
-                axios.get("/delete_current")
-                window.location.reload(true)
+                    axios.get("/delete_current")
+                    window.location.reload(true)
                 }
             },
         });

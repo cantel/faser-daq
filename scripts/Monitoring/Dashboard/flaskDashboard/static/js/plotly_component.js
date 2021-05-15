@@ -9,7 +9,7 @@ Vue.component("plotly-graph", {
 
             c_config: {
                 toImageButtonOptions : {
-                    filename: "test"
+                    filename: "default"
                 },
                 displayModeBar: true,
                 displaylogo: false,
@@ -38,7 +38,9 @@ Vue.component("plotly-graph", {
             if (this.c_log) {
                 figure.layout.yaxis.type = "log"
             }
-            this.c_config.toImageButtonOptions.filename = figure.config.filename.split(".")[0]
+            if (figure.config){
+                this.c_config.toImageButtonOptions.filename = figure.config.filename.split(".")[0]
+            }
             Plotly.react(this.$refs[this.divid], figure.data, figure.layout, this.c_config)
             this.$emit('graph_loading', false)
         }, {

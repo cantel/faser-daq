@@ -48,7 +48,8 @@ def histograms_save():
         histobj = r.hget(module, f"h_{histname}")
         if histobj != None:
             data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-            figure = dict(data=data, layout=layout)
+            config = {"filename":f"{ID}_{timestamp}"}  
+            figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
             if r7.hlen(ID) >= 30:
                 key_to_remove = sorted(r7.hkeys(ID))[0]
@@ -67,7 +68,8 @@ def old_histogram_save():
         histobj = r.hget(module, f"h_{histname}")
         if histobj != None:
             data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-            figure = dict(data=data, layout=layout)
+            config = {"filename":f"{ID}_{timestamp}"} 
+            figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
             r7.hset(f"old:{ID}", f"old:{timestamp}", json.dumps(hist)) 
 

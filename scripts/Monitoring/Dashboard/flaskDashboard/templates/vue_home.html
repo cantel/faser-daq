@@ -248,7 +248,7 @@
                     return dayjs.unix(timestamp).format("HH:mm:ss (MM/DD)")
                 },
                 timestampCERN: function (timestamp) {
-                    return dayjs.tz(1613146340.4713376 * 1000, "Europe/Zurich").format("HH:mm:ss (MM/DD)")
+                    return dayjs.tz(parseFloat(timestamp) * 1000, "Europe/Zurich").format("HH:mm:ss (MM/DD)")
                 }
             },
             computed: {

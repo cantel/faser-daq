@@ -144,6 +144,7 @@ void TriggerReceiverModule::runner() noexcept {
   uint32_t local_source_id    = SourceIDs::TriggerSourceID;
   uint64_t local_event_id;
   uint16_t local_bc_id;
+  uint16_t local_trigger_bits(0);
 
 
   while (m_run || vector_of_raw_events.size()) {
@@ -160,6 +161,7 @@ void TriggerReceiverModule::runner() noexcept {
         auto event = vector_of_raw_events[i].data();
 
         m_fragment_status = 0;  
+        local_trigger_bits = 0;
      
         if (TLBDecode::IsMonitoringHeader(*event)){ // tlb monitoring data event
           local_fragment_tag=EventTags::TLBMonitoringTag;
@@ -184,6 +186,8 @@ void TriggerReceiverModule::runner() noexcept {
             WARNING("Corrupted trigger physics data fragment at triggered event count "<<m_physicsEventCount);
             m_fragment_status = EventStatus::CorruptedFragment;
             m_status = STATUS_WARN;
+          } else {
+            local_trigger_bits = tlb_fragment.tap();
           }
           DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_physicsEventCount+=1;
@@ -195,6 +199,7 @@ void TriggerReceiverModule::runner() noexcept {
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, event, total_size));
         fragment->set_status(m_fragment_status);
+        fragment->set_trigger_bits(local_trigger_bits);
 
         if (m_fragment_status){
           m_badFragmentsCount+=1;

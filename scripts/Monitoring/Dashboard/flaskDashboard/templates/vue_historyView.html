@@ -18,7 +18,15 @@
     <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
     <!-- day.js manipulating timestamps -->
-    <script src="https://unpkg.com/dayjs@1.8.21/dayjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/dayjs.min.js"
+        integrity="sha512-0fcCRl828lBlrSCa8QJY51mtNqTcHxabaXVLPgw/jPA5Nutujh6CbTdDgRzl9aSPYW/uuE7c4SffFUQFBAy6lg=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/utc.min.js"
+        integrity="sha512-m00bfmYnAl3plEBlQfeQUhw/U2uvmw29V2+jxSWpAjankMWS+zAsjezbKWDEJNXqWq9o9qQZSOiA2RKDpa4D5w=="
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/timezone.min.js"
+        integrity="sha512-pslqxxHAYPCxaSeFSmXXxDkLejD5dbFVC66aiVq0z4v7VTJBU+wqcG1OpNh4p3MjS2D6NCwz/H2QmSc7dXxryg=="
+        crossorigin="anonymous"></script>
 
     <!-- Plotly library -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -62,8 +70,12 @@
     </div>
     <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
     <script>
-        const EventBus = new Vue();
+        const timezone = window.dayjs_plugin_timezone
+        const UTC = window.dayjs_plugin_utc
+        dayjs.extend(timezone)
+        dayjs.extend(UTC)
 
+        const EventBus = new Vue();
 
         ////////////// Main Component //////////////
         var app = new Vue({
@@ -78,25 +90,29 @@
                 c_figure: null
             },
             delimiters: ["[[", "]]"],
-            computed: {
-
-            },
             filters: {
                 timestampDisplay: function (timestamp) {
-                    if (timestamp.includes("old")) {
-                        return "old:" + dayjs.unix(timestamp.slice(4)).format("HH:mm:ss (MM/DD)")
+                    if (timestamp.includes("R")) {
+                        var elements = timestamp.split("R") // (old:)timestamp+runNumber
+                        if (timestamp.includes("old")) {
+                            return "old:" + dayjs.unix(elements[0].slice(4)).format("HH:mm:ss (DD/MM)") +
+                                " Run: " + elements[1]
+                        } else {
+                            return dayjs.unix(elements[0]).format("HH:mm:ss (DD/MM)") +
+                            " Run: " + elements[1]
+                        }
                     } else {
-                        return dayjs.unix(timestamp).format("HH:mm:ss (MM/DD)")
+                        if (timestamp.includes("old")) {
+                            return "old:" + dayjs.unix(timestamp.slice(4)).format("HH:mm:ss (DD/MM)")
+                        } else {
+                            return dayjs.unix(timestamp).format("HH:mm:ss (DD/MM)")
+                        }
                     }
                 }
-            },
-            created() {
-
             },
             watch: {
                 c_selected: function (value) {
                     const index = this.c_timestamps.indexOf(value)
-
                     if (index == 0) {
                         this.c_right_disabled = true
                         this.c_left_disabled = false
@@ -111,12 +127,14 @@
                     axios.get('/stored_histogram', {
                             params: {
                                 ID: this.c_ID,
-                                timestamp: value
+                                args: value
                             }
                         })
                         .then(response => {
-                            console.log(response.data)
                             this.c_figure = response.data["figure"]
+                        })
+                        .catch(function(error){
+                            console.log("The stored histogram is not in the right format ")
                         })
                 }
             },

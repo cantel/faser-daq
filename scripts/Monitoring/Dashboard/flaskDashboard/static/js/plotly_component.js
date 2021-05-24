@@ -6,7 +6,6 @@ Vue.component("plotly-graph", {
     data: function () {
         return {
             c_log : false,
-
             c_config: {
                 toImageButtonOptions : {
                     filename: "default"
@@ -19,7 +18,6 @@ Vue.component("plotly-graph", {
                         name: "log scale",
                         icon: log_icon,
                         click: (gd) => {
-                            var update = {'yaxis.type': "log"}
                             this.c_log =! this.c_log
                             if (this.c_log){
                                 Plotly.relayout(gd,{'yaxis.type':"log"})
@@ -38,8 +36,10 @@ Vue.component("plotly-graph", {
             if (this.c_log) {
                 figure.layout.yaxis.type = "log"
             }
-            if (figure.config){
-                this.c_config.toImageButtonOptions.filename = figure.config.filename.split(".")[0]
+            if (figure.config.filename){
+                var ts = figure.config.filename.split("+")
+                var day = dayjs.tz(parseFloat(ts[1])* 1000 , "Europe/Zurich").format("DDMMYYYY_HHmmss")
+                this.c_config.toImageButtonOptions.filename = ts[0]+"_"+day
             }
             Plotly.react(this.$refs[this.divid], figure.data, figure.layout, this.c_config)
             this.$emit('graph_loading', false)

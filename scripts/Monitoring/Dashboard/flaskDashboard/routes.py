@@ -7,6 +7,8 @@
 # @brief Defines all the flask routes and the api endpoints
 
 
+#TODO: afficher numéro run number sur les graphs et les history histograms  -> client side history !!
+
 import time
 import json
 from flask.helpers import flash
@@ -26,6 +28,10 @@ INTERVAL_TASK_ID = "interval-task-id"  # can be deleted ?
 ## Redis database where the last histograms are published.
 r = redis.Redis(
     host="localhost", port=6379, db=1, charset="utf-8", decode_responses=True
+)
+
+r2 = redis.Redis(
+    host="localhost", port=6379, db=2, charset="utf-8", decode_responses=True
 )
 ## Redis database where the tags are stored.
 r5 = redis.Redis(
@@ -47,14 +53,15 @@ def histograms_save():
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
         if histobj != None:
+            runNumber = r2.get("runNumber")
             data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-            config = {"filename":f"{ID}_{timestamp}"}  
+            config = {"filename":f"{ID}+{timestamp}"}  
             figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
             if r7.hlen(ID) >= 30:
                 key_to_remove = sorted(r7.hkeys(ID))[0]
                 r7.hdel(ID, key_to_remove)
-            r7.hset(ID, str(timestamp), json.dumps(hist))
+            r7.hset(ID, f"{timestamp}R{runNumber}", json.dumps(hist))
 
             
 def old_histogram_save():
@@ -67,11 +74,12 @@ def old_histogram_save():
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
         if histobj != None:
+            runNumber = r2.get("runNumber")
             data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-            config = {"filename":f"{ID}_{timestamp}"} 
+            config = {"filename":f"{ID}+{timestamp}"} 
             figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
-            r7.hset(f"old:{ID}", f"old:{timestamp}", json.dumps(hist)) 
+            r7.hset(f"old:{ID}", f"old:{timestamp}R{runNumber}", json.dumps(hist)) 
 
 # setting up the background jobs
 scheduler = BackgroundScheduler()
@@ -139,42 +147,6 @@ def getModules():
     return jsonify(modules)
 
 
-# not used for now
-@app.route("/download_tags_json")
-def download_tags_json():
-    """! Gets all ids with their associated tags and return a Response object containing the JSON file. """
-    json_file = {}
-    keys = r5.keys("id*")
-    for key in keys:
-        json_file[key.replace("id:", "")] = list(r5.smembers(key))
-    json_file = json.dumps(json_file)
-    return Response(
-        json_file,
-        mimetype="text/json",
-        headers={"Content-disposition": "attachment; filename=tags.json"},
-    )
-
-# not used for now
-@app.route("/load_tags_from_file", methods=["POST"])
-def load_tags_from_file():
-    """! Gets the JSON file with a POST request, read it and store the information in the redis database (db 5). """
-    if request.method == "POST":
-        file = request.files["filename"]
-        if file:
-            if file.filename.split(".")[1] == "json":
-                content = file.read()
-                content = json.loads(content.decode("utf-8"))
-                for key in content.keys():
-                    r5.sadd(f"id:{key}", *content[key])
-                    for tag in content[key]:
-                        r5.sadd(f"tag:{tag}", key)
-            else:
-                flash("Wrong filetype, upload a .json file", category="danger")
-        else:
-            flash("No chosen file", category="danger")
-    return redirect(url_for("home"))
-
-
 @app.route("/")
 @app.route("/vue_home", methods=["GET"])
 def vue_home():
@@ -212,16 +184,17 @@ def IDs_from_tags():
 
 @app.route("/histogram_from_ID", methods=["GET"])
 def histogram_from_ID():
+    runNumber = r2.get("runNumber")
     packet = {}
     ID = request.args.get("ID")
     source, histname = ID.split("-")
     histobj = r.hget(source, f"h_{histname}")
     if histobj is not None:
         data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
-        config = {"filename":f"{ID}_{timestamp}"} 
+        config = {"filename":f"{ID}+{timestamp}"} 
         fig = dict(data=data,layout=layout, config=config)
         tags = get_tags_by_ID(ID)
-        packet = dict(timestamp=float(timestamp), fig=fig, ID=ID, tags=tags)
+        packet = dict(timestamp=float(timestamp), fig=fig, ID=ID, tags=tags, runNumber = runNumber)
     return jsonify(packet)
 
 ## Tag section
@@ -266,19 +239,23 @@ def stored_timestamps():
     ID = request.args.get("ID")
     timestamps = sorted(r7.hkeys(ID), reverse= True)
     old_timestamps = sorted(r7.hkeys(f"old:{ID}"), reverse=True)
+    print(old_timestamps)
     packet = dict(ts=timestamps, ots=old_timestamps)
     return jsonify(packet)
 
 
 @app.route("/stored_histogram", methods = ["GET"])
 def stored_histogram():
-    timestamp = str(request.args.get("timestamp"))
+    hist = ""
+    ts_run = str(request.args.get("args"))  # (old:)timestamp&runNumber
     ID = request.args.get("ID")
-    if "old" in timestamp:
-        hist = r7.hget(f"old:{ID}", timestamp)
+    print("ts_run",ts_run)
+    #ts_run = args.split("&")
+    if "old" in ts_run:
+        hist = r7.hget(f"old:{ID}", ts_run)
         hist = json.loads(hist)
     else:   
-        hist = r7.hget(ID, timestamp)
+        hist = r7.hget(ID, ts_run)
         hist = json.loads(hist)
     return jsonify(hist)
 

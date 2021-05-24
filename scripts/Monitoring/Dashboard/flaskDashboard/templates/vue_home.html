@@ -21,11 +21,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/dayjs.min.js"
         integrity="sha512-0fcCRl828lBlrSCa8QJY51mtNqTcHxabaXVLPgw/jPA5Nutujh6CbTdDgRzl9aSPYW/uuE7c4SffFUQFBAy6lg=="
         crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/utc.min.js"
+            integrity="sha512-m00bfmYnAl3plEBlQfeQUhw/U2uvmw29V2+jxSWpAjankMWS+zAsjezbKWDEJNXqWq9o9qQZSOiA2RKDpa4D5w=="
+            crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/timezone.min.js"
         integrity="sha512-pslqxxHAYPCxaSeFSmXXxDkLejD5dbFVC66aiVq0z4v7VTJBU+wqcG1OpNh4p3MjS2D6NCwz/H2QmSc7dXxryg=="
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/utc.min.js"
-        integrity="sha512-m00bfmYnAl3plEBlQfeQUhw/U2uvmw29V2+jxSWpAjankMWS+zAsjezbKWDEJNXqWq9o9qQZSOiA2RKDpa4D5w=="
         crossorigin="anonymous"></script>
 
     <!-- Plotly library -->
@@ -33,7 +33,7 @@
     <!-- custom css -->
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-    <title>Home</title>
+    <title>Faser Monitoring</title>
 
 </head>
 
@@ -80,7 +80,6 @@
     </div>
     <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
     <script>
-        
         const timezone = window.dayjs_plugin_timezone
         const UTC = window.dayjs_plugin_utc
         dayjs.extend(timezone)
@@ -234,6 +233,7 @@
                     c_figure: null,
                     c_isLoading: false,
                     c_tags: [],
+                    c_runNumber: null
 
                 }
             },
@@ -245,10 +245,11 @@
             },
             filters: {
                 timestampLocal: function (timestamp) {
-                    return dayjs.unix(timestamp).format("HH:mm:ss (MM/DD)")
+                    return dayjs.unix(timestamp).format("HH:mm:ss (DD/MM)")
                 },
                 timestampCERN: function (timestamp) {
-                    return dayjs.tz(parseFloat(timestamp) * 1000, "Europe/Zurich").format("HH:mm:ss (MM/DD)")
+                    return dayjs.tz(parseFloat(timestamp) * 1000, "Europe/Zurich").format(
+                        "HH:mm:ss (DD/MM)")
                 }
             },
             computed: {
@@ -268,7 +269,7 @@
                             this.c_figure = response.data["fig"]
                             this.c_timestamp = response.data["timestamp"]
                             this.c_tags = response.data["tags"]
-
+                            this.c_runNumber = response.data["runNumber"]
                         })
 
 
@@ -288,7 +289,6 @@
                 },
 
                 removeTag(item) {
-                    //console.log("item appuyé sur la croix", item);
                     const index = this.c_tags.indexOf(item);
                     if (index > -1) {
                         this.c_tags.splice(index, 1);
@@ -305,7 +305,7 @@
 
                 },
                 openTimeView() {
-                    console.log('Appuyé sur time_view', this.id);
+                    //console.log('Appuyé sur time_view', this.id);
                     window.open("/history_view/" + this.id, "_blank", "width=600, height=455")
                 }
             },
@@ -354,7 +354,7 @@
                         <v-tooltip top transition="fade-transition">
                             <template v-slot:activator="{ on, attrs }">
                                 <span class="timestamp" v-bind="attrs" v-on="on">
-                                    <i>[[ c_timestamp | timestampLocal ]]</i>
+                                    <i>[[ c_timestamp | timestampLocal ]] R[[ c_runNumber ]]</i>
                                 </span>
                             </template>
                             <span>CERN: [[ c_timestamp | timestampCERN ]]</span>

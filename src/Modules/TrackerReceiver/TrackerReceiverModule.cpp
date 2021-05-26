@@ -442,7 +442,7 @@ void TrackerReceiverModule::runner() noexcept {
           try { 
             TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
             local_event_id = trk_data_fragment.event_id();
-            local_bc_id = trk_data_fragment.bc_id();
+            local_bc_id = (trk_data_fragment.bc_id()-m_BCIDCORR)%3564;
             local_status = 0;
 
             if ( trk_data_fragment.valid()) {

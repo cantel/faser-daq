@@ -119,7 +119,7 @@ class runner:
 
         rc=self.shutdown()
         if not rc:
-            printf("Failed to shutdown - retry again in 10 seconds")
+            print("Failed to shutdown - retry again in 10 seconds")
             time.sleep(10)
             rc=self.shutdown()
             if not rc:
@@ -158,6 +158,35 @@ def main(args):
     hostUrl=config["hostUrl"]
     maxTransitionTime=config["maxTransitionTime"]
     cfgs=[]
+    if "template" in config:
+        if "steps" in config:
+            print("ERROR: cannot specify both 'template' and 'steps'")
+            return 1
+        steps=[]
+        tempVars={}
+        varLen=0
+        for var in config['template']['vars']:
+            varDef=config['template']['vars'][var]
+            if type(varDef)==str:
+                varDef=list(range(*eval(varDef)))
+            if type(varDef)!=list:
+                print(f"Template variable {var} not properly defined")
+                return 1
+            if varLen and len(varDef)!=varLen:
+                print(f"Template variable {var} does not have the proper number of entries")
+                return 1
+            varLen=len(varDef)
+            tempVars[var]=varDef
+        for idx in range(varLen):
+            values={}
+            for var in tempVars:
+                values[var]=tempVars[var][idx]
+            step={}
+            for item in config['template']['step']:
+                step[item]=config['template']['step'][item].format(**values)
+            steps.append(step)
+        config["steps"]=steps
+
     for cfg in config["steps"]:
         for par in ["cfgFile",
                     "runtype",
@@ -168,12 +197,19 @@ def main(args):
                     "preCommand",
                     "postCommand"]:
             if not par in cfg:
-                if not par in config:
+                if not par in config['defaults']:
                     print(f"Did not find value for '{par}'")
                     return 1
-                cfg[par]=config[par]
+                cfg[par]=config['defaults'][par]
         cfgs.append(cfg)
-    
+
+    if "initCommand" in config:
+        print("Running INIT command")
+        rc=os.system(config["initCommand"])
+        if rc:
+            print("Failed in init command")
+            return 1
+
     for step in range(startStep-1,len(cfgs)):
         print(f"Running step {step+1}")
         cfg=cfgs[step]
@@ -184,6 +220,15 @@ def main(args):
         else:
             print("Failed to run, please check")
             return 1
+
+    if "finalizeCommand" in config:
+        print("Running FINALIZE command")
+        rc=os.system(config["finalizeCommand"])
+        if rc:
+            print("Failed in finalize command")
+            return 1
+
+
     return 0
 
 if __name__ == "__main__":

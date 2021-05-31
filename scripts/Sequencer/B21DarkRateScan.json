@@ -1,0 +1,18 @@
+{"hostUrl": "http://faser-daq-001.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "defaults": {
+     "cfgFile": "digitizerDarkRateSciLab.json",
+     "runtype": "Test",
+     "maxRunTime": 100,
+     "maxEvents": 10000,
+     "postCommand": null,
+     "endcomment": "enough stat."
+ },
+ "template": {
+     "vars": { "voltage": "(500,1020,25)" },
+     "step": {
+	 "startcomment": "Dark rate measurement {voltage} V",
+	 "preCommand": "/home/aagaard/HVControl/N1470CLI.py CH0 {voltage};sleep 30s"
+     }
+ }
+}

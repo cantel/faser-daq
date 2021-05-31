@@ -1,0 +1,19 @@
+{"hostUrl": "http://faser-daq-006.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "defaults": {
+     "cfgFile": "tlbDigiTI12.json",
+     "runtype": "Test",
+     "maxRunTime": 3000,
+     "maxEvents": 10000,
+     "postCommand": null,
+     "endcomment": "Sequencer stop",
+     "finalizeCommand": "/home/aagaard/DCS/setPMTVoltages.py 0"
+ },
+ "template": {
+     "vars": { "voltage": "(0,601,100)"},
+     "step": {
+	 "startcomment": "PMT HV Scan, nominal voltage - {voltage}",
+	 "preCommand": "/home/aagaard/DCS/setPMTVoltages.py {voltage}"
+     }
+ }
+}

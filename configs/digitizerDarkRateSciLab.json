@@ -1,0 +1,26 @@
+{
+  "configuration": {
+    "version": 10,
+    "group": "faser",
+    "components": [
+      { "$ref" : "Templates/digitizer.json#DigitizerDarkRateB21" },
+      {
+        "name": "eventbuilder01",
+        "host": "localhost",
+        "port": 5500,
+        "type": "EventBuilderFaser",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+        "connections": {
+          "receivers": [
+            { "chid": 0,"port": 8101, "host": "localhost", "type": "pair", "transport": "tcp" }
+          ],
+          "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
+	}
+      },
+      { "$ref": "Templates/fileWriter.json#FileWriter" },
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" }
+    ]
+  }
+}

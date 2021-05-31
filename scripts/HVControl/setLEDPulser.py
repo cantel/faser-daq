@@ -4,7 +4,7 @@
 #  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
 #
 
-
+import os
 import sys
 import requests
 import time
@@ -47,6 +47,8 @@ def main(args):
     if amplB<0 or amplB>3300:
         print("invalid B amplitude")
         sys.exit(1)
+
+    rc=os.system("ping -c 1 faser-ledcalib-03")
 
     doSetting(f"amplitude/A/{amplA}")
     doSetting(f"amplitude/B/{amplB}")

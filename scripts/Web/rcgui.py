@@ -42,6 +42,7 @@ app.register_blueprint(metric_blueprint)
 app.register_blueprint(config_blueprint)
 app.register_blueprint(add_blueprint)
 app.register_blueprint(configFiles_blueprint)
+app.config['SESSION_COOKIE_SAMESITE'] = "Lax"
 
 app.debug = True
 Scss(app, static_dir='static/css', asset_dir='assets/scss')

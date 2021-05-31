@@ -47,6 +47,7 @@ class TrackerReceiverModule : public FaserProcess {
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;
   bool m_triggerEnabled;
+  uint64_t m_prev_event_id;
 
   std::atomic<int> m_event_size_bytes;
   std::atomic<int> m_physicsEventCount;
@@ -57,9 +58,11 @@ class TrackerReceiverModule : public FaserProcess {
   std::atomic<int> m_receivedEvents;
   std::atomic<float> m_dataRate;
   std::atomic<int> m_PLLErrCnt;
+  std::atomic<int> m_missedL1;
 
   bool m_debug = false;
   bool m_trace = false;
   const uint32_t m_TRBENDOFDAQ = 0x07000eee;
   const int m_UPDATEMETRIC_INTERVAL = 10; // in seconds
+  const int m_BCIDCORR = 6; // to match TLB
 };

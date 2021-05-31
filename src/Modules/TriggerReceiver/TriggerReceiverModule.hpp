@@ -29,6 +29,7 @@ class TriggerReceiverModule : public FaserProcess {
   
   bool m_enable_monitoringdata;
   bool m_enable_triggerdata;
+  uint64_t m_prev_event_id;
  
   // metrics 
   std::atomic<int> m_physicsEventCount;
@@ -38,5 +39,6 @@ class TriggerReceiverModule : public FaserProcess {
   std::atomic<int> m_monitoring_payload_size;
   std::atomic<int> m_fragment_status;
   std::atomic<float> m_dataRate;
+  std::atomic<int> m_missedL1;
  
 };

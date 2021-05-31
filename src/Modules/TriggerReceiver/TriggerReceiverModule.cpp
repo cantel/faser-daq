@@ -36,7 +36,7 @@ TriggerReceiverModule::TriggerReceiverModule() {
 }
 
 TriggerReceiverModule::~TriggerReceiverModule() { 
-  INFO("In ~TriggerReceiverModule"); 
+  INFO("Shutdown"); 
  
   delete m_tlb;
 }
@@ -55,6 +55,7 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
   registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10.); // kB/s read via network socket
+  registerVariable(m_missedL1, "MissedEventIDError");
   
   auto cfg = m_config.getSettings();
 
@@ -101,37 +102,64 @@ void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   //if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   //if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
   //m_tlb->StartReadout(WhatToRead); //Temp
-  m_tlb->EnableTrigger(false,false); //Only enables trigger. Doesn't send ECR nor Reset
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::EnableTrigger, false,false); //Only enables trigger. Doesn't send ECR nor Reset 
+  if (m_status) {
+    ERROR("Issue encountered while enabling trigger. If trigger rate remains 0, try enabling trigger again.");
+  }
 }
 
 void TriggerReceiverModule::disableTrigger(const std::string &arg) { //run with "command disableTrigger"
   INFO("Got disableTrigger command with argument "<<arg);
-  m_tlb->DisableTrigger();
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::DisableTrigger);
+  if (m_status) {
+    ERROR("Issue encountered while disabling trigger. If still see trigger rate, try disabling trigger again.");
+  }
   //m_tlb->StopReadout(); //Temporary while using USB. Should empty USB buffer.
   usleep(100); //Once ethernet is implemented you should either check if data is pushed or if timeout (100musec).  
 }
 
 void TriggerReceiverModule::sendECR() { //run with "command ECR"
-  INFO("Got ECR command");
-  m_tlb->SendECR();
+  INFO("Received ECR command.");
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::SendECR);
+  if (m_status){
+    ERROR("Issue encountered while resetting the TLB L1 counter. Try resend ECR?");
+  }
+  else INFO("ECR successful.");
+  INFO("ECR count = " << m_ECRcount);
+  m_prev_event_id = 0;
 }
 
 
 void TriggerReceiverModule::start(unsigned run_num) {
-  FaserProcess::start(run_num);
+  INFO("Starting...");
   uint16_t readout_param = TLBReadoutParameters::ReadoutFIFOReset;
   if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
-  m_tlb->StartReadout( readout_param );
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::StartReadout, readout_param );
+  if (m_status) {
+    THROW(TLBAccessException, "Board communication issue encountered while starting readout. Will not enable trigger.");
+  }
   usleep(2000*_ms);//temporary - wait for all modules
-  m_tlb->EnableTrigger(true,true); //sends ECR and Reset
+  INFO("Enabling trigger...");
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::EnableTrigger, true,true); //sends ECR and Reset
+  if (m_status){
+    THROW(TLBAccessException, "Board communication issue encountered while enabling trigger.");
+  }
+  INFO("Starting software DAQ processing.");
+  FaserProcess::start(run_num);
 }
 
 void TriggerReceiverModule::stop() {  
   INFO("Stopping readout.");
-  m_tlb->DisableTrigger();
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::DisableTrigger);
+  if (m_status){
+    ERROR("Issue encountered while disabling trigger. Continuing tentatively...");
+  }
   usleep(100*_ms);
-  m_tlb->StopReadout();
+  m_status = TLBAccess::GPIOCheck(m_tlb, &TLBAccess::StopReadout);
+  if (m_status){
+    ERROR("Issue encountered while stopping readout. Continuing tentatively...");
+  }
   usleep(1000*_ms); //value to be tweaked. Should be large enough to empty the buffer.
   FaserProcess::stop(); //this turns m_run to false
 }
@@ -145,6 +173,7 @@ void TriggerReceiverModule::runner() noexcept {
   uint64_t local_event_id;
   uint16_t local_bc_id;
   uint16_t local_trigger_bits(0);
+  m_prev_event_id = 0;
 
 
   while (m_run || vector_of_raw_events.size()) {
@@ -182,19 +211,29 @@ void TriggerReceiverModule::runner() noexcept {
           TLBDataFragment tlb_fragment = TLBDataFragment(event, total_size);
           local_event_id = tlb_fragment.event_id();
           local_bc_id = tlb_fragment.bc_id();
-          if (!tlb_fragment.valid()) {
+          if (tlb_fragment.valid()) {
+            auto expected_event_id = m_prev_event_id+1;
+            if (local_event_id != (expected_event_id&0xffffff)){
+              WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<expected_event_id);
+              m_missedL1+=(local_event_id-(expected_event_id&0xffffff));
+              if (m_missedL1) m_status = STATUS_WARN;
+              else m_status = STATUS_OK;
+            }
+            m_prev_event_id = local_event_id;
+            local_trigger_bits = tlb_fragment.tap();
+          }
+          else {
             WARNING("Corrupted trigger physics data fragment at triggered event count "<<m_physicsEventCount);
             m_fragment_status = EventStatus::CorruptedFragment;
             m_status = STATUS_WARN;
-          } else {
-            local_trigger_bits = tlb_fragment.tap();
+            m_prev_event_id++;
           }
           DEBUG("Data fragment:\n"<<tlb_fragment<<"fragment size: "<<total_size<<", fragment status: "<<m_fragment_status<<", ECRcount: "<<m_ECRcount);
           m_physicsEventCount+=1;
           m_trigger_payload_size = total_size;
         }
 
-        local_event_id = (m_ECRcount<<24) + (local_event_id);
+        local_event_id = (m_ECRcount<<24) + local_event_id;
 
         std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, event, total_size));

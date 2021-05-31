@@ -146,7 +146,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
 }    
 
 TrackerReceiverModule::~TrackerReceiverModule() { 
-    INFO("");
+    INFO("Shutdown");
 }
 
 
@@ -167,6 +167,7 @@ void TrackerReceiverModule::configure() {
   registerVariable(m_receivedEvents, "ReceivedEvents"); // events transferred from driver to tracker receiver.
   registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10); // kB/s read via network socket
   registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE, m_UPDATEMETRIC_INTERVAL);
+  registerVariable(m_missedL1, "MissedEventIDError");
 
   //TRB configuration 
   m_moduleMask = 0;
@@ -329,8 +330,14 @@ void TrackerReceiverModule::configure() {
 
 void TrackerReceiverModule::sendECR()
 {
-  INFO("TRB --> ECR." << " ECRcount: " << m_ECRcount);
-  m_trb->L1CounterReset(); // TODO need to reset SCT module counters here as well
+  INFO("Received ECR command.");
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::L1CounterReset); // TODO need to reset SCT module counters here as well
+  if (m_status) {
+    ERROR("Issue encountered while resetting the TRB L1 counter. Try resend ECR?");
+  }
+  else INFO("ECR successful.");
+  INFO("ECR count = " << m_ECRcount);
+  m_prev_event_id = 0;
 }
 
 
@@ -338,9 +345,15 @@ void TrackerReceiverModule::sendECR()
  *        Start module
  * ************************************/
 void TrackerReceiverModule::start(unsigned run_num) {
-  m_triggerEnabled = true;
-  m_trb->StartReadout(FASER::TRBReadoutParameters::READOUT_L1COUNTER_RESET | FASER::TRBReadoutParameters::READOUT_ERRCOUNTER_RESET | FASER::TRBReadoutParameters::READOUT_FIFO_RESET); //doing ErrCnTReset, FifoReset,L1ACounterReset
+  INFO("Starting...");
+  uint16_t param = FASER::TRBReadoutParameters::READOUT_L1COUNTER_RESET | FASER::TRBReadoutParameters::READOUT_ERRCOUNTER_RESET | FASER::TRBReadoutParameters::READOUT_FIFO_RESET;
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::StartReadout, param); //doing ErrCnTReset, FifoReset,L1ACounterReset
+  if (m_status){
+    THROW(TRBAccessException, "Board communication issue encountered when starting readout.");
+  }
   INFO("TRB --> readout started." );
+  m_triggerEnabled = true;
+  INFO("Starting software DAQ processing.");
   FaserProcess::start(run_num);
 }
 
@@ -349,9 +362,16 @@ void TrackerReceiverModule::start(unsigned run_num) {
  *        Stop module
  * ************************************/
 void TrackerReceiverModule::stop() {
-  m_trb->StopReadout();
+  std::this_thread::sleep_for(std::chrono::microseconds(100000)); //wait for events 
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::StopReadout);
+  if (m_status){
+    ERROR("Issue encountered while stopping readout. Continuing tentatively...");
+  }
   usleep(100);
-  m_trb->SetDirectParam(0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::SetDirectParam, 0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+  if (m_status){
+    WARNING("Issue encountered while trying to unset direct parameters. This might cause problems during configurations next time. Continuing...");
+  }
   FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }
@@ -385,18 +405,19 @@ void TrackerReceiverModule::runner() noexcept {
   uint32_t local_source_id    = SourceIDs::TrackerSourceID + m_trb->GetBoardID();
   uint64_t local_event_id;
   uint16_t local_bc_id;
+  m_prev_event_id = 0;
   unsigned local_status;
   float check_point(0);
 
   while (m_run || vector_of_raw_events.size()) { 
     if (!m_extClkSelect && m_triggerEnabled == true){
       usleep(1e5);
-      m_trb->GenerateL1A(m_moduleMask); //Generate L1A on the board
+      FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::GenerateL1A,m_moduleMask, false); //Generate L1A on the board
     }
 
     m_dataRate = m_trb->GetDataRate();
     if (std::difftime(std::time(nullptr), check_point) > m_UPDATEMETRIC_INTERVAL) { // only need to update occassionally. this sends command to TRB.
-      if (m_extClkSelect && m_run) m_PLLErrCnt = m_trb->ReadPLLErrorCounter();
+      if (m_extClkSelect && m_run) m_PLLErrCnt = m_trb->ReadPLLErrorCounter(); // ReadPLLErrorCounter is done safely. Will return 0 in case of failure.
       check_point = std::time(nullptr); 
     }
 
@@ -421,14 +442,22 @@ void TrackerReceiverModule::runner() noexcept {
           try { 
             TrackerDataFragment trk_data_fragment = TrackerDataFragment(event, total_size);
             local_event_id = trk_data_fragment.event_id();
-            local_event_id = local_event_id | (m_ECRcount << 24);
-            local_bc_id = trk_data_fragment.bc_id();
+            local_bc_id = (trk_data_fragment.bc_id()-m_BCIDCORR)%3564;
+            local_status = 0;
 
             if ( trk_data_fragment.valid()) {
-                local_status = 0;
+                auto expected_event_id = m_prev_event_id+1;
+                if (local_event_id != (expected_event_id&0xffffff)){
+                  WARNING("Unexpected L1 ID! Current L1 ID = "<<local_event_id<<" but was expecting "<<expected_event_id);
+                  m_missedL1+=(local_event_id-(expected_event_id&0xffffff));
+                  if (m_missedL1) m_status = STATUS_WARN;
+                  else m_status = STATUS_OK;
+                }
+                m_prev_event_id = local_event_id;
             }
             else{
-                local_status = EventStatus::UnclassifiedError;
+                local_status = EventStatus::CorruptedFragment;
+                m_prev_event_id++;
                 m_status=STATUS_WARN;
                 m_corrupted_fragments += 1; //Monitoring data
                 WARNING("Corrupted tracker data fragment at triggered event count "<<m_physicsEventCount);
@@ -450,10 +479,13 @@ void TrackerReceiverModule::runner() noexcept {
               local_event_id = 0xffffff;
               local_bc_id = 0xffff;
               local_status = EventStatus::CorruptedFragment;
+              m_prev_event_id++;
               m_corrupted_fragments += 1; //Monitoring data
               m_status=STATUS_WARN;
               WARNING("Crashed tracker data fragment at triggered event count "<<m_physicsEventCount);
           }
+
+          local_event_id = local_event_id | (m_ECRcount << 24);
 
           std::unique_ptr<EventFragment> fragment(new EventFragment(local_fragment_tag, local_source_id, 
                                               local_event_id, local_bc_id, event, total_size));

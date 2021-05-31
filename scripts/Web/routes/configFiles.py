@@ -47,10 +47,11 @@ def saveNewConfigFile(newFileName):
 	
 @configFiles_blueprint.route('/<fileName>')
 def getConfigFile(fileName):
-		
-	res = h.read(fileName)
-	session["selectedFile"] = fileName;
-	if(res == "NOJSON" or res == "BADSCHEMA" or res == "NOSCHEMA" or res == "NOTCOMP"):
-		pass #FIXME do something here?
-	return jsonify(res)
+        res = h.read(fileName)
+        session["selectedFile"] = fileName;
+        print("Selected",fileName)
+        if(res == "NOJSON" or res == "BADSCHEMA" or res == "NOSCHEMA" or res == "NOTCOMP"):
+                print("ERROR",res)
+                pass #FIXME do something here?
+        return jsonify(res)
 

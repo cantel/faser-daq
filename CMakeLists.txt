@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+add_compile_definitions(FOLLY_NO_CONFIG) # Required for building with Folly library
+
 # Include Threads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 FIND_PACKAGE(Threads REQUIRED)
@@ -31,6 +33,8 @@ if(NOT BUILD_New)
   set(BUILD_New OFF)
 endif()
 
+# Set use of DAQLING_LOGGING
+add_compile_definitions(DAQLING_LOGGING)
 # Add submodules
 add_subdirectory(faser-common)
 add_subdirectory(gpiodrivers)

@@ -36,11 +36,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8110
+		    "port": 8110,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -82,11 +86,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8111
+		    "port": 8111,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -129,11 +137,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8112
+		    "port": 8112,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -175,11 +187,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8113
+		    "port": 8113,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -221,11 +237,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8114
+		    "port": 8114,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -267,11 +287,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8115
+		    "port": 8115,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -315,11 +339,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8116
+		    "port": 8116,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -365,11 +393,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8117
+		    "port": 8117,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -413,11 +445,15 @@
 	"connections": {
             "senders": [
 		{
-		    "type": "pair",
+		    "type": "ZMQPair",
 		    "chid": 0,
 		    "transport": "tcp",
 		    "host": "*",
-		    "port": 8118
+		    "port": 8118,
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -436,11 +472,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
+		    "type": "ZMQPubSub",
 		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -459,11 +503,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -482,11 +534,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -505,11 +565,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -528,11 +596,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -551,11 +627,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -574,11 +658,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -597,11 +689,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}
@@ -620,11 +720,19 @@
 	"connections": {
             "receivers": [
 		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+			"type": "ZMQPubSub",
+			"chid": 0,
+			"connections":[
+				{
+					"transport": "tcp",
+					"host": "localhost",
+					"port": 8200
+				}
+			],
+			"queue":{
+				"type":"FollyProducerConsumer",
+				"queue_size":1000
+			}
 		}
             ]
 	}

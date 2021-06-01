@@ -102,7 +102,7 @@ void EventPlaybackModule::runner() noexcept {
 	m_eventCounts[tag]++;
 	sendEvent(tag,&event);
       } catch (EFormatException &e) {
-	INFO("Got exception while reading "<<(*curFileName)<<":"<<e.what());
+	INFO("Got exception while reading "<<(*curFileName)<<":"<<e);
 	newFile=true;
       }
     } else {

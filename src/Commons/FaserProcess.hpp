@@ -22,7 +22,6 @@ public:
 
   virtual void configure() {
     //    DAQProcess::configure(); // replaced with local instance to allow environment variabls in influxdb string
-    setupStatistics();
     std::string influxDbURI = m_config.getMetricsSettings()["influxDb_uri"];
     std::ifstream secretsFile("/etc/faser-secrets.json");
     if (secretsFile.good()) {
@@ -32,10 +31,8 @@ public:
       autoExpandEnvironmentVariables(influxDbURI,secrets);
       INFO("After variable replacement: "+influxDbURI);
     }
-    m_statistics->setInfluxDBuri(influxDbURI);
-    if (m_stats_on) {
-      m_statistics->start();
-    }
+    m_config.getMetricsSettings()["influxDb_uri"] = influxDbURI;
+    DAQProcess::configure();
 
     registerVariable(m_status,"Status");
 

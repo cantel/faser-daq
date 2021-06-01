@@ -15,8 +15,41 @@
 
 #include "Commons/FaserProcess.hpp"
 #include "Utils/Binary.hpp"
-#include "Utils/ProducerConsumerQueue.hpp"
+#include "folly/ProducerConsumerQueue.h"
+#include "Utils/Ers.hpp"
+#include "Utils/Common.hpp"
+#include "Utils/ReusableThread.hpp"
 
+/**
+ * Issues related to FileWriterFaserModule.
+ */
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  TimestampFormatFailed,                                                   // Class name
+                  "Failed to format timestamp", // Message
+                  ERS_EMPTY)                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  UnknownOutputFileArgument,                                                   // Class name
+                  "Unknown output file argument '" << c << "'", // Message
+                  ((char)c))                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  MissingChannelNames,                                                   // Class name
+                  "Missing channel names. - Channel names needs to be supplied for all input channels.", // Message
+                  ERS_EMPTY)                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  InvalidFileNamePattern,                                                   // Class name
+                  "Configured file name pattern '" << c<<"' may not yield unique output file on rotation; your files may be silently "
+                "overwritten. Ensure the pattern contains all fields ('%c', '%n' and '%D').", // Message
+                  ((std::string)c))                      // Args
+
+ERS_DECLARE_ISSUE(FileWriterIssues,                                                             // Namespace
+                  OfstreamFailed,                                                   // Class name
+                  " Write operation for channel " << chid << " of size " << size
+                                               << "B failed!", // Message
+                  ((uint)chid)
+                  ((size_t)size))                      // Args
 /**
  * Module for writing your acquired data to file.
  */

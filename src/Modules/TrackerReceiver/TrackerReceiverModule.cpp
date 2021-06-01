@@ -15,7 +15,8 @@
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
-
+using namespace TrackerReceiverIssues;
+using namespace TrackerData;
 TrackerReceiverModule::TrackerReceiverModule() { 
     INFO("");
     m_status = STATUS_OK;
@@ -28,8 +29,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
       m_userBoardID = cfg["BoardID"];
     }
     else if (!runEmulation) {
-      ERROR("No board ID specified.");
-      throw std::runtime_error("No board ID specified.");
+      throw NoBoardID(ERS_HERE);
     }
 
     bool usingUSB(false);
@@ -39,8 +39,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
         m_DAQIP = cfg["DAQIP"];
       }
       else {
-        ERROR("No DAQ IP specified.");
-        throw std::runtime_error("No DAQ IP specified.");
+        throw NoDaqIP(ERS_HERE);
       }
       INFO("SC and DAQ IPs have been specified. Assuming we're communicating through the ether!");
     }
@@ -225,16 +224,15 @@ void TrackerReceiverModule::configure() {
           }
           else { 
             m_status=STATUS_ERROR;
-            ERROR("Empty configuration file provided for module "<<l_moduleNo<<".");
             sleep(1);
-            THROW(TRBConfigurationException, "Cannot configure module due to missing configuration file.");
+            throw MissingConfigurationFile(ERS_HERE,l_moduleNo);
           }
           try {
             m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
           } catch ( TRBConfigurationException &e) {
              m_status=STATUS_ERROR;
              sleep(1);
-             throw e;
+             throw TRBConfigurationIssue(ERS_HERE,e);
           }
           INFO("Configuration of module " << l_moduleNo << " finished.");
         }
@@ -278,15 +276,15 @@ void TrackerReceiverModule::configure() {
         usleep(1e5); // 100 ms
       }
       if ( !(status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL) ) {
-        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
+        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TLBSyncFailed(ERS_HERE);}  
         continue;
       } 
       m_trb->WritePhaseConfigReg();
       m_trb->ApplyPhaseConfig();
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
-      } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
-         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw e; };
+      } catch ( Exceptions::BaseException &e  ){ // FIXME figure out why it won't catch TRBAccessException
+         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TRBAccesIssue(ERS_HERE,e); };
          ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
          m_trb->SetDirectParam(0);
          uint16_t status;
@@ -315,7 +313,7 @@ void TrackerReceiverModule::configure() {
   try { m_trb->VerifyConfigReg(); }
   catch ( TRBConfigurationException& e) {
     m_status=STATUS_ERROR;
-    ERROR("Configurations read back do not match configurations sent.");
+    ERROR("Configurations read back do not match configurations sent. Reason: "<<e);
   }
   INFO("TRB configured successfully. TRB configurations read back:");
   m_trb->ReadbackAndPrintConfig();

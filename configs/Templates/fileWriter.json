@@ -25,53 +25,81 @@
         "connections": {
           "receivers": [
             {
-              "type": "pair",
+              "type": "ZMQPair",
               "chid": 0,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8300
+              "port": 8300,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pair",
+              "type": "ZMQPair",
               "chid": 1,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8301
+              "port": 8301,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pair",
+              "type": "ZMQPair",
               "chid": 2,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8302
+              "port": 8302,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pair",
+              "type": "ZMQPair",
               "chid": 3,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8303
+              "port": 8303,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pair",
+              "type": "ZMQPair",
               "chid": 4,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8316
+              "port": 8316,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pair",
+              "type": "ZMQPair",
               "chid": 5,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8317
+              "port": 8317,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             },
             {
-              "type": "pair",
+              "type": "ZMQPair",
               "chid": 6,
               "transport": "tcp",
               "host": "localhost",
-              "port": 8318
+              "port": 8318,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
             }
           ]
         }

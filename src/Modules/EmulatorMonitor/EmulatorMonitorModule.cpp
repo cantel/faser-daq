@@ -25,7 +25,7 @@ EmulatorMonitorModule::~EmulatorMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void EmulatorMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void EmulatorMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

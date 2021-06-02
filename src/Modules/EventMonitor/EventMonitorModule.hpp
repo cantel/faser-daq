@@ -23,7 +23,7 @@ class EventMonitorModule : public MonitorBaseModule {
   unsigned int m_trb_bcid;
 
   // standard methods for monitoring module
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists();
   void register_metrics();
 

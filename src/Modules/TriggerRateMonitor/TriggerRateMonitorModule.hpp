@@ -35,7 +35,7 @@ class TriggerRateMonitorModule : public MonitorBaseModule {
   std::atomic<float> m_digi_busy_fraction;
   std::atomic<float> m_global_deadtime_fraction;
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
 

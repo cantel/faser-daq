@@ -23,7 +23,7 @@ TrackerMonitorModule::~TrackerMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void TrackerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void TrackerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

@@ -16,7 +16,9 @@ class FaserProcess: public daqling::core::DAQProcess {
 public:
   enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 
-  FaserProcess() {  INFO("Booting with config: " << m_config.getConfig().dump(4)); }
+  FaserProcess() {  INFO("Booting with config: " << m_config.getConfig().dump(4));
+  senderType = "DataFragment<daqling::utilities::Binary>";
+  receiverType = "DataFragment<daqling::utilities::Binary>"; }
 
   virtual ~FaserProcess() {}
 

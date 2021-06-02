@@ -66,7 +66,7 @@ void MonitorBaseModule::runner() noexcept {
   INFO("Running...");
 
   m_event_header_unpacked = false;
-  daqling::utilities::Binary eventBuilderBinary;
+  DataFragment<daqling::utilities::Binary> eventBuilderBinary;
 
   while (m_run) {
 
@@ -87,7 +87,7 @@ void MonitorBaseModule::runner() noexcept {
 
 }
 
-void MonitorBaseModule::monitor(daqling::utilities::Binary&) {
+void MonitorBaseModule::monitor(DataFragment<daqling::utilities::Binary>&) {
 }
 
 void MonitorBaseModule::register_metrics() {
@@ -136,7 +136,7 @@ void MonitorBaseModule::register_hists() {
 
 }
 
-uint16_t MonitorBaseModule::unpack_event_header( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorBaseModule::unpack_event_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary ) {
 
   uint16_t dataStatus(0);
   try {
@@ -153,7 +153,7 @@ uint16_t MonitorBaseModule::unpack_event_header( daqling::utilities::Binary &eve
 
 }
 
-uint16_t MonitorBaseModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
+uint16_t MonitorBaseModule::unpack_fragment_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
@@ -170,12 +170,12 @@ uint16_t MonitorBaseModule::unpack_fragment_header( daqling::utilities::Binary &
   return dataStatus;
 }
 
-uint16_t MonitorBaseModule::unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary ) {
+uint16_t MonitorBaseModule::unpack_fragment_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary ) {
   auto dataStatus = unpack_fragment_header(eventBuilderBinary, m_sourceID);
   return dataStatus;
 }
 
-uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID ) {
+uint16_t MonitorBaseModule::unpack_full_fragment( DataFragment<daqling::utilities::Binary> &eventBuilderBinary, uint32_t sourceID ) {
 
   uint16_t dataStatus=0;
 
@@ -224,7 +224,7 @@ uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &ev
   return dataStatus;
 }
 
-uint16_t MonitorBaseModule::unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary) {
+uint16_t MonitorBaseModule::unpack_full_fragment( DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
   auto dataStatus = unpack_full_fragment(eventBuilderBinary, m_sourceID);
   return dataStatus;
 }

@@ -29,7 +29,7 @@ TriggerRateMonitorModule::~TriggerRateMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

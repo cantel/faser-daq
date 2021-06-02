@@ -514,7 +514,7 @@ void TrackerReceiverModule::runner() noexcept {
 
          // place the raw binary event fragment on the output port
          std::unique_ptr<const byteVector> bytestream(fragment->raw());
-         daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+         DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
          m_connections.send(0, binData);
 
          } // event loop

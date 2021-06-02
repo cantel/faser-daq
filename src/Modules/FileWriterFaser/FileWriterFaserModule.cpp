@@ -204,7 +204,7 @@ void FileWriterFaserModule::runner() noexcept {
       auto &pq = std::get<PayloadQueue>(ctx);
 
       while (m_run) {
-        daqutils::Binary pl;
+        DataFragment<daqutils::Binary> pl;
         while (!m_connections.receive(chid, std::ref(pl)) && m_run) {
           if (m_statistics) {
             m_channelMetrics.at(chid).payload_queue_size = pq.sizeGuess();
@@ -213,6 +213,7 @@ void FileWriterFaserModule::runner() noexcept {
         }
 
         DEBUG(" Received " << pl.size() << "B payload on channel: " << chid);
+        //use shared data
         while (!pq.write(pl) && m_run)
           ; // try until successful append
         if (m_statistics && pl.size()) {
@@ -234,16 +235,16 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
                                FileGenerator fg) const {
   size_t bytes_written = 0;
   std::ofstream out = fg.next();
-  auto buffer = daqutils::Binary();
+  auto buffer = DataFragment<daqutils::Binary>();
   m_channelMetrics.at(chid).files_written = 1;
-  const auto flush = [&](daqutils::Binary &data) {
+  const auto flush = [&](DataFragment<daqutils::Binary> &data) {
     out.write(data.data<char *>(), static_cast<std::streamsize>(data.size()));
     if (out.fail()) {
       throw OfstreamFailed(ERS_HERE,chid,data.size());
     }
     m_channelMetrics.at(chid).bytes_written += data.size();
     bytes_written += data.size();
-    data = daqutils::Binary();
+    data = DataFragment<daqutils::Binary>();
   };
 
   while (!m_stopWriters) {
@@ -276,8 +277,8 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
       assert(tail_len > 0);
 
       // Split the payload into a head and a tail
-      daqutils::Binary head(payload->data(), split_offset);
-      daqutils::Binary tail(payload->data<char *>() + split_offset, tail_len);
+      DataFragment<daqutils::Binary> head(payload->data(), split_offset);
+      DataFragment<daqutils::Binary> tail(payload->data<char *>() + split_offset, tail_len);
       DEBUG(" -> head length: " << head.size() << "; tail length: " << tail.size());
       assert(head.size() + tail.size() == payload->size());
 
@@ -286,8 +287,8 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
 
       // Flush the tail until it is small enough to fit in the buffer
       while (tail_len > max_buffer_size) {
-        daqutils::Binary body(tail.data(), max_buffer_size);
-        daqutils::Binary next_tail(tail.data<char *>() + max_buffer_size,
+        DataFragment<daqutils::Binary> body(tail.data(), max_buffer_size);
+        DataFragment<daqutils::Binary> next_tail(tail.data<char *>() + max_buffer_size,
                                    tail_len - max_buffer_size);
         assert(body.size() + next_tail.size() == tail.size());
         flush(body);

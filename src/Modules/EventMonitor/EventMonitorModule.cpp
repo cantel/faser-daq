@@ -44,7 +44,7 @@ EventMonitorModule::~EventMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void EventMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

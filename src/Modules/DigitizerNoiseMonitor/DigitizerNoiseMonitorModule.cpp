@@ -24,7 +24,7 @@ DigitizerNoiseMonitorModule::DigitizerNoiseMonitorModule() {
 DigitizerNoiseMonitorModule::~DigitizerNoiseMonitorModule() { 
 }
 
-void DigitizerNoiseMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void DigitizerNoiseMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
   DEBUG("Digitizer monitoring");
 
   // the m_event object is populated with the event binary here

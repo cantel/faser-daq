@@ -12,7 +12,7 @@ class TrackerMonitorModule : public MonitorBaseModule {
 
  protected:
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
 

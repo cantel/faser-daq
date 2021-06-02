@@ -58,7 +58,7 @@ bool EventPlaybackModule::sendEvent(uint8_t event_tag,EventFull *event) {
   int channel=event_tag; 
   INFO("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
-  daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+  DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);
   delete bytestream;
   return true;
@@ -68,7 +68,7 @@ bool EventPlaybackModule::sendEvent(uint8_t event_tag,EventFull *event) {
 void EventPlaybackModule::runner() noexcept {
   INFO("Running...");
 
-  daqling::utilities::Binary  blob;
+  DataFragment<daqling::utilities::Binary>  blob;
   auto last=system_clock::now();
   std::ifstream infh;
   unsigned int runCount=0;

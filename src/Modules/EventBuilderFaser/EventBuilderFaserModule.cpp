@@ -87,7 +87,7 @@ bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,EventFull *event) {
   int channel=event_tag; 
   DEBUG("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
-  daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+  DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);      // to file writer
   m_connections.send(channel+100,binData);  // to monitoring
   delete bytestream;

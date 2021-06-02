@@ -25,7 +25,7 @@ FrontEndMonitorModule::~FrontEndMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void FrontEndMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void FrontEndMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

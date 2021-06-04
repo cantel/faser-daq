@@ -18,7 +18,7 @@
 #include "NewModule.hpp"
 #include "Utils/Ers.hpp"
 
-NewModule::NewModule() { ERS_INFO(""); }
+NewModule::NewModule(const std::string& n):daqling::core::DAQProcess(n) { ERS_INFO(""); }
 
 NewModule::~NewModule() { ERS_INFO(""); }
 

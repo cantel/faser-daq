@@ -12,8 +12,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Include Threads
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-FIND_PACKAGE(Threads REQUIRED)
+#set(THREADS_PREFER_PTHREAD_FLAG ON)
+#FIND_PACKAGE(Threads REQUIRED)
+add_compile_definitions(FOLLY_NO_CONFIG) # Required for building with Folly library
 
 # Build daqling
 add_subdirectory(daqling)

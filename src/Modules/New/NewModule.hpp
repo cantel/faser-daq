@@ -21,7 +21,7 @@
 
 class NewModule : public daqling::core::DAQProcess {
  public:
-  NewModule();
+  NewModule(const std::string& n);
   ~NewModule();
 
   void configure(); // optional (configuration can be handled in the constructor)

@@ -71,7 +71,7 @@ private:
     daqling::utilities::ReusableThread consumer;
     daqling::utilities::ReusableThread producer;
   };
-  using PayloadQueue = folly::ProducerConsumerQueue<daqling::utilities::Binary>;
+  using PayloadQueue = folly::ProducerConsumerQueue<DataFragment<daqling::utilities::Binary>>;
   using Context = std::tuple<PayloadQueue, ThreadContext>;
 
   struct Metrics {

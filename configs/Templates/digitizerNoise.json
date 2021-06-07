@@ -3,31 +3,36 @@
         "name": "digitizernoise",
         "host": "localhost",
         "port": 5561,
-        "type": "DigitizerNoiseMonitor",
-        "loglevel":         { "$ref": "top.json#loglevel" },
-        "metrics_settings": { "$ref": "top.json#metrics_settings" },
-        "settings": {
-            "fragmentID": 262144,
-            "buffer_length": 600,
-            "publish_interval": 20
-        },
-        "connections": {
-            "receivers": [
-                {
-                    "type": "ZMQPubSub",
-                    "chid": 0,
-                    "connections":
-                    {
-                        "transport": "tcp",
-                        "host": "localhost",
-                        "port": 8200
-                    },
-                    "queue":{
-                        "queue_size":1000,
-                        "type":"FollyProducerConsumer"
-                    }
+        "modules":[
+            {
+                "name": "digitizernoise",
+                "type": "DigitizerNoiseMonitor",
+                "settings": {
+                    "fragmentID": 262144,
+                    "buffer_length": 600,
+                    "publish_interval": 20
+                },
+                "connections": {
+                    "receivers": [
+                        {
+                            "type": "ZMQPubSub",
+                            "chid": 0,
+                            "connections":
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8200
+                            },
+                            "queue":{
+                                "queue_size":1000,
+                                "type":"FollyProducerConsumer"
+                            }
+                        }
+                    ]
                 }
-            ]
-        }
+            }
+        ],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+        "metrics_settings": { "$ref": "top.json#metrics_settings" }
     }
 }

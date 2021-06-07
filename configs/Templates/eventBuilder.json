@@ -1,28 +1,29 @@
 {
   "EventBuilder": {
-      "name": "eventbuilder01",
-      "host": "localhost",
-      "port": 5500,
-      "type": "EventBuilderFaser",
-      "loglevel":         { "$ref": "top.json#loglevel" },
-      "metrics_settings": { "$ref": "top.json#metrics_settings" },
-      "settings": {
+    "name": "eventbuilder01",
+    "host": "localhost",
+    "port": 5500,
+    "modules": [
+      {
+        "name": "eventbuilder01",
+        "type": "EventBuilderFaser",
+        "settings": {
           "maxPending": 10,
           "timeout_ms": 120000,
           "stopTimeout_ms": 1000
-      },
-      "connections": {
+        },
+        "connections": {
           "receivers": [],
-	  "senders": [
+          "senders": [
             {
               "type": "ZMQPair",
               "chid": 0,
               "transport": "tcp",
               "host": "*",
               "port": 8300,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -31,9 +32,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8301,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -42,9 +43,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8302,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -53,9 +54,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8303,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -64,9 +65,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8316,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -75,9 +76,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8317,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -86,9 +87,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8318,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -97,9 +98,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8200,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -108,9 +109,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8201,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -119,9 +120,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8202,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -130,9 +131,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8203,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -141,9 +142,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8216,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -152,9 +153,9 @@
               "transport": "tcp",
               "host": "*",
               "port": 8217,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -163,12 +164,20 @@
               "transport": "tcp",
               "host": "*",
               "port": 8218,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             }
           ]
-	  }
+        }
+      }
+    ],
+    "loglevel": {
+      "$ref": "top.json#loglevel"
+    },
+    "metrics_settings": {
+      "$ref": "top.json#metrics_settings"
+    }
   }
 }

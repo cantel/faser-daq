@@ -1,35 +1,54 @@
 {
-    "EventMonitor": {
-	"name": "eventmonitor01",
-	"host": "localhost",
-	"port": 5505,
-	"type": "EventMonitor",
-        "loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-	"settings": {
-            "fragmentID": 262144,
-            "enable_digitizer": true,
-            "enable_tlb": true,
-            "enable_trb": [false, false, false, false, false, false, false, true, false]
-	},
-	"connections": {
-            "receivers": [
-				{
-					"type": "ZMQPubSub",
-					"chid": 0,
-					"connections":[
+	"EventMonitor": {
+		"name": "eventmonitor01",
+		"host": "localhost",
+		"port": 5505,
+		"modules": [
+			{
+				"name": "eventmonitor01",
+				"type": "EventMonitor",
+				"settings": {
+					"fragmentID": 262144,
+					"enable_digitizer": true,
+					"enable_tlb": true,
+					"enable_trb": [
+						false,
+						false,
+						false,
+						false,
+						false,
+						false,
+						false,
+						true,
+						false
+					]
+				},
+				"connections": {
+					"receivers": [
 						{
-							"transport": "tcp",
-							"host": "localhost",
-							"port": 8200
+							"type": "ZMQPubSub",
+							"chid": 0,
+							"connections": [
+								{
+									"transport": "tcp",
+									"host": "localhost",
+									"port": 8200
+								}
+							],
+							"queue": {
+								"type": "FollyProducerConsumer",
+								"queue_size": 1000
+							}
 						}
-					],
-					"queue":{
-						"type":"FollyProducerConsumer",
-						"queue_size":1000
-					}
+					]
 				}
-            ]
+			}
+		],
+		"loglevel": {
+			"$ref": "top.json#loglevel"
+		},
+		"metrics_settings": {
+			"$ref": "top.json#metrics_settings"
+		}
 	}
-    }
 }

@@ -1,17 +1,19 @@
-{ 
-    "FileWriter": 
-        {
+{
+  "FileWriter": {
+    "name": "filewriter",
+    "host": "localhost",
+    "port": 5501,
+    "modules": [
+      {
         "name": "filewriter",
-        "host": "localhost",
-        "port": 5501,
         "type": "FileWriterFaser",
-        "loglevel": { "$ref": "top.json#loglevel" },
-        "metrics_settings": { "$ref": "top.json#metrics_settings" },
         "settings": {
           "max_filesize": 1000000000,
           "buffer_size": 20000,
-	  "stop_timeout_ms": 1500,
-          "filename_pattern": { "$ref": "top.json#filename_pattern" },
+          "stop_timeout_ms": 1500,
+          "filename_pattern": {
+            "$ref": "top.json#filename_pattern"
+          },
           "channel_names": [
             "Physics",
             "Calibration",
@@ -30,9 +32,9 @@
               "transport": "tcp",
               "host": "localhost",
               "port": 8300,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -41,9 +43,9 @@
               "transport": "tcp",
               "host": "localhost",
               "port": 8301,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -52,9 +54,9 @@
               "transport": "tcp",
               "host": "localhost",
               "port": 8302,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -63,9 +65,9 @@
               "transport": "tcp",
               "host": "localhost",
               "port": 8303,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -74,9 +76,9 @@
               "transport": "tcp",
               "host": "localhost",
               "port": 8316,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -85,9 +87,9 @@
               "transport": "tcp",
               "host": "localhost",
               "port": 8317,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             },
             {
@@ -96,12 +98,20 @@
               "transport": "tcp",
               "host": "localhost",
               "port": 8318,
-              "queue":{
-                "type":"FollyProducerConsumer",
-                "queue_size":1000
+              "queue": {
+                "type": "FollyProducerConsumer",
+                "queue_size": 1000
               }
             }
           ]
         }
       }
+    ],
+    "loglevel": {
+      "$ref": "top.json#loglevel"
+    },
+    "metrics_settings": {
+      "$ref": "top.json#metrics_settings"
+    }
+  }
 }

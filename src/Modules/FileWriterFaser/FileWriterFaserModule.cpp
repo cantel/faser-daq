@@ -100,7 +100,7 @@ void FileWriterFaserModule::configure() {
     INFO("Channel "<<ch<<": "<<name);
     ch++;
   }
-  m_channels = m_config.getConnections()["receivers"].size();
+  m_channels = m_config.getConnections(getName())["receivers"].size();
   if (ch<m_channels) {
     throw MissingChannelNames(ERS_HERE);
   }

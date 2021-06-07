@@ -21,7 +21,7 @@ EventBuilderFaserModule::EventBuilderFaserModule(const std::string& n):FaserProc
   m_maxPending = cfg.value("maxPending",10);
   m_timeout = 1000*cfg.value("timeout_ms",1000);
   m_stopTimeout = 1000*cfg.value("stopTimeout_ms",1000);
-  m_numChannels=m_config.getNumReceiverConnections();
+  m_numChannels=m_config.getNumReceiverConnections(getName());
 
 }
 
@@ -154,13 +154,13 @@ void EventBuilderFaserModule::runner() noexcept {
   INFO("Running...");
 
   bool noData=true;
-  daqling::utilities::Binary  blob;
+  DataFragment<daqling::utilities::Binary>  blob;
   while (m_run) { 
     if (m_timeoutCount>10) m_status=STATUS_WARN;
     if (m_timeoutCount>100) m_status=STATUS_ERROR;
 
     noData=true;
-    auto receivers = m_config.getConnections()["receivers"];
+    auto receivers = m_config.getConnections(m_name)["receivers"];
     for (auto receiver : receivers) {
       auto channel = receiver["chid"]; 
       if (m_connections.receive(channel, blob)) {

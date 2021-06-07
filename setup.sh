@@ -16,6 +16,7 @@ echo "Setting up to run from ${FASERTOP}"
 source ${FASERTOP}/daqling/cmake/setup.sh
 
 #overwrite daqling setup variables to be director independent
+export DAQ_SCRIPT_DIR=${FASERTOP}/daqling/scripts/
 export DAQ_CONFIG_DIR=${FASERTOP}/configs/
 export DAQ_BUILD_DIR=${FASERTOP}/build/
 alias daqpy='python3 $FASERTOP/daqling/scripts/Control/daq.py'

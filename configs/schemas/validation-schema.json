@@ -128,7 +128,7 @@
             }
           }
         },
-        "required": ["name", "host", "port", "type", "loglevel"]
+        "required": ["name", "host", "port", "modules", "loglevel"]
       }
     }
   }

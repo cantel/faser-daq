@@ -23,7 +23,7 @@
           }
         ],
         "loglevel": { "$ref": "top.json#loglevel" },
-	      "metrics_settings": { "$ref": "top.json#metrics_settings" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "FrontendEmulator01": {
         "name": "frontendemulator01",
@@ -48,7 +48,7 @@
           }
         ],
         "loglevel": { "$ref": "top.json#loglevel" },
-	      "metrics_settings": { "$ref": "top.json#metrics_settings" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "FrontendEmulator02": {
         "name": "frontendemulator02",
@@ -73,7 +73,7 @@
           }
         ],
         "loglevel": { "$ref": "top.json#loglevel" },
-	      "metrics_settings": { "$ref": "top.json#metrics_settings" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
       },
     "FrontendReceiver01": {
         "name": "frontendreceiver01",

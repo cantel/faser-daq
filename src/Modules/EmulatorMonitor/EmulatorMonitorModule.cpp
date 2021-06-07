@@ -16,8 +16,7 @@ using namespace std::chrono;
 
 #define PI 3.14
 
-EmulatorMonitorModule::EmulatorMonitorModule() { 
-
+EmulatorMonitorModule::EmulatorMonitorModule(const std::string& n):MonitorBaseModule(n) { 
    INFO("");
  }
 

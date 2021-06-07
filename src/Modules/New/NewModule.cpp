@@ -4,7 +4,7 @@
 
 #include "NewModule.hpp"
 
-NewModule::NewModule() { INFO(""); }
+NewModule::NewModule(const std::string& n):FaserProcess(n) { INFO(""); }
 
 NewModule::~NewModule() { INFO(""); }
 

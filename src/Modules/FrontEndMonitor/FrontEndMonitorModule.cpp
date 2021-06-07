@@ -16,7 +16,7 @@ using namespace std::chrono;
 
 #define PI 3.14
 
-FrontEndMonitorModule::FrontEndMonitorModule() { 
+FrontEndMonitorModule::FrontEndMonitorModule(const std::string& n):MonitorBaseModule(n) { 
 
    INFO("");
  }

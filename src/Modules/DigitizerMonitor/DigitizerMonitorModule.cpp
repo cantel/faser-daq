@@ -14,7 +14,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-DigitizerMonitorModule::DigitizerMonitorModule() { 
+DigitizerMonitorModule::DigitizerMonitorModule(const std::string& n):MonitorBaseModule(n) { 
   INFO("Instantiating ...");
 }
 

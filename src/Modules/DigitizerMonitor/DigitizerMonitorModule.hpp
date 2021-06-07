@@ -10,7 +10,7 @@
 
 class DigitizerMonitorModule : public MonitorBaseModule {
  public:
-  DigitizerMonitorModule();
+  DigitizerMonitorModule(const std::string&);
   ~DigitizerMonitorModule();
 
   float GetPedestalMean(std::vector<uint16_t> input, int start, int end);

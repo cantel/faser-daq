@@ -42,7 +42,7 @@ ERS_DECLARE_ISSUE_BASE(DigitizerReceiver,                                       
 
 class DigitizerReceiverModule : public FaserProcess {
  public:
-  DigitizerReceiverModule();
+  DigitizerReceiverModule(const std::string&);
   ~DigitizerReceiverModule();
 
   ///////////////////////////////////////////

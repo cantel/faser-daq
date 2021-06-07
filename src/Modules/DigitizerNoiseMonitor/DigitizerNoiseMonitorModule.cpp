@@ -17,7 +17,8 @@ using namespace std::chrono;
 // only monitoring the first two channels
 #define NCHANNELS 15
 
-DigitizerNoiseMonitorModule::DigitizerNoiseMonitorModule() { 
+DigitizerNoiseMonitorModule::DigitizerNoiseMonitorModule(const std::string& n):MonitorBaseModule(n)
+{ 
   INFO("Instantiating ...");
 }
 

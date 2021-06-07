@@ -23,7 +23,7 @@ using namespace FASER;
 
 class TriggerReceiverModule : public FaserProcess {
  public:
-  TriggerReceiverModule();
+  TriggerReceiverModule(const std::string&);
   ~TriggerReceiverModule();
 
   void configure(); // optional (configuration can be handled in the constructor)

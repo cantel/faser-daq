@@ -24,7 +24,7 @@ EventBuilderFaser,                                                              
 
 class EventBuilderFaserModule : public FaserProcess {
  public:
-  EventBuilderFaserModule();
+  EventBuilderFaserModule(const std::string&);
   ~EventBuilderFaserModule();
 
   void configure();

@@ -79,7 +79,7 @@ bool FileWriterFaserModule::FileGenerator::yields_unique(const std::string &patt
   return std::all_of(fields.cbegin(), fields.cend(), [](const auto &f) { return f.second; });
 }
 
-FileWriterFaserModule::FileWriterFaserModule() : m_stopWriters{false} {
+FileWriterFaserModule::FileWriterFaserModule(const std::string& n) :FaserProcess(n), m_stopWriters{false} {
   DEBUG("");
 
   // Set up static resources...

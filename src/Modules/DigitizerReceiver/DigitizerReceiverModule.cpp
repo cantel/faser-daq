@@ -7,7 +7,7 @@
 #define HOSTNAME_MAX_LENGTH 100
 #define NCHANNELS 16
 using namespace DigitizerReceiver;
-DigitizerReceiverModule::DigitizerReceiverModule() { INFO(""); 
+DigitizerReceiverModule::DigitizerReceiverModule(const std::string& n):FaserProcess(n) { INFO(""); 
   INFO("DigitizerReceiverModule Constructor");
 
   auto cfg = m_config.getConfig()["settings"];

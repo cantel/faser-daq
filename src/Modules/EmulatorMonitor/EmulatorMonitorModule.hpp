@@ -7,7 +7,7 @@
 
 class EmulatorMonitorModule : public MonitorBaseModule {
  public:
-  EmulatorMonitorModule();
+  EmulatorMonitorModule(const std::string&);
   ~EmulatorMonitorModule();
 
  protected:

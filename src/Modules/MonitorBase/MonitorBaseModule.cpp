@@ -15,7 +15,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 using namespace MonitorBase;
-MonitorBaseModule::MonitorBaseModule() { 
+MonitorBaseModule::MonitorBaseModule(const std::string& n):FaserProcess(n) { 
    INFO("");
 
    auto cfg = m_config.getSettings();

@@ -18,7 +18,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-TriggerRateMonitorModule::TriggerRateMonitorModule() { 
+TriggerRateMonitorModule::TriggerRateMonitorModule(const std::string& n): MonitorBaseModule(n) { 
 
    INFO("");
    m_ECR_cnt = 0;

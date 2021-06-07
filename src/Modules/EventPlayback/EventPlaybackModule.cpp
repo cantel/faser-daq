@@ -15,7 +15,7 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-EventPlaybackModule::EventPlaybackModule() {
+EventPlaybackModule::EventPlaybackModule(const std::string& n):FaserProcess(n) {
   auto cfg = m_config.getSettings();
 
   m_timeBetween = 1000000us/cfg.value("maxRate",10);

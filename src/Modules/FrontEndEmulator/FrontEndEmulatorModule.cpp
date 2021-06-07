@@ -5,7 +5,7 @@
 
 #include <random>
 
-FrontEndEmulatorModule::FrontEndEmulatorModule() {
+FrontEndEmulatorModule::FrontEndEmulatorModule(const std::string& n):FaserProcess(n) {
   INFO("");
 
   auto cfg = m_config.getSettings();

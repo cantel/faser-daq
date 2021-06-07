@@ -6,7 +6,7 @@
 
 #include <random>
 
-TriggerGeneratorModule::TriggerGeneratorModule() {
+TriggerGeneratorModule::TriggerGeneratorModule(const std::string& n):FaserProcess(n) {
   INFO("");
   auto cfg = m_config.getConfig()["settings"];
   m_rate = cfg["rateInHz"];

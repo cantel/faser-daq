@@ -7,7 +7,7 @@
 
 class EventMonitorModule : public MonitorBaseModule {
  public:
-  EventMonitorModule();
+  EventMonitorModule(const std::string&);
   ~EventMonitorModule();
 
  protected:

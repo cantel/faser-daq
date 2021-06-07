@@ -7,7 +7,7 @@
 
 class TrackerMonitorModule : public MonitorBaseModule {
  public:
-  TrackerMonitorModule();
+  TrackerMonitorModule(const std::string&);
   ~TrackerMonitorModule();
 
  protected:

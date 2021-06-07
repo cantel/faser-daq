@@ -19,7 +19,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-EventMonitorModule::EventMonitorModule() { 
+EventMonitorModule::EventMonitorModule(const std::string& n):MonitorBaseModule(n) { 
   INFO("In EventMonitorModule contructor");
   
   auto cfg = m_config.getConfig()["settings"];

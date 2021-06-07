@@ -33,7 +33,7 @@ MonitorBase,                                                              // nam
 )
 class MonitorBaseModule : public FaserProcess {
  public:
-  MonitorBaseModule();
+  MonitorBaseModule(const std::string&);
   virtual ~MonitorBaseModule();
 
   void configure();

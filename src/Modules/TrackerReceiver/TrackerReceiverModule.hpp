@@ -47,7 +47,7 @@ ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                        
 
 class TrackerReceiverModule : public FaserProcess {
  public:
-  TrackerReceiverModule();
+  TrackerReceiverModule(const std::string&);
   ~TrackerReceiverModule();
 
   void configure(); // optional (configuration can be handled in the constructor)

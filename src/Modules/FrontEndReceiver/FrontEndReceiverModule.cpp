@@ -14,7 +14,7 @@
 
 using namespace DAQFormats;
 
-FrontEndReceiverModule::FrontEndReceiverModule() {
+FrontEndReceiverModule::FrontEndReceiverModule(const std::string& n):FaserProcess(n) {
   INFO("With config: " << m_config.dump());
 
   auto cfg = m_config.getSettings();

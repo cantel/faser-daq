@@ -7,7 +7,7 @@
 
 class TriggerMonitorModule : public MonitorBaseModule {
  public:
-  TriggerMonitorModule();
+  TriggerMonitorModule(const std::string&);
   ~TriggerMonitorModule();
 
  protected:

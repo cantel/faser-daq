@@ -18,7 +18,7 @@ using namespace TLBMonFormat;
 using namespace TriggerReceiver;
 #define _ms 1000 // used for usleep
 
-TriggerReceiverModule::TriggerReceiverModule() {
+TriggerReceiverModule::TriggerReceiverModule(const std::string& n):FaserProcess(n) {
   auto cfg = m_config.getSettings();
 
   INFO("In TriggerReceiverModule()");

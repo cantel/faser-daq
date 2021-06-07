@@ -55,7 +55,7 @@ ERS_DECLARE_ISSUE(FileWriterIssues,                                             
  */
 class FileWriterFaserModule : public FaserProcess {
 public:
-  FileWriterFaserModule();
+  FileWriterFaserModule(const std::string&);
   ~FileWriterFaserModule();
 
   void configure();

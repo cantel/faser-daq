@@ -7,7 +7,7 @@
 
 class FrontEndMonitorModule : public MonitorBaseModule {
  public:
-  FrontEndMonitorModule();
+  FrontEndMonitorModule(const std::string&);
   ~FrontEndMonitorModule();
 
  protected:

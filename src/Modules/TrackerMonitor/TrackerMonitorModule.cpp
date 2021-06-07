@@ -14,7 +14,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-TrackerMonitorModule::TrackerMonitorModule(): m_prefix_hname_hitp("hitpattern_mod"), m_prefix_hname_scterr("sct_data_error_types_mod") { 
+TrackerMonitorModule::TrackerMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"), m_prefix_hname_scterr("sct_data_error_types_mod") { 
 
    INFO("");
  }

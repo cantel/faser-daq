@@ -17,7 +17,7 @@ using namespace DAQFormats;
 using namespace daqling::utilities;
 using namespace TrackerReceiverIssues;
 using namespace TrackerData;
-TrackerReceiverModule::TrackerReceiverModule() { 
+TrackerReceiverModule::TrackerReceiverModule(const std::string& n):FaserProcess(n) { 
     INFO("");
     m_status = STATUS_OK;
 

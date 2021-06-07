@@ -164,8 +164,8 @@ void TrackerReceiverModule::configure() {
   registerVariable(m_checksum_mismatches, "checksum_mismatches");
   registerVariable(m_checksum_mismatches_rate, "checksum_mismatches_rate");
   registerVariable(m_receivedEvents, "ReceivedEvents"); // events transferred from driver to tracker receiver.
-  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10); // kB/s read via network socket
-  registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE, m_UPDATEMETRIC_INTERVAL);
+  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE); // kB/s read via network socket
+  registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE);
   registerVariable(m_missedL1, "MissedEventIDError");
 
   //TRB configuration 

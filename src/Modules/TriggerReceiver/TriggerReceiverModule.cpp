@@ -54,7 +54,7 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_fragment_status, "FragmentStatus");
   registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
-  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10.); // kB/s read via network socket
+  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE); // kB/s read via network socket
   registerVariable(m_missedL1, "MissedEventIDError");
   
   auto cfg = m_config.getSettings();

@@ -21,7 +21,7 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   float m_display_thresh;
  protected:
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists();
   void register_metrics();
   std::atomic<float> m_avg[NCHANNELS];

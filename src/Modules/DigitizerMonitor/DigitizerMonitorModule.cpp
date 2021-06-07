@@ -22,7 +22,7 @@ DigitizerMonitorModule::~DigitizerMonitorModule() {
   INFO("With config: " << m_config.dump());
 }
 
-void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
   DEBUG("Digitizer monitoring");
 
   // the m_event object is populated with the event binary here

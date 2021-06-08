@@ -52,8 +52,8 @@ void HistogramManager::stop(){
   INFO("Flushing all histograms ...");
   flushHistograms();
 
-  m_histo_socket.reset();
-  m_histo_context.reset();
+  // m_histo_socket.reset();
+  // m_histo_context.reset();
   m_zmq_publisher = false;
 
   return;

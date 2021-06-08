@@ -21,9 +21,9 @@ TrackerReceiverModule::TrackerReceiverModule(const std::string& n):FaserProcess(
     INFO("");
     m_status = STATUS_OK;
 
-    auto cfg = m_config.getSettings();
+    auto cfg = m_config.getModuleSettings(getName());
 
-    bool runEmulation = m_config.getConfig()["settings"]["emulation"]; 
+    bool runEmulation = m_config.getModuleSettings(getName())["emulation"]; 
 
     if ( cfg.contains("BoardID")) {
       m_userBoardID = cfg["BoardID"];
@@ -139,7 +139,7 @@ TrackerReceiverModule::TrackerReceiverModule(const std::string& n):FaserProcess(
 
     //Setting up the emulated interface
     if (runEmulation) {
-      std::string l_TRBconfigFile = m_config.getConfig()["settings"]["emulatorFile"];
+      std::string l_TRBconfigFile = m_config.getModuleSettings(getName())["emulatorFile"];
       static_cast<FASER::dummyInterface*>(m_trb->m_interface)->SetInputFile(l_TRBconfigFile); //file to read events from
     }
 }    
@@ -172,10 +172,10 @@ void TrackerReceiverModule::configure() {
   m_moduleMask = 0;
   m_moduleClkCmdMask = 0;
   for (int i = 7; i >= 0; i--){ //there are 8 modules
-    if (m_config.getConfig()["settings"]["moduleMask"][i]){
+    if (m_config.getModuleSettings(getName())["moduleMask"][i]){
       m_moduleMask |= (1 << i);
     }
-    if (m_config.getConfig()["settings"]["moduleClkCmdMask"][i]){
+    if (m_config.getModuleSettings(getName())["moduleClkCmdMask"][i]){
       m_moduleClkCmdMask |= (1 << i);
     }
   }
@@ -215,8 +215,8 @@ void TrackerReceiverModule::configure() {
       INFO("Starting configuration of module number " << l_moduleNo);
           
         std::unique_ptr<FASER::ConfigHandlerSCT> l_cfg(new FASER::ConfigHandlerSCT());
-        if (m_config.getConfig()["settings"]["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
-          std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
+        if (m_config.getModuleSettings(getName())["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
+          std::string l_moduleConfigFile = m_config.getModuleSettings(getName())["moduleConfigFiles"][std::to_string(l_moduleNo)];
           if (l_moduleConfigFile != ""){
               l_cfg->ReadFromFile(l_moduleConfigFile);
               l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);

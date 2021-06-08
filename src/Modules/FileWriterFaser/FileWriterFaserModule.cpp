@@ -91,11 +91,11 @@ FileWriterFaserModule::~FileWriterFaserModule() { DEBUG(""); }
 void FileWriterFaserModule::configure() {
   FaserProcess::configure();
   // Read out required and optional configurations
-  m_max_filesize = m_config.getSettings().value("max_filesize", 1 * daqutils::Constant::Giga);
-  m_buffer_size = m_config.getSettings().value("buffer_size", 4 * daqutils::Constant::Kilo);
-  m_stop_timeout = m_config.getSettings().value("stop_timeout_ms", 1500);
+  m_max_filesize = m_config.getModuleSettings(getName()).value("max_filesize", 1 * daqutils::Constant::Giga);
+  m_buffer_size = m_config.getModuleSettings(getName()).value("buffer_size", 4 * daqutils::Constant::Kilo);
+  m_stop_timeout = m_config.getModuleSettings(getName()).value("stop_timeout_ms", 1500);
   uint64_t ch=0;
-  for ( auto& name : m_config.getSettings()["channel_names"]) {
+  for ( auto& name : m_config.getModuleSettings(getName())["channel_names"]) {
     m_channel_names[ch]=name;
     INFO("Channel "<<ch<<": "<<name);
     ch++;
@@ -104,7 +104,7 @@ void FileWriterFaserModule::configure() {
   if (ch<m_channels) {
     throw MissingChannelNames(ERS_HERE);
   }
-  m_pattern = m_config.getSettings()["filename_pattern"];
+  m_pattern = m_config.getModuleSettings(getName())["filename_pattern"];
   INFO("Configuration:");
   INFO(" -> Maximum filesize: " << m_max_filesize << "B");
   INFO(" -> Buffer size: " << m_buffer_size << "B");

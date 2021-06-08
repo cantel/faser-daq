@@ -8,7 +8,7 @@
 FrontEndEmulatorModule::FrontEndEmulatorModule(const std::string& n):FaserProcess(n) {
   INFO("");
 
-  auto cfg = m_config.getSettings();
+  auto cfg = m_config.getModuleSettings(getName());
 
   m_meanSize = cfg["meanSize"];
   m_rmsSize = cfg["rmsSize"];

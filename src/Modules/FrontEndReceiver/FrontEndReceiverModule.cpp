@@ -17,7 +17,7 @@ using namespace DAQFormats;
 FrontEndReceiverModule::FrontEndReceiverModule(const std::string& n):FaserProcess(n) {
   INFO("With config: " << m_config.dump());
 
-  auto cfg = m_config.getSettings();
+  auto cfg = m_config.getModuleSettings(getName());
 
   if (m_dataIn.init(cfg.value("dataPort",0))) {
     ERROR("Cannot bind data port");

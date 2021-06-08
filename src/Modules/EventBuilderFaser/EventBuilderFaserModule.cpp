@@ -16,7 +16,7 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 using namespace EventBuilderFaser;
 EventBuilderFaserModule::EventBuilderFaserModule(const std::string& n):FaserProcess(n) {
-  auto cfg = m_config.getSettings();
+  auto cfg = m_config.getModuleSettings(getName());
 
   m_maxPending = cfg.value("maxPending",10);
   m_timeout = 1000*cfg.value("timeout_ms",1000);
@@ -87,9 +87,13 @@ bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,EventFull *event) {
   int channel=event_tag; 
   DEBUG("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
+  // could be optimized by using SharedDataType with EventFull as inner data
   DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
+  DataFragment<daqling::utilities::Binary> binData1(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);      // to file writer
-  m_connections.send(channel+100,binData);  // to monitoring
+  m_connections.send(channel+100,binData1);  // to monitoring
+  std::this_thread::sleep_for(std::chrono::microseconds(100000));
+  ERS_INFO("Hi before deleting bytestream");
   delete bytestream;
   return true;
 }

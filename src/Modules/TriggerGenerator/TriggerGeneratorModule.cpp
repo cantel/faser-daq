@@ -8,7 +8,7 @@
 
 TriggerGeneratorModule::TriggerGeneratorModule(const std::string& n):FaserProcess(n) {
   INFO("");
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = m_config.getModuleSettings(getName());
   m_rate = cfg["rateInHz"];
   INFO("Triggers generated at "<<m_rate<<" Hz");
   auto dests = cfg["frontendApps"];

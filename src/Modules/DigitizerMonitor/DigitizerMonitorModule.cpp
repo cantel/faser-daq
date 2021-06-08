@@ -87,8 +87,8 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
 void DigitizerMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerMonitor ... " );
   
-  double publish_interval = (double)m_config.getConfig()["settings"]["publish_interval"];;
-  m_display_thresh=(float)m_config.getSettings()["display_thresh"];
+  double publish_interval = (double)m_config.getModuleSettings(getName())["publish_interval"];;
+  m_display_thresh=(float)m_config.getModuleSettings(getName())["display_thresh"];
   // payload size
   m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, publish_interval);
 
@@ -97,7 +97,7 @@ void DigitizerMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, publish_interval );
 
   // synthesis common for all channels
-  int buffer_length = (int)m_config.getConfig()["settings"]["buffer_length"];
+  int buffer_length = (int)m_config.getModuleSettings(getName())["buffer_length"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
     // example pulse
     m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, publish_interval);

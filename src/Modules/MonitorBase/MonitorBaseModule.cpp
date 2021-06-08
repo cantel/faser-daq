@@ -18,8 +18,8 @@ using namespace MonitorBase;
 MonitorBaseModule::MonitorBaseModule(const std::string& n):FaserProcess(n) { 
    INFO("");
 
-   auto cfg = m_config.getSettings();
-   auto cfg_sourceID = m_config.getConfig()["settings"]["fragmentID"];
+   auto cfg = m_config.getModuleSettings(getName());
+   auto cfg_sourceID = cfg["fragmentID"];
    if (cfg_sourceID!="" && cfg_sourceID!=nullptr)
       m_sourceID = cfg_sourceID;
    else m_sourceID=0;

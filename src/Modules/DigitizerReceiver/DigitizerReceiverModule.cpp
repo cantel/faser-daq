@@ -10,7 +10,7 @@ using namespace DigitizerReceiver;
 DigitizerReceiverModule::DigitizerReceiverModule(const std::string& n):FaserProcess(n) { INFO(""); 
   INFO("DigitizerReceiverModule Constructor");
 
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = m_config.getModuleSettings(getName());
   
   // retrieve the ip address of the sis3153 master board
   // this is configured via the arp and route commands on the network switch
@@ -219,7 +219,7 @@ void DigitizerReceiverModule::configure() {
 
   // configuration of hardware
   INFO("Configuring ...");  
-  m_digitizer->Configure(m_config.getConfig()["settings"]);
+  m_digitizer->Configure(m_config.getModuleSettings(getName()));
 
   for(int chan=0;chan<16;chan++)
     m_pedestal[chan]=m_digitizer->m_pedestal[chan]; //these are pedestals used to calculate thresholds
@@ -280,7 +280,7 @@ static unsigned int BOBRWord(unsigned int *data,int address, int len=4) {
 void DigitizerReceiverModule::runner() noexcept {
   INFO("Running...");  
   
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = m_config.getModuleSettings(getName());
   m_prev_event_id=0;
 
   // for reading the buffer

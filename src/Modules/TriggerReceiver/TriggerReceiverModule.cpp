@@ -19,7 +19,7 @@ using namespace TriggerReceiver;
 #define _ms 1000 // used for usleep
 
 TriggerReceiverModule::TriggerReceiverModule(const std::string& n):FaserProcess(n) {
-  auto cfg = m_config.getSettings();
+  auto cfg = m_config.getModuleSettings(getName());
 
   INFO("In TriggerReceiverModule()");
   m_status = STATUS_OK;
@@ -57,7 +57,7 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE); // kB/s read via network socket
   registerVariable(m_missedL1, "MissedEventIDError");
   
-  auto cfg = m_config.getSettings();
+  auto cfg = m_config.getModuleSettings(getName());
 
   auto log_level = (m_config.getConfig())["loglevel"]["module"];
   m_tlb->SetDebug((log_level=="TRACE"?1:0)); //Set to 0 for no debug, to 1 for debug
@@ -97,7 +97,7 @@ void TriggerReceiverModule::configure() {
 
 void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   INFO("Got enableTrigger command with argument "<<arg);
-  //auto myjson = m_config.getSettings(); //Temporary while using USB.
+  //auto myjson = m_config.getModuleSettings(getName()); //Temporary while using USB.
   //int WhatToRead=0x0; //Temp
   //if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   //if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;

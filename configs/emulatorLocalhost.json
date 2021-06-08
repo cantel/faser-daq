@@ -27,7 +27,7 @@
             "name": "eventbuilder01",
             "type": "EventBuilderFaser",
             "settings": {
-              "$ref": "Templates/eventBuilder.json#EventBuilder/settings"
+              "$ref": "Templates/eventBuilder.json#EventBuilder/modules/0/settings"
             },
             "connections": {
               "receivers": [
@@ -55,7 +55,7 @@
                 }
               ],
               "senders": {
-                "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders"
+                "$ref": "Templates/eventBuilder.json#EventBuilder/modules/0/connections/senders"
               }
             }
           }

@@ -92,8 +92,6 @@ bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,EventFull *event) {
   DataFragment<daqling::utilities::Binary> binData1(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);      // to file writer
   m_connections.send(channel+100,binData1);  // to monitoring
-  std::this_thread::sleep_for(std::chrono::microseconds(100000));
-  ERS_INFO("Hi before deleting bytestream");
   delete bytestream;
   return true;
 }

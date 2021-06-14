@@ -15,7 +15,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 #set(THREADS_PREFER_PTHREAD_FLAG ON)
 #FIND_PACKAGE(Threads REQUIRED)
 add_compile_definitions(FOLLY_NO_CONFIG) # Required for building with Folly library
-
+#link custom datatypes to daqling
+if(EXISTS ${CMAKE_SOURCE_DIR}/src/DataTypes)
+  set(CUSTOM_DATATYPES_DIR ${CMAKE_SOURCE_DIR}/src/DataTypes)
+  set(CUSTOM_DATATYPES true)
+  add_compile_definitions(CUSTOM_DATATYPES)
+endif()
 # Build daqling
 add_subdirectory(daqling)
 

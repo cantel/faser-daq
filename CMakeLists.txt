@@ -18,6 +18,7 @@ add_compile_definitions(FOLLY_NO_CONFIG) # Required for building with Folly libr
 #link custom datatypes to daqling
 if(EXISTS ${CMAKE_SOURCE_DIR}/src/DataTypes)
   set(CUSTOM_DATATYPES_DIR ${CMAKE_SOURCE_DIR}/src/DataTypes)
+  add_compile_definitions(CUSTOM_DATATYPES_NAME="CustomDataTypeDefinitions.hpp")
   set(CUSTOM_DATATYPES true)
   add_compile_definitions(CUSTOM_DATATYPES)
 endif()

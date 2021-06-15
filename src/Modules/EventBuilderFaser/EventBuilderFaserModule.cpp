@@ -16,7 +16,7 @@ using namespace std::chrono;
 using namespace std::chrono_literals;
 using namespace EventBuilderFaser;
 EventBuilderFaserModule::EventBuilderFaserModule(const std::string& n):FaserProcess(n) {
-  auto cfg = m_config.getModuleSettings(getName());
+  auto cfg = getModuleSettings();
 
   m_maxPending = cfg.value("maxPending",10);
   m_timeout = 1000*cfg.value("timeout_ms",1000);

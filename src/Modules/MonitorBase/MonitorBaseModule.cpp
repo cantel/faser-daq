@@ -18,7 +18,7 @@ using namespace MonitorBase;
 MonitorBaseModule::MonitorBaseModule(const std::string& n):FaserProcess(n) { 
    INFO("");
 
-   auto cfg = m_config.getModuleSettings(getName());
+   auto cfg = getModuleSettings();
    auto cfg_sourceID = cfg["fragmentID"];
    if (cfg_sourceID!="" && cfg_sourceID!=nullptr)
       m_sourceID = cfg_sourceID;

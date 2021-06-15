@@ -22,7 +22,7 @@ using namespace std::chrono;
 EventMonitorModule::EventMonitorModule(const std::string& n):MonitorBaseModule(n) { 
   INFO("In EventMonitorModule contructor");
   
-  auto cfg = m_config.getModuleSettings(getName());
+  auto cfg = getModuleSettings();
   
   // determine which systems are configured for monitoring
   m_enable_digitizer = (bool)cfg["enable_digitizer"];

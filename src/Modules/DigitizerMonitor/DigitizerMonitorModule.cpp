@@ -64,9 +64,10 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
     // mean and rms for monitoring a channel that goes out of wack
     float avg = GetPedestalMean(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
     float rms = GetPedestalRMS(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
-
+    
     m_avg[iChan]=avg;
-    m_rms[iChan]=rms;
+    if (m_rms[iChan]==0) m_rms[iChan]=rms; //initialize on first event
+    m_rms[iChan]=0.02*rms+0.98*m_rms[iChan]; //exponential moving average
 
     // example pulse
     auto v = m_pmtdataFragment->channel_adc_counts(iChan);

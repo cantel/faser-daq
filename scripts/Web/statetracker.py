@@ -165,7 +165,11 @@ def stateTracker(logger):
             overallState=None
             if not config['components']: overallState="DOWN"
             for comp in config['components']:       
-                rawStatus = daq.getStatus(comp)
+                rawStatus, module_names = daq.getStatus(comp) #FIXME: support for multiple modules?
+                if len(rawStatus)!=1:
+                    logger.error("Do not know how to handle status %s for %s",str(rawStatus),comp)
+                    raise Exception("bad status")
+                rawStatus=rawStatus[0]
                 timeout = None
                 state = str(h.translateStatus(rawStatus, timeout))
                 if not overallState:

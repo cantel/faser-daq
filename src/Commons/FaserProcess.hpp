@@ -85,13 +85,13 @@ protected:
   //simple metrics interface. Note variables are zero'd
   void registerVariable(std::atomic<int> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE) {
     var=0;
-    if (m_stats_on) {
+    if (m_statistics->isStatsOn()) {
       m_statistics->registerMetric<std::atomic<int>>(&var, name, mtype);
     }
   }
   void registerVariable(std::atomic<float> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE) {
     var=0;
-    if (m_stats_on) {
+    if (m_statistics->isStatsOn()) {
       m_statistics->registerMetric<std::atomic<float>>(&var, name, mtype);
     }
   }

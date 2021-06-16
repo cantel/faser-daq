@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 add_compile_definitions(FOLLY_NO_CONFIG) # Required for building with Folly library
-
+add_compile_definitions(DONT_LOG_FUNCTION_NAME) # Removes function name from logging entries
 # Include Threads
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 FIND_PACKAGE(Threads REQUIRED)

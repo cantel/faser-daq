@@ -50,7 +50,8 @@ def read(fileName):
 
                 else:
                     data= "NOSCHEMA"
-            except:
+            except Exception as e:
+                print(e)
                 data = "BADJSON"
     else:
         data = {}

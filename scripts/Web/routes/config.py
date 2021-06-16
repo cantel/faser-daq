@@ -38,11 +38,16 @@ def config(fileName, boardName):
     component = d['components'][index]
     boardName = d['components'][index]['name']
     boardType = component['modules'][0]['type'] # FIXME: does not support multiple modules
-    
+
+    config={}
+    config["name"]=boardName
+    config["host"]=component['host']
+    config["port"]=component['port']
+    config["type"]=component['modules'][0]['type']
+    config["settings"]=component['modules'][0]['settings']
     schema = h.readSchema(boardType + ".schema")
-    generalSchema = h.readGeneral()    
-    print(repr(generalSchema))
-    return render_template('config.html', pageName='Config Editor - '+boardName, component = d['components'][index], schema = schema, flag= 0, schemaChoices = {}, boardName = boardName, fileName= fileName, generalSchema= generalSchema)
+    generalSchema = h.readGeneral()    #FIXME we actually don't use this anymore
+    return render_template('config.html', pageName='Config Editor - '+boardName, component = config, schema = schema, flag= 0, schemaChoices = {}, boardName = boardName, fileName= fileName, generalSchema= generalSchema)
 
 @config_blueprint.route("/<fileName>/<boardName>/removeBoard")
 def removeBoard(fileName, boardName):
@@ -60,7 +65,12 @@ def changeConfigFile(fileName, boardName):
         #print(submittedValue)
         #print("***************")
         #print(    d['components'][index] )
-        d['components'][index] = submittedValue
+        component=d['components'][index]
+        component['name']= submittedValue['name']
+        component['host']= submittedValue['host']
+        component['port']= submittedValue['port']
+        component['modules'][0]['settings']=submittedValue["settings"]
+        
         h.write(d)
         
         

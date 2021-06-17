@@ -55,7 +55,28 @@
         "display_thresh": {
            "type": "integer",
            "minimum": 1
-        }
+        },
+	"rate_thresholds": {
+           "type": "array",
+           "title": "Thresholds",
+	   "description": "Thresholds used for digitizer rate monitoring per channel",
+	   "minItems"        : 16,
+ 	   "maxItems"        : 16,
+	   "items": {
+	     "type": "array",
+	     "minItems"        : 1,
+ 	     "maxItems"        : 4,
+	     "items": {
+	       "type": "integer"
+	     },
+	     "options": {
+               "disable_array_reorder": true
+              }
+	     },
+	    "options": {
+              "disable_array_reorder": true
+             }
+	}			   
       },
       "format":"grid",
       "propertyOrder": 5

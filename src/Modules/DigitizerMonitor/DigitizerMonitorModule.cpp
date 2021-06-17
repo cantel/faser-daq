@@ -60,7 +60,9 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
   // anything worth doing to all channels
   for(int iChan=0; iChan<NCHANNELS; iChan++){
     if (!m_pmtdataFragment->channel_has_data(iChan)) continue;
-    
+    std::string chStr = std::to_string(iChan);
+    if (iChan<10) chStr = "0"+chStr;
+
     // mean and rms for monitoring a channel that goes out of wack
     float avg = GetPedestalMean(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
     float rms = GetPedestalRMS(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
@@ -74,12 +76,15 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
     float min_value = *std::min_element(v.begin(),v.end());
     float max_value = *std::max_element(v.begin(),v.end());
     if ((avg-min_value)>m_display_thresh||(max_value-avg)>m_display_thresh) {
-      FillChannelPulse("h_pulse_ch"+std::to_string(iChan), iChan);
+      FillChannelPulse("h_pulse_ch"+chStr, iChan);
     }
     float peak=avg-min_value;
     if ((max_value-avg)>peak) peak=avg-max_value;
-    m_histogrammanager->fill("h_peak_ch"+std::to_string(iChan), peak/8.192, 1.0); //FIXME: assume 2V range
-
+    m_histogrammanager->fill("h_peak_ch"+chStr, peak/8.192, 1.0); //FIXME: assume 2V range
+    for(int ii=0;ii<THRESHOLDS;ii++) {
+      if (m_thresholds[iChan][ii] && peak/8.192>m_thresholds[iChan][ii])  //FIXME: assume 2V range
+	m_thresh_counts[iChan][ii]++;
+    }
   }
   
 }
@@ -99,9 +104,11 @@ void DigitizerMonitorModule::register_hists() {
   // synthesis common for all channels
   int buffer_length = (int)m_config.getConfig()["settings"]["buffer_length"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
+    std::string chStr = std::to_string(iChan);
+    if (iChan<10) chStr = "0"+chStr;
     // example pulse
-    m_histogrammanager->registerHistogram("h_pulse_ch"+std::to_string(iChan), "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, publish_interval);
-    m_histogrammanager->registerHistogram("h_peak_ch"+std::to_string(iChan), "Peak signal [mV]", -200, 2000, 110, publish_interval);
+    m_histogrammanager->registerHistogram("h_pulse_ch"+chStr, "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, publish_interval);
+    m_histogrammanager->registerHistogram("h_peak_ch"+chStr, "Peak signal [mV]", -200, 2000, 110, publish_interval);
   
   }
   
@@ -118,11 +125,26 @@ void DigitizerMonitorModule::register_metrics() {
   m_metric_payload = 0;
   m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
+  json thresholds = m_config.getSettings()["rate_thresholds"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
-    m_avg[iChan]=0;
-    m_rms[iChan]=0;
-    m_statistics->registerMetric(&m_avg[iChan], "pedestal_mean_ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
-    m_statistics->registerMetric(&m_rms[iChan], "pedestal_rms_ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
+    std::string chStr = std::to_string(iChan);
+    if (iChan<10) chStr = "0"+chStr;
+
+    json ch_thresh=thresholds[iChan];
+    if (ch_thresh.size()>THRESHOLDS) {
+      ERROR("Too many thresholds specified for channel "+chStr);
+    }
+    for(unsigned int ii=0;ii<THRESHOLDS;ii++) {
+      m_thresholds[iChan][ii]=0;
+      if (ii<ch_thresh.size()) {
+	  float thresh=ch_thresh[ii];
+	  if (thresh==0) continue;
+	  registerVariable(m_thresh_counts[iChan][ii], "rate_ch"+chStr+"_"+std::to_string(thresh)+"mV",daqling::core::metrics::RATE);
+	  m_thresholds[iChan][ii]=thresh;
+	}
+    }
+    registerVariable(m_avg[iChan], "pedestal_mean_ch"+chStr);
+    registerVariable(m_rms[iChan], "pedestal_rms_ch"+chStr);
   }
 
   return;

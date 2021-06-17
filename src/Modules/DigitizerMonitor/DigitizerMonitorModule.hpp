@@ -7,6 +7,7 @@
 
 #include <cmath>
 #define NCHANNELS 16
+#define THRESHOLDS 4
 
 class DigitizerMonitorModule : public MonitorBaseModule {
  public:
@@ -24,8 +25,9 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   void monitor(daqling::utilities::Binary &eventBuilderBinary);
   void register_hists();
   void register_metrics();
+  float m_thresholds[NCHANNELS][THRESHOLDS];
   std::atomic<float> m_avg[NCHANNELS];
   std::atomic<float> m_rms[NCHANNELS];
-
+  std::atomic<int> m_thresh_counts[NCHANNELS][THRESHOLDS];
 
 };

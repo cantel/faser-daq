@@ -1,6 +1,18 @@
+
 # For now the setup is hardcoded - down the line we might need to auto generate som
 
 #determine top level directory from where setup script is located
+if [ $# -gt 1 ];
+then
+  echo "Invalid number of arguments: $#"
+  return 1
+fi
+if [ $# -eq 1 ]
+then
+  DAQLING_SPACK_REPO_PATH=$1
+else
+  DAQLING_SPACK_REPO_PATH=''
+fi
 pushd . > /dev/null
 FASERTOP="${BASH_SOURCE[0]}"
 if ([ -h "${FASERTOP}" ]); then
@@ -13,7 +25,7 @@ popd  > /dev/null
 
 echo "Setting up to run from ${FASERTOP}"
 
-source ${FASERTOP}/daqling/cmake/setup.sh
+source ${FASERTOP}/daqling/cmake/setup.sh ${DAQLING_SPACK_REPO_PATH}
 
 #overwrite daqling setup variables to be director independent
 export DAQ_SCRIPT_DIR=${FASERTOP}/daqling/scripts/

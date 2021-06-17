@@ -9,5 +9,9 @@
     "influxDb_name": "DAQTestMetrics",
     "stats_uri": "tcp://localhost:7000"
   },
-  "filename_pattern": "/home/data/Faser-%c-%r-%n.raw"
+  "filename_pattern": "/home/data/Faser-%c-%r-%n.raw",
+  "queue":{
+    "type": "FollyProducerConsumer",
+    "queue_size": 1000
+  }
 }

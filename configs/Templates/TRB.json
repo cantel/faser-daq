@@ -1,1075 +1,686 @@
 {
-	"TRBReceiver00": {
+    "TRBReceiver00":{
+	"name": "trackerreceiver00",
+	"host": "faser-daq-006",
+	"port": 5530,
+	"modules":[{
 		"name": "trackerreceiver00",
-		"host": "faser-daq-006",
-		"port": 5530,
-		"modules": [
-			{
-				"name": "trackerreceiver00",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 0,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 39,
-					"FinePhaseLed1": 38,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module0_300321_0121.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module1_300321_0121.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module2_300321_0121.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module3_300321_0121.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module4_300321_0121.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module5_300321_0121.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module6_300321_0121.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module7_300321_0121.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8110,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID" : 0,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 39,
+            "FinePhaseLed1": 38,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true], 
+            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module0_300321_0121.json",
+				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module1_300321_0121.json",
+				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module2_300321_0121.json",
+				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module3_300321_0121.json",
+				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module4_300321_0121.json",
+				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module5_300321_0121.json",
+				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module6_300321_0121.json",
+				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module7_300321_0121.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8110,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TRBReceiver01": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver01":{
+	"name": "trackerreceiver01",
+	"host": "faser-daq-006",
+	"port": 5531, 
+	"modules":[{
 		"name": "trackerreceiver01",
-		"host": "faser-daq-006",
-		"port": 5531,
-		"modules":[
-			{
-				"name": "trackerreceiver01",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 1,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 37,
-					"FinePhaseLed1": 40,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module0_300321_0141.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module1_300321_0141.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module2_300321_0141.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module3_300321_0141.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module4_300321_0141.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module5_300321_0141.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module6_300321_0141.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module7_300321_0141.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8111,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID" : 1,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 37,
+            "FinePhaseLed1": 40,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true], 
+            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module0_300321_0141.json",
+                                  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module1_300321_0141.json",
+                                  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module2_300321_0141.json",
+                                  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module3_300321_0141.json",
+                                  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module4_300321_0141.json",
+                                  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module5_300321_0141.json",
+                                  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module6_300321_0141.json",
+                                  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module7_300321_0141.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8111,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TRBReceiver02": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver02":{
+	"name": "trackerreceiver02",
+	"host": "faser-daq-006",
+	"port": 5532,
+	"modules":[{
 		"name": "trackerreceiver02",
-		"host": "faser-daq-006",
-		"port": 5532,
-		"modules":[
-			{
-				"name": "trackerreceiver02",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 2,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 43,
-					"FinePhaseLed1": 32,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module0_300321_0124.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module1_300321_0124.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module2_300321_0124.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module3_300321_0124.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module4_300321_0124.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module5_300321_0124.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module6_300321_0124.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module7_300321_0124.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8112,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID" : 2,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 43,
+            "FinePhaseLed1": 32,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true], 
+            "moduleConfigFiles": {
+                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module0_300321_0124.json",
+                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module1_300321_0124.json",
+                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module2_300321_0124.json",
+                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module3_300321_0124.json",
+                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module4_300321_0124.json",
+                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module5_300321_0124.json",
+                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module6_300321_0124.json",
+                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module7_300321_0124.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8112,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TRBReceiver03": {
+	}],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver03":{
+	"name": "trackerreceiver03",
+	"host": "faser-daq-006",
+	"port": 5533,
+	"modules":[{
 		"name": "trackerreceiver03",
-		"host": "faser-daq-006",
-		"port": 5533,
-		"modules":[
-			{
-				"name": "trackerreceiver03",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 3,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 36,
-					"FinePhaseLed1": 36,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module0_300321_0147.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module1_300321_0147.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module2_300321_0147.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module3_300321_0147.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module4_300321_0147.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module5_300321_0147.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module6_300321_0147.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module7_300321_0147.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8113,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID" : 3,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 36,
+            "FinePhaseLed1": 36,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true], 
+            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module0_300321_0147.json",
+				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module1_300321_0147.json",
+				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module2_300321_0147.json",
+				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module3_300321_0147.json",
+				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module4_300321_0147.json",
+				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module5_300321_0147.json",
+				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module6_300321_0147.json",
+				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module7_300321_0147.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8113,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TRBReceiver04": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver04":{
+	"name": "trackerreceiver04",
+	"host": "faser-daq-006",
+	"port": 5534,
+	"modules":[{
 		"name": "trackerreceiver04",
-		"host": "faser-daq-006",
-		"port": 5534,
-		"modules":[
-			{
-				"name": "trackerreceiver04",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 4,
-					"SCIP": "10.11.66.11",
-					"DAQIP": "10.11.66.11",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 38,
-					"FinePhaseLed1": 38,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module0_300321_0135.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module1_300321_0135.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module2_300321_0135.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module3_300321_0135.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module4_300321_0135.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module5_300321_0135.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module6_300321_0135.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module7_300321_0135.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8114,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID" : 4,
+            "SCIP" : "10.11.66.11",
+            "DAQIP" : "10.11.66.11",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 38,
+            "FinePhaseLed1": 38,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true], 
+            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module0_300321_0135.json",
+				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module1_300321_0135.json",
+				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module2_300321_0135.json",
+				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module3_300321_0135.json",
+				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module4_300321_0135.json",
+				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module5_300321_0135.json",
+				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module6_300321_0135.json",
+				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module7_300321_0135.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8114,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TRBReceiver05": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver05":{
+	"name": "trackerreceiver05",
+	"host": "faser-daq-006",
+	"port": 5535,
+	"modules":[{
 		"name": "trackerreceiver05",
-		"host": "faser-daq-006",
-		"port": 5535,
-		"modules":[
-			{
-				"name": "trackerreceiver05",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 5,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 39,
-					"FinePhaseLed1": 38,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module0_300321_0128.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module1_300321_0128.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module2_300321_0128.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module3_300321_0128.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module4_300321_0128.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module5_300321_0128.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module6_300321_0128.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module7_300321_0128.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8115,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID" : 5,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 39,
+            "FinePhaseLed1": 38,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true], 
+            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module0_300321_0128.json",
+				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module1_300321_0128.json",
+				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module2_300321_0128.json",
+				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module3_300321_0128.json",
+				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module4_300321_0128.json",
+				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module5_300321_0128.json",
+				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module6_300321_0128.json",
+				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module7_300321_0128.json"},
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+				"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8115,
+				"queue":{"$ref":"top.json#queue"}
+			}
+				]
 		}
-	},
-	"TRBReceiver06": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver06": {
+	"name": "trackerreceiver06",
+	"host": "faser-daq-006",
+	"port": 5536,
+	"modules":[{
 		"name": "trackerreceiver06",
-		"host": "faser-daq-006",
-		"port": 5536,
-		"modules":[
-			{
-				"name": "trackerreceiver06",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 6,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 36,
-					"FinePhaseLed1": 36,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module0_300321_0231.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module1_300321_0231.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module2_300321_0231.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module3_300321_0231.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module4_300321_0231.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module5_300321_0231.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module6_300321_0231.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module7_300321_0231.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8116,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID": 6,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 36,
+            "FinePhaseLed1": 36,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {
+                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module0_300321_0231.json",
+                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module1_300321_0231.json",
+                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module2_300321_0231.json",
+                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module3_300321_0231.json",
+                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module4_300321_0231.json",
+                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module5_300321_0231.json",
+                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module6_300321_0231.json",
+                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module7_300321_0231.json"
+                              },
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8116,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TRBReceiver07": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver07": {
+	"name": "trackerreceiver07",
+	"host": "faser-daq-006",
+	"port": 5537,
+	"modules":[{
 		"name": "trackerreceiver07",
-		"host": "faser-daq-006",
-		"port": 5537,
-		"modules":[
-			{
-				"name": "trackerreceiver07",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 7,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 35,
-					"FinePhaseLed1": 37,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"L1PulseN": 1,
-					"L1PulseDelay": 2000,
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module0_300321_0248.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module1_300321_0248.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module2_300321_0248.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module3_300321_0248.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module4_300321_0248.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module5_300321_0248.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module6_300321_0248.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module7_300321_0248.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8117,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID": 7,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 35,
+            "FinePhaseLed1": 37,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "L1PulseN": 1,
+            "L1PulseDelay": 2000,
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {
+                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module0_300321_0248.json",
+                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module1_300321_0248.json",
+                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module2_300321_0248.json",
+                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module3_300321_0248.json",
+                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module4_300321_0248.json",
+                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module5_300321_0248.json",
+                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module6_300321_0248.json",
+                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module7_300321_0248.json"
+                              },
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+				"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8117,
+				"queue":{"$ref":"top.json#queue"}
+			}
+				]
 		}
-	},
-	"TRBReceiver08": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver08": {
+	"name": "trackerreceiver08",
+	"host": "faser-daq-006",
+	"port": 5538,
+	"modules":[{
 		"name": "trackerreceiver08",
-		"host": "faser-daq-006",
-		"port": 5538,
-		"modules":[
-			{
-				"name": "trackerreceiver08",
-				"type": "TrackerReceiver",
-				"settings": {
-					"BoardID": 8,
-					"SCIP": "faser-daq-006",
-					"DAQIP": "faser-daq-006",
-					"ReadoutMode": 0,
-					"ConfigureModules": true,
-					"HWDelayClk0": 0,
-					"HWDelayClk1": 0,
-					"FinePhaseClk0": 0,
-					"FinePhaseClk1": 0,
-					"FinePhaseLed0": 35,
-					"FinePhaseLed1": 37,
-					"RxTimeoutDisable": false,
-					"L1Atype": "external",
-					"emulation": false,
-					"emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-					"moduleMask": [
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true,
-						true
-					],
-					"moduleConfigFiles": {
-						"0": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module0_300321_0246.json",
-						"1": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module1_300321_0246.json",
-						"2": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module2_300321_0246.json",
-						"3": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module3_300321_0246.json",
-						"4": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module4_300321_0246.json",
-						"5": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module5_300321_0246.json",
-						"6": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module6_300321_0246.json",
-						"7": "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module7_300321_0246.json"
-					},
-					"moduleClkCmdMask": [
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false,
-						false
-					]
-				},
-				"connections": {
-					"senders": [
-						{
-							"type": "ZMQPair",
-							"chid": 0,
-							"transport": "tcp",
-							"host": "*",
-							"port": 8118,
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID": 8,
+            "SCIP" : "faser-daq-006",
+            "DAQIP" : "faser-daq-006",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 35,
+            "FinePhaseLed1": 37,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {
+                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module0_300321_0246.json",
+                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module1_300321_0246.json",
+                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module2_300321_0246.json",
+                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module3_300321_0246.json",
+                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module4_300321_0246.json",
+                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module5_300321_0246.json",
+                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module6_300321_0246.json",
+                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module7_300321_0246.json"
+                                 },
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8118,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor00": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+    },
+    "TrackerMonitor00": {
+	"name": "trackermonitor00",
+	"host": "localhost",
+	"port": 5550,
+	"modules":[{
 		"name": "trackermonitor00",
-		"host": "localhost",
-		"port": 5550,
-		"modules":[
-			{
-				"name": "trackermonitor00",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196608,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196608,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp", "host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor01": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackerMonitor01": {
+	"name": "trackermonitor01",
+	"host": "localhost",
+	"port": 5551,
+	"modules":[{
 		"name": "trackermonitor01",
-		"host": "localhost",
-		"port": 5551,
-		"modules":[
-			{
-				"name": "trackermonitor01",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196609,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196609,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor02": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+    },
+    "TrackerMonitor02": {
+	"name": "trackermonitor02",
+	"host": "localhost",
+	"port": 5552,
+	"modules":[{
 		"name": "trackermonitor02",
-		"host": "localhost",
-		"port": 5552,
-		"modules":[
-			{
-				"name": "trackermonitor02",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196610,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196610,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor03": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackerMonitor03": {
+	"name": "trackermonitor03",
+	"host": "localhost",
+	"port": 5553,
+	"modules":[{
 		"name": "trackermonitor03",
-		"host": "localhost",
-		"port": 5553,
-		"modules":[
-			{
-				"name": "trackermonitor03",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196611,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196611,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor04": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackerMonitor04": {
+	"name": "trackermonitor04",
+	"host": "localhost",
+	"port": 5554,
+	"modules":[{
 		"name": "trackermonitor04",
-		"host": "localhost",
-		"port": 5554,
-		"modules":[
-			{
-				"name": "trackermonitor04",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196612,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196612,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{ "transport": "tcp", "host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor05": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackerMonitor05": {
+	"name": "trackermonitor05",
+	"host": "localhost",
+	"port": 5555,
+	"modules":[{
 		"name": "trackermonitor05",
-		"host": "localhost",
-		"port": 5555,
-		"modules":[
-			{
-				"name": "trackermonitor05",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196613,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196613,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor06": {
+	}],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackerMonitor06": {
+	"name": "trackermonitor06",
+	"host": "localhost",
+	"port": 5556,
+	"modules":[{
 		"name": "trackermonitor06",
-		"host": "localhost",
-		"port": 5556,
-		"modules":[
-			{
-				"name": "trackermonitor06",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196614,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196614,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor07": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackerMonitor07": {
+	"name": "trackermonitor07",
+	"host": "localhost",
+	"port": 5557,
+	"modules":[{
 		"name": "trackermonitor07",
-		"host": "localhost",
-		"port": 5557,
-		"modules":[
-			{
-				"name": "trackermonitor07",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196615,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196615,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	},
-	"TrackerMonitor08": {
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackerMonitor08": {
+	"name": "trackermonitor08",
+	"host": "localhost",
+	"port": 5558,
+	"modules":[{
 		"name": "trackermonitor08",
-		"host": "localhost",
-		"port": 5558,
-		"modules":[
-			{
-				"name": "trackermonitor08",
-				"type": "TrackerMonitor",
-				"settings": {
-					"fragmentID": 196616,
-					"stats_uri": "tcp://localhost:7000"
-				},
-				"connections": {
-					"receivers": [
-						{
-							"type": "ZMQPubSub",
-							"chid": 0,
-							"connections": [
-								{
-									"transport": "tcp",
-									"host": "localhost",
-									"port": 8200
-								}
-							],
-							"queue": {
-								"type": "FollyProducerConsumer",
-								"queue_size": 1000
-							}
-						}
-					]
-				}
-			}
-		],
-		"loglevel": {
-			"$ref": "top.json#loglevel"
+		"type": "TrackerMonitor",
+		"settings": {
+            "fragmentID": 196616,
+            "stats_uri": "tcp://localhost:7000"
 		},
-		"metrics_settings": {
-			"$ref": "top.json#metrics_settings"
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-	}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    }
 }

@@ -3,67 +3,29 @@
     "version": 10,
     "group": "faser",
     "components": [
-      {
-        "$ref": "Templates/TLB.json#TLBReceiverB21"
-      },
-      {
-        "$ref": "Templates/digitizer.json#DigitizerB21"
-      },
+      { "$ref" : "Templates/TLB.json#TLBReceiverB21" },
+      { "$ref" : "Templates/digitizer.json#DigitizerB21" },
       {
         "name": "eventbuilder01",
         "host": "localhost",
         "port": 5500,
-        "modules": [
-          {
-            "name": "eventbuilder01",
-            "type": "EventBuilderFaser",
-            "settings": {
-              "$ref": "Templates/eventBuilder.json#EventBuilder/settings"
-            },
-            "connections": {
-              "receivers": [
-                {
-                  "chid": 0,
-                  "port": 8100,
-                  "host": "localhost",
-                  "type": "ZMQPair",
-                  "transport": "tcp",
-                  "queue": {
-                    "type": "FollyProducerConsumer",
-                    "queue_size": 1000
-                  }
-                },
-                {
-                  "chid": 1,
-                  "port": 8101,
-                  "host": "localhost",
-                  "type": "ZMQPair",
-                  "transport": "tcp",
-                  "queue": {
-                    "type": "FollyProducerConsumer",
-                    "queue_size": 1000
-                  }
-                }
-              ],
-              "senders": {
-                "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders"
-              }
-            }
+        "modules":[{
+          "name": "eventbuilder01",
+          "type": "EventBuilderFaser",
+          "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+          "connections": {
+            "receivers": [
+              { "chid": 0,"port": 8100, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 1,"port": 8101, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} }
+            ],
+            "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
           }
-        ],
-        "loglevel": {
-          "$ref": "top.json#loglevel"
-        },
-        "metrics_settings": {
-          "$ref": "top.json#metrics_settings"
-        }
+        }],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
       },
-      {
-        "$ref": "Templates/fileWriter.json#FileWriter"
-      },
-      {
-        "$ref": "Templates/digitizer.json#DigitizerMonitor"
-      }
+      { "$ref": "Templates/fileWriter.json#FileWriter" },
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" }
     ]
   }
 }

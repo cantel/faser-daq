@@ -93,7 +93,7 @@
           }
         }],
         "loglevel": { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+  "metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "FrontendReceiver02": {
         "name": "frontendreceiver02",
@@ -149,21 +149,24 @@
         "name": "emulatormonitor01",
         "host": "localhost",
         "port": 5560,
-        "type": "EmulatorMonitor",
+        "modules":[{
+          "name": "emulatormonitor01",
+          "type": "EmulatorMonitor",
+          "settings": {
+            "fragmentID": 1000001
+          },
+          "connections": {
+            "receivers": [
+              {
+                "type": "ZMQPubSub",
+                "chid": 0,
+                "connections":[{"transport": "tcp", "host": "localhost", "port": 8202}],
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
         "loglevel": { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-        "settings": {
-          "fragmentID": 1000001
-        },
-        "connections": {
-          "receivers": [
-            {
-              "type": "ZMQPubSub",
-              "chid": 0,
-              "connections":[{"transport": "tcp", "host": "localhost", "port": 8202}],
-              "queue":{"$ref":"top.json#queue"}
-            }
-          ]
-        }
-      }
-}
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
+    }
+  }

@@ -6,18 +6,16 @@ stages:
 build_faser_daq:
   stage: build
   needs: []
-  image: gitlab-registry.cern.ch/faser/docker/daq:master
+  image: gitlab-registry.cern.ch/faser/docker/daq:daqling-v1
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:
     - ls
     - pwd
-    - source setup.sh
-    - export BOOST_ROOT_DIR=/opt/lcg/Boost/1.70.0-eebf1/x86_64-centos7-gcc8-opt 
-    - export BOOST_VERSION=1.70
+    - source setup.sh /daqling-spack-repo
     - mkdir -p build 
     - cd build
-    - cmake3 ../
+    - cmake ../
     - make -j8
     
 validate_configs:

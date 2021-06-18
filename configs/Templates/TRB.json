@@ -456,7 +456,7 @@
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "TrackerMonitor00": {
 	"name": "trackermonitor00",
@@ -506,7 +506,7 @@
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "TrackerMonitor02": {
 	"name": "trackermonitor02",

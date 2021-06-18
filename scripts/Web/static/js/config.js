@@ -35,7 +35,8 @@ function closeWindow(){
 
 //takes the general schema and replaces the settings, name, type
 function improveSchema(generalSchema, schema){
-
+    schema.required = schema.required + [",settings"];
+    return schema
 	generalSchema = generalSchema.properties.components.items;
     console.log(generalSchema);
 	//return generalSchema;
@@ -138,7 +139,8 @@ function addBoard(){
     var urlPath = '/add/addBoard/'+currentFile;
     //alert(urlPath);
     var errors = editor.validate();
-    console.log("Errors: "+errors);
+    console.log("Errors: ");
+    console.log(errors);
     if(!errors.length){
 	
 	var value = editor.getValue();

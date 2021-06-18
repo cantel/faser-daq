@@ -95,12 +95,12 @@ def main():
       filepath = directory+"/"+path_to_config
       cfg = getConfig(filepath, directory)
 
+      cfg_schema = directory+"/schemas/validation-schema.json"
+      print("Validating - ",path_to_config," | ","Components"," - against : ",cfg_schema)
+      result_config = checkConfig(cfg["configuration"],cfg_schema,directory)
+      print("Config validity : ",result_config)
+
       for cfg_sub in cfg["configuration"]["components"]:
-        cfg_schema = directory+"/schemas/validation-schema.json"
-        cfg_name= cfg_sub["name"]
-        print("Validating - ",cfg_name," | ","Component"," - against : ",cfg_schema)
-        result_config = checkConfig(cfg_sub,cfg_schema,directory)
-        print("Config validity : ",result_config)
         for module_cfg in cfg_sub["modules"]:
           # get config type
           cfg_name   = module_cfg["name"]

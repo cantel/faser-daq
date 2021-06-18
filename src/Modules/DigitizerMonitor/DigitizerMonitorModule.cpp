@@ -126,7 +126,7 @@ void DigitizerMonitorModule::register_metrics() {
   m_metric_payload = 0;
   m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
-  json thresholds = m_config.getSettings()["rate_thresholds"];
+  json thresholds = getModuleSettings()["rate_thresholds"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
     std::string chStr = std::to_string(iChan);
     if (iChan<10) chStr = "0"+chStr;

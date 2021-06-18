@@ -42,7 +42,6 @@ playback.json              \
 emulatorLocalhost.json \
 digitizerDarkRateSciLab.json \
 digitizerLEDSciLab.json \
-
 --extras   \
 top.json \
 current.json \

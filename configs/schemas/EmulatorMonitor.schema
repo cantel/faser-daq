@@ -9,23 +9,11 @@
       "pattern": "^((?!XXX).)*$",
       "propertyOrder": 1
     },
-    "host": {
-      "type": "string",
-      "default": "localhost",
-      "propertyOrder": 2
-    },          
-    "port": {
-      "type": "integer",
-      "default": 0,
-      "minimum": 1024,
-      "maximum": 65535,
-      "propertyOrder": 3
-    },
     "type": {
       "type": "string",
       "default": "Monitor",
       "readOnly": true,
-      "propertyOrder": 4,
+      "propertyOrder": 2,
       "options": { "hidden": true }
     },
     "settings": {
@@ -38,10 +26,10 @@
         }
       },
       "format":"grid",
-      "propertyOrder": 5
+      "propertyOrder": 3
     }
   },
-  "required": ["name", "host", "port"]
+  "required": ["name", "type"]
 }
 
 

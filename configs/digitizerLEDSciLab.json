@@ -8,7 +8,7 @@
         "name": "eventbuilder01",
         "host": "localhost",
         "port": 5500,
-        "module":[{
+        "modules":[{
           "name": "eventbuilder01",
           "type": "EventBuilderFaser",
           "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },

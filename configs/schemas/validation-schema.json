@@ -75,9 +75,6 @@
 	        "maximum": 65535,
 		"propertyOrder":3
           },
-          "type": {
-            "type": "string"
-          },
           "loglevel": {
             "type": "object",
             "title": "Log Levels",
@@ -93,7 +90,7 @@
                 "enum": ["DEBUG", "INFO", "WARNING", "TRACE"]
               }
             },
-            "required": ["core", "module"]
+            "required": ["core", "module","connection"]
           },
           "metrics_settings": {
             "title": "Metrics Settings",
@@ -117,15 +114,6 @@
             "type": "object",
             "title": "Settings",
              "propertyOrder": 10
-          },
-          "connections": {
-            "type": "object",
-            "title": "Connections",
-            "propertyOrder": 100,
-            "properties": {
-              "receivers": {"oneOf":[{"$ref":"refs/connection-schema.json#/definitions/receivers"}] },
-              "senders": { "oneOf":[{"$ref":"refs/connection-schema.json#/definitions/senders"}] }
-            }
           }
         },
         "required": ["name", "host", "port", "modules", "loglevel"]

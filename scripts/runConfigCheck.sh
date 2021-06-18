@@ -40,11 +40,15 @@ combinedSciLab.json \
 combinedTI12.json \
 playback.json              \
 emulatorLocalhost.json \
+digitizerDarkRateSciLab.json \
+digitizerLEDSciLab.json \
+
 --extras   \
 top.json \
 current.json \
 grafana/faser_metrics.json                   \
 schemas/validation-schema.json                   \
+schemas/refs/connection-schema.json                   \
 Templates/top.json                   \
 customized/host.json                 
 

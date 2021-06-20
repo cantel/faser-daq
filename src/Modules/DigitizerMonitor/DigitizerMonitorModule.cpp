@@ -76,7 +76,6 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
     float min_value = *std::min_element(v.begin(),v.end());
     float max_value = *std::max_element(v.begin(),v.end());
     if ((avg-min_value)>m_display_thresh||(max_value-avg)>m_display_thresh) {
-      INFO("filling hist ch "<<iChan<<": "<<avg<<" "<<min_value<<" "<<max_value<<" "<<m_display_thresh);
       FillChannelPulse("h_pulse_ch"+chStr, iChan);
     }
     float peak=avg-min_value;

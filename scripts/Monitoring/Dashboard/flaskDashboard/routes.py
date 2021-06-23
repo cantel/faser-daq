@@ -6,10 +6,6 @@
 
 # @brief Defines all the flask routes and the api endpoints
 
-
-#TODO: afficher numéro run number sur les graphs et les history histograms  -> client side history !!
-
-import time
 import json
 from flask.helpers import flash
 import redis
@@ -29,7 +25,7 @@ INTERVAL_TASK_ID = "interval-task-id"  # can be deleted ?
 r = redis.Redis(
     host="localhost", port=6379, db=1, charset="utf-8", decode_responses=True
 )
-
+## Redis database where the current run informations are stored 
 r2 = redis.Redis(
     host="localhost", port=6379, db=2, charset="utf-8", decode_responses=True
 )
@@ -45,7 +41,7 @@ r7 = redis.Redis(
 
 def histograms_save():
     """! Defines the job that will be executed every 60 seconds
-    It saves the current histograms in the redis database 1 in the redis database 6
+    It saves the current histograms in redis database 1 to redis database 6
     """
     with app.app_context():
         IDs = getAllIDs().get_json()  # we get all the IDs
@@ -79,9 +75,12 @@ def old_histogram_save():
             config = {"filename":f"{ID}+{timestamp}"} 
             figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
+            if r7.hlen(f"old:{ID}")>=336 : # 24 (hours) * 7 (days) * 2 (half hour) 
+                key_to_remove = sorted(r7.hkeys(f"old:{ID})"))[0]
+                r7.hdel(f"old:{ID}", key_to_remove)
             r7.hset(f"old:{ID}", f"old:{timestamp}R{runNumber}", json.dumps(hist)) 
 
-# setting up the background jobs
+# setting up the background jobs for storing old histograms
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=histograms_save, trigger="interval", seconds=60)
 scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=1800)
@@ -91,13 +90,11 @@ atexit.register(lambda: scheduler.shutdown())
 
 @app.route("/getIDs", methods=["GET"])
 def getIDs():
-    """! Returns an JSON response with an list with the ID (<moduleName>-<histogramName>) of all histograms
-    (sorted alphabetically).
+    """! Get the ID of all histograms sorted alphabetically.
 
-    @return keys: JSON response with a list of all IDs.
+    @return JSON: list of all IDs from redis database 1.
     """
     modules = getModules().get_json()
-
     keys = []
     for module in modules:
         histnames = r.hkeys(module)
@@ -127,7 +124,10 @@ def storeDefaultTagsAndIDs():
 
 @app.route("/getAllIDs")
 def getAllIDs():
-    """! Returns a JSON response with all IDs stored in the redis database. """
+    """! Gets the IDs stored in the redis database 5. 
+
+    @return JSON: all IDs 
+    """
     ids = r5.keys("id:*")
     ids = [s.replace("id:", "") for s in ids]
     ids.sort()
@@ -138,7 +138,7 @@ def getAllIDs():
 def getModules():
     """! Gets the keys from the redis database containing the "monitor" expression and whose data type is hash.
 
-    @return JSON response : list of all valid modules.
+    @return JSON: all valid modules.
     """
     modules = r.keys("*monitor*")
     modules = [module for module in modules if r.type(module) == "hash"]
@@ -150,12 +150,16 @@ def getModules():
 @app.route("/")
 @app.route("/vue_home", methods=["GET"])
 def vue_home():
+    """! Renders the vue_home.html"""
     storeDefaultTagsAndIDs()
     return render_template("vue_home.html")
 
 
 @app.route("/getModulesAndTags", methods=["GET"])
 def get_modules_and_tags():
+    """! Gets all module names used for monitoring (contain the keyword "monitor") and all the tags associated to the modules.
+    @return JSON : JSON response with all modules name and tags
+    """
     packet = {}
     modules = r.keys("*monitor*")
     tags = r5.keys("tag*")
@@ -166,6 +170,9 @@ def get_modules_and_tags():
 
 @app.route("/IDs_from_tags", methods=["POST"])
 def IDs_from_tags():
+    """! Gets the IDs of the histograms associated with the given tags.
+    @return list: list of IDs.
+    """
     request_data = request.get_json()
     tags = request_data["tags"]
     if len(tags) == 0:
@@ -184,6 +191,9 @@ def IDs_from_tags():
 
 @app.route("/histogram_from_ID", methods=["GET"])
 def histogram_from_ID():
+    """! Get the histogram from redis database 1 associated with the given ID.
+    @return JSON containing the timestamp, the plotly figure, the ID, the associated tags and the runNumber of the histogram.
+    """
     runNumber = r2.get("runNumber")
     packet = {}
     ID = request.args.get("ID")
@@ -199,9 +209,11 @@ def histogram_from_ID():
 
 ## Tag section
 
-
 @app.route("/add_tag", methods=["POST"])
 def add_tag():
+    """! Adds the given tag to redis.
+    @return JSON with key "existed". If true, the added tag already existed in the database.
+    """
     existed = False
     data = request.get_json()
     ID = data["ID"]
@@ -216,7 +228,7 @@ def add_tag():
 @app.route("/remove_tag", methods=["POST"])
 def remove_tag():
     """! Remove the tag sent through a POST request.
-    @return "true" if the tag exists after the delete, "false" otherwise.
+    @return JSON with key "exists". If true, the removed tag still exists in the database.
     """
     exists = True
     data = request.get_json()
@@ -231,21 +243,27 @@ def remove_tag():
 
 @app.route("/history_view/<string:ID>")
 def history_view(ID):
+    """! Renders the history view page."""
     return render_template("vue_historyView.html",ID=ID)
 
 
 @app.route("/stored_timestamps", methods=["GET"])
 def stored_timestamps():
+    """! Gets all stored timestamps in the database for a given ID.
+    @return JSON with timestamps and old timestamps : {"ts": [...], "ots":[...]}
+    """
     ID = request.args.get("ID")
     timestamps = sorted(r7.hkeys(ID), reverse= True)
     old_timestamps = sorted(r7.hkeys(f"old:{ID}"), reverse=True)
-    print(old_timestamps)
     packet = dict(ts=timestamps, ots=old_timestamps)
     return jsonify(packet)
 
 
 @app.route("/stored_histogram", methods = ["GET"])
 def stored_histogram():
+    """! Get the histogram from redis database 7 associated with the given timestamp 
+    @return JSON: stored histogram  
+    """
     hist = ""
     ts_run = str(request.args.get("args"))  # (old:)timestamp&runNumber
     ID = request.args.get("ID")
@@ -288,13 +306,19 @@ def delete_current():
 
 @app.route("/redis_info", methods=["GET"])
 def redis_info():
+    """! Returns informations about the state of the Redis database. 
+    @returns JSON: inofs apbut the database
+    """
     r_infos = r.info()
     return jsonify(r_infos)
 
 ## functions
 
 def get_tags_by_ID(ID):
-    module, histname = ID.split("-")
+    """! Function that gets all tags without the default ones associated with an histogtram ID 
+    @returns list: all tags
+    """
+    module, histname = ID.split("-")    
     # get the members associated with the key id:<histID> in the redis database
     tags = list(r5.smembers(f"id:{ID}"))
     # remove the default tags of the histogram (module name and histogram name)

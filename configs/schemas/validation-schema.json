@@ -1,0 +1,253 @@
+{
+  "$id": "validation-schema.json",
+  "title": "DAQ Configuration",
+  "type": "object",
+  "required": [
+    "version",
+    "group",
+    "components"
+  ],
+  "properties": {
+    "version": {
+      "type": "integer",
+      "description": "Schema version",
+      "minimum": 9,
+      "maximum": 10,
+      "default": 10
+    },
+    "group": {
+      "type": "string",
+      "default": "daq"
+    },
+    "scripts": {
+      "type": "array",
+      "format": "table",
+      "title": "Scripts",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "title": "Script",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "executable": {
+            "type": "string"
+          },
+          "command": {
+            "type": "string"
+          },
+          "directory": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "host",
+          "executable",
+          "command",
+          "directory"
+        ]
+      }
+    },
+    "components": {
+      "type": "array",
+      "format": "table",
+      "title": "components",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "title": "component",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "host": {
+            "type": "string"
+          },
+          "port": {
+            "type": "integer"
+          },
+          "modules":{
+            "type":"array",
+            "format":"table",
+            "title":"modules",
+            "items":{
+              "type":"object",
+              "title":"module",
+              "properties":{
+                "type": {
+                  "type": "string"
+                },
+                "settings": {
+                  "title": "Settings",
+                  "options": {
+                    "collapsed": true
+                  }
+                },
+                "connections": {
+                  "type": "object",
+                  "title": "Connections",
+                  "options": {
+                    "collapsed": true
+                  },
+                  "properties": {
+                    "receivers":{
+                      "oneOf":[{"$ref":"refs/connection-schema.json#/definitions/receivers"}]
+                    },
+                    "senders":{
+                      "oneOf":[{"$ref":"refs/connection-schema.json#/definitions/senders"}]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ]
+            }
+          },
+          "loglevel": {
+            "type": "object",
+            "title": "Log Levels",
+            "options": {
+              "collapsed": true
+            },
+            "properties": {
+              "core": {
+                "type": "string",
+                "enum": [
+                  "DEBUG",
+                  "INFO",
+                  "WARNING"
+                ]
+              },
+              "module": {
+                "type": "string",
+                "enum": [
+                  "DEBUG",
+                  "INFO",
+                  "WARNING"
+                ]
+              },
+              "connection": {
+                "type": "string",
+                "enum": [
+                  "DEBUG",
+                  "INFO",
+                  "WARNING"
+                ]
+              }
+            },
+            "required": [
+              "core",
+              "module",
+              "connection"
+            ],
+            "additionalProperties": false
+          },
+          "metrics_settings": {
+            "title": "Metrics Settings",
+            "options": {
+              "collapsed": true
+            },
+            "oneOf": [
+              {
+                "$ref": "validation-schema.json#/definitions/no_metrics"
+              },
+              {
+                "$ref": "validation-schema.json#/definitions/influxdb"
+              },
+              {
+                "$ref": "validation-schema.json#/definitions/metrics_manager"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name",
+          "host",
+          "port",
+          "modules",
+          "loglevel"
+        ]
+      }
+    },
+    "resources":{
+      "type": "array",
+      "format": "table",
+      "title": "Resources",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "title": "Resource",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "resource": {
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "resource"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "no_metrics": {
+      "title": "no_metrics",
+      "type": "object",
+      "properties": {},
+      "additionalProperties": false
+    },
+    "influxdb": {
+      "title": "influxdb",
+      "type": "object",
+      "properties": {
+        "influxDb_uri": {
+          "type": "string",
+          "default": "http://localhost:8086/write?db="
+        },
+        "influxDb_name": {
+          "type": "string",
+          "default": "DAQlingMetrics"
+        },
+        "stats_interval":{
+          "type":"integer"
+        }
+      },
+      "required": [
+        "influxDb_uri",
+        "influxDb_name"
+      ],
+      "additionalProperties": false
+    },
+    "metrics_manager": {
+      "title": "metrics_manager",
+      "type": "object",
+      "properties": {
+        "stats_uri": {
+          "type": "string",
+          "default": "tcp://localhost:6007"
+        },
+        "stats_interval":{
+          "type":"integer"
+        }
+      },
+      "required": [
+        "stats_uri"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

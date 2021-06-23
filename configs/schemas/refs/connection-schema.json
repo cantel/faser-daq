@@ -1,0 +1,556 @@
+{
+  "$id": "connection-schema.json",
+  "definitions":
+  {
+    "senders": {
+      "type": "array",
+      "format": "table",
+      "title": "Senders",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "oneOf": [
+          {
+            "$ref": "#/definitions/ZMQipcPair"
+          },
+          {
+            "$ref": "#/definitions/ZMQinprocPair"
+          },
+          {
+            "$ref": "#/definitions/ZMQtcpPair"
+          },
+          {
+            "$ref": "#/definitions/ZMQtcpPubSubSender"
+          },
+          {
+            "$ref": "#/definitions/ZMQipcPubSubSender"
+          },
+          {
+            "$ref": "#/definitions/ZMQinprocPubSubSender"
+          },
+          {
+            "$ref": "#/definitions/BoostAsioUdp"
+          },
+          {
+            "$ref": "#/definitions/Local"
+          }
+        ]
+      }
+    },
+    "receivers": {
+      "type": "array",
+      "format": "table",
+      "title": "Receivers",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "oneOf":  [
+          {
+            "$ref": "#/definitions/ZMQipcPair"
+          },
+          {
+            "$ref": "#/definitions/ZMQtcpPair"
+          },
+          {
+            "$ref": "#/definitions/ZMQinprocPair"
+          },
+          {
+            "$ref": "#/definitions/ZMQPubSubReceiver"
+          },
+          {
+            "$ref": "#/definitions/BoostAsioUdp"
+          },
+          {
+            "$ref": "#/definitions/Local"
+          }
+        ]
+      }
+    },
+    "Local":{
+      "title":"Local",
+      "type":"object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "Local"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "id": {
+          "type":"integer"
+        }
+      },
+      "required":[
+        "chid",
+        "id",
+        "type"
+      ]
+
+    },
+    "BoostAsioUdp": {
+      "title": "BoostAsioUdp",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "BoostAsioUdp"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "udp"
+          ]
+        },
+        "host": {
+          "type": "string"
+        },
+        "dest_port": {
+          "type": "integer"
+        },
+        "src_port": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+      
+        }
+      },
+      "required": [
+        "type",
+        "dest_port",
+        "host",
+        "transport",
+        "chid"
+      ],
+      "additionalProperties": false
+    },
+    "ZMQipcPair": {
+      "title": "ZMQipcPair",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ZMQPair"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "ipc"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "integer"
+        },
+        "filter_size": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "path",
+        "transport",
+        "chid"
+      ],
+      "additionalProperties": false
+    },
+    "ZMQinprocPair": {
+      "title": "ZMQinprocPair",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ZMQPair"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "inproc"
+          ]
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "id":{
+          "type": "integer"
+        },
+        "filter": {
+          "type": "integer"
+        },
+        "filter_size": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "endpoint",
+        "transport",
+        "chid",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "ZMQtcpPair": {
+      "title": "ZMQtcpPair",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ZMQPair"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "tcp"
+          ]
+        },
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "filter": {
+          "type": "integer"
+        },
+        "filter_size": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "port",
+        "transport",
+        "host",
+        "chid"
+      ],
+      "additionalProperties": false
+    },
+    "ZMQtcpPubSubSender": {
+      "title": "ZMQtcpPubSubSender",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ZMQPubSub"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "tcp"
+          ]
+        },
+        "host": {
+          "type": "string"
+        },
+        "port": {
+          "type": "integer"
+        },
+        "filter": {
+          "type": "integer"
+        },
+        "filter_size": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "port",
+        "transport",
+        "host",
+        "chid"
+      ],
+      "additionalProperties": false
+    },
+    "ZMQipcPubSubSender": {
+      "title": "ZMQipcPubSubSender",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ZMQPubSub"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "ipc"
+          ]
+        },
+        "path": {
+          "type": "string"
+        },
+        "filter": {
+          "type": "integer"
+        },
+        "filter_size": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "path",
+        "transport",
+        "chid"
+      ],
+      "additionalProperties": false
+    },
+    "ZMQinprocPubSubSender": {
+      "title": "ZMQinprocPubSubSender",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ZMQPubSub"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "transport": {
+          "type": "string",
+          "enum": [
+            "inproc"
+          ]
+        },
+        "endpoint": {
+          "type": "string"
+        },
+        "id":{
+          "type":"integer"
+        },
+        "filter": {
+          "type": "integer"
+        },
+        "filter_size": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "endpoint",
+        "transport",
+        "chid",
+        "id"
+      ],
+      "additionalProperties": false
+    },
+    "ZMQPubSubReceiver": {
+      "title": "ZMQPubSubReceiver",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "ZMQPubSub"
+          ]
+        },
+        "chid":{
+          "type":"integer"
+        },
+        "id":{
+          "type":"integer"
+        },
+        "connections": {
+          "type": "array",
+          "format": "table",
+          "title": "connections",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "oneOf": [
+              {
+                "title": "tcp",
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string"
+                  },
+                  "port": {
+                    "type": "integer"
+                  },
+                  "transport": {
+                    "type": "string",
+                    "enum": [
+                      "tcp"
+                    ]
+                  }
+                }
+              },
+              {
+                "title": "ipc",
+                "type": "object",
+                "properties": {
+                  "transport": {
+                    "type": "string",
+                    "enum": [
+                      "ipc"
+                    ]
+                  },
+                  "path": {
+                    "type": "string"
+                  }
+                }
+              },
+              {
+                "title": "inproc",
+                "type": "object",
+                "properties": {
+                  "transport": {
+                    "type": "string",
+                    "enum": [
+                      "inproc"
+                    ]
+                  },
+                  "endpoint": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "filter": {
+          "type": "integer"
+        },
+        "filter_size": {
+          "type": "integer"
+        },
+        "queue": {
+          "type": "object",
+          "oneof": {
+            "$ref": "#/definitions/queues"
+          }
+        }
+      },
+      "required": [
+        "type",
+        "connections",
+        "chid"
+      ],
+      "additionalProperties": false
+    },
+    "queues":[
+      {
+        "FollyProducerConsumer":{
+          "title":"FollyProducerConsumer",
+          "type":"object",
+          "properties": {
+              "type":{
+                  "type":"string",
+                  "enum":[
+                      "FollyProducerConsumer"
+                  ]
+              },
+              "queue_size":{
+                  "type":"integer"
+              }
+      
+          },
+          "required": [
+              "type",
+              "queue_size"
+          ],
+          "additionalProperties": false
+        }
+      },
+      {
+        "MoodyReaderWriter":{
+          "title":"MoodyReaderWriter",
+          "type":"object",
+          "properties": {
+              "type":{
+                  "type":"string",
+                  "enum":[
+                      "MoodyReaderWriter"
+                  ]
+              },
+              "queue_size":{
+                  "type":"integer"
+              }
+      
+          },
+          "required": [
+              "type",
+              "queue_size"
+          ],
+          "additionalProperties": false
+        }
+      }
+  ]
+  }
+}

@@ -18,8 +18,7 @@ import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
 from flaskDashboard import interfacePlotly
 
-## ID used for backround jobs (can it be deleted ?)
-INTERVAL_TASK_ID = "interval-task-id"  # can be deleted ?
+
 
 ## Redis database where the last histograms are published.
 r = redis.Redis(
@@ -75,7 +74,7 @@ def old_histogram_save():
             config = {"filename":f"{ID}+{timestamp}"} 
             figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
-            if r7.hlen(f"old:{ID}")>=336 : # 24 (hours) * 7 (days) * 2 (half hour) 
+            if r7.hlen(f"old:{ID}")>=168 : # 24 (hours) * 7 (days) 
                 key_to_remove = sorted(r7.hkeys(f"old:{ID})"))[0]
                 r7.hdel(f"old:{ID}", key_to_remove)
             r7.hset(f"old:{ID}", f"old:{timestamp}R{runNumber}", json.dumps(hist)) 
@@ -83,7 +82,7 @@ def old_histogram_save():
 # setting up the background jobs for storing old histograms
 scheduler = BackgroundScheduler()
 scheduler.add_job(func=histograms_save, trigger="interval", seconds=60)
-scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=1800)
+scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=3600)
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
@@ -307,7 +306,7 @@ def delete_current():
 @app.route("/redis_info", methods=["GET"])
 def redis_info():
     """! Returns informations about the state of the Redis database. 
-    @returns JSON: inofs apbut the database
+    @returns JSON: infos about the database
     """
     r_infos = r.info()
     return jsonify(r_infos)

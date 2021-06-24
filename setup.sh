@@ -24,9 +24,12 @@ FASERTOP=`pwd`;
 popd  > /dev/null
 
 echo "Setting up to run from ${FASERTOP}"
-
-source ${FASERTOP}/daqling/cmake/setup.sh ${DAQLING_SPACK_REPO_PATH}
-
+if [ $# -eq 1 ]
+then
+source ${FASERTOP}/daqling/cmake/setup.sh ${DAQLING_SPACK_REPO_PATH} ${FASERTOP}/configs/
+else
+source ${FASERTOP}/daqling/cmake/setup.sh
+fi
 #overwrite daqling setup variables to be director independent
 export DAQ_SCRIPT_DIR=${FASERTOP}/daqling/scripts/
 export DAQ_CONFIG_DIR=${FASERTOP}/configs/

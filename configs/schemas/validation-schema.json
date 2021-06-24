@@ -10,9 +10,9 @@
     "version": {
       "type": "integer",
       "description": "Configuration version",
-      "minimum": 9,
-      "maximum": 10,
-      "default": 10
+      "minimum": 11,
+      "maximum": 11,
+      "default": 11
     },
     "group": {
       "type": "string",

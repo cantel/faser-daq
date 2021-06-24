@@ -1,6 +1,6 @@
 {
   "configuration": {
-    "version": 10,
+    "version": 11,
     "group": "faser",
     "components": [
       { "$ref" : "Templates/digitizer.json#DigitizerB21" },

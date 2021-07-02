@@ -4,9 +4,7 @@ Template project for custom DAQling Modules, scripts, and configurations.
 
 ## Documentation
 
-Detailed documentation can be found [here][codimd].
-
-[codimd]: <https://codimd.web.cern.ch/s/B1oArin-r>
+Detailed documentation can be found at [https://daqling.docs.cern.ch](https://daqling.docs.cern.ch).
 
 Subscribe to the "daqling-users" CERN e-group for updates.
 
@@ -27,16 +25,24 @@ will checkout the correct DAQling version for that commit.
 
 ## Host configuration and framework build
 
-### Configure the CERN CentOS 7 host
+### Build dependencies installation
 
 Refer to `daqling/README.md` for host setup instructions.
 
 ### Build
 
+For the first-time sourcing of `daqling/cmake/setup.sh`, pass the location of the daqling-spack-repo to `daqling/cmake/setup.sh`:
+
+    source daqling/cmake/setup.sh </full/path/to/daqling-spack-repo/>
+
+More info in `README_SPACK.md`.
+
+Then:
+
     source daqling/cmake/setup.sh
     mkdir build
     cd build
-    cmake3 ..
+    cmake ..
     make
 
 #### Advanced build options
@@ -71,14 +77,21 @@ The custom module will be discovered and built by CMake as part of the project.
 
 To run a newly created Module (e.g. `MyNewModule`), it is necessary to add a corresponding entry in `components:` to a JSON configuration file. Note that the name of the Module needs to be specified in the `type:` field. E.g.:
 
-    {
-      "name": "mynewmodule01",
-      "host": "localhost",
-      "port": 5555,
-      "type": "MyNewModule",
-      "loglevel": {"core": "INFO", "module": "DEBUG"},
-      "settings": {
-      },
-      "connections": {
-      }    
-    }
+```json
+{
+  "name": "mynewmodule01",
+  "host": "localhost",
+  "port": 5555,
+  "modules":[
+   {
+     "type": "MyNewModule",
+     "name": "mynewmodule",
+     "connections": {
+     }    
+   }
+  ],
+  "loglevel": {"core": "INFO", "module": "DEBUG","connection":"WARNING"},
+  "settings": {
+  }
+}
+```

@@ -3,30 +3,31 @@
 */
 
 #include "NewModule.hpp"
+#include "Utils/Ers.hpp"
 
-NewModule::NewModule(const std::string& n):FaserProcess(n) { INFO(""); }
+NewModule::NewModule(const std::string& n):FaserProcess(n) { ERS_INFO(""); }
 
-NewModule::~NewModule() { INFO(""); }
+NewModule::~NewModule() { ERS_INFO(""); }
 
 // optional (configuration can be handled in the constructor)
 void NewModule::configure() {
   FaserProcess::configure();
-  INFO("");
+  ERS_INFO("");
 }
 
 void NewModule::start(unsigned run_num) {
   FaserProcess::start(run_num);
-  INFO("");
+  ERS_INFO("");
 }
 
 void NewModule::stop() {
   FaserProcess::stop();
-  INFO("");
+  ERS_INFO("");
 }
 
 void NewModule::runner() noexcept {
-  INFO("Running...");
+  ERS_INFO("Running...");
   while (m_run) {
   }
-  INFO("Runner stopped");
+  ERS_INFO("Runner stopped");
 }

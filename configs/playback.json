@@ -12,7 +12,7 @@
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
         "settings":         { "maxRate": 100,
 			      "repeats": 2,
-			      "fileList": ["/home/data/Faser-Physics-000488-00000.raw","/home/data/Faser-Monitoring-000488-00000.raw"]
+			      "fileList": ["/home/data/Faser-Physics-002806-00000.raw"]
 	    
 	},
         "connections": {
@@ -20,7 +20,7 @@
           "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
 	}
       },
-      { "$ref": "Templates/emulator.json#FrontEndMonitor01" },
+      { "$ref": "Templates/TRB.json#IFTMonitor00" },
       { "$ref": "Templates/emulator.json#EmulatorMonitor" }
     ]
   }

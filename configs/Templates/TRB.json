@@ -628,5 +628,28 @@
 		}
             ]
 	}
+    },
+    "IFTMonitor00": {
+	"name": "iftmonitor00",
+	"host": "localhost",
+	"port": 5559,
+	"type": "IFTMonitor",
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" },
+	"settings": {
+            "fragmentID": 196617,
+            "stats_uri": "tcp://localhost:7000"
+	},
+	"connections": {
+            "receivers": [
+		{
+		    "type": "pubsub",
+		    "chid": 0,
+		    "transport": "tcp",
+		    "host": "localhost",
+		    "port": 8200
+		}
+            ]
+	}
     }
 }

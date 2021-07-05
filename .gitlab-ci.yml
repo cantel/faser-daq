@@ -6,7 +6,7 @@ stages:
 build_faser_daq:
   stage: build
   needs: []
-  image: gitlab-registry.cern.ch/faser/docker/daq:daqling-v1
+  image: gitlab-registry.cern.ch/faser/docker/daq:master
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   script:

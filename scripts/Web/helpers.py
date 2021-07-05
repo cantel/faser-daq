@@ -34,7 +34,9 @@ def read(fileName):
                             schema = json.load(f)
                         
                             try:
-                                jsonschema.validate(instance=data, schema=schema)
+                                #jsonschema.validate(instance=data, schema=schema)
+                                resolver=jsonschema.RefResolver(base_uri='file://'+env['DAQ_CONFIG_DIR']+'schemas/',referrer=schema)
+                                jsonschema.validate(instance=data, schema=schema,resolver=resolver)
                             except jsonschema.exceptions.ValidationError as e:
                                 print(e)
                                 data= "NOTCOMP"
@@ -48,7 +50,8 @@ def read(fileName):
 
                 else:
                     data= "NOSCHEMA"
-            except:
+            except Exception as e:
+                print(e)
                 data = "BADJSON"
     else:
         data = {}
@@ -81,7 +84,10 @@ def readGeneral():
 #        schemaFileName = env['DAQ_CONFIG_DIR'] +    "json-config.schema"
         schemaFileName = env['DAQ_CONFIG_DIR'] +    "schemas/validation-schema.json"
         f = open(schemaFileName)
-        schema = json.load(f)
+        #schema = json.load(f)
+        schema = jsonref.load(f,base_uri=Path(schemaFileName).as_uri(),loader=jsonref.JsonLoader())
+        schema = deepcopy(schema)
+
         f.close()
     except:
         schema= "error"
@@ -90,7 +96,8 @@ def readGeneral():
 def detectorList(config):
     detList=[]
     for comp in config["components"]:
-        compType=comp['type']
+        print(comp)
+        compType=comp['modules'][0]['type'] #FIXME: do not support modules
         if compType=="TriggerReceiver": 
             detList.append("TLB")
         elif compType=="DigitizerReceiver": 
@@ -146,7 +153,7 @@ def tail(file, n=1, bs=1024):
 def findIndex(boardName, d):
     index = 0
     for p in d['components']:
-        if p['name'] == boardName:
+        if p['name'] == boardName: #FIXME: does not support multiple modules
             break
         else:
             index += 1

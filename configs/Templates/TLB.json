@@ -1,106 +1,104 @@
 {
+    "TLBConnections": {
+        "senders": [
+          {
+              "type": "ZMQPair",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8100,
+              "queue":{"$ref":"top.json#queue"}
+          }
+        ]
+    },
     "TLBReceiverTI12": {
         "name": "tlbreceiver01",
         "host": "localhost",
         "port": 5520,
-        "type": "TriggerReceiver",
         "loglevel":         { "$ref": "top.json#loglevel" },
         "metrics_settings": { "$ref": "top.json#metrics_settings" },
-        "settings": {
-            "SamplingPhase": [false, false, false, false, false, false, false, false],
-            "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
-            "RandomTriggerRate": 7,
-            "Prescale": [1, 1, 1, 1, 20, 0],
-            "TrackerDelay": 100,
-            "DigitizerDelay": 0,
-            "LHC_CLK": true,
-            "OrbitDelay": 0,
-            "Deadtime": 500,
-            "MonitoringRate": 11245,
-            "OutputDestination": 0,
-            "Input": [true, true, true, true, true, true, true, false],
-            "Busy0Disable": false,
-            "Busy1Disable": true,
-            "EnableTriggerData": true,
-            "EnableMonitoringData": true,
-            "Derandomize": false,
-            "ReadoutFIFOReset": true,
-            "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                           "Trig1": "FirstVetoLayer|SecondVetoLayer",
-                           "Trig2": "TimingLayerBottom|TimingLayerTop",
-                           "Trig3": "PreshowerLayer"            
-            },                  
-            "SCIP" : "faser-daq-006",
-            "DAQIP" : "faser-daq-006",
-            "BoardID" : 10
-        },
-        "connections": {
-            "senders": [
-              {
-                  "type": "pair",
-                  "chid": 0,
-                  "transport": "tcp",
-                  "host": "*",
-                  "port": 8100
-              }
-            ]
-      }
+        "modules":[{
+            "name": "tlbreceiver01",
+            "type": "TriggerReceiver",
+            "settings": {
+                "SamplingPhase": [false, false, false, false, false, false, false, false],
+                "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
+                "RandomTriggerRate": 7,
+                "Prescale": [1, 1, 1, 1, 20, 0],
+                "TrackerDelay": 100,
+                "DigitizerDelay": 0,
+                "LHC_CLK": true,
+                "OrbitDelay": 0,
+                "Deadtime": 500,
+                "MonitoringRate": 11245,
+                "OutputDestination": 0,
+                "Input": [true, true, true, true, true, true, true, false],
+                "Busy0Disable": false,
+                "Busy1Disable": true,
+                "EnableTriggerData": true,
+                "EnableMonitoringData": true,
+                "Derandomize": false,
+                "ReadoutFIFOReset": true,
+                "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
+                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
+                               "Trig2": "TimingLayerBottom|TimingLayerTop",
+                               "Trig3": "PreshowerLayer"            
+                },                  
+                "SCIP" : "faser-daq-006",
+                "DAQIP" : "faser-daq-006",
+                "BoardID" : 10
+            },
+            "connections": {"$ref":"#TLBConnections" }
+        }]
     },
     "TLBReceiverTI12LED": {
         "name": "tlbreceiver01",
         "host": "localhost",
         "port": 5520,
-        "type": "TriggerReceiver",
+        "modules":[{
+            "name": "tlbreceiver01",
+            "type": "TriggerReceiver",
+            "settings": {
+                "SamplingPhase": [false, false, false, false, false, false, false, false],
+                "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
+                "RandomTriggerRate": 7,
+                "Prescale": [0, 0, 0, 0, 0, 1],
+                "TrackerDelay": 100,
+                "DigitizerDelay": 8,
+                "LHC_CLK": false,
+                "OrbitDelay": 0,
+                "Deadtime": 500,
+                "MonitoringRate": 11223,
+                "OutputDestination": 0,
+                "Input": [true, true, true, true, true, true, true, false],
+                "Busy0Disable": true,
+                "Busy1Disable": true,
+                "EnableTriggerData": true,
+                "EnableMonitoringData": true,
+                "Derandomize": false,
+                "ReadoutFIFOReset": true,
+                "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
+                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
+                               "Trig2": "TimingLayerBottom|TimingLayerTop",
+                               "Trig3": "PreshowerLayer"            
+                },                  
+                "SCIP" : "10.11.66.11",
+                "DAQIP" : "10.11.66.11",
+                "BoardID" : 10
+            },
+            "connections": {"$ref":"#TLBConnections" }
+        }],
         "loglevel":         { "$ref": "top.json#loglevel" },
-        "metrics_settings": { "$ref": "top.json#metrics_settings" },
-        "settings": {
-            "SamplingPhase": [false, false, false, false, false, false, false, false],
-            "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
-            "RandomTriggerRate": 7,
-            "Prescale": [0, 0, 0, 0, 0, 1],
-            "TrackerDelay": 100,
-            "DigitizerDelay": 8,
-            "LHC_CLK": false,
-            "OrbitDelay": 0,
-            "Deadtime": 500,
-            "MonitoringRate": 11223,
-            "OutputDestination": 0,
-            "Input": [true, true, true, true, true, true, true, false],
-            "Busy0Disable": true,
-            "Busy1Disable": true,
-            "EnableTriggerData": true,
-            "EnableMonitoringData": true,
-            "Derandomize": false,
-            "ReadoutFIFOReset": true,
-            "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                           "Trig1": "FirstVetoLayer|SecondVetoLayer",
-                           "Trig2": "TimingLayerBottom|TimingLayerTop",
-                           "Trig3": "PreshowerLayer"            
-            },                  
-            "SCIP" : "10.11.66.11",
-            "DAQIP" : "10.11.66.11",
-            "BoardID" : 10
-        },
-        "connections": {
-            "senders": [
-              {
-                  "type": "pair",
-                  "chid": 0,
-                  "transport": "tcp",
-                  "host": "*",
-                  "port": 8100
-              }
-            ]
-      }
+        "metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "TLBReceiverB21": {
 	"name": "tlbreceiver01",
 	"host": "localhost",
 	"port": 5520,
-	"type": "TriggerReceiver",
-        "loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-	"settings": {
+    "modules":[{
+        "name": "tlbreceiver01",
+        "type": "TriggerReceiver",
+        "settings": {
             "SamplingPhase": [true, true, true, false, true, true, true, false],
             "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
             "RandomTriggerRate": 6,
@@ -127,27 +125,20 @@
             "SCIP" : "10.11.65.7",
             "DAQIP" : "10.11.65.7",
             "BoardID" : 0
-	},
-	"connections": {
-            "senders": [
-		{
-		    "type": "pair",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "*",
-		    "port": 8100
-		}
-            ]
-	}
+        },
+        "connections": {"$ref":"#TLBConnections" }
+    }],
+    "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "TLBReceiverEHN1": {
 	"name": "tlbreceiver01",
 	"host": "localhost",
 	"port": 5520,
-	"type": "TriggerReceiver",
-        "loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-	"settings": {
+    "modules":[{
+        "name": "tlbreceiver01",
+        "type": "TriggerReceiver",
+        "settings": {
             "SamplingPhase": [false, false, false, false, false, false, false, false],
             "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
             "RandomTriggerRate": 7,
@@ -174,62 +165,59 @@
             "SCIP" : "10.11.66.11",
             "DAQIP" : "10.11.66.11",
             "BoardID" : 10
-	},
-	"connections": {
-            "senders": [
-		{
-		    "type": "pair",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "*",
-		    "port": 8100
-		}
-            ]
-	}
+        },
+        "connections": {"$ref":"#TLBConnections" }
+    }],
+    "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "RateMonitor": {
 	"name": "ratemonitor01",
 	"host": "localhost",
 	"port": 5521,
-	"type": "TriggerRateMonitor",
-        "loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-	"settings": {
-            "fragmentID": 131072
-	},
-	"connections": {
+    "modules":[{
+        "name": "ratemonitor01",
+        "type": "TriggerRateMonitor",
+        "connections": {
             "receivers": [
-		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8203
-		}
+            {
+                "type": "ZMQPubSub",
+                "chid": 0,
+                "connections":[{"transport": "tcp", "host": "localhost", "port": 8203 }],
+                "queue":{"$ref":"top.json#queue"}
+            }
             ]
-	}
+	    },
+        "settings": {
+            "fragmentID": 131072
+	    }
+    }],
+    "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
     "TriggerMonitor": {
 	"name": "triggermonitor01",
 	"host": "localhost",
 	"port": 5522,
-	"type": "TriggerMonitor",
-        "loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-	"settings": {
+    "modules":[{
+        "name": "triggermonitor01",
+        "type": "TriggerMonitor",
+        "settings": {
             "fragmentID": 131072
-	},
-	"connections": {
-            "receivers": [
-		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
-		}
-            ]
-	}
+        },
+        "connections": {
+                "receivers": [
+                {
+                    "type": "ZMQPubSub",
+                    "chid": 0,
+                    "connections":[{"transport": "tcp", "host": "localhost", "port": 8200}],
+                    "queue":{"$ref":"top.json#queue"}
+                }
+                ]
+        }
+    }],
+    "loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     }
 }
 

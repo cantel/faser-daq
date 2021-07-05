@@ -9,7 +9,7 @@
 
 class DigitizerNoiseMonitorModule : public MonitorBaseModule {
  public:
-  DigitizerNoiseMonitorModule();
+  DigitizerNoiseMonitorModule(const std::string&);
   ~DigitizerNoiseMonitorModule();
 
   void GetPedestalMeanRMS(std::vector<uint16_t> input, float &mean, float &rms);
@@ -21,7 +21,7 @@ class DigitizerNoiseMonitorModule : public MonitorBaseModule {
 
  protected:
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists();
   void register_metrics();
 

@@ -17,14 +17,15 @@ using namespace std::chrono;
 // only monitoring the first two channels
 #define NCHANNELS 15
 
-DigitizerNoiseMonitorModule::DigitizerNoiseMonitorModule() { 
+DigitizerNoiseMonitorModule::DigitizerNoiseMonitorModule(const std::string& n):MonitorBaseModule(n)
+{ 
   INFO("Instantiating ...");
 }
 
 DigitizerNoiseMonitorModule::~DigitizerNoiseMonitorModule() { 
 }
 
-void DigitizerNoiseMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void DigitizerNoiseMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
   DEBUG("Digitizer monitoring");
 
   // the m_event object is populated with the event binary here

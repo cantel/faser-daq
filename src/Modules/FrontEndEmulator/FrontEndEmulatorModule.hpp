@@ -13,7 +13,7 @@ using namespace std::chrono;
 
 class FrontEndEmulatorModule : public FaserProcess {
  public:
-  FrontEndEmulatorModule();
+  FrontEndEmulatorModule(const std::string&);
   ~FrontEndEmulatorModule();
 
   void start(unsigned int);

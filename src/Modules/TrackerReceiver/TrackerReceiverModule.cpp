@@ -15,21 +15,21 @@
 
 using namespace DAQFormats;
 using namespace daqling::utilities;
-
-TrackerReceiverModule::TrackerReceiverModule() { 
+using namespace TrackerReceiverIssues;
+using namespace TrackerData;
+TrackerReceiverModule::TrackerReceiverModule(const std::string& n):FaserProcess(n) { 
     INFO("");
     m_status = STATUS_OK;
 
-    auto cfg = m_config.getSettings();
+    auto cfg = getModuleSettings();
 
-    bool runEmulation = m_config.getConfig()["settings"]["emulation"]; 
+    bool runEmulation = getModuleSettings()["emulation"]; 
 
     if ( cfg.contains("BoardID")) {
       m_userBoardID = cfg["BoardID"];
     }
     else if (!runEmulation) {
-      ERROR("No board ID specified.");
-      throw std::runtime_error("No board ID specified.");
+      throw NoBoardID(ERS_HERE);
     }
 
     bool usingUSB(false);
@@ -39,8 +39,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
         m_DAQIP = cfg["DAQIP"];
       }
       else {
-        ERROR("No DAQ IP specified.");
-        throw std::runtime_error("No DAQ IP specified.");
+        throw NoDaqIP(ERS_HERE);
       }
       INFO("SC and DAQ IPs have been specified. Assuming we're communicating through the ether!");
     }
@@ -140,7 +139,7 @@ TrackerReceiverModule::TrackerReceiverModule() {
 
     //Setting up the emulated interface
     if (runEmulation) {
-      std::string l_TRBconfigFile = m_config.getConfig()["settings"]["emulatorFile"];
+      std::string l_TRBconfigFile = getModuleSettings()["emulatorFile"];
       static_cast<FASER::dummyInterface*>(m_trb->m_interface)->SetInputFile(l_TRBconfigFile); //file to read events from
     }
 }    
@@ -165,18 +164,18 @@ void TrackerReceiverModule::configure() {
   registerVariable(m_checksum_mismatches, "checksum_mismatches");
   registerVariable(m_checksum_mismatches_rate, "checksum_mismatches_rate");
   registerVariable(m_receivedEvents, "ReceivedEvents"); // events transferred from driver to tracker receiver.
-  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10); // kB/s read via network socket
-  registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE, m_UPDATEMETRIC_INTERVAL);
+  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE); // kB/s read via network socket
+  registerVariable(m_PLLErrCnt, "PLLErrCnt", metrics::LAST_VALUE);
   registerVariable(m_missedL1, "MissedEventIDError");
 
   //TRB configuration 
   m_moduleMask = 0;
   m_moduleClkCmdMask = 0;
   for (int i = 7; i >= 0; i--){ //there are 8 modules
-    if (m_config.getConfig()["settings"]["moduleMask"][i]){
+    if (getModuleSettings()["moduleMask"][i]){
       m_moduleMask |= (1 << i);
     }
-    if (m_config.getConfig()["settings"]["moduleClkCmdMask"][i]){
+    if (getModuleSettings()["moduleClkCmdMask"][i]){
       m_moduleClkCmdMask |= (1 << i);
     }
   }
@@ -216,8 +215,8 @@ void TrackerReceiverModule::configure() {
       INFO("Starting configuration of module number " << l_moduleNo);
           
         std::unique_ptr<FASER::ConfigHandlerSCT> l_cfg(new FASER::ConfigHandlerSCT());
-        if (m_config.getConfig()["settings"]["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
-          std::string l_moduleConfigFile = m_config.getConfig()["settings"]["moduleConfigFiles"][std::to_string(l_moduleNo)];
+        if (getModuleSettings()["moduleConfigFiles"].contains(std::to_string(l_moduleNo))){ //module numbers in cfg file from 0 to 7!!
+          std::string l_moduleConfigFile = getModuleSettings()["moduleConfigFiles"][std::to_string(l_moduleNo)];
           if (l_moduleConfigFile != ""){
               l_cfg->ReadFromFile(l_moduleConfigFile);
               l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
@@ -225,16 +224,15 @@ void TrackerReceiverModule::configure() {
           }
           else { 
             m_status=STATUS_ERROR;
-            ERROR("Empty configuration file provided for module "<<l_moduleNo<<".");
             sleep(1);
-            THROW(TRBConfigurationException, "Cannot configure module due to missing configuration file.");
+            throw MissingConfigurationFile(ERS_HERE,l_moduleNo);
           }
           try {
             m_trb->ConfigureSCTModule(l_cfg.get(), (0x1 << l_moduleNo)); //sending configuration to corresponding module
           } catch ( TRBConfigurationException &e) {
              m_status=STATUS_ERROR;
              sleep(1);
-             throw e;
+             throw TRBConfigurationIssue(ERS_HERE,e);
           }
           INFO("Configuration of module " << l_moduleNo << " finished.");
         }
@@ -278,15 +276,15 @@ void TrackerReceiverModule::configure() {
         usleep(1e5); // 100 ms
       }
       if ( !(status & FASER::TRBStatusParameters::STATUS_TLBCLKSEL) ) {
-        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); THROW(TRBAccessException,"Could not sync to TLB CLK");}  
+        if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TLBSyncFailed(ERS_HERE);}  
         continue;
       } 
       m_trb->WritePhaseConfigReg();
       m_trb->ApplyPhaseConfig();
       try {
         m_trb->GenerateSoftReset(m_moduleMask);
-      } catch ( Exceptions::BaseException &e ){ // FIXME figure out why it won't catch TRBAccessException
-         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw e; };
+      } catch ( Exceptions::BaseException &e  ){ // FIXME figure out why it won't catch TRBAccessException
+         if (!nRetries) { m_status=STATUS_ERROR; sleep(1); throw TRBAccesIssue(ERS_HERE,e); };
          ERROR("Sending configuration commands failed. Will try resyncing to clock. "<<(int)nRetries<<" retries remaining.");
          m_trb->SetDirectParam(0);
          uint16_t status;
@@ -315,7 +313,7 @@ void TrackerReceiverModule::configure() {
   try { m_trb->VerifyConfigReg(); }
   catch ( TRBConfigurationException& e) {
     m_status=STATUS_ERROR;
-    ERROR("Configurations read back do not match configurations sent.");
+    ERROR("Configurations read back do not match configurations sent. Reason: "<<e);
   }
   INFO("TRB configured successfully. TRB configurations read back:");
   m_trb->ReadbackAndPrintConfig();
@@ -516,7 +514,7 @@ void TrackerReceiverModule::runner() noexcept {
 
          // place the raw binary event fragment on the output port
          std::unique_ptr<const byteVector> bytestream(fragment->raw());
-         daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+         DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
          m_connections.send(0, binData);
 
          } // event loop

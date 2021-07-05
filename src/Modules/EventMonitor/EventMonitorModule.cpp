@@ -19,10 +19,10 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-EventMonitorModule::EventMonitorModule() { 
+EventMonitorModule::EventMonitorModule(const std::string& n):MonitorBaseModule(n) { 
   INFO("In EventMonitorModule contructor");
   
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = getModuleSettings();
   
   // determine which systems are configured for monitoring
   m_enable_digitizer = (bool)cfg["enable_digitizer"];
@@ -44,7 +44,7 @@ EventMonitorModule::~EventMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void EventMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void EventMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

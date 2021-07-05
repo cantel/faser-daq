@@ -16,13 +16,12 @@ class FaserProcess: public daqling::core::DAQProcess {
 public:
   enum StatusFlags { STATUS_OK=0,STATUS_WARN,STATUS_ERROR };
 
-  FaserProcess() {  INFO("Booting with config: " << m_config.getConfig().dump(4)); }
+  FaserProcess(const std::string& n):daqling::core::DAQProcess(n) {  INFO("Booting with config: " << m_config.getConfig().dump(4)); }
 
   virtual ~FaserProcess() {}
 
   virtual void configure() {
     //    DAQProcess::configure(); // replaced with local instance to allow environment variabls in influxdb string
-    setupStatistics();
     std::string influxDbURI = m_config.getMetricsSettings()["influxDb_uri"];
     std::ifstream secretsFile("/etc/faser-secrets.json");
     if (secretsFile.good()) {
@@ -32,10 +31,8 @@ public:
       autoExpandEnvironmentVariables(influxDbURI,secrets);
       INFO("After variable replacement: "+influxDbURI);
     }
-    m_statistics->setInfluxDBuri(influxDbURI);
-    if (m_stats_on) {
-      m_statistics->start();
-    }
+    m_config.getMetricsSettings()["influxDb_uri"] = influxDbURI;
+    DAQProcess::configure();
 
     registerVariable(m_status,"Status");
 
@@ -84,16 +81,16 @@ public:
 
 protected:
   //simple metrics interface. Note variables are zero'd
-  void registerVariable(std::atomic<int> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, float delta_t = 1) {
+  void registerVariable(std::atomic<int> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE) {
     var=0;
-    if (m_stats_on) {
-      m_statistics->registerMetric<std::atomic<int>>(&var, name, mtype, delta_t);
+    if (m_statistics->isStatsOn()) {
+      m_statistics->registerMetric<std::atomic<int>>(&var, name, mtype);
     }
   }
-  void registerVariable(std::atomic<float> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, float delta_t = 1) {
+  void registerVariable(std::atomic<float> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE) {
     var=0;
-    if (m_stats_on) {
-      m_statistics->registerMetric<std::atomic<float>>(&var, name, mtype,delta_t);
+    if (m_statistics->isStatsOn()) {
+      m_statistics->registerMetric<std::atomic<float>>(&var, name, mtype);
     }
   }
 

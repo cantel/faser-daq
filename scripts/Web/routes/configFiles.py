@@ -49,8 +49,8 @@ def saveNewConfigFile(newFileName):
 def getConfigFile(fileName):
         res = h.read(fileName)
         session["selectedFile"] = fileName;
-        print("Selected",fileName)
-        if(res == "NOJSON" or res == "BADSCHEMA" or res == "NOSCHEMA" or res == "NOTCOMP"):
+        print("Selected",fileName,res)
+        if(res == "NOJSON" or res == "BADSCHEMA" or res == "NOSCHEMA" or res == "NOTCOMP" or res == "BADJSON"):
                 print("ERROR",res)
                 pass #FIXME do something here?
         return jsonify(res)

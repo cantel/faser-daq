@@ -7,11 +7,23 @@
 #include "Commons/FaserProcess.hpp"
 #include "TLBAccess/TLBAccess.h"
 
+ERS_DECLARE_ISSUE(
+TriggerReceiver,                                                              // namespace
+    TriggerReceiverIssue,                                                    // issue name
+  message,  // message
+    ((std::string) message)
+)
+ERS_DECLARE_ISSUE(
+TriggerReceiver,                                                              // namespace
+    TLBAccesIssue,                                                    // issue name
+  "Caught TLBAccesException with message:",  // message
+    ERS_EMPTY
+)
 using namespace FASER;
 
 class TriggerReceiverModule : public FaserProcess {
  public:
-  TriggerReceiverModule();
+  TriggerReceiverModule(const std::string&);
   ~TriggerReceiverModule();
 
   void configure(); // optional (configuration can be handled in the constructor)

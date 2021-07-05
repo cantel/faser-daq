@@ -4,76 +4,86 @@
         "name": "filewriter",
         "host": "localhost",
         "port": 5501,
-        "type": "FileWriterFaser",
+        "modules":[{
+          "name": "filewriter",
+          "type": "FileWriterFaser",
+          "settings": {
+            "max_filesize": 1000000000,
+            "buffer_size": 20000,
+      "stop_timeout_ms": 1500,
+            "filename_pattern": { "$ref": "top.json#filename_pattern" },
+            "channel_names": [
+              "Physics",
+              "Calibration",
+              "Monitoring",
+              "TLBMonitoring",
+              "Corrupted",
+              "Incomplete",
+              "Duplicate"
+            ]
+          },
+          "connections": {
+            "receivers": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "tcp",
+                "host": "localhost",
+                "port": 8300,
+                "queue":{"$ref":"top.json#queue"}
+              },
+              {
+                "type": "ZMQPair",
+                "chid": 1,
+                "transport": "tcp",
+                "host": "localhost",
+                "port": 8301,
+                "queue":{"$ref":"top.json#queue"}
+              },
+              {
+                "type": "ZMQPair",
+                "chid": 2,
+                "transport": "tcp",
+                "host": "localhost",
+                "port": 8302,
+                "queue":{"$ref":"top.json#queue"}
+              },
+              {
+                "type": "ZMQPair",
+                "chid": 3,
+                "transport": "tcp",
+                "host": "localhost",
+                "port": 8303,
+                "queue":{"$ref":"top.json#queue"}
+              },
+              {
+                "type": "ZMQPair",
+                "chid": 4,
+                "transport": "tcp",
+                "host": "localhost",
+                "port": 8316,
+                "queue":{"$ref":"top.json#queue"}
+              },
+              {
+                "type": "ZMQPair",
+                "chid": 5,
+                "transport": "tcp",
+                "host": "localhost",
+                "port": 8317,
+                "queue":{"$ref":"top.json#queue"}
+              },
+              {
+                "type": "ZMQPair",
+                "chid": 6,
+                "transport": "tcp",
+                "host": "localhost",
+                "port": 8318,
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
         "loglevel": { "$ref": "top.json#loglevel" },
-        "metrics_settings": { "$ref": "top.json#metrics_settings" },
-        "settings": {
-          "max_filesize": 1000000000,
-          "buffer_size": 20000,
-	  "stop_timeout_ms": 1500,
-          "filename_pattern": { "$ref": "top.json#filename_pattern" },
-          "channel_names": [
-            "Physics",
-            "Calibration",
-            "Monitoring",
-            "TLBMonitoring",
-            "Corrupted",
-            "Incomplete",
-            "Duplicate"
-          ]
-        },
-        "connections": {
-          "receivers": [
-            {
-              "type": "pair",
-              "chid": 0,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8300
-            },
-            {
-              "type": "pair",
-              "chid": 1,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8301
-            },
-            {
-              "type": "pair",
-              "chid": 2,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8302
-            },
-            {
-              "type": "pair",
-              "chid": 3,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8303
-            },
-            {
-              "type": "pair",
-              "chid": 4,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8316
-            },
-            {
-              "type": "pair",
-              "chid": 5,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8317
-            },
-            {
-              "type": "pair",
-              "chid": 6,
-              "transport": "tcp",
-              "host": "localhost",
-              "port": 8318
-            }
-          ]
-        }
+        "metrics_settings": { "$ref": "top.json#metrics_settings" }
       }
 }

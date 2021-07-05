@@ -14,10 +14,10 @@
 
 using namespace DAQFormats;
 
-FrontEndReceiverModule::FrontEndReceiverModule() {
+FrontEndReceiverModule::FrontEndReceiverModule(const std::string& n):FaserProcess(n) {
   INFO("With config: " << m_config.dump());
 
-  auto cfg = m_config.getSettings();
+  auto cfg = getModuleSettings();
 
   if (m_dataIn.init(cfg.value("dataPort",0))) {
     ERROR("Cannot bind data port");
@@ -84,7 +84,7 @@ void FrontEndReceiverModule::runner() noexcept {
     std::unique_ptr<EventFragment> fragment(new EventFragment(fragment_tag, source_id, event_id, bc_id, &buffer,payload_size));
     fragment->set_status(status);
     std::unique_ptr<const byteVector> bytestream(fragment->raw());
-    daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+    DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
 
     m_connections.send(0,binData);
 

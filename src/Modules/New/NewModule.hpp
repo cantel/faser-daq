@@ -8,7 +8,7 @@
 
 class NewModule : public FaserProcess {
  public:
-  NewModule();
+  NewModule(const std::string& n);
   ~NewModule();
 
   void configure(); // optional (configuration can be handled in the constructor)

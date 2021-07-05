@@ -16,7 +16,7 @@
 #include "EventFormats/TrackerDataFragment.hpp"
 
 #include "Utils/HistogramManager.hpp"
-#include "Utils/Logging.hpp"
+#include "Utils/Ers.hpp"
 #include "Exceptions/Exceptions.hpp"
 #include <Utils/Binary.hpp>
 
@@ -24,11 +24,16 @@ using namespace DAQFormats;
 using namespace TLBDataFormat;
 using namespace TLBMonFormat;
 
-class ConfigurationException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
 
+ERS_DECLARE_ISSUE(
+MonitorBase,                                                              // namespace
+    ConfigurationIssue,                                                    // issue name
+  message,  // message
+    ((std::string) message)
+)
 class MonitorBaseModule : public FaserProcess {
  public:
-  MonitorBaseModule();
+  MonitorBaseModule(const std::string&);
   virtual ~MonitorBaseModule();
 
   void configure();
@@ -71,15 +76,15 @@ class MonitorBaseModule : public FaserProcess {
   std::atomic<int> m_metric_error_unpack;
 
   // functions 
-  virtual void monitor(daqling::utilities::Binary&);
+  virtual void monitor(DataFragment<daqling::utilities::Binary>&);
   virtual void register_hists( );
   virtual void register_metrics();
   void register_error_metrics(); // lets derived classes register metrics for all error types defined in EventFormat.
-  uint16_t unpack_event_header( daqling::utilities::Binary &eventBuilderBinary );
-  uint16_t unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID);
-  uint16_t unpack_fragment_header( daqling::utilities::Binary &eventBuilderBinary);
-  uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary, uint32_t sourceID);
-  uint16_t unpack_full_fragment( daqling::utilities::Binary &eventBuilderBinary);
+  uint16_t unpack_event_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary );
+  uint16_t unpack_fragment_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary, uint32_t sourceID);
+  uint16_t unpack_fragment_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
+  uint16_t unpack_full_fragment( DataFragment<daqling::utilities::Binary> &eventBuilderBinary, uint32_t sourceID);
+  uint16_t unpack_full_fragment( DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void fill_error_status_to_metric(uint32_t fragmentStatus);
   void fill_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name);
 

@@ -15,8 +15,8 @@
 using namespace std::chrono;
 using namespace std::chrono_literals;
 
-EventPlaybackModule::EventPlaybackModule() {
-  auto cfg = m_config.getSettings();
+EventPlaybackModule::EventPlaybackModule(const std::string& n):FaserProcess(n) {
+  auto cfg = getModuleSettings();
 
   m_timeBetween = 1000000us/cfg.value("maxRate",10);
   m_repeats = cfg.value("repeats",1);
@@ -58,7 +58,7 @@ bool EventPlaybackModule::sendEvent(uint8_t event_tag,EventFull *event) {
   int channel=event_tag; 
   INFO("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
-  daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+  DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);
   delete bytestream;
   return true;
@@ -68,7 +68,7 @@ bool EventPlaybackModule::sendEvent(uint8_t event_tag,EventFull *event) {
 void EventPlaybackModule::runner() noexcept {
   INFO("Running...");
 
-  daqling::utilities::Binary  blob;
+  DataFragment<daqling::utilities::Binary>  blob;
   auto last=system_clock::now();
   std::ifstream infh;
   unsigned int runCount=0;
@@ -102,7 +102,7 @@ void EventPlaybackModule::runner() noexcept {
 	m_eventCounts[tag]++;
 	sendEvent(tag,&event);
       } catch (EFormatException &e) {
-	INFO("Got exception while reading "<<(*curFileName)<<":"<<e.what());
+	INFO("Got exception while reading "<<(*curFileName)<<":"<<e);
 	newFile=true;
       }
     } else {

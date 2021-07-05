@@ -11,7 +11,7 @@
 
 class DigitizerMonitorModule : public MonitorBaseModule {
  public:
-  DigitizerMonitorModule();
+  DigitizerMonitorModule(const std::string&);
   ~DigitizerMonitorModule();
 
   float GetPedestalMean(std::vector<uint16_t> input, int start, int end);
@@ -22,7 +22,7 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   float m_display_thresh;
  protected:
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists();
   void register_metrics();
   float m_thresholds[NCHANNELS][THRESHOLDS];

@@ -16,7 +16,7 @@ using namespace std::chrono;
 
 #define PI 3.14
 
-FrontEndMonitorModule::FrontEndMonitorModule() { 
+FrontEndMonitorModule::FrontEndMonitorModule(const std::string& n):MonitorBaseModule(n) { 
 
    INFO("");
  }
@@ -25,7 +25,7 @@ FrontEndMonitorModule::~FrontEndMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void FrontEndMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void FrontEndMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

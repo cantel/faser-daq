@@ -13,7 +13,7 @@
 
 class FrontEndReceiverModule : public FaserProcess {
  public:
-  FrontEndReceiverModule();
+  FrontEndReceiverModule(const std::string&);
   ~FrontEndReceiverModule();
   void configure();
   void sendECR();

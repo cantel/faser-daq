@@ -15,11 +15,11 @@ using namespace TLBMonFormat;
 using namespace daqling::utilities;
 using namespace TLBDataFormat;
 using namespace TLBMonFormat;
-
+using namespace TriggerReceiver;
 #define _ms 1000 // used for usleep
 
-TriggerReceiverModule::TriggerReceiverModule() {
-  auto cfg = m_config.getSettings();
+TriggerReceiverModule::TriggerReceiverModule(const std::string& n):FaserProcess(n) {
+  auto cfg = getModuleSettings();
 
   INFO("In TriggerReceiverModule()");
   m_status = STATUS_OK;
@@ -54,10 +54,10 @@ void TriggerReceiverModule::configure() {
   registerVariable(m_fragment_status, "FragmentStatus");
   registerVariable(m_trigger_payload_size, "TriggerPayloadSize");
   registerVariable(m_monitoring_payload_size, "MonitoringPayloadSize");
-  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE, 10.); // kB/s read via network socket
+  registerVariable(m_dataRate, "DataRate", metrics::LAST_VALUE); // kB/s read via network socket
   registerVariable(m_missedL1, "MissedEventIDError");
   
-  auto cfg = m_config.getSettings();
+  auto cfg = getModuleSettings();
 
   auto log_level = (m_config.getConfig())["loglevel"]["module"];
   m_tlb->SetDebug((log_level=="TRACE"?1:0)); //Set to 0 for no debug, to 1 for debug
@@ -79,7 +79,7 @@ void TriggerReceiverModule::configure() {
   if ( cfg_LUTconfig==nullptr ) {
     m_status=STATUS_ERROR;
     sleep(1); // wait for error state to appear in RC GUI.
-    THROW(Exceptions::BaseException,"No LUT configuration provided. TLB Configuration failed.");
+    throw TriggerReceiverIssue(ERS_HERE,"No LUT configuration provided. TLB Configuration failed.");
   }
   
   // attempt configuration with cfg and appropriate LUT
@@ -90,14 +90,14 @@ void TriggerReceiverModule::configure() {
   } catch ( TLBAccessException &e ){
       m_status=STATUS_ERROR;
       sleep(1);
-      throw e;
+      throw TLBAccesIssue(ERS_HERE,e);
   }
 
 }
 
 void TriggerReceiverModule::enableTrigger(const std::string &arg) {
   INFO("Got enableTrigger command with argument "<<arg);
-  //auto myjson = m_config.getSettings(); //Temporary while using USB.
+  //auto myjson = getModuleSettings(); //Temporary while using USB.
   //int WhatToRead=0x0; //Temp
   //if ( m_enable_triggerdata ) readout_param |= TLBReadoutParameters::EnableTriggerData;
   //if ( m_enable_monitoringdata ) readout_param |= TLBReadoutParameters::EnableMonitoringData;
@@ -246,7 +246,7 @@ void TriggerReceiverModule::runner() noexcept {
 
         std::unique_ptr<const byteVector> bytestream(fragment->raw());
 
-        daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+        DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
         m_connections.send(0,binData); // place the raw binary event fragment on the output port
       }
     } 

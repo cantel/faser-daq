@@ -10,7 +10,7 @@
 
 class TriggerGeneratorModule : public FaserProcess {
  public:
-  TriggerGeneratorModule();
+  TriggerGeneratorModule(const std::string&);
   ~TriggerGeneratorModule();
 
   void start(unsigned int);

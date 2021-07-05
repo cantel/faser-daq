@@ -16,8 +16,7 @@ using namespace std::chrono;
 
 #define PI 3.14
 
-EmulatorMonitorModule::EmulatorMonitorModule() { 
-
+EmulatorMonitorModule::EmulatorMonitorModule(const std::string& n):MonitorBaseModule(n) { 
    INFO("");
  }
 
@@ -25,7 +24,7 @@ EmulatorMonitorModule::~EmulatorMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void EmulatorMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void EmulatorMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

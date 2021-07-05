@@ -9,11 +9,10 @@
 /// \endcond
 
 #include "FileWriterFaserModule.hpp"
-#include "Utils/Logging.hpp"
 
 using namespace std::chrono_literals;
 namespace daqutils = daqling::utilities;
-
+using namespace FileWriterIssues;
 static std::string to_zero_lead(const int value, const unsigned precision)
 {
      std::ostringstream oss;
@@ -30,7 +29,7 @@ std::ofstream FileWriterFaserModule::FileGenerator::next() {
       std::time_t t = std::time(nullptr);
       char tstr[32];
       if (!std::strftime(tstr, sizeof(tstr), "%F-%T", std::localtime(&t))) {
-        throw std::runtime_error("Failed to format timestamp");
+        throw TimestampFormatFailed(ERS_HERE);
       }
       return std::string(tstr);
     }
@@ -41,9 +40,7 @@ std::ofstream FileWriterFaserModule::FileGenerator::next() {
     case 'r': // The run number
     return to_zero_lead(m_run_number,6);
     default:
-      std::stringstream ss;
-      ss << "Unknown output file argument '" << c << "'";
-      throw std::runtime_error(ss.str());
+      throw UnknownOutputFileArgument(ERS_HERE,c);
     }
   };
 
@@ -82,7 +79,7 @@ bool FileWriterFaserModule::FileGenerator::yields_unique(const std::string &patt
   return std::all_of(fields.cbegin(), fields.cend(), [](const auto &f) { return f.second; });
 }
 
-FileWriterFaserModule::FileWriterFaserModule() : m_stopWriters{false} {
+FileWriterFaserModule::FileWriterFaserModule(const std::string& n) :FaserProcess(n), m_stopWriters{false} {
   DEBUG("");
 
   // Set up static resources...
@@ -94,32 +91,27 @@ FileWriterFaserModule::~FileWriterFaserModule() { DEBUG(""); }
 void FileWriterFaserModule::configure() {
   FaserProcess::configure();
   // Read out required and optional configurations
-  m_max_filesize = m_config.getSettings().value("max_filesize", 1 * daqutils::Constant::Giga);
-  m_buffer_size = m_config.getSettings().value("buffer_size", 4 * daqutils::Constant::Kilo);
-  m_stop_timeout = m_config.getSettings().value("stop_timeout_ms", 1500);
+  m_max_filesize = getModuleSettings().value("max_filesize", 1 * daqutils::Constant::Giga);
+  m_buffer_size = getModuleSettings().value("buffer_size", 4 * daqutils::Constant::Kilo);
+  m_stop_timeout = getModuleSettings().value("stop_timeout_ms", 1500);
   uint64_t ch=0;
-  for ( auto& name : m_config.getSettings()["channel_names"]) {
+  for ( auto& name : getModuleSettings()["channel_names"]) {
     m_channel_names[ch]=name;
     INFO("Channel "<<ch<<": "<<name);
     ch++;
   }
-  m_channels = m_config.getConnections()["receivers"].size();
+  m_channels = m_config.getConnections(getName())["receivers"].size();
   if (ch<m_channels) {
-    CRITICAL("Channel names needs to be supplied for all input channels");
-    throw std::logic_error("Missing channel names");
+    throw MissingChannelNames(ERS_HERE);
   }
-  m_pattern = m_config.getSettings()["filename_pattern"];
+  m_pattern = getModuleSettings()["filename_pattern"];
   INFO("Configuration:");
   INFO(" -> Maximum filesize: " << m_max_filesize << "B");
   INFO(" -> Buffer size: " << m_buffer_size << "B");
   INFO(" -> channels: " << m_channels);
 
   if (!FileGenerator::yields_unique(m_pattern)) {
-    CRITICAL("Configured file name pattern '"
-             << m_pattern
-             << "' may not yield unique output file on rotation; your files may be silently "
-                "overwritten. Ensure the pattern contains all fields ('%c', '%n' and '%D').");
-    throw std::logic_error("invalid file name pattern");
+    throw InvalidFileNamePattern(ERS_HERE,m_pattern);
   }
 
   DEBUG("setup finished");
@@ -133,19 +125,19 @@ void FileWriterFaserModule::configure() {
     // Register statistical variables
     for (auto & [ chid, metrics ] : m_channelMetrics) {
       m_statistics->registerMetric<std::atomic<size_t>>(&metrics.bytes_written,
-                                                        fmt::format("BytesWritten_{}",  m_channel_names[chid]),
+                                                        "BytesWritten_"+m_channel_names[chid],
                                                         daqling::core::metrics::RATE);
       m_statistics->registerMetric<std::atomic<size_t>>(
-          &metrics.events_received, fmt::format("EventsReceived_{}", m_channel_names[chid]),
+          &metrics.events_received, "EventsReceived_"+m_channel_names[chid],
           daqling::core::metrics::LAST_VALUE);
       m_statistics->registerMetric<std::atomic<size_t>>(
-          &metrics.files_written, fmt::format("FilesWritten_{}", m_channel_names[chid]),
+          &metrics.files_written, "FilesWritten_"+m_channel_names[chid],
           daqling::core::metrics::LAST_VALUE);
       m_statistics->registerMetric<std::atomic<size_t>>(
-          &metrics.payload_queue_size, fmt::format("PayloadQueueSize_{}", m_channel_names[chid]),
+          &metrics.payload_queue_size, "PayloadQueueSize_"+m_channel_names[chid],
           daqling::core::metrics::LAST_VALUE);
       m_statistics->registerMetric<std::atomic<size_t>>(&metrics.payload_size,
-                                                        fmt::format("PayloadSize_{}", m_channel_names[chid]),
+                                                        "PayloadSize_"+m_channel_names[chid],
                                                         daqling::core::metrics::AVERAGE);
     }
     DEBUG("Metrics are setup");
@@ -212,8 +204,8 @@ void FileWriterFaserModule::runner() noexcept {
       auto &pq = std::get<PayloadQueue>(ctx);
 
       while (m_run) {
-        daqutils::Binary pl;
-        while (!m_connections.receive(chid, std::ref(pl)) && m_run) {
+        DataFragment<daqutils::Binary> pl;
+        while (!m_connections.receive(chid, pl) && m_run) {
           if (m_statistics) {
             m_channelMetrics.at(chid).payload_queue_size = pq.sizeGuess();
           }
@@ -221,6 +213,7 @@ void FileWriterFaserModule::runner() noexcept {
         }
 
         DEBUG(" Received " << pl.size() << "B payload on channel: " << chid);
+        //use shared data
         while (!pq.write(pl) && m_run)
           ; // try until successful append
         if (m_statistics && pl.size()) {
@@ -242,18 +235,16 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
                                FileGenerator fg) const {
   size_t bytes_written = 0;
   std::ofstream out = fg.next();
-  auto buffer = daqutils::Binary();
+  auto buffer = DataFragment<daqutils::Binary>();
   m_channelMetrics.at(chid).files_written = 1;
-  const auto flush = [&](daqutils::Binary &data) {
+  const auto flush = [&](DataFragment<daqutils::Binary> &data) {
     out.write(data.data<char *>(), static_cast<std::streamsize>(data.size()));
     if (out.fail()) {
-      CRITICAL(" Write operation for channel " << chid << " of size " << data.size()
-                                               << "B failed!");
-      throw std::runtime_error("std::ofstream::fail()");
+      throw OfstreamFailed(ERS_HERE,chid,data.size());
     }
     m_channelMetrics.at(chid).bytes_written += data.size();
     bytes_written += data.size();
-    data = daqutils::Binary();
+    data = DataFragment<daqutils::Binary>();
   };
 
   while (!m_stopWriters) {
@@ -286,8 +277,8 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
       assert(tail_len > 0);
 
       // Split the payload into a head and a tail
-      daqutils::Binary head(payload->data(), split_offset);
-      daqutils::Binary tail(payload->data<char *>() + split_offset, tail_len);
+      DataFragment<daqutils::Binary> head(payload->data(), split_offset);
+      DataFragment<daqutils::Binary> tail(payload->data<char *>() + split_offset, tail_len);
       DEBUG(" -> head length: " << head.size() << "; tail length: " << tail.size());
       assert(head.size() + tail.size() == payload->size());
 
@@ -296,8 +287,8 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
 
       // Flush the tail until it is small enough to fit in the buffer
       while (tail_len > max_buffer_size) {
-        daqutils::Binary body(tail.data(), max_buffer_size);
-        daqutils::Binary next_tail(tail.data<char *>() + max_buffer_size,
+        DataFragment<daqutils::Binary> body(tail.data(), max_buffer_size);
+        DataFragment<daqutils::Binary> next_tail(tail.data<char *>() + max_buffer_size,
                                    tail_len - max_buffer_size);
         assert(body.size() + next_tail.size() == tail.size());
         flush(body);

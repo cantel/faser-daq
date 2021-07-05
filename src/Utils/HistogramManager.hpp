@@ -12,7 +12,7 @@
 #include <type_traits> // is_integral, is_floating_point, ...
 
 #include "Utils/Histogram.hpp"
-#include "Utils/Logging.hpp"
+#include "Utils/Ers.hpp"
 #include "Core/Configuration.hpp"
 
 using namespace boost::histogram;
@@ -23,6 +23,18 @@ namespace Axis {
    EXTENDABLE=1
   };
 }
+
+ERS_DECLARE_ISSUE(ERS_EMPTY,                                                             // Namespace
+                  HistogramIssue,                                                   // Class name
+                  ERS_EMPTY, // Message
+                  ERS_EMPTY)                      // Args
+ERS_DECLARE_ISSUE_BASE(ERS_EMPTY,                                         // namespace name
+      FailedToAddZMQChannel,                                                  // issue name
+      HistogramIssue,                                                // base issue name
+      " Failed to add Histo publisher channel! ZMQ returned: " << zmq_ret,                                 // message
+      ERS_EMPTY,            // base class attributes
+       ((std::string)zmq_ret )                                     // this class attributes
+)
 
 class HistogramManager{
 public:

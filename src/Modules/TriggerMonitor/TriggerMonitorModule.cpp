@@ -20,7 +20,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-TriggerMonitorModule::TriggerMonitorModule(): m_prefix_hname_signal_nextBC("signal_nextBC_ch") { 
+TriggerMonitorModule::TriggerMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_signal_nextBC("signal_nextBC_ch") { 
 
   INFO("In TriggerMonitorModule contructor");
   m_previous_orbit = 0;
@@ -31,7 +31,7 @@ TriggerMonitorModule::~TriggerMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void TriggerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void TriggerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

@@ -19,7 +19,7 @@ class EventPlaybackException : public Exceptions::BaseException { using Exceptio
 
 class EventPlaybackModule : public FaserProcess {
  public:
-  EventPlaybackModule();
+  EventPlaybackModule(const std::string&);
   ~EventPlaybackModule();
 
   void configure();

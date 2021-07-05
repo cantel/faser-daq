@@ -67,15 +67,23 @@ def main():
       # go through each of the entries in the template
       for key in cfg.keys():
       
-        # get config type
-        cfg_type   = cfg[key]["type"]
-        # form schema path
-        cfg_schema = directory+"/schemas/"+cfg_type+".schema"
-        print("Validating against : ",cfg_schema)                
-      
-        print("Checking config : ",filepath, cfg_schema, directory, [key])
-        result_config = checkConfig(filepath, cfg_schema, directory, [key])
-        print("Config validity : ",result_config)
+        # Not a valid component, so can't validate.
+        if "modules" not in cfg[key]:
+          break
+
+        i = 0
+        for modules in cfg[key]["modules"]:
+          # get config type
+          cfg_type   = modules["type"]
+          cfg_name   = modules["name"]
+          # form schema path
+          cfg_schema = directory+"/schemas/"+cfg_type+".schema"
+          print("Validating against : ",cfg_schema)                
+
+          print("Checking config : ",filepath, cfg_schema, directory, [key],cfg_name)
+          result_config = checkConfig(filepath, cfg_schema, directory, [key],[i])
+          print("Config validity : ",result_config)
+          i+=1
       
   # check each of the top level configs
   print("\n\n >>>>>> CHECKING CONFIGS <<<<<< \n\n")
@@ -87,18 +95,23 @@ def main():
       filepath = directory+"/"+path_to_config
       cfg = getConfig(filepath, directory)
 
+      cfg_schema = directory+"/schemas/validation-schema.json"
+      print("Validating - ",path_to_config," | ","Components"," - against : ",cfg_schema)
+      result_config = checkConfig(cfg["configuration"],cfg_schema,directory)
+      print("Config validity : ",result_config)
+
       for cfg_sub in cfg["configuration"]["components"]:
+        for module_cfg in cfg_sub["modules"]:
+          # get config type
+          cfg_name   = module_cfg["name"]
+          cfg_type   = module_cfg["type"]
+          # form schema path
+          cfg_schema = directory+"/schemas/"+cfg_type+".schema"
+          print("Validating - ",cfg_name," | ",cfg_type," - against : ",cfg_schema)                
       
-        # get config type
-        cfg_name   = cfg_sub["name"]
-        cfg_type   = cfg_sub["type"]
-        # form schema path
-        cfg_schema = directory+"/schemas/"+cfg_type+".schema"
-        print("Validating - ",cfg_name," | ",cfg_type," - against : ",cfg_schema)                
-    
-        result_config = checkConfig(cfg_sub, cfg_schema, directory)
-    
-        print("Config validity : ",result_config)
+          result_config = checkConfig(module_cfg, cfg_schema, directory)
+      
+          print("Config validity : ",result_config)
     
   # finally, check that all files in the repository have been accounted for
   print("\n\n >>>>>> CHECKING EXTRAS <<<<<< \n\n")
@@ -168,7 +181,7 @@ def checkSchema(path_to_schema):
     return False
   
 # validate config against schema
-def checkConfig(path_to_config, path_to_schema, directory, entry=False):
+def checkConfig(path_to_config, path_to_schema, directory, entry=False,modules_entry=False):
   #print("Checking config : ",path_to_config," at ",directory," tunelling to location [",entry,"] with schema ", path_to_schema)
   # get the schema
   if type(path_to_schema) is str:
@@ -195,6 +208,9 @@ def checkConfig(path_to_config, path_to_schema, directory, entry=False):
   if entry!=False:
     for tunnel in entry:
       cfg_to_test = cfg_to_test[tunnel]
+    if modules_entry !=False:
+      for modules_tunnel in modules_entry:
+        cfg_to_test = cfg_to_test["modules"][modules_tunnel]
 
   try:
     validate(instance=cfg_to_test, schema=schema)

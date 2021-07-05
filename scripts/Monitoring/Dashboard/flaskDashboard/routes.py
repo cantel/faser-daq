@@ -17,6 +17,7 @@ import atexit
 import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
 from flaskDashboard import interfacePlotly
+from flaskDashboard import redis_interface
 
 
 
@@ -266,8 +267,6 @@ def stored_histogram():
     hist = ""
     ts_run = str(request.args.get("args"))  # (old:)timestamp&runNumber
     ID = request.args.get("ID")
-    print("ts_run",ts_run)
-    #ts_run = args.split("&")
     if "old" in ts_run:
         hist = r7.hget(f"old:{ID}", ts_run)
         hist = json.loads(hist)
@@ -310,6 +309,28 @@ def redis_info():
     """
     r_infos = r.info()
     return jsonify(r_infos)
+
+
+@app.route("/compare_histograms", methods=["POST"])
+def compare_histograms():
+
+    data = request.get_json() 
+    ID = data["ID"]
+    ts1 = data["ts1"]
+    ts2 = data["ts2"]
+
+    hist1 = redis_interface.get_stored_histogram(r7,ID,ts1)
+    hist2 = redis_interface.get_stored_histogram(r7,ID,ts2)
+
+    diff_histo = hist1 # create dict object based on hist1 
+    if hist1["figure"]["data"][0]["type"] == 'bar':
+        diff_histo["figure"]["data"][0]["y"] = np.abs(np.array(hist1["figure"]["data"][0]["y"]) - np.array(hist2["figure"]["data"][0]["y"])).tolist()
+    elif hist1["figure"]["data"][0]["type"] == 'heatmap':
+        diff_histo["figure"]["data"][0]["z"] = np.abs(np.array(hist1["figure"]["data"][0]["z"]) - np.array(hist2["figure"]["data"][0]["z"])).tolist()
+    
+    return jsonify(diff_histo)
+
+
 
 ## functions
 

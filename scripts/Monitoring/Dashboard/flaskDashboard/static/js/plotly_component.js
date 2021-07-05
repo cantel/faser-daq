@@ -31,6 +31,7 @@ Vue.component("plotly-graph", {
         }
     },
     mounted() {
+        
         this.$watch('figure', (figure) => {
             this.$emit('graph_loading', true)
             if (this.c_log) {

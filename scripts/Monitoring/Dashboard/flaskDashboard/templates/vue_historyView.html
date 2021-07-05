@@ -59,8 +59,38 @@
                             </template>
                         </v-select>
                         <v-spacer></v-spacer>
+                        <v-tooltip top transition="fade-transition" open-delay="500">
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn class="mx-2" v-bind="attrs" v-on="on" @click="toggleCompareMenu">
+                                    <v-icon>mdi-select-compare </v-icon>
+                                </v-btn>
+                            </template>
+                            <span> Substract previous histograms </span>
+                        </v-tooltip>
+
                     </v-card-title>
+                    <div id="compareSection" v-show="c_compare_menu_toggled"
+                        style="display: flex;justify-content: center; flex-direction: column;">
+                        <div class="text-subtitle-1 text-center font-italic mb-2"> Select another histogram to compare
+                        </div>
+
+                        <div class="d-inline-flex mb-2">
+                            <v-select dense outlined flat hide-details class="ml-8" :items="c_timestamps"
+                                v-model="c_selected2">
+                                <template v-slot:item="{ item }">
+                                    [[ item | timestampDisplay ]]
+                                </template>
+                                <template v-slot:selection="{ item }">
+                                    [[ item | timestampDisplay ]]
+                                </template>
+                            </v-select>
+
+                            <v-btn class="mx-4" @click="compare_histo"> compare </v-btn>
+
+                        </div>
+                    </div>
                     <v-divider></v-divider>
+
                     <v-card-text class="card_histo_cont">
                         <plotly-graph v-if="c_figure" :figure="c_figure" :divid="c_ID"></plotly-graph>
                     </v-card-text>
@@ -85,9 +115,11 @@
                 c_ID: "{{ ID | safe }}",
                 c_timestamps: [],
                 c_selected: null,
+                c_selected2: null,
                 c_left_disabled: false,
                 c_right_disabled: true,
-                c_figure: null
+                c_figure: null,
+                c_compare_menu_toggled: false
             },
             delimiters: ["[[", "]]"],
             filters: {
@@ -99,7 +131,7 @@
                                 " Run: " + elements[1]
                         } else {
                             return dayjs.unix(elements[0]).format("HH:mm:ss (DD/MM)") +
-                            " Run: " + elements[1]
+                                " Run: " + elements[1]
                         }
                     } else {
                         if (timestamp.includes("old")) {
@@ -133,7 +165,7 @@
                         .then(response => {
                             this.c_figure = response.data["figure"]
                         })
-                        .catch(function(error){
+                        .catch(function (error) {
                             console.log("The stored histogram is not in the right format ")
                         })
                 }
@@ -156,7 +188,29 @@
                 previous_histo() {
                     const index = this.c_timestamps.indexOf(this.c_selected)
                     this.c_selected = this.c_timestamps[index + 1]
+                },
+                toggleCompareMenu() {
+                    this.c_compare_menu_toggled = !this.c_compare_menu_toggled
+
+                },
+
+                compare_histo() {
+                    if (this.c_selected2) {
+                        axios.post('/compare_histograms', {
+                                ID: this.c_ID,
+                                ts1: this.c_selected,
+                                ts2: this.c_selected2
+                            })
+                            .then(response => {
+                                this.c_figure = response.data.figure
+                            })
+                    }
+                    else {
+                        console.log("Rien sélectionné");
+                    }
                 }
+
+
             },
         });
     </script>

@@ -305,8 +305,7 @@
 
                 },
                 openTimeView() {
-                    //console.log('Appuyé sur time_view', this.id);
-                    window.open("/history_view/" + this.id, "_blank", "width=600, height=455")
+                    window.open("/history_view/" + this.id, "_blank", "width=650, height=500")
                 }
             },
             watch: {
@@ -392,7 +391,6 @@
             mounted() {
                 axios.get("/redis_info").then(response => {
                     this.c_redis_infos = response.data
-                    //console.log(this.c_redis_infos);
                 })
             },
             methods: {

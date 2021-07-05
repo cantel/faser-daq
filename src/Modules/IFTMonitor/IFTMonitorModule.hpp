@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+  Copyright (C) 2019-2021 CERN for the benefit of the FASER collaboration
 */
 #pragma once
 
@@ -18,14 +18,9 @@ class IFTMonitorModule : public MonitorBaseModule {
 
  private:
 
-  uint16_t m_bcid;
-  uint32_t m_l1id;
-  uint16_t number;
   uint16_t goodHits;
+  uint16_t goodHitsLayer[3];
   uint16_t goodHitsMod[8];
-  uint16_t module;
-  uint16_t mapline;
-  uint16_t mapline2;
   const std::string m_prefix_hname_hitp;
   const std::string m_prefix_hname_scterr;
   unsigned m_total_WARNINGS;
@@ -43,8 +38,4 @@ class IFTMonitorModule : public MonitorBaseModule {
   const uint8_t kSCT_ERR_BUFFOVERFLOW = 0x2;
   const uint8_t kSCT_ERR_BUFFERROR = 0x4;
   const uint8_t kSCT_ERR_UNKNOWNCHIP = 0xFF;
-
-  //metrics
-  std::atomic<float> m_hit_multiplicity;
-
 };

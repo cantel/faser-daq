@@ -127,6 +127,8 @@ void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> 
     m_histogrammanager->fill2D("deadtime_vs_ratelimiter", deadtime_veto_cnt, rate_limiter_veto_cnt);
   }
 
+  m_total_orbits_lost += m_tlbmonitoringFragment->orbits_lost_counter();
+
 }
 
 void TriggerRateMonitorModule::register_hists() {
@@ -220,6 +222,8 @@ void TriggerRateMonitorModule::register_metrics() {
   registerVariable(m_bcr_fraction, "BCRVetoPercentage");
   registerVariable(m_digi_busy_fraction, "digiBusyVetoPercentage");
   registerVariable(m_global_deadtime_fraction, "globalDeadtimePercentage");
+
+  registerVariable(m_total_orbits_lost, "TotalOrbitsLost");
 
   return;
 }

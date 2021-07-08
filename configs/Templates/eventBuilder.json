@@ -8,7 +8,7 @@
       "metrics_settings": { "$ref": "top.json#metrics_settings" },
       "settings": {
           "maxPending": 10,
-          "timeout_ms": 120000,
+          "timeout_ms": 10000,
           "stopTimeout_ms": 1000
       },
       "connections": {

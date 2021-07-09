@@ -31,6 +31,11 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
     return;
   }
 
+  for (unsigned i = 0; i<3; i++){
+    goodHitsLayer[i]=0;
+  }
+  goodHits = 0;
+
   for (int TRBBoardID = 0; TRBBoardID < 3; ++TRBBoardID) {
     auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardID);
     if (fragmentUnpackStatus) {
@@ -45,7 +50,7 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
       WARNING("Invalid tracker data fragment for TRB " << TRBBoardID);
     }
 
-    for ( auto it = m_trackerdataFragment->cbegin(); it != trackerFragment->cend(); ++it ) {
+    for ( auto it = m_trackerdataFragment->cbegin(); it != m_trackerdataFragment->cend(); ++it ) {
       auto sctEvent = *it;
       if (sctEvent == nullptr) { 
           WARNING("Invalid SCT Event for event " << m_trackerdataFragment->event_id());

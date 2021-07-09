@@ -60,6 +60,8 @@ bool EventPlaybackModule::sendEvent(uint8_t event_tag,EventFull *event) {
   auto *bytestream=event->raw();
   daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);
+  m_connections.send(channel+100,binData);
+
   delete bytestream;
   return true;
 }

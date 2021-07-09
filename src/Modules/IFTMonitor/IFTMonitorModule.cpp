@@ -3,7 +3,6 @@
 */
 /// \cond
 #include <chrono>
-#include <map>
 #include <iostream>
 #include <sstream>
 #include <fstream>
@@ -14,8 +13,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-IFTMonitorModule::IFTMonitorModule()
-    : m_prefix_hname_hitp("hitpattern_mod"), m_prefix_hname_scterr("sct_data_error_types_mod") {}
+IFTMonitorModule::IFTMonitorModule() {}
 
 IFTMonitorModule::~IFTMonitorModule() { 
   INFO("With config: " << m_config.dump());
@@ -30,11 +28,6 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
     ERROR("Event tag does not match filter tag. Are the module's filter settings correct?");
     return;
   }
-
-  for (unsigned i = 0; i<3; i++){
-    goodHitsLayer[i]=0;
-  }
-  goodHits = 0;
 
   for (int TRBBoardID = 0; TRBBoardID < 3; ++TRBBoardID) {
     auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardID);
@@ -56,61 +49,55 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
           WARNING("Invalid SCT Event for event " << m_trackerdataFragment->event_id());
           continue;
       }
-      unsigned short onlineModuleID = sctEvent->GetModuleID(); 
-      // check for errors
-      if (onlineModuleID >= TrackerDataFragment::MODULES_PER_FRAGMENT) {
-        ERROR("Invalid module ID (" << onlineModuleID << ") from trb " << TRBBoardID);
+      unsigned short moduleId = sctEvent->GetModuleID(); 
+      if (moduleId >= TrackerDataFragment::MODULES_PER_FRAGMENT) {
+        ERROR("Invalid module ID (" << moduleId << ") from trb " << TRBBoardID);
         continue;
       }
       if (sctEvent->BCIDMismatch()) {
-        ERROR("Module data BCID mismatch between sides for online module " << onlineModuleID);
+        ERROR("Module data BCID mismatch between sides for online module " << moduleId);
         continue;
       }
       else if (sctEvent->HasError()) {
-        ERROR("Online module " << onlineModuleID << " reports one or more errors.");
+        ERROR("Online module " << moduleId << " reports one or more errors.");
         continue;
       }
       else if (sctEvent->MissingData()) {
-        ERROR("Online module " << onlineModuleID << " reports missing data.");
+        ERROR("Online module " << moduleId << " reports missing data.");
         continue;
       }
       else if (!sctEvent->IsComplete()) {
-        ERROR("Online module " << onlineModuleID << " reports not complete.");
+        ERROR("Online module " << moduleId << " reports not complete.");
         continue;
       }
 
-      DEBUG("Processing online module #" << onlineModuleID);
-      std::vector<uint32_t> m_moduleMap {};
-      uint32_t module = m_moduleMap[onlineModuleID];
-      size_t chipIndex{0};
-      for (auto hitVector : sctEvent->GetHits()) {
-        if (hitVector.size() > 0) {
-          int side = chipIndex / TrackerDataFragment::CHIPS_PER_SIDE;
-          // uint32_t chipOnSide = chipIndex % TrackerDataFragment::CHIPS_PER_SIDE;
-          for (auto hit : hitVector) {
-            goodHitsLayer[TRBBoardID]++;
-            uint32_t stripOnChip = hit.first;
-            if (stripOnChip >= TrackerDataFragment::STRIPS_PER_CHIP) {
-              ERROR("Invalid strip number on chip: " << stripOnChip );
-              continue;
-            }
-            int phiModule = module % 4; // 0 to 3 from bottom to top
-            int etaModule = -1 + 2*((module%2 + module/4) % 2); // -1 or +1
-            DEBUG("layer:" << TRBBoardID << ", side:" << side 
-                  << ", row: " << etaModule << ", column: " << phiModule);
+      DEBUG("Processing online module #" << moduleId);
+      auto allHits = sctEvent->GetHits();
+      for (unsigned int chipIdx = 0; chipIdx < (unsigned int)kCHIPS_PER_MODULE*0.5; chipIdx++) {
+        auto hitsPerChip1 = allHits[chipIdx];
+        for (auto hit1 : hitsPerChip1) { // hit is an std::pair<uint8 strip, uint8 pattern>
+          uint32_t hitPattern1  = hit1.second;
+          if (((hitPattern1 & 0x1) == 0) && ((hitPattern1 & 0x2) == 0) && ((hitPattern1 & 0x4) == 0)) continue;
+          if (m_hitMode == HitMode::EDGE && (((hitPattern1 & 0x2) == 0 ) || ((hitPattern1 & 0x4) != 0) ) ) continue; // 01X
+          if (m_hitMode == HitMode::LEVEL && ((hitPattern1 & 0x2) == 0)) continue; // X1X
+          auto strip1 = hit1.first;
+          unsigned int chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx;
+          auto hitsPerChip2 = allHits[chipIdx2];
+          for (auto hit2 : hitsPerChip2) {
+            uint32_t hitPattern2  = hit2.second;
+            if (((hitPattern2 & 0x1) == 0) && ((hitPattern2 & 0x2) == 0) && ((hitPattern2 & 0x4) == 0)) continue;
+            if (m_hitMode == HitMode::EDGE && (((hitPattern2 & 0x2) == 0 ) || ((hitPattern2 & 0x4) != 0) ) ) continue; // 01X
+            if (m_hitMode == HitMode::LEVEL && ((hitPattern2 & 0x2) == 0)) continue; // X1X
+            auto strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
+            if (std::abs(strip1-strip2) > kSTRIPDIFFTOLERANCE) continue;
+            // good physics hits
+            m_histogrammanager->fill2D(hitmaps[TRBBoardID], moduleId, chipIdx, 1);
+            m_histogrammanager->fill2D(hitmaps[TRBBoardID], moduleId, chipIdx2, 1);
           }
         }
-        chipIndex++;
       }
     }
   }
-
-  for (auto hits : goodHitsLayer) 
-    goodHits += hits;
-  m_histogrammanager->fill("good_hits_multiplicity", goodHits);
-  if (goodHitsLayer[0]) m_histogrammanager->fill("good_hits_multiplicity_Layer0",goodHitsLayer[0]);
-  if (goodHitsLayer[1]) m_histogrammanager->fill("good_hits_multiplicity_Layer1",goodHitsLayer[1]);
-  if (goodHitsLayer[2]) m_histogrammanager->fill("good_hits_multiplicity_Layer2",goodHitsLayer[2]);
 }
 
 void IFTMonitorModule::register_hists() {
@@ -119,10 +106,9 @@ void IFTMonitorModule::register_hists() {
 
   const unsigned kPUBINT = 30; // publishing interval in seconds
 
-  m_histogrammanager->registerHistogram("good_hits_multiplicity", "good_hits_multiplicity", 0, 30, 30, Axis::Range::EXTENDABLE, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Layer0", "good_hits_multiplicity_Layer0", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Layer1", "good_hits_multiplicity_Layer1", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Layer2", "good_hits_multiplicity_Layer2", 1, 30, 29, kPUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_layer0", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx", 0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, kPUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_layer1", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx", 0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, kPUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_layer2", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx", 0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, kPUBINT);
 
   INFO(" ... done registering histograms ... " );
 
@@ -133,6 +119,7 @@ void IFTMonitorModule::register_hists() {
 void IFTMonitorModule::register_metrics() {
 
   INFO( "... registering metrics in IFTMonitorModule ... " );
+  INFO(" ... done registering metrics ... " );
 
   return;
 }

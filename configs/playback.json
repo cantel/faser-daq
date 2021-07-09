@@ -12,7 +12,7 @@
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
         "settings":         { "maxRate": 100,
 			      "repeats": 2,
-			      "fileList": ["/home/data/Faser-Physics-002806-00000.raw"]
+			      "fileList": ["/home/tboeckh/data/Faser-Physics-002806-00000.raw"]
 	    
 	},
         "connections": {
@@ -21,6 +21,7 @@
 	}
       },
       { "$ref": "Templates/TRB.json#IFTMonitor00" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor08" },
       { "$ref": "Templates/emulator.json#EmulatorMonitor" }
     ]
   }

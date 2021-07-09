@@ -634,7 +634,10 @@
 	"host": "localhost",
 	"port": 5559,
 	"type": "IFTMonitor",
-        "loglevel":         { "$ref": "top.json#loglevel" },
+        "loglevel": {
+            "core": "DEBUG",
+            "module": "DEBUG"
+        },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
             "fragmentID": 196617,

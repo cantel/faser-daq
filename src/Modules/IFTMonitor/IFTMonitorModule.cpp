@@ -155,52 +155,33 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
       }
 
 
-      for (unsigned chipIdx = 0; chipIdx < kCHIPS_PER_MODULE; chipIdx++) {
-        if (allClusters[chipIdx].empty()) continue;
-        auto clustersPerChip = allClusters[chipIdx];
-        for (auto cluster : clustersPerChip) {
-          DEBUG("m " << module << ", c " << chipIdx << ", cluster" << cluster);
+      // create space points
+      for (unsigned chipIdx1 = 0; chipIdx1 < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx1++) {
+        unsigned int chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx1;
+        if ((allClusters[chipIdx1].empty()) or (allClusters[chipIdx2].empty())) continue;
+        for (auto cluster1 : allClusters[chipIdx1]) {
+          for (auto cluster2 : allClusters[chipIdx2]) {
+            cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; // invert
+
+            // check for intersections
+            if (std::abs(cluster1-cluster2) > kSTRIPDIFFTOLERANCE) continue;
+
+            // every second moudle is flipped
+            int c1 = module % 2 == 0 ? chipIdx1: chipIdx1;
+            int c2 = module % 2 == 0 ? 5-(chipIdx2 % 6) : chipIdx2 % 6;
+
+            // calculate intersection
+            double y1 = kMODULEPOS[module % 4] + (c1 * kSTRIPS_PER_CHIP + cluster1) * kSTRIP_PITCH;
+            double y2 = kMODULEPOS[module % 4] + (c2 * kSTRIPS_PER_CHIP + cluster2) * kSTRIP_PITCH;
+            double py = 0.5 * (y1 + y2);
+            double px = intersection(y1, y2);
+
+            px = module % 2 == 0 ? 2 * kXMIN + px : 2 * kXMAX - px;
+            DEBUG("l " << TRBBoardId <<  ", m " << module << ", c " << chipIdx1 << ", s1 " << cluster1 << ", s2 " << cluster2);
+            DEBUG("x=" << px << ", y=" << py);
+          }
         }
       }
-
-//      module = sctEvent->GetModuleID();
-//      std::vector<int> cluster1 {};
-//      std::vector<int> cluster2 {};
-//      for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
-//        auto hitsPerChip1 = allHits[chipIdx];
-//        for (auto hit1 : hitsPerChip1) { // hit is an std::pair<uint8 strip, uint8 pattern>
-//          if (hit1.second == 7) continue;
-//          int strip1 = hit1.first;
-//          unsigned int chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx;
-//          auto hitsPerChip2 = allHits[chipIdx2];
-//          for (auto hit2 : hitsPerChip2) { // hit is an std::pair<uint8 strip, uint8 pattern>
-//            if (hit2.second == 7) continue;
-//            int strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
-//
-//            // good physics hits
-//            if (std::abs(strip1-strip2) > kSTRIPDIFFTOLERANCE) continue;
-//            m_histogrammanager->fill2D(m_hit_maps[TRBBoardId], module, chipIdx, 1);
-//            m_histogrammanager->fill2D(m_hit_maps[TRBBoardId], module, chipIdx2, 1);
-//
-//            chipIdx2 = chipIdx2 % 6;
-//
-//            // every second moudle is flipped
-//            if (module % 2 == 0) {
-//              chipIdx2 = 5 - chipIdx2;
-//            } else {
-//              chipIdx = 5 - chipIdx;
-//            }
-//
-//            double y1 = kMODULEPOS[module % 4] + (chipIdx * kSTRIPS_PER_CHIP + strip1) * kSTRIP_PITCH;
-//            double y2 = kMODULEPOS[module % 4] + (chipIdx2 * kSTRIPS_PER_CHIP + strip2) * kSTRIP_PITCH;
-//            double py = 0.5 * (y1 + y2);
-//            double px = intersection(y1, y2);
-//
-//            px = module % 2 == 0 ? 2 * kXMIN + px : 2 * kXMAX - px;
-//            DEBUG("x=" << px << ", y=" << py);
-//          }
-//        }
-//      }
     }
   }
 }

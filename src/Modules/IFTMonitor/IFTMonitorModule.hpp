@@ -18,17 +18,27 @@ class IFTMonitorModule : public MonitorBaseModule {
   void register_metrics();
 
  private:
+  struct SpacePoint {
+    int event;
+    int layer;
+    double x;
+    double y;
+  };
+
   bool adjacent(unsigned int strip1, unsigned int strip2);
   int average(std::vector<int> strips);
   double intersection(double y1, double y2);
 
+  std::vector<SpacePoint> m_spacePoints = {};
+
   const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
-  double kMODULEPOS[4] = {60.02388382, -3.65610385, -67.55613708, -131.21612549}; // values in mm
+  double kMODULEPOS[4] = {65.02388382, 1.34389615, -62.55613708, -126.21612549}; // values in mm
   const double kSTRIP_PITCH = 0.08; // in mm
   const double kXMIN = -63.04; // in mm
   const double kXMAX = 63.04; // in mm
   const double kSTRIP_LENGTH = 126.08; // in mm
   const double kSTRIP_ANGLE = 0.04; // in radian
+  int m_eventId = 0;
   uint16_t m_bcid;
   uint32_t m_l1id;
   uint16_t number;

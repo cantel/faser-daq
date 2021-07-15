@@ -73,9 +73,10 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
     fill_error_status_to_metric(m_fragment->status());
   
     const TrackerDataFragment* trackerdataFragment = m_trackerdataFragment;
+    m_eventId = m_trackerdataFragment->event_id();
 
     if (TRBBoardId == 0)
-      DEBUG("event " << m_trackerdataFragment->event_id());
+      DEBUG("event " << m_eventId);
     
     size_t payload_size = m_fragment->payload_size();
     if (payload_size > MAXFRAGSIZE) {
@@ -161,14 +162,15 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
         if ((allClusters[chipIdx1].empty()) or (allClusters[chipIdx2].empty())) continue;
         for (auto cluster1 : allClusters[chipIdx1]) {
           for (auto cluster2 : allClusters[chipIdx2]) {
-            cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; // invert
+            // invert
+            cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; 
 
             // check for intersections
             if (std::abs(cluster1-cluster2) > kSTRIPDIFFTOLERANCE) continue;
 
             // every second moudle is flipped
-            int c1 = module % 2 == 0 ? chipIdx1: chipIdx1;
-            int c2 = module % 2 == 0 ? 5-(chipIdx2 % 6) : chipIdx2 % 6;
+            int c1 = module % 2 == 0 ? chipIdx1 : 5 - chipIdx1;
+            int c2 = module % 2 == 0 ? 5 - (chipIdx2 % 6) : chipIdx2 % 6;
 
             // calculate intersection
             double y1 = kMODULEPOS[module % 4] + (c1 * kSTRIPS_PER_CHIP + cluster1) * kSTRIP_PITCH;
@@ -176,14 +178,19 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
             double py = 0.5 * (y1 + y2);
             double px = intersection(y1, y2);
 
-            px = module % 2 == 0 ? 2 * kXMIN + px : 2 * kXMAX - px;
-            DEBUG("l " << TRBBoardId <<  ", m " << module << ", c " << chipIdx1 << ", s1 " << cluster1 << ", s2 " << cluster2);
-            DEBUG("x=" << px << ", y=" << py);
+            // add x-offset
+            px = module / 4 == 0 ? 2 * kXMIN + px : 2 * kXMAX - px;
+
+            m_spacePoints.push_back({m_eventId, TRBBoardId, px, py});
           }
         }
       }
     }
   }
+
+  // write out space points
+  for (auto sp : m_spacePoints)
+    DEBUG("?? " << sp.event << "   " << sp.layer << "   " << sp.x << "   " << sp.y);
 }
 
 void IFTMonitorModule::register_hists() {

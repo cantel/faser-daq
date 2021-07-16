@@ -12,18 +12,23 @@
 
 #include "IFTMonitorModule.hpp"
 
+#define PI 3.14159265
+
 using namespace std::chrono_literals;
 using namespace std::chrono;
+using Eigen::MatrixXd;
 
 
 bool IFTMonitorModule::adjacent(unsigned int strip1, unsigned int strip2) {
   return ((strip2 - strip1 == 1) or (strip1 - strip2 == 1));
 }
 
+
 int IFTMonitorModule::average(std::vector<int> strips) {
   size_t n = strips.size();
   return n != 0 ? (int)std::accumulate(strips.begin(), strips.end(), 0.0) / n : 0;
 }
+
 
 double IFTMonitorModule::intersection(double y1, double y2) {
   // calculate line line intersection given two points on each line (top and bottom of each strip)
@@ -33,6 +38,39 @@ double IFTMonitorModule::intersection(double y1, double y2) {
   return det != 0 ? ix/det : 0;
 }
 
+
+// linear regression in 3 dimensions
+// solve \theta = (X^T X)^{-1} X^T y where \theta is giving the coefficients that
+// best fit the data and X is the design matrix
+// https://gist.github.com/ialhashim/0a2554076a6cf32831ca
+std::pair<Vector3, Vector3> linear_fit(const std::vector<Vector3>& spacepoints) {
+  size_t n_spacepoints = spacepoints.size();
+  Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> centers(n_spacepoints, 3);
+  for (size_t i = 0; i < n_spacepoints; ++i) centers.row(i) = spacepoints[i];
+
+  Vector3 origin = centers.colwise().mean();
+  Eigen::MatrixXd centered = centers.rowwise() - origin.transpose();
+  Eigen::MatrixXd cov = centered.adjoint() * centered;
+  Eigen::SelfAdjointEigenSolver<Eigen::MatrixXd> eig(cov);
+  Vector3 axis = eig.eigenvectors().col(2).normalized();
+
+  return std::make_pair(origin, axis);
+}
+
+
+// return the mean squared error of the fit
+double mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit) {
+  Vector3 origin = fit.first;
+  Vector3 dir = fit.second;
+
+  double rms = 0;
+  for (int i  = 0; i < 3; ++i) {
+    double lambda = (track[i].z() - origin.z()) / dir.z();
+    Vector3 delta = origin + lambda * dir - track[i];
+    rms += delta.transpose()*delta;
+  }
+  return rms;
+}
 
 
 IFTMonitorModule::IFTMonitorModule() {}
@@ -181,23 +219,71 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
             // add x-offset
             px = module / 4 == 0 ? 2 * kXMIN + px : 2 * kXMAX - px;
 
-            m_spacePoints.push_back({m_eventId, TRBBoardId, px, py});
+            m_histogrammanager->fill2D(m_hit_maps[TRBBoardId], px, py, 1);
+            m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
+            m_spacepointsList.push_back({m_eventId, TRBBoardId, px, py});
           }
         }
       }
     }
   }
 
-  // write out space points
-  for (auto sp : m_spacePoints)
-    DEBUG("?? " << sp.event << "   " << sp.layer << "   " << sp.x << "   " << sp.y);
+  // calculate direction only for events with a space point in each layer
+  if (m_spacepoints.size() == 3) {
+
+    // create all combinations of three space points
+    std::vector<std::vector<Vector3>> tracks;
+    for (const auto& p0 : m_spacepoints[0]) {
+      for (const auto& p1 : m_spacepoints[1]) {
+        for (const auto& p2 : m_spacepoints[2]) {
+          tracks.push_back({p0, p1, p2});
+        }
+      }
+    }
+
+    // fit all track candidates and get candidate with best mean-squared-error
+    Vector3 origin;
+    Vector3 direction;
+    double mse;
+    double mse_min = 999;
+    for (auto track : tracks) {
+      std::pair<Vector3, Vector3> fit = linear_fit(track);
+      mse = mse_fit(track, fit);
+      if (mse < mse_min) {
+        mse_min = mse;
+        origin = fit.first;
+        direction = fit.second;
+      }
+    }
+
+    if (mse_min < 999) {
+      double phi_xz = atan(direction.x() / direction.z()) * 180 / PI;
+      double phi_yz = atan(direction.y() / direction.z()) * 180 / PI;
+      m_histogrammanager->fill("phi_xz", phi_xz);
+      m_histogrammanager->fill("phi_yz", phi_yz);
+      m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), phi_xz, phi_yz});
+    }
+  }
+
+  m_spacepoints.clear();
+
+
+  // write out debug information every 1000 events
+  if (m_eventId % 1000 == 0) {
+    for (auto info : m_eventInfo)
+      DEBUG("?? " << info.event << ": x " << info.x << ", " << info.y << ", " << info.z << ", phi1 " << info.phi1 << ", phi2 " << info.phi2);
+    for (auto sp : m_spacepointsList)
+      DEBUG(sp.event << ", " << sp.layer << ", " << sp.x << ", " << sp.y);
+  }
 }
 
 void IFTMonitorModule::register_hists() {
   INFO(" ... registering histograms in TrackerMonitor ... " );
   const unsigned kPUBINT = 30; // publishing interval in seconds
   for ( const auto& hit_map : m_hit_maps)
-    m_histogrammanager->register2DHistogram(hit_map, "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, kPUBINT);
+    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_xz", "phi(xz)", -90, 90, 36, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_yz", "phi(yz)", -90, 90, 36, kPUBINT);
   INFO(" ... done registering histograms ... " );
 }
 

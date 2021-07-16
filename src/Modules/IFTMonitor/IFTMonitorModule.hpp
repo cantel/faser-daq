@@ -4,7 +4,11 @@
 #pragma once
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
+#include <Eigen/Dense>
 #include <vector>
+
+typedef Eigen::Matrix<double, 3, 1> Vector3;
+
 
 class IFTMonitorModule : public MonitorBaseModule {
  public:
@@ -25,13 +29,25 @@ class IFTMonitorModule : public MonitorBaseModule {
     double y;
   };
 
+  struct EventInfo {
+    int event;
+    double x;
+    double y;
+    double z;
+    double phi1;
+    double phi2;
+  };
+
   bool adjacent(unsigned int strip1, unsigned int strip2);
   int average(std::vector<int> strips);
   double intersection(double y1, double y2);
 
-  std::vector<SpacePoint> m_spacePoints = {};
+  std::map<int, std::vector<Vector3>> m_spacepoints = {};
+  std::vector<EventInfo> m_eventInfo = {};
+  std::vector<SpacePoint> m_spacepointsList = {};
 
   const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
+  double kLAYERPOS[3] = {18.41871, 47.78175, 79.224144}; // values in mm
   double kMODULEPOS[4] = {65.02388382, 1.34389615, -62.55613708, -126.21612549}; // values in mm
   const double kSTRIP_PITCH = 0.08; // in mm
   const double kXMIN = -63.04; // in mm

@@ -19,8 +19,8 @@ using namespace std::chrono;
 using Eigen::MatrixXd;
 
 
-bool IFTMonitorModule::adjacent(unsigned int strip1, unsigned int strip2) {
-  return ((strip2 - strip1 == 1) or (strip1 - strip2 == 1));
+bool IFTMonitorModule::adjacent(int strip1, int strip2) {
+  return std::abs(strip1 - strip2) <= 2;
 }
 
 
@@ -30,12 +30,18 @@ int IFTMonitorModule::average(std::vector<int> strips) {
 }
 
 
-double IFTMonitorModule::intersection(double y1, double y2) {
-  // calculate line line intersection given two points on each line (top and bottom of each strip)
-  // https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-  double det = -kSTRIP_LENGTH * kSTRIP_LENGTH * tan(kSTRIP_ANGLE);
-  double ix = kSTRIP_LENGTH * kSTRIP_LENGTH * y1 + kSTRIP_LENGTH * kXMIN * (2*y2 + kSTRIP_LENGTH * tan(kSTRIP_ANGLE));
-  return det != 0 ? ix/det : 0;
+// calculate line line intersection given two points on each line (top and bottom of each strip)
+// https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
+double IFTMonitorModule::intersection(double yf, double yb) {
+  double y1 = yf, y2 = yf;
+  double y3 = yb + tan(kSTRIP_ANGLE) * kXMIN;
+  double y4 = yb + tan(kSTRIP_ANGLE) * kXMAX;
+  double x1 = kXMIN, x3 = kXMIN;
+  double x2 = kXMAX, x4 = kXMAX;
+
+  double d = (x1-x2) * (y3-y4) - (y1-y2) * (x3-x4);
+  double px = (x1*y2 - y1*x2) * (x3-x4) - (x1-x2) * (x3*y4 - y3*x4);
+  return d != 0 ? px/d : 0;
 }
 
 
@@ -43,7 +49,7 @@ double IFTMonitorModule::intersection(double y1, double y2) {
 // solve \theta = (X^T X)^{-1} X^T y where \theta is giving the coefficients that
 // best fit the data and X is the design matrix
 // https://gist.github.com/ialhashim/0a2554076a6cf32831ca
-std::pair<Vector3, Vector3> linear_fit(const std::vector<Vector3>& spacepoints) {
+std::pair<Vector3, Vector3> IFTMonitorModule::linear_fit(const std::vector<Vector3>& spacepoints) {
   size_t n_spacepoints = spacepoints.size();
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> centers(n_spacepoints, 3);
   for (size_t i = 0; i < n_spacepoints; ++i) centers.row(i) = spacepoints[i];
@@ -59,7 +65,7 @@ std::pair<Vector3, Vector3> linear_fit(const std::vector<Vector3>& spacepoints) 
 
 
 // return the mean squared error of the fit
-double mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit) {
+double IFTMonitorModule::mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit) {
   Vector3 origin = fit.first;
   Vector3 dir = fit.second;
 
@@ -195,29 +201,33 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 
 
       // create space points
-      for (unsigned chipIdx1 = 0; chipIdx1 < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx1++) {
-        unsigned int chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx1;
+      for (int chipIdx1 = 0; chipIdx1 < (int)kCHIPS_PER_MODULE*0.5; chipIdx1++) {
+        int chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx1;
         if ((allClusters[chipIdx1].empty()) or (allClusters[chipIdx2].empty())) continue;
         for (auto cluster1 : allClusters[chipIdx1]) {
           for (auto cluster2 : allClusters[chipIdx2]) {
-            // invert
-            cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; 
+
+            // every second module is flipped
+            // invert for the downstream side the cluster and chip number
+            double chip = module % 2 == 0 ? chipIdx1 : 5 - chipIdx1;
+            if (module % 2 == 0)
+              cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; 
+            else
+              cluster1 = kSTRIPS_PER_CHIP - 1 - cluster1; 
 
             // check for intersections
             if (std::abs(cluster1-cluster2) > kSTRIPDIFFTOLERANCE) continue;
 
-            // every second moudle is flipped
-            int c1 = module % 2 == 0 ? chipIdx1 : 5 - chipIdx1;
-            int c2 = module % 2 == 0 ? 5 - (chipIdx2 % 6) : chipIdx2 % 6;
-
             // calculate intersection
-            double y1 = kMODULEPOS[module % 4] + (c1 * kSTRIPS_PER_CHIP + cluster1) * kSTRIP_PITCH;
-            double y2 = kMODULEPOS[module % 4] + (c2 * kSTRIPS_PER_CHIP + cluster2) * kSTRIP_PITCH;
-            double py = 0.5 * (y1 + y2);
-            double px = intersection(y1, y2);
+            double yf = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster1) * kSTRIP_PITCH;
+            double yb = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster2) * kSTRIP_PITCH;
+            double px = intersection(yf, yb);
 
-            // add x-offset
-            px = module / 4 == 0 ? 2 * kXMIN + px : 2 * kXMAX - px;
+            double py = 0.5 * (yf + yb) + kLAYER_OFFSET[TRBBoardId];
+
+            // invert every second module and add x-offset
+            if (module % 2 == 1) px *= -1;
+            px = module / 4 == 0 ? kXMIN - px : kXMAX + px;
 
             m_histogrammanager->fill2D(m_hit_maps[TRBBoardId], px, py, 1);
             m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
@@ -271,7 +281,7 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   // write out debug information every 1000 events
   if (m_eventId % 1000 == 0) {
     for (auto info : m_eventInfo)
-      DEBUG("?? " << info.event << ": x " << info.x << ", " << info.y << ", " << info.z << ", phi1 " << info.phi1 << ", phi2 " << info.phi2);
+      DEBUG(info.event << ", " << info.x << ", " << info.y << ", " << info.z << ", " << info.phi1 << ", " << info.phi2);
     for (auto sp : m_spacepointsList)
       DEBUG(sp.event << ", " << sp.layer << ", " << sp.x << ", " << sp.y);
   }

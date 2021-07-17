@@ -38,17 +38,20 @@ class IFTMonitorModule : public MonitorBaseModule {
     double phi2;
   };
 
-  bool adjacent(unsigned int strip1, unsigned int strip2);
+  bool adjacent(int strip1, int strip2);
   int average(std::vector<int> strips);
   double intersection(double y1, double y2);
+  std::pair<Vector3, Vector3> linear_fit(const std::vector<Vector3>& spacepoints);
+  double mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit);
 
   std::map<int, std::vector<Vector3>> m_spacepoints = {};
   std::vector<EventInfo> m_eventInfo = {};
   std::vector<SpacePoint> m_spacepointsList = {};
 
   const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
-  double kLAYERPOS[3] = {18.41871, 47.78175, 79.224144}; // values in mm
-  double kMODULEPOS[4] = {65.02388382, 1.34389615, -62.55613708, -126.21612549}; // values in mm
+  double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm
+  double kMODULEPOS[4] = {64.92386246, 1.20386696, -62.55613708, -126.25613403}; // values in mm
+  const double kLAYER_OFFSET[3] = {0, -5, 5}; // in mm
   const double kSTRIP_PITCH = 0.08; // in mm
   const double kXMIN = -63.04; // in mm
   const double kXMAX = 63.04; // in mm

@@ -267,11 +267,16 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
     }
 
     if (mse_min < 999) {
-      double phi_xz = atan(direction.x() / direction.z()) * 180 / PI;
-      double phi_yz = atan(direction.y() / direction.z()) * 180 / PI;
+      double tan_phi_xz = direction.x() / direction.z();
+      double tan_phi_yz = direction.y() / direction.z();
+      double phi_xz = atan(tan_phi_xz) * 180 / PI;
+      double phi_yz = atan(tan_phi_yz) * 180 / PI;
       m_histogrammanager->fill("phi_xz", phi_xz);
       m_histogrammanager->fill("phi_yz", phi_yz);
-      m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), phi_xz, phi_yz});
+      m_histogrammanager->fill("tan_phi_xz", tan_phi_xz);
+      m_histogrammanager->fill("tan_phi_yz", tan_phi_yz);
+      m_histogrammanager->fill2D("hitmap_track", origin.x(), origin.y(), 1);
+      m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz});
     }
   }
 
@@ -292,8 +297,11 @@ void IFTMonitorModule::register_hists() {
   const unsigned kPUBINT = 30; // publishing interval in seconds
   for ( const auto& hit_map : m_hit_maps)
     m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, kPUBINT);
-  m_histogrammanager->registerHistogram("phi_xz", "phi(xz)", -90, 90, 36, kPUBINT);
-  m_histogrammanager->registerHistogram("phi_yz", "phi(yz)", -90, 90, 36, kPUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_track", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -90, 90, 36, kPUBINT);
+  m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.05, 0.05, 40, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -90, 90, 36, kPUBINT);
+  m_histogrammanager->registerHistogram("tan_phi_yz", "tan(phi_yz)", -0.05, 0.05, 40, kPUBINT);
   INFO(" ... done registering histograms ... " );
 }
 

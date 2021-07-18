@@ -345,6 +345,8 @@ void DigitizerReceiverModule::runner() noexcept {
     bool shouldsleep = (n_events_present==0);
     float read_time=0;
     float parse_time=0;
+    int receivedEvents=0;
+    //    int time_now   = (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - time_start).count() * 1e-6)/1000;
     while(n_events_present){
       DEBUG("[Running] - Reading events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
       DEBUG("With m_ECRcount : "<<m_ECRcount);
@@ -358,7 +360,7 @@ void DigitizerReceiverModule::runner() noexcept {
       nwords_obtained = m_digitizer->ReadSingleEvent(m_raw_payload, m_event_size, m_monitoring, nerrors,
 						     m_readout_method, false);
       read_time+=m_monitoring["block_readout_time"];
-
+      receivedEvents++;
       if (nwords_obtained==0) { //most likely reqest didn't arrive at VME card
 	m_empty_events++;
 	continue;
@@ -369,7 +371,6 @@ void DigitizerReceiverModule::runner() noexcept {
       }
       // count triggers sent
       m_triggers ++;
-
       // parse the events and decorate them with a FASER header
       auto fragment = m_digitizer->ParseEventSingle(m_raw_payload, m_event_size, m_monitoring, 
 						    m_ECRcount, m_ttt_converter, m_bcid_ttt_fix, nerrors);
@@ -388,7 +389,6 @@ void DigitizerReceiverModule::runner() noexcept {
       std::unique_ptr<const byteVector> bytestream(fragment->raw());
       DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
       m_connections.send(0, binData);  
-      
       n_events_present--;
     }
     m_lock.unlock();
@@ -398,8 +398,8 @@ void DigitizerReceiverModule::runner() noexcept {
     if (shouldsleep) {
       usleep(1000); 
     } else {
-      m_time_read = read_time;
-      m_time_parse = parse_time;
+      m_time_read = read_time/receivedEvents;
+      m_time_parse = parse_time/receivedEvents;
     }
 
 

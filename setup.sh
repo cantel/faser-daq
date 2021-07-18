@@ -36,6 +36,7 @@ export DAQ_CONFIG_DIR=${FASERTOP}/configs/
 export DAQ_BUILD_DIR=${FASERTOP}/build/
 alias daqpy='python3 $FASERTOP/daqling/scripts/Control/daq.py'
 alias rcgui='pushd $FASERTOP/scripts/Web; ./rcgui.py; popd'
+alias rcguilocal='pushd $FASERTOP/scripts/Web; ./rcgui.py -l; popd'
 
 #add python and binary directories needed for runnings
 export PYTHONPATH=${FASERTOP}/daqling/scripts/Control:$PYTHONPATH

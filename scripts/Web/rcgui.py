@@ -158,8 +158,9 @@ def usage():
     sys.exit(0)
     
 if __name__ == '__main__':
+    localOnly=False
     try:
-        opts, args= getopt.getopt(sys.argv[1:],"p:",[])
+        opts, args= getopt.getopt(sys.argv[1:],"p:l",[])
     except getopt.GetoptError:
         usage()
     port=5000
@@ -169,9 +170,11 @@ if __name__ == '__main__':
             if port<1024:
                 print("Port number has to be >1023")
                 sys.exit(1)
-    
+        if opt=="-l":
+            print("Running in local mode - no run number InfluxDB archiving")
+            localOnly=True
 
-    state=statetracker.State(app.logger)
+    state=statetracker.State(app.logger,localOnly)
     metrics=metricsHandler.Metrics(app.logger)
 
     print("Connect browser to:")

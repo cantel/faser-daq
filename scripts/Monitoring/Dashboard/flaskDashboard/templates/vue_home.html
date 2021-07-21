@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <!-- axios for AJAX calls-->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- include VueJS  -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <!-- use the latest vue-select release -->
+
+    <!-- Vuetify dependencies-->
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
+    <!-- day.js manipulating timestamps -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/dayjs.min.js"
+        integrity="sha512-0fcCRl828lBlrSCa8QJY51mtNqTcHxabaXVLPgw/jPA5Nutujh6CbTdDgRzl9aSPYW/uuE7c4SffFUQFBAy6lg=="
+        crossorigin="anonymous"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/utc.min.js"
+            integrity="sha512-m00bfmYnAl3plEBlQfeQUhw/U2uvmw29V2+jxSWpAjankMWS+zAsjezbKWDEJNXqWq9o9qQZSOiA2RKDpa4D5w=="
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/timezone.min.js"
+        integrity="sha512-pslqxxHAYPCxaSeFSmXXxDkLejD5dbFVC66aiVq0z4v7VTJBU+wqcG1OpNh4p3MjS2D6NCwz/H2QmSc7dXxryg=="
+        crossorigin="anonymous"></script>
+
+    <!-- Plotly library -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <!-- custom css -->
+    <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+    <title>Faser Monitoring</title>
+
+</head>
+
+<body>
+    <div id="app">
+        <v-app>
+            <v-app-bar app>
+                <v-menu offset-y>
+                    <template v-slot:activator="{ on, attrs }">
+                        <v-btn depressed color="primary" v-bind="attrs" v-on="on">
+                            Monitoring
+                        </v-btn>
+                    </template>
+                    <v-list>
+                        <v-list-item>
+                            <redis_info_dialog :redis_infos="c_redis_infos"> </redis_info_dialog>
+                        </v-list-item>
+                        <v-list-item :disabled="c_safeMode" @click="deleteCurrent">
+                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete current
+                        </v-list-item>
+                        <v-list-item :disabled="c_safeMode" @click="deleteHistory">
+                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete history
+                        </v-list-item>
+                        <v-list-item :disabled="c_safeMode" @click="deleteTags">
+                            <v-icon color="error" class="mr-1"> mdi-trash-can-outline </v-icon> Delete tags
+                        </v-list-item>
+                        <v-list-item>
+                            <v-switch v-model="c_safeMode" label="Safe mode" hide-details></v-switch>
+                        </v-list-item>
+                    </v-list>
+                </v-menu>
+                <v-spacer></v-spacer>
+                <search-tool @search-tags="getIDs"></search-tool>
+                <v-spacer></v-spacer>
+            </v-app-bar>
+            <v-main>
+
+                <div class="histograms_container">
+                    <histogram-card v-for="ID in c_ids" :id="ID" :key="ID"></histogram-card>
+                </div>
+
+            </v-main>
+        </v-app>
+    </div>
+    <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
+    <script>
+        const timezone = window.dayjs_plugin_timezone
+        const UTC = window.dayjs_plugin_utc
+        dayjs.extend(timezone)
+        dayjs.extend(UTC)
+
+        const EventBus = new Vue();
+        ////////////// Redis info dialog //////////////
+        Vue.component("redis_info_dialog", {
+            delimiters: ["[[", "]]"],
+            props: ["redis_infos"],
+            data: function () {
+                return {
+                    dialog: false,
+                }
+            },
+            template: //html
+                `
+
+<v-dialog v-model="dialog" width="500">
+    <template v-slot:activator="{ on, attrs }">
+        <v-btn plain v-bind="attrs" v-on="on" style="text-transform: none;">
+            Redis infos
+        </v-btn>
+
+    </template>
+
+    <v-card>
+        <v-card-title class="headline grey lighten-2">
+            Redis stats (summary)
+        </v-card-title>
+
+        <v-card-text>
+            <v-list dense>
+
+                <v-list-item two-line>
+                    <v-list-item-content>
+                        <v-list-item-title> Memory used </v-list-item-title>
+                        <v-list-item-subtitle>[[ redis_infos.used_memory_human]]</v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+
+                <v-list-item two-line>
+                    <v-list-item-content>
+                        <v-list-item-title>Memory used (rss) </v-list-item-title>
+                        <v-list-item-subtitle>[[ redis_infos.used_memory_rss_human ]]</v-list-item-subtitle>
+                    </v-list-item-content>
+                </v-list-item>
+
+            </v-list>
+        </v-card-text>
+
+        <v-divider></v-divider>
+
+        <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" text @click="dialog = false">
+                Close
+            </v-btn>
+        </v-card-actions>
+    </v-card>
+</v-dialog>
+`
+
+        })
+        ////////////// Search-bar component //////////////
+
+        Vue.component("search-tool", {
+            delimiters: ["[[", "]]"],
+
+
+            data: function () {
+                return {
+                    selected_tags: [],
+                    c_tags: [],
+                    c_modules_tags: [],
+                    c_selected_module: null,
+                    c_all_tags: []
+
+                }
+            },
+            mounted() {
+                axios.get("/getModulesAndTags").then(response => {
+                        this.c_tags = response.data["modules"].concat(response.data["tags"]).sort()
+                        this.c_modules_tags = response.data["modules"].sort()
+                    })
+                    .catch(err => {
+                        console.log("Could not get the IDs");
+                    })
+                EventBus.$on("add_tag_to_dropdown", (tag) => {
+                    this.c_tags.push(tag)
+                });
+
+                EventBus.$on("remove_tag_from_dropdown", (tag) => {
+                    const index = this.c_tags.indexOf(tag);
+                    if (index > -1) {
+                        this.c_tags.splice(index, 1);
+                    }
+
+                });
+
+            },
+            methods: {
+                emitTags: function () {
+                    this.$emit('search-tags', this.selected_tags)
+                },
+                emitModule: function () {
+                    const selected_module = [this.c_selected_module]
+                    this.$emit('search-tags', selected_module)
+                }
+            },
+            template: //html
+                `
+            <div class="menu">
+                <div style="width:50%;">
+                    <v-select class="mx-2" dense flat hide-details solo
+                        :append-outer-icon="'mdi-toy-brick-search-outline'" @click:append-outer="emitModule"
+                        :items="c_modules_tags" v-model="c_selected_module">
+                    </v-select>
+                </div>
+            <v-autocomplete v-model="selected_tags"
+            :items="c_tags"
+            :append-outer-icon="'mdi-magnify'"
+            @click:append-outer="emitTags"
+            multiple
+            solo
+            hide-details
+            hide-selected
+            clearable
+            deletable-chips
+            dense
+            small-chips
+            label = "select tags ..."
+            flat
+            :menu-props="{closeOnClick: true}"
+            ></v-autocomplete>
+            </div>
+            `,
+        })
+
+
+        ////////////// Histogram-card Components //////////////
+
+        Vue.component("histogram-card", {
+            delimiters: ["[[", "]]"],
+            props: ["id"],
+            data: function () {
+                return {
+                    c_polling: null,
+                    c_updating_rate: 5000, // updating every 5 seconds
+                    c_timestamp: null,
+                    c_figure: null,
+                    c_isLoading: false,
+                    c_tags: [],
+                    c_runNumber: null
+
+                }
+            },
+            mounted() {
+                this.pollData()
+            },
+            beforeDestroy() {
+                clearInterval(this.polling)
+            },
+            filters: {
+                timestampLocal: function (timestamp) {
+                    return dayjs.unix(timestamp).format("HH:mm:ss (DD/MM)")
+                },
+                timestampCERN: function (timestamp) {
+                    return dayjs.tz(parseFloat(timestamp) * 1000, "Europe/Zurich").format(
+                        "HH:mm:ss (DD/MM)")
+                }
+            },
+            computed: {
+                divName() {
+                    return "graph_" + this.id
+                },
+            },
+            methods: {
+
+                pollData() {
+                    axios.get('/histogram_from_ID', {
+                            params: {
+                                ID: this.id
+                            }
+                        })
+                        .then(response => {
+                            this.c_figure = response.data["fig"]
+                            this.c_timestamp = response.data["timestamp"]
+                            this.c_tags = response.data["tags"]
+                            this.c_runNumber = response.data["runNumber"]
+                        })
+
+
+                    this.polling = setInterval(() => {
+                        axios.get('/histogram_from_ID', {
+                                params: {
+                                    ID: this.id
+                                }
+                            })
+                            .then(response => {
+                                this.c_figure = response.data["fig"]
+                                this.c_timestamp = response.data["timestamp"]
+                                //this.c_tags = response.data["tags"]
+
+                            })
+                    }, this.c_updating_rate)
+                },
+
+                removeTag(item) {
+                    const index = this.c_tags.indexOf(item);
+                    if (index > -1) {
+                        this.c_tags.splice(index, 1);
+                    }
+                    axios.post('/remove_tag', {
+                            ID: this.id,
+                            tag: item
+                        })
+                        .then(response => {
+                            if (!response.data["exists"]) {
+                                EventBus.$emit("remove_tag_from_dropdown", item)
+                            }
+                        })
+
+                },
+                openTimeView() {
+                    window.open("/history_view/" + this.id, "_blank", "width=650, height=500")
+                }
+            },
+            watch: {
+                c_tags: {
+                    handler: function (newVal, oldVal) {
+                        if (newVal.length > oldVal.length && newVal.length - oldVal.length === 1) {
+                            var addedTag = newVal.filter(x => oldVal.indexOf(x) === -1);
+                            axios.post('/add_tag', {
+                                    ID: this.id,
+                                    tag: addedTag[0]
+                                })
+                                .then(response => {
+                                    if (!response.data["existed"]) {
+                                        EventBus.$emit("add_tag_to_dropdown", addedTag[0])
+                                    }
+
+                                })
+                        } else if (newVal.length < oldVal.length && newVal.length - oldVal.length === -1) {
+                            var removedTag = oldVal.filter(x => newVal.indexOf(x) === -1);
+                            axios.post('/remove_tag', {
+                                    ID: this.id,
+                                    tag: removedTag[0]
+                                })
+                                .then(response => {
+                                    if (!response.data["exists"]) {
+                                        EventBus.$emit("remove_tag_from_dropdown", removedTag[0])
+                                    }
+                                })
+                        }
+                    }
+                }
+            },
+            template: //html
+                `
+            <span>
+                <v-card width="500" class="mx-auto mt-5">
+                    <v-card-title class="pb-1 pt-2">
+                        <span class="hist_title"> [[ id ]]</span>
+                        <v-spacer> </v-spacer>
+                        <v-btn icon @click="openTimeView">
+                            <v-icon>mdi-history</v-icon>
+                        </v-btn>
+                        <v-spacer> </v-spacer>
+
+                        <v-tooltip top transition="fade-transition">
+                            <template v-slot:activator="{ on, attrs }">
+                                <span class="timestamp" v-bind="attrs" v-on="on">
+                                    <i>[[ c_timestamp | timestampLocal ]] R[[ c_runNumber ]]</i>
+                                </span>
+                            </template>
+                            <span>CERN: [[ c_timestamp | timestampCERN ]]</span>
+                            </v-tooltip>
+                    </v-card-title>
+                        <plotly-graph class="card_histo_cont mx-auto" v-if="c_figure" :figure="c_figure"
+                            :divid="divName">
+                        </plotly-graph>
+                        <v-card-actions class="pb-1">
+                            <v-combobox v-model="c_tags" small-chips multiple solo hide-selected hide-details
+                                persistent-hint dense hide-no-data flat label="Enter tags...">
+                            <template v-slot:selection="{ attrs, item, select, selected }">
+                                <v-chip close pill x-small v:bind="attrs" :input-value="selected" @click="select" @click:close="removeTag(item)">
+                                    [[ item ]]
+                                </v-chip>                            
+                            </template>
+                        </v-combobox>
+                    </v-card-actions>
+                </v-card>
+            </span>
+            `,
+        })
+        ////////////// Main Component //////////////
+        var app = new Vue({
+            el: '#app',
+            vuetify: new Vuetify(),
+            data: {
+                c_tags: [],
+                c_ids: [],
+                c_safeMode: true,
+                c_redis_infos: null
+            },
+            delimiters: ["[[", "]]"],
+            computed: {},
+            mounted() {
+                axios.get("/redis_info").then(response => {
+                    this.c_redis_infos = response.data
+                })
+            },
+            methods: {
+                getIDs(selected_tags) {
+                    this.c_tags = selected_tags
+
+                    axios.post('/IDs_from_tags', {
+                            tags: selected_tags,
+                        })
+                        .then(response => {
+                            this.c_ids = response.data.sort()
+                        })
+                },
+                deleteHistory() {
+                    axios.get("/delete_history")
+                },
+
+                deleteTags() {
+                    axios.get("/delete_tags")
+                    window.location.reload(true)
+                },
+                //api call to delete current histograms
+                deleteCurrent() {
+                    axios.get("/delete_current")
+                    window.location.reload(true)
+                }
+            },
+        });
+    </script>
+</body>
+
+</html>

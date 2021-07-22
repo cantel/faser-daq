@@ -611,7 +611,10 @@
 	"host": "localhost",
 	"port": 5558,
 	"type": "TrackerMonitor",
-        "loglevel":         { "$ref": "top.json#loglevel" },
+        "loglevel": {
+            "core": "DEBUG",
+            "module": "DEBUG"
+        },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
             "fragmentID": 196616,
@@ -640,7 +643,7 @@
         },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" },
 	"settings": {
-            "fragmentID": 196617,
+            "fragmentID": 196608,
             "stats_uri": "tcp://localhost:7000"
 	},
 	"connections": {

@@ -21,7 +21,9 @@
 	}
       },
       { "$ref": "Templates/TRB.json#IFTMonitor00" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor08" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor00" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor01" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor02" },
       { "$ref": "Templates/emulator.json#EmulatorMonitor" }
     ]
   }

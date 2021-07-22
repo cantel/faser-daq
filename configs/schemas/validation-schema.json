@@ -10,9 +10,9 @@
     "version": {
       "type": "integer",
       "description": "Configuration version",
-      "minimum": 9,
-      "maximum": 10,
-      "default": 10
+      "minimum": 11,
+      "maximum": 11,
+      "default": 11
     },
     "group": {
       "type": "string",
@@ -75,9 +75,6 @@
 	        "maximum": 65535,
 		"propertyOrder":3
           },
-          "type": {
-            "type": "string"
-          },
           "loglevel": {
             "type": "object",
             "title": "Log Levels",
@@ -93,7 +90,7 @@
                 "enum": ["DEBUG", "INFO", "WARNING", "TRACE"]
               }
             },
-            "required": ["core", "module"]
+            "required": ["core", "module","connection"]
           },
           "metrics_settings": {
             "title": "Metrics Settings",
@@ -117,187 +114,9 @@
             "type": "object",
             "title": "Settings",
              "propertyOrder": 10
-          },
-          "connections": {
-            "type": "object",
-            "title": "Connections",
-            "propertyOrder": 100,
-            "properties": {
-              "receivers": { 
-                "type": "array", 
-                "format": "table",
-                "title": "Receivers",
-                "uniqueItems": true,
-                "items": {
-                    "type": "object",
-		    "title": "",
-		    "options": {
-			"disable_collapse": true
-		    },
-		    "oneOf": [
-			{
-			    "title": "TCP",
-			    "type": "object",
-			    "format": "grid",
-			    "properties": {
-				"transport": {
-				    "type": "string",
-				    "enum":["tcp"],
-				    "options": {
-					"hidden": true
-				    }
-				},
-				"type": {
-				    "type":"string",
-                              "enum": ["pair", "pubsub"]
-				},
-				"chid": {"type":"integer"},
-				"host": {
-                                    "type":"string",
-                                    "format": "host"
-				},
-				"port": {"type":"integer"}
-			    },
-			    "required": ["transport","type", "chid", "host", "port"],
-			    "additionalProperties": false
-			},
-			{
-			    "title": "FilteredTCP",
-			    "type": "object",
-			    "format": "grid",
-			    "properties": {
-				"transport": {
-				    "type": "string",
-				    "enum":["tcp"],
-				    "options": {
-					"hidden": true
-				    }
-				},
-				"type": {
-				    "type":"string",
-                              "enum": ["pair", "pubsub"]
-				},
-				"chid": {"type":"integer"},
-				"host": {
-                                    "type":"string",
-                                    "format": "host"
-				},
-				"port": {"type":"integer"},
-                                "filter": {
-                                   "type":"integer",
-                                   "enum": [187,443,699,955],
-				   "options": {
-				       "enum_titles": ["Physics","Calibration","Monitoring","TLBMonitoring"]
-				   }
-                                },
-                                "filter_size": {
-                                   "type":"integer",
-				   "default": 2,
-				   "options": {
-				      "hidden": true
-				   }
-                                }
-			    },
-			    "required": ["transport","type", "chid", "host", "port","filter","filter_size"],
-			    "additionalProperties": false
-			},
-			{
-			    "title": "IPC",
-			    "type": "object",
-			    "format": "grid",
-			    "properties": {
-				"transport": {
-				    "type": "string",
-				    "enum":["ipc"],
-				    "options": {
-					"hidden": true
-				    }
-				},
-				"type": {
-				    "type":"string",
-				    "enum": ["pair", "pubsub"]
-				},
-				"chid": {"type":"integer"},
-				"path": {"type":"string"}
-			    },
-			    "required": ["transport","type", "chid", "path"],
-			    "additionalProperties": false
-			}
-		    ]
-		}
-	      },
-              "senders": { 
-                "type": "array", 
-                "format": "table",
-                "title": "Senders",
-                "uniqueItems": true,
-                "items": {
-                    "type": "object",
-		    "options": {
-			"disable_collapse": true
-		    },
-		    "oneOf": [
-			{
-			    "title": "TCP",
-			    "type": "object",
-			    "format": "grid",
-			    "properties": {
-				"transport": {
-				    "type": "string",
-				    "enum":["tcp"],
-				    "options": {
-					"hidden": true
-				    }
-				},
-				"type": {
-				    "type":"string",
-                              "enum": ["pair", "pubsub"]
-				},
-				"chid": {"type":"integer"},
-				"host": {
-                                    "type":"string",
-                                    "format": "host"
-				},
-				"port": {"type":"integer"}
-			    },
-			    "required": ["transport","type", "chid", "host", "port"],
-			    "additionalProperties": false,
-			    "options": {
-				"disable_collapse": true
-			    }
-			},
-			{
-			    "title": "IPC",
-			    "type": "object",
-			    "format": "grid",
-			    "properties": {
-				"transport": {
-				    "type": "string",
-				    "enum":["ipc"],
-				    "options": {
-					"hidden": true
-				    }
-				},
-				"type": {
-				    "type":"string",
-				    "enum": ["pair", "pubsub"]
-				},
-				"chid": {"type":"integer"},
-				"path": {"type":"string"}
-			    },
-			    "required": ["transport","type", "chid", "path"],
-			    "additionalProperties": false,
-			    "options": {
-				"disable_collapse": true
-			    }
-			}
-		    ]
-		}
-	      }
-            }
           }
         },
-        "required": ["name", "host", "port", "type", "loglevel"]
+        "required": ["name", "host", "port", "modules", "loglevel"]
       }
     }
   }

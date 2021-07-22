@@ -18,7 +18,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-TriggerRateMonitorModule::TriggerRateMonitorModule() { 
+TriggerRateMonitorModule::TriggerRateMonitorModule(const std::string& n): MonitorBaseModule(n) { 
 
    INFO("");
    m_ECR_cnt = 0;
@@ -29,7 +29,7 @@ TriggerRateMonitorModule::~TriggerRateMonitorModule() {
   INFO("With config: " << m_config.dump());
  }
 
-void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
@@ -127,6 +127,8 @@ void TriggerRateMonitorModule::monitor(daqling::utilities::Binary &eventBuilderB
     m_histogrammanager->fill2D("deadtime_vs_ratelimiter", deadtime_veto_cnt, rate_limiter_veto_cnt);
   }
 
+  m_total_orbits_lost += m_tlbmonitoringFragment->orbits_lost_counter();
+
 }
 
 void TriggerRateMonitorModule::register_hists() {
@@ -220,6 +222,8 @@ void TriggerRateMonitorModule::register_metrics() {
   registerVariable(m_bcr_fraction, "BCRVetoPercentage");
   registerVariable(m_digi_busy_fraction, "digiBusyVetoPercentage");
   registerVariable(m_global_deadtime_fraction, "globalDeadtimePercentage");
+
+  registerVariable(m_total_orbits_lost, "TotalOrbitsLost");
 
   return;
 }

@@ -7,12 +7,12 @@
 
 class EmulatorMonitorModule : public MonitorBaseModule {
  public:
-  EmulatorMonitorModule();
+  EmulatorMonitorModule(const std::string&);
   ~EmulatorMonitorModule();
 
  protected:
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
 

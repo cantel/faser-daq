@@ -14,14 +14,14 @@
 
 using namespace std::chrono;
 using namespace std::chrono_literals;
-
-EventBuilderFaserModule::EventBuilderFaserModule() {
-  auto cfg = m_config.getSettings();
+using namespace EventBuilderFaser;
+EventBuilderFaserModule::EventBuilderFaserModule(const std::string& n):FaserProcess(n) {
+  auto cfg = getModuleSettings();
 
   m_maxPending = cfg.value("maxPending",10);
   m_timeout = 1000*cfg.value("timeout_ms",1000);
   m_stopTimeout = 1000*cfg.value("stopTimeout_ms",1000);
-  m_numChannels=m_config.getNumReceiverConnections();
+  m_numChannels=m_config.getNumReceiverConnections(getName());
 
 }
 
@@ -87,9 +87,11 @@ bool EventBuilderFaserModule::sendEvent(uint8_t event_tag,EventFull *event) {
   int channel=event_tag; 
   DEBUG("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
-  daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+  // could be optimized by using SharedDataType with EventFull as inner data
+  DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
+  DataFragment<daqling::utilities::Binary> binData1(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);      // to file writer
-  m_connections.send(channel+100,binData);  // to monitoring
+  m_connections.send(channel+100,binData1);  // to monitoring
   delete bytestream;
   return true;
 }
@@ -117,7 +119,7 @@ void EventBuilderFaserModule::addFragment(EventFragment *fragment) {
   }
 
   auto event=pendingEvents[event_id];
-  if (!event) THROW(EventBuilderException,"Out of memory");
+  if (!event) throw EventBuilderIssue(ERS_HERE,"Out of memory");
   
   try {
     auto status=event->addFragment(fragment);
@@ -154,13 +156,13 @@ void EventBuilderFaserModule::runner() noexcept {
   INFO("Running...");
 
   bool noData=true;
-  daqling::utilities::Binary  blob;
+  DataFragment<daqling::utilities::Binary>  blob;
   while (m_run) { 
     if (m_timeoutCount>10) m_status=STATUS_WARN;
     if (m_timeoutCount>100) m_status=STATUS_ERROR;
 
     noData=true;
-    auto receivers = m_config.getConnections()["receivers"];
+    auto receivers = m_config.getConnections(m_name)["receivers"];
     for (auto receiver : receivers) {
       auto channel = receiver["chid"]; 
       if (m_connections.receive(channel, blob)) {

@@ -6,11 +6,11 @@
 
 #define HOSTNAME_MAX_LENGTH 100
 #define NCHANNELS 16
-
-DigitizerReceiverModule::DigitizerReceiverModule() { INFO(""); 
+using namespace DigitizerReceiver;
+DigitizerReceiverModule::DigitizerReceiverModule(const std::string& n):FaserProcess(n) { INFO(""); 
   INFO("DigitizerReceiverModule Constructor");
 
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = getModuleSettings();
   
   // retrieve the ip address of the sis3153 master board
   // this is configured via the arp and route commands on the network switch
@@ -21,9 +21,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
     // check to make sure you can copy over the config
     int length = strlen(std::string(cfg_ip).c_str());
     if(length>HOSTNAME_MAX_LENGTH){
-      ERROR("This is too long of a name : "<<std::string(cfg_ip));
-      ERROR("Max length of IP hostname : "<<HOSTNAME_MAX_LENGTH);
-      THROW(DigitizerHardwareException, "IP address or hostname is too long");
+      throw HostNameOrIPTooLong(ERS_HERE,std::string(cfg_ip),HOSTNAME_MAX_LENGTH );
     }
 
     // lookup the IP address dynamically
@@ -36,13 +34,11 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
     // check to make sure the thing is an IP address
     if(IsIPAddress(ip_addr_string)==false){
       strcpy(ip_addr_string,"0.0.0.0");
-      ERROR("This is not an IP address : "<<ip_addr_string);
-      THROW(DigitizerHardwareException, "Invalid IP address");
+      throw InvalidIP(ERS_HERE, ip_addr_string);
     }
   }
   else{
-    ERROR("No IP address setting in the digitizer configuration.");
-    THROW(DigitizerHardwareException, "No valid IP address setting in your config");
+    throw DigitizerHardwareIssue(ERS_HERE, "No valid IP address setting in the digitizer configuration.");
   }
     
   INFO("Digitizer IP Address : "<<ip_addr_string);
@@ -56,8 +52,7 @@ DigitizerReceiverModule::DigitizerReceiverModule() { INFO("");
     vme_base_address = std::stoi(std::string(cfg_vme_base_address),0,16);
   }
   else{
-    ERROR("No VME Base address setting in the digitizer configuration.");
-    THROW(DigitizerHardwareException, "No valid VME Base address setting in your config");
+    throw DigitizerHardwareIssue(ERS_HERE, "No valid VME Base address setting in the digitizer configuration.");
   }
   INFO("Base VME Address = 0x"<<std::setfill('0')<<std::setw(8)<<std::hex<<vme_base_address);
 
@@ -224,7 +219,7 @@ void DigitizerReceiverModule::configure() {
 
   // configuration of hardware
   INFO("Configuring ...");  
-  m_digitizer->Configure(m_config.getConfig()["settings"]);
+  m_digitizer->Configure(getModuleSettings());
 
   for(int chan=0;chan<16;chan++)
     m_pedestal[chan]=m_digitizer->m_pedestal[chan]; //these are pedestals used to calculate thresholds
@@ -285,7 +280,7 @@ static unsigned int BOBRWord(unsigned int *data,int address, int len=4) {
 void DigitizerReceiverModule::runner() noexcept {
   INFO("Running...");  
   
-  auto cfg = m_config.getConfig()["settings"];
+  auto cfg = getModuleSettings();
   m_prev_event_id=0;
 
   // for reading the buffer
@@ -350,6 +345,8 @@ void DigitizerReceiverModule::runner() noexcept {
     bool shouldsleep = (n_events_present==0);
     float read_time=0;
     float parse_time=0;
+    int receivedEvents=0;
+    //    int time_now   = (chrono::duration_cast<chrono::nanoseconds>(chrono::high_resolution_clock::now() - time_start).count() * 1e-6)/1000;
     while(n_events_present){
       DEBUG("[Running] - Reading events : totalEvents = "<<std::dec<<n_events_present<<"  eventsRequested = "<<std::dec<<m_n_events_requested);
       DEBUG("With m_ECRcount : "<<m_ECRcount);
@@ -363,7 +360,7 @@ void DigitizerReceiverModule::runner() noexcept {
       nwords_obtained = m_digitizer->ReadSingleEvent(m_raw_payload, m_event_size, m_monitoring, nerrors,
 						     m_readout_method, false);
       read_time+=m_monitoring["block_readout_time"];
-
+      receivedEvents++;
       if (nwords_obtained==0) { //most likely reqest didn't arrive at VME card
 	m_empty_events++;
 	continue;
@@ -374,7 +371,6 @@ void DigitizerReceiverModule::runner() noexcept {
       }
       // count triggers sent
       m_triggers ++;
-
       // parse the events and decorate them with a FASER header
       auto fragment = m_digitizer->ParseEventSingle(m_raw_payload, m_event_size, m_monitoring, 
 						    m_ECRcount, m_ttt_converter, m_bcid_ttt_fix, nerrors);
@@ -391,9 +387,8 @@ void DigitizerReceiverModule::runner() noexcept {
 
       // place the raw binary event fragment on the output port
       std::unique_ptr<const byteVector> bytestream(fragment->raw());
-      daqling::utilities::Binary binData(bytestream->data(),bytestream->size());
+      DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
       m_connections.send(0, binData);  
-      
       n_events_present--;
     }
     m_lock.unlock();
@@ -403,8 +398,8 @@ void DigitizerReceiverModule::runner() noexcept {
     if (shouldsleep) {
       usleep(1000); 
     } else {
-      m_time_read = read_time;
-      m_time_parse = parse_time;
+      m_time_read = read_time/receivedEvents;
+      m_time_parse = parse_time/receivedEvents;
     }
 
 

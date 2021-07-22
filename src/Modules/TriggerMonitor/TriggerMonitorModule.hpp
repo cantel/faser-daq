@@ -7,7 +7,7 @@
 
 class TriggerMonitorModule : public MonitorBaseModule {
  public:
-  TriggerMonitorModule();
+  TriggerMonitorModule(const std::string&);
   ~TriggerMonitorModule();
 
  protected:
@@ -18,7 +18,7 @@ class TriggerMonitorModule : public MonitorBaseModule {
   uint32_t m_previous_orbit;
   uint16_t m_previous_bcid;
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
 

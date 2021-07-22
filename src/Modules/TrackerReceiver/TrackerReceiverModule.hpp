@@ -14,10 +14,40 @@
 #include <string>
 #include <iostream>
 #include <bitset>
+#include <ers/Issue.h>
+
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  NoBoardID,                                                   // Class name
+                  "No board ID specified.", // Message
+                  ERS_EMPTY)                      // Args
+
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  NoDaqIP,                                                   // Class name
+                  "No DAQ IP specified.", // Message
+                  ERS_EMPTY)                      // Args
+
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  MissingConfigurationFile,                                                   // Class name
+                  "Cannot configure module due to missing configuration file. - Empty configuration file provided for module "<<l_moduleNo<<".", // Message
+                  ((unsigned)l_moduleNo))                      // Args
+
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  TLBSyncFailed,                                                   // Class name
+                  "Could not sync to TLB CLK", // Message
+                  ERS_EMPTY)                      // Args
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  TRBConfigurationIssue,                                                   // Class name
+                  "Caught TRBConfigurationException with message:", // Message
+                  ERS_EMPTY)                      // Args
+
+ERS_DECLARE_ISSUE(TrackerReceiverIssues,                                                             // Namespace
+                  TRBAccesIssue,                                                   // Class name
+                  "Caught TRBAccesException with message:", // Message
+                  ERS_EMPTY)                      // Args
 
 class TrackerReceiverModule : public FaserProcess {
  public:
-  TrackerReceiverModule();
+  TrackerReceiverModule(const std::string&);
   ~TrackerReceiverModule();
 
   void configure(); // optional (configuration can be handled in the constructor)

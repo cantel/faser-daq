@@ -5,10 +5,10 @@
 
 #include <random>
 
-FrontEndEmulatorModule::FrontEndEmulatorModule() {
+FrontEndEmulatorModule::FrontEndEmulatorModule(const std::string& n):FaserProcess(n) {
   INFO("");
 
-  auto cfg = m_config.getSettings();
+  auto cfg = getModuleSettings();
 
   m_meanSize = cfg["meanSize"];
   m_rmsSize = cfg["rmsSize"];

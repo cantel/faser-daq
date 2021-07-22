@@ -14,7 +14,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-DigitizerMonitorModule::DigitizerMonitorModule() { 
+DigitizerMonitorModule::DigitizerMonitorModule(const std::string& n):MonitorBaseModule(n) { 
   INFO("Instantiating ...");
 }
 
@@ -22,7 +22,7 @@ DigitizerMonitorModule::~DigitizerMonitorModule() {
   INFO("With config: " << m_config.dump());
 }
 
-void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
   DEBUG("Digitizer monitoring");
 
   // the m_event object is populated with the event binary here
@@ -92,8 +92,8 @@ void DigitizerMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBin
 void DigitizerMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerMonitor ... " );
   
-  double publish_interval = (double)m_config.getConfig()["settings"]["publish_interval"];;
-  m_display_thresh=(float)m_config.getSettings()["display_thresh"];
+  double publish_interval = (double)getModuleSettings()["publish_interval"];;
+  m_display_thresh=(float)getModuleSettings()["display_thresh"];
   // payload size
   m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, publish_interval);
 
@@ -102,7 +102,7 @@ void DigitizerMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, publish_interval );
 
   // synthesis common for all channels
-  int buffer_length = (int)m_config.getConfig()["settings"]["buffer_length"];
+  int buffer_length = (int)getModuleSettings()["buffer_length"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
     std::string chStr = std::to_string(iChan);
     if (iChan<10) chStr = "0"+chStr;
@@ -125,7 +125,7 @@ void DigitizerMonitorModule::register_metrics() {
   m_metric_payload = 0;
   m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
 
-  json thresholds = m_config.getSettings()["rate_thresholds"];
+  json thresholds = getModuleSettings()["rate_thresholds"];
   for(int iChan=0; iChan<NCHANNELS; iChan++){
     std::string chStr = std::to_string(iChan);
     if (iChan<10) chStr = "0"+chStr;

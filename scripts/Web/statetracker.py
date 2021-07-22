@@ -42,7 +42,7 @@ def removeProcess(p,group,logger):
     except Exception as e:
         logger.error("Exception"+str(e)+": Couldn't get process state")
 
-def stateTracker(logger):
+def stateTracker(logger,localOnly):
     pubsub=r1.pubsub()
     pubsub.subscribe("stateAction")
     oldState={}
@@ -66,6 +66,10 @@ def stateTracker(logger):
             configName=runState["fileName"]
             config=h.read(configName)
             #FIXME: add handling of failed reads here
+            if localOnly:
+                for comp in config['components']:
+                    comp['metrics_settings']['influxDb_uri']=""
+                    comp['metrics_settings']['influxDb_name']=""
             daq=None
         if not daq and type(config)==dict:
             daq = h.createDaqInstance(config)
@@ -165,7 +169,11 @@ def stateTracker(logger):
             overallState=None
             if not config['components']: overallState="DOWN"
             for comp in config['components']:       
-                rawStatus = daq.getStatus(comp)
+                rawStatus, module_names = daq.getStatus(comp) #FIXME: support for multiple modules?
+                if len(rawStatus)!=1:
+                    logger.error("Do not know how to handle status %s for %s",str(rawStatus),comp)
+                    raise Exception("bad status")
+                rawStatus=rawStatus[0]
                 timeout = None
                 state = str(h.translateStatus(rawStatus, timeout))
                 if not overallState:
@@ -213,37 +221,38 @@ def stateTracker(logger):
                     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
                     runNumber=1000000000
                     runType="Unspecified"
-                    try:
-                        runType=subInfo['runtype']
-                        r= requests.post('http://faser-runnumber.web.cern.ch/NewRunNumber',
-                                         auth=(run_user,run_pw),
-                                         json = {
-                                             'version':    version,
-                                             'type':       subInfo['runtype'],
-                                             'username':       os.getenv("USER"),
-                                             'startcomment':    subInfo['startcomment'],
-                                             'detectors':  detList,
-                                             'configName': configName,
-                                             'configuration': config
-                                         })
-                        if r.status_code!=201:
-                            logger.error("Failed to get run number: "+r.text)
-                        else:
-                            try:
-                                runNumber=int(r.text)
-                                r1.set("runOngoing",1)
-                            except ValueError:
+                    if not localOnly:
+                        try:
+                            runType=subInfo['runtype']
+                            r= requests.post('http://faser-runnumber.web.cern.ch/NewRunNumber',
+                                             auth=(run_user,run_pw),
+                                             json = {
+                                                 'version':    version,
+                                                 'type':       subInfo['runtype'],
+                                                 'username':       os.getenv("USER"),
+                                                 'startcomment':    subInfo['startcomment'],
+                                                 'detectors':  detList,
+                                                 'configName': configName,
+                                                 'configuration': config
+                                             })
+                            if r.status_code!=201:
                                 logger.error("Failed to get run number: "+r.text)
-                    except requests.exceptions.ConnectionError:
-                        logger.error("Could not connect to run service")
-                    startMsg=subInfo['startcomment'].replace('"',"'")
-                    runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
-                    r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
-                                    auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
-                                    data=runData,
-                                    verify=False)
-                    if r.status_code!=204:
-                        logger.error("Failed to post end of run information to influxdb: "+r.text)
+                            else:
+                                try:
+                                    runNumber=int(r.text)
+                                    r1.set("runOngoing",1)
+                                except ValueError:
+                                    logger.error("Failed to get run number: "+r.text)
+                        except requests.exceptions.ConnectionError:
+                            logger.error("Could not connect to run service")
+                        startMsg=subInfo['startcomment'].replace('"',"'")
+                        runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
+                        r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                                        auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                                        data=runData,
+                                        verify=False)
+                        if r.status_code!=204:
+                            logger.error("Failed to post end of run information to influxdb: "+r.text)
 
                     r1.set("runNumber",runNumber)
                     r1.set("runType",runType)
@@ -318,7 +327,7 @@ def refresh():
     r1.publish("status","new") # force update
     
 class State:
-    def __init__(self,logger):
+    def __init__(self,logger,localOnly):
         try:
             r1.ping()
         except:
@@ -341,7 +350,7 @@ class State:
             r1.set("runStart",0)
 
 
-        self.tracker = threading.Thread(name="stateTracker",target=stateTracker,args=(logger,))
+        self.tracker = threading.Thread(name="stateTracker",target=stateTracker,args=(logger,localOnly))
         self.tracker.start()
 
     def stop(self):

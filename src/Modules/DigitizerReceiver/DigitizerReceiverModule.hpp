@@ -10,17 +10,39 @@
 // needed for external tools
 #include "Commons/FaserProcess.hpp"
 #include "EventFormats/DAQFormats.hpp"
-#include "Exceptions/Exceptions.hpp"
+#include <ers/Issue.h>
 
 // needed for sendECR() and runner() protection
 #include <mutex>
 
-class DigitizerReceiverException : public Exceptions::BaseException { using Exceptions::BaseException::BaseException; };
+ERS_DECLARE_ISSUE(
+DigitizerReceiver,                                                              // namespace
+    DigitizerHardwareIssue,                                                    // issue name
+  ERS_EMPTY,  // message
+  ERS_EMPTY
+)
+ERS_DECLARE_ISSUE_BASE(DigitizerReceiver,                                          // namespace name
+      HostNameOrIPTooLong,                                                  // issue name
+      DigitizerReceiver::DigitizerHardwareIssue,                                                // base issue name
+      "This is too long of a name: "<<ip<< "Max length of IP hostname: "<<len,                                 // message
+      ERS_EMPTY,            // base class attributes
+      ((std::string) ip)
+      ((unsigned)len)                                     // this class attributes
+)
+ERS_DECLARE_ISSUE_BASE(DigitizerReceiver,                                          // namespace name
+      InvalidIP,                                                  // issue name
+      DigitizerReceiver::DigitizerHardwareIssue,                                                // base issue name
+      "Invalid IP address: "<<ip,                                 // message
+      ERS_EMPTY,            // base class attributes
+      ((std::string) ip)                                     // this class attributes
+)
+
+
 
 
 class DigitizerReceiverModule : public FaserProcess {
  public:
-  DigitizerReceiverModule();
+  DigitizerReceiverModule(const std::string&);
   ~DigitizerReceiverModule();
 
   ///////////////////////////////////////////

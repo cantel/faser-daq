@@ -1,7 +1,11 @@
-#
 #  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
 #
-import time
+# @mainpage Histogram Monitoring server
+
+# @file routes.py
+
+# @brief Defines all the flask routes and the api endpoints
+
 import json
 from flask.helpers import flash
 import redis
@@ -10,62 +14,87 @@ from flask import url_for, redirect, request, Response, jsonify
 from flaskDashboard import app
 import numpy as np
 import atexit
+import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
+from flaskDashboard import interfacePlotly
+from flaskDashboard import redis_interface
 
 
-INTERVAL_TASK_ID = "interval-task-id"
 
+## Redis database where the last histograms are published.
 r = redis.Redis(
-    host="localhost", port=6379, db=1, charset="utf-8", decode_responses=True 
+    host="localhost", port=6379, db=1, charset="utf-8", decode_responses=True
 )
+## Redis database where the current run informations are stored 
+r2 = redis.Redis(
+    host="localhost", port=6379, db=2, charset="utf-8", decode_responses=True
+)
+## Redis database where the tags are stored.
 r5 = redis.Redis(
     host="localhost", port=6379, db=5, charset="utf-8", decode_responses=True
 )
 
-r6 = redis.Redis(
-    host="localhost", port=6379, db=6, charset="utf-8", decode_responses=True
+## Redis database where the previous histograms are stored.
+r7 = redis.Redis(
+    host="localhost", port=6379, db=7, charset="utf-8", decode_responses=True
 )
-def recent_histograms_save():
+
+def histograms_save():
+    """! Defines the job that will be executed every 60 seconds
+    It saves the current histograms in redis database 1 to redis database 6
+    """
+    with app.app_context():
+        IDs = getAllIDs().get_json()  # we get all the IDs
+    for ID in IDs:
+        module, histname = ID.split("-")
+        histobj = r.hget(module, f"h_{histname}")
+        if histobj != None:
+            runNumber = r2.get("runNumber")
+            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+            config = {"filename":f"{ID}+{timestamp}"}  
+            figure = dict(data=data, layout=layout, config=config)
+            hist = dict(timestamp=timestamp, figure=figure)
+            if r7.hlen(ID) >= 30:
+                key_to_remove = sorted(r7.hkeys(ID))[0]
+                r7.hdel(ID, key_to_remove)
+            r7.hset(ID, f"{timestamp}R{runNumber}", json.dumps(hist))
+
+            
+def old_histogram_save():
+    """! Defines the job that will be executed every 30 minutes.
+    It saves the current histograms in the redis database 1 in the redis database 7
+    """
     with app.app_context():
         IDs = getAllIDs().get_json()
     for ID in IDs:
         module, histname = ID.split("-")
         histobj = r.hget(module, f"h_{histname}")
-        if histobj !=None:
-            data, layout, timestamp = convert_to_plotly(histobj)
-            figure = dict(data=data, layout=layout)
+        if histobj != None:
+            runNumber = r2.get("runNumber")
+            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+            config = {"filename":f"{ID}+{timestamp}"} 
+            figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
-            entry = {json.dumps(hist): float(timestamp)}
-            r6.zadd(ID, entry)
-            if r6.zcard(ID) >= 31:
-                r6.zremrangebyrank(ID, 0, 0)
+            if r7.hlen(f"old:{ID}")>=168 : # 24 (hours) * 7 (days) 
+                key_to_remove = sorted(r7.hkeys(f"old:{ID})"))[0]
+                r7.hdel(f"old:{ID}", key_to_remove)
+            r7.hset(f"old:{ID}", f"old:{timestamp}R{runNumber}", json.dumps(hist)) 
 
-def historic_histograms_save():
-    with app.app_context():
-        IDs = getAllIDs().get_json()
-    for ID in IDs:
-        module, histname = ID.split("-")
-        histobj = r.hget(module, f"h_{histname}")
-        if histobj !=None:
-            data, layout, timestamp = convert_to_plotly(histobj)
-            figure = dict(data=data, layout=layout)
-            hist = dict(timestamp=timestamp, figure=figure)
-            entry = {json.dumps(hist): float(timestamp)}
-            r6.zadd(f"historic:{ID}", entry)
-
-
+# setting up the background jobs for storing old histograms
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=recent_histograms_save, trigger="interval", seconds=60)
-scheduler.add_job(func=historic_histograms_save, trigger="interval", seconds=1800)
+scheduler.add_job(func=histograms_save, trigger="interval", seconds=60)
+scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=3600)
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
 
-
 @app.route("/getIDs", methods=["GET"])
 def getIDs():
-    modules = getModules().get_json()
+    """! Get the ID of all histograms sorted alphabetically.
 
+    @return JSON: list of all IDs from redis database 1.
+    """
+    modules = getModules().get_json()
     keys = []
     for module in modules:
         histnames = r.hkeys(module)
@@ -73,23 +102,16 @@ def getIDs():
             if "h_" in histname:
                 keys.append(f"{module}-{histname[2:]}")
 
-    keys.sort()
+    keys = sorted(keys)
     return jsonify(keys)
 
-#### tags section ###
-
-def getTagsByID(ids):
-    packet = {}
-    for ID in ids:
-        module, histname = ID.split("-")
-        packet[ID] = list(r5.smembers(f"id:{ID}"))
-        packet[ID].sort()
-        packet[ID].pop(packet[ID].index(module))
-        packet[ID].pop(packet[ID].index(histname))
-    return packet
 
 @app.route("/storeDefaultTagsAndIDs", methods=["GET"])
 def storeDefaultTagsAndIDs():
+    """! Stores in the Redis database the default tags for all the histograms.
+
+    @return The string "true".
+    """
     ids = getIDs().get_json()
     for ID in ids:
         module, histname = ID.split("-")
@@ -98,270 +120,234 @@ def storeDefaultTagsAndIDs():
         r5.sadd(f"id:{ID}", module, histname)
     return "true"
 
-@app.route("/addTag", methods=["GET"])
-def addTag():
-    exists = "false"
-    tag_to_add = request.args.get("tag")
-    ID, tag = tag_to_add.split(",")
-    if r5.exists(f"tag:{tag}"):
-        exists = "true"
-    r5.sadd(f"id:{ID}", tag)
-    r5.sadd(f"tag:{ tag }", ID)
-    return exists
-
-@app.route("/removeTag", methods=["GET"])
-def removeTag():
-    exists = "true"
-    tag_to_remove = request.args.get("tag")
-    ID, tag = tag_to_remove.split(",")
-    r5.srem(f"id:{ID}", tag)
-    r5.srem(f"tag:{tag}", ID)
-    if not r5.exists(f"tag:{tag}"):
-        exists = "false"
-    return exists
-
-@app.route("/renameTag", methods=["GET"])
-def renameTag():
-    oldtagexists = "true"
-    newtagexists = "false"
-    tag = request.args.get("tag")
-    ID, oldname, newname = tag.split(",")
-    if r5.exists(f"tag:{newname}"):
-        newtagexists = "true"
-    r5.srem(f"id:{ID}", oldname)
-    r5.sadd(f"id:{ID}", newname)
-    r5.srem(f"tag:{oldname}", ID)
-    r5.sadd(f"tag:{ newname }", ID)
-    if not r5.exists(f"tag:{oldname}"):
-        oldtagexists = "false"
-    packet = dict(oldtagexists=oldtagexists, newtagexists=newtagexists)
-    return jsonify(packet)
-
-@app.route("/getAllTags", methods=["GET"])
-def getAllTags():
-    tags = r5.keys("tag*")
-    tags = [s.replace("tag:", "") for s in tags]
-    tags.sort()
-    return jsonify(tags)
 
 
 @app.route("/getAllIDs")
 def getAllIDs():
+    """! Gets the IDs stored in the redis database 5. 
+
+    @return JSON: all IDs 
+    """
     ids = r5.keys("id:*")
     ids = [s.replace("id:", "") for s in ids]
     ids.sort()
     return jsonify(ids)
 
+
 @app.route("/getModules", methods=["GET"])
 def getModules():
+    """! Gets the keys from the redis database containing the "monitor" expression and whose data type is hash.
+
+    @return JSON: all valid modules.
+    """
     modules = r.keys("*monitor*")
     modules = [module for module in modules if r.type(module) == "hash"]
- 
-    modules.sort()
+
+    # modules.sort()
     return jsonify(modules)
 
-@app.route("/flush_tags", methods=["GET"])
-def flush_tags():
-    r5.flushdb()
-    return "true"
-
-@app.route("/flush_current_histograms", methods=["GET"])
-def flush_current_histograms():
-    r.flushdb()
-    return "true"
-
-## Time_view ###
-@app.route("/delete_histos", methods=["GET"])
-def delete_histos():
-    r6.flushdb()
-    return "true"
-
-@app.route("/change_histo", methods = ["GET"])
-def change_histo():
-    timestamp = request.args.get("selected")
-    ID = request.args.get("ID")
-    newGraph =""
-    if "old" in timestamp:
-        newGraph = r6.zrangebyscore(f"historic:{ID}",(timestamp.replace("old:","")),(timestamp.replace("old:","")))
-    else:
-        newGraph = r6.zrangebyscore(f"{ID}",timestamp, (timestamp))
-    return jsonify(newGraph[0])
 
 @app.route("/")
-@app.route("/home")
-def home():
-    print("Doing the busy stuff")
-    storeDefaultTagsAndIDs()  # puts the basic tags module and histname
-    return render_template("home.html")
-
-@app.route("/monitor", methods=["GET", "POST"])
-def monitor():
-    if request.method == "GET":
-        if request.args.get("selected_module"):
-            selected_module = request.args.get("selected_module")
-            ids = r5.smembers(f"tag:{selected_module}")
-            ids = list(ids)
-            tagsbyID = getTagsByID(ids)
-            return render_template(
-                "monitor.html",
-                selected_module=selected_module,
-                tagsByID=tagsbyID,
-                ids=ids,
-            )
-        elif request.args.getlist("selected_tags"):
-            selected_tags = request.args.getlist("selected_tags")
-            selected_tags = [f"tag:{s}" for s in selected_tags]
-            ids = r5.sunion(selected_tags)
-            ids = list(ids)
-            tagsbyID = getTagsByID(ids)
-            return render_template("monitor.html", tagsByID=tagsbyID, ids=ids)
-
-        else: 
-            return render_template("home.html")
-
-@app.route("/time_view/<string:ID>")
-def timeView(ID):
-    data = r6.zrangebyscore(ID, "-inf", "inf", withscores=True)
-    if len(data) == 0: 
-        return render_template("time_view.html", ID = ID)
-    timestamps = [element[1] for element in data]
-    lastHisto = data[0][0]
-    historic_data = r6.zrangebyscore(f"historic:{ID}", "-inf", "inf", withscores=True)
-    historic_timestamps = [element[1] for element in historic_data]
-    
-    return render_template(
-        "time_view.html",
-        historic_timestamps=historic_timestamps,
-        timestamps=timestamps,
-        lastHisto=lastHisto,
-        ID = ID
-    )
-
-@app.route("/single_view/<string:ID>")
-def single_view(ID):
-    return render_template("single_view.html", ID = ID)
-
-@app.route("/download_tags_json")
-def download_tags_json():
-    json_file = {}
-    keys = r5.keys("id*")
-    for key in keys: 
-        json_file[key.replace("id:", "")] = list(r5.smembers(key))
-    json_file = json.dumps(json_file)
-    return Response(
-        json_file,
-        mimetype="text/json",
-        headers={"Content-disposition":
-                 "attachment; filename=tags.json"})
+@app.route("/vue_home", methods=["GET"])
+def vue_home():
+    """! Renders the vue_home.html"""
+    storeDefaultTagsAndIDs()
+    return render_template("vue_home.html")
 
 
-@app.route("/load_tags_from_file", methods = ["POST"])
-def load_tags_from_file():
-    if request.method == 'POST':
-            file = request.files['filename']
-            if file:
-                if file.filename.split(".")[1] == "json":
-                    content = file.read()
-                    content  = json.loads(content.decode("utf-8"))
-                    for key in content.keys():
-                        r5.sadd(f"id:{key}", *content[key])
-                        for tag in content[key]:
-                            r5.sadd(f"tag:{tag}", key)
-                else:
-                    flash("Wrong filetype, upload a .json file", category = "danger")
-            else: 
-                flash("No chosen file", category =  "danger")
-    return redirect(url_for("home"))
-
-@app.route("/source",methods=["GET"])
-def lastHistogram():
-    ID = request.args.get("ID")
+@app.route("/getModulesAndTags", methods=["GET"])
+def get_modules_and_tags():
+    """! Gets all module names used for monitoring (contain the keyword "monitor") and all the tags associated to the modules.
+    @return JSON : JSON response with all modules name and tags
+    """
     packet = {}
-    source, histname = ID.split("-")
-    histobj = r.hget(source, f"h_{histname}")
-    if histobj is not None:
-        data, layout, timestamp = convert_to_plotly(histobj)
-        fig = dict(data=data, layout=layout, config={"responsive": True})
-        packet = {
-                "figure": fig,
-                "time": float(timestamp)}
+    modules = r.keys("*monitor*")
+    tags = r5.keys("tag*")
+    packet["modules"] = [module for module in modules if r.type(module) == "hash"]
+    packet["tags"] = [s.replace("tag:", "") for s in tags]
     return jsonify(packet)
 
 
-def convert_to_plotly(histobj):
-    timestamp = float(histobj[: histobj.find(":")])
-    histobj = json.loads(histobj[histobj.find("{") :])
-
-    xaxis = dict(title=dict(text=histobj["xlabel"]))
-    yaxis = dict(title=dict(text=histobj["ylabel"]))
-
-    layout = dict(
-        autosize=False,
-        uirevision=True,
-        xaxis=xaxis,
-        yaxis=yaxis,
-        margin=dict(l=50, r=50, b=50, t=50, pad=4),
-    )
-    data = []
-    hist_type = histobj["type"]
-    if "categories" in hist_type:
-        xarray = histobj["categories"]
-        if "hitpattern" in histobj["name"]:
-          xarray = ['b'+str(x) for x in histobj["categories"]] 
-        yarray = histobj["yvalues"]
-        data = [dict(x=xarray, y=yarray, type="bar")]
-
-    elif "2d" in hist_type:
-        zarray = np.array(histobj["zvalues"])
-        xmin = float(histobj["xmin"])
-        xmax = float(histobj["xmax"])
-        xbins = int(histobj["xbins"])
-        xstep = (xmax - xmin) / float(xbins)
-        ymin = float(histobj["ymin"])
-        ymax = float(histobj["ymax"])
-        ybins = int(histobj["ybins"])
-        ystep = (ymax - ymin) / float(ybins)
-        xmin -= xstep
-        ymin -= ystep
-        xbins += 2
-        ybins += 2
-        xarray = [xmin + xbin * xstep for xbin in range(xbins)]
-        yarray = [ymin + ybin * ystep for ybin in range(ybins)]
-        zmatrix = zarray.reshape(len(yarray), len(xarray))
-        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(), type="heatmap",)]
+@app.route("/IDs_from_tags", methods=["POST"])
+def IDs_from_tags():
+    """! Gets the IDs of the histograms associated with the given tags.
+    @return list: list of IDs.
+    """
+    request_data = request.get_json()
+    tags = request_data["tags"]
+    if len(tags) == 0:
+        return jsonify([])
     else:
+        selected_tags = [f"tag:{s}" for s in tags]
+        IDs = list(r5.sunion(selected_tags))
+        keys = r5.keys("id:*")
+        keys = [ key[3:] for key in keys ]
+        # we take the intersection of the two sets
+        valid_IDs  = list(set(keys) & set(IDs))
 
-        if "_ext" in hist_type:
-            xmin = float(histobj["xmin"])
-            xmax = float(histobj["xmax"])
-            xbins = int(histobj["xbins"])
-            step = (xmax - xmin) / float(xbins)
-            xarray = [xmin + step * xbin for xbin in range(xbins)]
-            yarray = histobj["yvalues"]
-            data = [dict(x=xarray, y=yarray, type="bar")]
+    return jsonify(valid_IDs)
 
-        else:  # histogram with underflow and overflow
-            xmin = float(histobj["xmin"])
-            xmax = float(histobj["xmax"])
-            xbins = int(histobj["xbins"])
-            step = (xmax - xmin) / float(xbins)
-            xmin -= step
-            xbins += 2
 
-            xarray = [xmin + step * xbin for xbin in range(xbins)]
-            yarray = histobj["yvalues"]
 
-            data = [dict(x=xarray, y=yarray, type="bar")]
-    return data, layout, timestamp
+@app.route("/histogram_from_ID", methods=["GET"])
+def histogram_from_ID():
+    """! Get the histogram from redis database 1 associated with the given ID.
+    @return JSON containing the timestamp, the plotly figure, the ID, the associated tags and the runNumber of the histogram.
+    """
+    runNumber = r2.get("runNumber")
+    packet = {}
+    ID = request.args.get("ID")
+    source, histname = ID.split("-")
+    histobj = r.hget(source, f"h_{histname}")
+    if histobj is not None:
+        data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+        config = {"filename":f"{ID}+{timestamp}"} 
+        fig = dict(data=data,layout=layout, config=config)
+        tags = get_tags_by_ID(ID)
+        packet = dict(timestamp=float(timestamp), fig=fig, ID=ID, tags=tags, runNumber = runNumber)
+    return jsonify(packet)
 
-@app.context_processor
-def context_processor():
-    modules = getModules().get_json()
-    tags = getAllTags().get_json()
-    return dict(modules=modules, tags=tags)
+## Tag section
 
-@app.template_filter("ctime")
-def timectime(s):
-    d = time.localtime(s)
-    datestring = time.strftime("%x %X", d)
-    return datestring
+@app.route("/add_tag", methods=["POST"])
+def add_tag():
+    """! Adds the given tag to redis.
+    @return JSON with key "existed". If true, the added tag already existed in the database.
+    """
+    existed = False
+    data = request.get_json()
+    ID = data["ID"]
+    tag = data["tag"]
+    if r5.exists(f"tag:{tag}"):
+        existed = True
+    r5.sadd(f"id:{ID}", tag)
+    r5.sadd(f"tag:{ tag }", ID)
+    return jsonify({"existed": existed})
+
+
+@app.route("/remove_tag", methods=["POST"])
+def remove_tag():
+    """! Remove the tag sent through a POST request.
+    @return JSON with key "exists". If true, the removed tag still exists in the database.
+    """
+    exists = True
+    data = request.get_json()
+    ID = data["ID"]
+    tag = data["tag"]
+    r5.srem(f"id:{ID}", tag)
+    r5.srem(f"tag:{tag}", ID)
+    if not r5.exists(f"tag:{tag}"):
+        exists = False
+    return jsonify({"exists": exists})
+
+
+@app.route("/history_view/<string:ID>")
+def history_view(ID):
+    """! Renders the history view page."""
+    return render_template("vue_historyView.html",ID=ID)
+
+
+@app.route("/stored_timestamps", methods=["GET"])
+def stored_timestamps():
+    """! Gets all stored timestamps in the database for a given ID.
+    @return JSON with timestamps and old timestamps : {"ts": [...], "ots":[...]}
+    """
+    ID = request.args.get("ID")
+    timestamps = sorted(r7.hkeys(ID), reverse= True)
+    old_timestamps = sorted(r7.hkeys(f"old:{ID}"), reverse=True)
+    packet = dict(ts=timestamps, ots=old_timestamps)
+    return jsonify(packet)
+
+
+@app.route("/stored_histogram", methods = ["GET"])
+def stored_histogram():
+    """! Get the histogram from redis database 7 associated with the given timestamp 
+    @return JSON: stored histogram  
+    """
+    hist = ""
+    ts_run = str(request.args.get("args"))  # (old:)timestamp&runNumber
+    ID = request.args.get("ID")
+    if "old" in ts_run:
+        hist = r7.hget(f"old:{ID}", ts_run)
+        hist = json.loads(hist)
+    else:   
+        hist = r7.hget(ID, ts_run)
+        hist = json.loads(hist)
+    return jsonify(hist)
+
+@app.route("/delete_history", methods=["GET"])
+def delete_history():
+    """! Flushes the saved histograms from the redis database (db 7). """
+    r7.flushdb()
+    return jsonify({"response": "OK"})
+
+
+@app.route("/delete_tags", methods=["GET"])
+def delete_tags():
+    """! Flushes the tags redis database (db 5)."""
+    r5.flushdb()
+    return jsonify({"response": "OK"})
+
+
+@app.route("/delete_current", methods=["GET"])
+def delete_current():
+    """! Flushes the current histogram redis database (db 1)."""
+    r.flushdb() # delete current histograms 
+    # delete associated default tags 
+    ids = r5.keys("id:*")
+    m = map(delete_associated_tags, ids )
+    l = list(itertools.chain.from_iterable(m))
+    r5.delete(*l)
+
+    r5.delete(*ids) 
+    return jsonify({"response": "OK"})
+
+@app.route("/redis_info", methods=["GET"])
+def redis_info():
+    """! Returns informations about the state of the Redis database. 
+    @returns JSON: infos about the database
+    """
+    r_infos = r.info()
+    return jsonify(r_infos)
+
+
+@app.route("/compare_histograms", methods=["POST"])
+def compare_histograms():
+
+    data = request.get_json() 
+    ID = data["ID"]
+    ts1 = data["ts1"]
+    ts2 = data["ts2"]
+
+    hist1 = redis_interface.get_stored_histogram(r7,ID,ts1)
+    hist2 = redis_interface.get_stored_histogram(r7,ID,ts2)
+
+    diff_histo = hist1 # create dict object based on hist1 
+    if hist1["figure"]["data"][0]["type"] == 'bar':
+        diff_histo["figure"]["data"][0]["y"] = np.abs(np.array(hist1["figure"]["data"][0]["y"]) - np.array(hist2["figure"]["data"][0]["y"])).tolist()
+    elif hist1["figure"]["data"][0]["type"] == 'heatmap':
+        diff_histo["figure"]["data"][0]["z"] = np.abs(np.array(hist1["figure"]["data"][0]["z"]) - np.array(hist2["figure"]["data"][0]["z"])).tolist()
+    
+    return jsonify(diff_histo)
+
+
+
+## functions
+
+def get_tags_by_ID(ID):
+    """! Function that gets all tags without the default ones associated with an histogtram ID 
+    @returns list: all tags
+    """
+    module, histname = ID.split("-")    
+    # get the members associated with the key id:<histID> in the redis database
+    tags = list(r5.smembers(f"id:{ID}"))
+    # remove the default tags of the histogram (module name and histogram name)
+    tags.pop(tags.index(module))
+    tags.pop(tags.index(histname))
+    return tags
+
+def delete_associated_tags(ID):
+    tags = ID[3:].split("-")
+    tags[0] = f"tag:{tags[0]}"
+    tags[1] = f"tag:{tags[1]}"
+    return tags

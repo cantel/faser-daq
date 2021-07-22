@@ -7,12 +7,12 @@
 
 class FrontEndMonitorModule : public MonitorBaseModule {
  public:
-  FrontEndMonitorModule();
+  FrontEndMonitorModule(const std::string&);
   ~FrontEndMonitorModule();
 
  protected:
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
 

@@ -36,6 +36,7 @@ class IFTMonitorModule : public MonitorBaseModule {
     double z;
     double phi1;
     double phi2;
+    doubel mse;
   };
 
   bool adjacent(int strip1, int strip2);
@@ -48,7 +49,8 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::vector<EventInfo> m_eventInfo = {};
   std::vector<SpacePoint> m_spacepointsList = {};
 
-  const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
+  const std::string m_hit_maps_coarse[3] = {"hitmap_l0_coarse", "hitmap_l1_coarse", "hitmap_l2_coarse"};
+  const std::string m_hit_maps_fine[3] = {"hitmap_l0_fine", "hitmap_l1_fine", "hitmap_l2_fine"};
   double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm
   double kMODULEPOS[4] = {64.92386246, 1.20386696, -62.55613708, -126.25613403}; // values in mm
   const double kLAYER_OFFSET[3] = {0, -5, 5}; // in mm

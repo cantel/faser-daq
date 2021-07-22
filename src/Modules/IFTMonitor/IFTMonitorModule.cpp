@@ -229,7 +229,8 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
             if (module % 2 == 1) px *= -1;
             px = module / 4 == 0 ? kXMIN - px : kXMAX + px;
 
-            m_histogrammanager->fill2D(m_hit_maps[TRBBoardId], px, py, 1);
+            m_histogrammanager->fill2D(m_hit_maps_coarse[TRBBoardId], px, py, 1);
+            m_histogrammanager->fill2D(m_hit_maps_fine[TRBBoardId], px, py, 1);
             m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
             m_spacepointsList.push_back({m_eventId, TRBBoardId, px, py});
           }
@@ -276,7 +277,7 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
       m_histogrammanager->fill("tan_phi_xz", tan_phi_xz);
       m_histogrammanager->fill("tan_phi_yz", tan_phi_yz);
       m_histogrammanager->fill2D("hitmap_track", origin.x(), origin.y(), 1);
-      m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz});
+      m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz, mse_min});
     }
   }
 
@@ -286,7 +287,7 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   // write out debug information every 1000 events
   if (m_eventId % 1000 == 0) {
     for (auto info : m_eventInfo)
-      DEBUG(info.event << ", " << info.x << ", " << info.y << ", " << info.z << ", " << info.phi1 << ", " << info.phi2);
+      DEBUG(info.event << ", " << info.x << ", " << info.y << ", " << info.z << ", " << info.phi1 << ", " << info.phi2 << ", " << mse_min);
     for (auto sp : m_spacepointsList)
       DEBUG(sp.event << ", " << sp.layer << ", " << sp.x << ", " << sp.y);
   }
@@ -295,13 +296,16 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
 void IFTMonitorModule::register_hists() {
   INFO(" ... registering histograms in TrackerMonitor ... " );
   const unsigned kPUBINT = 30; // publishing interval in seconds
-  for ( const auto& hit_map : m_hit_maps)
-    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, kPUBINT);
-  m_histogrammanager->register2DHistogram("hitmap_track", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 40, kPUBINT);
-  m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -90, 90, 36, kPUBINT);
-  m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.05, 0.05, 40, kPUBINT);
-  m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -90, 90, 36, kPUBINT);
-  m_histogrammanager->registerHistogram("tan_phi_yz", "tan(phi_yz)", -0.05, 0.05, 40, kPUBINT);
+  for ( const auto& hit_map : m_hit_maps_coarse)
+    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
+  for ( const auto& hit_map : m_hit_maps_fine)
+    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, kPUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_track_coarse", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_track_fine", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -90, 90, 180, kPUBINT);
+  m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.05, 0.05, 100, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -90, 90, 180, kPUBINT);
+  m_histogrammanager->registerHistogram("tan_phi_yz", "tan(phi_yz)", -0.05, 0.05, 100, kPUBINT);
   INFO(" ... done registering histograms ... " );
 }
 

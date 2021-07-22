@@ -79,13 +79,15 @@ double IFTMonitorModule::mse_fit(std::vector<Vector3> track, std::pair<Vector3, 
 }
 
 
-IFTMonitorModule::IFTMonitorModule() {}
+IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) { 
+  INFO("");
+}
 
 IFTMonitorModule::~IFTMonitorModule() { 
   INFO("With config: " << m_config.dump());
 }
 
-void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
+void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;

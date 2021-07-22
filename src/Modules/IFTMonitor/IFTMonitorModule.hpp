@@ -12,12 +12,12 @@ typedef Eigen::Matrix<double, 3, 1> Vector3;
 
 class IFTMonitorModule : public MonitorBaseModule {
  public:
-  IFTMonitorModule();
+  IFTMonitorModule(const std::string&);
   ~IFTMonitorModule();
 
  protected:
 
-  void monitor(daqling::utilities::Binary &eventBuilderBinary);
+  void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
 

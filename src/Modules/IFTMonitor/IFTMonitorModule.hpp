@@ -36,7 +36,7 @@ class IFTMonitorModule : public MonitorBaseModule {
     double z;
     double phi1;
     double phi2;
-    doubel mse;
+    double mse;
   };
 
   bool adjacent(int strip1, int strip2);

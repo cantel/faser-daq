@@ -287,7 +287,7 @@ void IFTMonitorModule::monitor(daqling::utilities::Binary &eventBuilderBinary) {
   // write out debug information every 1000 events
   if (m_eventId % 1000 == 0) {
     for (auto info : m_eventInfo)
-      DEBUG(info.event << ", " << info.x << ", " << info.y << ", " << info.z << ", " << info.phi1 << ", " << info.phi2 << ", " << mse_min);
+      DEBUG(info.event << ", " << info.x << ", " << info.y << ", " << info.z << ", " << info.phi1 << ", " << info.phi2 << ", " << info.mse);
     for (auto sp : m_spacepointsList)
       DEBUG(sp.event << ", " << sp.layer << ", " << sp.x << ", " << sp.y);
   }

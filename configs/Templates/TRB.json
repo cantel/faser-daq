@@ -467,6 +467,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196608,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -492,6 +493,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196609,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -517,6 +519,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196610,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -542,6 +545,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196611,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -567,6 +571,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196612,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -592,6 +597,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196613,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -617,6 +623,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196614,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -642,6 +649,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196615,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -667,6 +675,7 @@
 		"type": "TrackerMonitor",
 		"settings": {
             "fragmentID": 196616,
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {

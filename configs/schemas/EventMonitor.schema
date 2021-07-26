@@ -28,10 +28,32 @@
           "sourceID": {
             "type": "integer",
             "minimum": 0
+          },
+          "publish_interval": {
+             "type": "integer",
+             "minimum": 1
+          },
+          "enable_tlb": {
+            "type": "boolean",
+            "description": "Set to true if TLB included in system."
+          },
+          "enable_digitizer": {
+            "type": "boolean",
+            "description": "Set to true if digitizer included in system."
+          },
+          "enable_trb": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 9,
+            "description": "List of TRB board IDs included in system.",
+	    "items": {
+	      "type": "integer"
+            }
           }
         },
         "format":"grid",
         "propertyOrder": 3
       }
-    }
+    },
+    "required": ["name","type"]
 }

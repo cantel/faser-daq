@@ -204,44 +204,42 @@ void TrackerMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TrackerMonitor ... " );
 
-  const unsigned kPUBINT = 30; // publishing interval in seconds
-
-  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", 0, MAXFRAGSIZE/50, MAXFRAGSIZE/2000,  Axis::Range::EXTENDABLE, kPUBINT*10);
+  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", 0, MAXFRAGSIZE/50, MAXFRAGSIZE/2000,  Axis::Range::EXTENDABLE, m_PUBINT*10);
 
   m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 1800);
   m_histogrammanager->registerHistogram("diff_trb_sct_bcid", "TRB BCID - SCT BCID", -5, 5, 10, Axis::Range::EXTENDABLE, 120);
   m_histogrammanager->registerHistogram("diff_trb_sct_l1id", "TRB BCID - SCT L1ID", -5, 5, 10, Axis::Range::EXTENDABLE, 120);
   m_histogrammanager->registerHistogram("total_hits_multiplicity", "total_hits_multiplicity", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity", "good_hits_multiplicity", 0, 30, 30, Axis::Range::EXTENDABLE, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod0", "good_hits_multiplicity_Mod0", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod1", "good_hits_multiplicity_Mod1", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod2", "good_hits_multiplicity_Mod2", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod3", "good_hits_multiplicity_Mod3", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod4", "good_hits_multiplicity_Mod4", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 1, 30, 29, kPUBINT);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_mod4to7", -130, 130, 52, kPUBINT);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_mod0to3", -130, 130, 52, kPUBINT);
-  m_histogrammanager->register2DHistogram("chip_occupancy_noise", "module_number",  0, 4, 4, "chip_number", 0, 24, 24, kPUBINT);
-  m_histogrammanager->register2DHistogram("chip_occupancy_physics", "module_number",  0, 4,4,"chip_number", 0, 24 , 24, kPUBINT);
-  m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, kPUBINT);
-  m_histogrammanager->register2DHistogram("hitmap_random", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, kPUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity", "good_hits_multiplicity", 0, 30, 30, Axis::Range::EXTENDABLE, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod0", "good_hits_multiplicity_Mod0", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod1", "good_hits_multiplicity_Mod1", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod2", "good_hits_multiplicity_Mod2", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod3", "good_hits_multiplicity_Mod3", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod4", "good_hits_multiplicity_Mod4", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_mod4to7", -130, 130, 52, m_PUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_mod0to3", -130, 130, 52, m_PUBINT);
+  m_histogrammanager->register2DHistogram("chip_occupancy_noise", "module_number",  0, 4, 4, "chip_number", 0, 24, 24, m_PUBINT);
+  m_histogrammanager->register2DHistogram("chip_occupancy_physics", "module_number",  0, 4,4,"chip_number", 0, 24 , 24, m_PUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_random", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
 // per module
   std::vector<std::string> hitp_categories = { "000", "001", "010", "011", "100", "110", "111" };
   for ( unsigned i = 0; i < kTOTAL_MODULES; i++ ){
     std::string hname_hitp = m_prefix_hname_hitp+std::to_string(i);
-    m_histogrammanager->registerHistogram(hname_hitp, "hit pattern", hitp_categories, kPUBINT);
+    m_histogrammanager->registerHistogram(hname_hitp, "hit pattern", hitp_categories, m_PUBINT);
   }
-  m_histogrammanager->registerHistogram("hitpattern_random", "hit pattern", hitp_categories, kPUBINT);
+  m_histogrammanager->registerHistogram("hitpattern_random", "hit pattern", hitp_categories, m_PUBINT);
 
   std::vector<std::string> trb_error_categories = {"TRBError", "ModuleError", "NoEventID", "NoBCID", "NoCRC", "MissingFrames", "UnrecognizedFrames", "ModuleDecodeError"};
-  m_histogrammanager->registerHistogram("track_data_error_types", "error type", trb_error_categories, kPUBINT);
+  m_histogrammanager->registerHistogram("track_data_error_types", "error type", trb_error_categories, m_PUBINT);
 
   std::vector<std::string> sct_error_categories = {"L1IDMismatch", "BCIDMismatch", "NoData", "BuffOverflow", "BuffError", "UnknownChip", "Unknown"};
   for ( unsigned i = 0; i < kTOTAL_MODULES; i++ ){
     std::string hname_scterr = m_prefix_hname_scterr+std::to_string(i);
-    m_histogrammanager->registerHistogram(hname_scterr, "error type", sct_error_categories, kPUBINT);
+    m_histogrammanager->registerHistogram(hname_scterr, "error type", sct_error_categories, m_PUBINT);
   }
 
   INFO(" ... done registering histograms ... " );

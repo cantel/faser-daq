@@ -8,9 +8,10 @@
 		"type": "EventMonitor",
 		"settings": {
             "fragmentID": 262144,
+            "publish_interval": 15,
             "enable_digitizer": true,
             "enable_tlb": true,
-            "enable_trb": [false, false, false, false, false, false, false, true, false]
+            "enable_trb": [1,2,3]
 		},
 		"connections": {
 				"receivers": [

@@ -110,15 +110,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 
 
   for (int TRBBoardId=0; TRBBoardId < kTRB_BOARDS; TRBBoardId++) {
-    fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
-    if (fragmentUnpackStatus) {
-      fill_error_status_to_metric(fragmentUnpackStatus);
-      return;
-    }
-
-    fill_error_status_to_metric(m_fragment->status());
-  
-    const TrackerDataFragment* trackerdataFragment = m_trackerdataFragment;
+    const TrackerDataFragment trackerdataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
     m_eventId = m_trackerdataFragment->event_id();
 
     if (TRBBoardId == 0)
@@ -130,9 +122,9 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
        payload_size = MAXFRAGSIZE;
     } 
 
-    if (trackerdataFragment->valid()){
-      m_bcid = trackerdataFragment->bc_id();
-      m_l1id = trackerdataFragment->event_id();
+    if (trackerdataFragment.valid()){
+      m_bcid = trackerdataFragment.bc_id();
+      m_l1id = trackerdataFragment.event_id();
     }
     else {
       WARNING("Ignoring corrupted data fragment.");
@@ -141,11 +133,11 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 
     m_print_WARNINGS = m_total_WARNINGS < kMAXWARNINGS;
 
-    for (auto it = trackerdataFragment->cbegin(); it != trackerdataFragment->cend(); ++it) {
+    for (auto it = trackerdataFragment.cbegin(); it != trackerdataFragment.cend(); ++it) {
       auto sctEvent = *it;
       if (sctEvent == nullptr) {
-        WARNING("Invalid SCT Event for event " << trackerdataFragment->event_id());
-        WARNING("tracker data fragment: " << *trackerdataFragment);
+        WARNING("Invalid SCT Event for event " << trackerdataFragment.event_id());
+        WARNING("tracker data fragment: " << trackerdataFragment);
         m_status = STATUS_WARN;
         continue;
       }

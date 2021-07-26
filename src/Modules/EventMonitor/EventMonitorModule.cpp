@@ -12,15 +12,15 @@
 
 #include "EventMonitorModule.hpp"
 
-#define MAX_TRIG_LINES 5
-
-#define MAX_L1A_SPACING 10000000
-
-using namespace std::chrono_literals;
-using namespace std::chrono;
-
 EventMonitorModule::EventMonitorModule(const std::string& n):MonitorBaseModule(n) { 
   INFO("In EventMonitorModule contructor");
+  m_tlb_bcid = 0;
+  m_digi_bcid = 0;
+  m_trb_bcid = 0;
+}
+
+void EventMonitorModule::configure(){
+  INFO("Configuring EventMonitorModule");
   
   auto cfg = getModuleSettings();
   
@@ -28,16 +28,13 @@ EventMonitorModule::EventMonitorModule(const std::string& n):MonitorBaseModule(n
   m_enable_digitizer = (bool)cfg["enable_digitizer"];
   m_enable_tlb       = (bool)cfg["enable_tlb"];
   
-  int n_trb = (int)cfg["enable_trb"].size();
+  m_n_trb = (int)cfg["enable_trb"].size();
+  if (m_n_trb > kMAXTRBs) throw MonitorBase::ConfigurationIssue(ERS_HERE, "Number of configured TRBs is larger than what exists.");
   
-  if(n_trb<9){
-    WARNING("It appears you have fewer TRB planes than expected : "<<(int)cfg["enable_trb"].size());
-  }
-  
-  for(int itrb=0; itrb<n_trb; itrb++){
-    m_enable_trb[itrb] = (bool)cfg["enable_trb"].at(itrb);
-  }
-  
+  m_enabled_trbs = cfg["enable_trb"].get<std::vector<int>>();
+
+  MonitorBaseModule::configure();
+
 }
 
 EventMonitorModule::~EventMonitorModule() { 
@@ -50,42 +47,55 @@ void EventMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &event
   if (evtHeaderUnpackStatus) return;
 
   // TLB BCID
-  auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::TriggerSourceID);
-  if ( fragmentUnpackStatus ) {
-    fill_error_status_to_metric( fragmentUnpackStatus );
-    return;
+  if (m_enable_tlb){
+    auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::TriggerSourceID);
+    if ( fragmentUnpackStatus ) {
+      fill_error_status_to_metric( fragmentUnpackStatus );
+      ERROR("Error retrieving TLB data fragment.");
+      if (fragmentUnpackStatus & MissingFragment) m_missing_tlb++;
+      return;
+    }
+    m_tlb_bcid = m_fragment->bc_id();
   }
-  m_tlb_bcid = m_fragment->bc_id();
 
   // Digi BCID
-  fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::PMTSourceID);
-  if ( fragmentUnpackStatus ) {
-    fill_error_status_to_metric( fragmentUnpackStatus );
-    return;
+  if (m_enable_digitizer){
+    auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::PMTSourceID);
+    if ( fragmentUnpackStatus ) {
+      fill_error_status_to_metric( fragmentUnpackStatus );
+      ERROR("Error retrieving digitizer data fragment.");
+      if (fragmentUnpackStatus & MissingFragment) m_missing_digi++;
+    } else {
+    if (m_enable_tlb){
+      m_digi_bcid = m_fragment->bc_id();
+      //std::cout<<"  tlb bcid: "<<m_tlb_bcid<<std::endl;
+      //std::cout<<"  digi bcid: "<<m_digi_bcid<<std::endl;
+      int diff_tlb_digi_bcid = m_tlb_bcid - m_digi_bcid;
+      if ( std::abs(diff_tlb_digi_bcid) < kMAXBCID ) m_histogrammanager->fill("h_diff_tlb_digi_bcid", diff_tlb_digi_bcid );
+      else WARNING("Difference between TLB BCID = "<<m_tlb_bcid<<" and digi BCID = "<<m_digi_bcid<<" too big to fill.");
+      }
+    }
   }
-  m_digi_bcid = m_fragment->bc_id();
-  //std::cout<<"  tlb bcid: "<<m_tlb_bcid<<std::endl;
-  //std::cout<<"  digi bcid: "<<m_digi_bcid<<std::endl;
-  int diff_tlb_digi_bcid = m_tlb_bcid - m_digi_bcid;
-  if ( std::abs(diff_tlb_digi_bcid) < 5000 ) m_histogrammanager->fill("h_diff_tlb_digi_bcid", diff_tlb_digi_bcid );
-  else WARNING("difference between tlb bcid = "<<m_tlb_bcid<<" and trb bcid = "<<m_digi_bcid<<" too big.");
   
-  // if ( (m_tlb_bcid < 5000) && (m_digi_bcid < 5000) ) m_histogrammanager->fill2D("h_digibcid_vs_tlbbcid", m_digi_bcid, m_tlb_bcid );
-
   //// TRB BCID
-  //fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::TrackerSourceID+1);
-  //if ( fragmentUnpackStatus ) {
-  //  fill_error_status_to_metric( fragmentUnpackStatus );
-  //  return;
-  //}
-  //m_trb_bcid = m_fragment->bc_id();
-  ////std::cout<<"tlb bcid = "<<m_tlb_bcid<<"  trb bcid = "<<m_trb_bcid<<std::endl;
-  ////std::cout<<"tlb bcid - trb bcid = "<<m_tlb_bcid - m_trb_bcid<<std::endl;
-  //int diff_tlb_trb_bcid = m_tlb_bcid - m_trb_bcid;
-  //if ( std::abs(diff_tlb_trb_bcid) < 5000 ) m_histogrammanager->fill("h_diff_tlb_trb_bcid", diff_tlb_trb_bcid );
-  //else WARNING("difference between tlb bcid = "<<m_tlb_bcid<<" and trb bcid = "<<m_trb_bcid<<" too big.");
-  //if ( (m_tlb_bcid < 5000) && (m_trb_bcid < 5000) ) m_histogrammanager->fill2D("h_trbbcid_vs_tlbbcid", m_trb_bcid, m_tlb_bcid );
-
+  for (int8_t i=0;i<m_n_trb;i++){
+    auto trb_id = m_enabled_trbs[i];
+    auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::TrackerSourceID+trb_id);
+    if ( fragmentUnpackStatus ) {
+      fill_error_status_to_metric( fragmentUnpackStatus );
+      ERROR("Error retrieving tracker data fragment.");
+      if (fragmentUnpackStatus & MissingFragment) m_missing_trb++;
+    } else {
+      if (m_enable_tlb) {
+        m_trb_bcid = m_fragment->bc_id();
+        //std::cout<<"tlb bcid = "<<m_tlb_bcid<<"  trb bcid = "<<m_trb_bcid<<std::endl;
+        //std::cout<<"tlb bcid - trb bcid = "<<m_tlb_bcid - m_trb_bcid<<std::endl;
+        int diff_tlb_trb_bcid = m_tlb_bcid - m_trb_bcid;
+        if ( std::abs(diff_tlb_trb_bcid) < kMAXBCID ) m_histogrammanager->fill(m_tlb_trb_hist_names.at(i), diff_tlb_trb_bcid );
+        else WARNING("Difference between TLB BCID = "<<m_tlb_bcid<<" and TRB BCID = "<<m_trb_bcid<<" too big to fill.");
+      }
+    }
+  }
 
 }
 
@@ -94,12 +104,19 @@ void EventMonitorModule::register_hists() {
   INFO(" ... registering histograms in EventMonitor ... " );
  
   // trigger counts 
-  m_histogrammanager->registerHistogram("h_diff_tlb_trb_bcid", "TLB BCID - TRB0 BCID", -20, 20, 40, Axis::Range::EXTENDABLE, 7200);
-  m_histogrammanager->registerHistogram("h_diff_tlb_digi_bcid", "TLB BCID - Digi BCID", -20, 20, 40, Axis::Range::EXTENDABLE, 7200);
-  
-  // ToDo : Figure out a way to display 2D info to be able to examine the correlation of the BCID matches
-  // m_histogrammanager->register2DHistogram("h_trbbcid_vs_tlbbcid", "TRB BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
-  // m_histogrammanager->register2DHistogram("h_digibcid_vs_tlbbcid", "DIGI BCID", 0, 3570, 3570, "TLB BCID", 0, 3570, 3570, 7200);
+  if ( m_enable_tlb && m_enable_digitizer){
+    m_histogrammanager->registerHistogram("h_diff_tlb_digi_bcid", "TLB BCID - Digi BCID", -5, 5, 10, Axis::Range::EXTENDABLE, m_PUBINT);
+  }
+  if ( m_enable_tlb){
+    for ( auto i: m_enabled_trbs){
+      std::stringstream histo_title;
+      histo_title<<"h_diff_tlb_trb"<<i<<"_bcid";
+      m_tlb_trb_hist_names.push_back(histo_title.str());
+      std::stringstream histo_label;
+      histo_label<<"TLB BCID - TRB"<<i<<" BCID";
+      m_histogrammanager->registerHistogram(histo_title.str(), histo_label.str(), -5, 5, 10, Axis::Range::EXTENDABLE, m_PUBINT);
+    }
+  }
 
   INFO(" ... done registering histograms ... " );
   return;
@@ -111,6 +128,10 @@ void EventMonitorModule::register_metrics() {
   INFO( "... registering metrics in EventMonitorModule ... " );
 
   register_error_metrics();
+
+  registerVariable(m_missing_tlb, "MissingTLBCnt");
+  registerVariable(m_missing_digi, "MissingDigiCnt");
+  registerVariable(m_missing_trb, "MissingTRBCnt");
 
   return;
 }

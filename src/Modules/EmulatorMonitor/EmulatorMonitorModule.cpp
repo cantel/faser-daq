@@ -7,14 +7,15 @@
 #include <iostream> // std::flush
 #include <sstream> // std::ostringstream
 #include <fstream>      // std::ofstream
+#include <chrono>
+using namespace std::chrono;
 /// \endcond
 
 #include "EmulatorMonitorModule.hpp"
 
-using namespace std::chrono_literals;
-using namespace std::chrono;
-
 #define PI 3.14
+#define NBINS 10
+
 
 EmulatorMonitorModule::EmulatorMonitorModule(const std::string& n):MonitorBaseModule(n) { 
    INFO("");
@@ -54,13 +55,16 @@ void EmulatorMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &ev
   m_histogrammanager->fill("sizefrag", m_monitoringFragment->size_fragments_sent/1000.);
 
   m_histogrammanager->reset("pulse");
-  short adc(0.);
   short amp = rand()%10+1;
-  float phase = (PI/2.)*(rand()%10)/10.;
-  for ( unsigned short i = 1; i <= 5; i++) {
-    adc = amp*sin( i*(PI/5.) + phase);
-    m_histogrammanager->fill("pulse", i, adc);
+  float phase = (PI/2.)*(rand()%10)/NBINS;
+  std::vector<short> adcs;
+  //std::vector<unsigned short> positions;
+  for ( unsigned short i = 1; i <= NBINS; i++) {
+    adcs.push_back(amp*sin( i*(PI/5.) + phase));
+    //positions.push_back(i);
   }
+  //m_histogrammanager->fill("pulse", positions, adcs); // fill by providing both vectors for x values and weights. Around 15% slower compared to filling method one line down
+  m_histogrammanager->fill("pulse", 1, 1, adcs); 
 
   // 2D hist fill
   DEBUG("m_monitoringFragment->num_fragments_sent = "<<m_monitoringFragment->num_fragments_sent);
@@ -76,17 +80,17 @@ void EmulatorMonitorModule::register_hists() {
   // example of 1D histogram: default is ylabel="counts" non-extendable axes (Axis::Range::NONEXTENDABLE & 60 second publishing interval.
   //m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
   // example of 1D histogram with extendable x-axis, publishing interval of every 30 seconds.
-  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 349.5, 175, Axis::Range::EXTENDABLE, 5);
+  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 349.5, 175, Axis::Range::EXTENDABLE, m_PUBINT);
 
   // example 1D histogram with non-extendable axis and resetting after each publish
-  m_histogrammanager->registerHistogram("sizefrag", "size of sent fragments [kB]","count/2kB", -0.5, 349.5, 175, Axis::Range::NONEXTENDABLE, 5);
+  m_histogrammanager->registerHistogram("sizefrag", "size of sent fragments [kB]","count/2kB", -0.5, 349.5, 175, Axis::Range::NONEXTENDABLE, m_PUBINT);
   m_histogrammanager->resetOnPublish("sizefrag", true);
 
   // example pulse reset
-   m_histogrammanager->registerHistogram("pulse", "pulse in magic adc", 1, 6, 5, 3);
+   m_histogrammanager->registerHistogram("pulse", "pulse in magic adc", 1, NBINS+1, NBINS, 5);
 
   // example 2D hist
-  m_histogrammanager->register2DHistogram("numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 100.5, 101, "size of sent fragments [kB]", -0.5, 9.5, 20, 5 );
+  m_histogrammanager->register2DHistogram("numfrag_vs_sizefrag", "no. of sent fragments", -0.5, 100.5, 101, "size of sent fragments [kB]", -0.5, 9.5, 20, m_PUBINT);
 
   INFO(" ... done registering histograms ... " );
 

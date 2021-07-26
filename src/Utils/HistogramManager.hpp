@@ -141,6 +141,66 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
+  template<typename X, typename W>
+  void fill( std::string name, std::vector<X> values, std::vector<W> weights )  {
+
+    static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
+                  "Cannot fill histogram with invalid value type. Value must be numeric.");
+    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
+                  "Cannot fill histogram with invalid weight value type. Value must be numeric.");
+
+    unsigned indices = values.size();
+    if ( indices != weights.size()) {
+      WARNING("Can't fill histogram. Given position and weight vectors not of same size.");
+      return;
+    }
+
+    if ( m_histogram_map.count(name) ) {
+      HistBase * base = m_histogram_map[name];
+      if (base->extendable) {
+        Hist<stretchy_hist_t>* hist = static_cast<Hist<stretchy_hist_t>*>(base); 
+        for ( unsigned i = 0; i < indices; i++ ){
+          hist->fill(values.at(i), weights.at(i)); // TODO does boost histogram support filling of arrays? weights function might be a problem.
+        }
+      } else {
+        Hist<hist_t>* hist = static_cast<Hist<hist_t>*>(base); 
+        for ( unsigned i = 0; i < indices; i++ ){
+          hist->fill(values.at(i), weights.at(i));
+        }
+      }
+    }
+    else 
+      WARNING("Histogram with name "<<name<<" does not exist.");
+  }
+
+  template<typename X, typename W>
+  void fill( std::string name, X start_value, X step, std::vector<W> weights )  {
+
+    static_assert(std::is_integral<X>::value || std::is_floating_point<X>::value,
+                  "Cannot fill histogram with invalid value type. Value must be numeric.");
+    static_assert(std::is_integral<W>::value || std::is_floating_point<W>::value,
+                  "Cannot fill histogram with invalid weight value type. Value must be numeric.");
+
+    if ( m_histogram_map.count(name) ) {
+      HistBase * base = m_histogram_map[name];
+      if (base->extendable) {
+        Hist<stretchy_hist_t>* hist = static_cast<Hist<stretchy_hist_t>*>(base); 
+        for ( unsigned i = 0; i < weights.size(); i++ ){
+          X value = start_value+i*step;
+          hist->fill(value, weights.at(i)); // TODO does boost histogram support filling of arrays? weights function might be a problem
+        }
+      } else {
+        Hist<hist_t>* hist = static_cast<Hist<hist_t>*>(base); 
+        for ( unsigned i = 0; i < weights.size(); i++ ){
+          X value = start_value+i*step;
+          hist->fill(value, weights.at(i));
+        }
+      }
+    }
+    else 
+      WARNING("Histogram with name "<<name<<" does not exist.");
+  }
+
   template<typename W = int>
   void fill( std::string name, std::string value, W weight=1 )  {
 

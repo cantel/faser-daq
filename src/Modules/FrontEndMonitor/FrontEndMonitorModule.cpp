@@ -61,10 +61,10 @@ void FrontEndMonitorModule::register_hists() {
   // example of 1D histogram: default is ylabel="counts" non-extendable axes (Axis::Range::NONEXTENDABLE & 60 second publishing interval.
   //m_histogrammanager->registerHistogram("h_tracker_payloadsize", "payload size [bytes]", -0.5, 545.5, 275);
   // example of 1D histogram with extendable x-axis, publishing interval of every 5 seconds.
-  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 99.5, 50, Axis::Range::EXTENDABLE, 5);
+  m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", "event count/2kB", -0.5, 99.5, 50, Axis::Range::EXTENDABLE, m_PUBINT);
 
   // example histograms with lots of bins
-  m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 10);
+  m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, m_PUBINT);
 
 
   INFO(" ... done registering histograms ... " );

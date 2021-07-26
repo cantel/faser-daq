@@ -92,14 +92,13 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
 void DigitizerMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerMonitor ... " );
   
-  double publish_interval = (double)getModuleSettings()["publish_interval"];;
   m_display_thresh=(float)getModuleSettings()["display_thresh"];
   // payload size
-  m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, publish_interval);
+  m_histogrammanager->registerHistogram("h_digitizer_payloadsize", "payload size [bytes]", -0.5, 545.5, 275, m_PUBINT);
 
   // payload status
   std::vector<std::string> categories = {"Ok", "Unclassified", "BCIDMistmatch", "TagMismatch", "Timeout", "Overflow","Corrupted", "Dummy", "Missing", "Empty", "Duplicate", "DataUnpack"};
-  m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, publish_interval );
+  m_histogrammanager->registerHistogram("h_digitizer_errorcount", "error type", categories, m_PUBINT );
 
   // synthesis common for all channels
   int buffer_length = (int)getModuleSettings()["buffer_length"];
@@ -107,8 +106,8 @@ void DigitizerMonitorModule::register_hists() {
     std::string chStr = std::to_string(iChan);
     if (iChan<10) chStr = "0"+chStr;
     // example pulse
-    m_histogrammanager->registerHistogram("h_pulse_ch"+chStr, "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, publish_interval);
-    m_histogrammanager->registerHistogram("h_peak_ch"+chStr, "Peak signal [mV]", -200, 2000, 110, publish_interval);
+    m_histogrammanager->registerHistogram("h_pulse_ch"+chStr, "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, m_PUBINT);
+    m_histogrammanager->registerHistogram("h_peak_ch"+chStr, "Peak signal [mV]", -200, 2000, 110, m_PUBINT);
   
   }
   
@@ -207,7 +206,5 @@ void DigitizerMonitorModule::FillChannelPulse(std::string histogram_name, int ch
   DEBUG("Filling pulse for : "<<histogram_name<<"  "<<channel);
 
   m_histogrammanager->reset(histogram_name);
-  for(int isamp=0; isamp<(int)m_pmtdataFragment->channel_adc_counts(channel).size(); isamp++){
-    m_histogrammanager->fill(histogram_name,isamp,m_pmtdataFragment->channel_adc_counts(channel).at(isamp));
-  }
+  m_histogrammanager->fill(histogram_name,0,1,m_pmtdataFragment->channel_adc_counts(channel));
 }

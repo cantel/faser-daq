@@ -8,6 +8,7 @@
 #include <fstream>
 #include <math.h>
 #include <numeric>
+#include "Utils/Ers.hpp"
 /// \endcond
 
 #include "IFTMonitorModule.hpp"
@@ -111,105 +112,109 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 
   for (int TRBBoardId=0; TRBBoardId < kTRB_BOARDS; TRBBoardId++) {
 
-    TrackerDataFragment m_trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
-    m_eventId = m_trackerDataFragment.event_id();
-    if (TRBBoardId == 0)
-      DEBUG("event " << m_eventId);
+    try {
+      TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
+      m_eventId = trackerDataFragment.event_id();
+      if (TRBBoardId == 0)
+        DEBUG("event " << m_eventId);
 
-    for (auto sctEvent : m_trackerDataFragment) {
-      if (sctEvent == nullptr) {
-        m_status = STATUS_WARN;
-        continue;
-      }
+      for (auto sctEvent : trackerDataFragment) {
+        if (sctEvent == nullptr) {
+          m_status = STATUS_WARN;
+          continue;
+        }
 
-      if (sctEvent->HasError()) {
-        auto sctErrorList= sctEvent->GetErrors();
-        for (unsigned idx = 0; idx < 12; idx++) {
-          auto sctErrors = sctErrorList.at(idx);
-          for (uint8_t sctError : sctErrors) {
-            WARNING("SCT Error for module "<<sctEvent->GetModuleID()<<", chip idx "<<idx<<". Error code = "<<static_cast<int>(sctError));
+        if (sctEvent->HasError()) {
+          auto sctErrorList= sctEvent->GetErrors();
+          for (unsigned idx = 0; idx < 12; idx++) {
+            auto sctErrors = sctErrorList.at(idx);
+            for (uint8_t sctError : sctErrors) {
+              WARNING("SCT Error for module "<<sctEvent->GetModuleID()<<", chip idx "<<idx<<". Error code = "<<static_cast<int>(sctError));
+            }
+          }
+        };
+
+        int diff_bcid = (m_bcid-sctEvent->GetBCID())&0xFF;
+        int diff_l1id = (m_l1id-sctEvent->GetL1ID())&0xF;
+        if (diff_bcid != kBCIDOFFSET) {
+          if (m_print_WARNINGS) WARNING("BCID mismatch for module "<<sctEvent->GetModuleID()<<". TRB BCID = "<<m_bcid<<", SCT BCID = "<<sctEvent->GetBCID());
+          m_total_WARNINGS++;
+        }
+        if (diff_l1id != 0) {
+          if (m_print_WARNINGS) WARNING("L1ID mismatch for module "<<sctEvent->GetModuleID()<<". TRB BCID = "<<m_l1id<<", SCT L1ID = "<<sctEvent->GetL1ID());
+          m_total_WARNINGS++;
+        }
+
+
+
+        int module = sctEvent->GetModuleID();
+
+        // combine adjacent strips to a cluster
+        std::vector<int> clustersPerChip = {};
+        std::vector<int> currentCluster = {};
+        int previousStrip = 0;
+        int currentStrip;
+        auto allHits = sctEvent->GetHits();
+        std::map<unsigned, std::vector<int>> allClusters;
+        for (unsigned chipIdx = 0; chipIdx < kCHIPS_PER_MODULE; chipIdx++) {
+          auto hitsPerChip = allHits[chipIdx];
+          previousStrip = 0;
+          for (auto hit : hitsPerChip) {
+            if (hit.second == 7) continue;
+            currentStrip = hit.first;
+            if ((not adjacent(previousStrip, currentStrip)) and (not currentCluster.empty())) {
+              clustersPerChip.push_back(average(currentCluster));
+              currentCluster.clear();
+            }
+            currentCluster.push_back(currentStrip);
+            previousStrip = currentStrip;
+          }
+          if (not currentCluster.empty()) clustersPerChip.push_back(average(currentCluster));
+          if (not clustersPerChip.empty()) allClusters[chipIdx] = clustersPerChip;
+          currentCluster.clear();
+          clustersPerChip.clear();
+        }
+
+
+        // create space points
+        for (int chipIdx1 = 0; chipIdx1 < (int)kCHIPS_PER_MODULE*0.5; chipIdx1++) {
+          int chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx1;
+          if ((allClusters[chipIdx1].empty()) or (allClusters[chipIdx2].empty())) continue;
+          for (auto cluster1 : allClusters[chipIdx1]) {
+            for (auto cluster2 : allClusters[chipIdx2]) {
+
+              // every second module is flipped
+              // invert for the downstream side the cluster and chip number
+              double chip = module % 2 == 0 ? chipIdx1 : 5 - chipIdx1;
+              if (module % 2 == 0)
+                cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; 
+              else
+                cluster1 = kSTRIPS_PER_CHIP - 1 - cluster1; 
+
+              // check for intersections
+              if (std::abs(cluster1-cluster2) > kSTRIPDIFFTOLERANCE) continue;
+
+              // calculate intersection
+              double yf = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster1) * kSTRIP_PITCH;
+              double yb = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster2) * kSTRIP_PITCH;
+              double px = intersection(yf, yb);
+
+              double py = 0.5 * (yf + yb) + kLAYER_OFFSET[TRBBoardId];
+
+              // invert every second module and add x-offset
+              if (module % 2 == 1) px *= -1;
+              px = module / 4 == 0 ? kXMIN - px : kXMAX + px;
+
+              m_histogrammanager->fill2D(m_hit_maps_coarse[TRBBoardId], px, py, 1);
+              m_histogrammanager->fill2D(m_hit_maps_fine[TRBBoardId], px, py, 1);
+              m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
+              m_spacepointsList.push_back({m_eventId, TRBBoardId, px, py});
+            }
           }
         }
-      };
-
-      int diff_bcid = (m_bcid-sctEvent->GetBCID())&0xFF;
-      int diff_l1id = (m_l1id-sctEvent->GetL1ID())&0xF;
-      if (diff_bcid != kBCIDOFFSET) {
-        if (m_print_WARNINGS) WARNING("BCID mismatch for module "<<sctEvent->GetModuleID()<<". TRB BCID = "<<m_bcid<<", SCT BCID = "<<sctEvent->GetBCID());
-        m_total_WARNINGS++;
       }
-      if (diff_l1id != 0) {
-        if (m_print_WARNINGS) WARNING("L1ID mismatch for module "<<sctEvent->GetModuleID()<<". TRB BCID = "<<m_l1id<<", SCT L1ID = "<<sctEvent->GetL1ID());
-        m_total_WARNINGS++;
-      }
-
-
-
-      int module = sctEvent->GetModuleID();
-
-      // combine adjacent strips to a cluster
-      std::vector<int> clustersPerChip = {};
-      std::vector<int> currentCluster = {};
-      int previousStrip = 0;
-      int currentStrip;
-      auto allHits = sctEvent->GetHits();
-      std::map<unsigned, std::vector<int>> allClusters;
-      for (unsigned chipIdx = 0; chipIdx < kCHIPS_PER_MODULE; chipIdx++) {
-        auto hitsPerChip = allHits[chipIdx];
-        previousStrip = 0;
-        for (auto hit : hitsPerChip) {
-          if (hit.second == 7) continue;
-          currentStrip = hit.first;
-          if ((not adjacent(previousStrip, currentStrip)) and (not currentCluster.empty())) {
-            clustersPerChip.push_back(average(currentCluster));
-            currentCluster.clear();
-          }
-          currentCluster.push_back(currentStrip);
-          previousStrip = currentStrip;
-        }
-        if (not currentCluster.empty()) clustersPerChip.push_back(average(currentCluster));
-        if (not clustersPerChip.empty()) allClusters[chipIdx] = clustersPerChip;
-        currentCluster.clear();
-        clustersPerChip.clear();
-      }
-
-
-      // create space points
-      for (int chipIdx1 = 0; chipIdx1 < (int)kCHIPS_PER_MODULE*0.5; chipIdx1++) {
-        int chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx1;
-        if ((allClusters[chipIdx1].empty()) or (allClusters[chipIdx2].empty())) continue;
-        for (auto cluster1 : allClusters[chipIdx1]) {
-          for (auto cluster2 : allClusters[chipIdx2]) {
-
-            // every second module is flipped
-            // invert for the downstream side the cluster and chip number
-            double chip = module % 2 == 0 ? chipIdx1 : 5 - chipIdx1;
-            if (module % 2 == 0)
-              cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; 
-            else
-              cluster1 = kSTRIPS_PER_CHIP - 1 - cluster1; 
-
-            // check for intersections
-            if (std::abs(cluster1-cluster2) > kSTRIPDIFFTOLERANCE) continue;
-
-            // calculate intersection
-            double yf = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster1) * kSTRIP_PITCH;
-            double yb = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster2) * kSTRIP_PITCH;
-            double px = intersection(yf, yb);
-
-            double py = 0.5 * (yf + yb) + kLAYER_OFFSET[TRBBoardId];
-
-            // invert every second module and add x-offset
-            if (module % 2 == 1) px *= -1;
-            px = module / 4 == 0 ? kXMIN - px : kXMAX + px;
-
-            m_histogrammanager->fill2D(m_hit_maps_coarse[TRBBoardId], px, py, 1);
-            m_histogrammanager->fill2D(m_hit_maps_fine[TRBBoardId], px, py, 1);
-            m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
-            m_spacepointsList.push_back({m_eventId, TRBBoardId, px, py});
-          }
-        }
-      }
+    } catch (MonitorBase::UnpackDataIssue &e) {
+      ERROR("Error checking data packet: "<<e.what()<<" Skipping event!");
     }
   }
 

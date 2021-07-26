@@ -110,34 +110,14 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 
 
   for (int TRBBoardId=0; TRBBoardId < kTRB_BOARDS; TRBBoardId++) {
-    const TrackerDataFragment trackerdataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
-    m_eventId = m_trackerdataFragment->event_id();
 
+    TrackerDataFragment m_trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
+    m_eventId = m_trackerDataFragment.event_id();
     if (TRBBoardId == 0)
       DEBUG("event " << m_eventId);
-    
-    size_t payload_size = m_fragment->payload_size();
-    if (payload_size > MAXFRAGSIZE) {
-       WARNING(" VERY large payload size received. Payload size of " << payload_size<<" bytes exceeds maximum allowable for histogram filling. Resetting to "<<MAXFRAGSIZE);
-       payload_size = MAXFRAGSIZE;
-    } 
 
-    if (trackerdataFragment.valid()){
-      m_bcid = trackerdataFragment.bc_id();
-      m_l1id = trackerdataFragment.event_id();
-    }
-    else {
-      WARNING("Ignoring corrupted data fragment.");
-      return;
-    }
-
-    m_print_WARNINGS = m_total_WARNINGS < kMAXWARNINGS;
-
-    for (auto it = trackerdataFragment.cbegin(); it != trackerdataFragment.cend(); ++it) {
-      auto sctEvent = *it;
+    for (auto sctEvent : m_trackerDataFragment) {
       if (sctEvent == nullptr) {
-        WARNING("Invalid SCT Event for event " << trackerdataFragment.event_id());
-        WARNING("tracker data fragment: " << trackerdataFragment);
         m_status = STATUS_WARN;
         continue;
       }
@@ -270,7 +250,8 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
       m_histogrammanager->fill("phi_yz", phi_yz);
       m_histogrammanager->fill("tan_phi_xz", tan_phi_xz);
       m_histogrammanager->fill("tan_phi_yz", tan_phi_yz);
-      m_histogrammanager->fill2D("hitmap_track", origin.x(), origin.y(), 1);
+      m_histogrammanager->fill2D("hitmap_track_coarse", origin.x(), origin.y(), 1);
+      m_histogrammanager->fill2D("hitmap_track_fine", origin.x(), origin.y(), 1);
       m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz, mse_min});
     }
   }
@@ -289,7 +270,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 
 void IFTMonitorModule::register_hists() {
   INFO(" ... registering histograms in TrackerMonitor ... " );
-  const unsigned kPUBINT = 30; // publishing interval in seconds
+  const unsigned kPUBINT = 5; // publishing interval in seconds
   for ( const auto& hit_map : m_hit_maps_coarse)
     m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
   for ( const auto& hit_map : m_hit_maps_fine)

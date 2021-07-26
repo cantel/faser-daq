@@ -701,6 +701,8 @@
 		"type": "IFTMonitor",
 		"settings": {
             "fragmentID": 196608,
+            "TriggerFilter" : "Physics",
+            "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {

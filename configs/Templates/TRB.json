@@ -687,26 +687,29 @@
 	"name": "iftmonitor00",
 	"host": "localhost",
 	"port": 5559,
-	"type": "IFTMonitor",
-        "loglevel": {
-            "core": "DEBUG",
-            "module": "DEBUG"
-        },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" },
-	"settings": {
+	"modules":[{
+		"name": "iftmonitor00",
+		"type": "IFTMonitor",
+		"settings": {
             "fragmentID": 196608,
             "stats_uri": "tcp://localhost:7000"
-	},
-	"connections": {
-            "receivers": [
-		{
-		    "type": "pubsub",
-		    "chid": 0,
-		    "transport": "tcp",
-		    "host": "localhost",
-		    "port": 8200
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
 		}
-            ]
-	}
+	}],
+        "loglevel": {
+            "core": "WARNING",
+            "module": "DEBUG",
+            "connection": "WARNING"
+        },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     }
 }

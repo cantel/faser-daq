@@ -129,7 +129,8 @@
         "name": "frontendmonitor01",
         "type": "FrontEndMonitor",
         "settings": {
-          "fragmentID": 1000001
+          "fragmentID": 1000001,
+            "publish_interval": 10
         },
         "connections": {
           "receivers": [
@@ -153,7 +154,8 @@
           "name": "emulatormonitor01",
           "type": "EmulatorMonitor",
           "settings": {
-            "fragmentID": 1000001
+            "fragmentID": 1000001,
+            "publish_interval": 10
           },
           "connections": {
             "receivers": [

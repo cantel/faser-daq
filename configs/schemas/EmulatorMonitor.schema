@@ -23,6 +23,10 @@
         "fragmentID": {
           "type": "integer",
           "minimum": 0
+        },
+        "publish_interval": {
+           "type": "integer",
+           "minimum": 1
         }
       },
       "format":"grid",

@@ -27,6 +27,22 @@ TriggerRateMonitorModule::TriggerRateMonitorModule(const std::string& n): Monito
 
 TriggerRateMonitorModule::~TriggerRateMonitorModule() { 
   INFO("With config: " << m_config.dump());
+
+  if (m_tapORed){
+    INFO("\n\n *** Trigger Summary ***\n"<<std::setprecision(2)<<
+        std::setw(24)<<"Triggered events: "<<std::setfill(' ')<<m_tapORed<<std::endl<<
+        std::setw(24)<<"Recorded events: "<<std::setfill(' ')<<m_tavORed<<" ("<<_PERCENT*((float)m_tavORed/(float)m_tapORed)<<"%)\n"<<
+        std::setw(24)<<"Simple deadtime vetoed: "<<std::setfill(' ')<<_PERCENT*((float)m_deadtime_veto/(float)m_tapORed)<<"%\n"<<
+        std::setw(24)<<"BCR vetoed: "<<std::setfill(' ')<<_PERCENT*(m_bcr_veto/m_tapORed)<<"%\n"<<
+        std::setw(24)<<"Tracker busy vetoed: "<<std::setfill(' ')<<_PERCENT*((float)m_busy_veto/(float)m_tapORed)<<"%\n"<<
+        std::setw(24)<<"Digitizer busy vetoed: "<<std::setfill(' ')<<_PERCENT*((float)m_digi_busy_veto/(float)m_tapORed)<<"%\n"<<
+        std::setw(24)<<"Rate limiter vetoed: "<<std::setfill(' ')<<_PERCENT*((float)m_rate_limiter_veto/(float)m_tapORed)<<"%");
+  } else {
+    INFO("\n\n *** Trigger Summary ***"<<
+        "\n Triggered events: "<<m_tapORed<<
+        "\n Recorded events: "<<m_tavORed);
+  }
+
  }
 
 void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
@@ -70,6 +86,8 @@ void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> 
 
   // trigger counts
   // --- 
+  m_tapORed += m_tlbmonitoringFragment->tap_ORed();
+  m_tavORed += m_tlbmonitoringFragment->tav_ORed();
   m_tbp0 += m_tlbmonitoringFragment->tbp(0);
   m_tbp1 += m_tlbmonitoringFragment->tbp(1);
   m_tbp2 += m_tlbmonitoringFragment->tbp(2);
@@ -159,6 +177,9 @@ void TriggerRateMonitorModule::register_metrics() {
   INFO( "... registering metrics in TriggerRateMonitorModule ... " );
 
   register_error_metrics();
+
+  registerVariable(m_tapORed, "TAPORed");
+  registerVariable(m_tavORed, "TAVORed");
 
   //TBP counts
   registerVariable(m_tbp0, "TBP0");

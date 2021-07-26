@@ -38,6 +38,34 @@ void MonitorBaseModule::configure() {
   INFO("Configuring...");
 
   FaserProcess::configure();
+
+  m_filter_physics = false;
+  m_filter_random = false;
+  m_filter_led = false;
+  auto mod_cfgs = getModuleSettings();
+  if (mod_cfgs.contains("TriggerFilter")){
+   auto filter = mod_cfgs["TriggerFilter"].get<std::string>();
+   if (filter == "Physics"){
+     m_filter_physics = true;
+     INFO("Monitoring physics triggered events only.");
+   }
+   else if (filter == "Random") {
+     m_filter_random = true;
+     INFO("Monitoring random triggered events only.");
+   }
+   else if (filter == "LED") {
+     m_filter_led = true;
+     INFO("Monitoring LED triggered events only.");
+   }
+   else{
+     WARNING("TriggerFilter setting not recognised.");
+   }
+  } else INFO("No special trigger filter set. Monitoring all received events.");
+
+  if (mod_cfgs.contains("publish_interval")){
+    m_PUBINT = mod_cfgs["publish_interval"].get<int>();
+  } else m_PUBINT = 5;
+
   register_metrics();
 
   m_histogramming_on = false;
@@ -65,19 +93,25 @@ void MonitorBaseModule::stop() {
 void MonitorBaseModule::runner() noexcept {
   INFO("Running...");
 
-  m_event_header_unpacked = false;
   DataFragment<daqling::utilities::Binary> eventBuilderBinary;
 
   while (m_run) {
+
+      m_event_header_unpacked = false;
 
       if ( !m_connections.receive(0, eventBuilderBinary)){
           std::this_thread::sleep_for(10ms);
           continue;
       }
-
-      monitor(eventBuilderBinary);
-
-      m_event_header_unpacked = false;
+      //DEBUG("Received event with size "<<eventBuilderBinary.size());
+      try {
+        if (m_filter_physics && !is_physics_triggered(eventBuilderBinary)) continue;
+        if (m_filter_random && !is_random_triggered(eventBuilderBinary)) continue;
+        if (m_filter_led && !is_led_triggered(eventBuilderBinary)) continue;
+        monitor(eventBuilderBinary);
+      } catch (UnpackDataIssue &e) {
+        ERROR("Error checking data packet: "<<e.what()<<" Skipping event!");
+      }
   }
 
 
@@ -93,6 +127,39 @@ void MonitorBaseModule::monitor(DataFragment<daqling::utilities::Binary>&) {
 void MonitorBaseModule::register_metrics() {
 
  INFO("... registering metrics in base MonitorBaseModule class ... " );
+
+}
+
+bool MonitorBaseModule::is_physics_triggered(DataFragment<daqling::utilities::Binary>& eventBuilderBinary) {
+
+  auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
+  if (evtHeaderUnpackStatus) throw UnpackDataIssue(ERS_HERE, "Error unpacking event header.");
+
+  auto trig_bits = m_event->trigger_bits();
+  if ( 0xF & trig_bits) return true;
+  else return false; 
+
+}
+
+bool MonitorBaseModule::is_random_triggered(DataFragment<daqling::utilities::Binary>& eventBuilderBinary) {
+
+  auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
+  if (evtHeaderUnpackStatus) throw UnpackDataIssue(ERS_HERE, "Error unpacking event header.");
+
+  auto trig_bits = m_event->trigger_bits();
+  if ( 0x10 & trig_bits) return true;
+  else return false; 
+
+}
+
+bool MonitorBaseModule::is_led_triggered(DataFragment<daqling::utilities::Binary>& eventBuilderBinary) {
+
+  auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
+  if (evtHeaderUnpackStatus) throw UnpackDataIssue(ERS_HERE, "Error unpacking event header.");
+
+  auto trig_bits = m_event->trigger_bits();
+  if ( 0x20 & trig_bits) return true;
+  else return false; 
 
 }
 
@@ -222,6 +289,36 @@ uint16_t MonitorBaseModule::unpack_full_fragment( DataFragment<daqling::utilitie
   }
   
   return dataStatus;
+}
+
+TrackerDataFragment MonitorBaseModule::get_tracker_data_fragment(DataFragment<daqling::utilities::Binary> &eventBuilderBinary, uint8_t boardId) {
+
+  if (unpack_fragment_header(eventBuilderBinary, TrackerSourceID+boardId)) throw UnpackDataIssue(ERS_HERE, "Issue encountered while unpacking fragment information.");
+
+  return TrackerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+}
+
+TLBDataFragment MonitorBaseModule::get_tlb_data_fragment(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
+
+  if (m_eventTag == TLBMonitoringTag) throw UnpackDataIssue(ERS_HERE,"Can't retrieve TLB data fragment: This is a monitoring event!");
+  if (unpack_fragment_header(eventBuilderBinary, TriggerSourceID)) throw UnpackDataIssue(ERS_HERE, "Issue encountered while unpacking fragment information.");
+
+  return TLBDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+}
+
+DigitizerDataFragment MonitorBaseModule::get_digitizer_data_fragment(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
+
+  if (unpack_fragment_header(eventBuilderBinary, PMTSourceID)) throw UnpackDataIssue(ERS_HERE, "Issue encountered while unpacking fragment information.");
+
+  return DigitizerDataFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
+}
+
+TLBMonitoringFragment MonitorBaseModule::get_tlb_monitoring_fragment(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
+
+  if (m_eventTag != TLBMonitoringTag) throw UnpackDataIssue(ERS_HERE,"Can't retrieve TLB monitoring fragment: This is not a TLB monitoring event!");
+  if (unpack_fragment_header(eventBuilderBinary, TriggerSourceID)) throw UnpackDataIssue(ERS_HERE, "Issue encountered while unpacking fragment information.");
+
+  return TLBMonitoringFragment(m_fragment->payload<const uint32_t*>(), m_fragment->payload_size());
 }
 
 uint16_t MonitorBaseModule::unpack_full_fragment( DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {

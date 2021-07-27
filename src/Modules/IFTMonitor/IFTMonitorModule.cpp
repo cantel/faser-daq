@@ -79,6 +79,20 @@ double IFTMonitorModule::mse_fit(std::vector<Vector3> track, std::pair<Vector3, 
   return rms;
 }
 
+double IFTMonitorModule::mean(double* x, int n) {
+	double sum = 0;
+	for (int i = 0; i < n; i++)
+		sum += x[i];
+	return sum / n;
+}
+
+double IFTMonitorModule::rms(double* x, int n) {
+	double sum = 0;
+	for (int i = 0; i < n; i++)
+		sum += pow(x[i], 2);
+	return sqrt(sum / n);
+}
+
 
 IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) { 
   INFO("");
@@ -205,6 +219,12 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
               if (module % 2 == 1) px *= -1;
               px = module / 4 == 0 ? kXMIN - px : kXMAX + px;
 
+              m_x = px;
+              m_y = py;
+              m_x_vec[m_vec_idx] = px;
+              m_y_vec[m_vec_idx] = py;
+              m_vec_idx = (m_vec_idx+1) % kAVGSIZE;
+
               m_histogrammanager->fill2D(m_hit_maps_coarse[TRBBoardId], px, py, 1);
               m_histogrammanager->fill2D(m_hit_maps_fine[TRBBoardId], px, py, 1);
               m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
@@ -263,7 +283,6 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 
   m_spacepoints.clear();
 
-
   // write out debug information every 1000 events
   if (m_eventId % 1000 == 0) {
     for (auto info : m_eventInfo)
@@ -271,6 +290,11 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
     for (auto sp : m_spacepointsList)
       DEBUG(sp.event << ", " << sp.layer << ", " << sp.x << ", " << sp.y);
   }
+
+  mean_x = mean(m_x_vec, kAVGSIZE);
+  mean_y = mean(m_y_vec, kAVGSIZE);
+  rms_x = rms(m_x_vec, kAVGSIZE);
+  rms_y = rms(m_y_vec, kAVGSIZE);
 }
 
 void IFTMonitorModule::register_hists() {
@@ -291,5 +315,13 @@ void IFTMonitorModule::register_hists() {
 
 void IFTMonitorModule::register_metrics() {
   INFO( "... registering metrics in TrackerMonitorModule ... " );
+
+  registerVariable(m_x, "X", daqling::core::metrics::AVERAGE);
+  registerVariable(m_y, "Y", daqling::core::metrics::AVERAGE);
+  registerVariable(mean_x, "mean_x");
+  registerVariable(mean_y, "mean_y");
+  registerVariable(rms_x, "rms_x");
+  registerVariable(rms_y, "rms_y");
+
   register_error_metrics();
 }

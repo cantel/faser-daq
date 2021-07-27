@@ -20,6 +20,12 @@ class IFTMonitorModule : public MonitorBaseModule {
   void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
   void register_metrics();
+  std::atomic<float> m_x;
+  std::atomic<float> m_y;
+  std::atomic<float> mean_x;
+  std::atomic<float> mean_y;
+  std::atomic<float> rms_x;
+  std::atomic<float> rms_y;
 
  private:
   struct SpacePoint {
@@ -44,6 +50,8 @@ class IFTMonitorModule : public MonitorBaseModule {
   double intersection(double y1, double y2);
   std::pair<Vector3, Vector3> linear_fit(const std::vector<Vector3>& spacepoints);
   double mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit);
+  double mean(double* x, int n);
+  double rms(double* x, int n);
 
   std::map<int, std::vector<Vector3>> m_spacepoints = {};
   std::vector<EventInfo> m_eventInfo = {};
@@ -53,6 +61,10 @@ class IFTMonitorModule : public MonitorBaseModule {
   const std::string m_hit_maps_fine[3] = {"hitmap_l0_fine", "hitmap_l1_fine", "hitmap_l2_fine"};
   double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm
   double kMODULEPOS[4] = {64.92386246, 1.20386696, -62.55613708, -126.25613403}; // values in mm
+  int m_vec_idx = 0;
+  static const int kAVGSIZE = 50;
+  double m_x_vec[kAVGSIZE] = {0};
+  double m_y_vec[kAVGSIZE] = {0};
   const double kLAYER_OFFSET[3] = {0, -5, 5}; // in mm
   const double kSTRIP_PITCH = 0.08; // in mm
   const double kXMIN = -63.04; // in mm

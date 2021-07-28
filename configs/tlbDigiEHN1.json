@@ -3,8 +3,8 @@
     "version": 11,
     "group": "faser",
     "components": [
-      { "$ref" : "Templates/TLB.json#TLBReceiverTI12LED" },
-      { "$ref" : "Templates/digitizer.json#DigitizerTI12" },
+      { "$ref" : "Templates/TLB.json#TLBReceiverEHN1" },
+      { "$ref" : "Templates/digitizer.json#DigitizerEHN1" },
       {
         "name": "eventbuilder01",
         "host": "localhost",
@@ -12,7 +12,7 @@
         "modules":[{
           "name": "eventbuilder01",
           "type": "EventBuilderFaser",
-          "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+          "settings":{ "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
           "connections": {
             "receivers": [
               { "chid": 0,"port": 8100, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
@@ -22,13 +22,15 @@
           }
         }],
         "loglevel":         { "$ref": "top.json#loglevel" },
-        "metrics_settings": { "$ref": "top.json#metrics_settings" }
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
       },
       { "$ref": "Templates/fileWriter.json#FileWriter" },
+      { "$ref": "Templates/monitor.json#EventMonitor" },
       { "$ref": "Templates/TLB.json#RateMonitor" },
       { "$ref": "Templates/TLB.json#TriggerMonitor" },
-      { "$ref": "Templates/digitizer.json#DigitizerMonitor" },
-      { "$ref": "Templates/monitor.json#EventMonitor" }
+      { "$ref": "Templates/digitizer.json#DigitizerPhysicsMonitor" },
+      { "$ref": "Templates/digitizer.json#DigitizerRandomMonitor" },
+      { "$ref": "Templates/digitizer.json#DigitizerLEDMonitor" }
     ]
   }
 }

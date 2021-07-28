@@ -1,0 +1,46 @@
+{
+  "configuration": {
+    "version": 11,
+    "group": "faser",
+    "components": [
+      { "$ref" : "Templates/TLB.json#TLBReceiverEHN1" },
+      { "$ref" : "Templates/digitizer.json#DigitizerEHN1" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver00CONFIGURED" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver01CONFIGURED" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver02CONFIGURED" },
+      {
+        "name": "eventbuilder01",
+        "host": "localhost",
+        "port": 5500,
+        "modules":[{
+          "name": "eventbuilder01",
+          "type": "EventBuilderFaser",
+          "settings":{ "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+          "connections": {
+            "receivers": [
+              { "chid": 0,"port": 8100, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 1,"port": 8101, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 2,"port": 8110, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 3,"port": 8111, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 4,"port": 8112, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} }
+            ],
+            "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
+          }
+        }],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
+      },
+      { "$ref": "Templates/fileWriter.json#FileWriter" },
+      { "$ref": "Templates/monitor.json#EventMonitor" },
+      { "$ref": "Templates/TLB.json#RateMonitor" },
+      { "$ref": "Templates/TLB.json#TriggerMonitor" },
+      { "$ref": "Templates/digitizer.json#DigitizerPhysicsMonitor" },
+      { "$ref": "Templates/digitizer.json#DigitizerRandomMonitor" },
+      { "$ref": "Templates/digitizer.json#DigitizerLEDMonitor" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor00" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor01" },
+      { "$ref": "Templates/TRB.json#TrackerMonitor02" },
+      { "$ref": "Templates/TRB.json#IFTMonitor00" }
+    ]
+  }
+}

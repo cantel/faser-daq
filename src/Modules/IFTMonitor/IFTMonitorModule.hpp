@@ -63,7 +63,7 @@ class IFTMonitorModule : public MonitorBaseModule {
   double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm
   double kMODULEPOS[4] = {64.92386246, 1.20386696, -62.55613708, -126.25613403}; // values in mm
   int m_vec_idx = 0;
-  static const int kAVGSIZE = 50;
+  static const int kAVGSIZE = 10000;
   double m_x_vec[kAVGSIZE] = {0};
   double m_y_vec[kAVGSIZE] = {0};
   const double kLAYER_OFFSET[3] = {0, -5, 5}; // in mm

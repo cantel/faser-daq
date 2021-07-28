@@ -278,6 +278,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
       m_histogrammanager->fill2D("hitmap_track_coarse", origin.x(), origin.y(), 1);
       m_histogrammanager->fill2D("hitmap_track_fine", origin.x(), origin.y(), 1);
       m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz, mse_min});
+      m_number_good_events++;
     }
   }
 
@@ -322,6 +323,7 @@ void IFTMonitorModule::register_metrics() {
   registerVariable(mean_y, "mean_y");
   registerVariable(rms_x, "rms_x");
   registerVariable(rms_y, "rms_y");
+  registerVariable(m_number_good_events, "number_good_events");
 
   register_error_metrics();
 }

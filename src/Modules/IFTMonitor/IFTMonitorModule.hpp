@@ -26,6 +26,7 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::atomic<float> mean_y;
   std::atomic<float> rms_x;
   std::atomic<float> rms_y;
+  std::atomic<int> m_number_good_events = 0;
 
  private:
   struct SpacePoint {

@@ -30,6 +30,10 @@ def convert_to_plotly(histobj):
         if "hitpattern" in histobj["name"]:
           xarray = ['b'+str(x) for x in histobj["categories"]] 
         yarray = histobj["yvalues"]
+        ysum=0
+        for y in yarray:
+          ysum+=y
+        yarray = [float(y)/float(ysum) if y else 0 for y in yarray]
         data = [dict(x=xarray, y=yarray, type="bar")]
 
     elif "2d" in hist_type:
@@ -56,7 +60,7 @@ def convert_to_plotly(histobj):
         #data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.2,"rgb(0,0,139)"],[0.4,"rgb(0,0,225)"],[0.6,"rgb(0,128,0)"],[0.8,"rgb(173,255,47)"],[1.0,"rgb(255,215,0)"]])]
         #data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.2,"rgb(0,0,139)"],[0.4,"rgb(0,0,225)"],[0.6,"rgb(0,129,0)"],[0.8,"rgb(173,255,47)"],[1.0,"rgb(255,0,0)"]])]
 #        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.2,"rgb(0,0,139)"],[0.6,"rgb(149,255,108)"], [1.0,"rgb(255,0,0)"]])]
-        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.05,"rgb(0,0,139)"], [0.3,"rgb(69,119,237)"],[0.6,"rgb(149,255,0)"], [1.0,"rgb(255,0,0)"]])]
+        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.0,"rgb(0,0,139)"],[0.05,"rgb(0,0,139)"], [0.3,"rgb(69,119,237)"],[0.6,"rgb(149,255,0)"], [1.0,"rgb(255,0,0)"]])]
     else:
 
         if "_ext" in hist_type:

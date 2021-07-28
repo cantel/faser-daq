@@ -226,7 +226,6 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
               m_vec_idx = (m_vec_idx+1) % kAVGSIZE;
 
               m_histogrammanager->fill2D(m_hit_maps_coarse[TRBBoardId], px, py, 1);
-              m_histogrammanager->fill2D(m_hit_maps_fine[TRBBoardId], px, py, 1);
               m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
               m_spacepointsList.push_back({m_eventId, TRBBoardId, px, py});
             }
@@ -276,7 +275,6 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
       m_histogrammanager->fill("tan_phi_xz", tan_phi_xz);
       m_histogrammanager->fill("tan_phi_yz", tan_phi_yz);
       m_histogrammanager->fill2D("hitmap_track_coarse", origin.x(), origin.y(), 1);
-      m_histogrammanager->fill2D("hitmap_track_fine", origin.x(), origin.y(), 1);
       m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz, mse_min});
       m_number_good_events++;
     }
@@ -303,10 +301,7 @@ void IFTMonitorModule::register_hists() {
   const unsigned kPUBINT = 5; // publishing interval in seconds
   for ( const auto& hit_map : m_hit_maps_coarse)
     m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
-  for ( const auto& hit_map : m_hit_maps_fine)
-    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, kPUBINT);
   m_histogrammanager->register2DHistogram("hitmap_track_coarse", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
-  m_histogrammanager->register2DHistogram("hitmap_track_fine", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, kPUBINT);
   m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -5, 5, 100, kPUBINT);
   m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.2, 0.2, 40, kPUBINT);
   m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -2, 2, 100, kPUBINT);

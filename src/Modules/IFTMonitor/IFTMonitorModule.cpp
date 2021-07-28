@@ -278,6 +278,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
       m_histogrammanager->fill2D("hitmap_track_coarse", origin.x(), origin.y(), 1);
       m_histogrammanager->fill2D("hitmap_track_fine", origin.x(), origin.y(), 1);
       m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz, mse_min});
+      m_number_good_events++;
     }
   }
 
@@ -303,13 +304,13 @@ void IFTMonitorModule::register_hists() {
   for ( const auto& hit_map : m_hit_maps_coarse)
     m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
   for ( const auto& hit_map : m_hit_maps_fine)
-    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, kPUBINT);
+    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, kPUBINT);
   m_histogrammanager->register2DHistogram("hitmap_track_coarse", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
-  m_histogrammanager->register2DHistogram("hitmap_track_fine", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 252, kPUBINT);
-  m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -90, 90, 180, kPUBINT);
-  m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.05, 0.05, 100, kPUBINT);
-  m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -90, 90, 180, kPUBINT);
-  m_histogrammanager->registerHistogram("tan_phi_yz", "tan(phi_yz)", -0.05, 0.05, 100, kPUBINT);
+  m_histogrammanager->register2DHistogram("hitmap_track_fine", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 150, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -5, 5, 100, kPUBINT);
+  m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.2, 0.2, 40, kPUBINT);
+  m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -2, 2, 100, kPUBINT);
+  m_histogrammanager->registerHistogram("tan_phi_yz", "tan(phi_yz)", -0.01, 0.01, 40, kPUBINT);
   INFO(" ... done registering histograms ... " );
 }
 
@@ -322,6 +323,7 @@ void IFTMonitorModule::register_metrics() {
   registerVariable(mean_y, "mean_y");
   registerVariable(rms_x, "rms_x");
   registerVariable(rms_y, "rms_y");
+  registerVariable(m_number_good_events, "number_good_events");
 
   register_error_metrics();
 }

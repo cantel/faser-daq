@@ -270,6 +270,8 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
       double tan_phi_yz = direction.y() / direction.z();
       double phi_xz = atan(tan_phi_xz) * 180 / PI;
       double phi_yz = atan(tan_phi_yz) * 180 / PI;
+      m_histogrammanager->fill("x", origin.x());
+      m_histogrammanager->fill("y", origin.y());
       m_histogrammanager->fill("phi_xz", phi_xz);
       m_histogrammanager->fill("phi_yz", phi_yz);
       m_histogrammanager->fill("tan_phi_xz", tan_phi_xz);
@@ -306,6 +308,8 @@ void IFTMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.2, 0.2, 40, kPUBINT);
   m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -2, 2, 100, kPUBINT);
   m_histogrammanager->registerHistogram("tan_phi_yz", "tan(phi_yz)", -0.01, 0.01, 40, kPUBINT);
+  m_histogrammanager->registerHistogram("x", "x", -128, 128, 50, kPUBINT);
+  m_histogrammanager->registerHistogram("y", "y", -128, 128, 50, kPUBINT);
   INFO(" ... done registering histograms ... " );
 }
 

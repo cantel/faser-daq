@@ -67,8 +67,8 @@ class IFTMonitorModule : public MonitorBaseModule {
   double m_y_vec[kAVGSIZE] = {0};
   const double kLAYER_OFFSET[3] = {0, -5, 5}; // in mm
   const double kSTRIP_PITCH = 0.08; // in mm
-  const double kXMIN = -63.04; // in mm
-  const double kXMAX = 63.04; // in mm
+  const double kXMIN = -63.96; // in mm
+  const double kXMAX = 63.96; // in mm
   const double kSTRIP_LENGTH = 126.08; // in mm
   const double kSTRIP_ANGLE = 0.04; // in radian
   int m_eventId = 0;

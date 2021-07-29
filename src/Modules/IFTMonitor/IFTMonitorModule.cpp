@@ -298,10 +298,10 @@ void IFTMonitorModule::register_hists() {
   for ( const auto& hit_map : m_hit_maps)
     m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
   m_histogrammanager->register2DHistogram("hitmap_track", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
-  m_histogrammanager->registerHistogram("x_l0", "x_l0", -128, 128, 50, kPUBINT);
-  m_histogrammanager->registerHistogram("y_l0", "y_l0", -128, 128, 50, kPUBINT);
-  m_histogrammanager->registerHistogram("x_track", "x_track", -128, 128, 50, kPUBINT);
-  m_histogrammanager->registerHistogram("y_track", "y_track", -128, 128, 50, kPUBINT);
+  m_histogrammanager->registerHistogram("x_l0", "x_l0", -128, 128, 25, kPUBINT);
+  m_histogrammanager->registerHistogram("y_l0", "y_l0", -128, 128, 25, kPUBINT);
+  m_histogrammanager->registerHistogram("x_track", "x_track", -128, 128, 25, kPUBINT);
+  m_histogrammanager->registerHistogram("y_track", "y_track", -128, 128, 25, kPUBINT);
   m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -5, 5, 100, kPUBINT);
   m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.2, 0.2, 40, kPUBINT);
   m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -2, 2, 100, kPUBINT);

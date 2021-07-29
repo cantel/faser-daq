@@ -231,7 +231,6 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
                 m_histogrammanager->fill("y_l0", py);
               }
               m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
-              m_spacepointsList.push_back({m_eventId, TRBBoardId, px, py});
             }
           }
         }
@@ -281,20 +280,11 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
       m_histogrammanager->fill("tan_phi_xz", tan_phi_xz);
       m_histogrammanager->fill("tan_phi_yz", tan_phi_yz);
       m_histogrammanager->fill2D("hitmap_track", origin.x(), origin.y(), 1);
-      m_eventInfo.push_back({m_eventId, origin.x(), origin.y(), origin.z(), tan_phi_xz, tan_phi_yz, mse_min});
       m_number_good_events++;
     }
   }
 
   m_spacepoints.clear();
-
-  // write out debug information every 1000 events
-  if (m_eventId % 1000 == 0) {
-    for (auto info : m_eventInfo)
-      DEBUG(info.event << ", " << info.x << ", " << info.y << ", " << info.z << ", " << info.phi1 << ", " << info.phi2 << ", " << info.mse);
-    for (auto sp : m_spacepointsList)
-      DEBUG(sp.event << ", " << sp.layer << ", " << sp.x << ", " << sp.y);
-  }
 
   mean_x = mean(m_x_vec, kAVGSIZE);
   mean_y = mean(m_y_vec, kAVGSIZE);

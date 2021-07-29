@@ -29,23 +29,6 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::atomic<int> m_number_good_events = 0;
 
  private:
-  struct SpacePoint {
-    int event;
-    int layer;
-    double x;
-    double y;
-  };
-
-  struct EventInfo {
-    int event;
-    double x;
-    double y;
-    double z;
-    double phi1;
-    double phi2;
-    double mse;
-  };
-
   bool adjacent(int strip1, int strip2);
   int average(std::vector<int> strips);
   double intersection(double y1, double y2);
@@ -55,8 +38,6 @@ class IFTMonitorModule : public MonitorBaseModule {
   double rms(double* x, int n);
 
   std::map<int, std::vector<Vector3>> m_spacepoints = {};
-  std::vector<EventInfo> m_eventInfo = {};
-  std::vector<SpacePoint> m_spacepointsList = {};
 
   const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
   double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm

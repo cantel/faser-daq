@@ -80,7 +80,7 @@ class IFTMonitorModule : public MonitorBaseModule {
   unsigned m_total_WARNINGS;
   bool m_print_WARNINGS;
   const uint8_t kTRB_BOARDS = 3;
-  const uint8_t kSTRIPDIFFTOLERANCE = 25;
+  const uint8_t kSTRIPDIFFTOLERANCE = 32; // arctan(0.04) * 63.96mm / 0.08mm = 32
   const uint8_t kSTRIPS_PER_CHIP = 128;
   const uint8_t kCHIPS_PER_MODULE = 12;
   const uint8_t kTOTAL_MODULES = 8;

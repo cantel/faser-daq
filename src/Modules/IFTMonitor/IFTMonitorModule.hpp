@@ -29,23 +29,6 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::atomic<int> m_number_good_events = 0;
 
  private:
-  struct SpacePoint {
-    int event;
-    int layer;
-    double x;
-    double y;
-  };
-
-  struct EventInfo {
-    int event;
-    double x;
-    double y;
-    double z;
-    double phi1;
-    double phi2;
-    double mse;
-  };
-
   bool adjacent(int strip1, int strip2);
   int average(std::vector<int> strips);
   double intersection(double y1, double y2);
@@ -55,11 +38,8 @@ class IFTMonitorModule : public MonitorBaseModule {
   double rms(double* x, int n);
 
   std::map<int, std::vector<Vector3>> m_spacepoints = {};
-  std::vector<EventInfo> m_eventInfo = {};
-  std::vector<SpacePoint> m_spacepointsList = {};
 
-  const std::string m_hit_maps_coarse[3] = {"hitmap_l0_coarse", "hitmap_l1_coarse", "hitmap_l2_coarse"};
-  const std::string m_hit_maps_fine[3] = {"hitmap_l0_fine", "hitmap_l1_fine", "hitmap_l2_fine"};
+  const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
   double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm
   double kMODULEPOS[4] = {64.92386246, 1.20386696, -62.55613708, -126.25613403}; // values in mm
   int m_vec_idx = 0;
@@ -80,7 +60,7 @@ class IFTMonitorModule : public MonitorBaseModule {
   unsigned m_total_WARNINGS;
   bool m_print_WARNINGS;
   const uint8_t kTRB_BOARDS = 3;
-  const uint8_t kSTRIPDIFFTOLERANCE = 25;
+  const uint8_t kSTRIPDIFFTOLERANCE = 32; // arctan(0.04) * 63.96mm / 0.08mm = 32
   const uint8_t kSTRIPS_PER_CHIP = 128;
   const uint8_t kCHIPS_PER_MODULE = 12;
   const uint8_t kTOTAL_MODULES = 8;

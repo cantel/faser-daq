@@ -231,6 +231,9 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
                 m_histogrammanager->fill("y_l0", py);
               }
               m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
+              if (m_spacepoints[TRBBoardId].size() > 10) {
+                break;
+              }
             }
           }
         }

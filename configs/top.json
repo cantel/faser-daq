@@ -9,7 +9,7 @@
     "influxDb_name": "DAQTestBeamMetrics",
     "stats_uri": "tcp://localhost:7000"
   },
-  "filename_pattern": "/home/data/Faser-%c-%r-%n.raw",
+  "filename_pattern": "/data/Faser-%c-%r-%n.raw",
   "queue":{
     "type": "FollyProducerConsumer",
     "queue_size": 1000

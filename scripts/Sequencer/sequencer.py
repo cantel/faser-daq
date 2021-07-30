@@ -126,6 +126,8 @@ class runner:
                 printf("Failed to shutdown - giving up")
                 return False
         print("SHUTDOWN")
+        print()
+        print()
 
         if self.postCommand:
             rc=os.system(self.postCommand)
@@ -181,6 +183,7 @@ def main(args):
             values={}
             for var in tempVars:
                 values[var]=tempVars[var][idx]
+            values["step"]=idx+1
             step={}
             for item in config['template']['step']:
                 step[item]=config['template']['step'][item].format(**values)

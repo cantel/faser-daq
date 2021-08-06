@@ -6,10 +6,10 @@
 
 #include "Commons/FaserProcess.hpp"
 
-class NewModule : public FaserProcess {
+class CalibrationModule : public FaserProcess {
  public:
-  NewModule(const std::string& n);
-  ~NewModule();
+  CalibrationModule(const std::string& n);
+  ~CalibrationModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
   void start(unsigned);

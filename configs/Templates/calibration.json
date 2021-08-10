@@ -1,0 +1,17 @@
+{
+    "Calibration01": {
+        "name": "calibration01",
+        "host": "localhost",
+        "port": 7351,
+        "modules":[{
+            "name": "calibration01",
+            "type": "Calibration",
+            "parameters": {
+                "configFile": "Module0.json",
+                "testList": [2]
+            }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	    "metrics_settings": { "$ref": "top.json#metrics_settings" }
+    }
+}

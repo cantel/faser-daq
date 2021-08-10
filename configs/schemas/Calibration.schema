@@ -1,0 +1,42 @@
+{
+    "type": "object",
+    "title": "Calibration01",
+    "required": ["name", "type", "parameters"],
+    "properties": {
+        "name": {
+            "type": "string",
+            "default": "calibration01",
+            "propertyOrder" : 1,
+        },
+        "type": {
+            "type": "string",
+            "default": "Calibration",
+            "readOnly" : true,
+            "propertyOrder" : 2,
+            "options" : {"hidden": true},
+        },
+        "parameters": {
+            "type": "object",
+            "title" : "Parameters",
+            "description" : "Parameters for tcalib",
+            "required" : ["configFile", "testList"],
+            "properties" : {
+                "configFile": {
+                    "type" : "string",
+                    "default" : "Module0.json",
+                    "options" : {"infoText" : "Location of the module/plane config json file"}
+                },
+                "testList": {
+                    "type" : "array",
+                    "items" : {
+                        "type" : "integer",
+                        "enum" : [1, 2, 3, 4, 5, 6, 7, 8]
+                    },
+                    "title" : "Tests",
+                    "description" : "List of tests to run"
+                }
+            }
+        }
+    }
+
+}

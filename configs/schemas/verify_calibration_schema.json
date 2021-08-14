@@ -30,7 +30,7 @@
                 "testList": {
                     "type" : "array",
                     "title" : "Test list",
-                    "description" : "List of tests to run, select multiple using Ctrl + click",
+                    "description" : "List of tests to run",
                     "items" : {
                         "type" : "integer",
                         "enum" : [1, 2, 3, 4, 5, 6, 7, 8]
@@ -47,11 +47,6 @@
                     "type" : "integer",
                     "title" : "Verbosity level (from 0 to 3)",
                     "enum" : [0, 1, 2, 3]
-                },
-                "l1delay" : {
-                    "type" : "integer",
-                    "title" : "Delay between calibration-pulse and L1A",
-                    "default" : 130
                 },
                 "noRunNumber" : {
                     "type" : "boolean",

@@ -16,4 +16,8 @@ class CalibrationModule : public FaserProcess {
   void stop();
 
   void runner() noexcept;
+ private:
+  std::string m_configLocation;
+  std::vector<int> m_testList;
+  
 };

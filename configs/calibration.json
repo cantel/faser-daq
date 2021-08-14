@@ -3,7 +3,26 @@
         "version": 11,
         "group": "faser",
         "components": [
-            { "$ref" : "Templates/calibration.json#Calibration01"}
+            { "$ref" : "Templates/calibration.json#Calibration"},
+            {
+                "name": "eventbuilder01",
+                "host": "localhost",
+                "port": 5500,
+                "modules":[{
+                  "name": "eventbuilder01",
+                  "type": "EventBuilderFaser",
+                  "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+                  "connections": {
+                    "receivers": [
+                      { "chid": 0,"port": 8101, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} }
+                    ],
+                    "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
+                  }
+                }],
+                "loglevel":         { "$ref": "top.json#loglevel" },
+                "metrics_settings": { "$ref": "top.json#metrics_settings" }
+              },
+              { "$ref": "Templates/fileWriter.json#FileWriter" }
         ]
     }
 }

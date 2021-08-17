@@ -16,8 +16,16 @@ class CalibrationModule : public FaserProcess {
   void stop();
 
   void runner() noexcept;
+
  private:
+  std::string m_tcalibLocation;
+  char m_tcalibCommand[500];
   std::string m_configLocation;
   std::vector<int> m_testList;
+  std::string m_outBaseDir{"."};
+  int m_verboseLevel{0};
+  int m_l1delay{130};
+  bool m_noRunNumber{false};
+  bool m_usb{false};
   
 };

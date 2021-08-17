@@ -21,6 +21,11 @@
             "title" : "Settings",
             "description" : "Parameters for tcalib",
             "properties" : {
+                "tcalibLocation": {
+                    "type" : "string",
+                    "title" : "Location of tcalib executable",
+                    "default" : "tcalib"
+                },
                 "configFile": {
                     "type" : "string",
                     "title" : "tcalib configuration file",

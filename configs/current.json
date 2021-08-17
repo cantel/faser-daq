@@ -16,15 +16,13 @@
                 {
                     "name": "calibration",
                     "settings": {
-                        "configFile": "Plane100.json",
+                        "configFile": "Module0.json",
                         "l1delay": 130,
                         "noRunNumber": true,
                         "outBaseDir": ".",
+                        "tcalibLocation": "/home/gfolino/trackercalibration/build/bin/tcalib",
                         "testList": [
-                            2,
-                            3,
-                            4,
-                            6
+                            2
                         ],
                         "usb": true,
                         "verbose": 3

@@ -59,6 +59,8 @@ void EventBuilderFaserModule::configure() {
   registerVariable(m_duplicateSourceCount, "DuplicateSourceErrors");
   registerVariable(m_timeoutCount, "TimeoutEventErrors");
   registerVariable(m_BCIDMismatchCount, "BCIDMisMatches");
+
+  registerVariable(m_idleRate, "IdleRate", metrics::RATE);
 }
 
 void EventBuilderFaserModule::start(unsigned int run_num) {
@@ -210,8 +212,10 @@ void EventBuilderFaserModule::runner() noexcept {
 	}
       }
     }
-    if (noData&&!sentMissing) std::this_thread::sleep_for(10ms);
-
+    if (noData&&!sentMissing) {
+      std::this_thread::sleep_for(1ms);
+      m_idleRate++;
+    }
   }
   INFO("Runner stopped");
 }

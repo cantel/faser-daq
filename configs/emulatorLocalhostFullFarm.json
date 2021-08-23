@@ -1,0 +1,71 @@
+{
+  "configuration": {
+    "version": 11,
+    "group": "faser",
+    "components": [
+      { "$ref" : "Templates/emulator.json#TriggerGenerator" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator01" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator02" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator10" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator11" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator12" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator13" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator14" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator15" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator16" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator17" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator18" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator19" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator20" },
+      { "$ref" : "Templates/emulator.json#FrontendEmulator21" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver01" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver02" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver10" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver11" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver12" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver13" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver14" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver15" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver16" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver17" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver18" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver19" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver20" },
+      { "$ref" : "Templates/emulator.json#FrontendReceiver21" },
+      {
+        "name": "eventbuilder01",
+        "host": "localhost",
+        "port": 5500,
+        "modules":[{
+          "name": "eventbuilder01",
+          "type": "EventBuilderFaser",
+          "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+          "connections": {
+            "receivers": [
+              { "chid": 0,"port": 8101, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 1,"port": 8102, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 2,"port": 8110, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 3,"port": 8111, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 4,"port": 8112, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 5,"port": 8113, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 6,"port": 8114, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 7,"port": 8115, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 8,"port": 8116, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 9,"port": 8117, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 10,"port": 8118, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 11,"port": 8119, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 12,"port": 8120, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 13,"port": 8121, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} }
+            ],
+            "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
+          }
+        }],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
+      },
+      { "$ref": "Templates/fileWriter.json#FileWriter" },
+      { "$ref": "Templates/emulator.json#FrontEndMonitor01" },
+      { "$ref": "Templates/emulator.json#EmulatorMonitor" }
+    ]
+  }
+}

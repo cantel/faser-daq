@@ -41,6 +41,12 @@ FrontEndEmulatorModule::~FrontEndEmulatorModule() {
   INFO("");
 }
 
+void FrontEndEmulatorModule::configure() {
+  FaserProcess::configure();
+  registerVariable(m_eventsSent,"Events_Physics");
+  registerVariable(m_monitoringSent,"Events_Monitoring");
+}
+
 void FrontEndEmulatorModule::start(unsigned int run_num) {
   m_eventCounter=0;
   FaserProcess::start(run_num);
@@ -101,11 +107,13 @@ void FrontEndEmulatorModule::runner() noexcept {
       numBytes=std::min(int(flat(generator)*0xFFFF),MAXFRAGSIZE);
     }
     m_outHandle.send(&data,numBytes);
+    m_eventsSent++;
     m_monFrag.num_fragments_sent+=1;
     m_monFrag.size_fragments_sent+=numBytes;
     if (m_monitoringInterval!=microseconds::zero() &&
 	((timeNow()-m_timeMonitoring)>m_monitoringInterval)) {
       m_outHandle.send(&m_monFrag,sizeof(m_monFrag));
+      m_monitoringSent++;
       DEBUG("Send monitoring fragment "<<m_monFrag.counter<<": "<<
 	   m_monFrag.num_fragments_sent<<" fragments with "<<m_monFrag.size_fragments_sent<<" bytes");
       m_monFrag.counter++;

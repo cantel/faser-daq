@@ -1,0 +1,796 @@
+{
+    "TriggerGenerator": {
+        "name": "triggergenerator",
+        "host": "localhost",
+        "port": 5540,
+        "modules":[{
+          "name": "triggergenerator",
+          "type": "TriggerGenerator",
+          "settings": {
+            "rateInHz": 15,
+            "frontendApps": [
+              {
+                "host": "localhost",
+                "port": 17001
+              },
+              {
+                "host": "localhost",
+                "port": 17002
+              },
+              {
+                "host": "localhost",
+                "port": 17010
+              },
+              {
+                "host": "localhost",
+                "port": 17011
+              },
+              {
+                "host": "localhost",
+                "port": 17012
+              },
+              {
+                "host": "localhost",
+                "port": 17013
+              },
+              {
+                "host": "localhost",
+                "port": 17014
+              },
+              {
+                "host": "localhost",
+                "port": 17015
+              },
+              {
+                "host": "localhost",
+                "port": 17016
+              },
+              {
+                "host": "localhost",
+                "port": 17017
+              },
+              {
+                "host": "localhost",
+                "port": 17018
+              },
+              {
+                "host": "localhost",
+                "port": 17019
+              },
+              {
+                "host": "localhost",
+                "port": 17020
+              },
+              {
+                "host": "localhost",
+                "port": 17021
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator01": {
+        "name": "frontendemulator01",
+        "host": "localhost",
+        "port": 5541,
+        "modules":[{
+          "name": "frontendemulator01",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 25,
+            "rmsSize": 0,
+            "fragmentID": 1000001,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17001,
+            "daqHost": "localhost",
+            "daqPort": 18001
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator02": {
+        "name": "frontendemulator02",
+        "host": "localhost",
+        "port": 5542,
+        "modules":[{
+          "name": "frontendemulator02",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 20000,
+            "rmsSize": 0,
+            "fragmentID": 1000002,
+            "probMissingTrigger": 0,
+            "probMissingFragment": 0,
+            "probCorruptedFragment": 0,
+            "monitoringInterval": 0,
+            "triggerPort": 17002,
+            "daqHost": "localhost",
+            "daqPort": 18002
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+      },
+    "FrontendEmulator10": {
+        "name": "frontendemulator10",
+        "host": "localhost",
+        "port": 5550,
+        "modules":[{
+          "name": "frontendemulator10",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000010,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17010,
+            "daqHost": "localhost",
+            "daqPort": 18010
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator11": {
+        "name": "frontendemulator11",
+        "host": "localhost",
+        "port": 5551,
+        "modules":[{
+          "name": "frontendemulator11",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000011,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17011,
+            "daqHost": "localhost",
+            "daqPort": 18011
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator12": {
+        "name": "frontendemulator12",
+        "host": "localhost",
+        "port": 5552,
+        "modules":[{
+          "name": "frontendemulator12",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000012,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17012,
+            "daqHost": "localhost",
+            "daqPort": 18012
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator13": {
+        "name": "frontendemulator13",
+        "host": "localhost",
+        "port": 5553,
+        "modules":[{
+          "name": "frontendemulator13",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000013,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17013,
+            "daqHost": "localhost",
+            "daqPort": 18013
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator14": {
+        "name": "frontendemulator14",
+        "host": "localhost",
+        "port": 5554,
+        "modules":[{
+          "name": "frontendemulator14",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000014,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17014,
+            "daqHost": "localhost",
+            "daqPort": 18014
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator15": {
+        "name": "frontendemulator15",
+        "host": "localhost",
+        "port": 5555,
+        "modules":[{
+          "name": "frontendemulator15",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000015,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17015,
+            "daqHost": "localhost",
+            "daqPort": 18015
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator16": {
+        "name": "frontendemulator16",
+        "host": "localhost",
+        "port": 5556,
+        "modules":[{
+          "name": "frontendemulator16",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000016,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17016,
+            "daqHost": "localhost",
+            "daqPort": 18016
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator17": {
+        "name": "frontendemulator17",
+        "host": "localhost",
+        "port": 5557,
+        "modules":[{
+          "name": "frontendemulator17",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000017,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17017,
+            "daqHost": "localhost",
+            "daqPort": 18017
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator18": {
+        "name": "frontendemulator18",
+        "host": "localhost",
+        "port": 5558,
+        "modules":[{
+          "name": "frontendemulator18",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000018,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17018,
+            "daqHost": "localhost",
+            "daqPort": 18018
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator19": {
+        "name": "frontendemulator19",
+        "host": "localhost",
+        "port": 5559,
+        "modules":[{
+          "name": "frontendemulator19",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000019,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17019,
+            "daqHost": "localhost",
+            "daqPort": 18019
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator20": {
+        "name": "frontendemulator20",
+        "host": "localhost",
+        "port": 5560,
+        "modules":[{
+          "name": "frontendemulator20",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000020,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17020,
+            "daqHost": "localhost",
+            "daqPort": 18020
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendEmulator21": {
+        "name": "frontendemulator21",
+        "host": "localhost",
+        "port": 5561,
+        "modules":[{
+          "name": "frontendemulator21",
+          "type": "FrontEndEmulator",
+          "settings": {
+            "meanSize": 200,
+            "rmsSize": 0,
+            "fragmentID": 1000021,
+            "probMissingTrigger": 0.00,
+            "probMissingFragment": 0.00,
+            "probCorruptedFragment": 0.00,
+            "monitoringInterval": 1.5,
+            "triggerPort": 17021,
+            "daqHost": "localhost",
+            "daqPort": 18021
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver01": {
+        "name": "frontendreceiver01",
+        "host": "localhost",
+        "port": 5563,
+        "modules":[{
+          "name": "frontendreceiver01",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18001
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8101",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+  "metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver02": {
+        "name": "frontendreceiver02",
+        "host": "localhost",
+        "port": 5562,
+        "modules":[{
+          "name": "frontendreceiver02",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18002
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8102",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver10": {
+        "name": "frontendreceiver10",
+        "host": "localhost",
+        "port": 5580,
+        "modules":[{
+          "name": "frontendreceiver10",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18010
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8110",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver11": {
+        "name": "frontendreceiver11",
+        "host": "localhost",
+        "port": 5581,
+        "modules":[{
+          "name": "frontendreceiver11",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18011
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8111",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver12": {
+        "name": "frontendreceiver12",
+        "host": "localhost",
+        "port": 5582,
+        "modules":[{
+          "name": "frontendreceiver12",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18012
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8112",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver13": {
+        "name": "frontendreceiver13",
+        "host": "localhost",
+        "port": 5583,
+        "modules":[{
+          "name": "frontendreceiver13",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18013
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8113",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver14": {
+        "name": "frontendreceiver14",
+        "host": "localhost",
+        "port": 5584,
+        "modules":[{
+          "name": "frontendreceiver14",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18014
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8114",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver15": {
+        "name": "frontendreceiver15",
+        "host": "localhost",
+        "port": 5585,
+        "modules":[{
+          "name": "frontendreceiver15",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18015
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8115",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver16": {
+        "name": "frontendreceiver16",
+        "host": "localhost",
+        "port": 5586,
+        "modules":[{
+          "name": "frontendreceiver16",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18016
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8116",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver17": {
+        "name": "frontendreceiver17",
+        "host": "localhost",
+        "port": 5587,
+        "modules":[{
+          "name": "frontendreceiver17",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18017
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8117",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver18": {
+        "name": "frontendreceiver18",
+        "host": "localhost",
+        "port": 5588,
+        "modules":[{
+          "name": "frontendreceiver18",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18018
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8118",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver19": {
+        "name": "frontendreceiver19",
+        "host": "localhost",
+        "port": 5589,
+        "modules":[{
+          "name": "frontendreceiver19",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18019
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8119",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver20": {
+        "name": "frontendreceiver20",
+        "host": "localhost",
+        "port": 5590,
+        "modules":[{
+          "name": "frontendreceiver20",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18020
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8120",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontendReceiver21": {
+        "name": "frontendreceiver21",
+        "host": "localhost",
+        "port": 5591,
+        "modules":[{
+          "name": "frontendreceiver21",
+          "type": "FrontEndReceiver",
+          "settings": {
+            "dataPort": 18021
+          },
+          "connections": {
+            "senders": [
+              {
+                "type": "ZMQPair",
+                "chid": 0,
+                "transport": "ipc",
+                "path": "/tmp/p8121",
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "FrontEndMonitor01": {
+      "name": "frontendmonitor01",
+      "host": "localhost",
+      "port": 5571,
+      "modules":[{
+        "name": "frontendmonitor01",
+        "type": "FrontEndMonitor",
+        "settings": {
+          "fragmentID": 1000001,
+            "publish_interval": 10
+        },
+        "connections": {
+          "receivers": [
+            {
+              "type": "ZMQPubSub",
+              "chid": 0,
+              "connections":[{"transport": "tcp", "host": "localhost", "port": 8200}],
+              "queue":{"$ref":"top.json#queue"}
+            }
+          ]
+        }
+      }],
+      "loglevel": { "$ref": "top.json#loglevel" },
+      "metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "EmulatorMonitor": {
+        "name": "emulatormonitor01",
+        "host": "localhost",
+        "port": 5570,
+        "modules":[{
+          "name": "emulatormonitor01",
+          "type": "EmulatorMonitor",
+          "settings": {
+            "fragmentID": 1000001,
+            "publish_interval": 10
+          },
+          "connections": {
+            "receivers": [
+              {
+                "type": "ZMQPubSub",
+                "chid": 0,
+                "connections":[{"transport": "tcp", "host": "localhost", "port": 8202}],
+                "queue":{"$ref":"top.json#queue"}
+              }
+            ]
+          }
+        }],
+        "loglevel": { "$ref": "top.json#loglevel" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
+    }
+  }

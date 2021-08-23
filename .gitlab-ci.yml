@@ -12,13 +12,13 @@ build_faser_daq:
   script:
     - ls
     - pwd
+    - source setup.sh
     - mkdir -p build 
     - cd build
     - cmake ../
     - make -j8
   before_script:
-    - ./cmake/install.sh -d /daqling-spack-repo -c configs/ -a
-    - source cmake/setup.sh
+    - ./daqling/cmake/install.sh -d /daqling-spack-repo -c configs/ -a
  
 validate_configs:
   stage: config

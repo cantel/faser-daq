@@ -19,6 +19,7 @@ schemas/TriggerGenerator.schema     \
 schemas/TriggerMonitor.schema     \
 schemas/TriggerRateMonitor.schema     \
 schemas/TriggerReceiver.schema     \
+schemas/Calibration.schema      \
 --templates \
 Templates/TLB.json \
 Templates/TRB.json \
@@ -28,6 +29,7 @@ Templates/fileWriter.json \
 Templates/monitor.json \
 Templates/eventBuilder.json \
 Templates/digitizerNoise.json \
+Templates/calibration.json \
 --configs   \
 digitizerSciLab.json \
 digitizerTI12.json \
@@ -42,6 +44,7 @@ playback.json              \
 emulatorLocalhost.json \
 digitizerDarkRateSciLab.json \
 digitizerLEDSciLab.json \
+calibration.json \
 --extras   \
 top.json \
 current.json \
@@ -49,7 +52,8 @@ grafana/faser_metrics.json                   \
 schemas/validation-schema.json                   \
 schemas/refs/connection-schema.json                   \
 Templates/top.json                   \
-customized/host.json                 
+customized/host.json                 \
+schemas/verify_calibration_schema.json
 
 
 

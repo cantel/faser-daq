@@ -13,8 +13,14 @@
                 "outBaseDir": ".",
                 "verbose": 3,
                 "l1delay": 130,
+                "log": "log.txt",
+                "emulateTRB": false,
+                "calLoop": false,
+                "saveDaq": false,
+                "noTrim": false,
                 "noRunNumber": true,
-                "usb": true
+                "usb": true,
+                "ip": "10.11.65.8"
 
             }
         }],

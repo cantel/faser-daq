@@ -58,6 +58,31 @@
                     "title" : "Delay between calibration-pulse and L1A",
                     "default" : 130
                 },
+                "log": {
+                    "type" : "string",
+                    "title" : "log file realtive to outBaseDir",
+                    "default" : "log.txt"
+                },
+                "emulateTRB" : {
+                    "type" : "boolean",
+                    "title" : "Emulate TRB interface",
+                    "default" : false
+                },
+                "calLoop" : {
+                    "type" : "boolean",
+                    "title" : "Use calLoop functionality",
+                    "default" : false
+                },
+                "saveDaq" : {
+                    "type" : "boolean",
+                    "title" : "Enable creation of .daq file",
+                    "default" : false
+                },
+                "noTrim" : {
+                    "type" : "boolean",
+                    "title" : "Do not load in chips the single-channel trimDac values",
+                    "default" : false
+                },
                 "noRunNumber" : {
                     "type" : "boolean",
                     "title" : "Disable automatic creation of run-number to be stored in DB",
@@ -67,6 +92,11 @@
                     "type" : "boolean",
                     "title" : "Use TRB connected via USB",
                     "default" : false
+                },
+                "ip": {
+                    "type" : "string",
+                    "title" : "SCIP / DAQIP address for ethernet communication",
+                    "default" : "10.11.65.8"
                 }
             },
             "required" : ["configFile", "testList"],

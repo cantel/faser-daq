@@ -10,3 +10,7 @@
 [submodule "digitizer-readout"]
 	path = digitizer-readout
 	url = ../digitizer-readout.git
+[submodule "trackercalibration"]
+	path = trackercalibration
+	url = https://gitlab.cern.ch/faser/online/trackercalibration.git
+	branch = master

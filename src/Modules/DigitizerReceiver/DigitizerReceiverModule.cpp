@@ -357,39 +357,45 @@ void DigitizerReceiverModule::runner() noexcept {
       // get the data from the board into the software buffer        
       int nwords_obtained = 0;
       int nerrors = 0;
-      nwords_obtained = m_digitizer->ReadSingleEvent(m_raw_payload, m_event_size, m_monitoring, nerrors,
+      int events_to_do = std::min(n_events_present,m_n_events_requested);
+
+      nwords_obtained = m_digitizer->ReadSingleEvent(m_raw_payload, events_to_do*m_event_size, m_monitoring, nerrors,
 						     m_readout_method, false);
       read_time+=m_monitoring["block_readout_time"];
-      receivedEvents++;
+      receivedEvents+=events_to_do;
       if (nwords_obtained==0) { //most likely reqest didn't arrive at VME card
 	m_empty_events++;
 	continue;
       }
-      if ((nwords_obtained!=m_event_size)&&(nerrors==0)) {
-	WARNING("Got "<<nwords_obtained<<" words while expecting "<<m_event_size<<" words, but no errors?");
+      if ((nwords_obtained!=m_event_size*events_to_do)&&(nerrors==0)) {
+	WARNING("Got "<<nwords_obtained<<" words while expecting "<<m_event_size*events_to_do<<" words, but no errors?");
 	nerrors=1;
       }
       // count triggers sent
-      m_triggers ++;
+      m_triggers +=events_to_do;
       // parse the events and decorate them with a FASER header
-      auto fragment = m_digitizer->ParseEventSingle(m_raw_payload, m_event_size, m_monitoring, 
-						    m_ECRcount, m_ttt_converter, m_bcid_ttt_fix, nerrors);
 
-      parse_time+=m_monitoring["time_parse_time"];
+      for(int i_evnt=0;i_evnt<events_to_do;i_evnt++) {
+	auto fragment = m_digitizer->ParseEventSingle(m_raw_payload+i_evnt*m_event_size, m_event_size, 
+						      m_monitoring, 
+						      m_ECRcount, m_ttt_converter, m_bcid_ttt_fix, nerrors);
 
-      // send vent to event builder
-      if (fragment->event_id()!=m_prev_event_id+1) {
-	WARNING("Got fragment "<<fragment->event_id()<<" was expecting: "<<m_prev_event_id+1);
+	parse_time+=m_monitoring["time_parse_time"];
+
+	// send vent to event builder
+	if (fragment->event_id()!=m_prev_event_id+1) {
+	  WARNING("Got fragment "<<fragment->event_id()<<" was expecting: "<<m_prev_event_id+1);
+	}
+	m_prev_event_id=fragment->event_id();
+	if (fragment->status()) m_corrupted_events++;
+
+
+	// place the raw binary event fragment on the output port
+	std::unique_ptr<const byteVector> bytestream(fragment->raw());
+	DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
+	m_connections.send(0, binData);  
       }
-      m_prev_event_id=fragment->event_id();
-      if (fragment->status()) m_corrupted_events++;
-
-
-      // place the raw binary event fragment on the output port
-      std::unique_ptr<const byteVector> bytestream(fragment->raw());
-      DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
-      m_connections.send(0, binData);  
-      n_events_present--;
+      n_events_present-=events_to_do;
     }
     m_lock.unlock();
 

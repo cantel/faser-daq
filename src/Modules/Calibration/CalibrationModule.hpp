@@ -6,6 +6,10 @@
 
 #include "Commons/FaserProcess.hpp"
 #include "TrackerReadout/TRBAccess.h"
+#include "TrackerCalibration/Module.h"
+#include "TrackerCalibration/Chip.h"
+#include "TrackerCalibration/CalibManager.h"
+
 
 class CalibrationModule : public FaserProcess {
  public:
@@ -36,5 +40,6 @@ class CalibrationModule : public FaserProcess {
 
   // calibmanager 
   FASER::TRBAccess *m_trb;
+  std::vector<TrackerCalib::Module*> m_modList; // vector of modules
   
 };

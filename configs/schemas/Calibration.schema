@@ -21,16 +21,11 @@
             "title" : "Settings",
             "description" : "Parameters for tcalib",
             "properties" : {
-                "tcalibLocation": {
-                    "type" : "string",
-                    "title" : "Location of tcalib executable",
-                    "default" : "tcalib"
-                },
                 "configFile": {
                     "type" : "string",
                     "title" : "tcalib configuration file",
                     "description" : "Location of the module/plane config json file",
-                    "default" : "Module0.json"
+                    "default" : "/home/gfolino/SCTModuleConfigs/Plane100.json"
                 },
                 "testList": {
                     "type" : "array",

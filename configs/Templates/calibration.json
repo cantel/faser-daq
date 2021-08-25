@@ -7,8 +7,7 @@
             "name": "calibration",
             "type": "Calibration",
             "settings": {
-                "tcalibLocation": "tcalib",
-                "configFile": "Module0.json",
+                "configFile": "/home/gfolino/SCTModuleConfigs/Plane100.json",
                 "testList": [2],
                 "outBaseDir": ".",
                 "verbose": 3,

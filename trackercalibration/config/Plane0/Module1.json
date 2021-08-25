@@ -1,0 +1,19 @@
+{
+    "Chips": [
+	{"Address": 32, "BiasDAC": 6169, "ConfigRegister": 8192, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 33, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 34, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 35, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 36, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 37, "BiasDAC": 6169, "ConfigRegister": 4096, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 40, "BiasDAC": 6169, "ConfigRegister": 8192, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 41, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 42, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 43, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 44, "BiasDAC": 6169, "ConfigRegister": 2048, "StrobeDelay": 0, "Threshold": 0},
+	{"Address": 45, "BiasDAC": 6169, "ConfigRegister": 4096, "StrobeDelay": 0, "Threshold": 0}
+    ],
+    "PlaneID": 0,
+    "ID": 20220040200596,
+    "TRBChannel": 1
+}

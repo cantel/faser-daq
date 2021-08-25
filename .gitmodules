@@ -13,4 +13,4 @@
 [submodule "trackercalibration"]
 	path = trackercalibration
 	url = https://gitlab.cern.ch/faser/online/trackercalibration.git
-	branch = master
+	branch = faserdaq-integration

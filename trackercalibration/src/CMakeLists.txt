@@ -32,11 +32,11 @@ set(TRACKER_CALIB_SRCS
 add_library(TrackerCalibration ${TRACKER_CALIB_SRCS})
 target_include_directories(TrackerCalibration PUBLIC
 ${CMAKE_CURRENT_SOURCE_DIR}/.. 
-${CMAKE_CURRENT_SOURCE_DIR}/../gpiodrivers/GPIOBase
-${CMAKE_CURRENT_SOURCE_DIR}/../gpiodrivers/TRBAccess
-${CMAKE_CURRENT_SOURCE_DIR}/../gpiodrivers/faser-common/Logging/include
-${CMAKE_CURRENT_SOURCE_DIR}/../gpiodrivers/faser-common/Exceptions
-${CMAKE_CURRENT_SOURCE_DIR}/../gpiodrivers/faser-common/EventFormats
+${CMAKE_SOURCE_DIR}/gpiodrivers/GPIOBase
+${CMAKE_SOURCE_DIR}/gpiodrivers/TRBAccess
+${CMAKE_SOURCE_DIR}/faser-common/Logging/include
+${CMAKE_SOURCE_DIR}/faser-common/Exceptions
+${CMAKE_SOURCE_DIR}/faser-common/EventFormats
 ${ROOT_INCLUDE_DIRS})
 target_link_libraries(TrackerCalibration PUBLIC usb-1.0 cpr curl ${ROOT_LIBRARIES})
 

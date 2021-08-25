@@ -62,6 +62,15 @@ endif()
 message(STATUS "################################################")
 message(STATUS "")
 
+set(DAQENV FALSE)
+if ("${CMAKE_PROJECT_NAME}" STREQUAL "daqling_top")
+  message( STATUS "Running in FASER DAQ environment.")
+  set(DAQENV TRUE)
+endif()
+
+#"Temporary" solution to make trackercalibration compile within FASER DAQ. 
+add_compile_options( -fPIC -w -Wno-error=unused-but-set-variable -Wno-error=unused-variable -Wno-error=old-style-cast -Wno-error=unused-parameter -Wno-error=sign-conversion -Wno-error=conversion-null -Wno-error=sign-compare -Wno-error=pedantic -Wno-error=strict-overflow -Wno-error=parentheses -Wno-error=missing-declarations -Wno-error=overflow -Wno-error=unused-parameter -Wno-error=cast-qual)
+
 #
 # dependencies
 #
@@ -79,7 +88,11 @@ include_directories(/opt/json/single_include)
 include_directories(/opt/cpr/include)
 
 # build the trackerreadout software that this depends on
-add_subdirectory(gpiodrivers)
+if (NOT DAQENV)
+  add_subdirectory(gpiodrivers)
+  # build the executable applications for the calibration
+  add_subdirectory(apps)
+endif()
 
 set(TRACKER_READOUT_LIBRARIES GPIOBase TRBAccess usbInterface TRBEventDecoder
 ConfigurationHandling Logging Exceptions)
@@ -87,8 +100,6 @@ ConfigurationHandling Logging Exceptions)
 # build the calibration libraries
 add_subdirectory(src)
 
-# build the executable applications for the calibration
-add_subdirectory(apps)
 
 
 

@@ -9,6 +9,12 @@
 #include "TrackerCalibration/Module.h"
 #include "TrackerCalibration/Chip.h"
 #include "TrackerCalibration/CalibManager.h"
+#include "TrackerCalibration/RunManager.h"
+
+#include <string>
+#include <vector>
+
+#include "nlohmann/json.hpp"
 
 
 class CalibrationModule : public FaserProcess {
@@ -23,12 +29,26 @@ class CalibrationModule : public FaserProcess {
   void runner() noexcept;
 
  private:
+  /** \brief Read json input file.  
+     *  
+     * This function parses a json input file and populates the list of
+     * Module objects to be processed afterwards. The json input file    
+     * can be either a single module config file, or a tracking plane 
+     * config file containing a list of module configs (with relative or absolute paths).
+     */
+  int readJson(std::string jsonCfg);
+
+    /** write final json configuration file (after all tests have been run). */
+  int writeJson(std::string outDir);
+
+ private:
   // tcalib parameters
+  
   std::string m_configLocation;
   std::vector<int> m_testList;
   std::string m_outBaseDir{"."};
   int m_verboseLevel{0};
-  int m_l1delay{130};
+  unsigned int m_l1delay{130};
   std::string m_log{"log.txt"};
   bool m_emulateTRB{false};
   bool m_calLoop{false};
@@ -38,8 +58,11 @@ class CalibrationModule : public FaserProcess {
   bool m_usb{false};
   std::string m_ip{"10.11.65.8"};
 
+  uint8_t m_globalMask{0x00}; 
+
   // calibmanager 
-  FASER::TRBAccess *m_trb;
+  FASER::TRBAccess *m_trb{nullptr};
   std::vector<TrackerCalib::Module*> m_modList; // vector of modules
+  //TrackerCalib::RunManager *m_rman;
   
 };

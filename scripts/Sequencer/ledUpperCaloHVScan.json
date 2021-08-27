@@ -1,4 +1,4 @@
-{"hostUrl": "http://faser-daq-006.cern.ch:5000",
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 30,
  "initCommand": "../HVControl/setLEDPulser.py 100 650 0",
  "finalizeCommand": "../HVControl/setLEDPulser.py 100 0 0",

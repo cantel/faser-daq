@@ -10,16 +10,17 @@ import subprocess
 import sys
 import time
 
-voltages={4:1610,
-          5:1495,
+voltages={#4:1610,
+          #5:1495,
           6:1510,
           7:1460,
           8:1655,
           9:1525,
           10:1575,
           11:1500,
-          12:1515,
-          13:1495}
+          #12:1515,
+          #13:1495
+}
 
 offset=int(sys.argv[1])
 

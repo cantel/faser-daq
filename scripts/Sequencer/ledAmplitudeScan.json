@@ -1,4 +1,4 @@
-{"hostUrl": "http://faser-daq-006.cern.ch:5000",
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 30,
  "cfgFile": "tlbDigiTI12LED.json",
  "runtype": "Test",

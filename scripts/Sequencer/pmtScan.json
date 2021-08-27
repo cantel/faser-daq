@@ -1,19 +1,19 @@
-{"hostUrl": "http://faser-daq-006.cern.ch:5000",
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 30,
+ "finalizeCommand": "../HVControl/setPMTVoltages.py 0",
  "defaults": {
-     "cfgFile": "tlbDigiTI12.json",
+     "cfgFile": "tlbDigiTI12PMTs.json",
      "runtype": "Test",
      "maxRunTime": 3000,
      "maxEvents": 10000,
      "postCommand": null,
-     "endcomment": "Sequencer stop",
-     "finalizeCommand": "/home/aagaard/DCS/setPMTVoltages.py 0"
+     "endcomment": "Sequencer stop"
  },
  "template": {
      "vars": { "voltage": "(0,601,100)"},
      "step": {
 	 "startcomment": "PMT HV Scan, nominal voltage - {voltage}",
-	 "preCommand": "/home/aagaard/DCS/setPMTVoltages.py {voltage}"
+	 "preCommand": "../HVControl/setPMTVoltages.py {voltage}"
      }
  }
 }

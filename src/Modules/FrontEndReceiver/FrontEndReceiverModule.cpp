@@ -31,7 +31,9 @@ FrontEndReceiverModule::~FrontEndReceiverModule() { }
 void FrontEndReceiverModule::configure() {
   FaserProcess::configure();
   registerVariable(m_recvCount,"RecvCount");  // variable is reset to zero here, but any reset on start of run has to be added to start() manually
-  
+  registerVariable(m_physicsCount,"RecvPhysicsCount");
+  registerVariable(m_monitoringCount,"RecvMonitoringCount");
+
   // any onetime electronics configuration should be done here
   // in case of issues, set m_status to STATUS_WARN or STATUS_ERROR
   // For fatal error set m_state="failed" as well to prevent starting run
@@ -54,8 +56,8 @@ void FrontEndReceiverModule::runner() noexcept {
   while (m_run) {
     RawFragment buffer;
     int payload_size = m_dataIn.receive(&buffer,sizeof(buffer));
-    m_recvCount+=1;
     if (payload_size < 0) continue;
+    m_recvCount+=1;
     if (payload_size < (int) sizeof(uint32_t)*buffer.headerwords()) {
       WARNING("Received only"<<payload_size<<" bytes");
       continue;
@@ -66,6 +68,7 @@ void FrontEndReceiverModule::runner() noexcept {
     uint32_t source_id=0;  //most likely the system source should be set here from and sub-board from payload (or from config)
     uint16_t status=0;
     if (buffer.type!=monType) {
+      m_physicsCount++;
       event_id  = buffer.event_id;  
       source_id = buffer.source_id;
       bc_id     = buffer.bc_id;
@@ -79,6 +82,7 @@ void FrontEndReceiverModule::runner() noexcept {
       event_id = monData->counter;
       source_id = monData->source_id;
       bc_id = 0xFFFF;
+      m_monitoringCount++;
     }
     event_id|=m_ECRcount<<24;
     std::unique_ptr<EventFragment> fragment(new EventFragment(fragment_tag, source_id, event_id, bc_id, &buffer,payload_size));

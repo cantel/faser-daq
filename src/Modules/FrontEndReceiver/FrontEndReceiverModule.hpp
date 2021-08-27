@@ -24,4 +24,6 @@ class FrontEndReceiverModule : public FaserProcess {
 private:
   UdpReceiver m_dataIn;
   std::atomic<int> m_recvCount;
+  std::atomic<int> m_physicsCount;
+  std::atomic<int> m_monitoringCount;
 };

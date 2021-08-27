@@ -16,6 +16,7 @@ class FrontEndEmulatorModule : public FaserProcess {
   FrontEndEmulatorModule(const std::string&);
   ~FrontEndEmulatorModule();
 
+  void configure();
   void start(unsigned int);
   void stop();
 
@@ -33,4 +34,8 @@ private:
   int m_eventCounter;
   microseconds m_timeMonitoring;
   MonitoringFragment m_monFrag;
+
+  std::atomic<int> m_eventsSent;
+  std::atomic<int> m_monitoringSent;
+
 };

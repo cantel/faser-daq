@@ -10,6 +10,7 @@
 #include "TrackerCalibration/Chip.h"
 #include "TrackerCalibration/CalibManager.h"
 #include "TrackerCalibration/RunManager.h"
+#include "TrackerCalibration/ITest.h"
 
 #include <string>
 #include <vector>
@@ -45,7 +46,7 @@ class CalibrationModule : public FaserProcess {
   // tcalib parameters
   
   std::string m_configLocation;
-  std::vector<int> m_testList;
+  std::vector<int> m_testSequence;
   std::string m_outBaseDir{"."};
   int m_verboseLevel{0};
   unsigned int m_l1delay{130};
@@ -63,6 +64,7 @@ class CalibrationModule : public FaserProcess {
   // calibmanager 
   FASER::TRBAccess *m_trb{nullptr};
   std::vector<TrackerCalib::Module*> m_modList; // vector of modules
+  std::vector<TrackerCalib::ITest*> m_testList; // vector of tests
   //TrackerCalib::RunManager *m_rman;
   
 };

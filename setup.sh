@@ -40,4 +40,5 @@ alias rcguilocal='pushd $FASERTOP/scripts/Web; ./rcgui.py -l; popd'
 
 #add python and binary directories needed for runnings
 export PYTHONPATH=${FASERTOP}/daqling/scripts/Control:$PYTHONPATH
-export PATH=${FASERTOP}/build/bin:${FASERTOP}/scripts/Web:${FASERTOP}/scripts/Monitoring:$PATH
+export PATH=${FASERTOP}/build/bin:${FASERTOP}/scripts/Web:${FASERTOP}/scripts/Monitoring:/home/cantel/root6/install/bin:$PATH
+export LD_LIBRARY_PATH=/home/cantel/root6/install/lib:$LD_LIBRARY_PATH

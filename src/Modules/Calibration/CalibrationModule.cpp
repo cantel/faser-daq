@@ -13,7 +13,7 @@
 
 /*----- The inclusion below is problematic------*/
 
-//#include "TrackerCalibration/ITest.h"
+#include "TrackerCalibration/ITest.h"
 
 /*----------------------------------------------*/
 
@@ -73,6 +73,7 @@ m_ip{m_cfg["ip"]}
 CalibrationModule::CalibrationModule(const std::string& n): 
 FaserProcess(n) 
 { 
+  INFO("constructor");
 
   ERS_INFO(""); 
 }
@@ -263,9 +264,8 @@ void CalibrationModule::configure() {
   m_configLocation = cfg["configFile"];
 
   for( auto& testID : cfg["testList"]) 
-    m_testList.push_back(testID.get<int>());
+    m_testSequence.push_back(testID.get<int>());
 
-  //m_outBaseDir = cfg["outBaseDir"];
   std::string outBaseDir = cfg["outBaseDir"];
   m_verboseLevel = cfg["verbose"];
   m_l1delay = cfg["l1delay"];
@@ -292,16 +292,23 @@ void CalibrationModule::configure() {
   std::size_t pos = outBaseDir.length()-1;
   m_outBaseDir = outBaseDir.find_last_of("/") == pos ? 
     outBaseDir.substr(0,pos) : outBaseDir;
+    
+  INFO("1");
+
 
   // if we have more than one test, append TestSequence_ directory
-  if( m_testList.size() > 1 ) 
+  if( m_testSequence.size() > 1 ) 
     m_outBaseDir+="/TestSequence_"+TrackerCalib::dateStr()+"_"+TrackerCalib::timeStr();
 
+
+  INFO("2");
   //
   // 1.- populate list of modules
   //
   if( !readJson(m_configLocation) )
     throw std::runtime_error(TrackerCalib::bold+TrackerCalib::red+"\n\nCould not find input json file"+TrackerCalib::reset);
+
+  INFO("3");
 
   // compute global mask from list of modules
   for(auto mod : m_modList){
@@ -309,18 +316,19 @@ void CalibrationModule::configure() {
     m_globalMask |= (0x1 << trbchan);
   }
 
+  INFO("4");
     // in case of running just one test, update outBaseDir 
   // to the output dir of the test
-  //if( m_testList.size() == 1 )
-    //m_outBaseDir = m_testList[0]->TrackerCalib::ITest::outputDir();
+  if( m_testList.size() == 1 )
+    m_outBaseDir = m_testList[0]->TrackerCalib::ITest::outputDir();
 
-
+  INFO("5");
 
 /*
-  TrackerCalib::CalibManager cman(m_outBaseDir,
+  TrackerCalib::CalibManager cman(outBaseDir,
 				  m_configLocation,
 				  m_log,
-				  m_testList,
+				  m_testSequence,
 				  m_l1delay,
 				  m_emulateTRB,
 				  m_calLoop,
@@ -345,10 +353,13 @@ void CalibrationModule::configure() {
     throw std::runtime_error("ERROR: Need to specify at least one module!");
   }
 
+  INFO("6");
+
   // Use first module to identify plane ID (TRB ID for USB access)
   int boardId = m_modList.at(0)->planeId();
   std::cout << "TRB BoardID (PlaneID in config file): " << boardId << std::endl;
 
+  INFO("7");
   // sourceId written to event header so no impact on hardware access, can just be always set to board ID
   int sourceId = boardId;
 

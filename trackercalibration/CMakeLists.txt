@@ -28,8 +28,8 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
 
 # compiler options and flags
-use_cxx11()
-#use_cxx17()
+#use_cxx11()
+use_cxx17()
 #set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -75,7 +75,7 @@ add_compile_options( -fPIC -w -Wno-error=unused-but-set-variable -Wno-error=unus
 # dependencies
 #
 # ROOT
-find_package(ROOT 6.10 REQUIRED COMPONENTS Hist Tree)
+find_package(ROOT 6.24 REQUIRED COMPONENTS Hist Tree)
 execute_process(COMMAND root-config "--version" OUTPUT_VARIABLE ROOT_VERSION)
 message(STATUS "Using ROOT version ${ROOT_VERSION}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ROOT_CXX_FLAGS}")

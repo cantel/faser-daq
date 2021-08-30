@@ -9,27 +9,27 @@
  "steps": [
      {
 	 "startcomment": "TLB Standalone Run, Random Trig Setting 0",
-	 "preCommand": "../../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 0"
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 0"
      },
      {
 	 "startcomment": "TLB Standalone Run, Random Trig Setting 1",
-	 "preCommand": "../../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 1"
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 1"
      },
      {
 	 "startcomment": "TLB Standalone Run, Random Trig Setting 2",
-	 "preCommand": "../../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 2"
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 2"
      },
      {
 	 "startcomment": "TLB Standalone Run, Random Trig Setting 3",
-	 "preCommand": "../../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 3"
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 3"
      },
      {
 	 "startcomment": "TLB Standalone Run, Random Trig Setting 4",
-	 "preCommand": "../../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 4"
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 4"
      },
      {
 	 "startcomment": "TLB Standalone Run, Random Trig Setting 7",
-	 "preCommand": "../../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 7"
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBReceiverB21 -r 7"
      }
  ]
 }

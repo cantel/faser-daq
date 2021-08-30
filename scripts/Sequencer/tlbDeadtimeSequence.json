@@ -1,0 +1,19 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "defaults": {
+     "cfgFile": "tlbStandaloneEHN1.json",
+     "runtype": "Test",
+     "maxRunTime": 9000,
+     "maxEvents": 500000,
+     "postCommand": null,
+     "endcomment": "enough stats"
+ },
+ "template": {
+     "vars": { "deadtime": [100,250,500,750,1000,2000] },
+     "step": {
+	 "startcomment": "TLB Standalone Run, Deadtime Setting {deadtime} BC",
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBRandomEHN1 -d {deadtime} -r 1"
+     }
+ }
+}
+

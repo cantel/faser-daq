@@ -1,0 +1,19 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "defaults": {
+     "cfgFile": "tlbStandaloneEHN1.json",
+     "runtype": "Test",
+     "maxRunTime": 7200,
+     "maxEvents": 100000,
+     "postCommand": null,
+     "endcomment": "enough stats"
+ },
+ "template": {
+     "vars": { "rnd_setting": [0,1,2,3,4,5,6,7] },
+     "step": {
+	 "startcomment": "TLB Standalone Run, Random Trig Setting {rnd_setting}",
+	 "preCommand": "../TLBRateControl/updateTLBConfig.py -n TLBRandomEHN1 -r {rnd_setting}"
+     }
+ }
+}
+

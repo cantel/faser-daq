@@ -16,13 +16,19 @@
                 {
                     "name": "calibration",
                     "settings": {
-                        "configFile": "Module0.json",
+                        "calLoop": false,
+                        "configFile": "/home/gfolino/SCTModuleConfigs/Plane100.json",
+                        "emulateTRB": false,
+                        "ip": "10.11.65.8",
                         "l1delay": 130,
+                        "log": "log.txt",
                         "noRunNumber": true,
+                        "noTrim": true,
                         "outBaseDir": ".",
-                        "tcalibLocation": "/home/gfolino/trackercalibration/build/bin/tcalib",
+                        "saveDaq": false,
                         "testList": [
-                            2
+                            2,
+                            3
                         ],
                         "usb": true,
                         "verbose": 3

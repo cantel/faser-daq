@@ -16,7 +16,7 @@
                 "emulateTRB": false,
                 "calLoop": false,
                 "saveDaq": false,
-                "noTrim": false,
+                "noTrim": true,
                 "noRunNumber": true,
                 "usb": true,
                 "ip": "10.11.65.8"

@@ -1,0 +1,20 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 45,
+ "finalizeCommand": "/home/shifter/software/faser-daq/scripts/SCTThreshControl/update_tracker_configs.py -i /home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104 --tag 100721_0214 --trb TRBReceiver01",
+ "defaults": {
+   "cfgFile": "combinedTestBeamFullConfigure.json",
+   "runtype": "TestBeam",
+   "maxRunTime": 3600,
+   "maxEvents": 500000,
+   "postCommand": null,
+   "endcomment": "enough stats"
+  },
+  "template": { 
+     "vars": { "thresh": ["0.5", "1.5", "2.0", "2.5", "3.0", "4.0", "5.0", "1.0"]},
+     "step": {
+	 "startcomment": "TRB Threshold Scan, Step {step}, threshold point {thresh} fC",
+	 "preCommand": "/home/shifter/software/faser-daq/scripts/SCTThreshControl/update_tracker_configs.py -i /home/shifter/cernbox/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag {thresh}fC --trb TRBReceiver01"
+     }
+ }
+}
+

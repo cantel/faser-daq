@@ -37,10 +37,12 @@ class CalibrationModule : public FaserProcess {
      * can be either a single module config file, or a tracking plane 
      * config file containing a list of module configs (with relative or absolute paths).
      */
-  int readJson(std::string jsonCfg);
+  int readJson();
 
     /** write final json configuration file (after all tests have been run). */
   int writeJson(std::string outDir);
+
+  int finalizeSequence();
 
  private:
   // tcalib parameters
@@ -65,6 +67,10 @@ class CalibrationModule : public FaserProcess {
   FASER::TRBAccess *m_trb{nullptr};
   std::vector<TrackerCalib::Module*> m_modList; // vector of modules
   std::vector<TrackerCalib::ITest*> m_testList; // vector of tests
-  //TrackerCalib::RunManager *m_rman;
+  TrackerCalib::RunManager *m_rman;
+  unsigned m_testcnt{1};
+  TrackerCalib::ITest *m_t;
+
+  bool m_started{false};
   
 };

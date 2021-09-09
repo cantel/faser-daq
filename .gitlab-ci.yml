@@ -9,6 +9,8 @@ build_faser_daq:
   image: gitlab-registry.cern.ch/faser/docker/daq:master
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
+  before_script:
+    - yum -y install eigen3-devel
   script:
     - ls
     - pwd

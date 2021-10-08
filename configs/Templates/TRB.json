@@ -1,7 +1,7 @@
 {
     "TRBReceiver00": {
         "name": "trackerreceiver00",
-        "host": "faser-daq-002",
+        "host": "localhost",
         "port": 5530,
         "modules": [
             {
@@ -9,14 +9,14 @@
                 "type": "TrackerReceiver",
                 "settings": {
                     "BoardID": 0,
-                    "SCIP": "faser-daq-002",
-                    "DAQIP": "faser-daq-002",
+                    "SCIP": "10.11.65.8",
+                    "DAQIP": "10.11.65.8",
                     "ReadoutMode": 0,
                     "ConfigureModules": true,
                     "HWDelayClk0": 0,
                     "HWDelayClk1": 0,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
+                    "FinePhaseClk0": 8,
+                    "FinePhaseClk1": 8,
                     "FinePhaseLed0": 39,
                     "FinePhaseLed1": 38,
                     "RxTimeoutDisable": false,
@@ -79,7 +79,7 @@
     },
     "TRBReceiver01": {
         "name": "trackerreceiver01",
-        "host": "faser-daq-002",
+        "host": "localhost",
         "port": 5531,
         "modules": [
             {
@@ -87,14 +87,14 @@
                 "type": "TrackerReceiver",
                 "settings": {
                     "BoardID": 1,
-                    "SCIP": "faser-daq-002",
-                    "DAQIP": "faser-daq-002",
+                    "SCIP": "10.11.65.8",
+                    "DAQIP": "10.11.65.8",
                     "ReadoutMode": 0,
                     "ConfigureModules": true,
                     "HWDelayClk0": 0,
                     "HWDelayClk1": 0,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
+                    "FinePhaseClk0": 8,
+                    "FinePhaseClk1": 8,
                     "FinePhaseLed0": 37,
                     "FinePhaseLed1": 40,
                     "RxTimeoutDisable": false,
@@ -112,14 +112,14 @@
                         true
                     ],
                     "moduleConfigFiles": {
-                        "0": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module0_100721_0214.json",
-                        "1": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module1_100721_0214.json",
-                        "2": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module2_100721_0214.json",
-                        "3": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module3_100721_0214.json",
-                        "4": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module4_100721_0214.json",
-                        "5": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module5_100721_0214.json",
-                        "6": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module6_100721_0214.json",
-                        "7": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module7_100721_0214.json"
+                        "0": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module0_100721_0214.json",
+                        "1": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module1_100721_0214.json",
+                        "2": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module2_100721_0214.json",
+                        "3": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module3_100721_0214.json",
+                        "4": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module4_100721_0214.json",
+                        "5": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module5_100721_0214.json",
+                        "6": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module6_100721_0214.json",
+                        "7": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104/Module7_100721_0214.json"
                     },
                     "moduleClkCmdMask": [
                         false,
@@ -157,7 +157,7 @@
     },
     "TRBReceiver02": {
         "name": "trackerreceiver02",
-        "host": "faser-daq-002",
+        "host": "localhost",
         "port": 5532,
         "modules": [
             {
@@ -165,14 +165,14 @@
                 "type": "TrackerReceiver",
                 "settings": {
                     "BoardID": 2,
-                    "SCIP": "faser-daq-002",
-                    "DAQIP": "faser-daq-002",
+                    "SCIP": "10.11.65.8",
+                    "DAQIP": "10.11.65.8",
                     "ReadoutMode": 0,
                     "ConfigureModules": true,
                     "HWDelayClk0": 0,
                     "HWDelayClk1": 0,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
+                    "FinePhaseClk0": 8,
+                    "FinePhaseClk1": 8,
                     "FinePhaseLed0": 37,
                     "FinePhaseLed1": 32,
                     "RxTimeoutDisable": false,
@@ -235,7 +235,7 @@
     },
     "TRBReceiver00CONFIGURED": {
         "name": "trackerreceiver00",
-        "host": "faser-daq-002",
+        "host": "localhost",
         "port": 5530,
         "modules": [
             {
@@ -243,8 +243,8 @@
                 "type": "TrackerReceiver",
                 "settings": {
                     "BoardID": 0,
-                    "SCIP": "faser-daq-002",
-                    "DAQIP": "faser-daq-002",
+                    "SCIP": "10.11.65.8",
+                    "DAQIP": "10.11.65.8",
                     "ReadoutMode": 0,
                     "ConfigureModules": false,
                     "HWDelayClk0": 0,
@@ -313,7 +313,7 @@
     },
     "TRBReceiver01CONFIGURED": {
         "name": "trackerreceiver01",
-        "host": "faser-daq-002",
+        "host": "localhost",
         "port": 5531,
         "modules": [
             {
@@ -321,8 +321,8 @@
                 "type": "TrackerReceiver",
                 "settings": {
                     "BoardID": 1,
-                    "SCIP": "faser-daq-002",
-                    "DAQIP": "faser-daq-002",
+                    "SCIP": "10.11.65.8",
+                    "DAQIP": "10.11.65.8",
                     "ReadoutMode": 0,
                     "ConfigureModules": false,
                     "HWDelayClk0": 0,
@@ -391,7 +391,7 @@
     },
     "TRBReceiver02CONFIGURED": {
         "name": "trackerreceiver02",
-        "host": "faser-daq-002",
+        "host": "localhost",
         "port": 5532,
         "modules": [
             {
@@ -399,8 +399,8 @@
                 "type": "TrackerReceiver",
                 "settings": {
                     "BoardID": 2,
-                    "SCIP": "faser-daq-002",
-                    "DAQIP": "faser-daq-002",
+                    "SCIP": "10.11.65.8",
+                    "DAQIP": "10.11.65.8",
                     "ReadoutMode": 0,
                     "ConfigureModules": false,
                     "HWDelayClk0": 0,
@@ -452,6 +452,84 @@
                             "transport": "tcp",
                             "host": "*",
                             "port": 8112,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+    },
+    "TRBReceiver01THRESHSCAN": {
+        "name": "trackerreceiver01",
+        "host": "localhost",
+        "port": 5531,
+        "modules": [
+            {
+                "name": "trackerreceiver01",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 1,
+                    "SCIP": "10.11.65.8",
+                    "DAQIP": "10.11.65.8",
+                    "ReadoutMode": 0,
+                    "ConfigureModules": true,
+                    "HWDelayClk0": 0,
+                    "HWDelayClk1": 0,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 37,
+                    "FinePhaseLed1": 40,
+                    "RxTimeoutDisable": false,
+                    "L1Atype": "external",
+                    "emulation": false,
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module0_100721_0214.json",
+                        "1": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module1_100721_0214.json",
+                        "2": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module2_100721_0214.json",
+                        "3": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module3_100721_0214.json",
+                        "4": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module4_100721_0214.json",
+                        "5": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module5_100721_0214.json",
+                        "6": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module6_100721_0214.json",
+                        "7": "/home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104//Module7_100721_0214.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8111,
                             "queue": {
                                 "$ref": "top.json#queue"
                             }
@@ -585,33 +663,45 @@
         }
     },
     "IFTMonitor00": {
-	"name": "iftmonitor00",
-	"host": "localhost",
-	"port": 5559,
-	"modules":[{
-		"name": "iftmonitor00",
-		"type": "IFTMonitor",
-		"settings": {
-            "TriggerFilter" : "Physics",
-            "publish_interval": 5,
-            "stats_uri": "tcp://localhost:7000"
-		},
-		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
+        "name": "iftmonitor00",
+        "host": "localhost",
+        "port": 5559,
+        "modules": [
+            {
+                "name": "iftmonitor00",
+                "type": "IFTMonitor",
+                "settings": {
+                    "TriggerFilter": "Physics",
+                    "publish_interval": 5,
+                    "stats_uri": "tcp://localhost:7000"
+                },
+                "connections": {
+                    "receivers": [
+                        {
+                            "type": "ZMQPubSub",
+                            "chid": 0,
+                            "connections": [
+                                {
+                                    "transport": "tcp",
+                                    "host": "localhost",
+                                    "port": 8200
+                                }
+                            ],
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
         "loglevel": {
             "core": "WARNING",
             "module": "INFO",
             "connection": "WARNING"
         },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     }
 }

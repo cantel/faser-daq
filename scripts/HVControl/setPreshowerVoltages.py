@@ -11,26 +11,19 @@ import sys
 import time
 
 voltageSettings={"high": 
-                 { 0: 1400*1.109,
-                   1: 1400*1.018,
-                   2: 1400*1.022,
-                   3: 1400,
-                   4: 1400*1.004,
-                   5: 1400*1.116},
+                 {
+                   12: 1100,
+                   13: 1100,
+                  },
                  "medium": 
-                 { 0: 1100*1.109,
-                   1: 1100*1.018,
-                   2: 1100*1.022,
-                   3: 1100,
-                   4: 1100*1.004,
-                   5: 1100*1.116},
+                 {
+                   12: 1100,
+                   13: 1100,
+               },
                  "low": 
-                 { 0: 700,
-                   1: 700,
-                   2: 700,
-                   3: 700,
-                   4: 700,
-                   5: 700
+                 {
+                   12: 1100,
+                   13: 1100,
                }
              }
 
@@ -38,7 +31,7 @@ voltageSettings={"high":
 #gain is wrt to above voltages
 
 if len(sys.argv)!=3:
-    print("Usage: setCaloHV.py <Gain> <Offset>")
+    print("Usage: setPreshowerVoltages.py <Gain> <Offset>")
     sys.exit(1)
 
 gainName=sys.argv[1]
@@ -52,7 +45,7 @@ except ValueError:
     print(f"not a valid offset: {sys.argv[2]}")
     sys.exit(1)
 
-if offset<-210:
+if offset<-500:
     print("Invalid offset, only positive values allowed")
     sys.exit(1)
 if offset>900:
@@ -61,10 +54,15 @@ if offset>900:
 
 voltages=voltageSettings[gainName]
 
+offsetPreshower=offset
+
 newTargets={}
 
 for ch in voltages:
-    volt=voltages[ch]-offset
+    if ch>10:
+        volt=voltages[ch]-offsetPreshower
+    else:
+        volt=voltages[ch]-offset
     newTargets[ch]=volt
     rc=os.system(f"snmpset -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-test outputVoltage.u9{ch:02d} F {volt}")
     if rc:

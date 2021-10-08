@@ -60,10 +60,12 @@ except ValueError:
     print(f"not a valid offset: {sys.argv[2]}")
     sys.exit(1)
 
-if offset<0:
+if offset<-200:
     print("Invalid offset, only positive values allowed")
-if offset>700:
+    sys.exit(1)
+if offset>900:
     print("Invalid offset, values >700 V not allowed")
+    sys.exit(1)
 
 voltages=voltageSettings[gainName]
 

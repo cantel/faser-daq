@@ -37,8 +37,8 @@ voltageSettings={"high":
 
 #gain is wrt to above voltages
 
-if len(sys.argv)!=3:
-    print("Usage: setCaloHV.py <Gain> <Offset>")
+if len(sys.argv)!=8:
+    print("Usage: setCaloHV.py <Gain> <Offset0> <Offset1> <Offset2> <Offset3> <Offset4> <Offset5>")
     sys.exit(1)
 
 gainName=sys.argv[1]
@@ -47,15 +47,16 @@ if not gainName in voltageSettings:
     sys.exit(1)
 
 try:
-    offset=float(sys.argv[2])
+    offsets=[float(arg) for arg in sys.argv[2:]]
 except ValueError:
-    print(f"not a valid offset: {sys.argv[2]}")
+    print(f"not a valid offset: {sys.argv[2:]}")
     sys.exit(1)
 
-if offset<-210:
+if min(offsets)<-210:
     print("Invalid offset, only positive values allowed")
     sys.exit(1)
-if offset>900:
+
+if max(offsets)>900:
     print("Invalid offset, values >700 V not allowed")
     sys.exit(1)
 
@@ -64,7 +65,7 @@ voltages=voltageSettings[gainName]
 newTargets={}
 
 for ch in voltages:
-    volt=voltages[ch]-offset
+    volt=voltages[ch]-offsets[ch]
     newTargets[ch]=volt
     rc=os.system(f"snmpset -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-test outputVoltage.u9{ch:02d} F {volt}")
     if rc:

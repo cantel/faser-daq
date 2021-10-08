@@ -4,10 +4,27 @@
 
 import json
 import numpy as np
-
+import base64
+import glob
+import random
+fishglob = glob.glob('/home/shifter/.waveforms/*.png')
+bobs=[]
+import re
+pattern=re.compile('(.+)_(\d+).png')
+print("appended bobs: ")
+for bob in fishglob:
+  if pattern.search(bob):
+    print(bob)
+    bobs.append((base64.b64encode(open(bob, 'rb').read())).decode())
+no_bobs=len(bobs)
+global fcnt
+fcnt=0
+flen=0.2
 
 def convert_to_plotly(histobj):
     """! Converts a "FASER type" histogram to a Plotly compatible histogram."""
+    global fcnt
+    fcnt+=1
     timestamp = float(histobj[: histobj.find(":")])
     histobj = json.loads(histobj[histobj.find("{") :])
 
@@ -84,4 +101,34 @@ def convert_to_plotly(histobj):
             yarray = histobj["yvalues"]
 
             data = [dict(x=xarray, y=yarray, type="bar")]
+
+            if "pulse_ch0" in histobj["name"] and no_bobs:
+               rnd = int(timestamp*1e6)&0xFFFFFFFF
+               if not rnd&0xAA:
+                 fidx=0
+                 fidx = fcnt%no_bobs
+                 matched = pattern.search(fishglob[fidx])
+                 if matched:
+                   ps = int(matched.group(2))
+                   print("checking fidx %s prescale %s "%(fidx,ps))
+                   if ps > 0:
+                     if fcnt%ps == 0:
+                       bob_decoded = bobs[fidx]
+                       print("fish! fcnt = %s, fidx = %s prescale = %s "%(fcnt,fidx,ps))
+                       flen=0.2
+                       if "blue" in fishglob[fidx]: flen=0.5
+                       layout["images"] = []
+                       layout["images"].append(dict(
+                             source='data:image/png;base64,{}'.format(bob_decoded),
+                             xref="x domain",
+                             yref="y domain",
+                             x=min(1-flen,random.random()),
+                             y=max(flen,random.random()),
+                             sizex=flen,
+                             sizey=flen,
+                             sizing="stretch",
+                             opacity=1,
+                             visible=True,
+                             layer="above"))
+
     return data, layout, timestamp

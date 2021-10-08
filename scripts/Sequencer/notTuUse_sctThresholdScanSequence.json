@@ -1,0 +1,43 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 45,
+ "defaults": {
+   "cfgFile": "combinedTestBeamFullConfigure.json",
+   "runtype": "Test",
+   "maxRunTime": 3600,
+   "maxEvents": 500000,
+   "postCommand": null,
+   "endcomment": "enough stats",
+   "finalizeCommand": "../SCTThreshControl/update_tracker_configs.py -i /home/shifter/cernbox/ehn1/DAQ_Data/StationIFT/Layer1/data/TestSequence_090721_2104/ResponseCurve_090721_2104 --tag 100721_0214 --trb TRBReceiver01" 
+  },
+ "steps": [
+     {
+	 "startcomment": "TRB Threshold Scan, Step 1/7, 0.5 fC",
+	 "preCommand": "../SCTThreshControl/update_tracker_configs.py -i /eos/project-f/faser-commissioning/tracker/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag 0.5fC --trb TRBReceiver01"
+     },
+     {
+	 "startcomment": "TRB Threshold Scan, Step 2/7, 1.5 fC",
+	 "preCommand": "../SCTThreshControl/update_tracker_configs.py -i /eos/project-f/faser-commissioning/tracker/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag 1.5fC --trb TRBReceiver01"
+     },
+     {
+	 "startcomment": "TRB Threshold Scan, Step 3/7, 2.0 fC",
+	 "preCommand": "../SCTThreshControl/update_tracker_configs.py -i /eos/project-f/faser-commissioning/tracker/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag 2.0fC --trb TRBReceiver01"
+     },
+     {
+	 "startcomment": "TRB Threshold Scan, Step 4/7, 2.5 fC",
+	 "preCommand": "../SCTThreshControl/update_tracker_configs.py -i /eos/project-f/faser-commissioning/tracker/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag 2.5fC --trb TRBReceiver01"
+     },
+     {
+	 "startcomment": "TRB Threshold Scan, Step 5/7, 3.0 fC",
+	 "preCommand": "../SCTThreshControl/update_tracker_configs.py -i /eos/project-f/faser-commissioning/tracker/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag 3.0fC --trb TRBReceiver01"
+     },
+     {
+	 "startcomment": "TRB Threshold Scan, Step 6/7, 4.0 fC",
+	 "preCommand": "../SCTThreshControl/update_tracker_configs.py -i /eos/project-f/faser-commissioning/tracker/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag 4.0fC --trb TRBReceiver01"
+     },
+     {
+	 "startcomment": "TRB Threshold Scan, Step 7/7, 5.0 fC",
+	 "preCommand": "../SCTThreshControl/update_tracker_configs.py -i /eos/project-f/faser-commissioning/tracker/ehn1/DAQ_Results/StationIFT/Layer1/TestSequence_090721_2104/ResponseCurve/ResponseCurve_090721_2104/Configs --tag 5.0fC --trb TRBReceiver01"
+     }
+ ]
+}
+

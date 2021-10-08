@@ -1,0 +1,19 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 60,
+ "finalizeCommand": "/home/shifter/software/faser-daq/scripts//HVControl/setCaloVoltagesSeparate.py high 300 300 300 300 300 300",
+ "defaults": {
+     "cfgFile": "combinedTestBeam.json",
+     "runtype": "TestBeam",
+     "maxRunTime": 3000,
+     "maxEvents": 200000,
+     "postCommand": null,
+     "endcomment": "Stop of HV scan point"
+ },
+ "template": {
+     "vars": { "offset": [300,400,500]},
+     "step": {
+	 "startcomment": "Step: {step} - Calorimeter HV Scan, high gain with offset of {offset} Volt",
+	 "preCommand": "/home/shifter/software/faser-daq/scripts/HVControl/setCaloVoltagesSeparate.py high 300 300 300 {offset} 300 300"
+     }
+ }
+}

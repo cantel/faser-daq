@@ -38,6 +38,7 @@ class IFTMonitorModule : public MonitorBaseModule {
   double rms(double* x, int n);
 
   std::map<int, std::vector<Vector3>> m_spacepoints = {};
+  uint32_t m_stationID = 0;
 
   double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm
   double kMODULEPOS[4] = {64.92386246, 1.20386696, -62.55613708, -126.25613403}; // values in mm

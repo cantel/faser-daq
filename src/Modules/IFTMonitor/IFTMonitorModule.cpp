@@ -96,6 +96,13 @@ double IFTMonitorModule::rms(double* x, int n) {
 
 IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) { 
   INFO("");
+  auto cfg = getModuleSettings();
+  auto cfg_stationID = cfg["stationID"];
+  if (cfg_stationID != "" && cfg_stationID != nullptr) {
+    DEBUG("read station " << cfg_stationID << " from config");
+    m_stationID = cfg_stationID;
+  }
+  else m_stationID = 0;
 }
 
 IFTMonitorModule::~IFTMonitorModule() { 
@@ -124,12 +131,12 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   }
 
 
-  for (int TRBBoardId=0; TRBBoardId < kTRB_BOARDS; TRBBoardId++) {
+  for (int TRBBoardId=m_stationID * kTRB_BOARDS; TRBBoardId < (m_stationID+1) * kTRB_BOARDS; TRBBoardId++) {
 
     try {
       TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
       m_eventId = trackerDataFragment.event_id();
-      if (TRBBoardId == 0)
+      if (TRBBoardId % kTRB_BOARDS == 0)
         DEBUG("event " << m_eventId);
 
       for (auto sctEvent : trackerDataFragment) {
@@ -213,7 +220,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
               double yb = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster2) * kSTRIP_PITCH;
               double px = intersection(yf, yb);
 
-              double py = 0.5 * (yf + yb) + kLAYER_OFFSET[TRBBoardId];
+              double py = 0.5 * (yf + yb) + kLAYER_OFFSET[TRBBoardId % kTRB_BOARDS];
 
               // invert every second module and add x-offset
               if (module % 2 == 1) px *= -1;
@@ -225,13 +232,13 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
               m_y_vec[m_vec_idx] = py;
               m_vec_idx = (m_vec_idx+1) % kAVGSIZE;
 
-              if (TRBBoardId == 0) {
+              if (TRBBoardId % kTRB_BOARDS == 0) {
                 m_histogrammanager->fill2D("hitmap_l0", px, py, 1);
                 m_histogrammanager->fill("x_l0", px);
                 m_histogrammanager->fill("y_l0", py);
               }
-              m_spacepoints[TRBBoardId].emplace_back(px, py, kLAYERPOS[TRBBoardId]);
-              if (m_spacepoints[TRBBoardId].size() > 10) {
+              m_spacepoints[TRBBoardId % kTRB_BOARDS].emplace_back(px, py, kLAYERPOS[TRBBoardId % kTRB_BOARDS]);
+              if (m_spacepoints[TRBBoardId % kTRB_BOARDS].size() > 10) {
                 break;
               }
             }

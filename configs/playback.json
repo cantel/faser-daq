@@ -24,7 +24,9 @@
 	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
       },
       { "$ref": "Templates/TRB.json#TrackerMonitor00" },
-      { "$ref": "Templates/TRB.json#IFTMonitor00" }
+      { "$ref": "Templates/TRB.json#IFTMonitor00" },
+      { "$ref": "Templates/TRB.json#IFTMonitor01" },
+      { "$ref": "Templates/TRB.json#IFTMonitor02" }
     ]
   }
 }

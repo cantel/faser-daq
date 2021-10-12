@@ -103,6 +103,17 @@ IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) 
     m_stationID = cfg_stationID;
   }
   else m_stationID = 0;
+  auto cfg_hitMode = cfg["hitMode"];
+  if (cfg_hitMode == "HIT")
+    m_hitMode = HitMode::HIT;
+  else if (cfg_hitMode == "EDGE")
+    m_hitMode = HitMode::EDGE;
+  else if (cfg_hitMode == "LEVEL")
+    m_hitMode = HitMode::LEVEL;
+  else {
+      ERROR("Unknown hit mode, allowed values are HIT, EDGE and LEVEL.\nSetting hit mode to HIT");
+      m_hitMode = HitMode::HIT;
+  }
 }
 
 IFTMonitorModule::~IFTMonitorModule() { 
@@ -138,6 +149,8 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
       m_eventId = trackerDataFragment.event_id();
       if (TRBBoardId % kTRB_BOARDS == 0)
         DEBUG("event " << m_eventId);
+
+      std::string hname_hitp = m_prefix_hname_hitp+std::to_string(TRBBoardId % 3);
 
       for (auto sctEvent : trackerDataFragment) {
         if (sctEvent == nullptr) {
@@ -181,7 +194,12 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
           auto hitsPerChip = allHits[chipIdx];
           previousStrip = 0;
           for (auto hit : hitsPerChip) {
-            if (hit.second == 7) continue;
+            u_int8_t hitPattern = hit.second;
+            std::bitset<3> bitset_hitp(hitPattern);
+            m_histogrammanager->fill(hname_hitp, bitset_hitp.to_string());
+            if (hitPattern == 7) continue;
+            if (m_hitMode == HitMode::EDGE && (((hitPattern & 0x2) == 0 ) || ((hitPattern & 0x4) != 0) ) ) continue; // 01X
+            if (m_hitMode == HitMode::LEVEL && ((hitPattern & 0x2) == 0)) continue; // X1X
             currentStrip = hit.first;
             if ((not adjacent(previousStrip, currentStrip)) and (not currentCluster.empty())) {
               clustersPerChip.push_back(average(currentCluster));
@@ -303,6 +321,10 @@ void IFTMonitorModule::register_hists() {
   const unsigned kPUBINT = 5; // publishing interval in seconds
   for ( const auto& hit_map : m_hit_maps)
     m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
+  for (uint8_t i = 0; i < kLAYERS; ++i) {
+    std::string hname_hitp = m_prefix_hname_hitp+std::to_string(i);
+    m_histogrammanager->registerHistogram(hname_hitp, "hit pattern", m_hitp_categories, m_PUBINT);
+  }
   m_histogrammanager->register2DHistogram("hitmap_track", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
   m_histogrammanager->registerHistogram("x_track", "x_track", -128, 128, 25, kPUBINT);
   m_histogrammanager->registerHistogram("y_track", "y_track", -128, 128, 25, kPUBINT);

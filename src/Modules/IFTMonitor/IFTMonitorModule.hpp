@@ -29,6 +29,9 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::atomic<int> m_number_good_events = 0;
 
  private:
+  enum class HitMode { HIT = 0, LEVEL, EDGE };
+  HitMode m_hitMode {HitMode::HIT};
+
   bool adjacent(int strip1, int strip2);
   int average(std::vector<int> strips);
   double intersection(double y1, double y2);
@@ -40,6 +43,8 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::map<int, std::vector<Vector3>> m_spacepoints = {};
   uint32_t m_stationID = 0;
   const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
+  const std::string m_prefix_hname_hitp = "hitpattern_layer";
+  const std::vector<std::string> m_hitp_categories = { "000", "001", "010", "011", "100", "110"};
 
   double kLAYERPOS[3] = {16.2075, 47.7075, 79.2075}; // values in mm
   double kMODULEPOS[4] = {64.92386246, 1.20386696, -62.55613708, -126.25613403}; // values in mm
@@ -60,6 +65,7 @@ class IFTMonitorModule : public MonitorBaseModule {
   uint16_t module;
   unsigned m_total_WARNINGS;
   bool m_print_WARNINGS;
+  const uint8_t kLAYERS = 3;
   const uint8_t kTRB_BOARDS = 3;
   const uint8_t kSTRIPDIFFTOLERANCE = 32; // arctan(0.04) * 63.96mm / 0.08mm = 32
   const uint8_t kSTRIPS_PER_CHIP = 128;

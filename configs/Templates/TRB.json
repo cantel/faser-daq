@@ -700,6 +700,7 @@
 		"name": "iftmonitor00",
 		"type": "IFTMonitor",
 		"settings": {
+			"hitMode": "EDGE",
             "fragmentID": 196608,
             "stationID": 0,
             "TriggerFilter" : "Physics",
@@ -732,6 +733,7 @@
 		"name": "iftmonitor01",
 		"type": "IFTMonitor",
 		"settings": {
+			"hitMode": "EDGE",
             "fragmentID": 196608,
             "stationID": 1,
             "TriggerFilter" : "Physics",
@@ -764,6 +766,7 @@
 		"name": "iftmonitor02",
 		"type": "IFTMonitor",
 		"settings": {
+			"hitMode": "EDGE",
             "fragmentID": 196608,
             "stationID": 2,
             "TriggerFilter" : "Physics",

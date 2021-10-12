@@ -232,11 +232,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
               m_y_vec[m_vec_idx] = py;
               m_vec_idx = (m_vec_idx+1) % kAVGSIZE;
 
-              if (TRBBoardId % kTRB_BOARDS == 0) {
-                m_histogrammanager->fill2D("hitmap_l0", px, py, 1);
-                m_histogrammanager->fill("x_l0", px);
-                m_histogrammanager->fill("y_l0", py);
-              }
+              m_histogrammanager->fill2D(m_hit_maps[TRBBoardId % kTRB_BOARDS], px, py, 1);
               m_spacepoints[TRBBoardId % kTRB_BOARDS].emplace_back(px, py, kLAYERPOS[TRBBoardId % kTRB_BOARDS]);
               if (m_spacepoints[TRBBoardId % kTRB_BOARDS].size() > 10) {
                 break;
@@ -305,10 +301,9 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 void IFTMonitorModule::register_hists() {
   INFO(" ... registering histograms in TrackerMonitor ... " );
   const unsigned kPUBINT = 5; // publishing interval in seconds
-  m_histogrammanager->register2DHistogram("hitmap_l0", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
+  for ( const auto& hit_map : m_hit_maps)
+    m_histogrammanager->register2DHistogram(hit_map, "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
   m_histogrammanager->register2DHistogram("hitmap_track", "x", -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, "y",  -kSTRIP_LENGTH, kSTRIP_LENGTH, 50, kPUBINT);
-  m_histogrammanager->registerHistogram("x_l0", "x_l0", -128, 128, 25, kPUBINT);
-  m_histogrammanager->registerHistogram("y_l0", "y_l0", -128, 128, 25, kPUBINT);
   m_histogrammanager->registerHistogram("x_track", "x_track", -128, 128, 25, kPUBINT);
   m_histogrammanager->registerHistogram("y_track", "y_track", -128, 128, 25, kPUBINT);
   m_histogrammanager->registerHistogram("phi_xz", "phi_xz", -5, 5, 100, kPUBINT);

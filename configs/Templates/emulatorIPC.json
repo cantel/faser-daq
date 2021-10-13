@@ -408,9 +408,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8101,
+                "transport": "ipc",
+                "path": "/tmp/p8101",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -434,9 +433,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8102,
+                "transport": "ipc",
+                "path": "/tmp/p8102",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -460,9 +458,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8110,
+                "transport": "ipc",
+                "path": "/tmp/p8110",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -486,9 +483,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8111,
+                "transport": "ipc",
+                "path": "/tmp/p8111",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -512,9 +508,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8112,
+                "transport": "ipc",
+                "path": "/tmp/p8112",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -538,9 +533,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8113,
+                "transport": "ipc",
+                "path": "/tmp/p8113",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -564,9 +558,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8114,
+                "transport": "ipc",
+                "path": "/tmp/p8114",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -590,9 +583,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8115,
+                "transport": "ipc",
+                "path": "/tmp/p8115",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -616,9 +608,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8116,
+                "transport": "ipc",
+                "path": "/tmp/p8116",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -642,9 +633,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8117,
+                "transport": "ipc",
+                "path": "/tmp/p8117",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -668,9 +658,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8118,
+                "transport": "ipc",
+                "path": "/tmp/p8118",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -694,9 +683,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8119,
+                "transport": "ipc",
+                "path": "/tmp/p8119",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -720,9 +708,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8120,
+                "transport": "ipc",
+                "path": "/tmp/p8120",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]
@@ -746,9 +733,8 @@
               {
                 "type": "ZMQPair",
                 "chid": 0,
-                "transport": "tcp",
-                "host": "*",
-                "port": 8121,
+                "transport": "ipc",
+                "path": "/tmp/p8121",
                 "queue":{"$ref":"top.json#queue"}
               }
             ]

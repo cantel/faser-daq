@@ -43,6 +43,7 @@ def histograms_save():
     """! Defines the job that will be executed every 60 seconds
     It saves the current histograms in redis database 1 to redis database 6
     """
+
     with app.app_context():
         IDs = getAllIDs().get_json()  # we get all the IDs
     for ID in IDs:
@@ -75,10 +76,10 @@ def old_histogram_save():
             config = {"filename":f"{ID}+{timestamp}"} 
             figure = dict(data=data, layout=layout, config=config)
             hist = dict(timestamp=timestamp, figure=figure)
-            if r7.hlen(f"old:{ID}")>=168 : # 24 (hours) * 7 (days) 
-                key_to_remove = sorted(r7.hkeys(f"old:{ID})"))[0]
+            if r7.hlen(f"old:{ID}")>=168: # 24 (hours) * 7 (days) 
+                key_to_remove = sorted(r7.hkeys(f"old:{ID}"))[0]
                 r7.hdel(f"old:{ID}", key_to_remove)
-            r7.hset(f"old:{ID}", f"old:{timestamp}R{runNumber}", json.dumps(hist)) 
+            r7.hset(f"old:{ID}", f"old:{timestamp}R{runNumber}", json.dumps(hist))
 
 # setting up the background jobs for storing old histograms
 scheduler = BackgroundScheduler()

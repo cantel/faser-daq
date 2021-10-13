@@ -6,13 +6,15 @@ properly (e.g. DCS).
 The codebase is stored at [https://gitlab.cern.ch/faser/daq](https://gitlab.cern.ch/faser/daq)
 and can be obtained by cloning it using any method that you prefer :
 ```
-git clone ssh://git@gitlab.cern.ch:7999/faser/daq.git
+git clone --recurse-submodules https://:@gitlab.cern.ch:8443/faser/online/faser-daq.git
+#OR for example
+git clone --recurse-submodules ssh://git@gitlab.cern.ch:7999/faser/online/faser-daq.git
 ```
 Because there are a number of submodules that pull in other tools, these must also be
 obtained by either using the `--recursive` option while cloning or performing an `init`/`update`
-call from within the cloned `faser/daq` repository:
+call from within the cloned `faser-daq` repository:
 ```
-cd daq
+cd faser-daq
 git submodule init
 git submodule update
 ```
@@ -43,10 +45,10 @@ After logging onto one of these machines and obtaining the code as described abo
 can setup your build directory and build the code as :
 ```
 cd daq
-source setup.sh
+source setup.sh  # the first time you will need specify spack repository, typically /home/daqling-spack-repo
 mkdir build
 cd build
-cmake3 ../
+cmake ../
 make -j12
 ```
 Note that you can perform a parallel build but it is wise to limit the number of cores
@@ -80,7 +82,7 @@ export BOOST_ROOT_DIR=/opt/lcg/Boost/1.70.0-eebf1/x86_64-centos7-gcc8-opt
 export BOOST_VERSION=1.70
 mkdir build
 cd build
-cmake3 ../
+cmake ../
 make
 ```
 Note that in this case, a parallel build is not recommended because you are working on your 
@@ -102,7 +104,7 @@ To be able to view and toggle all build options, you can use the interactive cma
 [ccmake](https://cmake.org/cmake/help/latest/manual/ccmake.1.html):
 ```
 cd build
-ccmake3 ../  # yes, two cc's 
+ccmake ../  # yes, two cc's 
 ```
 which will bring up a menu of options.  Among these, the two that are most useful
 for optimizations are
@@ -117,18 +119,85 @@ To compile and run the FASER DAQ on a new machine (virtual or real), the machine
 to be setup. For CentOS 7 machines at CERN, this follows the DAQling procedure with a few FASER
 specific add-ons, `daqling/README.md`. Assuming the repository has been checked out, the
 procedure to follow is as follows.  **Note** that you need SUDO rights on the machine on which
-you are performing the installation.
+you are performing the installation. If installing with software raid, instruction for configuration can be found at:
+[LVM instructions](https://tuxfixer.com/centos-7-installation-with-lvm-raid-1-mirroring/). This should only relevant for production DCS machines.
 ```
 #if needed setup proxy if there is no direct internet access, see below
+#Next steps are only relevant for real production machines (DAQ and DCS), not VMs
+
+#install telegraf for node monitoring to InfluxDB
+wget https://dl.influxdata.com/telegraf/releases/telegraf-1.19.3-1.x86_64.rpm
+sudo yum localinstall -y telegraf-1.19.3-1.x86_64.rpm
+scp faser-daq-010:/etc/telegraf/telegraf.conf .
+sudo cp telegraf.conf /etc/telegraf/telegraf.conf
+sudo echo 'KERNEL=="ipmi*", MODE="660", GROUP="telegraf"' > /etc/udev/rules.d/52-telegraf-ipmi.rules
+sudo systemctl enable telegraf
+sudo systemctl start telegraf
+
+
+#enable login over ssh with kerberos tokens for faser members
+sudo cern-get-keytab  # this will only work for hosts with a fixed IP
+scp faser-daq-002:/home/aagaard/sssd.conf .
+sudo cp sssd.conf /etc/sssd/
+sudo chown root:root /etc/sssd/sssd.conf
+sudo chmod 0600 /etc/sssd/sssd.conf
+sudo restorecon /etc/sssd/sssd.conf
+sudo authconfig --enablesssd --enablesssdauth --update
+sudo systemctl enable sssd
+sudo systemctl stop sssd
+sudo systemctl start sssd
+
+# IPMI tools
+sudo yum install OpenIPMI ipmitool
+sudo systemctl enable ipmi
+sudo systemctl start ipmi
+sudo systemctl status ipmi
+
+#setup data archiving to EOS
+sudo yum install -y xrootd-client
+git clone https://:@gitlab.cern.ch:8443/faser/online/data-archiver.git
+cd data-archiver
+scp faser-daq-006:/etc/faser-data-archiver.json .
+# might need to edit input and output location in above file
+sudo cp faser-archiver.py /usr/local/bin/
+sudo cp faser-data-archiver.json /etc
+sudo cp faser-transfer.cron /etc/cron.hourly/
+sudo chown 777 /data   # change to actual data path location
+cd ..
+
+#Installing EOS client
+sudo locmap --enable eosclient; 
+sudo locmap --configure eosclient
+
+# To be added - instructions for enabled core dumps
+
+#The following steps are for both production and VMs
+# install the daqling spack repository (might need to be updated on occassion)
+sudo yum install -y http://build.openhpc.community/OpenHPC:/1.3/CentOS_7/x86_64/ohpc-release-1.3-1.el7.x86_64.rpm
+sudo yum install -y gnu8-compilers-ohpc cmake
+export PATH=$PATH:/opt/ohpc/pub/compiler/gcc/8.3.0/bin
+sudo mkdir /home/daqling-spack-repo
+sudo chown $USER /home/daqling-spack-repo
+cd /home
+git clone --recurse-submodules https://:@gitlab.cern.ch:8443/ep-dt-di/daq/daqling-spack-repo.git
+cd daqling-spack-repo/
+./Install.sh
+
 #From DAQling
+git clone https://:@gitlab.cern.ch:8443/ep-dt-di/daq/daqling.git
 cd daqling
 sudo yum install -y ansible
-source cmake/setup.sh
-cd ansible/
-ansible-playbook set-up-host.yml --ask-become
-ansible-playbook install-boost-1_70.yml --ask-become
-ansible-playbook install-webdeps.yml --ask-become
+./cmake/install.sh -d /home/daqling-spack-repo -c $PWD/config -w
+cd ansible
 ansible-playbook install-redis.yml --ask-become
+#fix supervisor configuration:
+sudo sed -i s/daq/faser/ /etc/supervisor/conf.d/twiddler.conf
+sudo systemctl stop supervisord
+sudo systemctl start supervisord
+#redis doesn't seem to start on its own, so need to remove old log file owned by root and start it properly
+sudo rm -f  /var/log/redis/redis.log
+sudo systemctl enable redis
+sudo systemctl start redis
 
 #For FASER additional firewall ports need to be opened for the GPIO readout and histogram monitoring:
 sudo firewall-cmd --zone=public --add-port=50000-50005/udp --permanent
@@ -136,10 +205,12 @@ sudo firewall-cmd --zone=public --add-port=8050/tcp --permanent
 sudo firewall-cmd --reload
 #For FASER install additional python libraries for GUI:
 sudo pip3 install requests
+sudo pip3 install flask_scss
 #For FASER  histogram monitoring install additional python libraries:
 sudo pip3 install Flask-APScheduler
-#Installing EOS client
-sudo locmap --enable eosclient; locmap --configure eosclient
+#metrics logging config - if needed edit the DB location of the metrics archive
+scp faser-daq-002:/etc/faser-secrets.json .
+sudo cp faser-secrets.json /etc
 ```
 If running on machine without direct internet access, one has to setup a proxy on a different
 machine and point `pip`, `yum` and `git` to it before running the above scripts.

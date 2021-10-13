@@ -46,6 +46,7 @@ private:
   std::atomic<int> m_duplicateSourceCount;
   std::atomic<int> m_timeoutCount;
   std::atomic<int> m_BCIDMismatchCount;
+  std::atomic<int> m_idleRate;
 
   std::atomic<int> m_eventCounts[MaxAnyTag];
   std::atomic<int> m_pendingCounts[MaxAnyTag];

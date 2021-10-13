@@ -11,7 +11,7 @@
             "publish_interval": 15,
             "enable_digitizer": true,
             "enable_tlb": true,
-            "enable_trb": [1,2,3]
+            "enable_trb": [0,3,6]
 		},
 		"connections": {
 				"receivers": [

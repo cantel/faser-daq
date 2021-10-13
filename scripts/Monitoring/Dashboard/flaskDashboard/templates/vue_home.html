@@ -410,12 +410,15 @@
 
                 deleteTags() {
                     axios.get("/delete_tags")
+                        .then(response => {
                     window.location.reload(true)
+                        })
                 },
-                //api call to delete current histograms
                 deleteCurrent() {
                     axios.get("/delete_current")
+                        .then(response => {
                     window.location.reload(true)
+                        })
                 }
             },
         });

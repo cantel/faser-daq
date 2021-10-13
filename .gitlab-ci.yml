@@ -14,12 +14,14 @@ build_faser_daq:
   script:
     - ls
     - pwd
-    - source setup.sh /daqling-spack-repo
+    - source setup.sh
     - mkdir -p build 
     - cd build
     - cmake ../
     - make -j8
-    
+  before_script:
+    - ./daqling/cmake/install.sh -d /daqling-spack-repo -c configs/ -a
+ 
 validate_configs:
   stage: config
   image: gitlab-registry.cern.ch/faser/docker/daq:master

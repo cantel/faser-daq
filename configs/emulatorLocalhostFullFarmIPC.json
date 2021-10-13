@@ -1,0 +1,71 @@
+{
+  "configuration": {
+    "version": 11,
+    "group": "faser",
+    "components": [
+      { "$ref" : "Templates/emulatorIPC.json#TriggerGenerator" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator01" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator02" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator10" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator11" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator12" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator13" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator14" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator15" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator16" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator17" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator18" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator19" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator20" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendEmulator21" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver01" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver02" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver10" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver11" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver12" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver13" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver14" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver15" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver16" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver17" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver18" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver19" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver20" },
+      { "$ref" : "Templates/emulatorIPC.json#FrontendReceiver21" },
+      {
+        "name": "eventbuilder01",
+        "host": "localhost",
+        "port": 5500,
+        "modules":[{
+          "name": "eventbuilder01",
+          "type": "EventBuilderFaser",
+          "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+          "connections": {
+            "receivers": [
+              { "chid": 0,"path": "/tmp/p8101", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 1,"path": "/tmp/p8102", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 2,"path": "/tmp/p8110", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 3,"path": "/tmp/p8111", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 4,"path": "/tmp/p8112", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 5,"path": "/tmp/p8113", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 6,"path": "/tmp/p8114", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 7,"path": "/tmp/p8115", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 8,"path": "/tmp/p8116", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 9,"path": "/tmp/p8117", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 10,"path": "/tmp/p8118", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 11,"path": "/tmp/p8119", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 12,"path": "/tmp/p8120", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 13,"path": "/tmp/p8121", "type": "ZMQPair", "transport": "ipc", "queue":{"$ref": "top.json#queue"} }
+            ],
+            "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilderIPC/connections/senders" }
+          }
+        }],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
+      },
+      { "$ref": "Templates/fileWriter.json#FileWriterIPC" },
+      { "$ref": "Templates/emulatorIPC.json#FrontEndMonitor01" },
+      { "$ref": "Templates/emulatorIPC.json#EmulatorMonitor" }
+    ]
+  }
+}

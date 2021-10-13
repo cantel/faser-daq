@@ -10,11 +10,12 @@ build_faser_daq:
   variables:
     GIT_SUBMODULE_STRATEGY: recursive
   before_script:
-    - yum -y install eigen3-devel
   script:
+    - yum -y install eigen3-devel
     - ls
     - pwd
     - source setup.sh
+    - ls /usr/share
     - export Eigen3_DIR=/usr/share/eigen3/
     - mkdir -p build 
     - cd build

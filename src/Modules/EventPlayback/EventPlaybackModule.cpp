@@ -59,9 +59,10 @@ bool EventPlaybackModule::sendEvent(uint8_t event_tag,EventFull *event) {
   INFO("Sending event "<<event->event_id()<<" - "<<event->size()<<" bytes on channel "<<channel);
   auto *bytestream=event->raw();
   DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
+  DataFragment<daqling::utilities::Binary> binData2(bytestream->data(),bytestream->size());
   m_connections.send(channel,binData);
-  DataFragment<daqling::utilities::Binary> binData1(bytestream->data(),bytestream->size());
-  m_connections.send(channel+100,binData1);
+  m_connections.send(channel+100,binData2);
+
   delete bytestream;
   return true;
 }

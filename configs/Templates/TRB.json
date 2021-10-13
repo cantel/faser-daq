@@ -691,5 +691,104 @@
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "IFTMonitor00": {
+	"name": "iftmonitor00",
+	"host": "localhost",
+	"port": 5559,
+	"modules":[{
+		"name": "iftmonitor00",
+		"type": "IFTMonitor",
+		"settings": {
+			"hitMode": "HIT",
+            "fragmentID": 196608,
+            "stationID": 0,
+            "TriggerFilter" : "Physics",
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+        "loglevel": {
+            "core": "WARNING",
+            "module": "DEBUG",
+            "connection": "WARNING"
+        },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "IFTMonitor01": {
+	"name": "iftmonitor01",
+	"host": "localhost",
+	"port": 5560,
+	"modules":[{
+		"name": "iftmonitor01",
+		"type": "IFTMonitor",
+		"settings": {
+			"hitMode": "HIT",
+            "fragmentID": 196608,
+            "stationID": 1,
+            "TriggerFilter" : "Physics",
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+        "loglevel": {
+            "core": "WARNING",
+            "module": "DEBUG",
+            "connection": "WARNING"
+        },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "IFTMonitor02": {
+	"name": "iftmonitor02",
+	"host": "localhost",
+	"port": 5561,
+	"modules":[{
+		"name": "iftmonitor02",
+		"type": "IFTMonitor",
+		"settings": {
+			"hitMode": "HIT",
+            "fragmentID": 196608,
+            "stationID": 2,
+            "TriggerFilter" : "Physics",
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+        "loglevel": {
+            "core": "WARNING",
+            "module": "DEBUG",
+            "connection": "WARNING"
+        },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     }
 }

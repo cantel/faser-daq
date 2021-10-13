@@ -25,12 +25,6 @@ bool IFTMonitorModule::adjacent(int strip1, int strip2) {
 }
 
 
-int IFTMonitorModule::average(std::vector<int> strips) {
-  size_t n = strips.size();
-  return n != 0 ? (int)std::accumulate(strips.begin(), strips.end(), 0.0) / n : 0;
-}
-
-
 // calculate line line intersection given two points on each line (top and bottom of each strip)
 // https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
 double IFTMonitorModule::intersection(double yf, double yb) {
@@ -184,31 +178,27 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
         int module = sctEvent->GetModuleID();
 
         // combine adjacent strips to a cluster
-        std::vector<int> clustersPerChip = {};
-        std::vector<int> currentCluster = {};
-        int previousStrip = 0;
-        int currentStrip;
+        std::vector<Cluster> clustersPerChip = {};
+        Cluster currentCluster;
+        int previousHitPos = 0;
         auto allHits = sctEvent->GetHits();
-        std::map<unsigned, std::vector<int>> allClusters;
+        std::map<unsigned, std::vector<Cluster>> allClusters;
         for (unsigned chipIdx = 0; chipIdx < kCHIPS_PER_MODULE; chipIdx++) {
           auto hitsPerChip = allHits[chipIdx];
-          previousStrip = 0;
+          previousHitPos = 0;
           for (auto hit : hitsPerChip) {
-            u_int8_t hitPattern = hit.second;
-            std::bitset<3> bitset_hitp(hitPattern);
-            m_histogrammanager->fill(hname_hitp, bitset_hitp.to_string());
+            auto hitPattern = hit.second;
             if (hitPattern == 7) continue;
             if (m_hitMode == HitMode::EDGE && (((hitPattern & 0x2) == 0 ) || ((hitPattern & 0x4) != 0) ) ) continue; // 01X
             if (m_hitMode == HitMode::LEVEL && ((hitPattern & 0x2) == 0)) continue; // X1X
-            currentStrip = hit.first;
-            if ((not adjacent(previousStrip, currentStrip)) and (not currentCluster.empty())) {
-              clustersPerChip.push_back(average(currentCluster));
+            if ((not adjacent(previousHitPos, hit.first)) and (not currentCluster.empty())) {
+              clustersPerChip.push_back(currentCluster);
               currentCluster.clear();
             }
-            currentCluster.push_back(currentStrip);
-            previousStrip = currentStrip;
+            currentCluster.addHit(hit);
+            previousHitPos = hit.first;
           }
-          if (not currentCluster.empty()) clustersPerChip.push_back(average(currentCluster));
+          if (not currentCluster.empty()) clustersPerChip.push_back(currentCluster);
           if (not clustersPerChip.empty()) allClusters[chipIdx] = clustersPerChip;
           currentCluster.clear();
           clustersPerChip.clear();
@@ -224,20 +214,21 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
 
               // every second module is flipped
               // invert for the downstream side the cluster and chip number
+              int cluster1Pos = cluster1.position();
+              int cluster2Pos = cluster2.position();
               double chip = module % 2 == 0 ? chipIdx1 : 5 - chipIdx1;
               if (module % 2 == 0)
-                cluster2 = kSTRIPS_PER_CHIP - 1 - cluster2; 
+                cluster2Pos = kSTRIPS_PER_CHIP - 1 - cluster2Pos; 
               else
-                cluster1 = kSTRIPS_PER_CHIP - 1 - cluster1; 
+                cluster1Pos = kSTRIPS_PER_CHIP - 1 - cluster1Pos; 
 
               // check for intersections
-              if (std::abs(cluster1-cluster2) > kSTRIPDIFFTOLERANCE) continue;
+              if (std::abs(cluster1Pos-cluster2Pos) > kSTRIPDIFFTOLERANCE) continue;
 
               // calculate intersection
-              double yf = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster1) * kSTRIP_PITCH;
-              double yb = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster2) * kSTRIP_PITCH;
+              double yf = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster1Pos) * kSTRIP_PITCH;
+              double yb = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster2Pos) * kSTRIP_PITCH;
               double px = intersection(yf, yb);
-
               double py = 0.5 * (yf + yb) + kLAYER_OFFSET[TRBBoardId % kTRB_BOARDS];
 
               // invert every second module and add x-offset
@@ -251,7 +242,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
               m_vec_idx = (m_vec_idx+1) % kAVGSIZE;
 
               m_histogrammanager->fill2D(m_hit_maps[TRBBoardId % kTRB_BOARDS], px, py, 1);
-              m_spacepoints[TRBBoardId % kTRB_BOARDS].emplace_back(px, py, kLAYERPOS[TRBBoardId % kTRB_BOARDS]);
+              m_spacepoints[TRBBoardId % kTRB_BOARDS].emplace_back(SpacePoint({px, py, kLAYERPOS[TRBBoardId % kTRB_BOARDS]}, cluster1.hitPatterns(), cluster2.hitPatterns()));
               if (m_spacepoints[TRBBoardId % kTRB_BOARDS].size() > 10) {
                 break;
               }
@@ -268,11 +259,11 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   if (m_spacepoints.size() == 3) {
 
     // create all combinations of three space points
-    std::vector<std::vector<Vector3>> tracks;
+    std::vector<Tracklet> tracklets;
     for (const auto& p0 : m_spacepoints[0]) {
       for (const auto& p1 : m_spacepoints[1]) {
         for (const auto& p2 : m_spacepoints[2]) {
-          tracks.push_back({p0, p1, p2});
+          tracklets.push_back(Tracklet(p0.position(), p1.position(), p2.position(), p0.hitPatterns(), p1.hitPatterns(), p2.hitPatterns()));
         }
       }
     }
@@ -280,19 +271,26 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
     // fit all track candidates and get candidate with best mean-squared-error
     Vector3 origin;
     Vector3 direction;
+    std::vector<int> hitPatterns;
     double mse;
     double mse_min = 999;
-    for (auto track : tracks) {
-      std::pair<Vector3, Vector3> fit = linear_fit(track);
-      mse = mse_fit(track, fit);
+    for (auto tracklet : tracklets) {
+      std::pair<Vector3, Vector3> fit = linear_fit(tracklet.spacePoints());
+      mse = mse_fit(tracklet.spacePoints(), fit);
       if (mse < mse_min) {
         mse_min = mse;
         origin = fit.first;
         direction = fit.second;
+        hitPatterns = tracklet.hitPatterns();
       }
     }
 
     if (mse_min < 999) {
+      for (const auto& hitPattern : hitPatterns) {
+        std::bitset<3> bitset_hitp(hitPattern);
+        std::string hname_hitp = m_prefix_hname_hitp+std::to_string(0);
+        m_histogrammanager->fill(hname_hitp, bitset_hitp.to_string());
+      }
       double tan_phi_xz = direction.x() / direction.z();
       double tan_phi_yz = direction.y() / direction.z();
       double phi_xz = atan(tan_phi_xz) * 180 / PI;

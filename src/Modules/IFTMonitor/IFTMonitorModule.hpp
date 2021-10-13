@@ -29,18 +29,70 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::atomic<int> m_number_good_events = 0;
 
  private:
+
+  struct Cluster {
+   public:
+    Cluster() = default;
+    void addHit(std::pair<int, int> hit) {
+      m_hitPositions.push_back(hit.first);
+      m_hitPatterns.push_back(hit.second);
+    }
+    int position() const {
+      size_t n = m_hitPositions.size();
+      return n != 0 ? (int)std::accumulate(m_hitPositions.begin(), m_hitPositions.end(), 0.0) / n : 0;
+    }
+    std::vector<int> hitPatterns() const { return m_hitPatterns; }
+    bool empty() const { return m_hitPositions.size() == 0; }
+    void clear() {
+      m_hitPositions.clear();
+      m_hitPatterns.clear();
+    }
+   private:
+    std::vector<int> m_hitPositions {};
+    std::vector<int> m_hitPatterns {};
+  };
+  struct SpacePoint {
+   public:
+    SpacePoint(const Vector3& sp, const std::vector<int>& hitPatterns0, const std::vector<int>& hitPatterns1) : m_sp(sp) {
+      m_hitPatterns.reserve(hitPatterns0.size() + hitPatterns1.size());
+      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns0.begin(), hitPatterns0.end());
+      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns1.begin(), hitPatterns1.end());
+    }
+    Vector3 position() const { return m_sp; }
+    std::vector<int> hitPatterns() const { return m_hitPatterns; }
+   private:
+    Vector3 m_sp;
+    std::vector<int> m_hitPatterns;
+  };
+  struct Tracklet {
+   public:
+    Tracklet(Vector3 sp0, Vector3 sp1, Vector3 sp2,
+        std::vector<int> hitPatterns0, std::vector<int> hitPatterns1, std::vector<int> hitPatterns2) :
+        m_sp0(sp0), m_sp1(sp1), m_sp2(sp2) {
+      m_hitPatterns.reserve(hitPatterns0.size() + hitPatterns1.size() + hitPatterns2.size());
+      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns0.begin(), hitPatterns0.end());
+      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns1.begin(), hitPatterns1.end());
+      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns2.begin(), hitPatterns2.end());
+    }
+
+    std::vector<Vector3> spacePoints() const { return {m_sp0, m_sp1, m_sp2}; }
+    std::vector<int> hitPatterns() const { return m_hitPatterns; }
+   private:
+    Vector3 m_sp0, m_sp1, m_sp2;
+    std::vector<int> m_hitPatterns;
+  };
+
   enum class HitMode { HIT = 0, LEVEL, EDGE };
   HitMode m_hitMode {HitMode::HIT};
 
   bool adjacent(int strip1, int strip2);
-  int average(std::vector<int> strips);
   double intersection(double y1, double y2);
   std::pair<Vector3, Vector3> linear_fit(const std::vector<Vector3>& spacepoints);
   double mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit);
   double mean(double* x, int n);
   double rms(double* x, int n);
 
-  std::map<int, std::vector<Vector3>> m_spacepoints = {};
+  std::map<int, std::vector<SpacePoint>> m_spacepoints = {};
   uint32_t m_stationID = 0;
   const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
   const std::string m_prefix_hname_hitp = "hitpattern_layer";

@@ -69,17 +69,15 @@ class IFTMonitorModule : public MonitorBaseModule {
     Tracklet(Vector3 sp0, Vector3 sp1, Vector3 sp2,
         std::vector<int> hitPatterns0, std::vector<int> hitPatterns1, std::vector<int> hitPatterns2) :
         m_sp0(sp0), m_sp1(sp1), m_sp2(sp2) {
-      m_hitPatterns.reserve(hitPatterns0.size() + hitPatterns1.size() + hitPatterns2.size());
-      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns0.begin(), hitPatterns0.end());
-      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns1.begin(), hitPatterns1.end());
-      m_hitPatterns.insert(m_hitPatterns.end(), hitPatterns2.begin(), hitPatterns2.end());
+      m_layerHitPatternMap[0] = hitPatterns0;
+      m_layerHitPatternMap[1] = hitPatterns1;
+      m_layerHitPatternMap[2] = hitPatterns2;
     }
-
     std::vector<Vector3> spacePoints() const { return {m_sp0, m_sp1, m_sp2}; }
-    std::vector<int> hitPatterns() const { return m_hitPatterns; }
+    std::map<int, std::vector<int>> hitPatterns() const { return m_layerHitPatternMap; }
    private:
     Vector3 m_sp0, m_sp1, m_sp2;
-    std::vector<int> m_hitPatterns;
+    std::map<int, std::vector<int>> m_layerHitPatternMap;
   };
 
   enum class HitMode { HIT = 0, LEVEL, EDGE };

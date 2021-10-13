@@ -136,7 +136,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   }
 
 
-  for (int TRBBoardId=m_stationID * kTRB_BOARDS; TRBBoardId < (m_stationID+1) * kTRB_BOARDS; TRBBoardId++) {
+  for (uint32_t TRBBoardId=m_stationID * kTRB_BOARDS; TRBBoardId < (m_stationID+1) * kTRB_BOARDS; TRBBoardId++) {
 
     try {
       TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
@@ -271,7 +271,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
     // fit all track candidates and get candidate with best mean-squared-error
     Vector3 origin;
     Vector3 direction;
-    std::vector<int> hitPatterns;
+    std::map<int, std::vector<int>> layerHitPatternsMap;
     double mse;
     double mse_min = 999;
     for (auto tracklet : tracklets) {
@@ -281,15 +281,17 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
         mse_min = mse;
         origin = fit.first;
         direction = fit.second;
-        hitPatterns = tracklet.hitPatterns();
+        layerHitPatternsMap = tracklet.hitPatterns();
       }
     }
 
     if (mse_min < 999) {
-      for (const auto& hitPattern : hitPatterns) {
-        std::bitset<3> bitset_hitp(hitPattern);
-        std::string hname_hitp = m_prefix_hname_hitp+std::to_string(0);
-        m_histogrammanager->fill(hname_hitp, bitset_hitp.to_string());
+      for (const std::pair<int, std::vector<int>>& layerHitPatterns : layerHitPatternsMap) {
+        std::string hname_hitp = m_prefix_hname_hitp+std::to_string(layerHitPatterns.first);
+        for (const auto& hitPatterns : layerHitPatterns.second) {
+          std::bitset<3> bitset_hitp(hitPatterns);
+          m_histogrammanager->fill(hname_hitp, bitset_hitp.to_string());
+        }
       }
       double tan_phi_xz = direction.x() / direction.z();
       double tan_phi_yz = direction.y() / direction.z();

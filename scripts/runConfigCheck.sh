@@ -13,6 +13,7 @@ schemas/FileWriterFaser.schema     \
 schemas/FrontEndEmulator.schema     \
 schemas/FrontEndMonitor.schema     \
 schemas/FrontEndReceiver.schema     \
+schemas/IFTMonitor.schema     \
 schemas/TrackerMonitor.schema     \
 schemas/TrackerReceiver.schema     \
 schemas/TriggerGenerator.schema     \
@@ -24,6 +25,7 @@ Templates/TLB.json \
 Templates/TRB.json \
 Templates/digitizer.json \
 Templates/emulator.json \
+Templates/emulatorIPC.json \
 Templates/fileWriter.json \
 Templates/monitor.json \
 Templates/eventBuilder.json \
@@ -35,11 +37,14 @@ digiTLBSciLab.json \
 tlbDigiTI12.json \
 tlbDigiTI12LED.json \
 tlbDigiTI12Cosmics.json \
+tlbDigiTI12PMTs.json \
 combinedEHN1.json \
 combinedSciLab.json \
 combinedTI12.json \
 playback.json              \
 emulatorLocalhost.json \
+emulatorLocalhostFullFarm.json \
+emulatorLocalhostFullFarmIPC.json \
 digitizerDarkRateSciLab.json \
 digitizerLEDSciLab.json \
 --extras   \

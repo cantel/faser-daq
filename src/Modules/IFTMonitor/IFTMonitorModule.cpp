@@ -136,7 +136,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   }
 
 
-  for (uint32_t TRBBoardId=m_stationID * kTRB_BOARDS; TRBBoardId < (m_stationID+1) * kTRB_BOARDS; TRBBoardId++) {
+  for (int TRBBoardId=m_stationID * kTRB_BOARDS; TRBBoardId < (m_stationID+1) * kTRB_BOARDS; TRBBoardId++) {
 
     try {
       TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);

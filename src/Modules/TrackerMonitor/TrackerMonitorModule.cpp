@@ -189,7 +189,10 @@ void TrackerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
       }
   }
   m_hit_multiplicity = total_hits;
-  if (!randTrig) m_histogrammanager->fill("good_hits_multiplicity",goodHits);
+  if (!randTrig) {
+    m_histogrammanager->fill("good_hits_multiplicity",goodHits);
+    m_histogrammanager->fill("bcid_hit_weighted", m_bcid, goodHits);
+  }
   if (goodHitsMod[0]) m_histogrammanager->fill("good_hits_multiplicity_Mod0",goodHitsMod[0]);
   if (goodHitsMod[1]) m_histogrammanager->fill("good_hits_multiplicity_Mod1",goodHitsMod[1]);
   if (goodHitsMod[2]) m_histogrammanager->fill("good_hits_multiplicity_Mod2",goodHitsMod[2]);
@@ -207,6 +210,7 @@ void TrackerMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", 0, MAXFRAGSIZE/50, MAXFRAGSIZE/2000,  Axis::Range::EXTENDABLE, m_PUBINT*10);
 
   m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 1800);
+  m_histogrammanager->registerHistogram("bcid_hit_weighted", "BCID", -0.5, 3564.5, 3565, 30);
   m_histogrammanager->registerHistogram("diff_trb_sct_bcid", "TRB BCID - SCT BCID", -5, 5, 10, Axis::Range::EXTENDABLE, 120);
   m_histogrammanager->registerHistogram("diff_trb_sct_l1id", "TRB BCID - SCT L1ID", -5, 5, 10, Axis::Range::EXTENDABLE, 120);
   m_histogrammanager->registerHistogram("total_hits_multiplicity", "total_hits_multiplicity", 0, 30, 30, 30);

@@ -46,11 +46,13 @@ void TriggerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
   fill_error_status_to_metric( fragmentStatus );
  
   if ( m_tlbdataFragment->valid() ) {
+    bool isRndTrig(false);
+    if (m_tlbdataFragment->tbp() & 0x10) isRndTrig = true;
     m_bcid = m_tlbdataFragment->bc_id();
     if ( m_bcid > MAX_BCID ) WARNING("Retrieved BCID number "<<m_bcid<<" exceeds max LHC range");
     m_orbitid = m_tlbdataFragment->orbit_id();
     m_l1A_spacing  = (double)((m_orbitid - m_previous_orbit)*MAX_BCID + std::copysign((m_bcid - m_previous_bcid)%MAX_BCID,  m_bcid - m_previous_bcid))/MAX_BCID;
-    m_histogrammanager->fill("bcid", m_fragment->bc_id()); 
+    m_histogrammanager->fill("bcid", m_bcid); 
     if ( m_l1A_spacing < MAX_L1A_SPACING ) // protection for stretchy histograms
       m_histogrammanager->fill("l1a_spacing", m_l1A_spacing); 
     else
@@ -75,6 +77,8 @@ void TriggerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
           case 5: {m_tap5++; break;}
           default: WARNING("trigger item "<<k<<" out of range.");
         }
+        std::string hname_bcid = "bcid_trig_"+std::to_string(k);
+        m_histogrammanager->fill(hname_bcid, m_bcid);
       }
     }
     if (inputs) {
@@ -104,6 +108,7 @@ void TriggerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
         } // active bit on i
       } 
     }
+    if (inputs_nextBC && !isRndTrig) m_histogrammanager->fill("bcid_signalnextBC", m_bcid);
   }
   else WARNING("Skipping invalid trigger physics fragment:\n"<<std::dec<<*m_tlbdataFragment);
 }
@@ -111,21 +116,27 @@ void TriggerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
 void TriggerMonitorModule::register_hists() {
 
   INFO(" ... registering histograms in TriggerMonitor ... " );
+
+  const unsigned kPUBINT = 10; // larger interval than default
  
   m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 4095.5, 4096, 60);
+  m_histogrammanager->registerHistogram("bcid_signalnextBC", "BCID", -0.5, 4095.5, 4096, kPUBINT);
   m_histogrammanager->registerHistogram("l1a_spacing", "L1A Spacing [no. of orbits]", -0.5, 99.5, 500, Axis::Range::EXTENDABLE, 60);
   m_histogrammanager->registerHistogram("trigline_idx", "Trigger Line Idx", 0, MAX_TRIG_LINES, MAX_TRIG_LINES);
   m_histogrammanager->registerHistogram("trigitem_idx", "Trigger Item Idx", 0, MAX_TRIG_ITEMS, MAX_TRIG_ITEMS);
   m_histogrammanager->registerHistogram("trigitems_word", "Trigger Item Word", 0, 16, 16);
   m_histogrammanager->registerHistogram("triglines_word", "Trigger Line Word", 0, 256, 256);
   m_histogrammanager->registerHistogram("triglines_word_bothClk", "Trigger Line Word", 0, 256, 256);
-  /*for ( unsigned i = 0; i < MAX_TRIG_LINES; i++ ){
-    std::string hname_signal_nextBC = m_prefix_hname_signal_nextBC+std::to_string(i);
-    m_histogrammanager->registerHistogram(hname_signal_nextBC, "active inputs next BC", 0, MAX_TRIG_LINES, MAX_TRIG_LINES);
-  }*/
   m_histogrammanager->register2DHistogram("signal_current_vs_nextBC", "active line current BC", 0, MAX_TRIG_LINES, MAX_TRIG_LINES, "active line next BC", 0, MAX_TRIG_LINES, MAX_TRIG_LINES);
   m_histogrammanager->register2DHistogram("signal_currentBC", "active line current BC", 0, MAX_TRIG_LINES, MAX_TRIG_LINES, "active line current BC", 0, MAX_TRIG_LINES, MAX_TRIG_LINES);
   m_histogrammanager->register2DHistogram("trigline_vs_trigitem", "trigger line", 0, MAX_TRIG_LINES, MAX_TRIG_LINES, "trigger item", 0, MAX_TRIG_LINES, MAX_TRIG_LINES);
+
+  // per trigger monitoring
+  for ( unsigned t_item = 0; t_item < MAX_TRIG_ITEMS; t_item++) {
+    std::string hname_bcid;
+    hname_bcid = "bcid_trig_"+std::to_string(t_item);
+    m_histogrammanager->registerHistogram(hname_bcid, "BCID", -0.5, 4095.5, 4096, kPUBINT);
+  }
 
   INFO(" ... done registering histograms ... " );
   return;

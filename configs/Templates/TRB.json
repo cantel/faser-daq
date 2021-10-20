@@ -701,8 +701,7 @@
 		"type": "IFTMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "fragmentID": 196608,
-            "stationID": 0,
+            "stationID": 1,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
@@ -734,8 +733,7 @@
 		"type": "IFTMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "fragmentID": 196608,
-            "stationID": 1,
+            "stationID": 2,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
@@ -767,8 +765,7 @@
 		"type": "IFTMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "fragmentID": 196608,
-            "stationID": 2,
+            "stationID": 3,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"

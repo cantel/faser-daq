@@ -97,6 +97,10 @@ IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) 
     m_stationID = cfg_stationID;
   }
   else m_stationID = 0;
+
+  if (m_stationID == 0) m_trbID_offset = 11;  // IFT TRB ids are 11-13 but station id 0.
+  else m_trbID_offset = -3; // TRB ids 0-2 belong to station ID 1 etc.
+
   auto cfg_hitMode = cfg["hitMode"];
   if (cfg_hitMode == "HIT")
     m_hitMode = HitMode::HIT;
@@ -136,7 +140,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   }
 
 
-  for (int TRBBoardId=m_stationID * kTRB_BOARDS; TRBBoardId < (m_stationID+1) * kTRB_BOARDS; TRBBoardId++) {
+  for (int TRBBoardId=m_stationID * kTRB_BOARDS + m_trbID_offset; TRBBoardId < (m_stationID+1) * kTRB_BOARDS + m_trbID_offset; TRBBoardId++) {
 
     try {
       TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);

@@ -32,7 +32,12 @@
           "publish_interval": {
              "type": "integer",
              "minimum": 1
-          }
+          },
+          "stationID": {
+	    "type": "integer",
+	    "minimum": 0,
+	    "maximum": 3
+	  }
 	},
 	"format":"grid",
 	"propertyOrder": 5

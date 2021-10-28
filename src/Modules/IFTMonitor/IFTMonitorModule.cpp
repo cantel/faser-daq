@@ -98,8 +98,13 @@ IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) 
   }
   else m_stationID = 0;
 
-  if (m_stationID == 0) m_trbID_offset = 11;  // IFT TRB ids are 11-13 but station id 0.
-  else m_trbID_offset = -3; // TRB ids 0-2 belong to station ID 1 etc.
+  try {
+    m_trb_ids = m_map_trb_ids.at(m_stationID);
+  }
+  catch (const std::out_of_range &e) {
+    ERROR("Configured station ID "<<m_stationID<<" does not exist. Check your configuration file.");
+    throw MonitorBase::ConfigurationIssue(ERS_HERE, "Exiting now as I don't know which station to monitor.");
+  }
 
   auto cfg_hitMode = cfg["hitMode"];
   if (cfg_hitMode == "HIT")
@@ -140,7 +145,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   }
 
 
-  for (int TRBBoardId=m_stationID * kTRB_BOARDS + m_trbID_offset; TRBBoardId < (m_stationID+1) * kTRB_BOARDS + m_trbID_offset; TRBBoardId++) {
+  for ( auto TRBBoardId : m_trb_ids ) {
 
     try {
       TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);

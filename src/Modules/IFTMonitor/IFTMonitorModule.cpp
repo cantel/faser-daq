@@ -102,9 +102,12 @@ IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) 
     m_trb_ids = m_map_trb_ids.at(m_stationID);
   }
   catch (const std::out_of_range &e) {
-    ERROR("Configured station ID "<<m_stationID<<" does not exist. Check your configuration file.");
+    ERROR("Configured station ID "<<static_cast<int>(m_stationID)<<" does not exist. Check your configuration file.");
     throw MonitorBase::ConfigurationIssue(ERS_HERE, "Exiting now as I don't know which station to monitor.");
   }
+  std::stringstream trbid_out;
+  std::copy(m_trb_ids.cbegin(), m_trb_ids.cend(), std::ostream_iterator<int>(trbid_out, " "));
+  INFO("Reading data from Station ID "<<static_cast<int>(m_stationID)<<" and TRBs with IDs "<<trbid_out.str());
 
   auto cfg_hitMode = cfg["hitMode"];
   if (cfg_hitMode == "HIT")

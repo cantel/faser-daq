@@ -35,8 +35,14 @@
           },
           "stationID": {
 	    "type": "integer",
+            "description": "Tracker station ID for which tracklets are formed and monitored.",
 	    "minimum": 0,
 	    "maximum": 3
+	  },
+          "hitMode": {
+	    "type": "string",
+            "description": "Hit patterns used in tracklet reconstruction: HIT, LEVEL or EDGE.",
+            "enum":["HIT","LEVEL","EDGE"]
 	  }
 	},
 	"format":"grid",

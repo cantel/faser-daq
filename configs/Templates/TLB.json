@@ -21,6 +21,46 @@
             "name": "tlbreceiver01",
             "type": "TriggerReceiver",
             "settings": {
+                "SamplingPhase": [false, false, true, true, true, true, false, false],
+                "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
+                "RandomTriggerRate": 7,
+                "Prescale": [1, 1, 1, 1, 0, 0],
+                "TrackerDelay": 100,
+                "DigitizerDelay": 0,
+                "LHC_CLK": true,
+                "OrbitDelay": 100,
+                "Deadtime": 150,
+                "MonitoringRate": 11245,
+                "OutputDestination": 0,
+                "Input": [true, true, true, true, true, true, true, false],
+                "Busy0Disable": false,
+                "Busy1Disable": true,
+                "EnableTriggerData": true,
+                "EnableMonitoringData": true,
+                "Derandomize": false,
+                "ReadoutFIFOReset": true,
+                "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
+                               "Trig1": "FirstVetoLayer|SecondVetoLayer|PreshowerLayer",
+                               "Trig2": "TimingLayerBottom|TimingLayerTop",
+                               "Trig3": "(FirstVetoLayer|SecondVetoLayer)&PreshowerLayer"            
+                },     
+                "SCIP" : "faser-daq-010",
+                "DAQIP" : "faser-daq-010",
+                "BoardID" : 10
+            },
+            "connections": {"$ref":"#TLBConnections" }
+        }]
+    },
+    "TLBReceiverTI12Cosmics": {
+        "name": "tlbreceiver01",
+        "host": "localhost",
+        "port": 5520,
+        "loglevel":         { "$ref": "top.json#loglevel" },
+        "metrics_settings": { "$ref": "top.json#metrics_settings" },
+        "modules":[{
+            "name": "tlbreceiver01",
+            "type": "TriggerReceiver",
+            "settings": {
                 "SamplingPhase": [false, false, false, false, false, false, false, false],
                 "InputDelay": [1, 1, 0, 0, 0, 0, 0, 0],
                 "RandomTriggerRate": 7,
@@ -39,11 +79,11 @@
                 "EnableMonitoringData": true,
                 "Derandomize": false,
                 "ReadoutFIFOReset": true,
-                "LUTConfig": { "Trig0": "SecondVetoLayer&TimingLayerBottom",
-                               "Trig1": "SecondVetoLayer",
+                "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
+                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
-                               "Trig3": "SecondVetoLayer&TimingLayerTop"            
-                },                  
+                               "Trig3": "PreshowerLayer"            
+                },     
                 "SCIP" : "faser-daq-010",
                 "DAQIP" : "faser-daq-010",
                 "BoardID" : 10
@@ -202,8 +242,8 @@
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },                  
-                "SCIP" : "10.11.66.11",
-                "DAQIP" : "10.11.66.11",
+                "SCIP" : "faser-daq-010",
+                "DAQIP" : "faser-daq-010",
                 "BoardID" : 10
             },
             "connections": {"$ref":"#TLBConnections" }
@@ -242,8 +282,8 @@
                            "Trig2": "Tin2",
                            "Trig3": "Tin3"            
             },
-            "SCIP" : "10.11.65.7",
-            "DAQIP" : "10.11.65.7",
+            "SCIP" : "faser-daq-001",
+            "DAQIP" : "faser-daq-001",
             "BoardID" : 0
         },
         "connections": {"$ref":"#TLBConnections" }
@@ -282,8 +322,8 @@
                            "Trig2": "Tin0|Tin1",
                            "Trig3": "Tin0&Tin1"            
             },
-            "SCIP" : "10.11.66.11",
-            "DAQIP" : "10.11.66.11",
+            "SCIP" : "faser-daq-002",
+            "DAQIP" : "faser-daq-002",
             "BoardID" : 10
         },
         "connections": {"$ref":"#TLBConnections" }

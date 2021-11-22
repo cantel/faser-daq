@@ -1,15 +1,15 @@
 {
     "TRBReceiver00":{
 	"name": "trackerreceiver00",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5530,
 	"modules":[{
 		"name": "trackerreceiver00",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID" : 0,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -51,15 +51,15 @@
     },
     "TRBReceiver01":{
 	"name": "trackerreceiver01",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5531, 
 	"modules":[{
 		"name": "trackerreceiver01",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID" : 1,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -101,15 +101,15 @@
     },
     "TRBReceiver02":{
 	"name": "trackerreceiver02",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5532,
 	"modules":[{
 		"name": "trackerreceiver02",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID" : 2,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -152,15 +152,15 @@
     },
     "TRBReceiver03":{
 	"name": "trackerreceiver03",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5533,
 	"modules":[{
 		"name": "trackerreceiver03",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID" : 3,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -202,15 +202,15 @@
     },
     "TRBReceiver04":{
 	"name": "trackerreceiver04",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5534,
 	"modules":[{
 		"name": "trackerreceiver04",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID" : 4,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -252,15 +252,15 @@
     },
     "TRBReceiver05":{
 	"name": "trackerreceiver05",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5535,
 	"modules":[{
 		"name": "trackerreceiver05",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID" : 5,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -302,15 +302,15 @@
     },
     "TRBReceiver06": {
 	"name": "trackerreceiver06",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5536,
 	"modules":[{
 		"name": "trackerreceiver06",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID": 6,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -354,15 +354,15 @@
     },
     "TRBReceiver07": {
 	"name": "trackerreceiver07",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5537,
 	"modules":[{
 		"name": "trackerreceiver07",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID": 7,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,
@@ -408,15 +408,15 @@
     },
     "TRBReceiver08": {
 	"name": "trackerreceiver08",
-	"host": "faser-daq-010",
+	"host": "localhost",
 	"port": 5538,
 	"modules":[{
 		"name": "trackerreceiver08",
 		"type": "TrackerReceiver",
 		"settings": {
             "BoardID": 8,
-            "SCIP" : "faser-daq-010",
-            "DAQIP" : "faser-daq-010",
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
             "ReadoutMode": 0,
             "ConfigureModules": true, 
             "HWDelayClk0": 0,

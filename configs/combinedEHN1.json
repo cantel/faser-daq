@@ -33,9 +33,9 @@
       { "$ref": "Templates/fileWriter.json#FileWriter" },
       { "$ref": "Templates/TLB.json#RateMonitor" },
       { "$ref": "Templates/TLB.json#TriggerMonitor" },
-      { "$ref": "Templates/TRB.json#SCTDataMonitor06" },
-      { "$ref": "Templates/TRB.json#SCTDataMonitor07" },
-      { "$ref": "Templates/TRB.json#SCTDataMonitor08" }
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt2L0" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt2L1" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt2L2" }
     ]
   }
 }

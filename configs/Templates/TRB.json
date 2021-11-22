@@ -458,12 +458,90 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor00": {
-	"name": "sctdatamonitor00",
+    "SCTDataMonitorSt0L0": {
+	"name": "sctdatamonitorst0l0",
 	"host": "localhost",
 	"port": 5550,
 	"modules":[{
-		"name": "sctdatamonitor00",
+		"name": "sctdatamonitorst0l0",
+		"type": "SCTDataMonitor",
+		"settings": {
+            "fragmentID": 196619,
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp", "host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "SCTDataMonitorSt0L1": {
+	"name": "sctdatamonitorst0l1",
+	"host": "localhost",
+	"port": 5551,
+	"modules":[{
+		"name": "sctdatamonitorst0l1",
+		"type": "SCTDataMonitor",
+		"settings": {
+            "fragmentID": 196620,
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "SCTDataMonitorSt0L2": {
+	"name": "sctdatamonitorst0l2",
+	"host": "localhost",
+	"port": 5552,
+	"modules":[{
+		"name": "sctdatamonitorst0l2",
+		"type": "SCTDataMonitor",
+		"settings": {
+            "fragmentID": 196621,
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "SCTDataMonitorSt1L0": {
+	"name": "sctdatamonitorst1l0",
+	"host": "localhost",
+	"port": 5553,
+	"modules":[{
+		"name": "sctdatamonitorst1l0",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196608,
@@ -484,12 +562,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor01": {
-	"name": "sctdatamonitor01",
+    "SCTDataMonitorSt1L1": {
+	"name": "sctdatamonitorst1l1",
 	"host": "localhost",
-	"port": 5551,
+	"port": 5554,
 	"modules":[{
-		"name": "sctdatamonitor01",
+		"name": "sctdatamonitorst1l1",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196609,
@@ -510,12 +588,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor02": {
-	"name": "sctdatamonitor02",
+    "SCTDataMonitorSt1L2": {
+	"name": "sctdatamonitorst1l2",
 	"host": "localhost",
-	"port": 5552,
+	"port": 5555,
 	"modules":[{
-		"name": "sctdatamonitor02",
+		"name": "sctdatamonitorst1l2",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196610,
@@ -536,12 +614,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor03": {
-	"name": "sctdatamonitor03",
+    "SCTDataMonitorSt2L0": {
+	"name": "sctdatamonitorst2l0",
 	"host": "localhost",
-	"port": 5553,
+	"port": 5556,
 	"modules":[{
-		"name": "sctdatamonitor03",
+		"name": "sctdatamonitorst2l0",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196611,
@@ -562,12 +640,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor04": {
-	"name": "sctdatamonitor04",
+    "SCTDataMonitorSt2L1": {
+	"name": "sctdatamonitorst2l1",
 	"host": "localhost",
-	"port": 5554,
+	"port": 5557,
 	"modules":[{
-		"name": "sctdatamonitor04",
+		"name": "sctdatamonitorst2l1",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196612,
@@ -588,12 +666,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor05": {
-	"name": "sctdatamonitor05",
+    "SCTDataMonitorSt2L2": {
+	"name": "sctdatamonitorst2l2",
 	"host": "localhost",
-	"port": 5555,
+	"port": 5558,
 	"modules":[{
-		"name": "sctdatamonitor05",
+		"name": "sctdatamonitorst2l2",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196613,
@@ -614,12 +692,12 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor06": {
-	"name": "sctdatamonitor06",
+    "SCTDataMonitorSt3L0": {
+	"name": "sctdatamonitorst3l0",
 	"host": "localhost",
-	"port": 5556,
+	"port": 5559,
 	"modules":[{
-		"name": "sctdatamonitor06",
+		"name": "sctdatamonitorst3l0",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196614,
@@ -640,12 +718,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor07": {
-	"name": "sctdatamonitor07",
+    "SCTDataMonitorSt3L1": {
+	"name": "sctdatamonitorst3l1",
 	"host": "localhost",
-	"port": 5557,
+	"port": 5560,
 	"modules":[{
-		"name": "sctdatamonitor07",
+		"name": "sctdatamonitorst3l1",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196615,
@@ -666,12 +744,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "SCTDataMonitor08": {
-	"name": "sctdatamonitor08",
+    "SCTDataMonitorSt3L2": {
+	"name": "sctdatamonitorst3l2",
 	"host": "localhost",
-	"port": 5558,
+	"port": 5561,
 	"modules":[{
-		"name": "sctdatamonitor08",
+		"name": "sctdatamonitorst3l2",
 		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196616,
@@ -692,12 +770,12 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackStationMonitor00": {
-	"name": "trackstationmonitor00",
+    "TrackStationMonitorSt0": {
+	"name": "trackmonitorst0",
 	"host": "localhost",
-	"port": 5559,
+	"port": 5562,
 	"modules":[{
-		"name": "trackstationmonitor00",
+		"name": "trackmonitorst0",
 		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
@@ -717,19 +795,43 @@
 			]
 		}
 	}],
-        "loglevel": {
-            "core": "WARNING",
-            "module": "DEBUG",
-            "connection": "WARNING"
-        },
+	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackStationMonitor01": {
-	"name": "trackstationmonitor01",
+    "TrackStationMonitorSt1": {
+	"name": "trackmonitorst1",
 	"host": "localhost",
-	"port": 5560,
+	"port": 5563,
 	"modules":[{
-		"name": "trackstationmonitor01",
+		"name": "trackmonitorst1",
+		"type": "TrackStationMonitor",
+		"settings": {
+			"hitMode": "HIT",
+            "stationID": 1,
+            "TriggerFilter" : "Physics",
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackStationMonitorSt2": {
+	"name": "trackmonitorst2",
+	"host": "localhost",
+	"port": 5564,
+	"modules":[{
+		"name": "trackmonitorst2",
 		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
@@ -749,23 +851,19 @@
 			]
 		}
 	}],
-        "loglevel": {
-            "core": "WARNING",
-            "module": "DEBUG",
-            "connection": "WARNING"
-        },
+	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackStationMonitor02": {
-	"name": "trackstationmonitor02",
+    "TrackStationMonitorSt3": {
+	"name": "trackmonitorst3",
 	"host": "localhost",
-	"port": 5561,
+	"port": 5565,
 	"modules":[{
-		"name": "trackstationmonitor02",
+		"name": "trackmonitorst3",
 		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "stationID": 0,
+            "stationID": 3,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
@@ -781,11 +879,7 @@
 			]
 		}
 	}],
-        "loglevel": {
-            "core": "WARNING",
-            "module": "DEBUG",
-            "connection": "WARNING"
-        },
+	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     }
 }

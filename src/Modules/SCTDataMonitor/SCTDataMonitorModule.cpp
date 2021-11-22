@@ -9,21 +9,21 @@
 #include <fstream>      // std::ofstream
 /// \endcond
 
-#include "TrackerMonitorModule.hpp"
+#include "SCTDataMonitorModule.hpp"
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-TrackerMonitorModule::TrackerMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"), m_prefix_hname_scterr("sct_data_error_types_mod") { 
+SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"), m_prefix_hname_scterr("sct_data_error_types_mod") { 
 
    INFO("");
  }
 
-TrackerMonitorModule::~TrackerMonitorModule() { 
+SCTDataMonitorModule::~SCTDataMonitorModule() { 
   INFO("With config: " << m_config.dump());
  }
 
-void TrackerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
+void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
@@ -203,9 +203,9 @@ void TrackerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
   if (goodHitsMod[7]) m_histogrammanager->fill("good_hits_multiplicity_Mod7",goodHitsMod[7]);
 }
 
-void TrackerMonitorModule::register_hists() {
+void SCTDataMonitorModule::register_hists() {
 
-  INFO(" ... registering histograms in TrackerMonitor ... " );
+  INFO(" ... registering histograms in SCTDataMonitor ... " );
 
   m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", 0, MAXFRAGSIZE/50, MAXFRAGSIZE/2000,  Axis::Range::EXTENDABLE, m_PUBINT*10);
 
@@ -252,9 +252,9 @@ void TrackerMonitorModule::register_hists() {
 
 }
 
-void TrackerMonitorModule::register_metrics() {
+void SCTDataMonitorModule::register_metrics() {
 
-  INFO( "... registering metrics in TrackerMonitorModule ... " );
+  INFO( "... registering metrics in SCTDataMonitorModule ... " );
 
   registerVariable(m_hit_multiplicity, "HitMultiplicity");
 

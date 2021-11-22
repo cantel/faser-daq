@@ -11,10 +11,10 @@
 typedef Eigen::Matrix<double, 3, 1> Vector3;
 
 
-class IFTMonitorModule : public MonitorBaseModule {
+class TrackStationMonitorModule : public MonitorBaseModule {
  public:
-  IFTMonitorModule(const std::string&);
-  ~IFTMonitorModule();
+  TrackStationMonitorModule(const std::string&);
+  ~TrackStationMonitorModule();
 
  protected:
 

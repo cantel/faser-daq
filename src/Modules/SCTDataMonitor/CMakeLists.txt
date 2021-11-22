@@ -8,7 +8,7 @@ target_link_libraries(${module_name} EventFormats)
 
 # Add source file to library
 daqling_target_sources(${module_name}
-    TrackerMonitorModule.cpp
+    SCTDataMonitorModule.cpp
     ../MonitorBase/MonitorBaseModule.cpp
     ../../Utils/HistogramManager.cpp
 )

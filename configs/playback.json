@@ -12,7 +12,7 @@
           "type": "EventPlayback",
           "settings":         { "maxRate": 100,
 			      "repeats": 2,
-			      "fileList": ["/home/tboeckh/data/Faser-Physics-002806-00000.raw"]
+			      "fileList": ["/home/cantel/data/Faser-Physics-004912-00000.raw"]
 	    
 	        },
           "connections": {
@@ -23,10 +23,8 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
       },
-      { "$ref": "Templates/TRB.json#TrackerMonitor00" },
-      { "$ref": "Templates/TRB.json#IFTMonitor00" },
-      { "$ref": "Templates/TRB.json#IFTMonitor01" },
-      { "$ref": "Templates/TRB.json#IFTMonitor02" }
+      { "$ref": "Templates/TRB.json#TrackStationMonitor01" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitor00" }
     ]
   }
 }

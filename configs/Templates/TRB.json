@@ -458,13 +458,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor00": {
-	"name": "trackermonitor00",
+    "SCTDataMonitor00": {
+	"name": "sctdatamonitor00",
 	"host": "localhost",
 	"port": 5550,
 	"modules":[{
-		"name": "trackermonitor00",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor00",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196608,
             "publish_interval": 5,
@@ -484,13 +484,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor01": {
-	"name": "trackermonitor01",
+    "SCTDataMonitor01": {
+	"name": "sctdatamonitor01",
 	"host": "localhost",
 	"port": 5551,
 	"modules":[{
-		"name": "trackermonitor01",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor01",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196609,
             "publish_interval": 5,
@@ -510,13 +510,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor02": {
-	"name": "trackermonitor02",
+    "SCTDataMonitor02": {
+	"name": "sctdatamonitor02",
 	"host": "localhost",
 	"port": 5552,
 	"modules":[{
-		"name": "trackermonitor02",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor02",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196610,
             "publish_interval": 5,
@@ -536,13 +536,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor03": {
-	"name": "trackermonitor03",
+    "SCTDataMonitor03": {
+	"name": "sctdatamonitor03",
 	"host": "localhost",
 	"port": 5553,
 	"modules":[{
-		"name": "trackermonitor03",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor03",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196611,
             "publish_interval": 5,
@@ -562,13 +562,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor04": {
-	"name": "trackermonitor04",
+    "SCTDataMonitor04": {
+	"name": "sctdatamonitor04",
 	"host": "localhost",
 	"port": 5554,
 	"modules":[{
-		"name": "trackermonitor04",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor04",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196612,
             "publish_interval": 5,
@@ -588,13 +588,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor05": {
-	"name": "trackermonitor05",
+    "SCTDataMonitor05": {
+	"name": "sctdatamonitor05",
 	"host": "localhost",
 	"port": 5555,
 	"modules":[{
-		"name": "trackermonitor05",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor05",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196613,
             "publish_interval": 5,
@@ -614,13 +614,13 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor06": {
-	"name": "trackermonitor06",
+    "SCTDataMonitor06": {
+	"name": "sctdatamonitor06",
 	"host": "localhost",
 	"port": 5556,
 	"modules":[{
-		"name": "trackermonitor06",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor06",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196614,
             "publish_interval": 5,
@@ -640,13 +640,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor07": {
-	"name": "trackermonitor07",
+    "SCTDataMonitor07": {
+	"name": "sctdatamonitor07",
 	"host": "localhost",
 	"port": 5557,
 	"modules":[{
-		"name": "trackermonitor07",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor07",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196615,
             "publish_interval": 5,
@@ -666,13 +666,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor08": {
-	"name": "trackermonitor08",
+    "SCTDataMonitor08": {
+	"name": "sctdatamonitor08",
 	"host": "localhost",
 	"port": 5558,
 	"modules":[{
-		"name": "trackermonitor08",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitor08",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196616,
             "publish_interval": 5,
@@ -692,16 +692,16 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "IFTMonitor00": {
-	"name": "iftmonitor00",
+    "TrackStationMonitor00": {
+	"name": "trackstationmonitor00",
 	"host": "localhost",
 	"port": 5559,
 	"modules":[{
-		"name": "iftmonitor00",
-		"type": "IFTMonitor",
+		"name": "trackstationmonitor00",
+		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "stationID": 1,
+            "stationID": 0,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"
@@ -724,13 +724,13 @@
         },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "IFTMonitor01": {
-	"name": "iftmonitor01",
+    "TrackStationMonitor01": {
+	"name": "trackstationmonitor01",
 	"host": "localhost",
 	"port": 5560,
 	"modules":[{
-		"name": "iftmonitor01",
-		"type": "IFTMonitor",
+		"name": "trackstationmonitor01",
+		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
             "stationID": 2,
@@ -756,16 +756,16 @@
         },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "IFTMonitor02": {
-	"name": "iftmonitor02",
+    "TrackStationMonitor02": {
+	"name": "trackstationmonitor02",
 	"host": "localhost",
 	"port": 5561,
 	"modules":[{
-		"name": "iftmonitor02",
-		"type": "IFTMonitor",
+		"name": "trackstationmonitor02",
+		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "stationID": 3,
+            "stationID": 0,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
             "stats_uri": "tcp://localhost:7000"

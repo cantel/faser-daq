@@ -6,14 +6,15 @@
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 #include <Eigen/Dense>
 #include <vector>
+#include <map>
 
 typedef Eigen::Matrix<double, 3, 1> Vector3;
 
 
-class IFTMonitorModule : public MonitorBaseModule {
+class TrackStationMonitorModule : public MonitorBaseModule {
  public:
-  IFTMonitorModule(const std::string&);
-  ~IFTMonitorModule();
+  TrackStationMonitorModule(const std::string&);
+  ~TrackStationMonitorModule();
 
  protected:
 
@@ -29,6 +30,9 @@ class IFTMonitorModule : public MonitorBaseModule {
   std::atomic<int> m_number_good_events = 0;
 
  private:
+
+  const std::map<uint8_t,std::array<uint8_t,3>> m_map_trb_ids = {{0,{11,12,13}},{1,{0,1,2}},{2,{3,4,5}},{3,{6,7,8}}}; // Station 0: IFT , Station 1-3: Spectrometer trackers
+  std::array<uint8_t,3> m_trb_ids;  // filled at initialize
 
   struct Cluster {
    public:

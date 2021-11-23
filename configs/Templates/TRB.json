@@ -458,13 +458,247 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor00": {
-	"name": "trackermonitor00",
+    "TRBReceiver11": {
+	"name": "trackerreceiver11",
+	"host": "localhost",
+	"port": 5541,
+	"modules":[{
+		"name": "trackerreceiver11",
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID": 11,
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 35,
+            "FinePhaseLed1": 37,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {
+                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module0_300321_0246.json",
+                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module1_300321_0246.json",
+                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module2_300321_0246.json",
+                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module3_300321_0246.json",
+                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module4_300321_0246.json",
+                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module5_300321_0246.json",
+                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module6_300321_0246.json",
+                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module7_300321_0246.json"
+                                 },
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
+		},
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8119,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver12": {
+	"name": "trackerreceiver12",
+	"host": "localhost",
+	"port": 5542,
+	"modules":[{
+		"name": "trackerreceiver12",
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID": 12,
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 35,
+            "FinePhaseLed1": 37,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {
+                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module0_300321_0246.json",
+                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module1_300321_0246.json",
+                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module2_300321_0246.json",
+                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module3_300321_0246.json",
+                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module4_300321_0246.json",
+                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module5_300321_0246.json",
+                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module6_300321_0246.json",
+                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module7_300321_0246.json"
+                                 },
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
+		},
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8120,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TRBReceiver13": {
+	"name": "trackerreceiver13",
+	"host": "localhost",
+	"port": 5543,
+	"modules":[{
+		"name": "trackerreceiver13",
+		"type": "TrackerReceiver",
+		"settings": {
+            "BoardID": 8,
+            "SCIP" : "faser-daq-010-direct",
+            "DAQIP" : "faser-daq-010-direct",
+            "ReadoutMode": 0,
+            "ConfigureModules": true, 
+            "HWDelayClk0": 0,
+            "HWDelayClk1": 0,
+            "FinePhaseClk0": 0,
+            "FinePhaseClk1": 0,
+            "FinePhaseLed0": 35,
+            "FinePhaseLed1": 37,
+            "RxTimeoutDisable": false,
+            "L1Atype" : "external",  
+            "emulation" : false,
+            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+            "moduleMask" : [true, true, true, true, true, true, true, true],
+            "moduleConfigFiles": {
+                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module0_300321_0246.json",
+                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module1_300321_0246.json",
+                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module2_300321_0246.json",
+                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module3_300321_0246.json",
+                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module4_300321_0246.json",
+                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module5_300321_0246.json",
+                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module6_300321_0246.json",
+                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module7_300321_0246.json"
+                                 },
+            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
+		},
+		"connections": {
+			"senders": [
+			{
+				"type": "ZMQPair",
+				"chid": 0,
+				"transport": "tcp",
+				"host": "*",
+				"port": 8121,
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "SCTDataMonitorSt0L0": {
+	"name": "sctdatamonitorst0l0",
 	"host": "localhost",
 	"port": 5550,
 	"modules":[{
-		"name": "trackermonitor00",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst0l0",
+		"type": "SCTDataMonitor",
+		"settings": {
+            "fragmentID": 196619,
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp", "host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "SCTDataMonitorSt0L1": {
+	"name": "sctdatamonitorst0l1",
+	"host": "localhost",
+	"port": 5551,
+	"modules":[{
+		"name": "sctdatamonitorst0l1",
+		"type": "SCTDataMonitor",
+		"settings": {
+            "fragmentID": 196620,
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "SCTDataMonitorSt0L2": {
+	"name": "sctdatamonitorst0l2",
+	"host": "localhost",
+	"port": 5552,
+	"modules":[{
+		"name": "sctdatamonitorst0l2",
+		"type": "SCTDataMonitor",
+		"settings": {
+            "fragmentID": 196621,
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "SCTDataMonitorSt1L0": {
+	"name": "sctdatamonitorst1l0",
+	"host": "localhost",
+	"port": 5553,
+	"modules":[{
+		"name": "sctdatamonitorst1l0",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196608,
             "publish_interval": 5,
@@ -484,13 +718,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor01": {
-	"name": "trackermonitor01",
+    "SCTDataMonitorSt1L1": {
+	"name": "sctdatamonitorst1l1",
 	"host": "localhost",
-	"port": 5551,
+	"port": 5554,
 	"modules":[{
-		"name": "trackermonitor01",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst1l1",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196609,
             "publish_interval": 5,
@@ -510,13 +744,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor02": {
-	"name": "trackermonitor02",
+    "SCTDataMonitorSt1L2": {
+	"name": "sctdatamonitorst1l2",
 	"host": "localhost",
-	"port": 5552,
+	"port": 5555,
 	"modules":[{
-		"name": "trackermonitor02",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst1l2",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196610,
             "publish_interval": 5,
@@ -536,13 +770,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor03": {
-	"name": "trackermonitor03",
+    "SCTDataMonitorSt2L0": {
+	"name": "sctdatamonitorst2l0",
 	"host": "localhost",
-	"port": 5553,
+	"port": 5556,
 	"modules":[{
-		"name": "trackermonitor03",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst2l0",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196611,
             "publish_interval": 5,
@@ -562,13 +796,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor04": {
-	"name": "trackermonitor04",
+    "SCTDataMonitorSt2L1": {
+	"name": "sctdatamonitorst2l1",
 	"host": "localhost",
-	"port": 5554,
+	"port": 5557,
 	"modules":[{
-		"name": "trackermonitor04",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst2l1",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196612,
             "publish_interval": 5,
@@ -588,13 +822,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor05": {
-	"name": "trackermonitor05",
+    "SCTDataMonitorSt2L2": {
+	"name": "sctdatamonitorst2l2",
 	"host": "localhost",
-	"port": 5555,
+	"port": 5558,
 	"modules":[{
-		"name": "trackermonitor05",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst2l2",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196613,
             "publish_interval": 5,
@@ -614,13 +848,13 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor06": {
-	"name": "trackermonitor06",
+    "SCTDataMonitorSt3L0": {
+	"name": "sctdatamonitorst3l0",
 	"host": "localhost",
-	"port": 5556,
+	"port": 5559,
 	"modules":[{
-		"name": "trackermonitor06",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst3l0",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196614,
             "publish_interval": 5,
@@ -640,13 +874,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor07": {
-	"name": "trackermonitor07",
+    "SCTDataMonitorSt3L1": {
+	"name": "sctdatamonitorst3l1",
 	"host": "localhost",
-	"port": 5557,
+	"port": 5560,
 	"modules":[{
-		"name": "trackermonitor07",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst3l1",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196615,
             "publish_interval": 5,
@@ -666,13 +900,13 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "TrackerMonitor08": {
-	"name": "trackermonitor08",
+    "SCTDataMonitorSt3L2": {
+	"name": "sctdatamonitorst3l2",
 	"host": "localhost",
-	"port": 5558,
+	"port": 5561,
 	"modules":[{
-		"name": "trackermonitor08",
-		"type": "TrackerMonitor",
+		"name": "sctdatamonitorst3l2",
+		"type": "SCTDataMonitor",
 		"settings": {
             "fragmentID": 196616,
             "publish_interval": 5,
@@ -692,16 +926,15 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "IFTMonitor00": {
-	"name": "iftmonitor00",
+    "TrackStationMonitorSt0": {
+	"name": "trackmonitorst0",
 	"host": "localhost",
-	"port": 5559,
+	"port": 5562,
 	"modules":[{
-		"name": "iftmonitor00",
-		"type": "IFTMonitor",
+		"name": "trackmonitorst0",
+		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "fragmentID": 196608,
             "stationID": 0,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
@@ -718,23 +951,18 @@
 			]
 		}
 	}],
-        "loglevel": {
-            "core": "WARNING",
-            "module": "DEBUG",
-            "connection": "WARNING"
-        },
+	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "IFTMonitor01": {
-	"name": "iftmonitor01",
+    "TrackStationMonitorSt1": {
+	"name": "trackmonitorst1",
 	"host": "localhost",
-	"port": 5560,
+	"port": 5563,
 	"modules":[{
-		"name": "iftmonitor01",
-		"type": "IFTMonitor",
+		"name": "trackmonitorst1",
+		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "fragmentID": 196608,
             "stationID": 1,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
@@ -751,23 +979,18 @@
 			]
 		}
 	}],
-        "loglevel": {
-            "core": "WARNING",
-            "module": "DEBUG",
-            "connection": "WARNING"
-        },
+	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-    "IFTMonitor02": {
-	"name": "iftmonitor02",
+    "TrackStationMonitorSt2": {
+	"name": "trackmonitorst2",
 	"host": "localhost",
-	"port": 5561,
+	"port": 5564,
 	"modules":[{
-		"name": "iftmonitor02",
-		"type": "IFTMonitor",
+		"name": "trackmonitorst2",
+		"type": "TrackStationMonitor",
 		"settings": {
 			"hitMode": "HIT",
-            "fragmentID": 196608,
             "stationID": 2,
             "TriggerFilter" : "Physics",
             "publish_interval": 5,
@@ -784,11 +1007,35 @@
 			]
 		}
 	}],
-        "loglevel": {
-            "core": "WARNING",
-            "module": "DEBUG",
-            "connection": "WARNING"
-        },
+	"loglevel":         { "$ref": "top.json#loglevel" },
+	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    },
+    "TrackStationMonitorSt3": {
+	"name": "trackmonitorst3",
+	"host": "localhost",
+	"port": 5565,
+	"modules":[{
+		"name": "trackmonitorst3",
+		"type": "TrackStationMonitor",
+		"settings": {
+			"hitMode": "HIT",
+            "stationID": 3,
+            "TriggerFilter" : "Physics",
+            "publish_interval": 5,
+            "stats_uri": "tcp://localhost:7000"
+		},
+		"connections": {
+			"receivers": [
+			{
+				"type": "ZMQPubSub",
+				"chid": 0,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			}
+			]
+		}
+	}],
+	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     }
 }

@@ -11,7 +11,7 @@
 #include "Utils/Ers.hpp"
 /// \endcond
 
-#include "IFTMonitorModule.hpp"
+#include "TrackStationMonitorModule.hpp"
 
 #define PI 3.14159265
 
@@ -20,14 +20,14 @@ using namespace std::chrono;
 using Eigen::MatrixXd;
 
 
-bool IFTMonitorModule::adjacent(int strip1, int strip2) {
+bool TrackStationMonitorModule::adjacent(int strip1, int strip2) {
   return std::abs(strip1 - strip2) <= 2;
 }
 
 
 // calculate line line intersection given two points on each line (top and bottom of each strip)
 // https://en.wikipedia.org/wiki/Line%E2%80%93line_intersection
-double IFTMonitorModule::intersection(double yf, double yb) {
+double TrackStationMonitorModule::intersection(double yf, double yb) {
   double y1 = yf, y2 = yf;
   double y3 = yb + tan(kSTRIP_ANGLE) * kXMIN;
   double y4 = yb + tan(kSTRIP_ANGLE) * kXMAX;
@@ -44,7 +44,7 @@ double IFTMonitorModule::intersection(double yf, double yb) {
 // solve \theta = (X^T X)^{-1} X^T y where \theta is giving the coefficients that
 // best fit the data and X is the design matrix
 // https://gist.github.com/ialhashim/0a2554076a6cf32831ca
-std::pair<Vector3, Vector3> IFTMonitorModule::linear_fit(const std::vector<Vector3>& spacepoints) {
+std::pair<Vector3, Vector3> TrackStationMonitorModule::linear_fit(const std::vector<Vector3>& spacepoints) {
   size_t n_spacepoints = spacepoints.size();
   Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> centers(n_spacepoints, 3);
   for (size_t i = 0; i < n_spacepoints; ++i) centers.row(i) = spacepoints[i];
@@ -60,7 +60,7 @@ std::pair<Vector3, Vector3> IFTMonitorModule::linear_fit(const std::vector<Vecto
 
 
 // return the mean squared error of the fit
-double IFTMonitorModule::mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit) {
+double TrackStationMonitorModule::mse_fit(std::vector<Vector3> track, std::pair<Vector3, Vector3> fit) {
   Vector3 origin = fit.first;
   Vector3 dir = fit.second;
 
@@ -73,14 +73,14 @@ double IFTMonitorModule::mse_fit(std::vector<Vector3> track, std::pair<Vector3, 
   return rms;
 }
 
-double IFTMonitorModule::mean(double* x, int n) {
+double TrackStationMonitorModule::mean(double* x, int n) {
 	double sum = 0;
 	for (int i = 0; i < n; i++)
 		sum += x[i];
 	return sum / n;
 }
 
-double IFTMonitorModule::rms(double* x, int n) {
+double TrackStationMonitorModule::rms(double* x, int n) {
 	double sum = 0;
 	for (int i = 0; i < n; i++)
 		sum += pow(x[i], 2);
@@ -88,7 +88,7 @@ double IFTMonitorModule::rms(double* x, int n) {
 }
 
 
-IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) { 
+TrackStationMonitorModule::TrackStationMonitorModule(const std::string& n) : MonitorBaseModule(n) { 
   INFO("");
   auto cfg = getModuleSettings();
   auto cfg_stationID = cfg["stationID"];
@@ -97,6 +97,18 @@ IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) 
     m_stationID = cfg_stationID;
   }
   else m_stationID = 0;
+
+  try {
+    m_trb_ids = m_map_trb_ids.at(m_stationID);
+  }
+  catch (const std::out_of_range &e) {
+    ERROR("Configured station ID "<<static_cast<int>(m_stationID)<<" does not exist. Check your configuration file.");
+    throw MonitorBase::ConfigurationIssue(ERS_HERE, "Exiting now as I don't know which station to monitor.");
+  }
+  std::stringstream trbid_out;
+  std::copy(m_trb_ids.cbegin(), m_trb_ids.cend(), std::ostream_iterator<int>(trbid_out, " "));
+  INFO("Reading data from Station ID "<<static_cast<int>(m_stationID)<<" and TRBs with IDs "<<trbid_out.str());
+
   auto cfg_hitMode = cfg["hitMode"];
   if (cfg_hitMode == "HIT")
     m_hitMode = HitMode::HIT;
@@ -110,11 +122,11 @@ IFTMonitorModule::IFTMonitorModule(const std::string& n) : MonitorBaseModule(n) 
   }
 }
 
-IFTMonitorModule::~IFTMonitorModule() { 
+TrackStationMonitorModule::~TrackStationMonitorModule() { 
   INFO("With config: " << m_config.dump());
 }
 
-void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
+void TrackStationMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
   if (evtHeaderUnpackStatus) return;
@@ -136,7 +148,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   }
 
 
-  for (int TRBBoardId=m_stationID * kTRB_BOARDS; TRBBoardId < (m_stationID+1) * kTRB_BOARDS; TRBBoardId++) {
+  for ( auto TRBBoardId : m_trb_ids ) {
 
     try {
       TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
@@ -316,7 +328,7 @@ void IFTMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBu
   rms_y = rms(m_y_vec, kAVGSIZE);
 }
 
-void IFTMonitorModule::register_hists() {
+void TrackStationMonitorModule::register_hists() {
   INFO(" ... registering histograms in TrackerMonitor ... " );
   const unsigned kPUBINT = 5; // publishing interval in seconds
   for ( const auto& hit_map : m_hit_maps)
@@ -335,7 +347,7 @@ void IFTMonitorModule::register_hists() {
   INFO(" ... done registering histograms ... " );
 }
 
-void IFTMonitorModule::register_metrics() {
+void TrackStationMonitorModule::register_metrics() {
   INFO( "... registering metrics in TrackerMonitorModule ... " );
 
   registerVariable(m_x, "X", daqling::core::metrics::AVERAGE);

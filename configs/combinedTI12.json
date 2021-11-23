@@ -14,6 +14,9 @@
       { "$ref" : "Templates/TRB.json#TRBReceiver06" },
       { "$ref" : "Templates/TRB.json#TRBReceiver07" },
       { "$ref" : "Templates/TRB.json#TRBReceiver08" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver11" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver12" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver13" },
       {
         "name": "eventbuilder01",
         "host": "localhost",
@@ -34,7 +37,10 @@
               { "chid": 7,"port": 8115, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
               { "chid": 8,"port": 8116, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
               { "chid": 9,"port": 8117, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
-              { "chid": 10,"port": 8118, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} }
+              { "chid": 10,"port": 8118, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 11,"port": 8119, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 12,"port": 8120, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 13,"port": 8121, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} }
             ],
             "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
           }
@@ -45,16 +51,23 @@
       { "$ref": "Templates/fileWriter.json#FileWriter" },
       { "$ref": "Templates/TLB.json#RateMonitor" },
       { "$ref": "Templates/TLB.json#TriggerMonitor" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor00" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor01" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor02" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor03" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor04" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor05" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor06" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor07" },
-      { "$ref": "Templates/TRB.json#TrackerMonitor08" },
       { "$ref": "Templates/digitizer.json#DigitizerMonitor" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt0L0" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt0L1" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt0L2" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt1L0" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt1L1" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt1L2" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt2L0" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt2L1" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt2L2" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt3L0" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt3L1" },
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt3L2" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt0" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt1" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt2" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt3" },
       { "$ref": "Templates/monitor.json#EventMonitor" }
     ]
   }

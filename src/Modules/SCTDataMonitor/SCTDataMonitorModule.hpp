@@ -5,10 +5,10 @@
 
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
-class TrackerMonitorModule : public MonitorBaseModule {
+class SCTDataMonitorModule : public MonitorBaseModule {
  public:
-  TrackerMonitorModule(const std::string&);
-  ~TrackerMonitorModule();
+  SCTDataMonitorModule(const std::string&);
+  ~SCTDataMonitorModule();
 
  protected:
 

@@ -203,7 +203,9 @@ void DigitizerReceiverModule::configure() {
 
   registerVariable(m_udp_dma_write_receive_ack_retry_counter,"udp_dma_write_receive_ack_retry_counter");
   registerVariable(m_udp_dma_write_req_retry_counter,"udp_dma_write_req_retry_counter");
-  
+
+  m_loss_of_lock=1;
+  registerVariable(m_loss_of_lock,"FClock_lock_status");
   if (m_bobr) {
     registerVariable(m_bobr_statusword,"BOBR_status_word");
     registerVariable(m_bobr_timing,"BOBR_timing_status");
@@ -460,13 +462,19 @@ void DigitizerReceiverModule::runner() noexcept {
       else{
 	ERROR("Temperature monitoring picked up incorrect number of channels : "<<NCHANNELS);
       }
+      auto *vme_crate=m_digitizer->m_crate;
+      unsigned int data=0;
+      int rc = vme_crate->udp_sis3153_register_read (SIS3153USB_LEMO_IO_CTRL_REG, &data);
+      if (rc!=0) {
+	INFO("Failed to read clock status, status code: "<<std::hex<<rc<<std::dec);
+	continue;
+      } 
+      m_loss_of_lock = (data&(1<<20))!=0; // on input 1
       if (m_bobr) {
 	//BOBR readout - should be moved to digitizer-readout code?
-	auto *vme_crate=m_digitizer->m_crate;
 	unsigned int vme_base_address = 0x00B00000;
       
 	unsigned int addr=vme_base_address+0x10;
-	unsigned int data=0;
 	int return_code = vme_crate->vme_A24D32_read (addr, &data);
 	if (return_code!=0) {
 	  INFO("Failed to read BOBR status code: "<<std::hex<<return_code<<std::dec);

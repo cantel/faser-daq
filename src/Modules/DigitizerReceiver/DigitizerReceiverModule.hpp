@@ -131,6 +131,8 @@ class DigitizerReceiverModule : public FaserProcess {
   std::atomic<int> m_udp_dma_write_receive_ack_retry_counter;
   std::atomic<int> m_udp_dma_write_req_retry_counter;
 
+  std::atomic<int> m_loss_of_lock;
+
   std::atomic<int> m_bobr_statusword;
   std::atomic<int> m_bobr_timing;
   std::atomic<int> m_lhc_turncount;

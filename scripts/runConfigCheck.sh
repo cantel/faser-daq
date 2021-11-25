@@ -13,8 +13,8 @@ schemas/FileWriterFaser.schema     \
 schemas/FrontEndEmulator.schema     \
 schemas/FrontEndMonitor.schema     \
 schemas/FrontEndReceiver.schema     \
-schemas/IFTMonitor.schema     \
-schemas/TrackerMonitor.schema     \
+schemas/SCTDataMonitor.schema     \
+schemas/TrackStationMonitor.schema     \
 schemas/TrackerReceiver.schema     \
 schemas/TriggerGenerator.schema     \
 schemas/TriggerMonitor.schema     \

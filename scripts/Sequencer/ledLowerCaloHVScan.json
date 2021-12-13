@@ -4,7 +4,7 @@
  "finalizeCommand": "../HVControl/setLEDPulser.py 100 0 0",
  "defaults": {
      "cfgFile": "tlbDigiTI12LED.json",
-     "runtype": "Test",
+     "runtype": "LEDCalibration",
      "maxRunTime": 200,
      "maxEvents": 10000,
      "postCommand": null,

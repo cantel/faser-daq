@@ -57,6 +57,7 @@ def stateTracker(logger,localOnly):
       try:
         update=False
         runState=r1.hgetall("runningFile")
+        if not "comment" in runState: runState["comment"]="None"
         runNumber=r1.get("runNumber")
         runStart=r1.get("runStart")
         if not oldState==runState:
@@ -115,8 +116,10 @@ def stateTracker(logger,localOnly):
                                       json = stopMsg)
                     if r.status_code!=200:
                         logger.error("Failed to register end of run information: "+r.text)
+                    stopComment=stopMsg['endcomment'].replace('"',"'")
+                    runState["comment"]=stopComment
+                    r1.hset("runningFile", "comment", runState["comment"])
                     if influxDB:
-                        stopComment=stopMsg['endcomment'].replace('"',"'")
                         runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{stopMsg["type"]}",runNumber={runNumber},physicsEvents={physicsEvents}'
                         r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
                                         auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
@@ -149,7 +152,9 @@ def stateTracker(logger,localOnly):
                     physicsEvents=runinfo["eventCounts"]["Events_sent_Physics"]
                     stopMsg["runinfo"]=runinfo
                     stopMsg["endcomment"]="Run was shut down"
+                    runState["comment"]="Run was shut down"
                     r1.set("runOngoing",0)
+                    r1.hset("runningFile", "comment", runState["comment"])
                     r = requests.post(f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}',
                                       auth=(run_user,run_pw),
                                       json = stopMsg)
@@ -231,6 +236,9 @@ def stateTracker(logger,localOnly):
                                                  'type':       subInfo['runtype'],
                                                  'username':       os.getenv("USER"),
                                                  'startcomment':    subInfo['startcomment'],
+                                                 'seqnumber': subInfo['seqnumber'],
+                                                 'seqstep': subInfo['seqstep'],
+                                                 'seqsubstep': subInfo['seqsubstep'],
                                                  'detectors':  detList,
                                                  'configName': configName,
                                                  'configuration': config
@@ -246,6 +254,8 @@ def stateTracker(logger,localOnly):
                         except requests.exceptions.ConnectionError:
                             logger.error("Could not connect to run service")
                         startMsg=subInfo['startcomment'].replace('"',"'")
+                        runState["comment"]=startMsg
+
                         runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
                         r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
                                         auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
@@ -257,6 +267,7 @@ def stateTracker(logger,localOnly):
                     r1.set("runNumber",runNumber)
                     r1.set("runType",runType)
                     r1.set("runStart",time.time())
+                    r1.hset("runningFile", "comment", runState["comment"])
             elif cmd=="pause":
                 if overallState!="RUN":
                     logger.warn("Tried to pause run in state: "+overallState)
@@ -297,6 +308,9 @@ def start(reqinfo):
     info={}
     info['startcomment']=reqinfo.get('startcomment',"")[:500]
     info['runtype']=reqinfo.get('runtype',"Test")[:100]
+    info['seqnumber']=reqinfo.get('seqnumber',None)
+    info['seqstep']=reqinfo.get('seqstep',0)
+    info['seqsubstep']=reqinfo.get('seqsubstep',0)
     r1.publish("stateAction","start "+json.dumps(info))
 
 def pause():

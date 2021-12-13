@@ -1,0 +1,23 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "defaults": {
+     "cfgFile": "emulatorLocalhost.json",
+     "runtype": "Test",
+     "maxRunTime": 30,
+     "maxEvents": 100,
+     "postCommand": null
+ },
+ "steps": [
+     {
+	 "startcomment": "Sequencer test 1",
+	 "endcomment": "Sequencer stop test 1",
+	 "preCommand": "echo step 1"
+     },{
+	 "maxEvents": 2000,
+	 "startcomment": "Sequencer test 100 Hz",
+	 "endcomment": "Sequencer stop test 2",
+	 "preCommand": "echo step 2"
+     }
+ ]
+}
+

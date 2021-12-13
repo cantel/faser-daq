@@ -13,7 +13,7 @@ import sys
 import time
 
 class runner:
-    def __init__(self,config,hostUrl,maxTransitionTime):
+    def __init__(self,config,hostUrl,maxTransitionTime,seqnumber,seqstep):
         self.cfgFile=config["cfgFile"]
         self.runtype=config["runtype"]
         self.startcomment=config["startcomment"]
@@ -22,6 +22,9 @@ class runner:
         self.maxEvents=config["maxEvents"]
         self.preCommand=config["preCommand"]
         self.postCommand=config["postCommand"]
+        self.seqnumber=seqnumber
+        self.seqstep=seqstep
+        self.runnumber=None
         self.url=hostUrl
         self.maxTransitionTime=maxTransitionTime
     
@@ -47,6 +50,9 @@ class runner:
         return self.doTransition(f"start","RUN",
                                  {"runtype": self.runtype,
                                   "startcomment": self.startcomment,
+                                  "seqnumber": self.seqnumber,
+                                  "seqstep": self.seqstep,
+                                  "seqsubstep": 0
                               })
 
     def stop(self):
@@ -61,8 +67,9 @@ class runner:
 
     def checkState(self):
      state=requests.get(self.url+"/stateNow")
-     if state.status_code!=200: return "UNKNOWN"
-     return state.json()["globalStatus"]
+     if state.status_code!=200: return "UNKNOWN",0
+     state=state.json()
+     return state["globalStatus"],state["runNumber"]
 
     def getEvents(self):
      response=requests.get(self.url+"/monitoring/eventCounts")
@@ -72,18 +79,19 @@ class runner:
     def waitStop(self):
         now=time.time()
         while(True):
-            state=self.checkState()
+            state,runnumber=self.checkState()
             if state!="RUN":
                 print(f"State changed to '{state}' - bailing out")
                 return False
+            self.runnumber=runnumber
             events=self.getEvents()
             if events["Events_sent_Physics"]>=self.maxEvents: return True
             if time.time()-now>self.maxRunTime: return True
-            print(f'State: {state}, events: {events["Events_sent_Physics"]}, time: {time.time()-now} seconds')
+            print(f'Run {runnumber}, State: {state}, events: {events["Events_sent_Physics"]}, time: {time.time()-now} seconds')
             time.sleep(5)
 
     def run(self):
-        if self.checkState()!="DOWN":
+        if self.checkState()[0]!="DOWN":
             print("System is not shutdown - will not start run")
             return False
 
@@ -137,21 +145,26 @@ class runner:
         return True
 
 def usage():
-    print("./sequencer.py [-s <stepNumber>] <configuration.json>")
+    print("./sequencer.py [-S <seqNumber> -s <stepNumber> ] <configuration.json>")
     sys.exit(1)
 
 def main(args):
     
     startStep=1
+    seqnumber=0 
     try:
-        opts, args = getopt.getopt(args,"s:",[])
+        opts, args = getopt.getopt(args,"s:S:",[])
     except getopt.GetoptError:
         usage()
     for opt,arg in opts:
         if opt=="-s":
             startStep=int(arg)
+        if opt=="-S":
+            seqnumber=int(arg)
     if len(args)!=1:
         usage()
+    if startStep!=1 and seqnumber==0:
+        usage() #FIXME, maybe one should be able to look up last step?
 
 
     config=json.load(open(args[0]))
@@ -213,13 +226,17 @@ def main(args):
     for step in range(startStep-1,len(cfgs)):
         print(f"Running step {step+1}")
         cfg=cfgs[step]
-        run=runner(cfg,hostUrl,maxTransitionTime)
+        run=runner(cfg,hostUrl,maxTransitionTime,seqnumber,step+1)
         rc=run.run()
         if rc:
             print("Successful run")
         else:
             print("Failed to run, please check")
+            print("To redo from this step run:")
+            print(f"./sequencer.py -S {seqnumber} -s {step+1} {args[0]}")
             return 1
+        if seqnumber==0:
+            seqnumber=run.runnumber
 
     if "finalizeCommand" in config:
         print("Running FINALIZE command")

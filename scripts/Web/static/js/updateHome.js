@@ -35,6 +35,7 @@ function updateCommandAvailability(data){
 	document.getElementById("revisedType").value =data.runType;
     };
     document.getElementById("runningFile").innerHTML = data.runState.fileName;
+    document.getElementById("commentField").innerText = data.runState.comment;
     var buttonEnableStates= {
 	"INITIALISE": ["DOWN"],
 	"START": ["READY","PAUSED"],

@@ -3,7 +3,7 @@
  "finalizeCommand": "../HVControl/setPMTVoltages.py 0",
  "defaults": {
      "cfgFile": "tlbDigiTI12PMTs.json",
-     "runtype": "Test",
+     "runtype": "HVCalibration",
      "maxRunTime": 3000,
      "maxEvents": 10000,
      "postCommand": null,

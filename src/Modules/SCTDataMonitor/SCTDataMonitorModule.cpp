@@ -14,7 +14,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"), m_prefix_hname_scterr("sct_data_error_types_mod") { 
+SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"),m_hname_scterrors("sct_data_errors") { 
 
    INFO("");
  }
@@ -92,7 +92,7 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
         continue;
       }
      // how about SCT data errors
-     std::string hname_scterrors = m_prefix_hname_scterr+std::to_string(sctEvent->GetModuleID());
+     std::string hname_mod_scterrors = m_hname_scterrors+"_mod"+std::to_string(sctEvent->GetModuleID());
      if ( sctEvent->HasError() ) {
         auto sctErrorList= sctEvent->GetErrors();
         for ( unsigned idx = 0; idx < 12; idx++ ) {
@@ -102,37 +102,43 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
             //m_total_WARNINGS++;
             switch ( sctError ) {
               case 0x1:
-               m_histogrammanager->fill(hname_scterrors, "NoData");
+               m_histogrammanager->fill(hname_mod_scterrors, "NoData");
+               m_histogrammanager->fill(m_hname_scterrors, "NoData");
                break;
               case 0x2:
-               m_histogrammanager->fill(hname_scterrors, "BuffOverflow");
+               m_histogrammanager->fill(hname_mod_scterrors, "BuffOverflow");
+               m_histogrammanager->fill(m_hname_scterrors, "BuffOverflow");
                break;
               case 0x4:
-               m_histogrammanager->fill(hname_scterrors, "BuffError");
+               m_histogrammanager->fill(hname_mod_scterrors, "BuffError");
+               m_histogrammanager->fill(m_hname_scterrors, "BuffError");
                break;
               case 0xff:
-               m_histogrammanager->fill(hname_scterrors, "UnknownChip");
+               m_histogrammanager->fill(hname_mod_scterrors, "UnknownChip");
+               m_histogrammanager->fill(m_hname_scterrors, "UnknownChip");
                break;
               default:
-               m_histogrammanager->fill(hname_scterrors, "Unknown");
+               m_histogrammanager->fill(hname_mod_scterrors, "Unknown");
+               m_histogrammanager->fill(m_hname_scterrors, "Unknown");
             }
           }
         }
       }; // end of SCT ERRORs check
 
-      std::string hname_scterr = m_prefix_hname_scterr+std::to_string(sctEvent->GetModuleID());
       int diff_bcid = (m_bcid-sctEvent->GetBCID())&0xFF;
       int diff_l1id = (m_l1id-sctEvent->GetL1ID())&0xF;
       m_histogrammanager->fill("diff_trb_sct_bcid", diff_bcid);
       m_histogrammanager->fill("diff_trb_sct_l1id", diff_l1id);
       if ( diff_bcid != kBCIDOFFSET ) { 
         if (m_print_WARNINGS) WARNING("BCID mismatch for module "<<sctEvent->GetModuleID()<<". TRB BCID = "<<m_bcid<<", SCT BCID = "<<sctEvent->GetBCID());
-        m_histogrammanager->fill(hname_scterrors, "BCIDMismatch");
+        m_histogrammanager->fill(hname_mod_scterrors, "BCIDMismatch");
+        m_histogrammanager->fill(m_hname_scterrors, "BCIDMismatch");
         m_total_WARNINGS++;
       }
       if ( diff_l1id != 0 ) {
         if (m_print_WARNINGS) WARNING("L1ID mismatch for module "<<sctEvent->GetModuleID()<<". TRB BCID = "<<m_l1id<<", SCT L1ID = "<<sctEvent->GetL1ID());
-        m_histogrammanager->fill(hname_scterrors, "L1IDMismatch");
+        m_histogrammanager->fill(hname_mod_scterrors, "L1IDMismatch");
+        m_histogrammanager->fill(m_hname_scterrors, "L1IDMismatch");
         m_total_WARNINGS++;
       }
       auto allHits = sctEvent->GetHits();
@@ -242,9 +248,10 @@ void SCTDataMonitorModule::register_hists() {
 
   std::vector<std::string> sct_error_categories = {"L1IDMismatch", "BCIDMismatch", "NoData", "BuffOverflow", "BuffError", "UnknownChip", "Unknown"};
   for ( unsigned i = 0; i < kTOTAL_MODULES; i++ ){
-    std::string hname_scterr = m_prefix_hname_scterr+std::to_string(i);
-    m_histogrammanager->registerHistogram(hname_scterr, "error type", sct_error_categories, m_PUBINT);
+    std::string hname_mod_scterr = m_hname_scterrors+"_mod"+std::to_string(i);
+    m_histogrammanager->registerHistogram(hname_mod_scterr, "error type", sct_error_categories, m_PUBINT);
   }
+  m_histogrammanager->registerHistogram(m_hname_scterrors, "error type", sct_error_categories, m_PUBINT); 
 
   INFO(" ... done registering histograms ... " );
 

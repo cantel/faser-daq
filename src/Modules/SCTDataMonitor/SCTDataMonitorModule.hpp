@@ -27,7 +27,7 @@ class SCTDataMonitorModule : public MonitorBaseModule {
   uint16_t mapline;
   uint16_t mapline2;
   const std::string m_prefix_hname_hitp;
-  const std::string m_prefix_hname_scterr;
+  const std::string m_hname_scterrors;
   unsigned m_total_WARNINGS;
   bool m_print_WARNINGS;
   const uint8_t kSTRIPDIFFTOLERANCE = 25; // FIXME can be tuned

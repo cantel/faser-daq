@@ -18,10 +18,10 @@
 #include "nlohmann/json.hpp"
 
 
-class CalibrationModule : public FaserProcess {
+class TrackerCalibrationModule : public FaserProcess {
  public:
-  CalibrationModule(const std::string& n);
-  ~CalibrationModule();
+  TrackerCalibrationModule(const std::string& n);
+  ~TrackerCalibrationModule();
 
   void configure(); // optional (configuration can be handled in the constructor)
   void start(unsigned);

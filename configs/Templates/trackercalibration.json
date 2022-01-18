@@ -1,11 +1,11 @@
 {
-    "Calibration": {
-        "name": "calibration",
+    "TrackerCalibrationModule": {
+        "name": "trackercalibration",
         "host": "localhost",
         "port": 7351,
         "modules":[{
-            "name": "calibration",
-            "type": "Calibration",
+            "name": "trackercalibration",
+            "type": "TrackerCalibration",
             "settings": {
                 "configFile": "/home/gfolino/SCTModuleConfigs/Plane100.json",
                 "testList": [2],

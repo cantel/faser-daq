@@ -26,7 +26,7 @@
 #include "TrackerReadout/TRB_ConfigRegisters.h"
 
 // Faser-daq modules includes
-#include "CalibrationModule.hpp"
+#include "TrackerCalibrationModule.hpp"
 #include "Utils/Ers.hpp"
 
 #include "TrackerReadout/ConfigurationHandling.h"
@@ -49,7 +49,7 @@ using json = nlohmann::json;
 using Chip = TrackerCalib::Chip;
 
 //-----------------------------------------
-CalibrationModule::CalibrationModule(const std::string& n): 
+TrackerCalibrationModule::TrackerCalibrationModule(const std::string& n): 
 FaserProcess(n) 
 { 
   INFO("constructor");
@@ -58,11 +58,11 @@ FaserProcess(n)
 }
 
 //-----------------------------------------
-CalibrationModule::~CalibrationModule() { ERS_INFO(""); }
+TrackerCalibrationModule::~TrackerCalibrationModule() { ERS_INFO(""); }
 
 //---------- Functions ---------------
 
-int CalibrationModule::readJson(){
+int TrackerCalibrationModule::readJson(){
   
   // sanity check
   char *rpath = realpath(m_configLocation.c_str(),NULL);
@@ -117,7 +117,7 @@ int CalibrationModule::readJson(){
 
 //-------------------------------
 
-int CalibrationModule::writeJson(std::string outDir){
+int TrackerCalibrationModule::writeJson(std::string outDir){
 
   char *cp(0);
   
@@ -219,7 +219,7 @@ int CalibrationModule::writeJson(std::string outDir){
   return 1;
 }
 
-int CalibrationModule::finalizeSequence(){
+int TrackerCalibrationModule::finalizeSequence(){
   
   if( ! m_testList.empty() ){
    INFO(std::endl << "[ CalibManager::finalize ]");
@@ -258,7 +258,7 @@ int CalibrationModule::finalizeSequence(){
 //------------------ Main functions ---------------
 
 // optional (configuration can be handled in the constructor)
-void CalibrationModule::configure() {
+void TrackerCalibrationModule::configure() {
   FaserProcess::configure();
   
     //
@@ -608,7 +608,7 @@ void CalibrationModule::configure() {
   ERS_INFO("Done configuring");
 }
 
-void CalibrationModule::start(unsigned run_num) {
+void TrackerCalibrationModule::start(unsigned run_num) {
   ERS_INFO("Starting...");
 
   m_t = m_testList.at(m_testcnt - 1);
@@ -631,7 +631,7 @@ void CalibrationModule::start(unsigned run_num) {
   ERS_INFO("Done starting");
 }
 
-void CalibrationModule::stop() {
+void TrackerCalibrationModule::stop() {
   FaserProcess::stop();
 
   /** If there are no more tests, finalize the whole sequence.
@@ -644,7 +644,7 @@ void CalibrationModule::stop() {
   ERS_INFO("Stopped calibration run");
 }
 
-void CalibrationModule::runner() noexcept {
+void TrackerCalibrationModule::runner() noexcept {
   ERS_INFO("Running...");
   
 

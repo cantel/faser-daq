@@ -3,7 +3,7 @@
         "version": 11,
         "group": "faser",
         "components": [
-            { "$ref" : "Templates/calibration.json#Calibration"},
+            { "$ref" : "Templates/trackercalibration.json#TrackerCalibrationModule"},
             {
                 "name": "eventbuilder01",
                 "host": "localhost",

@@ -19,7 +19,7 @@ schemas/TriggerGenerator.schema     \
 schemas/TriggerMonitor.schema     \
 schemas/TriggerRateMonitor.schema     \
 schemas/TriggerReceiver.schema     \
-schemas/Calibration.schema      \
+schemas/TrackerCalibration.schema      \
 --templates \
 Templates/TLB.json \
 Templates/TRB.json \
@@ -29,7 +29,7 @@ Templates/fileWriter.json \
 Templates/monitor.json \
 Templates/eventBuilder.json \
 Templates/digitizerNoise.json \
-Templates/calibration.json \
+Templates/trackercalibration.json \
 --configs   \
 digitizerSciLab.json \
 digitizerTI12.json \
@@ -44,7 +44,7 @@ playback.json              \
 emulatorLocalhost.json \
 digitizerDarkRateSciLab.json \
 digitizerLEDSciLab.json \
-calibration.json \
+trackCalibrationEHN1.json \
 --extras   \
 top.json \
 current.json \
@@ -53,7 +53,6 @@ schemas/validation-schema.json                   \
 schemas/refs/connection-schema.json                   \
 Templates/top.json                   \
 customized/host.json                 \
-schemas/verify_calibration_schema.json
 
 
 

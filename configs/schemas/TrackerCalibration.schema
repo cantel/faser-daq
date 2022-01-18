@@ -1,10 +1,10 @@
 {
     "type": "object",
-    "title": "Calibration",
+    "title": "TrackerCalibration",
     "properties": {
         "name": {
             "type": "string",
-            "default": "calibration",
+            "default": "trackercalibration",
             "readOnly": true,
             "pattern": "^((?!XXX).)*$",
             "propertyOrder" : 1
@@ -25,12 +25,12 @@
                     "type" : "string",
                     "title" : "tcalib configuration file",
                     "description" : "Location of the module/plane config json file",
-                    "default" : "Module0.json"
+                    "default" : "/home/gfolino/SCTModuleConfigs/Plane100.json"
                 },
                 "testList": {
                     "type" : "array",
                     "title" : "Test list",
-                    "description" : "List of tests to run",
+                    "description" : "List of tests to run, select multiple using Ctrl + click",
                     "items" : {
                         "type" : "integer",
                         "enum" : [1, 2, 3, 4, 5, 6, 7, 8]
@@ -48,6 +48,36 @@
                     "title" : "Verbosity level (from 0 to 3)",
                     "enum" : [0, 1, 2, 3]
                 },
+                "l1delay" : {
+                    "type" : "integer",
+                    "title" : "Delay between calibration-pulse and L1A",
+                    "default" : 130
+                },
+                "log": {
+                    "type" : "string",
+                    "title" : "log file realtive to outBaseDir",
+                    "default" : "log.txt"
+                },
+                "emulateTRB" : {
+                    "type" : "boolean",
+                    "title" : "Emulate TRB interface",
+                    "default" : false
+                },
+                "calLoop" : {
+                    "type" : "boolean",
+                    "title" : "Use calLoop functionality",
+                    "default" : false
+                },
+                "saveDaq" : {
+                    "type" : "boolean",
+                    "title" : "Enable creation of .daq file",
+                    "default" : false
+                },
+                "noTrim" : {
+                    "type" : "boolean",
+                    "title" : "Do not load in chips the single-channel trimDac values",
+                    "default" : false
+                },
                 "noRunNumber" : {
                     "type" : "boolean",
                     "title" : "Disable automatic creation of run-number to be stored in DB",
@@ -57,6 +87,11 @@
                     "type" : "boolean",
                     "title" : "Use TRB connected via USB",
                     "default" : false
+                },
+                "ip": {
+                    "type" : "string",
+                    "title" : "SCIP / DAQIP address for ethernet communication",
+                    "default" : "10.11.65.8"
                 }
             },
             "required" : ["configFile", "testList"],

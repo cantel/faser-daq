@@ -1,3 +1,0 @@
-[submodule "gpiodrivers"]
-	path = gpiodrivers
-	url = ../gpiodrivers

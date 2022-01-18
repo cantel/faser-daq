@@ -42,12 +42,6 @@ add_subdirectory(gpiodrivers)
 add_subdirectory(digitizer-readout)
 add_subdirectory(trackercalibration)
 
-#include_directories(${PROJECT_SOURCE_DIR}/trackercalibration/)
-#include_directories(${PROJECT_SOURCE_DIR}/gpiodrivers/TRBAccess)
-#include_directories(${PROJECT_SOURCE_DIR}/gpiodrivers/GPIOBase)
-#include_directories(${PROJECT_SOURCE_DIR}/faser-common/Logging/include)
-#include_directories(${PROJECT_SOURCE_DIR}/faser-common/Exceptions/)
-
 # Disable some CXX FLAGS for convenience  (if needed)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-error -Wno-zero-as-null-pointer-constant -Wno-undef -Wno-sign-conversion -Wno-old-style-cast -Wno-strict-overflow")
 

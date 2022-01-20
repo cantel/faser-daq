@@ -324,7 +324,7 @@
             },
             "SCIP" : "faser-daq-002",
             "DAQIP" : "faser-daq-002",
-            "BoardID" : 10
+            "BoardID" : 15
         },
         "connections": {"$ref":"#TLBConnections" }
     }],

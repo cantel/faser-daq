@@ -18,7 +18,7 @@ import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
 from flaskDashboard import interfacePlotly
 from flaskDashboard import redis_interface
-
+from flaskDashboard import checker
 
 
 ## Redis database where the last histograms are published.
@@ -149,11 +149,11 @@ def getModules():
 
 
 @app.route("/")
-@app.route("/vue_home", methods=["GET"])
-def vue_home():
-    """! Renders the vue_home.html"""
+@app.route("/home", methods=["GET"])
+def home():
+    """! Renders the home.html"""
     storeDefaultTagsAndIDs()
-    return render_template("vue_home.html")
+    return render_template("home.html")
 
 
 @app.route("/getModulesAndTags", methods=["GET"])
@@ -189,12 +189,12 @@ def IDs_from_tags():
     return jsonify(valid_IDs)
 
 
-
 @app.route("/histogram_from_ID", methods=["GET"])
 def histogram_from_ID():
     """! Get the histogram from redis database 1 associated with the given ID.
     @return JSON containing the timestamp, the plotly figure, the ID, the associated tags and the runNumber of the histogram.
     """
+    checker_obj = checker.Checker()
     runNumber = r2.get("runNumber")
     packet = {}
     ID = request.args.get("ID")
@@ -205,10 +205,18 @@ def histogram_from_ID():
         config = {"filename":f"{ID}+{timestamp}"} 
         fig = dict(data=data,layout=layout, config=config)
         tags = get_tags_by_ID(ID)
-        packet = dict(timestamp=float(timestamp), fig=fig, ID=ID, tags=tags, runNumber = runNumber)
+        # for error histograms 
+        # if layout["hist_type"] == "categories" and "error" in histname :
+        #     checker_obj.check_countError(data)
+        
+        # if layout["hist_type"] == "uoflow":
+        #     checker_obj.check_overflow(data)
+        checker_obj.check(histname, layout, data)
+
+        packet = {"timestamp":float(timestamp), "fig":fig, "ID":ID, "tags":tags, "runNumber" : runNumber, "flags" : checker_obj.flags}
     return jsonify(packet)
 
-## Tag section
+## Tag sections 
 
 @app.route("/add_tag", methods=["POST"])
 def add_tag():
@@ -245,7 +253,7 @@ def remove_tag():
 @app.route("/history_view/<string:ID>")
 def history_view(ID):
     """! Renders the history view page."""
-    return render_template("vue_historyView.html",ID=ID)
+    return render_template("historyView.html",ID=ID)
 
 
 @app.route("/stored_timestamps", methods=["GET"])

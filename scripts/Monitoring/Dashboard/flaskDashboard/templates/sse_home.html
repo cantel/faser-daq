@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- include VueJS  -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-  
+
 
     <!-- Vuetify dependencies-->
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
@@ -68,9 +68,18 @@
                 <v-spacer></v-spacer>
             </v-app-bar>
             <v-main>
-                <v-container fluid class="histogram_container" v-if="c_ids">
-                    <histogram-card v-for="ID in c_ids" :id="ID" :key="ID"></histogram-card>
+                <!-- <div v-for="(content, ID) in c_data" v-if="c_data">
+                 [[ ID ]]
+                </div> -->
+
+                <v-container fluid class="histogram_container" v-if="c_data">
+                    <div v-if="!c_ready && c_ids.length!==0"
+                        style="margin-top: auto; margin-bottom: auto; font-size:xx-large;"> Loading... </div>
+
+                    <histogram-card v-for="(content,ID) in c_data" :id="ID" :key="ID" :data="content" v-show="c_ready">
+                    </histogram-card>
                 </v-container>
+
             </v-main>
         </v-app>
     </div>
@@ -82,6 +91,7 @@
         dayjs.extend(UTC)
 
         const EventBus = new Vue();
+
         ////////////// Redis info dialog //////////////
         Vue.component("redis_info_dialog", {
             delimiters: ["[[", "]]"],
@@ -214,30 +224,36 @@
             `,
         })
 
+
         ////////////// Histogram-card Components //////////////
 
         Vue.component("histogram-card", {
             delimiters: ["[[", "]]"],
-            props: ["id"],
+            props: ["id", "data"],
             data: function () {
                 return {
-                    c_polling: null,
-                    c_updating_rate: 5000, // updating every 5 seconds
                     c_timestamp: null,
                     c_figure: null,
                     c_isLoading: false,
                     c_tags: [],
                     c_runNumber: null,
                     c_flags: [],
-            
-
                 }
             },
-            mounted() {
-                this.pollData()
+            async mounted() {
+
+                // const response = await this.updateElements(this.data)
+                this.updateElements(this.data).then((newData) => {
+                    this.c_figure = newData["fig"]
+                    this.c_timestamp = newData["timestamp"]
+                    this.c_tags = newData["tags"]
+                    this.c_runNumber = newData["runNumber"]
+                    this.c_flags = newData["flags"]
+                }
+                )
+
             },
             beforeDestroy() {
-                clearInterval(this.c_polling)
             },
             filters: {
                 timestampLocal: function (timestamp) {
@@ -256,16 +272,16 @@
                     // write simpler code (if only two flags)
                     let border_color = "white"
                     let outline_color = "white"
-                    
-                    if (this.c_flags){
+
+                    if (this.c_flags) {
                         // outline_color = this.c_flags[0]
-                        let uoverflow = this.c_flags.filter(obj => {return obj.name === "uoverflow"})[0]
-                        let count_error = this.c_flags.filter(obj => {return obj.name === "count_error"})[0]
-                        
-                        if (uoverflow){
-                            outline_color= uoverflow.color;
+                        let uoverflow = this.c_flags.filter(obj => { return obj.name === "uoverflow" })[0]
+                        let count_error = this.c_flags.filter(obj => { return obj.name === "count_error" })[0]
+
+                        if (uoverflow) {
+                            outline_color = uoverflow.color;
                         }
-                        else if (count_error){
+                        else if (count_error) {
                             outline_color = count_error.color
                         }
                         // border_color  = uoverflow ? uoverflow.color : "white"
@@ -274,48 +290,45 @@
                     return {
                         // border: `4px solid ${border_color}`,
                         outline: `6px solid ${outline_color}`,
-                        
-                       
+
+
                     }
-                
+
                 },
-    
+
+
+            },
+            watch: {
+                // data: (newData) => {
+
+                //     // const response = await this.updateElements(newData)
+                //     // console.log(response)
+
+                //     this.updateElements(newData).then((message) => {
+                //         console.log(message)
+                //     }
+                //     )
+                //     // this.c_figure = newData["fig"]
+                //     // this.c_timestamp = newData["timestamp"]
+                //     // this.c_tags = newData["tags"]
+                //     // this.c_runNumber = newData["runNumber"]
+                //     // this.c_flags = newData["flags"]
+                // },
+                // deep: true,
+                // immediate: true
             },
             methods: {
-
-                pollData() {
-                    axios.get('/histogram_from_ID', {
-                        params: {
-                            ID: this.id
-                        }
+                updateElements(newData) {
+                    return new Promise((resolve, reject) => {
+                        console.log("Promise")
+                        resolve(newData)
                     })
-                        .then(response => {
-                            this.c_figure = response.data["fig"]
-                            this.c_timestamp = response.data["timestamp"]
-                            this.c_tags = response.data["tags"]
-                            this.c_runNumber = response.data["runNumber"]
-                            this.c_flags = response.data["flags"]
-                        })
 
-
-                    this.c_polling = setInterval(() => {
-                        axios.get('/histogram_from_ID', {
-                            params: {
-                                ID: this.id
-                            }
-                        })
-                            .then(response => {
-                                this.c_figure = response.data["fig"]
-                                this.c_timestamp = response.data["timestamp"]
-                                this.c_flags = response.data["flags"]
-                                //this.c_tags = response.data["tags"]
-
-                            })
-                    }, this.c_updating_rate)
                 },
 
+
                 removeTag(item) {
-        
+
                     const index = this.c_tags.indexOf(item);
                     if (index > -1) {
                         this.c_tags.splice(index, 1);
@@ -386,9 +399,11 @@
                             <span>CERN: [[ c_timestamp | timestampCERN ]]</span>
                             </v-tooltip>
                     </v-card-title>
-                        <plotly-graph class="card_histo_cont mx-auto" v-if="c_figure" :figure="c_figure"
+                        
+                    <plotly-graph class="card_histo_cont mx-auto" v-if="c_figure" :figure="c_figure"
                             :divid="divName">
                         </plotly-graph>
+
                         
                         <v-card-actions class="pb-1">
                             <v-combobox v-model="c_tags" small-chips multiple solo hide-selected hide-details
@@ -410,9 +425,15 @@
             vuetify: new Vuetify(),
             data: {
                 c_tags: [],
-                c_ids: [],
                 c_safeMode: true,
-                c_redis_infos: null
+                c_redis_infos: null,
+                c_data: {},
+                c_eventSource: null,
+                c_ids: [],
+                c_total_rendered: 0,
+                c_ready: false
+
+
             },
             delimiters: ["[[", "]]"],
             computed: {},
@@ -420,6 +441,16 @@
                 axios.get("/redis_info").then(response => {
                     this.c_redis_infos = response.data
                 })
+
+                EventBus.$on("finishLoading", () => {
+                    this.c_total_rendered += 1;
+                    if (this.c_total_rendered === this.c_ids.length) {
+                        this.c_ready = true;
+                    }
+                });
+
+
+
             },
             methods: {
                 getIDs(selected_tags) {
@@ -430,7 +461,32 @@
                     })
                         .then(response => {
                             this.c_ids = response.data.sort()
+
+                            this.createEventSource(this.c_ids)
                         })
+                },
+
+                async createEventSource(ids) {
+
+                    this.c_ready = false
+                    this.c_total_rendered = 0
+
+                    if (this.c_eventSource) {
+                        this.c_eventSource.close()
+                    }
+                    this.c_eventSource = new EventSource(`/stream_histograms/${ids.join("&")}`)
+                    this.c_eventSource.onmessage = async (event) => {
+                        // this.c_data = JSON.parse(event.data)
+                        await this.handleData(event.data)
+                    }
+
+                },
+
+                handleData(data) {
+                    return new Promise((resolve, reject) => {
+                        this.c_data = JSON.parse(data)
+                        resolve()
+                    })
                 },
                 deleteHistory() {
                     axios.get("/delete_history")

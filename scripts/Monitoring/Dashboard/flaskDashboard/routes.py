@@ -19,7 +19,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flaskDashboard import interfacePlotly
 from flaskDashboard import redis_interface
 from flaskDashboard import checker
-
+from time import sleep
 
 ## Redis database where the last histograms are published.
 r = redis.Redis(
@@ -149,12 +149,38 @@ def getModules():
 
 
 @app.route("/")
-@app.route("/home", methods=["GET"])
+@app.route("/home")
 def home():
-    """! Renders the home.html"""
+    """! Renders the home.html """
     storeDefaultTagsAndIDs()
     return render_template("home.html")
+    # return render_template("sse_home.html")
+    # return render_template("mix_home.html")
 
+
+
+
+@app.route('/stream_histograms/<string:ids_string>')
+def stream_histograms(ids_string):
+    def get_histograms():
+        packet={}
+        ids = ids_string.split("&")
+        while True:
+            for ID in ids :
+                checker_obj = checker.Checker()
+                runNumber = r2.get("runNumber")
+                source, histname = ID.split("-")
+                histobj = r.hget(source, f"h_{histname}")
+                if histobj is not None:
+                    data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+                    config = {"filename":f"{ID}+{timestamp}"} 
+                    fig = dict(data=data,layout=layout, config=config)
+                    tags = get_tags_by_ID(ID)
+                    checker_obj.check(histname, layout, data)
+                packet[ID] = {"timestamp":float(timestamp), "fig":fig, "ID":ID, "tags":tags, "runNumber" : runNumber, "flags" : checker_obj.flags}
+            yield f"data:{json.dumps(packet)}\n\n"
+            sleep(5)
+    return Response(get_histograms(), mimetype="text/event-stream")
 
 @app.route("/getModulesAndTags", methods=["GET"])
 def get_modules_and_tags():
@@ -205,14 +231,7 @@ def histogram_from_ID():
         config = {"filename":f"{ID}+{timestamp}"} 
         fig = dict(data=data,layout=layout, config=config)
         tags = get_tags_by_ID(ID)
-        # for error histograms 
-        # if layout["hist_type"] == "categories" and "error" in histname :
-        #     checker_obj.check_countError(data)
-        
-        # if layout["hist_type"] == "uoflow":
-        #     checker_obj.check_overflow(data)
         checker_obj.check(histname, layout, data)
-
         packet = {"timestamp":float(timestamp), "fig":fig, "ID":ID, "tags":tags, "runNumber" : runNumber, "flags" : checker_obj.flags}
     return jsonify(packet)
 

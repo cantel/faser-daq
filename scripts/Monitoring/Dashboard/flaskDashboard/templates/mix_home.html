@@ -7,7 +7,7 @@
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- include VueJS  -->
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
-  
+
 
     <!-- Vuetify dependencies-->
     <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
@@ -69,7 +69,7 @@
             </v-app-bar>
             <v-main>
                 <v-container fluid class="histogram_container" v-if="c_ids">
-                    <histogram-card v-for="ID in c_ids" :id="ID" :key="ID"></histogram-card>
+                    <histogram-card v-for="ID in c_ids" :id="ID" :key="ID" :data="c_data[ID]"></histogram-card>
                 </v-container>
             </v-main>
         </v-app>
@@ -214,14 +214,14 @@
             `,
         })
 
+
         ////////////// Histogram-card Components //////////////
 
         Vue.component("histogram-card", {
             delimiters: ["[[", "]]"],
-            props: ["id"],
+            props: ["id", "data"],
             data: function () {
                 return {
-                    c_polling: null,
                     c_updating_rate: 5000, // updating every 5 seconds
                     c_timestamp: null,
                     c_figure: null,
@@ -229,8 +229,6 @@
                     c_tags: [],
                     c_runNumber: null,
                     c_flags: [],
-            
-
                 }
             },
             mounted() {
@@ -256,16 +254,16 @@
                     // write simpler code (if only two flags)
                     let border_color = "white"
                     let outline_color = "white"
-                    
-                    if (this.c_flags){
+
+                    if (this.c_flags) {
                         // outline_color = this.c_flags[0]
-                        let uoverflow = this.c_flags.filter(obj => {return obj.name === "uoverflow"})[0]
-                        let count_error = this.c_flags.filter(obj => {return obj.name === "count_error"})[0]
-                        
-                        if (uoverflow){
-                            outline_color= uoverflow.color;
+                        let uoverflow = this.c_flags.filter(obj => { return obj.name === "uoverflow" })[0]
+                        let count_error = this.c_flags.filter(obj => { return obj.name === "count_error" })[0]
+
+                        if (uoverflow) {
+                            outline_color = uoverflow.color;
                         }
-                        else if (count_error){
+                        else if (count_error) {
                             outline_color = count_error.color
                         }
                         // border_color  = uoverflow ? uoverflow.color : "white"
@@ -274,12 +272,11 @@
                     return {
                         // border: `4px solid ${border_color}`,
                         outline: `6px solid ${outline_color}`,
-                        
-                       
+
                     }
-                
+
                 },
-    
+
             },
             methods: {
 
@@ -295,27 +292,14 @@
                             this.c_tags = response.data["tags"]
                             this.c_runNumber = response.data["runNumber"]
                             this.c_flags = response.data["flags"]
+
+
+                            EventBus.$emit("histo_cont_created")
                         })
 
-
-                    this.c_polling = setInterval(() => {
-                        axios.get('/histogram_from_ID', {
-                            params: {
-                                ID: this.id
-                            }
-                        })
-                            .then(response => {
-                                this.c_figure = response.data["fig"]
-                                this.c_timestamp = response.data["timestamp"]
-                                this.c_flags = response.data["flags"]
-                                //this.c_tags = response.data["tags"]
-
-                            })
-                    }, this.c_updating_rate)
                 },
-
                 removeTag(item) {
-        
+
                     const index = this.c_tags.indexOf(item);
                     if (index > -1) {
                         this.c_tags.splice(index, 1);
@@ -363,6 +347,25 @@
                                 })
                         }
                     }
+                },
+                data: {
+                    handler: function (newVal, oldVal) {
+
+                        if (oldVal) {
+                            if (newVal.timestamp === oldVal.timestamp) {
+                                console.log("rien Changé")
+                            }
+                            else {
+                                console.log("Changed timestamp")
+                                this.c_figure = newVal["fig"];
+                                this.c_timestamp = newVal["timestamp"]
+                                this.c_tags = newVal["tags"]
+                                this.c_runNumber = newVal["runNumber"]
+                                // this.c_flags = newVal["flags"]
+                            }
+                        }
+                    },
+                    deep: true
                 }
             },
             template: //html
@@ -412,26 +415,63 @@
                 c_tags: [],
                 c_ids: [],
                 c_safeMode: true,
-                c_redis_infos: null
+                c_redis_infos: null,
+                c_total_rendered: 0,
+                c_ready: false,
+                c_data: {},
+                c_eventSource: null
             },
             delimiters: ["[[", "]]"],
             computed: {},
             mounted() {
+                EventBus.$on("finishLoading", () => {
+                    this.c_total_rendered += 1;
+                    if (this.c_total_rendered === this.c_ids.length) {
+                        this.c_ready = true;
+                        this.createEventSource(this.c_ids)
+                    }
+                });
                 axios.get("/redis_info").then(response => {
                     this.c_redis_infos = response.data
                 })
             },
             methods: {
                 getIDs(selected_tags) {
-                    this.c_tags = selected_tags
+                    this.c_tags = selected_tags;
+                    this.c_total_rendered = 0;
+                    this.c_ready = false;
 
                     axios.post('/IDs_from_tags', {
                         tags: selected_tags,
                     })
                         .then(response => {
                             this.c_ids = response.data.sort()
+
                         })
+
                 },
+                async createEventSource(ids) {
+
+                    this.c_ready = false
+                    this.c_total_rendered = 0
+
+                    if (this.c_eventSource) {
+                        this.c_eventSource.close()
+                    }
+                    this.c_eventSource = new EventSource(`/stream_histograms/${ids.join("&")}`)
+                    this.c_eventSource.onmessage = async (event) => {
+                        // this.c_data = JSON.parse(event.data)
+                        await this.handleData(event.data)
+                    }
+
+                },
+                handleData(data) {
+                    return new Promise((resolve, reject) => {
+                        this.c_data = JSON.parse(data)
+                        resolve()
+                    })
+                },
+
                 deleteHistory() {
                     axios.get("/delete_history")
                 },

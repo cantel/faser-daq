@@ -98,7 +98,7 @@
             </v-main>
         </v-app>
     </div>
-    <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
+    <script src="{{ url_for('static', filename = 'js/plotlyComponent.js') }}"> </script>
     <script>
         const timezone = window.dayjs_plugin_timezone
         const UTC = window.dayjs_plugin_utc
@@ -191,7 +191,6 @@
                 },
                 toggleCompareMenu() {
                     this.c_compare_menu_toggled = !this.c_compare_menu_toggled
-
                 },
 
                 compare_histo() {
@@ -206,11 +205,9 @@
                             })
                     }
                     else {
-                        console.log("Rien sélectionné");
+                        console.log("Nothing selected");
                     }
                 }
-
-
             },
         });
     </script>

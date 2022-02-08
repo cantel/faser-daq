@@ -153,11 +153,18 @@ def getModules():
 def home():
     """! Renders the home.html """
     storeDefaultTagsAndIDs()
-    return render_template("home.html")
+    # return render_template("home.html")
     # return render_template("sse_home.html")
-    # return render_template("mix_home.html")
+    return render_template("mix_home.html")
 
 
+@app.route("/oldhome")
+def oldHome():
+    """! Renders the home.html """
+    storeDefaultTagsAndIDs()
+    # return render_template("home.html")
+    # return render_template("sse_home.html")
+    return render_template("home.html")
 
 
 @app.route('/stream_histograms/<string:ids_string>')
@@ -211,7 +218,6 @@ def IDs_from_tags():
         keys = [ key[3:] for key in keys ]
         # we take the intersection of the two sets
         valid_IDs  = list(set(keys) & set(IDs))
-
     return jsonify(valid_IDs)
 
 
@@ -326,7 +332,6 @@ def delete_current():
     m = map(delete_associated_tags, ids )
     l = list(itertools.chain.from_iterable(m))
     r5.delete(*l)
-
     r5.delete(*ids) 
     return jsonify({"response": "OK"})
 
@@ -337,7 +342,6 @@ def redis_info():
     """
     r_infos = r.info()
     return jsonify(r_infos)
-
 
 @app.route("/compare_histograms", methods=["POST"])
 def compare_histograms():
@@ -355,7 +359,6 @@ def compare_histograms():
         diff_histo["figure"]["data"][0]["y"] = np.abs(np.array(hist1["figure"]["data"][0]["y"]) - np.array(hist2["figure"]["data"][0]["y"])).tolist()
     elif hist1["figure"]["data"][0]["type"] == 'heatmap':
         diff_histo["figure"]["data"][0]["z"] = np.abs(np.array(hist1["figure"]["data"][0]["z"]) - np.array(hist2["figure"]["data"][0]["z"])).tolist()
-    
     return jsonify(diff_histo)
 
 

@@ -33,7 +33,6 @@ Vue.component("plotly-graph", {
         }
     },
     mounted() {
-
         this.$watch('figure', (figure) => {
             if (this.c_log) {
                 figure.layout.yaxis.type = "log"
@@ -41,15 +40,17 @@ Vue.component("plotly-graph", {
             if (figure.config.filename) {
                 var ts = figure.config.filename.split("+")
                 var day = dayjs.tz(parseFloat(ts[1]) * 1000, "Europe/Zurich").format("DDMMYYYY_HHmmss")
-                this.c_config.toImageButtonOptions.filename = ts[0] + "_" + day
+                this.c_config.toImageButtonOptions.filename = `${ts[0]}_${day}`
             }
-            setTimeout(()=>{
-                Plotly.react(this.$refs[this.divid], figure.data, figure.layout, this.c_config).then(()=> {
-                    this.c_first_time ?  EventBus.$emit("finishLoading") : this.c_first_time = false
-                })
-            }, 0);
-            
-           
+
+            Plotly.react(this.$refs[this.divid], figure.data, figure.layout, this.c_config).then(() => {
+                if (this.c_first_time) {
+                    EventBus.$emit("finishLoading");
+                }
+                else {
+                    this.c_first_time = false;
+                }
+            })
         }, {
             immediate: true,
             deep: true

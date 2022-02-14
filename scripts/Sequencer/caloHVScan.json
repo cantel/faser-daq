@@ -1,0 +1,19 @@
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "finalizeCommand": "../HVControl/setCaloVoltage.py 1200",
+ "defaults": {
+     "cfgFile": "tlbDigiTI12Calo.json",
+     "runtype": "Test",
+     "maxRunTime": 300,
+     "maxEvents": 10000,
+     "postCommand": null,
+     "endcomment": "Sequencer stop"
+ },
+ "template": {
+     "vars": { "voltage": "(1000,1601,50)"},
+     "step": {
+	 "startcomment": "Calo HV Scan, nominal voltage - {voltage}",
+	 "preCommand": "../HVControl/setCaloVoltage.py {voltage}"
+     }
+ }
+}

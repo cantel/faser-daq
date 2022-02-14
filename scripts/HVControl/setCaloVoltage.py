@@ -10,26 +10,23 @@ import subprocess
 import sys
 import time
 
-voltages={4:1610,
-          5:1495,
-          6:1510,
-          7:1460,
-          8:1655,
-          9:1525,
-          10:1575,
-          11:1500,
-          12:1515,
-          13:1495
-}
 
-offset=int(sys.argv[1])
+#gain is wrt to above voltages
 
-if offset<0 or offset>600:
-    print("ERROR in offset",offset)
+if len(sys.argv)!=2:
+    print("Usage: setCaloVoltage.py <voltage>")
     sys.exit(1)
 
-for ch in voltages:
-    volt=voltages[ch]-offset
+volt=float(sys.argv[1])
+
+if volt<100 or volt>1600:
+    print(f"{volt} V is out of range")
+    sys.exit(1)
+
+newTargets={}
+
+for ch in range(4):
+    newTargets[ch]=volt
     rc=os.system(f"snmpset -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-00 outputVoltage.u9{ch:02d} F {volt}")
     if rc:
         print("ERROR in channel ",ch)
@@ -39,8 +36,8 @@ time.sleep(5)
 redo=True
 while redo:
     redo=False
-    for ch in voltages:
-        volt=voltages[ch]-offset
+    for ch in range(4):
+        volt=newTargets[ch]
         rc,output=subprocess.getstatusoutput(f"snmpget -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-00 outputMeasurementSenseVoltage.u9{ch:02d}")
         print(output)
         if rc:
@@ -52,4 +49,4 @@ while redo:
             redo=True
             time.sleep(1)
 
-time.sleep(30) # give time to stabilize a bit
+

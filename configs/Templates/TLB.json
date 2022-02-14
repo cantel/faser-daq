@@ -302,6 +302,8 @@
             "SamplingPhase": [false, false, false, false, false, false, false, false],
             "InputDelay": [0, 0, 0, 0, 0, 0, 0, 0],
             "RandomTriggerRate": 7,
+            "Derandomize": false,
+            "RateLimiter": 0,
             "Prescale": [0, 0, 1, 0, 1, 0],
             "TrackerDelay": 102,
             "DigitizerDelay": 0,
@@ -315,7 +317,6 @@
             "Busy1Disable": true,
             "EnableTriggerData": true,
             "EnableMonitoringData": true,
-            "Derandomize": false,
             "ReadoutFIFOReset": true,
             "LUTConfig": { "Trig0": "Tin0",
                            "Trig1": "Tin1",
@@ -324,7 +325,7 @@
             },
             "SCIP" : "faser-daq-002",
             "DAQIP" : "faser-daq-002",
-            "BoardID" : 10
+            "BoardID" : 15
         },
         "connections": {"$ref":"#TLBConnections" }
     }],

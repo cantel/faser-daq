@@ -505,7 +505,7 @@
 		"name": "digitizer01",
 		"type": "DigitizerReceiver",
 		"settings": {
-            "host_pc": "faser-vme-controller-00",
+            "host_pc": "faser-vme-controller-01",
             "board_type": "v0",
             "digitizer_hw_address": "0x32000000",
 	    "useBOBR": false,

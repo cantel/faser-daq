@@ -95,6 +95,14 @@
                   "minimum"       : 0,
                   "maximum"       : 7
               },
+              "RateLimiter": {
+                  "type"          : "integer",
+                  "title"         : "Rate limiter rate limit",
+		  "description"     : "Sets the maximum rate allowed by the rate limiter. A setting of 0 sets the lowest limit (2.2kHz); setting 3 sets the highest allowed limit (5.6 kHz) - with setting 4 (11.2kHz) and 5 (NO limit) possible but disallowed to protect the SCT modules. ",
+                  "default"       : 0,
+                  "minimum"       : 0,
+                  "maximum"       : 3
+              },
               "Prescale": {
                 "type"            : "array",
                 "title"           : "Prescales",

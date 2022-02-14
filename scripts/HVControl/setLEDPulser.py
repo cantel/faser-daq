@@ -37,7 +37,7 @@ def main(args):
         print("Could not convert arguments")
         usage()
     
-    if freq<0 or freq>200:
+    if freq<0 or freq>20000:
         print("invalid frequency range")
         sys.exit(1)
     

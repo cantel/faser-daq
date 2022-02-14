@@ -1,6 +1,6 @@
 {"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 30,
- "initCommand": "../HVControl/setLEDPulser.py 100 650 0",
+ "initCommand": "../HVControl/setLEDPulser.py 100 610 0",
  "finalizeCommand": "../HVControl/setLEDPulser.py 100 0 0",
  "defaults": {
      "cfgFile": "tlbDigiTI12LED.json",

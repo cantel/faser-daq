@@ -15,7 +15,7 @@ def convert_to_plotly(histobj):
     yaxis = dict(title=dict(text=histobj["ylabel"]))
 
     layout = dict(
-        width= 490,
+        width= 485,
         height= 350,
         autosize=False,
         uirevision=True,
@@ -79,6 +79,5 @@ def convert_to_plotly(histobj):
 
             xarray = [xmin + step * xbin for xbin in range(xbins)]
             yarray = histobj["yvalues"]
-
             data = [dict(x=xarray, y=yarray, type="bar")]
     return data, layout, timestamp

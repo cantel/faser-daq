@@ -9,34 +9,34 @@
 import json
 from flask.helpers import flash
 import redis
-from flask import render_template
-from flask import url_for, redirect, request, Response, jsonify
-from flaskDashboard import app
+from flask import render_template, request, Response, jsonify
 import numpy as np
 import atexit
 import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
-from flaskDashboard import interfacePlotly
-from flaskDashboard import redis_interface
-from flaskDashboard import checker
+from flaskDashboard import app, interfacePlotly, redis_interface, checker, config_manager
 from time import sleep
 
+
+cfg = config_manager.loadConfig("config.json")
 ## Redis database where the last histograms are published.
 r = redis.Redis(
-    host="localhost", port=6379, db=1, charset="utf-8", decode_responses=True
+    host=cfg['redis']['host'], port=cfg['redis']['port'], db=cfg['redis']['pub_histo_db'], charset="utf-8", decode_responses=True
 )
 ## Redis database where the current run informations are stored 
 r2 = redis.Redis(
-    host="localhost", port=6379, db=2, charset="utf-8", decode_responses=True
+    host=cfg["redis"]["host"], port=cfg["redis"]["port"], db=cfg["redis"]["run_info_db"], charset="utf-8", decode_responses=True
+
 )
 ## Redis database where the tags are stored.
 r5 = redis.Redis(
-    host="localhost", port=6379, db=5, charset="utf-8", decode_responses=True
+     host=cfg["redis"]["host"], port=cfg["redis"]["port"], db=cfg["redis"]["tags_db"], charset="utf-8", decode_responses=True
+
 )
 
 ## Redis database where the previous histograms are stored.
 r7 = redis.Redis(
-    host="localhost", port=6379, db=7, charset="utf-8", decode_responses=True
+    host=cfg["redis"]["host"], port=cfg["redis"]["port"], db=cfg["redis"]["old_histo_db"], charset="utf-8", decode_responses=True
 )
 
 def histograms_save():
@@ -83,8 +83,8 @@ def old_histogram_save():
 
 # setting up the background jobs for storing old histograms
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=histograms_save, trigger="interval", seconds=60)
-scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=3600)
+scheduler.add_job(func=histograms_save, trigger="interval", seconds=cfg["general"]['short_save_histo_rate'])
+scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=cfg['general']['long_save_histo_rate'])
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
@@ -153,8 +153,6 @@ def getModules():
 def home():
     """! Renders the home.html """
     storeDefaultTagsAndIDs()
-    # return render_template("home.html")
-    # return render_template("sse_home.html")
     return render_template("mix_home.html")
 
 
@@ -162,8 +160,6 @@ def home():
 def oldHome():
     """! Renders the home.html """
     storeDefaultTagsAndIDs()
-    # return render_template("home.html")
-    # return render_template("sse_home.html")
     return render_template("home.html")
 
 
@@ -186,7 +182,7 @@ def stream_histograms(ids_string):
                     checker_obj.check(histname, layout, data)
                 packet[ID] = {"timestamp":float(timestamp), "fig":fig, "ID":ID, "tags":tags, "runNumber" : runNumber, "flags" : checker_obj.flags}
             yield f"data:{json.dumps(packet)}\n\n"
-            sleep(5)
+            sleep(cfg['general']['update_refresh_rate'])
     return Response(get_histograms(), mimetype="text/event-stream")
 
 @app.route("/getModulesAndTags", methods=["GET"])

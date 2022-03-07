@@ -5,7 +5,7 @@ Vue.component("histogram-card", {
     props: ["id", "data"],
     data: function () {
         return {
-            c_updating_rate: 5000, // updating every 5 seconds
+            c_updating_rate: 5000, // updating every 5 seconds TODO: to be removed if new version work.
             c_timestamp: null,
             c_figure: null,
             c_isLoading: false,
@@ -46,15 +46,16 @@ Vue.component("histogram-card", {
                 if (uoverflow) {
                     outline_color = uoverflow.color;
                 }
-                else if (count_error) {
-                    outline_color = count_error.color
+                if (count_error) {
+                    border_color = count_error.color
                 }
-                // border_color  = uoverflow ? uoverflow.color : "white"
-                // outline_color = count_error ? count_error.color : "white"
+                border_color  = uoverflow ? uoverflow.color : "white"
+                outline_color = count_error ? count_error.color : "white"
+
             }
             return {
-                // border: `4px solid ${border_color}`,
-                outline: `6px solid ${outline_color}`,
+                border: `6px solid ${border_color}`,
+                outline: `4px solid ${outline_color}`,
 
             }
 

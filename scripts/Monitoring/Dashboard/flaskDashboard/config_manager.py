@@ -1,3 +1,6 @@
+#  Copyright (C) 2019-2022 CERN for the benefit of the FASER collaboration
+#
+
 import json
 import sys
 

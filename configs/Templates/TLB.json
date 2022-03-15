@@ -40,9 +40,9 @@
                 "Derandomize": false,
                 "ReadoutFIFOReset": true,
                 "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                               "Trig1": "FirstVetoLayer|SecondVetoLayer|PreshowerLayer",
+                               "Trig1": "FaserNuVetoLayer|SecondVetoLayer|PreshowerLayer",
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
-                               "Trig3": "(FirstVetoLayer|SecondVetoLayer)&PreshowerLayer"            
+                               "Trig3": "(FaserNuVetoLayer|SecondVetoLayer)&PreshowerLayer"            
                 },     
                 "SCIP" : "faser-daq-010-direct",
                 "DAQIP" : "faser-daq-010-direct",
@@ -80,7 +80,7 @@
                 "Derandomize": false,
                 "ReadoutFIFOReset": true,
                 "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
+                               "Trig1": "FaserNuVetoLayer|SecondVetoLayer",
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },     
@@ -120,7 +120,7 @@
                 "Derandomize": false,
                 "ReadoutFIFOReset": true,
                 "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
+                               "Trig1": "FaserNuVetoLayer|SecondVetoLayer",
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"
                 },                  
@@ -160,7 +160,7 @@
                 "Derandomize": false,
                 "ReadoutFIFOReset": true,
                 "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
+                               "Trig1": "FaserNuVetoLayer|SecondVetoLayer",
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },                  
@@ -200,7 +200,7 @@
                 "Derandomize": false,
                 "ReadoutFIFOReset": true,
                 "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
+                               "Trig1": "FaserNuVetoLayer|SecondVetoLayer",
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },                  
@@ -238,7 +238,7 @@
                 "Derandomize": false,
                 "ReadoutFIFOReset": true,
                 "LUTConfig": { "Trig0": "CalorimeterBottom|CalorimeterTop",
-                               "Trig1": "FirstVetoLayer|SecondVetoLayer",
+                               "Trig1": "FaserNuVetoLayer|SecondVetoLayer",
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },                  

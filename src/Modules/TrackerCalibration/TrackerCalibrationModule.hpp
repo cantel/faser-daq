@@ -8,8 +8,6 @@
 #include "TrackerReadout/TRBAccess.h"
 #include "TrackerCalibration/Module.h"
 #include "TrackerCalibration/Chip.h"
-#include "TrackerCalibration/CalibManager.h"
-#include "TrackerCalibration/RunManager.h"
 #include "TrackerCalibration/ITest.h"
 
 #include <string>
@@ -30,21 +28,6 @@ class TrackerCalibrationModule : public FaserProcess {
   void runner() noexcept;
 
  private:
-  /** \brief Read json input file.  
-     *  
-     * This function parses a json input file and populates the list of
-     * Module objects to be processed afterwards. The json input file    
-     * can be either a single module config file, or a tracking plane 
-     * config file containing a list of module configs (with relative or absolute paths).
-     */
-  int readJson();
-
-    /** write final json configuration file (after all tests have been run). */
-  int writeJson(std::string outDir);
-
-  int finalizeSequence();
-
- private:
   // tcalib parameters
   
   std::string m_configLocation;
@@ -57,7 +40,6 @@ class TrackerCalibrationModule : public FaserProcess {
   bool m_calLoop{false};
   bool m_saveDaq{false};
   bool m_noTrim{false};
-  bool m_noRunNumber{false};
   bool m_usb{false};
   std::string m_ip{"10.11.65.8"};
 
@@ -67,7 +49,6 @@ class TrackerCalibrationModule : public FaserProcess {
   FASER::TRBAccess *m_trb{nullptr};
   std::vector<TrackerCalib::Module*> m_modList; // vector of modules
   std::vector<TrackerCalib::ITest*> m_testList; // vector of tests
-  TrackerCalib::RunManager *m_rman;
   unsigned m_testcnt{1};
   TrackerCalib::ITest *m_t;
 

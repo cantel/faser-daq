@@ -1,0 +1,151 @@
+{
+  "version": 11,
+  "group": "daq",
+  "components": [
+    {
+      "name": "readoutinterface01",
+      "host": "localhost",
+      "port": 5555,
+      "modules":[{
+        "name": "readoutinterface01",
+        "type": "ReadoutInterface",
+        "settings": {
+          "board_id": 0,
+          "delay_us": 100000,
+          "payload": {"min": 200, "max": 1500}
+        },
+        "connections": {
+          "senders": [
+            {
+              "type": "ZMQPubSub",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8101,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            }
+          ]
+        }
+      }],
+      "loglevel": {"core": "WARNING", "module": "INFO", "connection": "WARNING"},
+      "metrics_settings": {}
+    },
+    {
+      "name": "readoutinterface02",
+      "host": "localhost",
+      "port": 5556,
+      "modules":[{
+        "name": "readoutinterface02",
+        "type": "ReadoutInterface",
+        "settings": {
+          "board_id": 1,
+          "delay_us": 100000,
+          "payload": {"min": 200, "max": 1500}
+        },
+        "connections": {
+          "senders": [
+            {
+              "type": "ZMQPair",
+              "chid": 0,
+              "transport": "tcp",
+              "host": "*",
+              "port": 8102,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            }
+          ]
+        }
+      }],
+      "loglevel": {"core": "WARNING", "module": "INFO", "connection": "WARNING"},
+      "metrics_settings": {}
+    },
+    {
+      "name": "eventbuilder01",
+      "host": "localhost",
+      "port": 5560,
+      "modules":[{
+        "name": "eventbuilder01",
+        "type": "EventBuilder",
+        "settings": {},
+        "connections": {
+          "receivers": [
+            {
+              "type": "ZMQPubSub",
+              "chid": 0,
+              "connections":[
+                {
+                  "transport": "tcp",
+                  "host": "localhost",
+                  "port": 8101
+                }
+              ],
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            },
+            {
+              "type": "ZMQPair",
+              "chid": 1,
+              "transport": "tcp",
+              "host": "localhost",
+              "port": 8102,
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            }
+          ],
+          "senders": [
+            {
+              "type": "ZMQPair",
+              "chid": 0,
+              "transport": "ipc",
+              "path": "/tmp/feed3",
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            }
+          ]
+        }
+      }],
+      "loglevel": {"core": "WARNING", "module": "INFO", "connection": "WARNING"},
+      "metrics_settings": {}
+    },
+    {
+      "name": "filewriter01",
+      "host": "localhost",
+      "port": 5561,
+      "modules":[{
+        "name": "filewriter01",
+        "type": "FileWriter",
+        "settings": {
+          "filename_pattern": "/tmp/test-%D.%r.%c.%n.bin"
+        },
+        "connections": {
+          "receivers": [
+            {
+              "type": "ZMQPair",
+              "chid": 0,
+              "transport": "ipc",
+              "path": "/tmp/feed3",
+              "queue":{
+                "type":"FollyProducerConsumer",
+                "queue_size":1000
+              }
+            }
+          ]
+        }
+      }],
+      "loglevel": {"core": "WARNING", "module": "INFO", "connection": "WARNING"},
+      "metrics_settings": {}
+    }
+  ]
+}
+

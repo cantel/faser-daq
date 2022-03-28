@@ -1,0 +1,48 @@
+{
+  "fsm": {
+    "not_added": [
+      "add"
+    ],
+    "added": [
+      "boot",
+      "remove"
+    ],
+    "shutting": [],
+    "booted": [
+      "configure",
+      "shutdown",
+      "remove"
+    ],
+    "configuring": [],
+    "unconfiguring": [],
+    "ready": [
+      "start",
+      "unconfigure",
+      "shutdown"
+    ],
+    "starting": [],
+    "stopping": [],
+    "running": [
+      "stop",
+      "pause",
+      "shutdown"
+    ],
+    "paused": [
+      "resume"
+    ],
+    "pausing": [],
+    "resuming": []
+  },
+  "order": {
+    "start": [
+      "FW",
+      "EB",
+      "RI"
+    ],
+    "stop": [
+      "RI",
+      "EB",
+      "FW"
+    ]
+  }
+}

@@ -1,0 +1,5 @@
+global-exclude *.pyc
+graft daqControl/static
+graft daqControl/templates
+include daqControl/keycloak.json
+include daqControl/serverconfiguration.json

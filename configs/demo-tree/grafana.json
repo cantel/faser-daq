@@ -1,0 +1,18 @@
+{
+  "readoutinterface01": {
+	"grafana":["link1","link2","link3"],
+	"kibana":"kibalink1"
+	},
+  "readoutinterface02":{
+	"grafana":["link1","link2","link3"],
+	"kibana":"kibalink1"
+	},
+  "eventbuilder01":{ 
+	"grafana":["link1","link2"],
+	"kibana":"kibalink1"
+	},
+  "filewriter01":{
+	"grafana":["link1","link2"],
+	"kibana":"kibalink1"
+	}
+}

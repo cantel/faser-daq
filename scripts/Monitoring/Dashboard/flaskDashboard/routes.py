@@ -9,14 +9,17 @@
 import json
 from flask.helpers import flash
 import redis
-from flask import render_template, request, Response, jsonify
+from flask import render_template, request, Response, jsonify, send_file
 import numpy as np
 import atexit
 import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
 from flaskDashboard import app, interfacePlotly, redis_interface, checker, config_manager
 from time import sleep
-
+from datetime import datetime
+from concurrent.futures import as_completed, ProcessPoolExecutor
+import zipfile
+from io import BytesIO
 
 cfg = config_manager.loadConfig("config.json")
 ## Redis database where the last histograms are published.
@@ -208,8 +211,14 @@ def IDs_from_tags():
     if len(tags) == 0:
         return jsonify([])
     else:
-        selected_tags = [f"tag:{s}" for s in tags]
-        IDs = list(r5.sunion(selected_tags))
+        t = []
+        for tag in tags:
+            if "*" in tag :
+                temp_t = r5.keys(f"tag:{tag}")
+                t = [*t,*temp_t]
+            else:
+                t.append(f"tag:{tag}")
+        IDs = list(r5.sunion(t)) if t else [] 
         keys = r5.keys("id:*")
         keys = [ key[3:] for key in keys ]
         # we take the intersection of the two sets
@@ -357,9 +366,40 @@ def compare_histograms():
         diff_histo["figure"]["data"][0]["z"] = np.abs(np.array(hist1["figure"]["data"][0]["z"]) - np.array(hist2["figure"]["data"][0]["z"])).tolist()
     return jsonify(diff_histo)
 
-
+@app.route("/download_plots", methods=["POST"])
+def download_plots():
+    data = request.get_json()
+    IDs = data["IDs"] 
+    # runNumber = r2.get("runNumber")
+    listOfFigs={}
+    for ID in IDs: 
+        source, histname = ID.split("-")
+        histobj = r.hget(source, f"h_{histname}")
+        if histobj is not None:
+            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+            t = datetime.fromtimestamp(timestamp).strftime('%d%m%y_%H%M%S')
+            filename = f"{ID}_{t}"
+            fig = interfacePlotly.plot_js_to_plot_py(ID, data,layout)
+            listOfFigs[filename]=fig
+    binary_data = []
+    with ProcessPoolExecutor() as executor:
+        results = [executor.submit(figToPng,filename, fig ) for filename, fig in listOfFigs.items()]
+        for f in as_completed(results):
+            binary_data.append(f.result())
+    # binary_data = [(filename,fig.to_image(format="png")) for filename, fig in listOfFigs.items()]
+    mem_zip = BytesIO() 
+    with zipfile.ZipFile(mem_zip, mode="w",compression=zipfile.ZIP_DEFLATED) as zf:
+        for filename, binary in binary_data:
+            zf.writestr(f"{filename}.png", binary)
+    mem_zip.seek(0)
+    return send_file(mem_zip, attachment_filename='plots.zip', as_attachment=True, mimetype='application/zip')
 
 ## functions
+
+def figToPng(filename,fig):
+    bts = fig.to_image(format="png")
+    return (filename, bts)
+
 
 def get_tags_by_ID(ID):
     """! Function that gets all tags without the default ones associated with an histogtram ID 

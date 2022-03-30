@@ -152,7 +152,7 @@ Vue.component("histogram-card", {
     template: //html
         `
     <span>
-        <v-card width="500" class="mx-auto mt-5" :style="flags_style_object">
+        <v-card width="500" tile class="mx-auto mt-5" :style="flags_style_object">
             <v-card-title class="pb-1 pt-2">
                 <span class="hist_title"> [[ id ]]</span>
                 <v-spacer> </v-spacer>

@@ -13,9 +13,12 @@ var app = new Vue({
         c_safeMode: true,
         c_redis_infos: null,
         c_data: {},
-        c_eventSource: null
+        c_eventSource: null,
+        c_busy:false,
+
     },
     delimiters: ["[[", "]]"],
+
     methods: {
         getIDs(selected_tags) {
             this.c_tags = selected_tags;
@@ -67,6 +70,23 @@ var app = new Vue({
                 .then(response => {
                     window.location.reload(true)
                 })
+        },
+        download_plots(){
+            this.c_busy = true;
+            axios.post('/download_plots', {
+                IDs: this.c_ids,
+            }, {responseType: 'blob'}).then(response => {
+                var fileURL = window.URL.createObjectURL(new Blob([response.data]));
+                var fURL = document.createElement('a');
+
+                fURL.href = fileURL;
+                fURL.setAttribute('download', 'plots.zip');
+                document.body.appendChild(fURL);
+
+                fURL.click();
+                this.c_busy = false;
+            })
         }
+
     },
 });

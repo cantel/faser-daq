@@ -4,6 +4,7 @@
 
 import json
 import numpy as np
+import plotly.graph_objects as go
 
 
 def convert_to_plotly(histobj):
@@ -81,3 +82,33 @@ def convert_to_plotly(histobj):
             yarray = histobj["yvalues"]
             data = [dict(x=xarray, y=yarray, type="bar")]
     return data, layout, timestamp
+
+
+def plot_js_to_plot_py(ID, data,layout):
+    name = ID.split("-")[1]
+    trace = None
+    if data[0]["type"] == "bar":
+        trace = go.Bar(
+            data[0]
+            )
+    elif data[0]["type"] == "heatmap":
+        trace = go.Heatmap(
+            data[0]
+        ) 
+    fig = go.Figure(data=[trace],
+                layout=go.Layout(
+                title=dict(
+                    text=name,
+                    xanchor="center",
+                    x=0.5),
+                titlefont_size=20,
+                showlegend=False,
+                margin=dict(l=60, r=40, b=60, t=50, pad=4),
+                xaxis=layout["xaxis"],
+                yaxis=layout["yaxis"],
+                height=layout["height"],
+                width=layout["width"],
+                autosize=False,
+                )
+        )
+    return fig

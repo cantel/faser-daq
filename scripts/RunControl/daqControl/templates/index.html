@@ -2,47 +2,148 @@
 <html lang="en">
 
 <head>
-    <meta charset="utf-8">
+  <meta charset="utf-8" />
 
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script> -->
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
 
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script> -->
+  <script defer src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js" integrity="sha512-iqRVtNB+t9O+epcgUTIPF+nklypcR23H1yR1NFM9kffn6/iBhZ9bTB6oKLaGMv8JE9UgjcwfBFg/eHC/VMws+g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer></script>
+  <script src="{{ url_for('static', filename = 'js/main.js') }}" defer></script>
+  <!-- <script src="https://cdn.plot.ly/plotly-cartesian-2.9.0.min.js" async></script> -->
+  <!-- <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet"> -->
 
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <!-- <script src="https://cdn.plot.ly/plotly-cartesian-2.9.0.min.js" async></script> -->
-    <!-- <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet"> -->
-
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
-    <title>Run Control</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+  <title>Run Control</title>
+  <style>
+    .treeview {
+      font-size: small;
+    }
+    .logScrollableDiv{
+      height: 150px;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 
 <body>
-    <div id="app">
-        <v-app>
-            <v-navigation-drawer v-model="drawer" :permanent=false app>
-                Tree
-            </v-navigation-drawer>
+  <div id="app">
+    <v-app dark>
+      <v-navigation-drawer v-model="drawer" :permanent="false" app width="300">
+        <h3 class="my-4 text-center"> Tree View </h3>
+        <v-treeview open-all class="treeview" @update:active="getActiveNodeInfo" v-if="c_loadedConfigName" item-key="name"
+           activatable selection-type="independent" dense :items="[c_treeJson]">
+          <template v-slot:prepend="{ item,open }">
+            <v-icon :color="stateColors[getNodeState(item.name)]">
+              mdi-circle
+            </v-icon>
+          </template>
+          <template v-slot:label="{ item, selected, active }">
+            <div style="display:flex;align-items: center;">
+                [[ item.name ]]
+            <v-simple-checkbox :value="nodeStates[item.name][2]" @click="processIncludeExclude(item.name,nodeStates[item.name][2])" class="my-auto"  hide-details :ripple="false">
+            </v-simple-checkbox>
+          </div>
+          </template>
+        </v-treeview>
+      </v-navigation-drawer>
 
-            <v-app-bar app>
-                <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+      <v-app-bar app>
+        <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+        <v-toolbar-title>Faser RunControl</v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-btn @click="testSocket" icon text small class="mx-1">
+          <v-icon> mdi-account</v-icon>
+        </v-btn>
+        Logged as : {{ usr }}
+      </v-app-bar>
 
-                <v-toolbar-title>Faser RunControl</v-toolbar-title>
-            </v-app-bar>
+      <v-main class="indigo lighten-5">
 
-            <v-main class="indigo lighten-5">
-                <config-panel> </config-panel>
-            </v-main>
-        </v-app>
-    </div>
 
-    <script src="{{ url_for('static', filename = 'js/jsonViewer.js') }}"> </script>
-    <script src="{{ url_for('static', filename = 'js/configPanel.js') }}"> </script>
-    <script src="{{ url_for('static', filename = 'js/main.js') }}"> </script>
+        <v-card v-if="activeNode.length != 0" tile elevation="1" class="mx-4 my-4">
+          <v-card-title> Selected node: [[ activeNode[0] ]]</v-card-title>
+          <v-card-text>
+            <v-row class="text-center">
+              <div class="mx-2 my-1">Node state: <v-chip small :color="stateColors[getNodeState(activeNode[0])]"> [[
+                  getNodeState(activeNode[0]) ]]</v-chip>
+              </div>
+              <v-btn class="mx-2 my-1" depressed color="primary" small> log </v-btn>
+              <v-btn class="mx-2 my-1" depressed color="primary" small> info </v-btn>
+            </v-row>
+          </v-card-text>
+        </v-card>
+
+
+        <v-card tile elevation="1" class="mx-4 my-4">
+          <v-card-title> CONFIGURATION </v-card-title>
+          <v-card-text>
+            <v-row class="text-center">
+              <v-menu offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn v-bind="attrs" :loading="c_configLoading" v-on="on" class="mx-4 my-2" depressed color="primary"
+                    small>
+                    load
+                  </v-btn>
+                </template>
+                <v-list dense>
+                  <v-list-item-group>
+                    <v-list-item v-for="(item, index) in c_configDirs" @click="loadConfig(item)" :key="index">
+                      <v-list-item-title> [[item]] </v-list-item-title>
+                    </v-list-item>
+                  </v-list-item-group>
+                </v-list>
+              </v-menu>
+              <div class="mx-10 my-auto">Loaded config : [[c_loadedConfigName]]</div>
+            </v-row>
+          </v-card-text>
+        </v-card>
+        <v-card tile elevation="1" class="mx-4 my-4">
+          <v-card-title> CONTROL </v-card-title>
+          <v-card-text>
+            <v-row class="text-center mx-1 my-1">
+              <v-btn class="my-1 mx-1" depressed color="success"> INITIALISE </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> START </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="yellow darken-2"> STOP </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="error"> SHUTDOWN </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="yellow darken-2"> PAUSE </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> ECR </v-btn>
+            </v-row>
+            <v-row class="text-center mx-1 my-1">
+              <v-btn @click="add" class="my-1 mx-1" depressed color="success"> add </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> boot </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> configure </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> start </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> stop </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> unconfigure </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> shutdown </v-btn>
+              <v-btn class="my-1 mx-1" depressed color="success"> remove </v-btn>
+            </v-row>
+
+          </v-card-text>
+        </v-card>
+        <v-card tile elevation="1" class="mx-4 my-4">
+          <v-card-title> MONITORING </v-card-title>
+          <v-card-text>
+
+          </v-card-text>
+        </v-card>
+
+        <v-card tile elevation="1" class="mx-4 my-4">
+          <v-card-title> LOG </v-card-title>
+          <v-card-text class="logScrollableDiv">
+            <div v-for="(line,index) in log.slice().reverse()" :key="index" > [[line]]</div>
+          </v-card-text>
+        </v-card>
+      </v-main>
+    </v-app>
+  </div>
 </body>
 
 </html>

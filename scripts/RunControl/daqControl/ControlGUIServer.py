@@ -283,7 +283,7 @@ def test():
 def log():
     with open(serverConfigJson['serverlog_location_name']) as f:
         ret = f.readlines()
-    return jsonify(ret)
+    return jsonify(ret[-20:])
 
 @app.route('/serverconfig')
 def serverconfig():
@@ -318,7 +318,7 @@ def ajaxParse():
         r = executeComm(node, command)
     except Exception as e:
         logAndEmit(configName,'ERROR', str(e))
-    time.sleep(TIMEOUT)
+    # time.sleep(TIMEOUT)
     return jsonify(r)
     
 @app.route("/logout")
@@ -344,10 +344,9 @@ def fsmrulesJson():
     try:
         with open(os.path.join(session['configPath'], session['configDict']['fsm_rules'])) as f:
                 fsmRules = json.load(f)
-        f.close()
     except:
         return "error"
-    return fsmRules['fsm']
+    return jsonify(fsmRules['fsm'])
 
 @app.route('/grafanaJson', methods=['GET', 'POST'])
 def grafanaJson():

@@ -1,6 +1,6 @@
 {
   "version": 11,
-  "group": "daq",
+  "group": "faser",
   "components": [
     {
       "name": "readoutinterface01",

@@ -46,7 +46,7 @@
           </template>
           <template v-slot:label="{ item, selected, active }">
             <div style="display:flex;align-items: center;">
-                [[ item.name ]]
+                <span :class="{'red lighten-3': nodeStates[item.name][1]}">[[ item.name ]] </span>
             <v-simple-checkbox :value="nodeStates[item.name][2]" @click="processIncludeExclude(item.name,nodeStates[item.name][2])" class="my-auto"  hide-details :ripple="false">
             </v-simple-checkbox>
           </div>
@@ -58,7 +58,7 @@
         <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
         <v-toolbar-title>Faser RunControl</v-toolbar-title>
         <v-spacer></v-spacer>
-        <v-btn @click="testSocket" icon text small class="mx-1">
+        <v-btn icon text small class="mx-1">
           <v-icon> mdi-account</v-icon>
         </v-btn>
         Logged as : {{ usr }}
@@ -107,7 +107,7 @@
         <v-card tile elevation="1" class="mx-4 my-4">
           <v-card-title> CONTROL </v-card-title>
           <v-card-text>
-            <v-row class="text-center mx-1 my-1">
+            <v-row class="text-center mx-1 my-1" style="display: none;">
               <v-btn class="my-1 mx-1" depressed color="success"> INITIALISE </v-btn>
               <v-btn class="my-1 mx-1" depressed color="success"> START </v-btn>
               <v-btn class="my-1 mx-1" depressed color="yellow darken-2"> STOP </v-btn>
@@ -116,14 +116,14 @@
               <v-btn class="my-1 mx-1" depressed color="success"> ECR </v-btn>
             </v-row>
             <v-row class="text-center mx-1 my-1">
-              <v-btn @click="add" class="my-1 mx-1" depressed color="success"> add </v-btn>
-              <v-btn class="my-1 mx-1" depressed color="success"> boot </v-btn>
-              <v-btn class="my-1 mx-1" depressed color="success"> configure </v-btn>
-              <v-btn class="my-1 mx-1" depressed color="success"> start </v-btn>
-              <v-btn class="my-1 mx-1" depressed color="success"> stop </v-btn>
-              <v-btn class="my-1 mx-1" depressed color="success"> unconfigure </v-btn>
-              <v-btn class="my-1 mx-1" depressed color="success"> shutdown </v-btn>
-              <v-btn class="my-1 mx-1" depressed color="success"> remove </v-btn>
+              <v-btn :loading="processing['add']" @click="executeCommand('add')" :disabled="!fsmRules[getNodeState(activeNode[0])].includes('add')" class="my-1 mx-1" depressed color="success"> add </v-btn>
+              <v-btn :loading="processing['boot']" @click="executeCommand('boot')" class="my-1 mx-1" depressed :disabled="!fsmRules[getNodeState(activeNode[0])].includes('boot')"  color="success"> boot </v-btn>
+              <v-btn :loading="processing['configure']" @click="executeCommand('configure')" class="my-1 mx-1" depressed :disabled="!fsmRules[getNodeState(activeNode[0])].includes('configure')"  color="success"> configure </v-btn>
+              <v-btn :loading="processing['start']" @click="executeCommand('start')" class="my-1 mx-1" depressed :disabled="!fsmRules[getNodeState(activeNode[0])].includes('start')"  color="success"> start </v-btn>
+              <v-btn :loading="processing['stop']" @click="executeCommand('stop')" class="my-1 mx-1" depressed :disabled="!fsmRules[getNodeState(activeNode[0])].includes('stop')"  color="yellow darken-2"> stop </v-btn>
+              <v-btn :loading="processing['unconfigure']" @click="executeCommand('unconfigure')" class="my-1 mx-1" depressed :disabled="!fsmRules[getNodeState(activeNode[0])].includes('unconfigure')"  color="success"> unconfigure </v-btn>
+              <v-btn :loading="processing['shutdown']" @click="executeCommand('shutdown')" class="my-1 mx-1" depressed :disabled="!fsmRules[getNodeState(activeNode[0])].includes('shutdown')"  color="success"> shutdown </v-btn>
+              <v-btn :loading="processing['remove']" @click="executeCommand('remove')" class="my-1 mx-1" depressed :disabled="!fsmRules[getNodeState(activeNode[0])].includes('remove')"  color="success"> remove </v-btn>
             </v-row>
 
           </v-card-text>

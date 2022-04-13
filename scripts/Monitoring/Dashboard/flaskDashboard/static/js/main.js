@@ -74,18 +74,12 @@ var app = new Vue({
     },
     download_plots() {
       this.c_busy = true;
-      let ids = [];
-      for (let i = 0; i < this.c_ids.length; i++) {
-        const element = this.c_ids[i];
-        for (let j = 0; j < element.length; j++) {
-          ids.push(element[j]);
-        }
-      }
+    
       axios
         .post(
           "/download_plots",
           {
-            IDs: ids,
+            IDs: this.c_ids[this.c_currentPage-1],
           },
           { responseType: "blob" }
         )

@@ -21,6 +21,18 @@ var app = new Vue({
       error: "red",
     },
     log: [],
+    fsmRules : {"default":[]},
+    processing : {
+      "add": false,
+      "boot": false,
+      "configure":false,
+      "start" : false,
+      "stop" : false,
+      "unconfigure" :  false,
+      "shutdown": false,
+      "remove": false
+    }
+    
   },
   delimiters: ["[[", "]]"],
   mounted() {
@@ -31,15 +43,29 @@ var app = new Vue({
     });
   },
   methods: {
-    excecuteCommmand(command) {
+    getFSM(){
+      axios.get("fsmrulesJson").then((response)=>{
+        this.fsmRules = response.data
+        this.fsmRules["default"] = []
+        
+      })
+    },
+    executeCommand(command) {
+      if (this.activeNode.length != 0){
+        this.processing[command] = true;
       axios
         .post("/ajaxParse", {
-          node: "Root",
-          command: "exclude",
+          node: this.activeNode[0] ,
+          command: command,
         })
         .then((r) => {
-          console.info(node, "changed");
+          console.log("executeCommand: Recieved response");
+          this.processing[command] = false;
         });
+      }
+      else {
+        alert("Choissez d'abord un node")
+      }
     },
     getLog() {
       axios.get("log").then((response) => {
@@ -56,6 +82,7 @@ var app = new Vue({
     },
     loadConfig(config) {
       this.c_configLoading = true;
+      
 
       axios.get("initConfig", { params: { configName: config } }).then((_) => {
         console.log("config loaded");
@@ -65,6 +92,7 @@ var app = new Vue({
           axios.get("statesList").then((response) => {
             this.nodeStates = response.data;
             this.c_loadedConfigName = config;
+            this.getFSM();
             this.c_configLoading = false;
           });
         });
@@ -103,15 +131,7 @@ var app = new Vue({
             console.info(node, "changed");
           });
       }
-    },
-
-    testSocket() {
-      axios
-        .get("testSocket", { params: { configName: this.c_loadedConfigName } })
-        .then((result) => {
-          console.log(result.data);
-        });
-    },
+    }, 
   },
   watch: {
     c_loadedConfigName: {

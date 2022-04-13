@@ -28,6 +28,7 @@ def writeDefaultConfig(path):
         "update_refresh_rate": 5,
         "short_save_histo_rate" : 60,
         "long_save_histo_rate" : 3600,
+        "max_hist_per_page" : 2,
         "influxDB_related_stuff" : None       # TODO
     }
     if path.endswith("/"):

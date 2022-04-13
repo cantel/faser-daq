@@ -11,6 +11,7 @@
     "update_refresh_rate": 5,
     "short_save_histo_rate": 60,
     "long_save_histo_rate": 3600,
-    "influxDB_related_stuff": null
+    "influxDB_related_stuff": null,
+    "max_hist_per_page": 30
   }
 }

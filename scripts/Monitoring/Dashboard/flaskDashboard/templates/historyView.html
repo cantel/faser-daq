@@ -29,7 +29,7 @@
         crossorigin="anonymous"></script>
 
     <!-- Plotly library -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-cartesian-2.9.0.min.js" async></script>
 
     <!-- custom css -->
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
@@ -112,7 +112,7 @@
             el: '#app',
             vuetify: new Vuetify(),
             data: {
-                c_ID: "{{ ID | safe }}",
+                c_ID: "{{ ID | safe }}",
                 c_timestamps: [],
                 c_selected: null,
                 c_selected2: null,

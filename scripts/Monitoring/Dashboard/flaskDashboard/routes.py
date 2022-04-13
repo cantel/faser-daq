@@ -156,13 +156,6 @@ def getModules():
 def home():
     """! Renders the home.html """
     storeDefaultTagsAndIDs()
-    return render_template("mix_home.html")
-
-
-@app.route("/oldhome")
-def oldHome():
-    """! Renders the home.html """
-    storeDefaultTagsAndIDs()
     return render_template("home.html")
 
 
@@ -215,16 +208,39 @@ def IDs_from_tags():
         for tag in tags:
             if "*" in tag :
                 temp_t = r5.keys(f"tag:{tag}")
-                t = [*t,*temp_t]
+                t = t + temp_t
             else:
                 t.append(f"tag:{tag}")
-        IDs = list(r5.sunion(t)) if t else [] 
+        IDs = list(r5.sunion(t)) if t else []
         keys = r5.keys("id:*")
         keys = [ key[3:] for key in keys ]
         # we take the intersection of the two sets
         valid_IDs  = list(set(keys) & set(IDs))
+        valid_IDs.sort()
+        valid_IDs = split_into_pages(valid_IDs, cfg["general"]["max_hist_per_page"])
     return jsonify(valid_IDs)
 
+def split_into_pages(IDs, nb):
+    """
+    IDs : the ids to split into pages
+    nb : number of histogramm per page
+    """ 
+    if len(IDs) > nb : 
+        nbEqualparts= len(IDs)//nb
+        remainingElements = len(IDs)%nb
+        arr = None
+        if remainingElements == 0:
+            arr = np.array_split(IDs,nbEqualparts)
+        else:
+            arr = np.array_split(IDs[:-remainingElements],nbEqualparts)
+        arr = [ list(a) for a in arr]
+        if remainingElements == 0:
+            return arr 
+        arr.append(IDs[-remainingElements:])
+        return arr
+    else : 
+        return [IDs]
+        
 
 @app.route("/histogram_from_ID", methods=["GET"])
 def histogram_from_ID():

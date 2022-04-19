@@ -5,10 +5,8 @@ Vue.component("histogram-card", {
     props: ["id", "data"],
     data: function () {
         return {
-            c_updating_rate: 5000, // updating every 5 seconds TODO: to be removed if new version work.
             c_timestamp: null,
             c_figure: null,
-            c_isLoading: false,
             c_tags: [],
             c_runNumber: null,
             c_flags: [],
@@ -133,11 +131,7 @@ Vue.component("histogram-card", {
             handler: function (newVal, oldVal) {
 
                 if (oldVal) {
-                    // if (newVal.timestamp === oldVal.timestamp) {
-                    //     console.log(`${this.id} n'a pas changé`)
-                    // }
                     if (newVal.timestamp !== oldVal.timestamp) {
-                        // console.log(`${this.id} a changé`)
                         this.c_figure = newVal["fig"];
                         this.c_timestamp = newVal["timestamp"]
                         this.c_tags = newVal["tags"]

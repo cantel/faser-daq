@@ -85,7 +85,6 @@ def convert_to_plotly(histobj):
 
 
 def plot_js_to_plot_py(ID, data,layout):
-    name = ID.split("-")[1]
     trace = None
     if data[0]["type"] == "bar":
         trace = go.Bar(
@@ -98,10 +97,10 @@ def plot_js_to_plot_py(ID, data,layout):
     fig = go.Figure(data=[trace],
                 layout=go.Layout(
                 title=dict(
-                    text=name,
+                    text=ID,
                     xanchor="center",
                     x=0.5),
-                titlefont_size=20,
+                titlefont_size=15,
                 showlegend=False,
                 margin=dict(l=60, r=40, b=60, t=50, pad=4),
                 xaxis=layout["xaxis"],

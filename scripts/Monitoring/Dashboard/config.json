@@ -1,0 +1,17 @@
+{
+  "redis": {
+    "port": 6379,
+    "host": "localhost",
+    "pub_histo_db": 1,
+    "run_info_db": 2,
+    "tags_db": 5,
+    "old_histo_db": 7
+  },
+  "general": {
+    "update_refresh_rate": 5,
+    "short_save_histo_rate": 60,
+    "long_save_histo_rate": 3600,
+    "influxDB_related_stuff": null,
+    "max_hist_per_page": 30
+  }
+}

@@ -4,6 +4,7 @@
 
 import json
 import numpy as np
+import plotly.graph_objects as go
 
 
 def convert_to_plotly(histobj):
@@ -15,7 +16,7 @@ def convert_to_plotly(histobj):
     yaxis = dict(title=dict(text=histobj["ylabel"]))
 
     layout = dict(
-        width= 500,
+        width= 485,
         height= 350,
         autosize=False,
         uirevision=True,
@@ -25,7 +26,10 @@ def convert_to_plotly(histobj):
     )
     data = []
     hist_type = histobj["type"]
+    
+
     if "categories" in hist_type:
+        layout["hist_type"] = "categories"
         xarray = histobj["categories"]
         if "hitpattern" in histobj["name"]:
           xarray = ['b'+str(x) for x in histobj["categories"]] 
@@ -33,6 +37,7 @@ def convert_to_plotly(histobj):
         data = [dict(x=xarray, y=yarray, type="bar")]
 
     elif "2d" in hist_type:
+        layout["hist_type"] = "2d"
         zarray = np.array(histobj["zvalues"])
         xmin = float(histobj["xmin"])
         xmax = float(histobj["xmax"])
@@ -50,16 +55,12 @@ def convert_to_plotly(histobj):
         yarray = [ymin + ybin * ystep for ybin in range(ybins)]
         zmatrix = zarray.reshape(len(yarray), len(xarray))
         zmaxvalue = float(np.max(zarray))
-        #data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(), type="heatmap", colorscale= "Bluered")]
 
-        # Di
-        #data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.2,"rgb(0,0,139)"],[0.4,"rgb(0,0,225)"],[0.6,"rgb(0,128,0)"],[0.8,"rgb(173,255,47)"],[1.0,"rgb(255,215,0)"]])]
-        #data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.2,"rgb(0,0,139)"],[0.4,"rgb(0,0,225)"],[0.6,"rgb(0,129,0)"],[0.8,"rgb(173,255,47)"],[1.0,"rgb(255,0,0)"]])]
-#        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.2,"rgb(0,0,139)"],[0.6,"rgb(149,255,108)"], [1.0,"rgb(255,0,0)"]])]
         data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.05,"rgb(0,0,139)"], [0.3,"rgb(69,119,237)"],[0.6,"rgb(149,255,0)"], [1.0,"rgb(255,0,0)"]])]
     else:
 
         if "_ext" in hist_type:
+            layout["hist_type"] = "_ext"
             xmin = float(histobj["xmin"])
             xmax = float(histobj["xmax"])
             xbins = int(histobj["xbins"])
@@ -69,6 +70,7 @@ def convert_to_plotly(histobj):
             data = [dict(x=xarray, y=yarray, type="bar")]
 
         else:  # histogram with underflow and overflow
+            layout["hist_type"] = "uoflow"
             xmin = float(histobj["xmin"])
             xmax = float(histobj["xmax"])
             xbins = int(histobj["xbins"])
@@ -78,6 +80,34 @@ def convert_to_plotly(histobj):
 
             xarray = [xmin + step * xbin for xbin in range(xbins)]
             yarray = histobj["yvalues"]
-
             data = [dict(x=xarray, y=yarray, type="bar")]
     return data, layout, timestamp
+
+
+def plot_js_to_plot_py(ID, data,layout):
+    trace = None
+    if data[0]["type"] == "bar":
+        trace = go.Bar(
+            data[0]
+            )
+    elif data[0]["type"] == "heatmap":
+        trace = go.Heatmap(
+            data[0]
+        ) 
+    fig = go.Figure(data=[trace],
+                layout=go.Layout(
+                title=dict(
+                    text=ID,
+                    xanchor="center",
+                    x=0.5),
+                titlefont_size=15,
+                showlegend=False,
+                margin=dict(l=60, r=40, b=60, t=50, pad=4),
+                xaxis=layout["xaxis"],
+                yaxis=layout["yaxis"],
+                height=layout["height"],
+                width=layout["width"],
+                autosize=False,
+                )
+        )
+    return fig

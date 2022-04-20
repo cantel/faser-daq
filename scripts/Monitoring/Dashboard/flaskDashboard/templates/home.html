@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <!-- for developpement -->
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
+  <!-- for production -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <link defer href="https://fonts.googleapis.com/css?family=Material+Icons" rel="stylesheet" />
+  <link defer href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
+  <link defer href="https://cdn.jsdelivr.net/npm/@mdi/font@4.x/css/materialdesignicons.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet" />
+  <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+  <title>Faser Monitoring</title>
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+      <v-app-bar app>
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn depressed color="primary" v-bind="attrs" v-on="on" :loading="c_busy">
+              Monitoring
+            </v-btn>
+          </template>
+          <v-list>
+            <v-list-item>
+              <redis_info_dialog :redis_infos="c_redis_infos">
+              </redis_info_dialog>
+            </v-list-item>
+
+            <v-list-item :disabled="c_ids.length == 0" @click="download_plots">
+              <v-icon class="mr-1"> mdi-download </v-icon> Download displayed
+              histograms
+            </v-list-item>
+
+            <v-list-item :disabled="c_safeMode" @click="deleteCurrent">
+              <v-icon color="error" class="mr-1">
+                mdi-trash-can-outline
+              </v-icon>
+              Delete current
+            </v-list-item>
+            <v-list-item :disabled="c_safeMode" @click="deleteHistory">
+              <v-icon color="error" class="mr-1">
+                mdi-trash-can-outline
+              </v-icon>
+              Delete history
+            </v-list-item>
+            <v-list-item :disabled="c_safeMode" @click="deleteTags">
+              <v-icon color="error" class="mr-1">
+                mdi-trash-can-outline
+              </v-icon>
+              Delete tags
+            </v-list-item>
+            <v-list-item>
+              <v-switch v-model="c_safeMode" label="Safe mode" hide-details></v-switch>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+        <v-spacer></v-spacer>
+        <search-tool @search-tags="getIDs"></search-tool>
+        <v-spacer></v-spacer>
+      </v-app-bar>
+      <v-main>
+        <v-pagination  v-if="c_ids.length!=0" v-model="c_currentPage" class="page_selector pt-1" :length="c_ids.length"></v-pagination>
+        <v-container fluid class="histogram_container" v-if="c_ids">
+          <histogram-card v-for="ID in hist_currentPage" :id="ID" :key="ID" :data="c_data[ID]"></histogram-card>
+        </v-container>
+        <v-pagination  v-if="c_ids" v-model="c_currentPage" class="page_selector pb-1" :length="c_ids.length"></v-pagination>
+      </v-main>
+    </v-app>
+  </div>
+
+  <!-- <script src="{{ url_for('static', filename = 'js/redisInfoComponent.js') }}"></script> -->
+  <!-- <script src="{{ url_for('static', filename = 'js/searchComponent.js') }}"></script> -->
+  <!-- <script src="{{ url_for('static', filename = 'js/histogramComponent.js') }}"></script> -->
+  <!-- <script src="{{ url_for('static', filename = 'js/plotlyComponent.js') }}"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/dayjs.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/utc.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/dayjs/1.10.4/plugin/timezone.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+  <script src="https://cdn.plot.ly/plotly-cartesian-2.9.0.min.js" async></script>
+  <script src="{{ url_for('static', filename = 'js/components.js') }}"></script>
+  <script src="{{ url_for('static', filename = 'js/main.js') }}"></script>
+</body>
+
+</html>

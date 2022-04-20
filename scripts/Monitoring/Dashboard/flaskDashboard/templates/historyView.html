@@ -29,7 +29,7 @@
         crossorigin="anonymous"></script>
 
     <!-- Plotly library -->
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-cartesian-2.9.0.min.js" async></script>
 
     <!-- custom css -->
     <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet">
@@ -98,7 +98,7 @@
             </v-main>
         </v-app>
     </div>
-    <script src="{{ url_for('static', filename = 'js/plotly_component.js') }}"> </script>
+    <script src="{{ url_for('static', filename = 'js/plotlyComponent.js') }}"> </script>
     <script>
         const timezone = window.dayjs_plugin_timezone
         const UTC = window.dayjs_plugin_utc
@@ -112,7 +112,7 @@
             el: '#app',
             vuetify: new Vuetify(),
             data: {
-                c_ID: "{{ ID | safe }}",
+                c_ID: "{{ ID | safe }}",
                 c_timestamps: [],
                 c_selected: null,
                 c_selected2: null,
@@ -191,7 +191,6 @@
                 },
                 toggleCompareMenu() {
                     this.c_compare_menu_toggled = !this.c_compare_menu_toggled
-
                 },
 
                 compare_histo() {
@@ -206,11 +205,9 @@
                             })
                     }
                     else {
-                        console.log("Rien sélectionné");
+                        console.log("Nothing selected");
                     }
                 }
-
-
             },
         });
     </script>

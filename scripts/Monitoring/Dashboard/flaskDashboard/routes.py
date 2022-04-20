@@ -9,34 +9,37 @@
 import json
 from flask.helpers import flash
 import redis
-from flask import render_template
-from flask import url_for, redirect, request, Response, jsonify
-from flaskDashboard import app
+from flask import render_template, request, Response, jsonify, send_file
 import numpy as np
 import atexit
 import itertools
 from apscheduler.schedulers.background import BackgroundScheduler
-from flaskDashboard import interfacePlotly
-from flaskDashboard import redis_interface
+from flaskDashboard import app, interfacePlotly, redis_interface, checker, config_manager
+from time import sleep
+from datetime import datetime
+from concurrent.futures import as_completed, ProcessPoolExecutor
+import zipfile
+from io import BytesIO
 
-
-
+cfg = config_manager.loadConfig("config.json")
 ## Redis database where the last histograms are published.
 r = redis.Redis(
-    host="localhost", port=6379, db=1, charset="utf-8", decode_responses=True
+    host=cfg['redis']['host'], port=cfg['redis']['port'], db=cfg['redis']['pub_histo_db'], charset="utf-8", decode_responses=True
 )
 ## Redis database where the current run informations are stored 
 r2 = redis.Redis(
-    host="localhost", port=6379, db=2, charset="utf-8", decode_responses=True
+    host=cfg["redis"]["host"], port=cfg["redis"]["port"], db=cfg["redis"]["run_info_db"], charset="utf-8", decode_responses=True
+
 )
 ## Redis database where the tags are stored.
 r5 = redis.Redis(
-    host="localhost", port=6379, db=5, charset="utf-8", decode_responses=True
+     host=cfg["redis"]["host"], port=cfg["redis"]["port"], db=cfg["redis"]["tags_db"], charset="utf-8", decode_responses=True
+
 )
 
 ## Redis database where the previous histograms are stored.
 r7 = redis.Redis(
-    host="localhost", port=6379, db=7, charset="utf-8", decode_responses=True
+    host=cfg["redis"]["host"], port=cfg["redis"]["port"], db=cfg["redis"]["old_histo_db"], charset="utf-8", decode_responses=True
 )
 
 def histograms_save():
@@ -83,8 +86,8 @@ def old_histogram_save():
 
 # setting up the background jobs for storing old histograms
 scheduler = BackgroundScheduler()
-scheduler.add_job(func=histograms_save, trigger="interval", seconds=60)
-scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=3600)
+scheduler.add_job(func=histograms_save, trigger="interval", seconds=cfg["general"]['short_save_histo_rate'])
+scheduler.add_job(func=old_histogram_save, trigger="interval", seconds=cfg['general']['long_save_histo_rate'])
 scheduler.start()
 atexit.register(lambda: scheduler.shutdown())
 
@@ -149,12 +152,34 @@ def getModules():
 
 
 @app.route("/")
-@app.route("/vue_home", methods=["GET"])
-def vue_home():
-    """! Renders the vue_home.html"""
+@app.route("/home")
+def home():
+    """! Renders the home.html """
     storeDefaultTagsAndIDs()
-    return render_template("vue_home.html")
+    return render_template("home.html")
 
+
+@app.route('/stream_histograms/<string:ids_string>')
+def stream_histograms(ids_string):
+    def get_histograms():
+        packet={}
+        ids = ids_string.split("&")
+        while True:
+            for ID in ids :
+                checker_obj = checker.Checker()
+                runNumber = r2.get("runNumber")
+                source, histname = ID.split("-")
+                histobj = r.hget(source, f"h_{histname}")
+                if histobj is not None:
+                    data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+                    config = {"filename":f"{ID}+{timestamp}"} 
+                    fig = dict(data=data,layout=layout, config=config)
+                    tags = get_tags_by_ID(ID)
+                    checker_obj.check(histname, layout, data)
+                packet[ID] = {"timestamp":float(timestamp), "fig":fig, "ID":ID, "tags":tags, "runNumber" : runNumber, "flags" : checker_obj.flags}
+            yield f"data:{json.dumps(packet)}\n\n"
+            sleep(cfg['general']['update_refresh_rate'])
+    return Response(get_histograms(), mimetype="text/event-stream")
 
 @app.route("/getModulesAndTags", methods=["GET"])
 def get_modules_and_tags():
@@ -179,22 +204,50 @@ def IDs_from_tags():
     if len(tags) == 0:
         return jsonify([])
     else:
-        selected_tags = [f"tag:{s}" for s in tags]
-        IDs = list(r5.sunion(selected_tags))
+        t = []
+        for tag in tags:
+            if "*" in tag :
+                temp_t = r5.keys(f"tag:{tag}")
+                t = t + temp_t
+            else:
+                t.append(f"tag:{tag}")
+        IDs = list(r5.sunion(t)) if t else []
         keys = r5.keys("id:*")
         keys = [ key[3:] for key in keys ]
         # we take the intersection of the two sets
         valid_IDs  = list(set(keys) & set(IDs))
-
+        valid_IDs.sort()
+        valid_IDs = split_into_pages(valid_IDs, cfg["general"]["max_hist_per_page"])
     return jsonify(valid_IDs)
 
-
+def split_into_pages(IDs, nb):
+    """
+    IDs : the ids to split into pages
+    nb : number of histogramm per page
+    """ 
+    if len(IDs) > nb : 
+        nbEqualparts= len(IDs)//nb
+        remainingElements = len(IDs)%nb
+        arr = None
+        if remainingElements == 0:
+            arr = np.array_split(IDs,nbEqualparts)
+        else:
+            arr = np.array_split(IDs[:-remainingElements],nbEqualparts)
+        arr = [ list(a) for a in arr]
+        if remainingElements == 0:
+            return arr 
+        arr.append(IDs[-remainingElements:])
+        return arr
+    else : 
+        return [IDs]
+        
 
 @app.route("/histogram_from_ID", methods=["GET"])
 def histogram_from_ID():
     """! Get the histogram from redis database 1 associated with the given ID.
     @return JSON containing the timestamp, the plotly figure, the ID, the associated tags and the runNumber of the histogram.
     """
+    checker_obj = checker.Checker()
     runNumber = r2.get("runNumber")
     packet = {}
     ID = request.args.get("ID")
@@ -205,10 +258,11 @@ def histogram_from_ID():
         config = {"filename":f"{ID}+{timestamp}"} 
         fig = dict(data=data,layout=layout, config=config)
         tags = get_tags_by_ID(ID)
-        packet = dict(timestamp=float(timestamp), fig=fig, ID=ID, tags=tags, runNumber = runNumber)
+        checker_obj.check(histname, layout, data)
+        packet = {"timestamp":float(timestamp), "fig":fig, "ID":ID, "tags":tags, "runNumber" : runNumber, "flags" : checker_obj.flags}
     return jsonify(packet)
 
-## Tag section
+## Tag sections 
 
 @app.route("/add_tag", methods=["POST"])
 def add_tag():
@@ -245,7 +299,7 @@ def remove_tag():
 @app.route("/history_view/<string:ID>")
 def history_view(ID):
     """! Renders the history view page."""
-    return render_template("vue_historyView.html",ID=ID)
+    return render_template("historyView.html",ID=ID)
 
 
 @app.route("/stored_timestamps", methods=["GET"])
@@ -299,7 +353,6 @@ def delete_current():
     m = map(delete_associated_tags, ids )
     l = list(itertools.chain.from_iterable(m))
     r5.delete(*l)
-
     r5.delete(*ids) 
     return jsonify({"response": "OK"})
 
@@ -310,7 +363,6 @@ def redis_info():
     """
     r_infos = r.info()
     return jsonify(r_infos)
-
 
 @app.route("/compare_histograms", methods=["POST"])
 def compare_histograms():
@@ -328,12 +380,42 @@ def compare_histograms():
         diff_histo["figure"]["data"][0]["y"] = np.abs(np.array(hist1["figure"]["data"][0]["y"]) - np.array(hist2["figure"]["data"][0]["y"])).tolist()
     elif hist1["figure"]["data"][0]["type"] == 'heatmap':
         diff_histo["figure"]["data"][0]["z"] = np.abs(np.array(hist1["figure"]["data"][0]["z"]) - np.array(hist2["figure"]["data"][0]["z"])).tolist()
-    
     return jsonify(diff_histo)
 
-
+@app.route("/download_plots", methods=["POST"])
+def download_plots():
+    data = request.get_json()
+    IDs = data["IDs"] 
+    # runNumber = r2.get("runNumber")
+    listOfFigs={}
+    for ID in IDs: 
+        source, histname = ID.split("-")
+        histobj = r.hget(source, f"h_{histname}")
+        if histobj is not None:
+            data, layout, timestamp = interfacePlotly.convert_to_plotly(histobj)
+            t = datetime.fromtimestamp(timestamp).strftime('%d%m%y_%H%M%S')
+            filename = f"{ID}_{t}"
+            fig = interfacePlotly.plot_js_to_plot_py(ID, data,layout)
+            listOfFigs[filename]=fig
+    binary_data = []
+    with ProcessPoolExecutor() as executor:
+        results = [executor.submit(figToPng,filename, fig ) for filename, fig in listOfFigs.items()]
+        for f in as_completed(results):
+            binary_data.append(f.result())
+    # binary_data = [(filename,fig.to_image(format="png")) for filename, fig in listOfFigs.items()]
+    mem_zip = BytesIO() 
+    with zipfile.ZipFile(mem_zip, mode="w",compression=zipfile.ZIP_DEFLATED) as zf:
+        for filename, binary in binary_data:
+            zf.writestr(f"{filename}.png", binary)
+    mem_zip.seek(0)
+    return send_file(mem_zip, attachment_filename='plots.zip', as_attachment=True, mimetype='application/zip')
 
 ## functions
+
+def figToPng(filename,fig):
+    bts = fig.to_image(format="png")
+    return (filename, bts)
+
 
 def get_tags_by_ID(ID):
     """! Function that gets all tags without the default ones associated with an histogtram ID 

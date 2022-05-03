@@ -40,7 +40,8 @@ tlbDigiTI12Cosmics.json \
 tlbDigiTI12PMTs.json \
 combinedEHN1.json \
 combinedSciLab.json \
-combinedTI12.json \
+combinedTI12Physics.json \
+combinedTI12Cosmics.json \
 playback.json              \
 emulatorLocalhost.json \
 emulatorLocalhostFullFarm.json \

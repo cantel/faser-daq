@@ -145,6 +145,11 @@ TrackerReceiverModule::TrackerReceiverModule(const std::string& n):FaserProcess(
 }    
 
 TrackerReceiverModule::~TrackerReceiverModule() { 
+    INFO("Disable L1A, BCR and Trigger Clock, else modules can't be configured next time.");
+    m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::SetDirectParam, 0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
+    if (m_status){
+      WARNING("Issue encountered while trying to unset direct parameters. This might cause problems during configurations next time. Continuing...");
+    }
     INFO("Shutdown");
 }
 
@@ -366,10 +371,6 @@ void TrackerReceiverModule::stop() {
     ERROR("Issue encountered while stopping readout. Continuing tentatively...");
   }
   usleep(100);
-  m_status = FASER::TRBAccess::GPIOCheck(m_trb.get(), &FASER::TRBAccess::SetDirectParam, 0); // disable L1A, BCR and Trigger Clock, else modules can't be configured next time.
-  if (m_status){
-    WARNING("Issue encountered while trying to unset direct parameters. This might cause problems during configurations next time. Continuing...");
-  }
   FaserProcess::stop();
   INFO("TRB --> readout stopped.");
 }

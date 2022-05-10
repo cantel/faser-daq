@@ -21,11 +21,26 @@ r1=redis.Redis(host="localhost", port= 6379, db=2, charset="utf-8", decode_respo
 run_user="FASER"
 run_pw="HelloThere"
 
+mattermost_hook=""
 influxDB=None
 hostname=socket.gethostname()
 if os.access("/etc/faser-secrets.json",os.R_OK):
     influxDB=json.load(open("/etc/faser-secrets.json"))
+    mattermost_hook=influxDB.get("MATTERMOST","")
     urllib3.disable_warnings()
+
+def message(msg):
+    if mattermost_hook: 
+        try:
+            req = requests.post(mattermost_hook,json={"text": msg})
+            if req.status_code!=200:
+                print("Failed to post message below. Error code:",req.status_code)
+                print(msg)
+        except Exception as e:
+            print("Got exception when posting message",e)
+    else:
+        print(msg)
+
 
 #FIXME: this should probably be in daqcontrol
 import supervisor_wrapper
@@ -127,6 +142,8 @@ def stateTracker(logger,localOnly):
                                         verify=False)
                         if r.status_code!=204:
                             logger.error("Failed to post end of run information to influxdb: "+r.text)
+                        if configName.startswith("combined"):
+                            message(f"Run {runNumber} stopped\nOperator: {stopComment}")
                 logger.info("Stop done")
             elif cmd=="shutdown":
                 logger.info("Calling shutdown")
@@ -168,6 +185,9 @@ def stateTracker(logger,localOnly):
                                         verify=False)
                         if r.status_code!=204:
                             logger.error("Failed to post end of run information to influxdb: "+r.text)
+                        if configName.startswith("combined"):
+                            message(f"Run {runNumber} was shutdown")
+
                 logger.info("Shutdown down")
                 #h.spawnJoin(config['components'],  functools.partial(removeProcess,group=daq.group,logger=logger))
             status=[]
@@ -263,6 +283,8 @@ def stateTracker(logger,localOnly):
                                         verify=False)
                         if r.status_code!=204:
                             logger.error("Failed to post end of run information to influxdb: "+r.text)
+                        if configName.startswith("combined"):
+                            message(f"Run {runNumber} was started\nOperator: {startMsg}")
 
                     r1.set("runNumber",runNumber)
                     r1.set("runType",runType)

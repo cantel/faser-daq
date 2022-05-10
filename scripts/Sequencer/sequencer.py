@@ -12,6 +12,37 @@ import requests
 import sys
 import time
 
+mattermost_hook=""
+
+if os.access("/etc/faser-secrets.json",os.R_OK):
+    secrets=json.load(open("/etc/faser-secrets.json"))
+    mattermost_hook=secrets.get("MATTERMOST","")
+
+def message(msg):
+    if mattermost_hook: 
+        try:
+            req = requests.post(mattermost_hook,json={"text": msg})
+            if req.status_code!=200:
+                print("Failed to post message below. Error code:",req.status_code)
+                print(msg)
+        except Exception as e:
+            print("Got exception when posting message",e)
+    else:
+        print(msg)
+
+def error(msg):
+    if mattermost_hook: 
+        try:
+            req = requests.post(mattermost_hook,json={"text": msg,"channel": "faser-ops-alerts"})
+            if req.status_code!=200:
+                print("Failed to post message below. Error code:",req.status_code)
+                print(msg)
+        except Exception as e:
+            print("Got exception when posting message",e)
+    else:
+        print(msg)
+
+
 class runner:
     def __init__(self,config,hostUrl,maxTransitionTime,seqnumber,seqstep):
         self.cfgFile=config["cfgFile"]
@@ -223,6 +254,7 @@ def main(args):
             print("Failed in init command")
             return 1
 
+    message(f"Starting a sequence run ({args[0]}) with {len(cfgs)-startStep+1} steps")
     for step in range(startStep-1,len(cfgs)):
         print(f"Running step {step+1}")
         cfg=cfgs[step]
@@ -231,6 +263,7 @@ def main(args):
         if rc:
             print("Successful run")
         else:
+            message("Failed to start run from sequencer - please check")
             print("Failed to run, please check")
             print("To redo from this step run:")
             print(f"./sequencer.py -S {seqnumber} -s {step+1} {args[0]}")
@@ -243,9 +276,10 @@ def main(args):
         rc=os.system(config["finalizeCommand"])
         if rc:
             print("Failed in finalize command")
+            message("Failed at sequencer stop - please check")
             return 1
 
-
+    message("Sequence run completed")
     return 0
 
 if __name__ == "__main__":

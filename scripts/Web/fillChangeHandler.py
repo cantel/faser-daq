@@ -33,6 +33,18 @@ def message(msg):
     else:
         print(msg)
 
+def error(msg):
+    if mattermost_hook: 
+        try:
+            req = requests.post(mattermost_hook,json={"text": msg,"channel": "faser-ops-alerts"})
+            if req.status_code!=200:
+                print("Failed to post message below. Error code:",req.status_code)
+                print(msg)
+        except Exception as e:
+            print("Got exception when posting message",e)
+    else:
+        print(msg)
+
 class RunControl:
     def __init__(self):
         self.cfgFile="combinedTI12Physics.json"
@@ -108,29 +120,38 @@ class FillNo:
         
 
 if __name__ == '__main__':
-    
+    active=False
+    test=False
+    if "--active" in sys.argv:
+        print("Running in active mode - will stop/start runs")
+        active=True
+    if "--test" in sys.argv:
+        test=True
     fill=FillNo()
     print(f"Starting at fill number {fill.fillNo}")
     rc=RunControl()
     print("Starting DAQ state:",rc.checkState())
     while True:
         newFillNo=fill.checkNewFill()
-###FOR TEST        newFillNo=input("Enter new fill number: ")
+        if test:
+            newFillNo=input("Enter new fill number: ")
         if newFillNo:
             message(f"LHC fill number has changed to {newFillNo}")
             state,good=rc.checkState()
             if state=="RUN" and good:
-                print("should change run")
-#                message("Consider changing run number (not critical - to be automated)")
-                
-            # do action to stop/start run if in combined run
-###                if not rc.stop():
-###                    message("Failed to stop run cleanly - please check")
-###                elif not rc.start(newFillNo):
-###                    message("Failed to start new run cleanly - please check")
-###            else:
-###                message(f"No physics run seems to be going right now")
+                # do action to stop/start run if in combined run
+                if active:
+                    if not rc.stop():
+                        error("Failed to stop run cleanly - please check")
+                    elif not rc.start(newFillNo):
+                        error("Failed to start new run cleanly - please check")
+                else:
+                    print("should change run")
+                    
+            else:
+                message(f"No physics run seems to be going right now")
+
 
         time.sleep(5)
-    
+            
         

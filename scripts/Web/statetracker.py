@@ -273,6 +273,13 @@ def stateTracker(logger,localOnly):
                                     logger.error("Failed to get run number: "+r.text)
                         except requests.exceptions.ConnectionError:
                             logger.error("Could not connect to run service")
+                        if runNumber==1000000000:
+                            logger.error("Do not start run as we did not get run number")
+
+                            runState["comment"]="Failed to start run - no valid run number?"
+                            r1.hset("runningFile", "comment",runState["comment"])
+                            cmd=""
+                            continue
                         startMsg=subInfo['startcomment'].replace('"',"'")
                         runState["comment"]=startMsg
 

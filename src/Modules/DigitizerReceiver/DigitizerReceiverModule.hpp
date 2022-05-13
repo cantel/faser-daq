@@ -10,6 +10,7 @@
 // needed for external tools
 #include "Commons/FaserProcess.hpp"
 #include "EventFormats/DAQFormats.hpp"
+#include "EventFormats/BOBRDataFragment.hpp"
 #include <ers/Issue.h>
 
 // needed for sendECR() and runner() protection
@@ -57,6 +58,11 @@ class DigitizerReceiverModule : public FaserProcess {
   ///////////////////////////////////////////
   // Digitizer specific methods and members
   ///////////////////////////////////////////
+
+  // read BOBR data into data member
+  bool readBOBR();
+
+  BOBRDataFormat::BOBREventV1 m_bobrdata;
 
   // the digitizer hardware accessor object
   vx1730 *m_digitizer;

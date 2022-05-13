@@ -229,6 +229,14 @@ void DigitizerReceiverModule::configure() {
   
   INFO("Finished configuring - the settings of the digitizer are :");
   m_digitizer->DumpConfig();
+  if (m_bobr) {
+    if (!readBOBR()) {
+      ERROR("Failed to read BOBR data at configure");
+      m_status = STATUS_ERROR;
+    }
+    usleep(500000);
+    readBOBR();  //Second read to calculate meaningfull LHC frequency
+  }
   INFO("End of configure()");
 }
 
@@ -279,6 +287,97 @@ static unsigned int BOBRWord(unsigned int *data,int address, int len=4) {
   return result;
 }
 
+bool DigitizerReceiverModule::readBOBR() {
+  //BOBR readout - should be moved to digitizer-readout code?
+  unsigned int vme_base_address = 0x00B00000;
+  m_bobrdata.m_header=BOBRDataFormat::BOBR_HEADER_V1;
+
+  auto *vme_crate=m_digitizer->m_crate;
+  unsigned int data=0;
+
+  int rc = vme_crate->udp_sis3153_register_read (SIS3153USB_LEMO_IO_CTRL_REG, &data);
+  if (rc!=0) {
+    WARNING("Failed to read clock status, status code: "<<std::hex<<rc<<std::dec);
+  } 
+  m_loss_of_lock = (data&(1<<20))!=0; // on input 1
+
+
+  unsigned int addr=vme_base_address+0x10;
+  int return_code = vme_crate->vme_A24D32_read (addr, &data);
+  if (return_code!=0) {
+    INFO("Failed to read BOBR status code: "<<std::hex<<return_code<<std::dec);
+    return false;
+  } 
+  m_bobrdata.m_status=(data&0xFF00)|m_loss_of_lock;
+  m_bobr_statusword = data&0xFFFF;
+  m_bobr_timing=(data&0x0F00)==0x0F00;
+
+  //request update of data
+  unsigned int statusControl=data;
+  DEBUG("BOBR status: 0x"<<std::hex<<data);
+  statusControl&=~(1<<7);
+  return_code = vme_crate->vme_A24D32_write (addr, statusControl);
+  if (return_code!=0) {
+    INFO("Failed to write BOBR control code: "<<std::hex<<return_code<<std::dec);
+    return false;
+  }
+
+  //FIXME: this is inefficient way of reading out BOBR data
+  addr=vme_base_address+0xC00;
+  UINT addrs[40];
+  UINT datawords[40];
+  for(int word=0;word<40;word++) {
+    addr=vme_base_address+0xC00+word*4;
+    addrs[word]=addr;
+    datawords[word]=0xFFFFFFFF;
+  }
+        
+  return_code = vme_crate->vme_A24D32_sgl_random_burst_read(40,addrs,datawords);
+
+  if (return_code!=0) {
+    INFO("Failed to read BOBR data: "<<std::hex<<return_code<<std::dec);
+    return false;
+  }
+  int microseconds = BOBRWord(datawords,0);
+  unsigned int seconds      = BOBRWord(datawords,4);
+  unsigned int turncount    = BOBRWord(datawords,18);
+  m_lhc_turncount           = turncount;
+  m_lhc_fillnumber          = BOBRWord(datawords,22);
+  m_lhc_machinemode         = BOBRWord(datawords,26,2);
+  m_lhc_beamenergy          = BOBRWord(datawords,30,2)*0.12;
+  m_lhc_intensity1          = BOBRWord(datawords,32);
+  m_lhc_intensity2          = BOBRWord(datawords,36);
+
+  m_bobrdata.m_gpstime_seconds = seconds;
+  m_bobrdata.m_gpstime_useconds = microseconds;
+  m_bobrdata.m_turncount = turncount;
+  m_bobrdata.m_fillnumber = m_lhc_fillnumber;
+  m_bobrdata.m_machinemode = m_lhc_machinemode;
+  m_bobrdata.m_beam_momentum = BOBRWord(datawords,30,2);
+  m_bobrdata.m_beam1_intensity = m_lhc_intensity1;
+  m_bobrdata.m_beam2_intensity = m_lhc_intensity2; 
+
+  if (m_prev_seconds!=0) {
+    int deltaT = (seconds-m_prev_seconds)*1000000+(microseconds-m_prev_microseconds);
+    int deltaTurn = turncount-m_prev_turncount;
+    float freq=3564.0*deltaTurn/deltaT;
+    m_lhc_frequency=freq;
+  }
+  m_prev_seconds=seconds;
+  m_prev_microseconds=microseconds;
+  m_prev_turncount=turncount;
+  
+  addr=vme_base_address+0x10;
+  statusControl|=1<<2|1<<7;
+  return_code = vme_crate->vme_A24D32_write (addr, statusControl);
+  if (return_code!=0) {
+    INFO("Failed to reset BOBR control code: "<<std::hex<<return_code<<std::dec);
+    return false;
+  }
+
+  return true;
+}
+
 void DigitizerReceiverModule::runner() noexcept {
   INFO("Running...");  
   
@@ -313,6 +412,13 @@ void DigitizerReceiverModule::runner() noexcept {
   m_prev_microseconds=0;
   m_prev_turncount=0;
 
+  if (m_bobr) {
+    if (!readBOBR()) {
+      ERROR("Failed to read BOBR data at start");
+      m_status = STATUS_ERROR;
+    }
+  }
+  uint32_t bobr_id=0;
   // the polling loop
   while (m_run) {    
 
@@ -336,6 +442,7 @@ void DigitizerReceiverModule::runner() noexcept {
     } catch (DigitizerHardwareException &e) {
       static int numErrors=100;
       ERROR("Failed to read number of events: " << e.what());
+      m_status = STATUS_WARN;
       if (numErrors--==0) {
 	INFO("Too many read errors - bailing out");
 	throw e;
@@ -462,76 +569,16 @@ void DigitizerReceiverModule::runner() noexcept {
       else{
 	ERROR("Temperature monitoring picked up incorrect number of channels : "<<NCHANNELS);
       }
-      auto *vme_crate=m_digitizer->m_crate;
-      unsigned int data=0;
-      int rc = vme_crate->udp_sis3153_register_read (SIS3153USB_LEMO_IO_CTRL_REG, &data);
-      if (rc!=0) {
-	INFO("Failed to read clock status, status code: "<<std::hex<<rc<<std::dec);
-	continue;
-      } 
-      m_loss_of_lock = (data&(1<<20))!=0; // on input 1
       if (m_bobr) {
-	//BOBR readout - should be moved to digitizer-readout code?
-	unsigned int vme_base_address = 0x00B00000;
-      
-	unsigned int addr=vme_base_address+0x10;
-	int return_code = vme_crate->vme_A24D32_read (addr, &data);
-	if (return_code!=0) {
-	  INFO("Failed to read BOBR status code: "<<std::hex<<return_code<<std::dec);
-	  continue;
-	} 
-	m_bobr_statusword = data&0xFFFF;
-	m_bobr_timing=(data&0x0F00)==0x0F00;
-	unsigned int statusControl=data;
-	DEBUG("BOBR status: 0x"<<std::hex<<data);
-	statusControl&=~(1<<7);
-	return_code = vme_crate->vme_A24D32_write (addr, statusControl);
-	if (return_code!=0) {
-	  INFO("Failed to write BOBR control code: "<<std::hex<<return_code<<std::dec);
-	  continue;
-	}
-
-	addr=vme_base_address+0xC00;
-	UINT addrs[40];
-	UINT datawords[40];
-	for(int word=0;word<40;word++) {
-	  addr=vme_base_address+0xC00+word*4;
-	  addrs[word]=addr;
-	  datawords[word]=0xFFFFFFFF;
-	}
-        
-	return_code = vme_crate->vme_A24D32_sgl_random_burst_read(40,addrs,datawords);
-
-	if (return_code!=0) {
-	  INFO("Failed to read BOBR data: "<<std::hex<<return_code<<std::dec);
+	if (!readBOBR()) {
+	  ERROR("Failed to read BOBR data");
 	} else {
-	  int microseconds = BOBRWord(datawords,0);
-	  unsigned int seconds      = BOBRWord(datawords,4);
-	  unsigned int turncount    = BOBRWord(datawords,18);
-	  m_lhc_turncount           = turncount;
-	  m_lhc_fillnumber          = BOBRWord(datawords,22);
-	  m_lhc_machinemode         = BOBRWord(datawords,26,2);
-	  m_lhc_beamenergy          = BOBRWord(datawords,30,2)*0.12;
-	  m_lhc_intensity1          = BOBRWord(datawords,32);
-	  m_lhc_intensity2          = BOBRWord(datawords,36);
-
-	  if (m_prev_seconds!=0) {
-	    int deltaT = (seconds-m_prev_seconds)*1000000+(microseconds-m_prev_microseconds);
-	    int deltaTurn = turncount-m_prev_turncount;
-	    float freq=3564.0*deltaTurn/deltaT;
-	    m_lhc_frequency=freq;
-	  }
-	  m_prev_seconds=seconds;
-	  m_prev_microseconds=microseconds;
-	  m_prev_turncount=turncount;
-
-	}
-
-	addr=vme_base_address+0x10;
-	statusControl|=1<<2|1<<7;
-	return_code = vme_crate->vme_A24D32_write (addr, statusControl);
-	if (return_code!=0) {
-	  INFO("Failed to reset BOBR control code: "<<std::hex<<return_code<<std::dec);
+	  std::unique_ptr<EventFragment> fragment(new EventFragment(EventTags::MonitoringTag,
+								    SourceIDs::BOBRSourceID,
+								    bobr_id++,0,&m_bobrdata,sizeof(m_bobrdata)));
+	  std::unique_ptr<const byteVector> bytestream(fragment->raw());
+	  DataFragment<daqling::utilities::Binary> binData(bytestream->data(),bytestream->size());
+	  m_connections.send(0, binData);  
 	}
       }
     }

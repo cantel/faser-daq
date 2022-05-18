@@ -2,26 +2,15 @@
     "name": "Root",
     "children": [
         {
-            "name": "emulatormonitor01",
+            "name": "TriggerGenerator",
             "types": [
                 {
-                    "type": "EM"
+                    "type": "TG"
                 }
-            ]
-        },
-        {
-            "name": "eventbuilder01",
-            "types": [
+            ],
+            "children": [
                 {
-                    "type": "EBF"
-                }
-            ]
-        },
-        {
-            "name": "filewriter",
-            "types": [
-                {
-                    "type": "FWF"
+                    "name": "triggergenerator"
                 }
             ]
         },
@@ -42,14 +31,6 @@
             ]
         },
         {
-            "name": "frontendmonitor01",
-            "types": [
-                {
-                    "type": "FM"
-                }
-            ]
-        },
-        {
             "name": "FrontEndReceiver",
             "types": [
                 {
@@ -66,10 +47,54 @@
             ]
         },
         {
-            "name": "triggergenerator",
+            "name": "EventBuilderFaser",
             "types": [
                 {
-                    "type": "TG"
+                    "type": "EBF"
+                }
+            ],
+            "children": [
+                {
+                    "name": "eventbuilder01"
+                }
+            ]
+        },
+        {
+            "name": "FileWriterFaser",
+            "types": [
+                {
+                    "type": "FWF"
+                }
+            ],
+            "children": [
+                {
+                    "name": "filewriter"
+                }
+            ]
+        },
+        {
+            "name": "FrontEndMonitor",
+            "types": [
+                {
+                    "type": "FM"
+                }
+            ],
+            "children": [
+                {
+                    "name": "frontendmonitor01"
+                }
+            ]
+        },
+        {
+            "name": "EmulatorMonitor",
+            "types": [
+                {
+                    "type": "EM"
+                }
+            ],
+            "children": [
+                {
+                    "name": "emulatormonitor01"
                 }
             ]
         }

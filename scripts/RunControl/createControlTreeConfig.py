@@ -1,44 +1,46 @@
 from copy import deepcopy
 import os,sys
 from pathlib import Path
-import jsonref, json
+from os import environ as env
+import jsonref
 
 lt = {
-    "ReadoutInterface"   : "RI",
-    "EventBuilder"       : "EB",
-    "FileWriter"         : "FW", 
-    "EventBuilderFaser"  : "EBF",
-    "FileWriterFaser"    : "FWF",
-    "TriggerReceiver"    : "TR", 
-    "TriggerGenerator"   : "TG",
-    "TriggerMonitor"     : "TM",
-    "FrontEndReceiver"   : "FR",
-    "FrontEndMonitor"    : "FM",
-    "FrontEndEmulator"   : "FE",
-    "EmulatorMonitor"    : "EM",
-    "DigitizerReceiver"  : "DR",
-    "SCTDataMonitor"     : "SDM",
-    "TrackerReceiver"    : "TKR",
-    "TriggerRateMonitor" : "TRM",
-    "DigitizerMonitor"   : "DM",
-    "EventPlayback"      : "EP",
-    "TrackStationMonitor": "TSM",
-    "EventMonitor"       : "EvM",
+    "ReadoutInterface" : "RI",
+    "EventBuilder" : "EB",
+    "FileWriter" : "FW", 
+
+    "EventBuilderFaser": "EBF", #
+    "FileWriterFaser" : "FWF", #
+
+    "TriggerReceiver" :"TR", # hardware
+    "TriggerGenerator" : "TG", # emulation
+    "FrontEndReceiver" : "FR", # hardware
+    "FrontEndMonitor" : "FM",
+    "FrontEndEmulator" : "FE",
+    "EmulatorMonitor": "EM"
 }
 
-def createTreeJSON(configPath,configsDirPath):
+# configPath = sys.argv[1]
+# configPath = "demo-tree/config.json" # path to config file
+
+
+def createJSON(configPath):
+    configDirPath = os.path.join(env['DAQ_CONFIG_DIR'])
     try :
-        with open(configPath, "r") as fp :
-            base_dir_uri = f"{Path(configsDirPath).as_uri()}/"
+        with open(os.path.join(configDirPath, configPath), "r") as fp :
+            base_dir_uri = f"{Path(configDirPath).as_uri()}/"
             jsonref_obj = jsonref.load(fp,base_uri=base_dir_uri,loader=jsonref.JsonLoader())
     except FileNotFoundError:
-        print("Error, the file does not exist")
+        print("Error")
         exit(1)
-    if "configuration" in jsonref_obj: # faser ones have "configuration" but not demo-tree schema with references (version >= 10) 
+
+    if "configuration" in jsonref_obj: # faser ones have "configuration" but not demo-tree
+        # schema with references (version >= 10)
         configuration = deepcopy(jsonref_obj)["configuration"]
     else:
         # old-style schema (version < 10)
         configuration = jsonref_obj
+
     tree = {"name" : "Root", "children" :[]}
     sort = {}
     for component in configuration["components"]:
@@ -47,67 +49,37 @@ def createTreeJSON(configPath,configsDirPath):
         else:
             sort[component["modules"][0]["type"]] = []
             sort[component["modules"][0]["type"]].append(component["modules"][0]["name"])
-    
 
-    for key,item in sorted(sort.items()): 
-        # if there is only one module in the categorie, there is no category
-        try : 
-            if len(item) == 1:
-                cat = {"name" : item[0], "types" : [{"type" : lt[key]}]}  
-                tree["children"].append(cat)
-                continue
-            cat = {"name" : key, "types" :[{"type": lt[key]}], "children" : []}
-        except KeyError :
-            print(f"Module type '{key}' is not in the lookup table for abbrevations, please add it.")
-            exit(1)
-
+    for key,item in sort.items():
+        cat = {"name" : key, "types" :[{"type": lt[key]}], "children" : []}
         for comp in item :
             cat["children"].append({"name":comp})
         tree["children"].append(cat)
+
+
     return tree
 
 
-if __name__ == "__main__":
 
-    if len(sys.argv) != 2 :
-        print(f"USAGE : python {sys.argv[0]} <configFullPath>")
+if __name__ == "__main__":
+    
+    if len(sys.argv) != 3 :
+        print(f"USAGE : python {sys.argv[0]} <configPath> <destinationPath>")
         exit(1)
     
-    configPath     = sys.argv[1]                                  # full path to config
-    configsDirPath = os.path.dirname(os.path.abspath(configPath)) # full path to containing dir
-    configName     = os.path.basename(configPath)                 # name of the config with extension
-    configDir      = os.path.join(configsDirPath,configName.replace('.json','')) # dir of specific config
-    dict_obj = {
-        "tree"     : "control-tree.json",
-        "fsm_rules": "../fsm-rules.json",
-        "config"   : f"../{configName}",
-        "grafana"  : "../grafana.json"
-    }
+    configPath = sys.argv[1]
+    savePath = sys.argv[2] 
 
-    with open(os.path.join(configsDirPath,"fsm-rules.json"), "r") as fp:
-        fsm_rules = json.load(fp)
+    treeConfig = createJSON(configPath)
+     
+    with open(savePath, "w") as fp:
+        jsonref.dump(treeConfig,fp, indent=4)
 
-    tree_config = createTreeJSON(configPath, configsDirPath)
 
-    try : 
-        os.mkdir(configDir)
-        with open(os.path.join(configDir,"control-tree.json"), "w") as fp:
-            jsonref.dump(tree_config,fp, indent=4)
-        with open(os.path.join(configDir,"config-dict.json"), "w") as fp:
-            jsonref.dump(dict_obj,fp, indent=4)
-    except FileExistsError:
-        print("Directory already exists ! ")
-        r = input("Do you want to overwrite it ? (y/N) ")
-        if (r.upper() == "Y"):
-            with open(os.path.join(configDir,"control-tree.json"), "w") as fp:
-                jsonref.dump(tree_config,fp, indent=4)
-            with open(os.path.join(configDir,"config-dict.json"), "w") as fp:
-                jsonref.dump(dict_obj,fp, indent=4)
-        else:
-            print("Exiting...")
-            exit(0)
+
+
     
-
+    
 
 
 

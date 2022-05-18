@@ -7,80 +7,50 @@
       "boot",
       "remove"
     ],
-    "shutting": ["remove"],
+    "shutting": [],
     "booted": [
       "configure",
       "shutdown",
       "remove"
     ],
-    "configuring": ["remove"],
-    "unconfiguring": ["remove"],
+    "configuring": [],
+    "unconfiguring": [],
     "ready": [
       "start",
       "unconfigure",
-      "shutdown",
-      "remove"
+      "shutdown"
     ],
-    "starting": ["remove"],
-    "stopping": ["remove"],
+    "starting": [],
+    "stopping": [],
     "running": [
       "stop",
       "pause",
-      "shutdown",
-      "disableTrigger",
-      "remove"
+      "shutdown"
     ],
-    "pausing": ["remove"],
-    "resuming": ["remove"],
-    "pausingTrigger" : ["remove"],
-    "enablingTrigger" : ["remove"],
     "paused": [
-      "enableTrigger",
-      "remove",
-      "ECR"
+      "resume"
     ],
-    "sendingECR" : ["remove"],
+    "pausing": [],
+    "resuming": [],
     "DOWN" : ["INITIALISE"],
     "READY" : ["START", "SHUTDOWN"],
-    "RUN" : ["STOP", "PAUSE", "SHUTDOWN"],
-    "PAUSED":["RESUME", "STOP","ECR","SHUTDOWN"],
-    "IN TRANSITION": ["SHUTDOWN"]
+    "RUN" : ["STOP", "PAUSE", "ECR"],
+    "PAUSED":["RESUME", "STOP","ECR"]
   },
   "order": {
     "start": [
-        
+      
       "FWF",
       "EBF",
       "FR",
       "FM",
       "FE",
-      
-      "EvM",
       "EM",
-      "SDM",
-      "TSM",
-      "DM",
-      "TG",
-      "DR",
-      "TKR",
-      "TM",
-      "TRM",
-      "TR"
+      "TG"
     ],
     "stop": [
-        "TR",
-      "TRM",
-      "TM",
-      "TKR",
-      "SDM",
-      "TSM",
-      "DR",
       "TG",
       "EM",
-      "SDM",
-      "DM",
-      "EvM",
-
       "FE",
       "FR",
       "FM",

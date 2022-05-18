@@ -31,18 +31,31 @@
       "resume"
     ],
     "pausing": [],
-    "resuming": []
+    "resuming": [],
+    "DOWN" : ["INITIALISE"],
+    "READY" : ["START", "SHUTDOWN"],
+    "RUN" : ["STOP", "PAUSE", "ECR"],
+    "PAUSED":["RESUME", "STOP","ECR"]
   },
   "order": {
     "start": [
-      "FW",
-      "EB",
-      "RI"
+      
+      "FWF",
+      "EBF",
+      "FR",
+      "FM",
+      "FE",
+      "EM",
+      "TG"
     ],
     "stop": [
-      "RI",
-      "EB",
-      "FW"
+      "TG",
+      "EM",
+      "FE",
+      "FR",
+      "FM",
+      "EBF",
+      "FWF"
     ]
   }
 }

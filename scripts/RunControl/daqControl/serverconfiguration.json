@@ -11,9 +11,9 @@
     "paused":"/static/pics/orange.png",
     "error":"/static/pics/red.png"
     },
-  "SSO_enabled":0,
+  "SSO_enabled":1,
   "serverlog_location_name":"./log/webinterfaceserver.log",
-  "callbackUri":"http://localhost:32768/login/callback",
+  "callbackUri":"http://faser-daqvm-000:5000/login/callback",
   "ALLOWED_EXTENSIONS":["json", "txt"],
   "timeout_for_requests_secs": 5,
   "timeout_session_expiration_mins" : 120,

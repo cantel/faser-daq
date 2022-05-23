@@ -41,7 +41,7 @@ def createTreeJSON(configPath):
             sort[component["modules"][0]["type"]] = []
             sort[component["modules"][0]["type"]].append(component["modules"][0]["name"])
     
-    
+
     for key,item in sorted(sort.items()): 
         # if there is only one module in the categorie
         if len(item) == 1:
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     configDirPath = os.path.join(os.environ['DAQ_CONFIG_DIR'])
 
     if len(sys.argv) != 2 :
-        print(f"USAGE : python {sys.argv[0]}")
+        print(f"USAGE : python {sys.argv[0]} <configName>")
         exit(1)
     
     configName= sys.argv[1]

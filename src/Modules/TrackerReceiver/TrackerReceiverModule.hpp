@@ -74,6 +74,7 @@ class TrackerReceiverModule : public FaserProcess {
   bool m_ABCD_EdgeDetect;
   bool m_configureModules;
   bool m_RxTimeoutDisable;
+  bool m_applySCTMasks;
   unsigned int m_moduleMask;
   unsigned int m_moduleClkCmdMask;
   bool m_triggerEnabled;

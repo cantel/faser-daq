@@ -6,6 +6,7 @@
 #include <string>
 #include <regex>
 #include <fstream>
+#include <vector>
 
 #include "Core/DAQProcess.hpp"
 
@@ -72,6 +73,12 @@ public:
 
   virtual void start(unsigned int run_num) {
     m_ECRcount=0;
+    for(auto var : m_metric_ints) {
+      *var=0;
+    }
+    for(auto var : m_metric_floats) {
+      *var=0;
+      }
     DAQProcess::start(run_num);
   }
   
@@ -81,14 +88,20 @@ public:
 
 protected:
   //simple metrics interface. Note variables are zero'd
-  void registerVariable(std::atomic<int> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE) {
-    var=0;
+  void registerVariable(std::atomic<int> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, bool zero_on_start=true) {
+    if (zero_on_start) {
+      var=0;
+      m_metric_ints.push_back(&var);
+    }
     if (m_statistics->isStatsOn()) {
       m_statistics->registerMetric<std::atomic<int>>(&var, name, mtype);
     }
   }
-  void registerVariable(std::atomic<float> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE) {
-    var=0;
+  void registerVariable(std::atomic<float> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, bool zero_on_start=true) {
+    if (zero_on_start) {
+      var=0;
+      m_metric_floats.push_back(&var);
+    }
     if (m_statistics->isStatsOn()) {
       m_statistics->registerMetric<std::atomic<float>>(&var, name, mtype);
     }
@@ -97,5 +110,7 @@ protected:
 protected:
   std::atomic<int> m_ECRcount;
   std::atomic<int> m_status;
+  std::vector<std::atomic<int>*> m_metric_ints;
+  std::vector<std::atomic<float>*> m_metric_floats;
 };
   

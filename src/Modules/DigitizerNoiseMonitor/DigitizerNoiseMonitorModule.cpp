@@ -65,7 +65,7 @@ void DigitizerNoiseMonitorModule::monitor(DataFragment<daqling::utilities::Binar
     m_metric_pedestal[iChan]=avg;
     m_metric_rms[iChan]=rms;
     for(int ii=0;ii<4;ii++) {
-      double counts=m_metric_peaks[ii][iChan]+CountPeaks(m_pmtdataFragment->channel_adc_counts(iChan),avg,8+8*ii);
+      float counts=m_metric_peaks[ii][iChan]+CountPeaks(m_pmtdataFragment->channel_adc_counts(iChan),avg,8+8*ii);
       m_metric_peaks[ii][iChan]=counts;
     }
   }
@@ -84,25 +84,19 @@ void DigitizerNoiseMonitorModule::register_metrics() {
 
   register_error_metrics();
 
-  m_metric_payload = 0;
-  m_statistics->registerMetric(&m_metric_payload, "payload", daqling::core::metrics::LAST_VALUE);
+
+  registerVariable(m_metric_payload, "payload");
   for(int iChan=0; iChan<NCHANNELS; iChan++){
-    m_metric_pedestal[iChan]=0;
-    m_metric_rms[iChan]=0;
-    m_metric_peaks[0][iChan]=0;
-    m_metric_peaks[1][iChan]=0;
-    m_metric_peaks[2][iChan]=0;
-    m_metric_peaks[3][iChan]=0;
-    m_statistics->registerMetric(&m_metric_pedestal[iChan], "pedestal"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
-    m_statistics->registerMetric(&m_metric_rms[iChan], "rms"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
-    m_statistics->registerMetric(&m_metric_peaks[0][iChan], "peaks1ch"+std::to_string(iChan), daqling::core::metrics::RATE);
-    m_statistics->registerMetric(&m_metric_peaks[1][iChan], "peaks2ch"+std::to_string(iChan), daqling::core::metrics::RATE);
-    m_statistics->registerMetric(&m_metric_peaks[2][iChan], "peaks3ch"+std::to_string(iChan), daqling::core::metrics::RATE);
-    m_statistics->registerMetric(&m_metric_peaks[3][iChan], "peaks4ch"+std::to_string(iChan), daqling::core::metrics::RATE);
-    m_statistics->registerMetric(&m_metric_peaks[0][iChan], "countpeaks1ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
-    m_statistics->registerMetric(&m_metric_peaks[1][iChan], "countpeaks2ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
-    m_statistics->registerMetric(&m_metric_peaks[2][iChan], "countpeaks3ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
-    m_statistics->registerMetric(&m_metric_peaks[3][iChan], "countpeaks4ch"+std::to_string(iChan), daqling::core::metrics::LAST_VALUE);
+    registerVariable(m_metric_pedestal[iChan], "pedestal"+std::to_string(iChan));
+    registerVariable(m_metric_rms[iChan], "rms"+std::to_string(iChan));
+    registerVariable(m_metric_peaks[0][iChan], "peaks1ch"+std::to_string(iChan), metrics::RATE);
+    registerVariable(m_metric_peaks[1][iChan], "peaks2ch"+std::to_string(iChan), metrics::RATE);
+    registerVariable(m_metric_peaks[2][iChan], "peaks3ch"+std::to_string(iChan), metrics::RATE);
+    registerVariable(m_metric_peaks[3][iChan], "peaks4ch"+std::to_string(iChan), metrics::RATE);
+    registerVariable(m_metric_peaks[0][iChan], "countpeaks1ch"+std::to_string(iChan));
+    registerVariable(m_metric_peaks[1][iChan], "countpeaks2ch"+std::to_string(iChan));
+    registerVariable(m_metric_peaks[2][iChan], "countpeaks3ch"+std::to_string(iChan));
+    registerVariable(m_metric_peaks[3][iChan], "countpeaks4ch"+std::to_string(iChan));
   }
   return;
 }

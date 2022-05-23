@@ -67,7 +67,8 @@ def lastRates(sleeptime):
           if value and value!=prevValues.get(name,""):
             prevValues[name]=value
             value = value.decode().split(':')
-            values[valType+rateType]=[1000.*float(value[0]),float(value[1])]
+            if float(value[1])>=0: #avoid negative rates
+              values[valType+rateType]=[1000.*float(value[0]),float(value[1])]
       if values:
         yield f"data:{json.dumps(values)}\n\n"
       time.sleep(sleeptime)

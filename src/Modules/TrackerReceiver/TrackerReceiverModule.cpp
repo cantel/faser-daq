@@ -109,6 +109,11 @@ TrackerReceiverModule::TrackerReceiverModule(const std::string& n):FaserProcess(
     }
     else m_RxTimeoutDisable = false;
 
+    if ( cfg.contains("ApplySCTMasks")) {
+       m_applySCTMasks = cfg["ApplySCTMasks"];
+    }
+    else m_applySCTMasks = false;
+
     INFO("\n\n*** Configurations for TrackerReceiver module *** \n emulation mode: "<<
           (runEmulation?"TRUE":"FALSE")<<
           "\n Running on CLK: "<<(m_extClkSelect?"TLB CLK":"INTERNAL CLK")<<
@@ -226,6 +231,7 @@ void TrackerReceiverModule::configure() {
               l_cfg->ReadFromFile(l_moduleConfigFile);
               l_cfg->SetReadoutMode(m_ABCD_ReadoutMode);
               l_cfg->SetEdgeDetection(m_ABCD_EdgeDetect);
+              l_cfg->SetApplySCTMasks(m_applySCTMasks);
           }
           else { 
             m_status=STATUS_ERROR;

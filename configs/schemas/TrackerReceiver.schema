@@ -104,6 +104,12 @@
                     "description"   : "If true will disable RxTimeout",
                     "default"       : 0
                     },
+                "ApplySCTMasks"     : {
+                    "type"          : "boolean",
+                    "title"         : "Apply SCT masks",
+                    "description"   : "If true will mask SCT strips as set by the SCT config file, else unmasked all strips furing configuration.",
+                    "default"       : 0
+                 },
                 "emulation"         : {
                     "type"          : "boolean",
                     "title"         : "Emulate TRB",

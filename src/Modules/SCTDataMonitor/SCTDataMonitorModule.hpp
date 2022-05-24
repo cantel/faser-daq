@@ -45,6 +45,6 @@ class SCTDataMonitorModule : public MonitorBaseModule {
   const uint8_t kSCT_ERR_UNKNOWNCHIP = 0xFF;
 
   //metrics
-  std::atomic<float> m_hit_multiplicity;
+  std::atomic<int> m_hit_multiplicity;
 
 };

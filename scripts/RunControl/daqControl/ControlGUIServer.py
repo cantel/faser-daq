@@ -1,5 +1,4 @@
 from cmath import exp
-from crypt import methods
 from flask import Flask,redirect,url_for,render_template,request,session,g,jsonify,Response
 from datetime import timedelta
 import redis
@@ -47,16 +46,13 @@ whoInterlocked[""] = [None, 0]
 TIMEOUT = serverConfigJson["timeout_for_requests_secs"]
 LOGOUT_URL = serverConfigJson["LOGOUT_URL"]
 
-rootStates = {'not_added' : ""}
 
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 
 r2 = redis.Redis(host='localhost', port=6379, db=2,charset="utf-8", decode_responses=True)
 
-microStatetoState = {""}
+r2.setnx("runState","DOWN") # create key runState with value DOWN if it doesn't exist
 
-
- # The general state of the RUN : if DOWN, no  
 
 def systemConfiguration(configName, configPath):
     global sysConf
@@ -390,7 +386,7 @@ def login_callback():
     state = request.args.get("state", "unknown")
     _state = session.pop("state", None)
     if state != _state:
-        return Response("Invalid state", status=403)
+        return Response("Invalid state: Please retry", status=403)
     code = request.args.get("code")
     response = keycloak_client.callback(code)
     access_token = response["access_token"]
@@ -587,18 +583,6 @@ def login():
     auth_url, state = keycloak_client.login()
     session["state"] = state
     return redirect(auth_url)
-    # else:
-    #     session["user"] = {}
-    #     session["user"]["cern_upn"] = "local_user"
-    #     session["configName"] = ""
-    #     session["configPath"] = ""
-    #     session["configDict"] = ""
-    #     logAndEmit(
-    #         session["configName"],
-    #         "INFO",
-    #         "User " + session["user"]["cern_upn"] + " logged in ",
-    #     )
-    #     return redirect(url_for("index"))
 
 
 @app.route("/")
@@ -671,22 +655,85 @@ def infoWindow(module):
     return render_template("infoWindow.html", module = module)
 
 
-@app.route("/monitoring/previous")
-def monitoringPrevious():
+@app.route("/monitoring/initialValues",methods=["GET"])
+def monitoringInitialValues():
     """
     For the plots in the monitoring Panel (Run control GUI)
-    Returns : - previous <X> values for specified categories 
+    Returns : some metrics (defined by 'keys') and last values for rates defined in 'graphKeys'
+    NOTE: the function can be optimized
     """
-    ...
+    packet = {"values": {}, "graphs":{}}
+    keys = ["RunStart","RunNumber",
+            "Events_received_Physics","Event_rate_Physics",
+            "Events_received_Calibration", "Event_rate_Calibration",
+            "Events_received_TLBMonitoring","Event_rate_TLBMonitoring"]
+    # getting the eventbuilder module 
+    #NOTE The next line avoids the need to hardcode the name of the module, but it still needs to have eventbuilder in it's name.  
+    eventBuilderName = r.keys("eventbuilder*")[0] # should only be one eventbuilder module
+    results = [int(float(metric.split(":")[1])) for metric in r.hmget(eventBuilderName, keys )]
+    data = dict(zip(keys,results))
+    
+    data["RunStart"] =datetime.fromtimestamp(float(data["RunStart"])).strftime('%d/%m %H:%M:%S')  if data["RunStart"] != 0 else "-"
+    
+    packet["values"] = data
+    
+    # for the plot :
+
+    graphKeys = [
+        f"History:{eventBuilderName}_Event_rate_Physics",
+        f"History:{eventBuilderName}_Event_rate_Calibration",
+        f"History:{eventBuilderName}_Event_rate_TLBMonitoring",
+                ]
+    
+    for graphKey in graphKeys:
+        values, = sorted(r.lrange(graphKey,0,r.llen(graphKey)))[-20:],
+        values = [[float(value.split(":")[0]) for value in values], [int(value.split(":")[1]) for value in values]]
+        packet["graphs"][graphKey] = values
+    return jsonify(packet) 
+
     
 
-@app.route("/monitoring/latest")
-def monitoringLatest():
+@app.route("/monitoring/latestValues")
+def monitoringLatestValues():
     """
-    Returns : - run number
-              - starting time
+    Returns : a stream  from a "eventbuilder" module with various monitoring data
+
     """
-    ...
+    def getValues():
+        keys = ["RunStart","RunNumber",
+                "Events_received_Physics","Event_rate_Physics",
+                "Events_received_Calibration", "Event_rate_Calibration",
+                "Events_received_TLBMonitoring","Event_rate_TLBMonitoring"]
+        graphKeys = [
+                "Event_rate_Physics",
+                "Event_rate_Calibration",
+                "Event_rate_TLBMonitoring"]
+        # getting the eventbuilder module 
+        #NOTE The next line avoids the need to hardcode the name of the module, but it still needs to have eventbuilder in its name.  
+        eventBuilderName = r.keys("eventbuilder*")[0] # should only be one eventbuilder module
+
+        d1 = []
+        while True :
+            packet = {}
+            data_results = [int(float(metric.split(":")[1])) for metric in r.hmget(eventBuilderName, keys )]
+            graph_data =  r.hmget(eventBuilderName, graphKeys)
+            # TODO : populate graph_data
+            if (d1 != data_results + graph_data): # if data has changed           
+                data = dict(zip(keys,data_results))
+                data["RunStart"] = datetime.fromtimestamp(float(data["RunStart"])).strftime('%d/%m %H:%M:%S')  if data["RunStart"] != 0 else "-"
+                packet["values"] = data
+
+                packet["graphs"] = {key : [float(value.split(":")[0]),int(value.split(":")[1])] for (key,value) in zip(graphKeys,graph_data)}
+
+
+                d1 = data_results + graph_data
+
+
+                yield f"data:{json.dumps(packet)}\n\n"
+                d1 = data_results
+            time.sleep(1) # NOTE:Can be configurable
+    return Response(getValues(), mimetype="text/event-stream")
+
 
 
 if __name__ == "__main__":

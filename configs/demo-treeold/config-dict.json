@@ -1,6 +1,6 @@
 {
     "tree": "control-tree.json",
     "fsm_rules": "../fsm-rules.json",
-    "config": "../emulatorLocalhost.json",
+    "config": "config.json",
     "grafana": "../grafana.json"
 }

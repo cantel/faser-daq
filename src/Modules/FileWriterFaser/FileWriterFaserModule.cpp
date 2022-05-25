@@ -124,21 +124,14 @@ void FileWriterFaserModule::configure() {
   if (m_statistics) {
     // Register statistical variables
     for (auto & [ chid, metrics ] : m_channelMetrics) {
-      m_statistics->registerMetric<std::atomic<size_t>>(&metrics.bytes_written,
-                                                        "BytesWritten_"+m_channel_names[chid],
-                                                        daqling::core::metrics::RATE);
-      m_statistics->registerMetric<std::atomic<size_t>>(
-          &metrics.events_received, "EventsReceived_"+m_channel_names[chid],
-          daqling::core::metrics::LAST_VALUE);
-      m_statistics->registerMetric<std::atomic<size_t>>(
-          &metrics.files_written, "FilesWritten_"+m_channel_names[chid],
-          daqling::core::metrics::LAST_VALUE);
-      m_statistics->registerMetric<std::atomic<size_t>>(
-          &metrics.payload_queue_size, "PayloadQueueSize_"+m_channel_names[chid],
-          daqling::core::metrics::LAST_VALUE);
-      m_statistics->registerMetric<std::atomic<size_t>>(&metrics.payload_size,
-                                                        "PayloadSize_"+m_channel_names[chid],
-                                                        daqling::core::metrics::AVERAGE);
+      registerVariable(metrics.bytes_written,
+		       "BytesWritten_"+m_channel_names[chid],
+		       daqling::core::metrics::RATE);
+      registerVariable(metrics.events_received, "EventsReceived_"+m_channel_names[chid]);
+      registerVariable(metrics.files_written, "FilesWritten_"+m_channel_names[chid]);
+      registerVariable(metrics.payload_queue_size, "PayloadQueueSize_"+m_channel_names[chid]);
+      registerVariable(metrics.payload_size,"PayloadSize_"+m_channel_names[chid],
+		       daqling::core::metrics::AVERAGE);
     }
     DEBUG("Metrics are setup");
   }

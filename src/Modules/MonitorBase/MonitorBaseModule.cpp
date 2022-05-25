@@ -166,31 +166,19 @@ bool MonitorBaseModule::is_led_triggered(DataFragment<daqling::utilities::Binary
 void MonitorBaseModule::register_error_metrics() {
 
    m_metric_payload=0;
-   m_metric_error_unclassified=0;
-   m_metric_error_bcidmismatch=0;
-   m_metric_error_tagmismatch=0;
-   m_metric_error_timeout=0;
-   m_metric_error_overflow=0;
-   m_metric_error_corrupted=0;
-   m_metric_error_dummy=0;
-   m_metric_error_missing=0;
-   m_metric_error_empty=0;
-   m_metric_error_duplicate=0;
-   m_metric_error_unpack=0;
-
   if ( m_stats_on ) {
     INFO("... registering error metrics ... " );
-    m_statistics->registerMetric(&m_metric_error_unclassified, "error_unclassified", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_bcidmismatch, "error_bcidmismatch", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_tagmismatch, "error_tagmismatch", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_timeout, "error_timeout", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_overflow, "error_overflow", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_corrupted, "error_corrupted", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_dummy, "error_dummy", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_unpack, "error_unpack", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_missing, "error_missing", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_empty, "error_empty", daqling::core::metrics::ACCUMULATE);
-    m_statistics->registerMetric(&m_metric_error_duplicate, "error_duplicate", daqling::core::metrics::ACCUMULATE);
+    registerVariable(m_metric_error_unclassified, "error_unclassified", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_bcidmismatch, "error_bcidmismatch", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_tagmismatch, "error_tagmismatch", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_timeout, "error_timeout", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_overflow, "error_overflow", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_corrupted, "error_corrupted", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_dummy, "error_dummy", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_unpack, "error_unpack", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_missing, "error_missing", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_empty, "error_empty", metrics::ACCUMULATE);
+    registerVariable(m_metric_error_duplicate, "error_duplicate", metrics::ACCUMULATE);
   }
   return;
 

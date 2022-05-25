@@ -215,7 +215,7 @@ void DigitizerReceiverModule::configure() {
     registerVariable(m_lhc_beamenergy,"LHC_beamenergy");
     registerVariable(m_lhc_intensity1,"LHC_intensity1");
     registerVariable(m_lhc_intensity2,"LHC_intensity2");
-    registerVariable(m_lhc_frequency,"LHC_frequency");
+    registerVariable(m_lhc_frequency,"LHC_frequency",metrics::LAST_VALUE,false); //We don't reset this metric between runs
     m_lhc_frequency=40.079;
   }
 

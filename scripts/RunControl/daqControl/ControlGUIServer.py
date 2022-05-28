@@ -73,9 +73,7 @@ def getConfigsInDir(configPath):
     listOfFiles = []
     for d in os.listdir(configPath):
         conf_path = os.path.join(configPath, d)
-        if not os.path.isfile(conf_path) and "config-dict.json" in os.listdir(
-            conf_path
-        ):
+        if not os.path.isfile(conf_path) and "config-dict.json" in os.listdir(conf_path):
             listOfFiles.append(d)
     return listOfFiles
 
@@ -110,15 +108,10 @@ def reinitTree(configJson, oldRoot=None):
     with open(os.path.join(session["configPath"], configJson["config"])) as f:
         # base_dir_uri = Path(session['configPath']).as_uri() + '/' # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
         base_dir_uri = (
-            Path(configPath).as_uri() + "/"
-        )  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
-        jsonref_obj = jsonref.load(
-            f, base_uri=base_dir_uri, loader=jsonref.JsonLoader()
-        )
+            Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
+        jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
 
-    if (
-        "configuration" in jsonref_obj
-    ):  # faser ones have "configuration" but not demo-tree
+    if ("configuration" in jsonref_obj):  # faser ones have "configuration" but not demo-tree
         # schema with references (version >= 10)
         configuration = deepcopy(jsonref_obj)["configuration"]
     else:
@@ -268,9 +261,7 @@ def stateChecker():
     whoValue = {}
     rState1 = {}
     rState2 = {}
-    # runningFile =""
-
-    
+    runningFile =""
 
     files = getConfigsInDir(configPath)
     for file in files:
@@ -319,9 +310,10 @@ def stateChecker():
                 print()
             rState1[file] = rState2[file]
 
-        # if r2.get("runningFile") != runningFile :
-        #     print("Changed config")
-       
+        runningFile2 = r2.get("runningFile")
+        if runningFile2!= runningFile :
+            socketio.emit("configChng", runningFile2 )
+            runningFile = runningFile2
         time.sleep(0.5)
 
 
@@ -342,18 +334,14 @@ def updateRedis(file:str=None, status:str = None):
         r2.set('runState', status) 
         if status == "DOWN":
             r2.set('runOngoing',0)
-            r2.set('runningFile', '')
         else:
             r2.set('runOngoing',1)
-            r2.set('runningFile', file)
 
 
 
 keycloak_client = Client(callback_uri=serverConfigJson["callbackUri"])
 app.secret_key = os.urandom(24)
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
-    minutes=serverConfigJson["timeout_session_expiration_mins"]
-)
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfigJson["timeout_session_expiration_mins"])
 
 
 @app.route("/appState", methods=["GET"])
@@ -440,38 +428,15 @@ def interlock():
             session["user"]["cern_upn"],
             datetime.now(),
         ]
-        logAndEmit(
-            session["configName"],
-            "INFO",
-            "User "
-            + session["user"]["cern_upn"]
-            + " has TAKEN control of configuration "
-            + session["configName"],
-        )
+        logAndEmit(session["configName"],"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ session["configName"],)
         return "Control has been taken"
     else:
         if whoInterlocked[session["configName"]][0] == session["user"]["cern_upn"]:
-            logAndEmit(
-                session["configName"],
-                "INFO",
-                "User "
-                + session["user"]["cern_upn"]
-                + " has RELEASED control of configuration "
-                + session["configName"],
-            )
+            logAndEmit(session["configName"],"INFO","User "+ session["user"]["cern_upn"]+ " has RELEASED control of configuration "+ session["configName"],)
             whoInterlocked[session["configName"]] = [None, 0]
             return "Control has been released"
         else:
-            logAndEmit(
-                session["configName"],
-                "WARNING",
-                "User "
-                + session["user"]["cern_upn"]
-                + " ATTEMPTED to take control of configuration "
-                + session["configName"]
-                + " but failed, because it is controlled by "
-                + str(whoInterlocked[session["configName"]][0]),
-            )
+            logAndEmit(session["configName"],"WARNING","User "+ session["user"]["cern_upn"]+ " ATTEMPTED to take control of configuration "+ session["configName"]+ " but failed, because it is controlled by "+ str(whoInterlocked[session["configName"]][0]),)
             return "Controlled by user " + str(whoInterlocked[session["configName"]][0])
 
 
@@ -497,16 +462,12 @@ def logout():
     session.pop("configName", None)
     session.pop("configPath", None)
     session.pop("configDict", None)
-    return redirect(
-        "{}?redirect_uri={}".format(LOGOUT_URL, url_for("index", _external=True))
-    )
+    return redirect("{}?redirect_uri={}".format(LOGOUT_URL, url_for("index", _external=True)))
 
 @app.route("/fsmrulesJson", methods=["GET", "POST"])
 def fsmrulesJson():
     try:
-        with open(
-            os.path.join(session["configPath"], session["configDict"]["fsm_rules"])
-        ) as f:
+        with open(os.path.join(session["configPath"], session["configDict"]["fsm_rules"])) as f:
             fsmRules = json.load(f)
     except:
         return "error"
@@ -565,20 +526,13 @@ def configDirs():
 def initConfig():
     session["configName"] = request.args.get("configName")
     
-    logAndEmit(
-        session["configName"],
-        "INFO",
-        "User "
-        + session["user"]["cern_upn"]
-        + " has switched to configuration "
-        + session["configName"],
-    )
+    logAndEmit(session["configName"],"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ session["configName"],)
     session["configPath"] = os.path.join(env["DAQ_CONFIG_DIR"], session["configName"])
     with open(os.path.join(session["configPath"], "config-dict.json")) as f:
         session["configDict"] = json.load(f)
 
     systemConfiguration(session["configName"], session["configPath"])
-    socketio.emit("configChng",request.args.get("configName"))
+    r2.set("runningFile", session["configName"])
     return "Success"
 
 

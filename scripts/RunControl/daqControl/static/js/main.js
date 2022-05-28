@@ -283,9 +283,7 @@ var app = new Vue({
     isROOTButtonEnabled(RCommand) {
       // console.log(this.fsmRules ? this.fsmRules[this.runState].includes(RCommand): "Pas chargé")
       // TODO: add condition if logged in or not
-      return this.fsmRules
-        ? this.fsmRules[this.runState].includes(RCommand)
-        : false;
+      return this.fsmRules? this.fsmRules[this.runState].includes(RCommand) : false;
     },
     goToRunningConfig(runningConfig) {
       console.log("Going to ", runningConfig);
@@ -297,8 +295,7 @@ var app = new Vue({
         this.logged = data["user"]["logged"]
         this.username = data["user"]["name"]
         this.runOnGoing = data["runOngoing"];
-        if (this.runOnGoing) {
-          this.loadConfig(data["runningFile"]);
+        if ((data["runningFile"] != "") && (this.c_loadedConfigName != data["runningFile"] ) ) {this.loadConfig(data["runningFile"]);
         }
       });
     },

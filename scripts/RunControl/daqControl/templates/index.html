@@ -35,16 +35,13 @@
 
     .metrics-panel{
       width: 25%;
-      min-width: 50px;
+      min-width: max-content;
       max-width: 205px;
       margin-top: 10px;
       margin-left: 15px;
       margin-right: 15px;
       padding: 4px;
-
-      /* margin-left:auto;
-      margin-right:auto; */
-
+      white-space: nowrap;
     }
   </style>
 </head>
@@ -99,11 +96,10 @@
         </v-menu>
         <v-spacer></v-spacer>
         <v-btn icon text small class="mx-1">
-          <v-icon @click="login"> mdi-account</v-icon>
+          <v-icon v-if="logged" @click="logout"> mdi-account-off</v-icon>
+          <v-icon v-else @click="login"> mdi-account</v-icon>
         </v-btn>
-        <v-btn icon text small class="mx-1">
-          <v-icon @click="logout"> mdi-account-off</v-icon>
-        </v-btn>
+
         Logged as : {{ usr }}
       </v-app-bar>
 
@@ -114,8 +110,8 @@
               <h4>[[ c_loadedConfigName ]]: </h4>
               <v-chip label :color="stateColors[runState]" class="mx-3"> [[ runState ]] </v-chip>
             </div>
-            <span class="dark" class="mx-3" v-if="isActiveNode() ? !hasChildren(activeNode) : false">
-              <v-btn depressed small dark color="teal"> LOG </v-btn>
+            <span  class="mx-3" v-if="isActiveNode() ? !hasChildren(activeNode) : false">
+              <v-btn depressed small dark color="teal" @click="openLogWindow(activeNode[0])"> LOG </v-btn>
               <v-btn @click="infoIsActive= !infoIsActive" depressed small dark color="teal"> INFO </v-btn>
             </span>
           </v-card-title>

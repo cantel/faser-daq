@@ -47,16 +47,13 @@ Vue.component("plot", {
 });
 
 Vue.component("monitoring_panel", {
-  delimiters: ["[[", "]]"],
-  props: { p_on: Boolean },
-  data: function () {
+  delimiters: ["[[", "]]"], props: { p_on: Boolean }, data: function () {
     return {
       c_polling: null,
       tab: 1,
       updates: {
         Physics: { x: [[]], y: [[]] },
-        Calibration: { x: [[]], y: [[]] },
-        TLBMonitoring: { x: [[]], y: [[]] },
+        Calibration: { x: [[]], y: [[]] }, TLBMonitoring: { x: [[]], y: [[]] },
       },
       metrics: {},
     };
@@ -123,7 +120,7 @@ Vue.component("monitoring_panel", {
               <strong class="blue--text text--darken-4">Number:</strong> [[metrics.RunNumber]] 
             </div>
             <div>
-              <strong class="blue--text text--darken-4">Starting time:</strong>  [[metrics.RunStart]]
+              <strong class="blue--text text--darken-4" >Starting time:</strong>  [[metrics.RunStart]]
             </div>
           </div>
         </v-card>
@@ -243,11 +240,11 @@ var app = new Vue({
     infoIsActive: false, // if the info box is active
 
     runState: "",
-    runOnGoing: false,
+    runOnGoing: false, 
   },
   delimiters: ["[[", "]]"],
   mounted() {
-    this.getInitRunState();
+    this.getInitState();
     this.getConfigDirs();
     this.getLog();
     // listeners
@@ -257,21 +254,32 @@ var app = new Vue({
 
     this.c_socket.on("runStateChng", (info) => {
       this.runState = info["runState"];
-      if (
-        info["runState"] != "DOWN" &&
-        info["file"] != this.c_loadedConfigName
-      ) {
-        this.runOnGoing = true;
-        console.log("Switching configuration file");
-        this.loadConfig(info["file"]);
-      } else if (info["runState"] != "DOWN") {
-        this.runOnGoing = true;
-      } else if (info["runState"] == "DOWN") {
-        this.runOnGoing = false;
-      }
+      this.runOnGoing = true ? info.runState != "DOWN" : false;
     });
+
+    this.c_socket.on("configChng", (configName) => {
+      console.log("Personne qui a locked change de file ", configName)
+      if (configName != this.c_loadedConfigName && this.c_configLoading==false) {this.loadConfig(configName);}
+    })
+
   },
   methods: {
+    openLogWindow(){
+      //first checks the group na`e and the machine where the logs are located (TODO)
+      axios.get(`/logURL?module=${this.activeNode[0].name}`).then((r)=>{
+       let url = r.data;
+       window.open(
+        url,
+        "_blank",
+        "width=800, height=500"
+      );
+
+      })
+
+  
+
+    },
+
     isROOTButtonEnabled(RCommand) {
       // console.log(this.fsmRules ? this.fsmRules[this.runState].includes(RCommand): "Pas chargé")
       // TODO: add condition if logged in or not
@@ -282,10 +290,12 @@ var app = new Vue({
     goToRunningConfig(runningConfig) {
       console.log("Going to ", runningConfig);
     },
-    getInitRunState() {
-      axios.get("/runState").then((response) => {
+    getInitState() {
+      axios.get("/appState").then((response) => {
         data = response["data"];
         this.runState = data["runState"];
+        this.logged = data["user"]["logged"]
+        this.username = data["user"]["name"]
         this.runOnGoing = data["runOngoing"];
         if (this.runOnGoing) {
           this.loadConfig(data["runningFile"]);
@@ -334,6 +344,7 @@ var app = new Vue({
       });
     },
     loadConfig(config) {
+      // this.c_socket.emit('configChng', config);
       this.c_configLoading = true;
       this.infoIsActive = false;
       this.nodeStates = null;
@@ -392,6 +403,7 @@ var app = new Vue({
           });
       }
     },
+
     login() {
       window.location.replace("/login");
     },

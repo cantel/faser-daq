@@ -49,9 +49,13 @@ LOGOUT_URL = serverConfigJson["LOGOUT_URL"]
 
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 
-r2 = redis.Redis(host='localhost', port=6379, db=2,charset="utf-8", decode_responses=True)
+r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_responses=True)
+
 
 r2.setnx("runState","DOWN") # create key runState with value DOWN if it doesn't exist
+r2.setnx("runOngoing",0) # 
+r2.setnx("runningFile","") 
+
 
 
 def systemConfiguration(configName, configPath):
@@ -130,6 +134,7 @@ def reinitTree(configJson, oldRoot=None):
     #     raise Exception("Invalid grafana/kibana nodes configuration:" + e)
 
     group = configuration["group"]  # for example "daq"
+ 
     if "path" in configuration.keys():
         dir = configuration["path"]
     else:
@@ -196,7 +201,7 @@ def executeCommROOT(action:str):
         "ECR": {"commands": ["ecr"], "states": ["state"]},  # FIXME: find state for ecr
     }
 
-    r = ""
+
     configName = session["configName"]
     logAndEmit(
         configName,
@@ -207,10 +212,10 @@ def executeCommROOT(action:str):
     if action == "INITIALISE": 
         ...
     elif action == "START":     
-        # Where run service logic can go 
+        # Where run service logic can be implemented 
         ...
     elif action == "STOP":
-        # Where run service logic can go 
+        # Where run service logic can be implemented
         ...
     elif action == "SHUTDOWN":
         ...
@@ -219,10 +224,19 @@ def executeCommROOT(action:str):
     elif action == "ECR":
         ...
     
-
+    stateLog = {}
+    logPaths =[]
     for command,state in zip(commands[action]["commands"], commands[action]["states"]):
         print("Executing command "+ command)
         r = sysConf[session["configName"]].executeAction(command)
+
+        if command == "add":
+            logPaths = r
+            print("\n\n\n\n\n\n\n\n\n")
+            print(logPaths)
+            print(getListNodes(sysConf[configName]))
+        else: stateLog[command] = r
+
         # NOTE: Check for errors . If errors  cancel command and return to previous step
         while True:
             if (sysConf[session["configName"]].getState() == state) and  (not sysConf[session["configName"]].inconsistent) : 
@@ -230,7 +244,9 @@ def executeCommROOT(action:str):
             time.sleep(0.5)
             # NOTE: Needs timeout handling : if timeout : cancel all requests and come back to previous step. 
             # NOTE; Needs state validation 
-    return r
+
+    
+    return stateLog # success 
     
 
 def getStatesList(locRoot):
@@ -252,6 +268,7 @@ def stateChecker():
     whoValue = {}
     rState1 = {}
     rState2 = {}
+    # runningFile =""
 
     
 
@@ -301,6 +318,10 @@ def stateChecker():
                 print(f"rState: {file} not registred")
                 print()
             rState1[file] = rState2[file]
+
+        # if r2.get("runningFile") != runningFile :
+        #     print("Changed config")
+       
         time.sleep(0.5)
 
 
@@ -335,13 +356,13 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(
 )
 
 
-@app.route("/runState", methods=["GET"])
-def runState():
+@app.route("/appState", methods=["GET"])
+def appState():
     packet ={}
     packet["runOngoing"] = bool(int(r2.get("runOngoing")))
-    print(packet["runOngoing"])
     packet["runningFile"] = r2.get('runningFile')
     packet["runState"] = r2.get("runState")
+    packet["user"] = {"name":session["user"]["cern_upn"], "logged" : True if "cern_gid" in session["user"] else False }
     return jsonify(packet)
 
 
@@ -512,9 +533,6 @@ def connect():
 
 @app.before_first_request
 def startup():
-    print("Running startup function")
-    print("Status in startup function")
-    sessionStatus()
     global thread
     for file in getConfigsInDir(configPath):
         whoInterlocked[file] = [None, 0]
@@ -546,6 +564,7 @@ def configDirs():
 @app.route("/initConfig", methods=["GET", "POST"])
 def initConfig():
     session["configName"] = request.args.get("configName")
+    
     logAndEmit(
         session["configName"],
         "INFO",
@@ -558,9 +577,8 @@ def initConfig():
     with open(os.path.join(session["configPath"], "config-dict.json")) as f:
         session["configDict"] = json.load(f)
 
-    print("initConfig: ")
-    sessionStatus()
     systemConfiguration(session["configName"], session["configPath"])
+    socketio.emit("configChng",request.args.get("configName"))
     return "Success"
 
 
@@ -639,6 +657,7 @@ def statesList():
 def rootCommand():
     command = request.args.get("command")
     r = executeCommROOT(command)
+    print(r)
     return jsonify(r)
 
 @app.route("/info", methods=["GET"])
@@ -717,7 +736,6 @@ def monitoringLatestValues():
             packet = {}
             data_results = [int(float(metric.split(":")[1])) for metric in r.hmget(eventBuilderName, keys )]
             graph_data =  r.hmget(eventBuilderName, graphKeys)
-            # TODO : populate graph_data
             if (d1 != data_results + graph_data): # if data has changed           
                 data = dict(zip(keys,data_results))
                 data["RunStart"] = datetime.fromtimestamp(float(data["RunStart"])).strftime('%d/%m %H:%M:%S')  if data["RunStart"] != 0 else "-"
@@ -733,6 +751,23 @@ def monitoringLatestValues():
                 d1 = data_results
             time.sleep(1) # NOTE:Can be configurable
     return Response(getValues(), mimetype="text/event-stream")
+
+
+@app.route("/logURL", methods=["GET"])
+def return_logURL():
+    module = request.args.get("module")
+    print(module)
+    groupName =  "faser"  #TODO: Should not be hardcoded
+    # nodes = getListNodes(sysConf[session["configName"]])
+    url = f"http://{platform.node()}:9001/logtail/faser:{module}"
+
+    return jsonify(url)
+
+
+
+
+def getListNodes(locRoot):
+    return [node.name for pre,_,node in RenderTree(locRoot)]
 
 
 

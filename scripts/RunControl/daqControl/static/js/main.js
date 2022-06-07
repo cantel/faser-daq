@@ -23,7 +23,7 @@ Vue.component("plot", {
             type: "date",
           },
         },
-        config: { responsive: true, displayModeBar: false },
+        config: { responsive: true, displayModeBar: false, showTips: false },
       },
     };
   },
@@ -240,30 +240,66 @@ var app = new Vue({
     infoIsActive: false, // if the info box is active
 
     runState: "",
-    runOnGoing: false, 
+    runOnGoing: false,
+    interlocked: false,
+    username : "local_user",
+    whoInterlocked : null,
+    modulesError :[],
+    resultCommand: "" // what the root action will return (success or error-> timeout) 
   },
+
   delimiters: ["[[", "]]"],
   mounted() {
     this.getInitState();
     this.getConfigDirs();
     this.getLog();
-    // listeners
-    this.c_socket.on("logChng", (line) => {
-      this.log.push(line);
-    });
-
-    this.c_socket.on("runStateChng", (info) => {
-      this.runState = info["runState"];
-      this.runOnGoing = true ? info.runState != "DOWN" : false;
-    });
-
-    this.c_socket.on("configChng", (configName) => {
-      console.log("Personne qui a locked change de file ", configName)
-      if (configName != this.c_loadedConfigName && this.c_configLoading==false) {this.loadConfig(configName);}
-    })
-
+    this.initListeners();
   },
   methods: {
+    initListeners(){
+      this.c_socket.on("logChng", (line) => {
+        this.log.push(line);
+      });
+  
+      this.c_socket.on("runStateChng", (info) => {
+        this.runState = info["runState"];
+        this.runOnGoing = true ? info.runState != "DOWN" : false;
+      });
+  
+      this.c_socket.on("configChng", (configName) => {
+        console.log("Personne qui a locked change de file ", configName)
+        if (configName != this.c_loadedConfigName && this.c_configLoading==false) {this.loadConfig(configName);}
+      });
+  
+      this.c_socket.on("interlockChng", newState => {
+        console.log("djfasdfjsékflsdjféklasdjflkéfsdjf",newState)
+        this.whoInterlocked = newState;
+      });
+
+      this.c_socket.on("errorModChng", newErrorsMod => {
+        console.log("socket", newErrorsMod)
+        this.modulesError = newErrorsMod;
+      });
+
+      
+
+  
+    },
+    interlock(){
+
+        axios.post("/interlock", {
+          action: this.locked ? "unlock" : "lock" ,
+          cern_upn: this.username 
+        }).then((response) => {
+          console.log(response.data)
+          // this.interlocked = !this.interlocked;
+        }).catch(e => console.log(e))
+    },
+    
+    openFullLog(){
+      window.open(`/fullLog/${this.activeNode[0].name}`,"_blank");
+    },
+
     openLogWindow(){
       //first checks the group na`e and the machine where the logs are located (TODO)
       axios.get(`/logURL?module=${this.activeNode[0].name}`).then((r)=>{
@@ -273,15 +309,10 @@ var app = new Vue({
         "_blank",
         "width=800, height=500"
       );
-
       })
-
-  
-
     },
 
     isROOTButtonEnabled(RCommand) {
-      // console.log(this.fsmRules ? this.fsmRules[this.runState].includes(RCommand): "Pas chargé")
       // TODO: add condition if logged in or not
       return this.fsmRules? this.fsmRules[this.runState].includes(RCommand) : false;
     },
@@ -295,6 +326,7 @@ var app = new Vue({
         this.logged = data["user"]["logged"]
         this.username = data["user"]["name"]
         this.runOnGoing = data["runOngoing"];
+        this.whoInterlocked = data["whoInterlocked"];
         if ((data["runningFile"] != "") && (this.c_loadedConfigName != data["runningFile"] ) ) {this.loadConfig(data["runningFile"]);
         }
       });
@@ -302,6 +334,7 @@ var app = new Vue({
     getFSM() {
       axios.get("fsmrulesJson").then((response) => {
         if (response.data.length == 0) {
+          alert("Something is wrong with the fsm rules ")
         }
         this.fsmRules = response.data;
         this.fsmRules["default"] = [];
@@ -402,7 +435,7 @@ var app = new Vue({
     },
 
     login() {
-      window.location.replace("/login");
+      window.location.assign("/login");
     },
     logout() {
       // axios.get("/logout");
@@ -420,10 +453,9 @@ var app = new Vue({
       this.processing[action] = true;
       axios
         .get(`/processROOTCommand?command=${action}`)
-        .then(() => {
-          console.log(action);
+        .then((result) => {
           this.processing[action] = false;
-          console.log("Process completed");
+          this.resultCommand = result.data;
         })
         .catch((e) => {
           this.processing[action] = false;
@@ -462,8 +494,27 @@ var app = new Vue({
       // can have a different name than root
       return this.c_treeJson["name"];
     },
-    // runOnGoing: function(){
-    //   return false ? this.runState == "DOWN" : true;
-    // }
+    locked : function(){
+      if (this.username == this.whoInterlocked && this.logged ){
+        return true;
+      }
+      else {
+        return false;
+      }
+    },
+
+    d_loadConfig: function(){
+      if (this.runOnGoing || !this.logged || this.locked){
+      // if (!this.logged){
+        return true;
+      }
+      else {return false;}
+    },
+    d_controlPanel : function(){
+      return !this.locked ? true : false;
+    },
+    d_includeExclude : function(){
+      return this.runOnGoing || !this.locked ? true : false
+    }
   },
 });

@@ -21,6 +21,9 @@ from copy import deepcopy
 from pathlib import Path
 import platform
 
+maxTransitionTime = 30 # TODO: have to be in the configuration file 
+
+
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control"))
 from nodetree import NodeTree
 from daqcontrol import daqcontrol as daqctrl
@@ -45,7 +48,9 @@ whoInterlocked = {}
 whoInterlocked[""] = [None, 0]
 TIMEOUT = serverConfigJson["timeout_for_requests_secs"]
 LOGOUT_URL = serverConfigJson["LOGOUT_URL"]
-
+CONFIG_PATH =  ""
+CONFIG_DICT = {}
+configTree = None
 
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 
@@ -82,19 +87,18 @@ def reinitTree(configJson, oldRoot=None):
     """
     configJson: map des différents fichiers json
     """
-
     print("try reinit tree")
     if oldRoot != None:
         for pre, _, node in RenderTree(oldRoot):
             node.stopStateCheckers()
 
     # On récupère le fichier pour le tree
-    with open(os.path.join(session["configPath"], configJson["tree"])) as f:
+    with open(os.path.join(CONFIG_PATH, configJson["tree"])) as f:
         tree = json.load(f)
 
     # On récupère le fichier pour fsm
     try:
-        with open(os.path.join(session["configPath"], configJson["fsm_rules"])) as f:
+        with open(os.path.join(CONFIG_PATH, configJson["fsm_rules"])) as f:
             fsm_rules = json.load(f)
     except:
         # raise Exception("Invalid FSM configuration")
@@ -103,9 +107,8 @@ def reinitTree(configJson, oldRoot=None):
     state_action = fsm_rules["fsm"]  # allowed action if in state "booted", etc...
     order_rules = fsm_rules["order"]  # ordrer of starting and stopping
 
-    # print(os.path.join(session['configPath'], configJson['config']))
     # We open the main config file
-    with open(os.path.join(session["configPath"], configJson["config"])) as f:
+    with open(os.path.join(CONFIG_PATH, configJson["config"])) as f:
         # base_dir_uri = Path(session['configPath']).as_uri() + '/' # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
         base_dir_uri = (
             Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
@@ -126,7 +129,7 @@ def reinitTree(configJson, oldRoot=None):
     # except:
     #     raise Exception("Invalid grafana/kibana nodes configuration:" + e)
 
-    group = configuration["group"]  # for example "daq"
+    group = configuration["group"]  # for example "daq" or "faser"
  
     if "path" in configuration.keys():
         dir = configuration["path"]
@@ -154,18 +157,19 @@ def reinitTree(configJson, oldRoot=None):
 
 
 def executeComm(ctrl, action):
-    global sysConf
+    global sysConf,currentConfig
     r = ""
-    configName = session["configName"]
+    configName = r2.get("runningFile")
+
     logAndEmit(
         configName,"INFO","User "+ session["user"]["cern_upn"]+ " has sent command "+ action+ " on node "+ ctrl,)
     try:
         if action == "exclude":
-            r = find_by_attr(sysConf[session["configName"]], ctrl).exclude()
+            r = find_by_attr(sysConf[configName], ctrl).exclude()
         elif action == "include":
-            r = find_by_attr(sysConf[session["configName"]], ctrl).include()
+            r = find_by_attr(sysConf[configName], ctrl).include()
         else:
-            r = find_by_attr(sysConf[session["configName"]], ctrl).executeAction(action)
+            r = find_by_attr(sysConf[configName], ctrl).executeAction(action)
     except Exception as e:
         logAndEmit(configName, "ERROR", ctrl + ": " + str(e))
     if r != "":
@@ -175,7 +179,7 @@ def executeComm(ctrl, action):
 
 def executeCommROOT(action:str):
     """
-    execute actions on ROOT node (general commands)
+    Execute actions on ROOT node (general commands) and extend the interlock for another <timeout> seconds 
     Returns : location of the module specific log files 
     """
     global sysConf
@@ -194,18 +198,15 @@ def executeCommROOT(action:str):
         "ECR": {"commands": ["ecr"], "states": ["state"]},  # FIXME: find state for ecr
     }
 
-
-    configName = session["configName"]
-    logAndEmit(
-        configName,
-        "INFO",
-        "User " + session["user"]["cern_upn"] + " has sent ROOT command " + action,
-    )
+    r2.expire("whoInterlocked",maxTransitionTime)
+    configName =  r2.get("runningFile")
+    logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     # Logic before sending commands 
     if action == "INITIALISE": 
         ...
     elif action == "START":     
-        # Where run service logic can be implemented 
+        # Where run service logic can be implemented if mode is not local 
+        # if local, set run number to 1000000000 psa sur sur le nombre de 0 
         ...
     elif action == "STOP":
         # Where run service logic can be implemented
@@ -216,30 +217,44 @@ def executeCommROOT(action:str):
         ...
     elif action == "ECR":
         ...
-    
+
     stateLog = {}
-    logPaths =[]
     for command,state in zip(commands[action]["commands"], commands[action]["states"]):
         print("Executing command "+ command)
-        r = sysConf[session["configName"]].executeAction(command)
-
-        if command == "add":
-            logPaths = r
-            print("\n\n\n\n\n\n\n\n\n")
-            print(logPaths)
-            print(getListNodes(sysConf[configName]))
+        r = sysConf[configName].executeAction(command)
+        logAndEmit(configName, "INFO", str(r) )
+        if command == "add" and r[0] != "Action not allowed" :
+            logPaths = listLogs(r)
+            r2.delete("log")
+            r2.sadd("log", *logPaths)
         else: stateLog[command] = r
-
-        # NOTE: Check for errors . If errors  cancel command and return to previous step
+        now = time.time()
         while True:
-            if (sysConf[session["configName"]].getState() == state) and  (not sysConf[session["configName"]].inconsistent) : 
+            if (sysConf[configName].getState() == state)  and  (not sysConf[configName].inconsistent) : 
                 break
+            elif time.time()-now > maxTransitionTime: return f"ERROR: TIMEOUT"
             time.sleep(0.5)
-            # NOTE: Needs timeout handling : if timeout : cancel all requests and come back to previous step. 
-            # NOTE; Needs state validation 
+    return "Success" # success 
 
-    
-    return stateLog # success 
+
+def listLogs(r):
+    """
+    Transforms a list of tuples to a list of string with all the log paths
+    """
+    final = []
+    for sublist in r:
+        if isinstance(sublist, tuple): final.append(sublist[1])
+        else:
+            for item in sublist:
+                final.append(item[1])
+    return final
+
+def getLogPath(name:str):
+    paths = r2.smembers("log")
+    for path in paths:
+        if name in path:
+            return path
+    return ""
     
 
 def getStatesList(locRoot):
@@ -255,33 +270,24 @@ def getStatesList(locRoot):
 
 
 def stateChecker():
-    global whoInterlocked
+    # global whoInterlocked
     l1 = {}
     l2 = {}
-    whoValue = {}
+    # whoValue = {}
     rState1 = {}
     rState2 = {}
     runningFile =""
+    lockState = None
+    errors = []
 
-    files = getConfigsInDir(configPath)
-    for file in files:
-        whoValue[file] = whoInterlocked[file]
+
+
+    # files = getConfigsInDir(configPath)
+    # for file in files:
+    #     whoValue[file] = whoInterlocked[file]
     while True:
         files = getConfigsInDir(configPath)
         for file in sysConf:
-            if file not in whoInterlocked:
-                whoInterlocked[file] = [None, 0]
-                whoValue[file] = [None, 0]
-                systemConfiguration(configPath)
-            # NOTE: Not sur if it works
-            if whoInterlocked[file][0] not in [None,"local_user"]:  # if user is logged with cern account
-                if (whoInterlocked[file][1]+ timedelta(minutes=serverConfigJson["timeout_control_expiration_mins"]) < datetime.now()):
-                    logAndEmit(file,"INFO","Control of "+ file+ " for user "+ whoInterlocked[file][0]+ " has EXPIRED",)
-                    whoInterlocked[file] = [None, 0]
-            if whoValue[file][0] != whoInterlocked[file][0]:
-                socketio.emit("interlockChng", whoInterlocked[file][0], broadcast=True)  # notify if someone is locking a config
-            whoValue[file] = whoInterlocked[file]  # set up to date
-
             l2[file] = getStatesList(sysConf[file])
             rState2[file] = [sysConf[file].getState(), sysConf[file].inconsistent]
             try:
@@ -297,7 +303,6 @@ def stateChecker():
             
             try : 
                 if (rState2[file] != rState1[file]) and (rState2[file][1] == False ) and (rState2[file][0] not in ['booted','added']):
-                         # Lock interface because run will be started 
                     if rState2[file][0] == 'running' : state="RUN"
                     elif rState2[file][0] == 'not_added': state = "DOWN"
                     elif rState2[file][0] == 'ready': state = "READY"
@@ -307,16 +312,39 @@ def stateChecker():
 
             except KeyError : 
                 print(f"rState: {file} not registred")
-                print()
             rState1[file] = rState2[file]
 
         runningFile2 = r2.get("runningFile")
-        if runningFile2!= runningFile :
-            socketio.emit("configChng", runningFile2 )
+        if runningFile2 != runningFile :
+            socketio.emit("configChng", runningFile2, broadcast = True)
             runningFile = runningFile2
+
+        lockState2 = r2.get("whoInterlocked")
+        if lockState2 !=lockState:
+            socketio.emit("interlockChng", lockState2, broadcast = True)
+            lockState = lockState2
+
+        if runningFile2 and runningFile2 in sysConf:
+            errors2 = modulesWithError(sysConf[runningFile2])
+            if errors2 != errors:
+                socketio.emit("errorModChng", errors2, broadcast =True)
+                print("errorModChng")
+                errors = errors2
         time.sleep(0.5)
 
+def modulesWithError(tree):
+    errorList = []
+    for _,_, node in RenderTree(tree):
+        if not node.children : # if the node has no children -> not a category
+            if r.hget(node.name, "Status"):
+                status =  bool(int(r.hget(node.name, "Status").split(":")[1])) # returns 0, 1 or 2 (1 and 2 -> warning and error)
+                if status != 0 :
+                    errorList.append(node.parent.name)
+                    errorList.append(node.name)
+    return list(set(errorList)) 
 
+            
+            
 def logAndEmit(configtype, type, message):
     now = datetime.now()
     timestamp = now.strftime("%d/%m/%Y, %H:%M:%S")
@@ -351,7 +379,9 @@ def appState():
     packet["runningFile"] = r2.get('runningFile')
     packet["runState"] = r2.get("runState")
     packet["user"] = {"name":session["user"]["cern_upn"], "logged" : True if "cern_gid" in session["user"] else False }
+    packet["whoInterlocked"] = r2.get("whoInterlocked")
     return jsonify(packet)
+
 
 
 def nocache(view):
@@ -379,6 +409,8 @@ def getInfo(module:str) -> list:
     Gets the informations about a module in the redis database 
     Returns a list of dictionnaries with {"key": ..., "value": ..., "time": ... (string)}
     """
+
+    # TODO: use hgetall instead of hmget
     keys = r.hkeys(module)
     if keys == []: # if module is not in the redis database
         return []
@@ -388,7 +420,16 @@ def getInfo(module:str) -> list:
     info = [{"key":key, "value": val.split(":")[1],"time": datetime.fromtimestamp(int(float(val.split(":")[0]))).strftime('%a %d/%m/%y %H:%M:%S ') } for key,val in zip(keys,vals)]
     return info
  
-    
+@app.route("/fullLog/<string:module>")
+def fullLog(module:str):
+    """
+    Returns the full log for the current run #NOTE: Is it really just the current run ? 
+    (Works only if the logs are on the same server)
+    """
+    path = getLogPath(module)
+    with open(path, "r") as f:
+        log = f.readlines()
+    return Response(log, mimetype='text/plain')
 
 @app.route("/login/callback", methods=["GET"])
 def login_callback():
@@ -423,30 +464,39 @@ def serverconfig():
 @app.route("/interlock", methods=["POST"])
 def interlock():
     global whoInterlocked
-    if whoInterlocked[session["configName"]][0] == None:
-        whoInterlocked[session["configName"]] = [
-            session["user"]["cern_upn"],
-            datetime.now(),
-        ]
-        logAndEmit(session["configName"],"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ session["configName"],)
-        return "Control has been taken"
-    else:
-        if whoInterlocked[session["configName"]][0] == session["user"]["cern_upn"]:
-            logAndEmit(session["configName"],"INFO","User "+ session["user"]["cern_upn"]+ " has RELEASED control of configuration "+ session["configName"],)
-            whoInterlocked[session["configName"]] = [None, 0]
-            return "Control has been released"
-        else:
-            logAndEmit(session["configName"],"WARNING","User "+ session["user"]["cern_upn"]+ " ATTEMPTED to take control of configuration "+ session["configName"]+ " but failed, because it is controlled by "+ str(whoInterlocked[session["configName"]][0]),)
-            return "Controlled by user " + str(whoInterlocked[session["configName"]][0])
+    requestData  = request.get_json()
+    cern_upn = requestData["cern_upn"]
+    action = requestData["action"] # lock or unlock 
 
+
+    if action == "lock": 
+        print(session["user"]["cern_upn"])
+        if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=60,nx=True): 
+            logAndEmit(r2.get("runningFile"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("runningFile"),)
+            return jsonify("File locked successfully")
+        else : 
+            # quel'qun est a déjà locked la config 
+            logAndEmit(r2.get("runningFile"),"INFO","User "+ session["user"]["cern_upn"]+ " tried to take control configuration "+ r2.get("runningFile")+f"from {r2.get('whoInterlocked')}",)
+            return jsonify(f"Sorry, the config is already locked by {r2.get('whoInterlocked')}")
+
+    else: # action == "unlock"
+        if session["user"]["cern_upn"] == r2.get("whoInterlocked"): # if is the right person
+            r2.delete("whoInterlocked")            
+            logAndEmit(r2.get("runningFile"),"INFO","User " + session["user"]["cern_upn"]+ " has RELEASED control of configuration"+ r2.get('runningFile'))
+            return jsonify(f"unlocked file")
+
+        else: # someone else try to unlock file         
+            logAndEmit(r2.get("runningFile"),"INFO","User "+ session["user"]["cern_upn"]+ "  ATTEMPTED to take control of configuration "+ r2.get("runningFile")+f"from {r2.get('whoInterlocked')}",)
+            return jsonify(f"you can't")
 
 @app.route("/ajaxParse", methods=["POST"])
 def ajaxParse():
     postData = request.get_json()
     node = postData["node"]
     command = postData["command"]
-    configName = session["configName"]
-    whoInterlocked[session["configName"]][1] = datetime.now()
+    configName =  r2.get("runningFile")
+    r2.expire("whoInterlocked",maxTransitionTime) # adds a new timeout
+
     try:
         r = executeComm(node, command)
     except Exception as e:
@@ -466,11 +516,12 @@ def logout():
 
 @app.route("/fsmrulesJson", methods=["GET", "POST"])
 def fsmrulesJson():
+    print(session)
     try:
-        with open(os.path.join(session["configPath"], session["configDict"]["fsm_rules"])) as f:
+        with open(os.path.join(CONFIG_PATH, CONFIG_DICT["fsm_rules"])) as f:
             fsmRules = json.load(f)
-    except:
-        return "error"
+    except Exception as e:
+        raise e
     return jsonify(fsmRules["fsm"])
 
 
@@ -478,7 +529,7 @@ def fsmrulesJson():
 def grafanaJson():
     try:
         with open(
-            os.path.join(session["configPath"], session["configDict"]["grafana"])
+            os.path.join(CONFIG_PATH, CONFIG_DICT["grafana"])
         ) as f:
             grafanaConfig = json.load(f)
         f.close()
@@ -495,14 +546,12 @@ def connect():
 @app.before_first_request
 def startup():
     global thread
-    for file in getConfigsInDir(configPath):
-        whoInterlocked[file] = [None, 0]
+    # for file in getConfigsInDir(configPath):
+        # whoInterlocked[file] = [None, 0]
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(stateChecker)
-    handler = RotatingFileHandler(
-        serverConfigJson["serverlog_location_name"], maxBytes=1000000, backupCount=0
-    )
+    handler = RotatingFileHandler(serverConfigJson["serverlog_location_name"], maxBytes=1000000, backupCount=0)
     logging.root.setLevel(logging.NOTSET)
     handler.setLevel(logging.NOTSET)
     app.logger.addHandler(handler)
@@ -524,25 +573,27 @@ def configDirs():
 
 @app.route("/initConfig", methods=["GET", "POST"])
 def initConfig():
-    session["configName"] = request.args.get("configName")
+    global CONFIG_PATH,CONFIG_DICT
+    configName  =  request.args.get("configName")
     
-    logAndEmit(session["configName"],"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ session["configName"],)
-    session["configPath"] = os.path.join(env["DAQ_CONFIG_DIR"], session["configName"])
-    with open(os.path.join(session["configPath"], "config-dict.json")) as f:
-        session["configDict"] = json.load(f)
+    CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], configName)
+    logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ session["configName"],)
+    with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
+        CONFIG_DICT = json.load(f)
+        print(CONFIG_DICT)
 
-    systemConfiguration(session["configName"], session["configPath"])
-    r2.set("runningFile", session["configName"])
+    systemConfiguration(configName, CONFIG_PATH)
+    r2.set("runningFile", configName)
     return "Success"
 
 
 @app.route("/urlTreeJson")
 def urlTreeJson():
     print("urlTreeJson function")
-    sessionStatus()
+    # sessionStatus()
     try:
         with open(
-            os.path.join(session["configPath"], session["configDict"]["tree"]), "r"
+            os.path.join(CONFIG_PATH, CONFIG_DICT["tree"]), "r"
         ) as file:
             return jsonify(json.load(file))
     except Exception as e:
@@ -572,7 +623,7 @@ def localLogin():
     session["configName"] = ""
     session["configPath"] = ""
     session["configDict"] = ""
-    logAndEmit(session["configName"],"INFO","User " + session["user"]["cern_upn"] + " connected ")
+    logAndEmit("","INFO","User " + session["user"]["cern_upn"] + " connected ")
     return redirect(url_for('index'))
 
 
@@ -602,8 +653,9 @@ def sessionStatus():
 def statesList():
     global sysConf
     list = {}
-    list = getStatesList(sysConf[session["configName"]])
-    list["whoLocked"] = whoInterlocked[session["configName"]][0]
+    print("stateList", r2.get("runningFile"))
+    list = getStatesList(sysConf[r2.get("runningFile")])
+    # list["whoLocked"] = whoInterlocked[session["configName"]][0]
     return jsonify(list)
 
 
@@ -728,6 +780,7 @@ def getListNodes(locRoot):
 if __name__ == "__main__":
     print(f"Connect with the browser to http://{platform.node()}:5000")
     metrics = metricsHandler.Metrics(app.logger)
+
     socketio.run(app, host="0.0.0.0", port=5000, debug=True)
     print("Stopping... ")
     metrics.stop()

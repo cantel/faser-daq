@@ -19,7 +19,7 @@
   <script src="https://cdn.plot.ly/plotly-cartesian-2.9.0.min.js"></script>
   <!-- <link href="{{ url_for('static', filename='css/custom.css') }}" rel="stylesheet"> -->
 
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
   <title>Run Control</title>
   <style>
     .treeview {
@@ -33,7 +33,7 @@
       overflow-y: auto;
     }
 
-    .metrics-panel{
+    .metrics-panel {
       width: 25%;
       min-width: max-content;
       max-width: 205px;
@@ -51,9 +51,12 @@
     <v-app dark>
       <v-navigation-drawer v-model="drawer" :permanent="false" app width="300">
         <h3 class="my-4 text-center"> Tree View </h3>
-        <v-treeview return-object open-all class="treeview" @update:active="setActiveNode" v-if="nodeStates"
-          item-key="name" activatable selection-type="independent" dense :items="[c_treeJson]">
+        <v-treeview :hoverable="true" return-object open-all class="treeview" @update:active="setActiveNode"
+          v-if="nodeStates" item-key="name" activatable selection-type="independent" dense :items="[c_treeJson]">
           <template v-slot:prepend="{ item,open }">
+            <v-icon v-if="modulesError.includes(item.name)" color="error">
+              mdi-alert-circle
+            </v-icon>
             <v-tooltip open-delay="200" dark top :color="stateColors[getNodeState(item.name)]">
               <template v-slot:activator="{ on, attrs }">
                 <v-icon v-bind="attrs" v-on="on" :color="stateColors[getNodeState(item.name)]">
@@ -66,7 +69,7 @@
           <template v-slot:label="{ item, selected, active }">
             <div style="display:flex;align-items: center;">
               <span :class="{'red lighten-3': nodeStates[item.name][1]}">[[ item.name ]] </span>
-              <v-simple-checkbox :value="nodeStates[item.name][2]"
+              <v-simple-checkbox v-if="!d_includeExclude" :value="nodeStates[item.name][2]"
                 @click="processIncludeExclude(item.name,nodeStates[item.name][2])" class="my-auto" hide-details
                 :ripple="false">
               </v-simple-checkbox>
@@ -81,8 +84,8 @@
             src="{{url_for('static', filename = 'img/faser.svg')}}"> RunControl</v-toolbar-title>
         <v-menu offset-y>
           <template v-slot:activator="{ on, attrs }">
-            <v-btn v-bind="attrs" :loading="c_configLoading" v-on="on" class="mx-4 my-2" depressed color="primary"
-              small>
+            <v-btn v-bind="attrs" :loading="c_configLoading" v-on="on" class="mx-4 my-2" depressed color="primary" small
+              :disabled="d_loadConfig">
               load
             </v-btn>
           </template>
@@ -95,25 +98,33 @@
           </v-list>
         </v-menu>
         <v-spacer></v-spacer>
+        <span>[[ whoInterlocked ]]</span>
+        <v-btn icon text small class="mx-1" :disabled="!logged">
+          <v-icon v-if="locked" @click="interlock()"> mdi-lock-off</v-icon>
+          <v-icon v-else @click="interlock()"> mdi-lock</v-icon>
+        </v-btn>
+
         <v-btn icon text small class="mx-1">
           <v-icon v-if="logged" @click="logout"> mdi-account-off</v-icon>
           <v-icon v-else @click="login"> mdi-account</v-icon>
         </v-btn>
-
         Logged as : {{ usr }}
       </v-app-bar>
-
+      <!-- v-if="resultCommand.includes('ERROR')" -->
       <v-main class="indigo lighten-5">
-        <v-card tile elevation="1" class="mx-4 my-4">
+        <v-alert dense icon="mdi-alert-octagon" prominent class="d-flex align-center mx-4 my-4" color="error">
+          <v-row><span class="my-auto mx-3">ERROR: TIMEOUT [[ resultCommand ]] </span>
+            <v-btn> FORCE shutdown </v-btn>
+            <v-spacer></v-spacer>
+            <v-btn icon><v-icon>mdi-close-circle</v-icon></v-btn>
+          </v-row>
+        </v-alert>
+        <v-card :disabled="d_controlPanel" tile elevation="1" class="mx-4 my-4">
           <v-card-title> CONTROL
             <div class="mx-3 d-flex " v-if="c_loadedConfigName">
               <h4>[[ c_loadedConfigName ]]: </h4>
               <v-chip label :color="stateColors[runState]" class="mx-3"> [[ runState ]] </v-chip>
             </div>
-            <span  class="mx-3" v-if="isActiveNode() ? !hasChildren(activeNode) : false">
-              <v-btn depressed small dark color="teal" @click="openLogWindow(activeNode[0])"> LOG </v-btn>
-              <v-btn @click="infoIsActive= !infoIsActive" depressed small dark color="teal"> INFO </v-btn>
-            </span>
           </v-card-title>
           <v-card-text>
             <v-row class="text-center mx-1 my-1">
@@ -159,7 +170,6 @@
           </v-card-text>
         </v-card>
 
-
         <v-card tile elevation="1" class="mx-4 my-4" v-if="infoIsActive && isActiveNode() && !hasChildren(activeNode)">
           <v-card-title> Module information : [[ activeNode[0].name ]] <v-spacer></v-spacer>
             <v-btn @click="openInfoInNewWindow()" icon color="normal">
@@ -172,17 +182,31 @@
         </v-card>
 
         <v-card tile elevation="1" class="mx-4 my-4">
-          <v-card-title> MONITORING </v-card-title>
+          <v-card-title> MONITORING <span class="mx-3" v-if="isActiveNode() ? !hasChildren(activeNode) : false">
+              <v-menu offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn depressed small dark color="teal" v-bind="attrs" v-on="on"> LOG </v-btn>
+                </template>
+                <v-list>
+                  <v-list-item @click="openLogWindow()" :key="0">
+                    <v-list-item-title>Live log</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item :key="1" @click="openFullLog()">
+                    <v-list-item-title>Full log</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+              <v-btn @click="infoIsActive= !infoIsActive" depressed small dark color="teal"> INFO </v-btn>
+            </span>
+          </v-card-title>
           <v-card-text>
-
             <monitoring_panel :p_on="runOnGoing"></monitoring_panel>
-
           </v-card-text>
         </v-card>
 
         <v-card tile elevation="1" class="mx-4 my-4">
           <v-card-title> LOG </v-card-title>
-          <v-card-text  width ="170" class="scrollableDiv">
+          <v-card-text width="170" class="scrollableDiv">
             <div v-for="(line,index) in log.slice().reverse()" :key="index"> [[line]]</div>
           </v-card-text>
         </v-card>

@@ -31,13 +31,13 @@ void HistogramManager::configure(uint8_t ioT, std::string connStr, unsigned inte
   } catch (std::exception &e) {
     throw FailedToAddZMQChannel(ERS_HERE,e.what());
   }
-  m_zmq_publisher = true;
 }
 
 void HistogramManager::start(){
 
   INFO("HistogramManager thread about to spawn...");
   
+  m_zmq_publisher = true;
   m_stop_thread = false;
   m_histogram_thread = std::thread(&HistogramManager::CheckHistograms,this);
 }
@@ -72,11 +72,15 @@ void HistogramManager::CheckHistograms(){
   }
 }
 
+/***
+\brief: publishes all histograms, and resets their content.
+***/
 void HistogramManager::flushHistograms(){
 
   for (auto &pair : m_histogram_map ) { 
     HistBase * x = pair.second;
     publish(x);
+    reset(pair.first);
   }
 
 }

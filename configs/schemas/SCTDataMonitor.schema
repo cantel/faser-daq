@@ -32,6 +32,23 @@
           "publish_interval": {
              "type": "integer",
              "minimum": 1
+          },
+          "ActiveLHCModes": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 9,
+            "description": "LHC machine mode for which monitoring will be activated.",
+	    "items": {
+	      "type": "integer",
+              "minimum": 1,
+              "maximum": 21
+            }
+          },
+          "PhysicsTriggerBits": {
+            "type": "integer",
+            "minItems": 1,
+            "maxItems": 15,
+            "description": "Physics trigger bits for which physics hits are monitored."
           }
 	},
 	"format":"grid",

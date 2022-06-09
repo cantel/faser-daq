@@ -14,9 +14,17 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"),m_hname_scterrors("sct_data_errors") { 
+SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"),m_hname_scterrors("sct_data_errors"){ 
 
-   INFO("");
+   INFO("SCTDataMonitorModule()");
+   auto cfg = getModuleSettings();
+   auto cfg_trigbits_select = cfg["PhysicsTriggerBits"];
+   if (cfg_trigbits_select!="" && cfg_trigbits_select!=nullptr)
+      m_physics_trigbits = cfg_trigbits_select;
+   else m_physics_trigbits=0xf;
+
+   m_hit_avg = 0;
+   m_hit_avg_count = 0;
  }
 
 SCTDataMonitorModule::~SCTDataMonitorModule() { 
@@ -39,7 +47,9 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
     return;
   }
  bool randTrig(false);
+ bool physicsTrig(false);
  if (m_tlbdataFragment->tbp() & 0x10) randTrig = true;
+ if ((m_tlbdataFragment->tbp()&0xf) & m_physics_trigbits) physicsTrig=true;
 
   fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
@@ -142,8 +152,8 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
         m_total_WARNINGS++;
       }
       auto allHits = sctEvent->GetHits();
-      module = sctEvent->GetModuleID();
-      number = sctEvent->GetNHits();
+      uint8_t module = sctEvent->GetModuleID();
+      unsigned number = sctEvent->GetNHits();
       m_histogrammanager->fill("total_hits_multiplicity", number);
       total_hits+= number;
 
@@ -160,7 +170,7 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
           }
         }
       }
-      else { // only physics events
+      if (physicsTrig) { // only selected physics triggered events
         std::string hname_hitp = m_prefix_hname_hitp+std::to_string(sctEvent->GetModuleID());
         for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
           auto hitsPerChip1 = allHits[chipIdx];
@@ -189,13 +199,15 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
               m_histogrammanager->fill(hname_hitp, bitset_hitp1.to_string());
               std::bitset<3> bitset_hitp2(hit2.second);
               m_histogrammanager->fill(hname_hitp, bitset_hitp2.to_string());
+              update_hitavg(hit1.second);
+              update_hitavg(hit2.second);
             }
           }
         }
       }
   }
   m_hit_multiplicity = total_hits;
-  if (!randTrig) {
+  if (physicsTrig) {
     m_histogrammanager->fill("good_hits_multiplicity",goodHits);
     m_histogrammanager->fill("bcid_hit_weighted", m_bcid, goodHits);
   }
@@ -264,8 +276,23 @@ void SCTDataMonitorModule::register_metrics() {
   INFO( "... registering metrics in SCTDataMonitorModule ... " );
 
   registerVariable(m_hit_multiplicity, "HitMultiplicity");
+  registerVariable(m_hit_avg, "AvgHit");
 
   register_error_metrics();
 
   return;
 }
+
+void SCTDataMonitorModule::update_hitavg(unsigned hit){
+  if ( m_hit_weight_assignment.find(hit) != m_hit_weight_assignment.end()){
+    float hit_weight = m_hit_weight_assignment[hit];
+    m_hit_avg = update_avg(m_hit_avg,m_hit_avg_count, hit_weight);
+    m_hit_avg_count++; // increase the number of hits considered
+  }
+}
+
+float SCTDataMonitorModule::update_avg(float avg, size_t size, int value){
+  avg = (size*avg+value)/(size+1);
+  return avg;
+}
+

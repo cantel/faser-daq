@@ -627,6 +627,8 @@
 		"settings": {
             "fragmentID": 196619,
             "publish_interval": 5,
+            "ActiveLHCModes":[8,9,10,11],
+            "PhysicsTriggerBits": 8,
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
@@ -635,6 +637,12 @@
 				"type": "ZMQPubSub",
 				"chid": 0,
 				"connections":[{"transport": "tcp", "host": "localhost", "port": 8200}],
+				"queue":{"$ref":"top.json#queue"}
+			},
+			{
+				"type": "ZMQPubSub",
+				"chid": 1,
+				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8202}],
 				"queue":{"$ref":"top.json#queue"}
 			}
 			]
@@ -653,17 +661,12 @@
 		"settings": {
             "fragmentID": 196620,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -679,17 +682,12 @@
 		"settings": {
             "fragmentID": 196621,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -705,17 +703,12 @@
 		"settings": {
             "fragmentID": 196608,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp", "host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -731,17 +724,12 @@
 		"settings": {
             "fragmentID": 196609,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -757,17 +745,12 @@
 		"settings": {
             "fragmentID": 196610,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -783,17 +766,12 @@
 		"settings": {
             "fragmentID": 196611,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -809,17 +787,12 @@
 		"settings": {
             "fragmentID": 196612,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{ "transport": "tcp", "host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -835,17 +808,12 @@
 		"settings": {
             "fragmentID": 196613,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
         "loglevel":         { "$ref": "top.json#loglevel" },
@@ -861,17 +829,12 @@
 		"settings": {
             "fragmentID": 196614,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -887,17 +850,12 @@
 		"settings": {
             "fragmentID": 196615,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },
@@ -913,17 +871,12 @@
 		"settings": {
             "fragmentID": 196616,
             "publish_interval": 5,
+            "ActiveLHCModes": {"$ref": "#SCTDataMonitorSt0L0/modules/0/settings/ActiveLHCModes"},
+            "PhysicsTriggerBits": {"$ref":"#SCTDataMonitorSt0L0/modules/0/settings/PhysicsTriggerBits"},
             "stats_uri": "tcp://localhost:7000"
 		},
 		"connections": {
-			"receivers": [
-			{
-				"type": "ZMQPubSub",
-				"chid": 0,
-				"connections":[{"transport": "tcp",	"host": "localhost", "port": 8200}],
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
+                        "receivers":  { "$ref": "#SCTDataMonitorSt0L0/modules/0/connections/receivers" }
 		}
 	}],
 	"loglevel":         { "$ref": "top.json#loglevel" },

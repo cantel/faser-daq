@@ -23,6 +23,9 @@ MonitorBaseModule::MonitorBaseModule(const std::string& n):FaserProcess(n) {
    if (cfg_sourceID!="" && cfg_sourceID!=nullptr)
       m_sourceID = cfg_sourceID;
    else m_sourceID=0;
+   m_active_mon_lhc_modes={};
+   m_bobrProcessThread =nullptr;
+   m_activate_monitoring=false;
 
  }
 
@@ -66,11 +69,25 @@ void MonitorBaseModule::configure() {
     m_PUBINT = mod_cfgs["publish_interval"].get<int>();
   } else m_PUBINT = 5;
 
+  if (mod_cfgs.contains("ActiveLHCModes")){
+    m_active_mon_lhc_modes = mod_cfgs["ActiveLHCModes"].get<std::vector<int>>();
+  }
+
   register_metrics();
 
   m_histogramming_on = false;
   setupHistogramManager();
   register_hists();
+
+  // check if waiting for BOBR data - lets reserve channel 1 for BOBR data
+  if (m_config.getNumReceiverConnections(getName())>1) {
+    INFO("Will store BOBR data during run...");
+    m_store_bobr_data=true;
+  }
+  else {
+    INFO("Won't be storing BOBR data...");
+    m_store_bobr_data = false;
+  }
 
   return;
 }
@@ -78,7 +95,16 @@ void MonitorBaseModule::configure() {
 void MonitorBaseModule::start(unsigned int run_num) {
   FaserProcess::start(run_num);
 
+  m_status = STATUS_OK;
   if ( m_histogramming_on ) m_histogrammanager->start();
+  m_lhc_machinemode=-1;
+  if (m_store_bobr_data) {
+    if (m_bobrProcessThread != nullptr) {
+      WARNING("BOBR data processing thread already started or still running. Call StopReadout() to stop old thread.");
+    }
+    else m_bobrProcessThread = new std::thread(&MonitorBaseModule::process_bobr_data, this);
+  }
+
 
 }
 
@@ -86,6 +112,16 @@ void MonitorBaseModule::stop() {
   FaserProcess::stop();
 
   INFO("... finalizing ...");
+
+  if (m_bobrProcessThread != nullptr){
+    if (!m_bobrProcessThread->joinable()){
+      ERROR("BOBR data processing thread is not joinable!");
+    }
+    m_bobrProcessThread->join();
+    delete m_bobrProcessThread;
+    m_bobrProcessThread = nullptr;
+  }
+
   if (m_histogramming_on) m_histogrammanager->stop();
 
 }
@@ -103,6 +139,7 @@ void MonitorBaseModule::runner() noexcept {
           std::this_thread::sleep_for(10ms);
           continue;
       }
+      if (m_store_bobr_data && !m_activate_monitoring) continue;
       //DEBUG("Received event with size "<<eventBuilderBinary.size());
       try {
         if (m_filter_physics && !is_physics_triggered(eventBuilderBinary)) continue;
@@ -112,12 +149,35 @@ void MonitorBaseModule::runner() noexcept {
       } catch (UnpackDataIssue &e) {
         ERROR("Error checking data packet: "<<e.what()<<" Skipping event!");
       }
+
   }
 
 
   INFO("Runner stopped");
 
   return;
+
+}
+
+void MonitorBaseModule::process_bobr_data() noexcept {
+
+  INFO("Running...");
+
+  float check_point(0);
+  DataFragment<daqling::utilities::Binary> bobrEventBinary;
+
+  while (m_run) {
+      if (!m_connections.receive(1, bobrEventBinary)){
+        std::this_thread::sleep_for(1000ms);
+        continue;
+      }
+      if (std::difftime(std::time(nullptr), check_point) > m_INTERVAL_BOBRUPDATE) {
+        DEBUG("Received BOBR data");
+        auto status = store(bobrEventBinary);
+        if (status) m_status = STATUS_WARN;
+        check_point = std::time(nullptr);
+      }
+  }
 
 }
 
@@ -188,6 +248,36 @@ void MonitorBaseModule::register_hists() {
 
  INFO(" ... No histograms to register. Will not start histogram service. " );
  m_histogramming_on = false;
+
+}
+
+uint16_t MonitorBaseModule::store( DataFragment<daqling::utilities::Binary> &bobrEventBinary ) {
+  uint16_t dataStatus(0);
+
+  try {
+    EventFull event(bobrEventBinary.data<const uint8_t*>(),bobrEventBinary.size());
+    const EventFragment* fragment=event.find_fragment(DAQFormats::SourceIDs::BOBRSourceID);
+    if (fragment==0) {
+      ERROR("No correct fragment source ID found.");
+      return dataStatus |= MissingFragment;
+    }
+    BOBRDataFragment bobr_data_frag = BOBRDataFragment(fragment->payload<const uint32_t*>(), fragment->payload_size());
+    if (m_lhc_machinemode<0 || m_lhc_machinemode!=bobr_data_frag.machinemode()){
+      m_lhc_machinemode= bobr_data_frag.machinemode();
+      if (std::find(m_active_mon_lhc_modes.begin(), m_active_mon_lhc_modes.end(),m_lhc_machinemode)!=m_active_mon_lhc_modes.end()){
+        INFO("Activating monitoring for machine mode "<<m_lhc_machinemode);
+        m_activate_monitoring=true;
+      }
+      else { 
+        INFO("Deactivating monitoring for machine mode "<<m_lhc_machinemode);
+        m_activate_monitoring=false;
+      }
+    }
+  } catch (const std::runtime_error& e) {
+    ERROR(e.what());
+    return dataStatus |= CorruptedFragment;
+  }
+  return  dataStatus;
 
 }
 

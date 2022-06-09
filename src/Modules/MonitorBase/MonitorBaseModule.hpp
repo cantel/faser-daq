@@ -14,6 +14,7 @@
 #include "EventFormats/TLBMonitoringFragment.hpp"
 #include "EventFormats/DigitizerDataFragment.hpp"
 #include "EventFormats/TrackerDataFragment.hpp"
+#include "EventFormats/BOBRDataFragment.hpp"
 
 #include "Utils/HistogramManager.hpp"
 #include "Utils/Ers.hpp"
@@ -23,7 +24,7 @@
 using namespace DAQFormats;
 using namespace TLBDataFormat;
 using namespace TLBMonFormat;
-
+using namespace BOBRDataFormat;
 
 ERS_DECLARE_ISSUE(
 MonitorBase,                                                              // namespace
@@ -58,6 +59,7 @@ class MonitorBaseModule : public FaserProcess {
   bool m_filter_physics;
   bool m_filter_random;
   bool m_filter_led;
+  bool m_store_bobr_data;
   unsigned m_PUBINT;
   
   EventFull* m_event=0;
@@ -86,6 +88,9 @@ class MonitorBaseModule : public FaserProcess {
   std::atomic<int> m_metric_error_duplicate;
   std::atomic<int> m_metric_error_unpack;
 
+  // BOBR data to be stored
+  std::atomic<int> m_lhc_machinemode;
+
   // functions 
   virtual void monitor(DataFragment<daqling::utilities::Binary>&);
   virtual void register_hists( );
@@ -105,11 +110,19 @@ class MonitorBaseModule : public FaserProcess {
   bool is_physics_triggered(DataFragment<daqling::utilities::Binary>&);
   bool is_random_triggered(DataFragment<daqling::utilities::Binary>&);
   bool is_led_triggered(DataFragment<daqling::utilities::Binary>&);
+  
 
  private:
 
+  std::thread *m_bobrProcessThread;
   bool m_event_header_unpacked;
+  const int m_INTERVAL_BOBRUPDATE = 5; // in seconds
+  std::vector<int> m_active_mon_lhc_modes;
+  bool m_activate_monitoring;
 
   void setupHistogramManager();
+  // store BOBR info
+  void process_bobr_data() noexcept;
+  uint16_t store(DataFragment<daqling::utilities::Binary>&);
 
 };

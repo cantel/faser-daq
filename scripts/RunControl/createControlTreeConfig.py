@@ -13,10 +13,17 @@ lt = {
 
     "TriggerReceiver" :"TR", # hardware
     "TriggerGenerator" : "TG", # emulation
+    "TriggerMonitor": "TM",
     "FrontEndReceiver" : "FR", # hardware
     "FrontEndMonitor" : "FM",
     "FrontEndEmulator" : "FE",
-    "EmulatorMonitor": "EM"
+    "EmulatorMonitor": "EM",
+    "DigitizerReceiver" : "DR",
+    "SCTDataMonitor":"SDM",
+    "TrackerReceiver": "TKR",
+    "TriggerRateMonitor": "TRM",
+
+
 }
 
 def createTreeJSON(configPath):

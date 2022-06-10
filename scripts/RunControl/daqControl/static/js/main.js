@@ -245,7 +245,9 @@ var app = new Vue({
     username : "local_user",
     whoInterlocked : null,
     modulesError :[],
-    resultCommand: "" // what the root action will return (success or error-> timeout) 
+    resultCommand: "", // what the root action will return (success or error-> timeout) 
+    startRunDialog : false,
+    endRunDialog : false
   },
 
   delimiters: ["[[", "]]"],

@@ -58,7 +58,7 @@ class SCTDataMonitorModule : public MonitorBaseModule {
 
   //functions
   void update_hitavg(unsigned hit);
-  float update_avg(float avg, size_t size, int value);
+  float update_avg(float avg, size_t size, float value);
 
 
 };

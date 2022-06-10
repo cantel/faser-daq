@@ -1,621 +1,942 @@
 {
-    "TRBReceiver00":{
-	"name": "trackerreceiver00",
-	"host": "localhost",
-	"port": 5530,
-	"modules":[{
-		"name": "trackerreceiver00",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID" : 0,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 39,
-            "FinePhaseLed1": 38,
-            "RxTimeoutDisable": false,
-            "ApplySCTMasks": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true], 
-            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module0_300321_0121.json",
-				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module1_300321_0121.json",
-				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module2_300321_0121.json",
-				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module3_300321_0121.json",
-				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module4_300321_0121.json",
-				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module5_300321_0121.json",
-				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module6_300321_0121.json",
-				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer0/Module7_300321_0121.json"},
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8110,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    "TRBReceiver00": {
+        "name": "trackerreceiver00",
+        "host": "localhost",
+        "port": 5530,
+        "modules": [
+            {
+                "name": "trackerreceiver00",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 0,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "ReadoutMode": 0,
+                    "ConfigureModules": true,
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 39,
+                    "FinePhaseLed1": 38,
+                    "RxTimeoutDisable": false,
+                    "L1Atype": "external",
+                    "emulation": false,
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module0_110522_0414.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module1_110522_0414.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module2_110522_0414.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module3_110522_0414.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module4_110522_0414.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module5_110522_0414.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module6_110522_0414.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer0_Module7_110522_0414.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8110,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
-    "TRBReceiver01":{
-	"name": "trackerreceiver01",
-	"host": "localhost",
-	"port": 5531, 
-	"modules":[{
-		"name": "trackerreceiver01",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID" : 1,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 37,
-            "FinePhaseLed1": 40,
-            "RxTimeoutDisable": false,
-            "ApplySCTMasks": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true], 
-            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module0_300321_0141.json",
-                                  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module1_300321_0141.json",
-                                  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module2_300321_0141.json",
-                                  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module3_300321_0141.json",
-                                  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module4_300321_0141.json",
-                                  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module5_300321_0141.json",
-                                  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module6_300321_0141.json",
-                                  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer1/Module7_300321_0141.json"},
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8111,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    "TRBReceiver01": {
+        "name": "trackerreceiver01",
+        "host": "localhost",
+        "port": 5531,
+        "modules": [
+            {
+                "name": "trackerreceiver01",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 1,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 37,
+                    "FinePhaseLed1": 40,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module0_110522_0603.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module1_110522_0603.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module2_110522_0603.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module3_110522_0603.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module4_110522_0603.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module5_110522_0603.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module6_110522_0603.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer1_Module7_110522_0603.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8111,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
-    "TRBReceiver02":{
-	"name": "trackerreceiver02",
-	"host": "localhost",
-	"port": 5532,
-	"modules":[{
-		"name": "trackerreceiver02",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID" : 2,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 43,
-            "FinePhaseLed1": 32,
-            "RxTimeoutDisable": false,
-            "ApplySCTMasks": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true], 
-            "moduleConfigFiles": {
-                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module0_300321_0124.json",
-                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module1_300321_0124.json",
-                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module2_300321_0124.json",
-                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module3_300321_0124.json",
-                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module4_300321_0124.json",
-                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module5_300321_0124.json",
-                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module6_300321_0124.json",
-                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Upstream/Layer2/Module7_300321_0124.json"},
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8112,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-        "loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    "TRBReceiver02": {
+        "name": "trackerreceiver02",
+        "host": "localhost",
+        "port": 5532,
+        "modules": [
+            {
+                "name": "trackerreceiver02",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 2,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 43,
+                    "FinePhaseLed1": 32,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module0_110522_0410.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module1_110522_0410.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module2_110522_0410.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module3_110522_0410.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module4_110522_0410.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module5_110522_0410.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module6_110522_0410.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST1_Upstream_Layer2_Module7_110522_0410.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8112,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
-    "TRBReceiver03":{
-	"name": "trackerreceiver03",
-	"host": "localhost",
-	"port": 5533,
-	"modules":[{
-		"name": "trackerreceiver03",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID" : 3,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 36,
-            "FinePhaseLed1": 36,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true], 
-            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module0_300321_0147.json",
-				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module1_300321_0147.json",
-				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module2_300321_0147.json",
-				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module3_300321_0147.json",
-				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module4_300321_0147.json",
-				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module5_300321_0147.json",
-				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module6_300321_0147.json",
-				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer0/Module7_300321_0147.json"},
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8113,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    "TRBReceiver03": {
+        "name": "trackerreceiver03",
+        "host": "localhost",
+        "port": 5533,
+        "modules": [
+            {
+                "name": "trackerreceiver03",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 3,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 36,
+                    "FinePhaseLed1": 36,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module0_110522_0734.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module1_110522_0734.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module2_110522_0734.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module3_110522_0734.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module4_110522_0734.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module5_110522_0734.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module6_110522_0734.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module7_110522_0734.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8113,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
-    "TRBReceiver04":{
-	"name": "trackerreceiver04",
-	"host": "localhost",
-	"port": 5534,
-	"modules":[{
-		"name": "trackerreceiver04",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID" : 4,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 38,
-            "FinePhaseLed1": 38,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true], 
-            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module0_300321_0135.json",
-				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module1_300321_0135.json",
-				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module2_300321_0135.json",
-				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module3_300321_0135.json",
-				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module4_300321_0135.json",
-				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module5_300321_0135.json",
-				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module6_300321_0135.json",
-				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer1/Module7_300321_0135.json"},
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8114,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    "TRBReceiver04": {
+        "name": "trackerreceiver04",
+        "host": "localhost",
+        "port": 5534,
+        "modules": [
+            {
+                "name": "trackerreceiver04",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 4,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 38,
+                    "FinePhaseLed1": 38,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module0_110522_0351.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module1_110522_0351.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module2_110522_0351.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module3_110522_0351.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module4_110522_0351.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module5_110522_0351.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module6_110522_0351.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer1_Module7_110522_0351.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8114,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
-    "TRBReceiver05":{
-	"name": "trackerreceiver05",
-	"host": "localhost",
-	"port": 5535,
-	"modules":[{
-		"name": "trackerreceiver05",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID" : 5,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 39,
-            "FinePhaseLed1": 38,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true], 
-            "moduleConfigFiles": {"0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module0_300321_0128.json",
-				  "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module1_300321_0128.json",
-				  "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module2_300321_0128.json",
-				  "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module3_300321_0128.json",
-				  "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module4_300321_0128.json",
-				  "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module5_300321_0128.json",
-				  "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module6_300321_0128.json",
-				  "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Middle/Layer2/Module7_300321_0128.json"},
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-				"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8115,
-				"queue":{"$ref":"top.json#queue"}
-			}
-				]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+    "TRBReceiver05": {
+        "name": "trackerreceiver05",
+        "host": "localhost",
+        "port": 5535,
+        "modules": [
+            {
+                "name": "trackerreceiver05",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 5,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 39,
+                    "FinePhaseLed1": 38,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module0_110522_0351.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module1_110522_0351.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module2_110522_0351.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module3_110522_0351.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module4_110522_0351.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module5_110522_0351.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module6_110522_0351.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module7_110522_0351.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8115,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
     "TRBReceiver06": {
-	"name": "trackerreceiver06",
-	"host": "localhost",
-	"port": 5536,
-	"modules":[{
-		"name": "trackerreceiver06",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID": 6,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 36,
-            "FinePhaseLed1": 36,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true],
-            "moduleConfigFiles": {
-                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module0_300321_0231.json",
-                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module1_300321_0231.json",
-                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module2_300321_0231.json",
-                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module3_300321_0231.json",
-                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module4_300321_0231.json",
-                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module5_300321_0231.json",
-                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module6_300321_0231.json",
-                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer0/Module7_300321_0231.json"
-                              },
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8116,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+        "name": "trackerreceiver06",
+        "host": "localhost",
+        "port": 5536,
+        "modules": [
+            {
+                "name": "trackerreceiver06",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 6,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 36,
+                    "FinePhaseLed1": 36,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module0_110522_0759.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module1_110522_0759.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module2_110522_0759.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module3_110522_0759.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module4_110522_0759.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module5_110522_0759.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module6_110522_0759.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer0_Module7_110522_0759.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8116,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
     "TRBReceiver07": {
-	"name": "trackerreceiver07",
-	"host": "localhost",
-	"port": 5537,
-	"modules":[{
-		"name": "trackerreceiver07",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID": 7,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 35,
-            "FinePhaseLed1": 37,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "L1PulseN": 1,
-            "L1PulseDelay": 2000,
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true],
-            "moduleConfigFiles": {
-                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module0_300321_0248.json",
-                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module1_300321_0248.json",
-                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module2_300321_0248.json",
-                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module3_300321_0248.json",
-                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module4_300321_0248.json",
-                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module5_300321_0248.json",
-                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module6_300321_0248.json",
-                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer1/Module7_300321_0248.json"
-                              },
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-				"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8117,
-				"queue":{"$ref":"top.json#queue"}
-			}
-				]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+        "name": "trackerreceiver07",
+        "host": "localhost",
+        "port": 5537,
+        "modules": [
+            {
+                "name": "trackerreceiver07",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 7,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 35,
+                    "FinePhaseLed1": 37,
+                    "L1PulseN": 1,
+                    "L1PulseDelay": 2000,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module0_110522_0804.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module1_110522_0804.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module2_110522_0804.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module3_110522_0804.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module4_110522_0804.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module5_110522_0804.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module6_110522_0804.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer1_Module7_110522_0804.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8117,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
     "TRBReceiver08": {
-	"name": "trackerreceiver08",
-	"host": "localhost",
-	"port": 5538,
-	"modules":[{
-		"name": "trackerreceiver08",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID": 8,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 35,
-            "FinePhaseLed1": 37,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true],
-            "moduleConfigFiles": {
-                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module0_300321_0246.json",
-                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module1_300321_0246.json",
-                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module2_300321_0246.json",
-                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module3_300321_0246.json",
-                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module4_300321_0246.json",
-                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module5_300321_0246.json",
-                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module6_300321_0246.json",
-                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_03_31/Downstream/Layer2/Module7_300321_0246.json"
-                                 },
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8118,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+        "name": "trackerreceiver08",
+        "host": "localhost",
+        "port": 5538,
+        "modules": [
+            {
+                "name": "trackerreceiver08",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 8,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 0,
+                    "FinePhaseClk1": 0,
+                    "FinePhaseLed0": 35,
+                    "FinePhaseLed1": 37,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module0_110522_0805.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module1_110522_0805.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module2_110522_0805.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module3_110522_0805.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module4_110522_0805.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module5_110522_0805.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module6_110522_0805.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST3_Downstream_Layer2_Module7_110522_0805.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8118,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
     "TRBReceiver11": {
-	"name": "trackerreceiver11",
-	"host": "localhost",
-	"port": 5541,
-	"modules":[{
-		"name": "trackerreceiver11",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID": 11,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 35,
-            "FinePhaseLed1": 37,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true],
-            "moduleConfigFiles": {
-                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module0_241121_0015.json",
-                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module1_241121_0015.json",
-                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module2_241121_0015.json",
-                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module3_241121_0015.json",
-                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module4_241121_0015.json",
-                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module5_241121_0015.json",
-                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module6_241121_0015.json",
-                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer0/Module7_241121_0015.json"
-                                 },
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8119,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+        "name": "trackerreceiver11",
+        "host": "localhost",
+        "port": 5541,
+        "modules": [
+            {
+                "name": "trackerreceiver11",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 11,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 0,
+                    "HWDelayClk1": 0,
+                    "FinePhaseClk0": 32,
+                    "FinePhaseClk1": 32,
+                    "FinePhaseLed0": 0,
+                    "FinePhaseLed1": 0,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module0_110522_0338.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module1_110522_0338.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module2_110522_0338.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module3_110522_0338.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module4_110522_0338.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module5_110522_0338.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module6_110522_0338.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer0_Module7_110522_0338.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8119,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
     "TRBReceiver12": {
-	"name": "trackerreceiver12",
-	"host": "localhost",
-	"port": 5542,
-	"modules":[{
-		"name": "trackerreceiver12",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID": 12,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 35,
-            "FinePhaseLed1": 37,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true],
-            "moduleConfigFiles": {
-                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module0_241121_0040.json",
-                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module1_241121_0040.json",
-                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module2_241121_0040.json",
-                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module3_241121_0040.json",
-                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module4_241121_0040.json",
-                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module5_241121_0040.json",
-                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module6_241121_0040.json",
-                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer1/Module7_241121_0040.json"
-                                 },
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8120,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+        "name": "trackerreceiver12",
+        "host": "localhost",
+        "port": 5542,
+        "modules": [
+            {
+                "name": "trackerreceiver12",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 12,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 0,
+                    "HWDelayClk1": 0,
+                    "FinePhaseClk0": 32,
+                    "FinePhaseClk1": 32,
+                    "FinePhaseLed0": 0,
+                    "FinePhaseLed1": 0,
+                    "RxTimeoutDisable": false,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module0_110522_0410.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module1_110522_0410.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module2_110522_0410.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module3_110522_0410.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module4_110522_0410.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module5_110522_0410.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module6_110522_0410.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer1_Module7_110522_0410.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8120,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
     "TRBReceiver13": {
-	"name": "trackerreceiver13",
-	"host": "localhost",
-	"port": 5543,
-	"modules":[{
-		"name": "trackerreceiver13",
-		"type": "TrackerReceiver",
-		"settings": {
-            "BoardID": 13,
-            "SCIP" : "faser-daq-010-direct",
-            "DAQIP" : "faser-daq-010-direct",
-            "ReadoutMode": 0,
-            "ConfigureModules": true, 
-            "HWDelayClk0": 0,
-            "HWDelayClk1": 0,
-            "FinePhaseClk0": 0,
-            "FinePhaseClk1": 0,
-            "FinePhaseLed0": 35,
-            "FinePhaseLed1": 37,
-            "RxTimeoutDisable": false,
-            "L1Atype" : "external",  
-            "emulation" : false,
-            "emulatorFile" : "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
-            "moduleMask" : [true, true, true, true, true, true, true, true],
-            "moduleConfigFiles": {
-                              "0" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module0_241121_0034.json",
-                              "1" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module1_241121_0034.json",
-                              "2" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module2_241121_0034.json",
-                              "3" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module3_241121_0034.json",
-                              "4" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module4_241121_0034.json",
-                              "5" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module5_241121_0034.json",
-                              "6" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module6_241121_0034.json",
-                              "7" : "/home/shifter/TI12/ConfigsForCombinedRuns/2021_11_23/IFT/Layer2/Module7_241121_0034.json"
-                                 },
-            "moduleClkCmdMask" : [false, false, false, false, false, false, false, false]
-		},
-		"connections": {
-			"senders": [
-			{
-				"type": "ZMQPair",
-				"chid": 0,
-				"transport": "tcp",
-				"host": "*",
-				"port": 8121,
-				"queue":{"$ref":"top.json#queue"}
-			}
-			]
-		}
-	}],
-	"loglevel":         { "$ref": "top.json#loglevel" },
-	"metrics_settings": { "$ref": "top.json#metrics_settings" }
+        "name": "trackerreceiver13",
+        "host": "localhost",
+        "port": 5543,
+        "modules": [
+            {
+                "name": "trackerreceiver13",
+                "type": "TrackerReceiver",
+                "settings": {
+                    "BoardID": 13,
+                    "SCIP": "faser-daq-010-direct",
+                    "DAQIP": "faser-daq-010-direct",
+                    "HWDelayClk0": 0,
+                    "HWDelayClk1": 0,
+                    "FinePhaseClk0": 32,
+                    "FinePhaseClk1": 32,
+                    "FinePhaseLed0": 0,
+                    "FinePhaseLed1": 0,
+                    "ReadoutMode": {"$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"},
+                    "ConfigureModules": {"$ref": "#TRBReceiver00/modules/0/settings/ConfigureModules"},
+                    "RxTimeoutDisable": {"$ref": "#TRBReceiver00/modules/0/settings/RxTimeoutDisable"},
+                    "L1Atype": {"$ref": "#TRBReceiver00/modules/0/settings/L1Atype"},
+                    "emulation": {"$ref": "#TRBReceiver00/modules/0/settings/emulation"},
+                    "emulatorFile": "/home/otheiner/FASER_DAQ/DataTaking_4modules_10kL1A.daq",
+                    "moduleMask": [
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true,
+                        true
+                    ],
+                    "moduleConfigFiles": {
+                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module0_110522_0410.json",
+                        "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module1_110522_0410.json",
+                        "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module2_110522_0410.json",
+                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module3_110522_0410.json",
+                        "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module4_110522_0410.json",
+                        "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module5_110522_0410.json",
+                        "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module6_110522_0410.json",
+                        "7": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module7_110522_0410.json"
+                    },
+                    "moduleClkCmdMask": [
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false,
+                        false
+                    ]
+                },
+                "connections": {
+                    "senders": [
+                        {
+                            "type": "ZMQPair",
+                            "chid": 0,
+                            "transport": "tcp",
+                            "host": "*",
+                            "port": 8121,
+                            "queue": {
+                                "$ref": "top.json#queue"
+                            }
+                        }
+                    ]
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     },
     "SCTDataMonitorSt0L0": {
 	"name": "sctdatamonitorst0l0",

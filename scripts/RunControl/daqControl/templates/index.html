@@ -116,7 +116,9 @@
           <v-row><span class="my-auto mx-3">ERROR: TIMEOUT [[ resultCommand ]] </span>
             <v-btn> FORCE shutdown </v-btn>
             <v-spacer></v-spacer>
-            <v-btn icon><v-icon>mdi-close-circle</v-icon></v-btn>
+            <v-btn icon>
+              <v-icon>mdi-close-circle</v-icon>
+            </v-btn>
           </v-row>
         </v-alert>
         <v-card :disabled="d_controlPanel" tile elevation="1" class="mx-4 my-4">
@@ -131,8 +133,10 @@
               <v-btn :loading="processing['INITIALISE']" @click="sendROOTCommand('INITIALISE')"
                 :disabled="!isROOTButtonEnabled('INITIALISE')" class="my-1 mx-1" depressed color="success"> INITIALISE
               </v-btn>
-              <v-btn :loading="processing['START']" @click="sendROOTCommand('START')" class="my-1 mx-1" depressed
-                color="success" :disabled="!isROOTButtonEnabled('START')"> START </v-btn>
+              <v-btn :loading="processing['START']" @click="sendROOTCommand('START')" class="my-1 mx-1"
+                depressed color="success" :disabled="!isROOTButtonEnabled('START')"> START </v-btn>
+              <!-- <v-btn :loading="processing['START']" @click.stop="startRunDialog = !startRunDialog" class="my-1 mx-1"
+                depressed color="success" :disabled="!isROOTButtonEnabled('START')"> START </v-btn> -->
               <v-btn :loading="processing['STOP']" @click="sendROOTCommand('STOP')" class="my-1 mx-1" depressed
                 color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn>
               <v-btn :loading="processing['SHUTDOWN']" @click="sendROOTCommand('SHUTDOWN')" class="my-1 mx-1" depressed
@@ -210,6 +214,33 @@
             <div v-for="(line,index) in log.slice().reverse()" :key="index"> [[line]]</div>
           </v-card-text>
         </v-card>
+
+        <v-dialog v-model="startRunDialog" max-width="290">
+          <v-card>
+            <v-card-title class="text-h5"> Start Run </v-card-title>
+
+            <v-card-text>
+              <v-container>
+                Run type -> liste déroulante 
+                Run comment -> zone de texte 
+
+                cancel start
+              </v-container>
+            </v-card-text>
+
+            <v-card-actions>
+              <v-spacer></v-spacer>
+
+              <v-btn color="green darken-1" text @click="dialog = false">
+                Disagree
+              </v-btn>
+
+              <v-btn color="green darken-1" text @click="dialog = false">
+                Agree
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
       </v-main>
     </v-app>
   </div>

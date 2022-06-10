@@ -291,7 +291,7 @@ void SCTDataMonitorModule::update_hitavg(unsigned hit){
   }
 }
 
-float SCTDataMonitorModule::update_avg(float avg, size_t size, int value){
+float SCTDataMonitorModule::update_avg(float avg, size_t size, float value){
   avg = (size*avg+value)/(size+1);
   return avg;
 }

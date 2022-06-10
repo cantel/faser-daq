@@ -1,0 +1,53 @@
+{
+    "name": "Root",
+    "children": [
+        {
+            "name": "digitizer01",
+            "types": [
+                {
+                    "type": "DR"
+                }
+            ]
+        },
+        {
+            "name": "eventbuilder01",
+            "types": [
+                {
+                    "type": "EBF"
+                }
+            ]
+        },
+        {
+            "name": "filewriter",
+            "types": [
+                {
+                    "type": "FWF"
+                }
+            ]
+        },
+        {
+            "name": "triggermonitor01",
+            "types": [
+                {
+                    "type": "TM"
+                }
+            ]
+        },
+        {
+            "name": "ratemonitor01",
+            "types": [
+                {
+                    "type": "TRM"
+                }
+            ]
+        },
+        {
+            "name": "tlbreceiver01",
+            "types": [
+                {
+                    "type": "TR"
+                }
+            ]
+        }
+    ]
+}

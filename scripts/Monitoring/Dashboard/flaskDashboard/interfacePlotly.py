@@ -56,7 +56,7 @@ def convert_to_plotly(histobj):
         zmatrix = zarray.reshape(len(yarray), len(xarray))
         zmaxvalue = float(np.max(zarray))
 
-        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=1,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.05,"rgb(0,0,139)"], [0.3,"rgb(69,119,237)"],[0.6,"rgb(149,255,0)"], [1.0,"rgb(255,0,0)"]])]
+        data = [dict(x=xarray, y=yarray, z=zmatrix.tolist(),zmin=0,zmax=zmaxvalue, type="heatmap",colorscale = [[0.0, "rgb(255, 255, 255)"],[0.05,"rgb(0,0,139)"], [0.3,"rgb(69,119,237)"],[0.6,"rgb(149,255,0)"], [1.0,"rgb(255,0,0)"]])]
     else:
 
         if "_ext" in hist_type:

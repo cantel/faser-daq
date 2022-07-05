@@ -12,14 +12,20 @@ Vue.component("info_panel", {
       this.getData();
     },
     beforeDestroy (){
-      clearTimeout(this.c_polling);
+      clearInterval(this.c_polling);
     },
     methods: {
       getData : function(){
         axios.get(`/info?module=${this.module}`).then((response)=>{
           this.data = response.data;
-          this.c_polling = setTimeout(this.getData, this.interval)
+          
         })
+        this.c_polling = setInterval(()=>{
+          axios.get(`/info?module=${this.module}`).then((response)=>{
+            this.data = response.data;
+            
+          })
+        }, this.interval)
       }
     },
     template: `

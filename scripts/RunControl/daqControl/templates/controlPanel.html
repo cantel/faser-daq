@@ -23,7 +23,7 @@
           depressed color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn>
         <!-- <v-btn :loading="processing['STOP']" @click="sendROOTCommand('STOP')" class="my-1 mx-1" depressed
           color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn> -->
-        <v-btn :loading="processing['SHUTDOWN']" @click="processShutdown" class="my-1 mx-1" depressed
+        <v-btn :loading="processing['SHUTDOWN']" @click="sendROOTCommand('SHUTDOWN')" class="my-1 mx-1" depressed
           color="error" :disabled="!isROOTButtonEnabled('SHUTDOWN')"> SHUTDOWN </v-btn>
         <v-btn :loading="processing['PAUSE']" @click="sendROOTCommand('PAUSE')" class="my-1 mx-1" depressed
           color="yellow darken-2" :disabled="!isROOTButtonEnabled('PAUSE')"> PAUSE </v-btn>
@@ -58,15 +58,12 @@
           :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('remove')" color="success"> remove
         </v-btn>
       </v-row>
-      <v-row class="px-3 ">
-        <v-col cols="6">
-          <strong class="blue--text text--darken-4 mr-2">Run Type : </strong> [[ runType ]]
-        </v-col>
-        <v-col cols="6">
-          <strong class="blue--text text--darken-4 mr-2">Comment :</strong> [[ comment]]
-        </v-col>
-        
+      <!-- <v-row class="px-3 ">
+          <strong class="blue--text text--darken-4 mr-2">Run Type : </strong> [[ runInfo.runType ]]
       </v-row> 
+      <v-row class="px-3">
+        <strong class="blue--text text--darken-4 mr-2">Comment :</strong> [[ runInfo.comment]]
+      </v-row> -->
 
     </v-card-text>
   </v-card>

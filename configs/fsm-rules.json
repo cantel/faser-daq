@@ -7,35 +7,41 @@
       "boot",
       "remove"
     ],
-    "shutting": [],
+    "shutting": ["remove"],
     "booted": [
       "configure",
       "shutdown",
       "remove"
     ],
-    "configuring": [],
-    "unconfiguring": [],
+    "configuring": ["remove"],
+    "unconfiguring": ["remove"],
     "ready": [
       "start",
       "unconfigure",
-      "shutdown"
+      "shutdown",
+      "remove"
     ],
-    "starting": [],
-    "stopping": [],
+    "starting": ["remove"],
+    "stopping": ["remove"],
     "running": [
       "stop",
       "pause",
-      "shutdown"
+      "shutdown",
+      "disableTrigger",
+      "remove"
     ],
     "paused": [
-      "resume"
+      "enableTrigger",
+      "remove",
+      "ECR"
     ],
-    "pausing": [],
-    "resuming": [],
+    "pausing": ["remove"],
+    "resuming": ["remove"],
     "DOWN" : ["INITIALISE"],
     "READY" : ["START", "SHUTDOWN"],
-    "RUN" : ["STOP", "PAUSE", "ECR"],
-    "PAUSED":["RESUME", "STOP","ECR"]
+    "RUN" : ["STOP", "PAUSE", "SHUTDOWN"],
+    "PAUSED":["RESUME", "STOP","ECR","SHUTDOWN"],
+    "IN TRANSITION": ["SHUTDOWN"]
   },
   "order": {
     "start": [
@@ -66,10 +72,7 @@
       "FR",
       "FM",
       "EBF",
-      "FWF"
-      
-      
-      
+      "FWF" 
     ]
   }
 }

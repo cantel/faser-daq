@@ -22,8 +22,6 @@ lt = {
     "SCTDataMonitor":"SDM",
     "TrackerReceiver": "TKR",
     "TriggerRateMonitor": "TRM",
-
-
 }
 
 def createTreeJSON(configPath):

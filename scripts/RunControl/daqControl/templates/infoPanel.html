@@ -1,0 +1,10 @@
+<v-card tile elevation="1" class="mx-4 my-4" v-if="infoIsActive && isActiveNode() && !hasChildren(activeNode)">
+    <v-card-title> Module information : [[ activeNode[0].name ]] <v-spacer></v-spacer>
+      <v-btn @click="openInfoInNewWindow()" icon color="normal">
+        <v-icon>mdi-open-in-new</v-icon>
+      </v-btn>
+    </v-card-title>
+    <v-card-text class="scrollableDiv">
+      <info_panel :module="activeNode[0].name"></info_panel>
+    </v-card-text>
+  </v-card>

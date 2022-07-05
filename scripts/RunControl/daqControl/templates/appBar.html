@@ -1,0 +1,34 @@
+<v-app-bar app>
+    <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+    <v-toolbar-title class="d-flex align-center"><img class="mr-2" width="100"
+        src="{{url_for('static', filename = 'img/faser.svg')}}"> RunControl</v-toolbar-title>
+    <v-menu offset-y>
+      <template v-slot:activator="{ on, attrs }">
+        <v-btn v-bind="attrs" :loading="c_configLoading" v-on="on" class="mx-4 my-2" depressed color="primary" small
+          :disabled="d_loadConfig">
+          load
+        </v-btn>
+      </template>
+      <v-list dense>
+        <v-list-item-group>
+          <v-list-item v-for="(item, index) in c_configDirs" @click="loadConfig(item)" :key="index">
+            <v-list-item-title> [[item]] </v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-menu>
+    <v-spacer></v-spacer>
+    <v-chip v-if="crashedModules.length !=0" dark label color="red" class="mx-3 px-10 py-5"> CRASH </v-chip>
+    <v-spacer></v-spacer>
+    <span>[[ whoInterlocked ]]</span>
+    <v-btn icon text small class="mx-1" :disabled="!logged">
+      <v-icon v-if="locked" @click="interlock()"> mdi-lock-off</v-icon>
+      <v-icon v-else @click="interlock()"> mdi-lock</v-icon>
+    </v-btn>
+
+    <v-btn icon text small class="mx-1">
+      <v-icon v-if="logged" @click="logout"> mdi-account-off</v-icon>
+      <v-icon v-else @click="login"> mdi-account</v-icon>
+    </v-btn>
+    Logged as : {{ usr }}
+  </v-app-bar>

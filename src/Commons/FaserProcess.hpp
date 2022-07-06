@@ -76,6 +76,9 @@ public:
     for(auto var : m_metric_ints) {
       *var=0;
     }
+    for(auto var : m_metric_uints) {
+      *var=0;
+    }
     for(auto var : m_metric_floats) {
       *var=0;
       }
@@ -97,6 +100,15 @@ protected:
       m_statistics->registerMetric<std::atomic<int>>(&var, name, mtype);
     }
   }
+  void registerVariable(std::atomic<size_t> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, bool zero_on_start=true) {
+    if (zero_on_start) {
+      var=0;
+      m_metric_uints.push_back(&var);
+    }
+    if (m_statistics->isStatsOn()) {
+      m_statistics->registerMetric<std::atomic<size_t>>(&var, name, mtype);
+    }
+  }
   void registerVariable(std::atomic<float> &var,std::string name,metrics::metric_type mtype=metrics::LAST_VALUE, bool zero_on_start=true) {
     if (zero_on_start) {
       var=0;
@@ -111,6 +123,7 @@ protected:
   std::atomic<int> m_ECRcount;
   std::atomic<int> m_status;
   std::vector<std::atomic<int>*> m_metric_ints;
+  std::vector<std::atomic<size_t>*> m_metric_uints;
   std::vector<std::atomic<float>*> m_metric_floats;
 };
   

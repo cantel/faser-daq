@@ -10,26 +10,38 @@ import subprocess
 import sys
 import time
 
-voltages={#4:1610,
-          5:1495,
-          6:1510,
-          7:1460,
-          8:1655,
-          9:1525,
-          10:1575,
-          11:1500,
-          12:1515,
-          13:1495
-}
+highGainVoltages={0: 1450,
+                  1: 1420,
+                  2: 1430,
+                  3: 1405}
 
-offset=int(sys.argv[1])
+lowGainVoltages={0: 855,
+                 1: 840,
+                 2: 855,
+                 3: 840}
 
-if offset<0 or offset>600:
-    print("ERROR in offset",offset)
+
+#gain is interpolation between the above voltages
+
+if len(sys.argv)!=5:
+    print("Usage: setCaloGainBeam.py <GF0> <GF1> <GF2> <GF3>")
     sys.exit(1)
 
-for ch in voltages:
-    volt=voltages[ch]-offset
+gainfactors=[float(arg) for arg in sys.argv[1:5]]
+
+if min(gainfactors)<-0.1:
+    print("too low gain factor")
+    sys.exit(1)
+
+if max(gainfactors)>1.1:
+    print("too high gain factor")
+    sys.exit(1)
+
+newTargets={}
+
+for ch in lowGainVoltages:
+    volt=int(lowGainVoltages[ch]+gainfactors[ch]*(highGainVoltages[ch]-lowGainVoltages[ch]))
+    newTargets[ch]=volt
     rc=os.system(f"snmpset -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-00 outputVoltage.u9{ch:02d} F {volt}")
     if rc:
         print("ERROR in channel ",ch)
@@ -39,8 +51,8 @@ time.sleep(5)
 redo=True
 while redo:
     redo=False
-    for ch in voltages:
-        volt=voltages[ch]-offset
+    for ch in lowGainVoltages:
+        volt=newTargets[ch]
         rc,output=subprocess.getstatusoutput(f"snmpget -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-00 outputMeasurementSenseVoltage.u9{ch:02d}")
         print(output)
         if rc:
@@ -52,4 +64,4 @@ while redo:
             redo=True
             time.sleep(1)
 
-time.sleep(30) # give time to stabilize a bit
+time.sleep(10) # give time to stabilize a bit

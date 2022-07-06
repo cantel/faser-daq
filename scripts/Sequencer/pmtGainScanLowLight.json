@@ -1,0 +1,20 @@
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "initCommand": "../HVControl/setLEDPulser.py 100 600 900",
+ "finalizeCommand": "../HVControl/setAllPMTs.py 0 && ../HVControl/setLEDPulser.py 100 0 0",
+ "defaults": {
+     "cfgFile": "tlbDigiTI12LED.json",
+     "runtype": "HVCalibration",
+     "maxRunTime": 3000,
+     "maxEvents": 10000,
+     "postCommand": null,
+     "endcomment": "Sequencer stop"
+ },
+ "template": {
+     "vars": { "step": "(1,19,1)"},
+     "step": {
+	 "startcomment": "PMT HV gain Scan, voltage - {step}",
+	 "preCommand": "../HVControl/setAllPMTs.py -l {step}"
+     }
+ }
+}

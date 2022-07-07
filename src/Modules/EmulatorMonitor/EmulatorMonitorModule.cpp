@@ -43,9 +43,6 @@ void EmulatorMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &ev
   }
   // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
 
-  uint32_t fragmentStatus = m_fragment->status();
-  fill_error_status_to_metric( fragmentStatus );
-  
   uint16_t payloadSize = m_fragment->payload_size(); 
 
   // 1D histogram fill

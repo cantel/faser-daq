@@ -50,11 +50,13 @@ digitizerDarkRateSciLab.json \
 digitizerLEDSciLab.json \
 --extras   \
 top.json \
+monitor_top.json \
 current.json \
 grafana/faser_metrics.json                   \
 schemas/validation-schema.json                   \
 schemas/refs/connection-schema.json                   \
 Templates/top.json                   \
+Templates/monitor_top.json                   \
 customized/host.json                 
 
 

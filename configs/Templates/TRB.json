@@ -1058,46 +1058,12 @@
                 "settings": {
                     "fragmentID": 196619,
                     "publish_interval": 5,
-                    "ActiveLHCModes": [
-                        8,
-                        9,
-                        10,
-                        11
-                    ],
+                    "ActiveLHCModes": {"$ref": "monitor_top.json#monitor_lhc_modes/ActiveLHCModes"},
                     "PhysicsTriggerBits": 8,
                     "stats_uri": "tcp://localhost:7000"
                 },
                 "connections": {
-                    "receivers": [
-                        {
-                            "type": "ZMQPubSub",
-                            "chid": 0,
-                            "connections": [
-                                {
-                                    "transport": "tcp",
-                                    "host": "localhost",
-                                    "port": 8200
-                                }
-                            ],
-                            "queue": {
-                                "$ref": "top.json#queue"
-                            }
-                        },
-                        {
-                            "type": "ZMQPubSub",
-                            "chid": 1,
-                            "connections": [
-                                {
-                                    "transport": "tcp",
-                                    "host": "localhost",
-                                    "port": 8202
-                                }
-                            ],
-                            "queue": {
-                                "$ref": "top.json#queue"
-                            }
-                        }
-                    ]
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all/receivers"}
                 }
             }
         ],
@@ -1487,22 +1453,7 @@
                     "stats_uri": "tcp://localhost:7000"
                 },
                 "connections": {
-                    "receivers": [
-                        {
-                            "type": "ZMQPubSub",
-                            "chid": 0,
-                            "connections": [
-                                {
-                                    "transport": "tcp",
-                                    "host": "localhost",
-                                    "port": 8200
-                                }
-                            ],
-                            "queue": {
-                                "$ref": "top.json#queue"
-                            }
-                        }
-                    ]
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_physics/receivers"}
                 }
             }
         ],
@@ -1529,22 +1480,9 @@
                     "stats_uri": "tcp://localhost:7000"
                 },
                 "connections": {
-                    "receivers": [
-                        {
-                            "type": "ZMQPubSub",
-                            "chid": 0,
-                            "connections": [
-                                {
-                                    "transport": "tcp",
-                                    "host": "localhost",
-                                    "port": 8200
-                                }
-                            ],
-                            "queue": {
-                                "$ref": "top.json#queue"
-                            }
-                        }
-                    ]
+                    "receivers": {
+                        "$ref": "#TrackStationMonitorSt0/modules/0/connections/receivers"
+                    }
                 }
             }
         ],
@@ -1571,22 +1509,9 @@
                     "stats_uri": "tcp://localhost:7000"
                 },
                 "connections": {
-                    "receivers": [
-                        {
-                            "type": "ZMQPubSub",
-                            "chid": 0,
-                            "connections": [
-                                {
-                                    "transport": "tcp",
-                                    "host": "localhost",
-                                    "port": 8200
-                                }
-                            ],
-                            "queue": {
-                                "$ref": "top.json#queue"
-                            }
-                        }
-                    ]
+                    "receivers": {
+                        "$ref": "#TrackStationMonitorSt0/modules/0/connections/receivers"
+                    }
                 }
             }
         ],
@@ -1613,22 +1538,9 @@
                     "stats_uri": "tcp://localhost:7000"
                 },
                 "connections": {
-                    "receivers": [
-                        {
-                            "type": "ZMQPubSub",
-                            "chid": 0,
-                            "connections": [
-                                {
-                                    "transport": "tcp",
-                                    "host": "localhost",
-                                    "port": 8200
-                                }
-                            ],
-                            "queue": {
-                                "$ref": "top.json#queue"
-                            }
-                        }
-                    ]
+                    "receivers": {
+                        "$ref": "#TrackStationMonitorSt0/modules/0/connections/receivers"
+                    }
                 }
             }
         ],

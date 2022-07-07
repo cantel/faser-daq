@@ -9,6 +9,7 @@ class SCTDataMonitorModule : public MonitorBaseModule {
  public:
   SCTDataMonitorModule(const std::string&);
   ~SCTDataMonitorModule();
+  void start(unsigned int);
 
  protected:
 

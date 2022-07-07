@@ -23,13 +23,18 @@ using namespace std::chrono;
 TriggerMonitorModule::TriggerMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_signal_nextBC("signal_nextBC_ch") { 
 
   INFO("In TriggerMonitorModule contructor");
-  m_previous_orbit = 0;
-  m_previous_bcid = 0;
  }
 
 TriggerMonitorModule::~TriggerMonitorModule() { 
   INFO("With config: " << m_config.dump());
  }
+
+void TriggerMonitorModule::start(unsigned int run_num){
+  INFO("Starting "<<getName());
+  MonitorBaseModule::start(run_num);
+  m_previous_orbit = 0;
+  m_previous_bcid = 0;
+}
 
 void TriggerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
@@ -38,13 +43,10 @@ void TriggerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
 
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
-    fill_error_status_to_metric( fragmentUnpackStatus );
+    WARNING("Error unpacking event fragment. Skipping event!");
     return;
   }
 
-  uint32_t fragmentStatus = m_fragment->status();
-  fill_error_status_to_metric( fragmentStatus );
- 
   if ( m_tlbdataFragment->valid() ) {
     bool isRndTrig(false);
     if (m_tlbdataFragment->tbp() & 0x10) isRndTrig = true;
@@ -146,8 +148,6 @@ void TriggerMonitorModule::register_hists() {
 void TriggerMonitorModule::register_metrics() {
 
   INFO( "... registering metrics in TriggerMonitorModule ... " );
-
-  register_error_metrics();
 
   registerVariable(m_input_channel0, "Input0Rate", metrics::RATE);
   registerVariable(m_input_channel1, "Input1Rate", metrics::RATE);

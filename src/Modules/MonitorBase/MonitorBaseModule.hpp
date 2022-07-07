@@ -56,12 +56,10 @@ class MonitorBaseModule : public FaserProcess {
   // filled by json configs
   uint32_t m_sourceID=0;
   uint8_t m_eventTag;
-  bool m_filter_physics;
-  bool m_filter_random;
-  bool m_filter_led;
-  bool m_store_bobr_data;
   unsigned m_PUBINT;
-  
+ 
+  // filled during running 
+  bool m_lhc_physics_mode;
   EventFull* m_event=0;
   const EventFragment* m_fragment=0; // do not delete this one. Owned by m_event!
   const RawFragment * m_rawFragment = 0 ; // do not delete this one. Owned by m_event!
@@ -87,6 +85,7 @@ class MonitorBaseModule : public FaserProcess {
   std::atomic<int> m_metric_error_empty;
   std::atomic<int> m_metric_error_duplicate;
   std::atomic<int> m_metric_error_unpack;
+  std::atomic<int> m_metric_total_errors;
 
   // BOBR data to be stored
   std::atomic<int> m_lhc_machinemode;
@@ -95,7 +94,6 @@ class MonitorBaseModule : public FaserProcess {
   virtual void monitor(DataFragment<daqling::utilities::Binary>&);
   virtual void register_hists( );
   virtual void register_metrics();
-  void register_error_metrics(); // lets derived classes register metrics for all error types defined in EventFormat.
   uint16_t unpack_event_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary );
   uint16_t unpack_fragment_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary, uint32_t sourceID);
   uint16_t unpack_fragment_header( DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
@@ -105,8 +103,6 @@ class MonitorBaseModule : public FaserProcess {
   TLBDataFragment get_tlb_data_fragment(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   TLBMonitoringFragment get_tlb_monitoring_fragment(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   uint16_t unpack_full_fragment( DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
-  void fill_error_status_to_metric(uint32_t fragmentStatus);
-  void fill_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name);
   bool is_physics_triggered(DataFragment<daqling::utilities::Binary>&);
   bool is_random_triggered(DataFragment<daqling::utilities::Binary>&);
   bool is_led_triggered(DataFragment<daqling::utilities::Binary>&);
@@ -114,15 +110,27 @@ class MonitorBaseModule : public FaserProcess {
 
  private:
 
-  std::thread *m_bobrProcessThread;
   bool m_event_header_unpacked;
-  const int m_INTERVAL_BOBRUPDATE = 5; // in seconds
+  bool m_filter_physics;
+  bool m_filter_random;
+  bool m_filter_led;
+  bool m_store_bobr_data;
+  std::thread *m_bobrProcessThread;
+  int m_bobr_channel;
   std::vector<int> m_active_mon_lhc_modes;
-  bool m_activate_monitoring;
+
+  // constants
+  const int m_INTERVAL_BOBRUPDATE = 5; // in seconds
+  const int m_ORANGE_LVL_ERRCNT = 10;
+  const int m_RED_LVL_ERRCNT = 1000;
 
   void setupHistogramManager();
   // store BOBR info
   void process_bobr_data() noexcept;
   uint16_t store(DataFragment<daqling::utilities::Binary>&);
+  void register_fragment_error_metrics();
+  void register_fragment_error_histogram();
+  void fill_fragment_error_status_to_metric(uint32_t fragmentStatus);
+  void fill_fragment_error_status_to_histogram(uint32_t fragmentStatus, std::string hist_name="fragment_errors");
 
 };

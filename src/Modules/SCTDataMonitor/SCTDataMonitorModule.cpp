@@ -14,7 +14,7 @@
 using namespace std::chrono_literals;
 using namespace std::chrono;
 
-SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_mod"),m_hname_scterrors("sct_data_errors"){ 
+SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseModule(n),m_prefix_hname_hitp("hitpattern_physics_mod"),m_hname_scterrors("sct_data_errors"){ 
 
    INFO("SCTDataMonitorModule()");
    auto cfg = getModuleSettings();
@@ -23,13 +23,18 @@ SCTDataMonitorModule::SCTDataMonitorModule(const std::string& n): MonitorBaseMod
       m_physics_trigbits = cfg_trigbits_select;
    else m_physics_trigbits=0xf;
 
-   m_hit_avg = 0;
-   m_hit_avg_count = 0;
  }
 
 SCTDataMonitorModule::~SCTDataMonitorModule() { 
   INFO("With config: " << m_config.dump());
  }
+
+void SCTDataMonitorModule::start(unsigned int run_num){
+  INFO("Starting "<<getName());
+  m_hit_avg = 0;
+  m_hit_avg_count = 0;
+  MonitorBaseModule::start(run_num);
+}
 
 void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
@@ -41,24 +46,21 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
     return;
   }
 
- auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
- if ( fragmentUnpackStatus ) {
-    fill_error_status_to_metric( fragmentUnpackStatus );
-    return;
+  bool randTrig(false);
+  bool physicsTrig(false);
+  auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
+  if ( fragmentUnpackStatus ) {
+     WARNING("Unpacking error for trigger fragment. Can't use trigger information for this event!");
+  } else {
+    if (m_tlbdataFragment->tbp() & 0x10) randTrig = true;
+    if ((m_tlbdataFragment->tbp()&0xf) & m_physics_trigbits) physicsTrig=true;
   }
- bool randTrig(false);
- bool physicsTrig(false);
- if (m_tlbdataFragment->tbp() & 0x10) randTrig = true;
- if ((m_tlbdataFragment->tbp()&0xf) & m_physics_trigbits) physicsTrig=true;
 
   fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
-    fill_error_status_to_metric( fragmentUnpackStatus );
+    WARNING("Unpacking error for tracker fragment. Skipping event!");
     return;
   }
-
-  uint32_t fragmentStatus = m_fragment->status();
-  fill_error_status_to_metric( fragmentStatus );
 
   if ( m_trackerdataFragment ){
     if (m_trackerdataFragment->has_trb_error()) m_histogrammanager->fill("track_data_error_types", "TRBError");
@@ -68,6 +70,11 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
     if (m_trackerdataFragment->missing_crc()) m_histogrammanager->fill("track_data_error_types", "NoCRC");
     if (m_trackerdataFragment->missing_frames()) m_histogrammanager->fill("track_data_error_types", "MissingFrames");
     if (m_trackerdataFragment->unrecognized_frames()) m_histogrammanager->fill("track_data_error_types", "UnrecognizedFrames");
+    if (!m_trackerdataFragment->valid()) {
+      WARNING("Errors were found in tracker fragment:\n"<<*m_trackerdataFragment<<"\n Skipping event!");
+      m_metric_total_errors++;
+      return;
+    }
   }
   else {WARNING("Ignoring empty data fragment.");return;}
 
@@ -78,12 +85,9 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
   } 
   m_histogrammanager->fill("payloadsize", payload_size);
 
-  if (m_trackerdataFragment->valid()){
-    m_bcid = m_trackerdataFragment->bc_id();
-    m_l1id = m_trackerdataFragment->event_id();
-    m_histogrammanager->fill("bcid", m_bcid); 
-  }
-  else {WARNING("Ignoring corrupted data fragment.");return;}
+  m_bcid = m_trackerdataFragment->bc_id();
+  m_l1id = m_trackerdataFragment->event_id();
+  m_histogrammanager->fill("bcid", m_bcid);
 
   goodHits = 0;
   for (unsigned i = 0;i < 8; i++){
@@ -153,9 +157,9 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
       }
       auto allHits = sctEvent->GetHits();
       uint8_t module = sctEvent->GetModuleID();
-      unsigned number = sctEvent->GetNHits();
-      m_histogrammanager->fill("total_hits_multiplicity", number);
-      total_hits+= number;
+      unsigned nhits = sctEvent->GetNHits();
+      m_histogrammanager->fill("total_hits_multiplicity", nhits);
+      total_hits+= nhits;
 
       if (randTrig) {
         for ( unsigned chipIdx = 0; chipIdx < 12; chipIdx++) {
@@ -170,7 +174,7 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
           }
         }
       }
-      if (physicsTrig) { // only selected physics triggered events
+      if (physicsTrig && m_lhc_physics_mode) { // only selected physics triggered events during LHC collisions
         std::string hname_hitp = m_prefix_hname_hitp+std::to_string(sctEvent->GetModuleID());
         for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
           auto hitsPerChip1 = allHits[chipIdx];
@@ -183,8 +187,8 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
               if ( hit2.second == 7 ) continue;
               auto strip2 = kSTRIPS_PER_CHIP-1-hit2.first; // invert
               if (module<=3){
-                 m_histogrammanager->fill("strip_id_difference_mod0to3",strip1-strip2);}
-              else {m_histogrammanager->fill("strip_id_difference_mod4to7",strip1-strip2);}
+                 m_histogrammanager->fill("strip_id_difference_physics_mod0to3",strip1-strip2);}
+              else {m_histogrammanager->fill("strip_id_difference_physics_mod4to7",strip1-strip2);}
               if ( std::abs(strip1-strip2) > kSTRIPDIFFTOLERANCE ) continue;
               // good physics hits
               goodHits = goodHits + 1;
@@ -207,18 +211,18 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
       }
   }
   m_hit_multiplicity = total_hits;
-  if (physicsTrig) {
-    m_histogrammanager->fill("good_hits_multiplicity",goodHits);
-    m_histogrammanager->fill("bcid_hit_weighted", m_bcid, goodHits);
+  if (physicsTrig && m_lhc_physics_mode) {
+    m_histogrammanager->fill("good_nhits_physics",goodHits);
+    m_histogrammanager->fill("bcid_hit_weighted_physics", m_bcid, goodHits);
+    if (goodHitsMod[0]) m_histogrammanager->fill("good_nhits_physics_Mod0",goodHitsMod[0]);
+    if (goodHitsMod[1]) m_histogrammanager->fill("good_nhits_physics_Mod1",goodHitsMod[1]);
+    if (goodHitsMod[2]) m_histogrammanager->fill("good_nhits_physics_Mod2",goodHitsMod[2]);
+    if (goodHitsMod[3]) m_histogrammanager->fill("good_nhits_physics_Mod3",goodHitsMod[3]);
+    if (goodHitsMod[4]) m_histogrammanager->fill("good_nhits_physics_Mod4",goodHitsMod[4]);
+    if (goodHitsMod[5]) m_histogrammanager->fill("good_nhits_physics_Mod5",goodHitsMod[5]);
+    if (goodHitsMod[6]) m_histogrammanager->fill("good_nhits_physics_Mod6",goodHitsMod[6]);
+    if (goodHitsMod[7]) m_histogrammanager->fill("good_nhits_physics_Mod7",goodHitsMod[7]);
   }
-  if (goodHitsMod[0]) m_histogrammanager->fill("good_hits_multiplicity_Mod0",goodHitsMod[0]);
-  if (goodHitsMod[1]) m_histogrammanager->fill("good_hits_multiplicity_Mod1",goodHitsMod[1]);
-  if (goodHitsMod[2]) m_histogrammanager->fill("good_hits_multiplicity_Mod2",goodHitsMod[2]);
-  if (goodHitsMod[3]) m_histogrammanager->fill("good_hits_multiplicity_Mod3",goodHitsMod[3]);
-  if (goodHitsMod[4]) m_histogrammanager->fill("good_hits_multiplicity_Mod4",goodHitsMod[4]);
-  if (goodHitsMod[5]) m_histogrammanager->fill("good_hits_multiplicity_Mod5",goodHitsMod[5]);
-  if (goodHitsMod[6]) m_histogrammanager->fill("good_hits_multiplicity_Mod6",goodHitsMod[6]);
-  if (goodHitsMod[7]) m_histogrammanager->fill("good_hits_multiplicity_Mod7",goodHitsMod[7]);
 }
 
 void SCTDataMonitorModule::register_hists() {
@@ -228,21 +232,21 @@ void SCTDataMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", 0, MAXFRAGSIZE/50, MAXFRAGSIZE/2000,  Axis::Range::EXTENDABLE, m_PUBINT*10);
 
   m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 1800);
-  m_histogrammanager->registerHistogram("bcid_hit_weighted", "BCID", -0.5, 3564.5, 3565, 30);
+  m_histogrammanager->registerHistogram("bcid_hit_weighted_physics", "BCID", -0.5, 3564.5, 3565, 30);
   m_histogrammanager->registerHistogram("diff_trb_sct_bcid", "TRB BCID - SCT BCID", -5, 5, 10, Axis::Range::EXTENDABLE, 120);
   m_histogrammanager->registerHistogram("diff_trb_sct_l1id", "TRB BCID - SCT L1ID", -5, 5, 10, Axis::Range::EXTENDABLE, 120);
   m_histogrammanager->registerHistogram("total_hits_multiplicity", "total_hits_multiplicity", 0, 30, 30, 30);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity", "good_hits_multiplicity", 0, 30, 30, Axis::Range::EXTENDABLE, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod0", "good_hits_multiplicity_Mod0", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod1", "good_hits_multiplicity_Mod1", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod2", "good_hits_multiplicity_Mod2", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod3", "good_hits_multiplicity_Mod3", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod4", "good_hits_multiplicity_Mod4", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod5", "good_hits_multiplicity_Mod5", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod6", "good_hits_multiplicity_Mod6", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("good_hits_multiplicity_Mod7", "good_hits_multiplicity_Mod7", 1, 30, 29, m_PUBINT);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod4to7", "strip_id_difference_mod4to7", -130, 130, 52, m_PUBINT);
-  m_histogrammanager->registerHistogram("strip_id_difference_mod0to3", "strip_id_difference_mod0to3", -130, 130, 52, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics", "good_nhits_physics", 0, 30, 30, Axis::Range::EXTENDABLE, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod0", "good_nhits_physics_Mod0", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod1", "good_nhits_physics_Mod1", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod2", "good_nhits_physics_Mod2", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod3", "good_nhits_physics_Mod3", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod4", "good_nhits_physics_Mod4", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod5", "good_nhits_physics_Mod5", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod6", "good_nhits_physics_Mod6", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("good_nhits_physics_Mod7", "good_nhits_physics_Mod7", 1, 30, 29, m_PUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_physics_mod4to7", "strip_id_difference_mod4to7", -130, 130, 52, m_PUBINT);
+  m_histogrammanager->registerHistogram("strip_id_difference_physics_mod0to3", "strip_id_difference_mod0to3", -130, 130, 52, m_PUBINT);
   m_histogrammanager->register2DHistogram("chip_occupancy_noise", "module_number",  0, 4, 4, "chip_number", 0, 24, 24, m_PUBINT);
   m_histogrammanager->register2DHistogram("chip_occupancy_physics", "module_number",  0, 4,4,"chip_number", 0, 24 , 24, m_PUBINT);
   m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
@@ -277,8 +281,6 @@ void SCTDataMonitorModule::register_metrics() {
 
   registerVariable(m_hit_multiplicity, "HitMultiplicity");
   registerVariable(m_hit_avg, "AvgHit");
-
-  register_error_metrics();
 
   return;
 }

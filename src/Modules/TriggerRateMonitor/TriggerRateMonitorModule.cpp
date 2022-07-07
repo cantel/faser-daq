@@ -21,8 +21,6 @@ using namespace std::chrono;
 TriggerRateMonitorModule::TriggerRateMonitorModule(const std::string& n): MonitorBaseModule(n) { 
 
    INFO("");
-   m_ECR_cnt = 0;
-   m_total_unvetoed_events = 0;
  }
 
 TriggerRateMonitorModule::~TriggerRateMonitorModule() { 
@@ -45,6 +43,13 @@ TriggerRateMonitorModule::~TriggerRateMonitorModule() {
 
  }
 
+void TriggerRateMonitorModule::start(unsigned int run_num){
+  INFO("Starting "<<getName());
+  MonitorBaseModule::start(run_num);
+  m_ECR_cnt = 0;
+  m_total_unvetoed_events = 0;
+}
+
 void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
@@ -53,17 +58,13 @@ void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> 
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
-    fill_error_status_to_metric( fragmentUnpackStatus );
+    WARNING("Error unpacking event fragment. Skipping event!");
     return;
   }
   // m_tlbmonitoringFragment should now be filled
 
-  uint32_t fragmentStatus = m_fragment->status();
-  fill_error_status_to_metric( fragmentStatus );
-  
   if (!m_tlbmonitoringFragment->valid()) {
     WARNING("Skipping invalid tlb monitoring fragment\n"<<std::dec<<*m_tlbmonitoringFragment);
-    fill_error_status_to_metric(fragmentUnpackStatus);
     return;
   }
 
@@ -166,7 +167,6 @@ void TriggerRateMonitorModule::register_hists() {
   m_histogrammanager->register2DHistogram("deadtime_vs_trkbusy", "Simple Deadtime Vetoes", -0.5, 9.5, 10, "Tracker Busy Vetoes", -0.5, 9.5, 10, Axis::Range::EXTENDABLE);
   m_histogrammanager->register2DHistogram("deadtime_vs_ratelimiter", "Simple Deadtime Vetoes", -0.5, 9.5, 10, "Rate Limiter Vetoes", -0.5, 9.5, 10, Axis::Range::EXTENDABLE);
 
-
   INFO(" ... done registering histograms ... " );
   return;
 
@@ -175,8 +175,6 @@ void TriggerRateMonitorModule::register_hists() {
 void TriggerRateMonitorModule::register_metrics() {
 
   INFO( "... registering metrics in TriggerRateMonitorModule ... " );
-
-  register_error_metrics();
 
   registerVariable(m_tapORed, "TAPORed");
   registerVariable(m_tavORed, "TAVORed");

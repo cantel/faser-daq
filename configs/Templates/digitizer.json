@@ -639,16 +639,7 @@
 					]		
 		},
 		"connections": {
-				"receivers": [
-				{
-					"type": "ZMQPubSub",
-					"chid": 0,
-					"connections": [
-						{ "transport": "tcp", "host": "localhost","port": 8200 }
-					],
-					"queue":{"$ref":"top.json#queue"}
-				}
-				]
+                               "receivers": { "$ref": "monitor_top.json#monitor_receivers_physics/receivers"}
 		}
 	}],
         "loglevel":         { "$ref": "top.json#loglevel" },
@@ -738,16 +729,7 @@
 					]		
 		},
 		"connections": {
-				"receivers": [
-				{
-					"type": "ZMQPubSub",
-					"chid": 0,
-					"connections": [
-						{ "transport": "tcp", "host": "localhost","port": 8200 }
-					],
-					"queue":{"$ref":"top.json#queue"}
-				}
-				]
+                               "receivers": { "$ref": "monitor_top.json#monitor_receivers_physics/receivers"}
 		}
 	}],
         "loglevel":         { "$ref": "top.json#loglevel" },

@@ -39,18 +39,15 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
     ERROR("Error in unpacking");
-    fill_error_status_to_metric( fragmentUnpackStatus );
-    fill_error_status_to_histogram( fragmentUnpackStatus, "h_digitizer_errorcount" );
     return;
   }
-  // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
+
+  if (!m_pmtdataFragment->valid()) {
+    ERROR("Invalid PMT fragment. Skipping event!");
+    return;
+  }
 
   DEBUG("EventSize : "<<m_pmtdataFragment->event_size());
-
-  // number of errors into histogram
-  uint32_t fragmentStatus = m_fragment->status();
-  fill_error_status_to_metric( fragmentStatus );
-  fill_error_status_to_histogram( fragmentStatus, "h_digitizer_errorcount" );
 
   // size of fragment payload
   uint16_t payloadSize = m_fragment->payload_size(); 
@@ -111,15 +108,12 @@ void DigitizerMonitorModule::register_hists() {
   
   }
   
-  
   INFO(" ... done registering histograms ... " );
   return;
 }
 
 void DigitizerMonitorModule::register_metrics() {
   INFO( "... registering metrics in DigitizerMonitorModule ... " );
-
-  register_error_metrics();
 
   m_metric_payload = 0;
   registerVariable(m_metric_payload,"payload");

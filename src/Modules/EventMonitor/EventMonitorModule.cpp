@@ -50,7 +50,6 @@ void EventMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &event
   if (m_enable_tlb){
     auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::TriggerSourceID);
     if ( fragmentUnpackStatus ) {
-      fill_error_status_to_metric( fragmentUnpackStatus );
       ERROR("Error retrieving TLB data fragment.");
       if (fragmentUnpackStatus & MissingFragment) m_missing_tlb++;
       return;
@@ -62,7 +61,6 @@ void EventMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &event
   if (m_enable_digitizer){
     auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::PMTSourceID);
     if ( fragmentUnpackStatus ) {
-      fill_error_status_to_metric( fragmentUnpackStatus );
       ERROR("Error retrieving digitizer data fragment.");
       if (fragmentUnpackStatus & MissingFragment) m_missing_digi++;
     } else {
@@ -82,7 +80,6 @@ void EventMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &event
     auto trb_id = m_enabled_trbs[i];
     auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary, SourceIDs::TrackerSourceID+trb_id);
     if ( fragmentUnpackStatus ) {
-      fill_error_status_to_metric( fragmentUnpackStatus );
       ERROR("Error retrieving tracker data fragment.");
       if (fragmentUnpackStatus & MissingFragment) m_missing_trb++;
     } else {
@@ -126,8 +123,6 @@ void EventMonitorModule::register_hists() {
 void EventMonitorModule::register_metrics() {
 
   INFO( "... registering metrics in EventMonitorModule ... " );
-
-  register_error_metrics();
 
   registerVariable(m_missing_tlb, "MissingTLBCnt");
   registerVariable(m_missing_digi, "MissingDigiCnt");

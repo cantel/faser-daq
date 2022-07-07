@@ -9,6 +9,7 @@ class TriggerRateMonitorModule : public MonitorBaseModule {
  public:
   TriggerRateMonitorModule(const std::string&);
   ~TriggerRateMonitorModule();
+  void start(unsigned int);
 
  protected:
 

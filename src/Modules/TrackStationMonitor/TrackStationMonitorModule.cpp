@@ -138,15 +138,8 @@ void TrackStationMonitorModule::monitor(DataFragment<daqling::utilities::Binary>
 
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary, SourceIDs::TriggerSourceID);
   if (fragmentUnpackStatus) {
-    fill_error_status_to_metric(fragmentUnpackStatus);
     return;
   }
-
-  if (m_tlbdataFragment->tbp() & 0x10) {
-    WARNING("Skipping random trigger data");
-    return;
-  }
-
 
   for ( auto TRBBoardId : m_trb_ids ) {
 
@@ -344,6 +337,7 @@ void TrackStationMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("tan_phi_xz", "tan(phi_xz)", -0.2, 0.2, 40, kPUBINT);
   m_histogrammanager->registerHistogram("phi_yz", "phi_yz", -2, 2, 100, kPUBINT);
   m_histogrammanager->registerHistogram("tan_phi_yz", "tan(phi_yz)", -0.01, 0.01, 40, kPUBINT);
+
   INFO(" ... done registering histograms ... " );
 }
 
@@ -358,5 +352,4 @@ void TrackStationMonitorModule::register_metrics() {
   registerVariable(rms_y, "rms_y");
   registerVariable(m_number_good_events, "number_good_events");
 
-  register_error_metrics();
 }

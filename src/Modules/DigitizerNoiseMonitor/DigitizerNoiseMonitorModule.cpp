@@ -42,16 +42,14 @@ void DigitizerNoiseMonitorModule::monitor(DataFragment<daqling::utilities::Binar
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
     ERROR("Error in unpacking");
-    fill_error_status_to_metric( fragmentUnpackStatus );
     return;
   }
-  // m_rawFragment or m_monitoringFragment should now be filled, depending on tag.
+  if (!m_pmtdataFragment->valid()) {
+    ERROR("Invalid PMT fragment. Skipping event!");
+    return;
+  }
 
   DEBUG("EventSize : "<<m_pmtdataFragment->event_size());
-
-  // number of errors into histogram
-  uint32_t fragmentStatus = m_fragment->status();
-  fill_error_status_to_metric( fragmentStatus );
 
   // size of fragment payload
   uint16_t payloadSize = m_fragment->payload_size(); 
@@ -81,9 +79,6 @@ void DigitizerNoiseMonitorModule::register_hists() {
 
 void DigitizerNoiseMonitorModule::register_metrics() {
   INFO( "... registering metrics in DigitizerNoiseMonitorModule ... " );
-
-  register_error_metrics();
-
 
   registerVariable(m_metric_payload, "payload");
   for(int iChan=0; iChan<NCHANNELS; iChan++){

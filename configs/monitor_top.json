@@ -1,0 +1,166 @@
+{
+  "monitor_receivers_physics": {
+                "receivers": [
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 0,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8200
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    }
+                ]
+  },
+  "monitor_receivers_physics_bobr": {
+                "receivers": [
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 0,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8200
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    },
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 4,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8202
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    }
+                ]
+  },
+  "monitor_receivers_all_bobr": {
+                "receivers": [
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 0,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8200
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    },
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 1,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8216
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    },
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 2,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8217
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    },
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 4,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8202
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    }
+                ]
+  },
+  "monitor_receivers_all": {
+                "receivers": [
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 0,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8200
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    },
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 1,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8216
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    },
+                    {
+                        "type": "ZMQPubSub",
+                        "chid": 2,
+                        "connections": [
+                            {
+                                "transport": "tcp",
+                                "host": "localhost",
+                                "port": 8217
+                            }
+                        ],
+                        "queue": {
+                            "$ref": "top.json#queue"
+                        }
+                    }
+                ]
+  },
+  "monitor_lhc_modes": {
+                    "ActiveLHCModes": [
+                        8,
+                        9,
+                        10,
+                        11
+                    ]
+  }
+}

@@ -38,7 +38,6 @@ tlbDigiTI12.json \
 tlbDigiTI12LED.json \
 tlbDigiTI12Cosmics.json \
 tlbDigiTI12PMTs.json \
-tlbDigiTI12Calo.json \
 tlbDigiTI12PE.json \
 tlbDigiTI12SinglePMTs.json \
 combinedEHN1.json \

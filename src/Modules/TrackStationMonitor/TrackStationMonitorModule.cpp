@@ -138,18 +138,19 @@ void TrackStationMonitorModule::monitor(DataFragment<daqling::utilities::Binary>
 
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary, SourceIDs::TriggerSourceID);
   if (fragmentUnpackStatus) {
+    WARNING("ERROR unpacking trigger fragment");
     return;
   }
 
   for ( auto TRBBoardId : m_trb_ids ) {
 
+    uint8_t LayerIdx = m_stationID == 0? (TRBBoardId-2)%kTRB_BOARDS : TRBBoardId%kTRB_BOARDS; // adjust for IFT
+
     try {
       TrackerDataFragment trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
       m_eventId = trackerDataFragment.event_id();
-      if (TRBBoardId % kTRB_BOARDS == 0)
+      if (LayerIdx == 0)
         DEBUG("event " << m_eventId);
-
-      std::string hname_hitp = m_prefix_hname_hitp+std::to_string(TRBBoardId % 3);
 
       for (auto sctEvent : trackerDataFragment) {
         if (sctEvent == nullptr) {
@@ -234,7 +235,7 @@ void TrackStationMonitorModule::monitor(DataFragment<daqling::utilities::Binary>
               double yf = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster1Pos) * kSTRIP_PITCH;
               double yb = kMODULEPOS[module % 4] + (chip * kSTRIPS_PER_CHIP + cluster2Pos) * kSTRIP_PITCH;
               double px = intersection(yf, yb);
-              double py = 0.5 * (yf + yb) + kLAYER_OFFSET[TRBBoardId % kTRB_BOARDS];
+              double py = 0.5 * (yf + yb) + kLAYER_OFFSET[LayerIdx];
 
               // invert every second module and add x-offset
               if (module % 2 == 1) px *= -1;
@@ -246,9 +247,9 @@ void TrackStationMonitorModule::monitor(DataFragment<daqling::utilities::Binary>
               m_y_vec[m_vec_idx] = py;
               m_vec_idx = (m_vec_idx+1) % kAVGSIZE;
 
-              m_histogrammanager->fill2D(m_hit_maps[TRBBoardId % kTRB_BOARDS], px, py, 1);
-              m_spacepoints[TRBBoardId % kTRB_BOARDS].emplace_back(SpacePoint({px, py, kLAYERPOS[TRBBoardId % kTRB_BOARDS]}, cluster1.hitPatterns(), cluster2.hitPatterns()));
-              if (m_spacepoints[TRBBoardId % kTRB_BOARDS].size() > 10) {
+              m_histogrammanager->fill2D(m_hit_maps[LayerIdx], px, py, 1);
+              m_spacepoints[LayerIdx].emplace_back(SpacePoint({px, py, kLAYERPOS[LayerIdx]}, cluster1.hitPatterns(), cluster2.hitPatterns()));
+              if (m_spacepoints[LayerIdx].size() > 10) {
                 break;
               }
             }

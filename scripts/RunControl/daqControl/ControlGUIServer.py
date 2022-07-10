@@ -536,9 +536,8 @@ def interlock():
     cern_upn = requestData["cern_upn"]
     action = requestData["action"] # lock or unlock 
 
-
+    
     if action == "lock": 
-        print(session["user"]["cern_upn"])
         if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=60,nx=True): 
             logAndEmit(r2.get("runningFile"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("runningFile"),)
             return jsonify("File locked successfully")
@@ -671,9 +670,14 @@ def urlTreeJson():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    auth_url, state = keycloak_client.login()
-    session["state"] = state
-    return redirect(auth_url)
+    if serverConfigJson["SSO_enabled"] == 0:
+        session["user"]["cern_upn"] = "offlineUser"
+        session["user"]["cern_gid"] = "12345"
+        return render_template("index.html", usr=session["user"]["cern_upn"])
+    else : 
+        auth_url, state = keycloak_client.login()
+        session["state"] = state
+        return redirect(auth_url)
 
 
 @app.route("/")
@@ -691,7 +695,7 @@ def localLogin():
     session["configName"] = ""
     session["configPath"] = ""
     session["configDict"] = ""
-    logAndEmit("","INFO","User " + session["user"]["cern_upn"] + " connected ")
+    #logAndEmit("","INFO","User " + session["user"]["cern_upn"] + " connected ")
     return redirect(url_for('index'))
 
 

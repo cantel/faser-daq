@@ -675,7 +675,7 @@ def login():
     if serverConfigJson["SSO_enabled"] == 0:
         session["user"]["cern_upn"] = "offlineUser"
         session["user"]["cern_gid"] = "12345"
-        return render_template("index.html", usr=session["user"]["cern_upn"])
+        return redirect(url_for("index"))
     else : 
         auth_url, state = keycloak_client.login()
         session["state"] = state

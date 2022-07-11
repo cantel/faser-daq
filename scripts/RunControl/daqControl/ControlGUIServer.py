@@ -387,7 +387,8 @@ def stateChecker():
                 socketio.emit("errorModChng", errors2, broadcast =True)
                 r2.delete("modulesErrors")
                 print(errors2)
-                r2.sadd("modulesErrors", *errors2)
+                if len(errors2) != 0:
+                    r2.sadd("modulesErrors", *errors2)
                 errors = errors2
         time.sleep(0.5)
 

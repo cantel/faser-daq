@@ -171,6 +171,7 @@ class NodeTree(NodeMixin):
           elif action == "unconfigure":
             return self.dc.handleRequest(self.host, self.port, action,*types)
           elif action == "start":
+            print(self.name)
             run_num = 0
             if arg != None:
               run_num = int(arg)

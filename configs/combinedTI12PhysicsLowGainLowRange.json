@@ -1,0 +1,302 @@
+{
+  "configuration": {
+    "version": 11,
+    "group": "faser",
+    "components": [
+      { "$ref" : "Templates/TLB.json#TLBReceiverTI12" },
+      { "$ref" : "Templates/digitizer.json#DigitizerTI12LowGainLowRange" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver00" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver01" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver02" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver03" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver04" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver05" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver06" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver07" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver08" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver11" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver12" },
+      { "$ref" : "Templates/TRB.json#TRBReceiver13" },
+      {
+        "name": "eventbuilder01",
+        "host": "localhost",
+        "port": 5500,
+        "modules":[{
+          "name": "eventbuilder01",
+          "type": "EventBuilderFaser",
+          "settings":         { "$ref": "Templates/eventBuilder.json#EventBuilder/settings" },
+          "connections": {
+            "receivers": [
+              { "chid": 0,"port": 8100, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 1,"port": 8101, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 2,"port": 8110, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 3,"port": 8111, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 4,"port": 8112, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 5,"port": 8113, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 6,"port": 8114, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 7,"port": 8115, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 8,"port": 8116, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 9,"port": 8117, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 10,"port": 8118, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 11,"port": 8119, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 12,"port": 8120, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} },
+              { "chid": 13,"port": 8121, "host": "localhost", "type": "ZMQPair", "transport": "tcp", "queue":{"$ref": "top.json#queue"} }
+            ],
+            "senders":  { "$ref": "Templates/eventBuilder.json#EventBuilder/connections/senders" }
+          }
+        }],
+        "loglevel":         { "$ref": "top.json#loglevel" },
+        "metrics_settings": { "$ref": "top.json#metrics_settings" }
+      },
+      { "$ref": "Templates/fileWriter.json#FileWriter" },
+      { "$ref": "Templates/monitor.json#EventMonitor" },
+      { "$ref": "Templates/TLB.json#RateMonitor" },
+      { "$ref": "Templates/TLB.json#TriggerMonitor" },
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt0" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt1" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt2" },
+      { "$ref": "Templates/TRB.json#TrackStationMonitorSt3" },
+      {"name": "sctdatamonitorst0l0",
+        "host": "localhost",
+        "port": 5550,
+        "modules": [
+            {
+                "name": "sctdatamonitorst0l0",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt0L0/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst0l1",
+        "host": "localhost",
+        "port": 5551,
+        "modules": [
+            {
+                "name": "sctdatamonitorst0l1",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt0L1/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst0l2",
+        "host": "localhost",
+        "port": 5552,
+        "modules": [
+            {
+                "name": "sctdatamonitorst0l2",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt0L2/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst1l0",
+        "host": "localhost",
+        "port": 5553,
+        "modules": [
+            {
+                "name": "sctdatamonitorst1l0",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt1L0/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst1l1",
+        "host": "localhost",
+        "port": 5554,
+        "modules": [
+            {
+                "name": "sctdatamonitorst1l1",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt1L1/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst1l2",
+        "host": "localhost",
+        "port": 5555,
+        "modules": [
+            {
+                "name": "sctdatamonitorst1l2",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt1L2/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst2l0",
+        "host": "localhost",
+        "port": 5556,
+        "modules": [
+            {
+                "name": "sctdatamonitorst2l0",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt2L0/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst2l1",
+        "host": "localhost",
+        "port": 5557,
+        "modules": [
+            {
+                "name": "sctdatamonitorst2l1",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt2L1/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst2l2",
+        "host": "localhost",
+        "port": 5558,
+        "modules": [
+            {
+                "name": "sctdatamonitorst2l2",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt2L2/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst3l0",
+        "host": "localhost",
+        "port": 5559,
+        "modules": [
+            {
+                "name": "sctdatamonitorst3l0",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt3L0/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst3l1",
+        "host": "localhost",
+        "port": 5560,
+        "modules": [
+            {
+                "name": "sctdatamonitorst3l1",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt3L1/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      },
+      {"name": "sctdatamonitorst3l2",
+        "host": "localhost",
+        "port": 5561,
+        "modules": [
+            {
+                "name": "sctdatamonitorst3l2",
+                "type": "SCTDataMonitor",
+                "settings": {"$ref": "Templates/TRB.json#SCTDataMonitorSt3L2/modules/0/settings"},
+                "connections": {
+                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all_bobr/receivers"}
+                }
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
+      }
+    ]
+  }
+}

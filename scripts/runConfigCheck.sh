@@ -40,10 +40,14 @@ tlbDigiTI12Cosmics.json \
 tlbDigiTI12PMTs.json \
 tlbDigiTI12PE.json \
 tlbDigiTI12SinglePMTs.json \
+tlbDigiTI12LEDLowerLowRange.json \
+tlbDigiTI12LEDUpperLowRange.json \
 combinedEHN1.json \
 combinedSciLab.json \
 combinedTI12Physics.json \
 combinedTI12Cosmics.json \
+combinedTI12PhysicsLowGain.json \
+combinedTI12PhysicsLowGainLowRange.json \
 playback.json              \
 emulatorLocalhost.json \
 emulatorLocalhostFullFarm.json \

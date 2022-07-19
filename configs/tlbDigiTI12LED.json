@@ -27,8 +27,7 @@
       { "$ref": "Templates/fileWriter.json#FileWriter" },
       { "$ref": "Templates/TLB.json#RateMonitor" },
       { "$ref": "Templates/TLB.json#TriggerMonitor" },
-      { "$ref": "Templates/digitizer.json#DigitizerMonitor" },
-      { "$ref": "Templates/monitor.json#EventMonitor" }
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" }
     ]
   }
 }

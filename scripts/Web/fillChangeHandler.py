@@ -47,7 +47,7 @@ def error(msg):
 
 class RunControl:
     def __init__(self):
-        self.cfgFile="combinedTI12Physics.json"
+        self.cfgFile="combinedTI12Physics"
         self.runtype="Physics"
         self.startcomment="Restart for fill {0}"
         self.endcomment="End of fill"
@@ -91,7 +91,7 @@ class RunControl:
         state=state.json()
         try:
             return (state["globalStatus"],
-                    state["runState"]['fileName']==self.cfgFile and state['runType']==self.runtype and 
+                    state["runState"]['fileName'].startswith(self.cfgFile) and state['runType']==self.runtype and 
                     time.time()-float(state["runStart"])>self.minRunTime)
         except KeyError:
             return "CORRUPTEDINFO",False

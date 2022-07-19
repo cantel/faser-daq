@@ -3,8 +3,8 @@
     "version": 11,
     "group": "faser",
     "components": [
-      { "$ref" : "Templates/TLB.json#TLBReceiverTI12Cosmics" },
-      { "$ref" : "Templates/digitizer.json#DigitizerTI12" },
+      { "$ref" : "Templates/TLB.json#TLBReceiverTI12LED" },
+      { "$ref" : "Templates/digitizer.json#DigitizerTI12LowGainLowerLowRange" },
       {
         "name": "eventbuilder01",
         "host": "localhost",

@@ -34,6 +34,7 @@ def getConfigFileNames():
 	for e in entries:
 		if(e.endswith(".json") and not e=="top.json"):
 			fileNames.append({'name': e})
+	fileNames.sort(key=lambda a: a['name'])
 	return jsonify({'configFileNames' : fileNames})
 		
 

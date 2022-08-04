@@ -674,7 +674,7 @@ def urlTreeJson():
 def login():
     if serverConfigJson["SSO_enabled"] == 0:
         session["user"]["cern_upn"] = "offlineUser"
-        session["user"]["cern_gid"] = "12345"
+        session["user"]["cern_gid"] = ""
         return redirect(url_for("index"))
     else : 
         auth_url, state = keycloak_client.login()
@@ -759,8 +759,11 @@ def monitoringInitialValues():
     """
     For the plots in the monitoring Panel (Run control GUI)
     Returns : some metrics (defined by 'keys') and last values for rates defined in 'graphKeys'
-    NOTE: the function can be optimized
+    NOTE: the function can be easily optimized
     """
+    def is_recent(value):
+        return datetime.now().timestamp() - float(value.split(":")[0]) < 1800
+
     packet = {"values": {}, "graphs":{}}
     keys = ["RunStart","RunNumber",
             "Events_received_Physics","Event_rate_Physics",
@@ -771,9 +774,7 @@ def monitoringInitialValues():
     eventBuilderName = r.keys("eventbuilder*")[0] # should only be one eventbuilder module
     results = [int(float(metric.split(":")[1])) for metric in r.hmget(eventBuilderName, keys )]
     data = dict(zip(keys,results))
-    
     data["RunStart"] =datetime.fromtimestamp(float(data["RunStart"])).strftime('%d/%m %H:%M:%S')  if data["RunStart"] != 0 else "-"
-    
     packet["values"] = data
     
     # for the plot :
@@ -786,6 +787,7 @@ def monitoringInitialValues():
                 
     for graphKey in graphKeys:
         values, = sorted(r.lrange(graphKey,0,r.llen(graphKey)))[-20:],
+        values = filter(lambda value : datetime.now().timestamp() - float(value.split(":")[0]) < 1800 ,values) # filter old values
         values = [[float(value.split(":")[0]) for value in values], [int(value.split(":")[1]) for value in values]]
         packet["graphs"][graphKey] = values
     return jsonify(packet) 

@@ -1,0 +1,39 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 70,
+ "finalizeCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 8,8; ../TRBControl/update_trb_setting.py --trb TRBReceiver01 -n FinePhaseClk0,FinePhaseClk1 -v 8,8; ../TRBControl/update_trb_setting.py --trb TRBReceiver02 -n FinePhaseClk0,FinePhaseClk1 -v 8,8;", 
+ "defaults": {
+   "cfgFile": "combinedEHN1.json",
+   "runtype": "Test",
+   "maxRunTime": 5400,
+   "maxEvents": 100000,
+   "postCommand": null,
+   "endcomment": "enough stats"
+  },
+ "steps": [
+     {
+	 "startcomment": "TRB FineTime Scan, Step 1 large steps, fine time setting Layer0: 16,16, Layer1: 32,32 Layer2: 48,48 ",
+         "preCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 16,16; ../TRBControl/update_trb_setting.py --trb TRBReceiver01 -n FinePhaseClk0,FinePhaseClk1 -v 32,32; ../TRBControl/update_trb_setting.py --trb TRBReceiver02 -n FinePhaseClk0,FinePhaseClk1 -v 48,48;"
+     },
+     {
+	 "startcomment": "TRB FineTime Scan, Step 2 fine step, fine time setting Layer0: 34,34, Layer1: 45,45 Layer2: 56,56 ",
+         "preCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 34,34; ../TRBControl/update_trb_setting.py --trb TRBReceiver01 -n FinePhaseClk0,FinePhaseClk1 -v 45,45; ../TRBControl/update_trb_setting.py --trb TRBReceiver02 -n FinePhaseClk0,FinePhaseClk1 -v 56,56;"
+     },
+     {
+	 "startcomment": "TRB FineTime Scan, Step 3 fine step, fine time setting Layer0: 37,37, Layer1: 48,48 Layer2: 59,59 ",
+         "preCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 37,37; ../TRBControl/update_trb_setting.py --trb TRBReceiver01 -n FinePhaseClk0,FinePhaseClk1 -v 48,48; ../TRBControl/update_trb_setting.py --trb TRBReceiver02 -n FinePhaseClk0,FinePhaseClk1 -v 59,59;"
+     },
+     {
+	 "startcomment": "TRB FineTime Scan, Step 4 fine step, fine time setting Layer0: 40,40, Layer1: 51,51 Layer2: 63,63 ",
+         "preCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 40,40; ../TRBControl/update_trb_setting.py --trb TRBReceiver01 -n FinePhaseClk0,FinePhaseClk1 -v 51,51; ../TRBControl/update_trb_setting.py --trb TRBReceiver02 -n FinePhaseClk0,FinePhaseClk1 -v 63,63;"
+     },
+     {
+	 "startcomment": "TRB FineTime Scan, Step 5 fine step, fine time setting Layer0: 43,43, Layer1: 54,54 Layer2: 3,3 ",
+         "preCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 43,43; ../TRBControl/update_trb_setting.py --trb TRBReceiver01 -n FinePhaseClk0,FinePhaseClk1 -v 54,54; ../TRBControl/update_trb_setting.py --trb TRBReceiver02 -n FinePhaseClk0,FinePhaseClk1 -v 3,3;"
+     },
+     {
+	 "startcomment": "TRB FineTime Scan, Step 6 fine step, fine time setting Layer0: 46,46, Layer1: 57,57 Layer2: 6,6 ",
+         "preCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 46,46; ../TRBControl/update_trb_setting.py --trb TRBReceiver01 -n FinePhaseClk0,FinePhaseClk1 -v 57,57; ../TRBControl/update_trb_setting.py --trb TRBReceiver02 -n FinePhaseClk0,FinePhaseClk1 -v 6,6;"
+     }
+  ]
+}
+

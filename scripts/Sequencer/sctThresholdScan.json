@@ -1,0 +1,23 @@
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
+ "maxTransitionTime": 45,
+ "defaults": {
+   "cfgFile": "combinedTI12PhysicsSCTTreshScan.json",
+   "runtype": "Test",
+   "maxRunTime": 1800,
+   "maxEvents": 1000000,
+   "postCommand": null,
+   "endcomment": "enough stats"
+  },
+  "template": { 
+     "vars": { "layer": [0,1,2,0,1,2,0,1,2,0,1,2,0,1,2],
+               "fC": [1.1,1.1,1.1,1.3,1.3,1.3,1.5,1.5,1.5,2.0,2.0,2.0,3.0,3.0,3.0],
+               "maxruntime": [1800,1800,1800,1500,1500,1500,1200,1200,1200,600,600,600,300,300,300],
+               "maxevents": [756000,756000,756000,630000,630000,630000,504000,504000,504000,252000,252000,252000,126000,126000,126000]
+             },
+     "step": { "maxRunTime": "{maxruntime}",
+               "maxEvents": "{maxevents}",
+	       "startcomment": "Tracker threshold scan, point {fC}fC, adjust layer {layer} (others at nominal)",
+               "preCommand": "cp ../../configs/Templates/TRB.json ../../configs/Templates/TRB_THRSCAN.json; ../TRBControl/update_sct_configs_from_dir.py -i /home/shifter/TI12/ConfigsForCombinedRuns/2022_07_14/ThresholdScan --station 0 --layer {layer} --tag '{fC}fC' --prefix 'ST0_Layer{layer}' --cfg TRB_THRSCAN.json; ../TRBControl/update_sct_configs_from_dir.py -i /home/shifter/TI12/ConfigsForCombinedRuns/2022_07_14/ThresholdScan --station 1 --layer {layer} --tag '{fC}fC' --prefix 'ST1_Layer{layer}' --cfg TRB_THRSCAN.json; ../TRBControl/update_sct_configs_from_dir.py -i /home/shifter/TI12/ConfigsForCombinedRuns/2022_07_14/ThresholdScan --station 2 --layer {layer} --tag '{fC}fC' --prefix 'ST2_Layer{layer}' --cfg TRB_THRSCAN.json; ../TRBControl/update_sct_configs_from_dir.py -i /home/shifter/TI12/ConfigsForCombinedRuns/2022_07_14/ThresholdScan --station 3 --layer {layer} --tag '{fC}fC' --prefix 'ST3_Layer{layer}' --cfg TRB_THRSCAN.json;"
+             }
+ }
+}

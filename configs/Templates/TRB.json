@@ -15,10 +15,10 @@
                     "ConfigureModules": true,
                     "HWDelayClk0": 1,
                     "HWDelayClk1": 1,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
-                    "FinePhaseLed0": 39,
-                    "FinePhaseLed1": 38,
+                    "FinePhaseClk0": 41,
+                    "FinePhaseClk1": 41,
+                    "FinePhaseLed0": 15,
+                    "FinePhaseLed1": 14,
                     "RxTimeoutDisable": false,
                     "L1Atype": "external",
                     "emulation": false,
@@ -91,10 +91,10 @@
                     "DAQIP": "faser-daq-010-direct",
                     "HWDelayClk0": 1,
                     "HWDelayClk1": 1,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
-                    "FinePhaseLed0": 37,
-                    "FinePhaseLed1": 40,
+                    "FinePhaseClk0": 41,
+                    "FinePhaseClk1": 41,
+                    "FinePhaseLed0": 13,
+                    "FinePhaseLed1": 16,
                     "ReadoutMode": {
                         "$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"
                     },
@@ -179,10 +179,10 @@
                     "DAQIP": "faser-daq-010-direct",
                     "HWDelayClk0": 1,
                     "HWDelayClk1": 1,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
-                    "FinePhaseLed0": 43,
-                    "FinePhaseLed1": 32,
+                    "FinePhaseClk0": 41,
+                    "FinePhaseClk1": 41,
+                    "FinePhaseLed0": 19,
+                    "FinePhaseLed1": 8,
                     "ReadoutMode": {
                         "$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"
                     },
@@ -265,12 +265,12 @@
                     "BoardID": 3,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 1,
-                    "HWDelayClk1": 1,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
-                    "FinePhaseLed0": 36,
-                    "FinePhaseLed1": 36,
+                    "HWDelayClk0": 2,
+                    "HWDelayClk1": 2,
+                    "FinePhaseClk0": 51,
+                    "FinePhaseClk1": 51,
+                    "FinePhaseLed0": 18,
+                    "FinePhaseLed1": 18,
                     "ReadoutMode": {
                         "$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"
                     },
@@ -301,7 +301,7 @@
                         "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module0_110522_0734.json",
                         "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module1_110522_0734.json",
                         "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module2_110522_0734.json",
-                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module3_110522_0734.json",
+                        "3": "/home/shifter/TI12/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST2_Middle_Layer0_Module3_DirectNoiseOccupancy_230622_1045.json",
                         "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module4_110522_0734.json",
                         "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module5_110522_0734.json",
                         "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module6_110522_0734.json",
@@ -353,12 +353,12 @@
                     "BoardID": 4,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 1,
-                    "HWDelayClk1": 1,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
-                    "FinePhaseLed0": 38,
-                    "FinePhaseLed1": 38,
+                    "HWDelayClk0": 2,
+                    "HWDelayClk1": 2,
+                    "FinePhaseClk0": 51,
+                    "FinePhaseClk1": 51,
+                    "FinePhaseLed0": 20,
+                    "FinePhaseLed1": 20,
                     "ReadoutMode": {
                         "$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"
                     },
@@ -441,12 +441,12 @@
                     "BoardID": 5,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 1,
-                    "HWDelayClk1": 1,
-                    "FinePhaseClk0": 0,
-                    "FinePhaseClk1": 0,
-                    "FinePhaseLed0": 39,
-                    "FinePhaseLed1": 38,
+                    "HWDelayClk0": 2,
+                    "HWDelayClk1": 2,
+                    "FinePhaseClk0": 51,
+                    "FinePhaseClk1": 51,
+                    "FinePhaseLed0": 21,
+                    "FinePhaseLed1": 20,
                     "ReadoutMode": {
                         "$ref": "#TRBReceiver00/modules/0/settings/ReadoutMode"
                     },
@@ -474,7 +474,7 @@
                         true
                     ],
                     "moduleConfigFiles": {
-                        "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module0_110522_0351.json",
+                        "0": "/home/shifter/TI12/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST2_Middle_Layer2_Module0_DirectNoiseOccupancy_230622_1045.json",
                         "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module1_110522_0351.json",
                         "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module2_110522_0351.json",
                         "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module3_110522_0351.json",
@@ -529,8 +529,8 @@
                     "BoardID": 6,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 1,
-                    "HWDelayClk1": 1,
+                    "HWDelayClk0": 2,
+                    "HWDelayClk1": 2,
                     "FinePhaseClk0": 0,
                     "FinePhaseClk1": 0,
                     "FinePhaseLed0": 36,
@@ -617,8 +617,8 @@
                     "BoardID": 7,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 1,
-                    "HWDelayClk1": 1,
+                    "HWDelayClk0": 2,
+                    "HWDelayClk1": 2,
                     "FinePhaseClk0": 0,
                     "FinePhaseClk1": 0,
                     "FinePhaseLed0": 35,
@@ -707,8 +707,8 @@
                     "BoardID": 8,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 1,
-                    "HWDelayClk1": 1,
+                    "HWDelayClk0": 2,
+                    "HWDelayClk1": 2,
                     "FinePhaseClk0": 0,
                     "FinePhaseClk1": 0,
                     "FinePhaseLed0": 35,
@@ -795,10 +795,10 @@
                     "BoardID": 11,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 0,
-                    "HWDelayClk1": 0,
-                    "FinePhaseClk0": 32,
-                    "FinePhaseClk1": 32,
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 27,
+                    "FinePhaseClk1": 27,
                     "FinePhaseLed0": 0,
                     "FinePhaseLed1": 0,
                     "ReadoutMode": {
@@ -883,10 +883,10 @@
                     "BoardID": 12,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 0,
-                    "HWDelayClk1": 0,
-                    "FinePhaseClk0": 32,
-                    "FinePhaseClk1": 32,
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 27,
+                    "FinePhaseClk1": 27,
                     "FinePhaseLed0": 0,
                     "FinePhaseLed1": 0,
                     "RxTimeoutDisable": {
@@ -971,10 +971,10 @@
                     "BoardID": 13,
                     "SCIP": "faser-daq-010-direct",
                     "DAQIP": "faser-daq-010-direct",
-                    "HWDelayClk0": 0,
-                    "HWDelayClk1": 0,
-                    "FinePhaseClk0": 32,
-                    "FinePhaseClk1": 32,
+                    "HWDelayClk0": 1,
+                    "HWDelayClk1": 1,
+                    "FinePhaseClk0": 27,
+                    "FinePhaseClk1": 27,
                     "FinePhaseLed0": 0,
                     "FinePhaseLed1": 0,
                     "ReadoutMode": {
@@ -1007,7 +1007,7 @@
                         "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module0_110522_0410.json",
                         "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module1_110522_0410.json",
                         "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module2_110522_0410.json",
-                        "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module3_110522_0410.json",
+                        "3": "/home/shifter/TI12/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST0_IFT_Layer2_Module3_DirectNoiseOccupancy_230622_1045.json",
                         "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module4_110522_0410.json",
                         "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module5_110522_0410.json",
                         "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module6_110522_0410.json",
@@ -1058,12 +1058,16 @@
                 "settings": {
                     "fragmentID": 196619,
                     "publish_interval": 5,
-                    "ActiveLHCModes": {"$ref": "monitor_top.json#monitor_lhc_modes/ActiveLHCModes"},
+                    "ActiveLHCModes": {
+                        "$ref": "monitor_top.json#monitor_lhc_modes/ActiveLHCModes"
+                    },
                     "PhysicsTriggerBits": 8,
                     "stats_uri": "tcp://localhost:7000"
                 },
                 "connections": {
-                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_all/receivers"}
+                    "receivers": {
+                        "$ref": "monitor_top.json#monitor_receivers_all/receivers"
+                    }
                 }
             }
         ],
@@ -1453,7 +1457,9 @@
                     "stats_uri": "tcp://localhost:7000"
                 },
                 "connections": {
-                    "receivers": {"$ref": "monitor_top.json#monitor_receivers_physics/receivers"}
+                    "receivers": {
+                        "$ref": "monitor_top.json#monitor_receivers_physics/receivers"
+                    }
                 }
             }
         ],

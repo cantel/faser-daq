@@ -147,12 +147,34 @@ If really needed, the actions provided by the FSM can be directly applied to a n
 
 The action buttons should only be used as a last resort, the root commands are preferable in any case. 
 
+```mermaid
+flowchart LR
+
+n1([Node action]):::start
+
+n1-->n2
+subgraph g1 [" "]
+direction LR
+n2([send action]) --> |action| modules
+end
+n3([raise timeout error])
+done[[Done]]:::stop
+g1-->|success|done
+g1-->|timeout|n3-->done
+
+
+classDef start fill:#5cf754
+classDef stop fill:#f2453f
+
+
+```
+
 ### Root commands
 
-Commands that will only be applied to the "root" node, so to all modules, no matter which module is selected. They should be seen as generalized commands. These are the commands to use to control the experiment. 
+Commands that will only be applied to the "root" node, so to all modules, no matter which module is selected. They should be seen as generalized commands. These are the commands to use to control the daq system. 
 
 
-The root commands allow access to the different general states of the application. 
+The root commands allow access to the different general states of the Run Control. 
 
 ```mermaid
 flowchart LR
@@ -208,7 +230,7 @@ The command will send the `enableTrigger` action to all modules, but the unaffec
 *Allows you to reset the counters*.
 Accessible only in `PAUSED` state, the command sends the `ECR` action to all modules. This command does not change the general state and remains in `PAUSED` state.
 
-![image](https://mermaid.ink/svg/pako:eNqVVc2O2zYQfhVCBQIvkA1ESpa9QpEA7fbQSwK025PkA1cay0Ik0iCpJAtrj32TvllfpEPSsql4nWJ9MDQ_mvm-b4bUIapkDVEebTv5tdpxZcjDL6UohaCL4g8pDflV9j0X9eYmz3NtMAFjrFgoqFt9s0EjORz2Slag9ZT7_IzudLH49-9_bm5csWxRaBA14ZVppdigU6yKXtZDB9rWWC8KxVsNxLQ9yMEQUEoql3d3OHSy4p0U3RP54ErTeFE0YIgaxMehfwSfSCmiGgTRoL60FThslF02pknYmabXW9PlRe9aCiiKe_zfbJwgcu_VIre378kI3wx2g5q0woDCdz-PRLBzvPICjSKxwqHvloytaE3LO4QwitQK51OxtALSyUaTPTe70ZXxMZHZnnp4bBTf70hDSTGBz0kSowIVUiP4q1sFjrmbqvWIzJfnNaJYkbmzkmLbNoNCJCsfQTalaI7o9VDZMY9WBO99h_iPrUextlk-ZtmhMbqFGcWdnaO1hRxxJpP1BBrN2AsYo8fHaPyzjZbR7x9zYp728MaVIVY8EIZ8-ushP8--jLAGtTVCSdhrJKEswEqTgDmyZC9yZ99xp34yJ_YvrM6kiNxj-tJn4bnAQVgyuDFbedy6szaZS7L2pAV5Q2yJSYyJu6CrFzZ9HWz6WZvkVdqsAtTrQBqPC-O-_d3VY9R43nP9EpQvUO9upt6k1Z4P9lCwOESfvgY9iy9U8X4aKHPMtB3xTuOPHTyotmlAYWs6WwbB2HWaKVJCJu7p-3OgQA-9pZKEVJavopJcoZJeUHEtQcyZpLPoCVA63_alJcGYezqTuKCxDGlkIQ32PyyWV1hkFyzcMRhEcCexbBbTu8HU8qu4CCjo5Zcg_0guxLwiRRltpaqATGXK6AewV1dgr2ewT9kzFOu5xJm7Ohp3bhBHuCuMnawmm-lfiqrjWt_DlvjLcNt2Xf4TZWsWL2dBvBt8jCcxo6l_OXob9aB63tb4qT84qJHZQQ9llONjzdXnMirFM-YN-5ob-K1u8fsT5VveaXgb8cHIP59EdXL4rPuWo5790fv8H6pcy8w)
+[![](https://mermaid.ink/img/pako:eNqVVc1u2zgQfhVCBQoHaAqT-rEjFF2gzR720gW66UnygZEomViJNEiq3cDKsW-yb9YX6ZC0bCqOW8QHQ_Ojme_7Zkjto0rWLMqjppPfqi1VBt19KEUpBF4Un6U06KPseyrqzVWe59pAAsRIsVCs5vpqA0a83--UrJjWU-7jI7iTxeLH9_-vrlyxbFFoJmpEK8Ol2IBTrIpe1kPHtK2xXhSKcs2Q4T2Tg0FMKalc3s1-38mKdlJ0D-gPVxovF0XLDFKD-DT098wnYgyoBoE0U195xRw2TM4b4zjsjJPLrXF61ruWghXFLfxvNk4QufNqoevr92hk_xnoxmrEhWEK3v13RIKc4pUXaBSxFQ5812jkghtOO4AwisQK51OhtGKok61GO2q2oyvjYyKzPfVw3yq626IWo2ICn6N4CQpUQA3Br-aKOeZuqtYjMl-e1oBihebOSoqGt4MCJCsfATalaA_o9VDZMY9WBO99C_gPrUextlk-ZtmBMbqFGcWNnaO1hRxhJpP1wDSYSy_gEjw-hpfvbLSM_vqUI_OwY69dGWTFY8Kgv7_c5afZlxHUwLZGKAl5iSSYBFhxHDAHluRZ7uQJd-wnc2T_zOpMisgdpKc-C84FDMKSgY1p5GHrTtpkLsnakxboNbIlJjEm7gKvntn0dbDpJ23iF2mzClCvA2k8Loj79jcXj1Hrec_1i0G-QL2bmXqTVjs62ENBliH65CXoyfJMFe_HgTKHTNsR7jR637E7xduWKWiNZ8sgCLlMMwFKwMQ9PT0Hiumht1TikEr6IirxBSrJGRXXkok5k2QWPQJK5tueWhKEuKcTiTMaaUgjC2mQ37BIL7DIzli4YzCI4E4i2Symt4Op5TdxFlCsl1-D_AO5EPMKFWXUSFUxNJUpo1_AXl2AvZ7BPmbPUKznEmfu6mjduQEc4a4QcrTabKZ_KaqOan3LGuQvw4Z3Xf4qrZpVmsyCcDf4WEOSNG78y9GbqGeqp7yGT_3eQY3MlvWsjHJ47Hi7NWVUikdIHHY1NezPmsMHKMob2mn2JqKDkf88iOro8Fm3nIKg_cH7-BPUl8zt)](https://mermaid.live/edit#pako:eNqVVc1u2zgQfhVCBQoHaAqT-rEjFF2gzR720gW66UnygZEomViJNEiq3cDKsW-yb9YX6ZC0bCqOW8QHQ_Ojme_7Zkjto0rWLMqjppPfqi1VBt19KEUpBF4Un6U06KPseyrqzVWe59pAAsRIsVCs5vpqA0a83--UrJjWU-7jI7iTxeLH9_-vrlyxbFFoJmpEK8Ol2IBTrIpe1kPHtK2xXhSKcs2Q4T2Tg0FMKalc3s1-38mKdlJ0D-gPVxovF0XLDFKD-DT098wnYgyoBoE0U195xRw2TM4b4zjsjJPLrXF61ruWghXFLfxvNk4QufNqoevr92hk_xnoxmrEhWEK3v13RIKc4pUXaBSxFQ5812jkghtOO4AwisQK51OhtGKok61GO2q2oyvjYyKzPfVw3yq626IWo2ICn6N4CQpUQA3Br-aKOeZuqtYjMl-e1oBihebOSoqGt4MCJCsfATalaA_o9VDZMY9WBO99C_gPrUextlk-ZtmBMbqFGcWNnaO1hRxhJpP1wDSYSy_gEjw-hpfvbLSM_vqUI_OwY69dGWTFY8Kgv7_c5afZlxHUwLZGKAl5iSSYBFhxHDAHluRZ7uQJd-wnc2T_zOpMisgdpKc-C84FDMKSgY1p5GHrTtpkLsnakxboNbIlJjEm7gKvntn0dbDpJ23iF2mzClCvA2k8Loj79jcXj1Hrec_1i0G-QL2bmXqTVjs62ENBliH65CXoyfJMFe_HgTKHTNsR7jR637E7xduWKWiNZ8sgCLlMMwFKwMQ9PT0Hiumht1TikEr6IirxBSrJGRXXkok5k2QWPQJK5tueWhKEuKcTiTMaaUgjC2mQ37BIL7DIzli4YzCI4E4i2Symt4Op5TdxFlCsl1-D_AO5EPMKFWXUSFUxNJUpo1_AXl2AvZ7BPmbPUKznEmfu6mjduQEc4a4QcrTabKZ_KaqOan3LGuQvw4Z3Xf4qrZpVmsyCcDf4WEOSNG78y9GbqGeqp7yGT_3eQY3MlvWsjHJ47Hi7NWVUikdIHHY1NezPmsMHKMob2mn2JqKDkf88iOro8Fm3nIKg_cH7-BPUl8zt)
 
 
 ### Log and info panels
@@ -232,7 +254,35 @@ To perform actions on the daq system, you must log in with your CERN account by 
 The CERN nickname will appear at the top next to the interlock icon.
 Only **one** person at a time can take control of the system.
 
-Interlock has a timeout that is extended by the same amount of time if any action is taken on the system.  
+Interlock has a timeout that is extended by the same amount of time if any action is taken on the system.
+```mermaid
+flowchart LR
+
+n1([interlock]):::start-->n2{{locked ?}}
+done[[Done]]:::stop
+n2-->|yes|n3([raise already locked warning])-->done
+n2-->|no|n4([lock config file])-->done
+
+
+classDef start fill:#5cf754
+classDef stop fill:#f2453f
+```
+```mermaid
+flowchart LR
+
+n1([login]):::start-->n2{{SSO ?}}
+done[[Done]]:::stop
+n2-->|yes|n3([reach keycloak])<-->n5[(keycloak)]
+n3-->done
+n2-->|no|n4([set username: offlineUser])-->done
+
+
+classDef start fill:#5cf754
+classDef stop fill:#f2453f
+
+
+
+```
 
 ### Monitoring
 

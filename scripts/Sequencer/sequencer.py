@@ -49,8 +49,8 @@ class runner:
         self.runtype=config["runtype"]
         self.startcomment=config["startcomment"]
         self.endcomment=config["endcomment"]
-        self.maxRunTime=config["maxRunTime"]
-        self.maxEvents=config["maxEvents"]
+        self.maxRunTime=int(config["maxRunTime"])
+        self.maxEvents=int(config["maxEvents"])
         self.preCommand=config["preCommand"]
         self.postCommand=config["postCommand"]
         self.seqnumber=seqnumber

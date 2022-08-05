@@ -1,0 +1,20 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 45,
+ "finalizeCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v 0,0"
+ "defaults": {
+   "cfgFile": "trbTLBConfig.json",
+   "runtype": "Test",
+   "maxRunTime": 3600,
+   "maxEvents": 500000,
+   "postCommand": null,
+   "endcomment": "enough stats"
+  },
+  "template": { 
+     "vars": { "time": ["0", "8", "16", "24", "32", "40", "48", "56", "63"]},
+     "step": {
+	 "startcomment": "TRB FineTime Scan, Step {step}, fine time setting {time}",
+         "preCommand": "../TRBControl/update_trb_setting.py --trb TRBReceiver00 -n FinePhaseClk0,FinePhaseClk1 -v {time},{time}"
+     }
+ }
+}
+

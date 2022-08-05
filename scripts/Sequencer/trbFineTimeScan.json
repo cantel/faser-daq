@@ -1,0 +1,20 @@
+{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+ "maxTransitionTime": 45,
+ "finalizeCommand": "../TRBControl/adjust_trb_fine_time.py --trb all --adjust 0",
+ "defaults": {
+   "cfgFile": "combinedTI12PhysicsLowGain.json",
+   "runtype": "Test",
+   "maxRunTime": 300,
+   "maxEvents": 80000,
+   "postCommand": null,
+   "endcomment": "enough stats"
+  },
+  "template": { 
+     "vars": { "fine_adjust_l0": [0, -62, -50, -34, -18, -10, -4,  6, 14, 30, 46, 58], "fine_adjust_l1": [0, -58, -46, -30, -14,  -8, -2,  8, 18, 34, 50, 60], "fine_adjust_l2": [0, -54, -42, -26, -12,  -6, 2, 10, 22, 38, 54, 62]},
+     "step": {
+	 "startcomment": "TRB FineTime Scan, fine time adjust layer 0: {fine_adjust_l0}, layer 1: {fine_adjust_l1}, layer 2: {fine_adjust_l2}",
+         "preCommand": "../TRBControl/adjust_trb_fine_time.py --trb TRBReceiver00,TRBReceiver03,TRBReceiver06,TRBReceiver11 --adjust {fine_adjust_l0}; ../TRBControl/adjust_trb_fine_time.py --trb TRBReceiver01,TRBReceiver04,TRBReceiver07,TRBReceiver12 --adjust {fine_adjust_l1}; ../TRBControl/adjust_trb_fine_time.py --trb TRBReceiver02,TRBReceiver05,TRBReceiver08,TRBReceiver13 --adjust {fine_adjust_l2};"
+     }
+ }
+}
+

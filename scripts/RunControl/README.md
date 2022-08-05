@@ -35,7 +35,7 @@ s6.-> |ECR| s6
 
 Instead of having only one configuration file, now a configuration setup needs 4 configuration files, one of which must not change between the different configurations : 
 
-- <nameofconfig>.json : the current config file.
+- \<nameofconfig>.json : the current config file.
 - control-tree.json : the tree structure of the configuration. 
 - fsm-rules.json : the possible states and order of starting and stopping  modules (should not change between configurations) 
 - config-dict.json : paths of above configuration files. 

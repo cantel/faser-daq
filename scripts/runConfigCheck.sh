@@ -46,7 +46,7 @@ combinedEHN1.json \
 combinedSciLab.json \
 combinedTI12Physics.json \
 combinedTI12Cosmics.json \
-combinedTI12PhysicsLowGain.json \
+combinedTI12PhysicsHighGain.json \
 combinedTI12PhysicsLowGainLowRange.json \
 playback.json              \
 emulatorLocalhost.json \

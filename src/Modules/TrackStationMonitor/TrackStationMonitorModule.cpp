@@ -136,6 +136,11 @@ void TrackStationMonitorModule::monitor(DataFragment<daqling::utilities::Binary>
     return;
   }
 
+  if (m_event->payload_size() > kMAXFRAGSIZE) {
+    WARNING("Large event encountered. Skipping event.");
+    return;
+  }
+
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary, SourceIDs::TriggerSourceID);
   if (fragmentUnpackStatus) {
     WARNING("ERROR unpacking trigger fragment");

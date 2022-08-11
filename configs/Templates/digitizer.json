@@ -11,7 +11,7 @@
 			}
 		]
 	},
-   "DigitizerTI12": {
+   "DigitizerTI12HighGain": {
 	"name": "digitizer01",
 	"host": "localhost",
 	"port": 5510,
@@ -65,7 +65,7 @@
 	"loglevel":         { "$ref": "top.json#loglevel" },
 	"metrics_settings": { "$ref": "top.json#metrics_settings" }
     },
-   "DigitizerTI12LowGain": {
+   "DigitizerTI12": {
 	"name": "digitizer01",
 	"host": "localhost",
 	"port": 5510,

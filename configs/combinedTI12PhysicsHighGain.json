@@ -4,7 +4,7 @@
     "group": "faser",
     "components": [
       { "$ref" : "Templates/TLB.json#TLBReceiverTI12" },
-      { "$ref" : "Templates/digitizer.json#DigitizerTI12LowGain" },
+      { "$ref" : "Templates/digitizer.json#DigitizerTI12HighGain" },
       { "$ref" : "Templates/TRB.json#TRBReceiver00" },
       { "$ref" : "Templates/TRB.json#TRBReceiver01" },
       { "$ref" : "Templates/TRB.json#TRBReceiver02" },

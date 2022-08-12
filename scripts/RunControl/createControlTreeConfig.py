@@ -4,24 +4,24 @@ from pathlib import Path
 import jsonref, json
 
 lt = {
-    "ReadoutInterface"  : "RI",
-    "EventBuilder"      : "EB",
-    "FileWriter"        : "FW", 
-    "EventBuilderFaser" : "EBF", #
-    "FileWriterFaser"   : "FWF", #
-    "TriggerReceiver"   : "TR", # hardware
-    "TriggerGenerator"  : "TG", # emulation
-    "TriggerMonitor"    : "TM",
-    "FrontEndReceiver"  : "FR", # hardware
-    "FrontEndMonitor"   : "FM",
-    "FrontEndEmulator"  : "FE",
-    "EmulatorMonitor"   : "EM",
-    "DigitizerReceiver" : "DR",
-    "SCTDataMonitor"    : "SDM",
-    "TrackerReceiver"   : "TKR",
-    "TriggerRateMonitor": "TRM",
-    "DigitizerMonitor"  : "DM",
-    "EventPlayback"     : "EP",
+    "ReadoutInterface"   : "RI",
+    "EventBuilder"       : "EB",
+    "FileWriter"         : "FW", 
+    "EventBuilderFaser"  : "EBF",
+    "FileWriterFaser"    : "FWF",
+    "TriggerReceiver"    : "TR", 
+    "TriggerGenerator"   : "TG",
+    "TriggerMonitor"     : "TM",
+    "FrontEndReceiver"   : "FR",
+    "FrontEndMonitor"    : "FM",
+    "FrontEndEmulator"   : "FE",
+    "EmulatorMonitor"    : "EM",
+    "DigitizerReceiver"  : "DR",
+    "SCTDataMonitor"     : "SDM",
+    "TrackerReceiver"    : "TKR",
+    "TriggerRateMonitor" : "TRM",
+    "DigitizerMonitor"   : "DM",
+    "EventPlayback"      : "EP",
     "TrackStationMonitor":"TSM"
 }
 
@@ -68,7 +68,6 @@ def createTreeJSON(configPath,configsDirPath):
 
 if __name__ == "__main__":
 
-    
     if len(sys.argv) != 2 :
         print(f"USAGE : python {sys.argv[0]} <configFullPath>")
         exit(1)
@@ -83,9 +82,9 @@ if __name__ == "__main__":
         "config"   : f"../{configName}",
         "grafana"  : "../grafana.json"
     }
+
     with open(os.path.join(configsDirPath,"fsm-rules.json"), "r") as fp:
         fsm_rules = json.load(fp)
-
 
     tree_config = createTreeJSON(configPath, configsDirPath)
 
@@ -95,7 +94,6 @@ if __name__ == "__main__":
             jsonref.dump(tree_config,fp, indent=4)
         with open(os.path.join(configDir,"config-dict.json"), "w") as fp:
             jsonref.dump(dict_obj,fp, indent=4)
-
     except FileExistsError:
         print("Directory already exists ! ")
         r = input("Do you want to overwrite it ? (y/N) ")
@@ -108,8 +106,6 @@ if __name__ == "__main__":
             print("Exiting...")
             exit(0)
     
-    # checking if all the types are in the fsm-rules order > start/stop arrays 
-
 
 
 

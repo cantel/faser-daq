@@ -396,6 +396,9 @@ var app = new Vue({
     },
     setActiveNode(node) {
       this.activeNode = node;
+      console.log("node = ", node)
+      this.infoIsActive = node ? true : false 
+  
     },
     getConfigDirs() {
       axios.get("/configDirs").then((response) => {

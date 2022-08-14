@@ -43,7 +43,6 @@ thread = None
 sysConf = {}
 root = threading.local()
 mainRoot = None
-ALLOWED_EXTENSIONS = set(serverConfigJson["ALLOWED_EXTENSIONS"])
 whoInterlocked = {}
 whoInterlocked[""] = [None, 0]
 TIMEOUT = serverConfigJson["timeout_for_requests_secs"]
@@ -250,12 +249,7 @@ def executeCommROOT(action:str):
         r=sysConf[configName].executeAction("ECR")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
         done = waitUntilCorrectState("paused", 30)
-    
-
-
-
-
-    
+ 
     setTransitionFlag(0)
     if not done :
         return "ERROR: TIMEOUT"

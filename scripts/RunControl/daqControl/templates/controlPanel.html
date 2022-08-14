@@ -23,7 +23,7 @@
           depressed color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn>
         <!-- <v-btn :loading="processing['STOP']" @click="sendROOTCommand('STOP')" class="my-1 mx-1" depressed
           color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn> -->
-        <v-btn :loading="processing['SHUTDOWN']" @click="sendROOTCommand('SHUTDOWN')" class="my-1 mx-1" depressed
+        <v-btn :loading="processing['SHUTDOWN']" @click="processShutdown" class="my-1 mx-1" depressed
           color="error" :disabled="!isROOTButtonEnabled('SHUTDOWN')"> SHUTDOWN </v-btn>
         <v-btn :loading="processing['PAUSE']" @click="sendROOTCommand('PAUSE')" class="my-1 mx-1" depressed
           color="yellow darken-2" :disabled="!isROOTButtonEnabled('PAUSE')"> PAUSE </v-btn>

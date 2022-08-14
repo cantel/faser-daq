@@ -201,7 +201,7 @@ var app = new Vue({
   vuetify: new Vuetify(),
   data: {
     drawer: false, // if the tree view is closed or not
-    isDrawerLocked: false, // if the tree view in is in locked state
+    isDrawerLocked: false, // if the tree view is in locked state
     c_configDirs: [],
     c_treeJson: {},
     c_loadedConfigName: null, // the name of the config file
@@ -261,7 +261,8 @@ var app = new Vue({
     startTime :"",
     comment :"",
     runType : "",
-    runTypes : ['Test', 'TestBeam','Calibration','Cosmics', 'Physics']
+    runTypes : ['Test', 'TestBeam','Calibration','Cosmics', 'Physics'],
+    lostConnection: false
   },
 
   delimiters: ["[[", "]]"],
@@ -272,6 +273,7 @@ var app = new Vue({
     this.initListeners();
   },
   methods: {
+    refreshPage() {location.reload()},
     endRun(){
       this.endRunDialog  = !this.endRunDialog
       this.sendROOTCommand("STOP")
@@ -308,6 +310,11 @@ var app = new Vue({
         console.log("socket", newErrorsMod);
         this.modulesError = newErrorsMod;
       });
+
+      this.c_socket.on("disconnect", ()=>{
+        this.lostConnection = true;
+      })
+     
     },
     interlock() {
       axios

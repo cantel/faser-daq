@@ -21,14 +21,58 @@ from copy import deepcopy
 from pathlib import Path
 import platform
 
-maxTransitionTime = 30 # TODO: have to be in the configuration file (has to be more)
-
-
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control"))
 from nodetree import NodeTree
 from daqcontrol import daqcontrol as daqctrl
 from flask_cors import CORS
 import metricsHandler
+
+# rewriting the original function from NodeTree class from daqLing
+def childrenStateChecker(self):
+    while (self.check):
+        states = []
+        for c in self.children:
+            if c.getIncluded() == True:
+                if type(c.getState())==str:
+                    states.append(c.getState())
+                elif type(c.getState())==list:
+                    for item in c.getState(): states.append(item)
+                else:
+                    raise Exception("getState returned object of invalid type.") 
+        # if no children is included
+        if len(states) == 0:
+            # add back all of them as to have a meaningful state
+            for c in self.children:
+                states.append(c.getState())
+            self.exclude() # automatically exclude parent
+        else:
+        # if at least a child is included then include self if excluded (parent)
+            if self.getIncluded() == False:
+                self.included = True
+        max_state = max(states, key=lambda state: list(self.state_action.keys()).index(state))
+        min_state = min(states, key=lambda state: list(self.state_action.keys()).index(state))
+        max_count = 0
+        min_count = 0
+        for s in states:
+            if s == max_state:
+                max_count = max_count + 1
+            elif s == min_state:
+                min_count = min_count + 1
+        if max_count == len(states):
+            self.state = max_state
+            self.inconsistent = False
+        elif min_count == len(states):
+            self.state = min_state
+            self.inconsistent = False
+        else:
+            # instead of having the lowest state, it stays in the max state until all the states are in the lowest state. 
+            # self.state = min_state
+            self.state = max_state ## <------
+            self.inconsistent = True
+        time.sleep(0.1)
+NodeTree.childrenStateChecker = childrenStateChecker
+interlockTime = 30 # TODO: have to be in the configuration file (has to be more)
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control"))
 
 configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 
@@ -54,7 +98,6 @@ configTree = None
 localOnly = False
 
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
-
 r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_responses=True)
 
 
@@ -558,7 +601,7 @@ def ajaxParse():
     node = postData["node"]
     command = postData["command"]
     configName =  r2.get("runningFile")
-    r2.expire("whoInterlocked",maxTransitionTime) # adds a new timeout
+    r2.expire("whoInterlocked",interlockTime) # adds a new timeout
 
     try:
         r = executeComm(node, command)

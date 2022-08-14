@@ -53,13 +53,29 @@
 <!-- LOST CONNECTION DIALOG -->
 <v-dialog persistent v-model="lostConnection" transition="dialog-top-transition" max-width="400">
   <v-card>
-    <v-card-title class="text-h5" style="display: flex; justify-content: center;"> Lost Connection to the server </v-card-title>
+    <v-card-title class="text-h5" style="display: flex; justify-content: center;"> Lost connection to the server </v-card-title>
     <v-card-text class="px-5 text-h6" style="display: flex; justify-content: center;">
       Please refresh the page. 
     </v-card-text>
     <v-card-actions style="display: flex; justify-content: center; ">
       <v-btn color="red darken-1" dark @click="refreshPage()">
         Refresh
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+<!-- SHUTDOWN WARNING -->
+<v-dialog v-model="shutdownWarning" max-width="410" transition="dialog-top-transition">
+  <v-card>
+    <v-card-title class="text-h5"> Do you really want to shutdown ?  </v-card-title>
+    <v-card-actions>
+      <v-btn color="green darken-1" dark @click="shutdownWarning = false">
+        Cancel
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-btn color="red darken-1" dark @click="shutdownRun">
+        Shutdown
       </v-btn>
     </v-card-actions>
   </v-card>

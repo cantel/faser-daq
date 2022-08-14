@@ -243,7 +243,7 @@ var app = new Vue({
       SHUTDOWN: false,
       PAUSE: false,
       ECR: false,
-      RESUME: false 
+      RESUME: false
     },
     logged: false, // if the user is logged using cern account
     infoIsActive: false, // if the info box is active
@@ -257,12 +257,13 @@ var app = new Vue({
     resultCommand: "", // what the root action will return (success or error-> timeout)
     startRunDialog: false,
     endRunDialog: false,
-    runNumber : 0,
-    startTime :"",
-    comment :"",
-    runType : "",
-    runTypes : ['Test', 'TestBeam','Calibration','Cosmics', 'Physics'],
-    lostConnection: false
+    runNumber: 0,
+    startTime: "",
+    comment: "",
+    runType: "",
+    runTypes: ['Test', 'TestBeam', 'Calibration', 'Cosmics', 'Physics'],
+    lostConnection: false,
+    shutdownWarning: false
   },
 
   delimiters: ["[[", "]]"],
@@ -273,9 +274,17 @@ var app = new Vue({
     this.initListeners();
   },
   methods: {
-    refreshPage() {location.reload()},
-    endRun(){
-      this.endRunDialog  = !this.endRunDialog
+    processShutdown() {
+      if (this.runState === "READY") { this.shutdownRun() }
+      else { this.shutdownWarning = true; }
+    },
+    refreshPage() { location.reload() },
+    shutdownRun() {
+      this.shutdownWarning = false;
+      this.sendROOTCommand('SHUTDOWN')
+    },
+    endRun() {
+      this.endRunDialog = !this.endRunDialog
       this.sendROOTCommand("STOP")
     },
     startRun() {
@@ -311,10 +320,10 @@ var app = new Vue({
         this.modulesError = newErrorsMod;
       });
 
-      this.c_socket.on("disconnect", ()=>{
+      this.c_socket.on("disconnect", () => {
         this.lostConnection = true;
       })
-     
+
     },
     interlock() {
       axios
@@ -404,8 +413,8 @@ var app = new Vue({
     setActiveNode(node) {
       this.activeNode = node;
       console.log("node = ", node)
-      this.infoIsActive = node ? true : false 
-  
+      this.infoIsActive = node ? true : false
+
     },
     getConfigDirs() {
       axios.get("/configDirs").then((response) => {
@@ -490,31 +499,31 @@ var app = new Vue({
     },
     sendROOTCommand(action) {
       this.processing[action] = true;
-      if (action == "START" || action == "STOP"){
+      if (action == "START" || action == "STOP") {
         axios
-        .get(`/processROOTCommand?command=${action}&type=${"test"}&comment=${"Test comment"}`)
-        .then((result) => {
-          this.processing[action] = false;
-          this.resultCommand = result.data;
-        })
-        .catch((e) => {
-          this.processing[action] = false;
-          console.log("ERROR:", e);
-        });
+          .get(`/processROOTCommand?command=${action}&type=${"test"}&comment=${"Test comment"}`)
+          .then((result) => {
+            this.processing[action] = false;
+            this.resultCommand = result.data;
+          })
+          .catch((e) => {
+            this.processing[action] = false;
+            console.log("ERROR:", e);
+          });
       }
       else {
         axios
-        .get(`/processROOTCommand?command=${action}`)
-        .then((result) => {
-          this.processing[action] = false;
-          this.resultCommand = result.data;
-        })
-        .catch((e) => {
-          this.processing[action] = false;
-          console.log("ERROR:", e);
-        });
+          .get(`/processROOTCommand?command=${action}`)
+          .then((result) => {
+            this.processing[action] = false;
+            this.resultCommand = result.data;
+          })
+          .catch((e) => {
+            this.processing[action] = false;
+            console.log("ERROR:", e);
+          });
       }
-      
+
     },
     isActiveNode() {
       return this.activeNode.length != 0;
@@ -572,7 +581,7 @@ var app = new Vue({
 
     crashedModules() {
       let modules = [];
-      if (this.nodeStates == null ){
+      if (this.nodeStates == null) {
         return modules
       }
       let rootState = this.nodeStates["Root"][0];

@@ -21,6 +21,7 @@ from copy import deepcopy
 from pathlib import Path
 import platform
 
+
 from nodetree import NodeTree
 from daqcontrol import daqcontrol as daqctrl
 from flask_cors import CORS
@@ -70,9 +71,9 @@ def childrenStateChecker(self):
             self.inconsistent = True
         time.sleep(0.1)
 NodeTree.childrenStateChecker = childrenStateChecker
-interlockTime = 30 # TODO: have to be in the configuration file (has to be more)
+interlockTime = 30 # TODO: have to be in the configuration file
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control")) # ?note
 
 configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 
@@ -87,8 +88,6 @@ thread = None
 sysConf = {}
 root = threading.local()
 mainRoot = None
-whoInterlocked = {}
-whoInterlocked[""] = [None, 0]
 TIMEOUT = serverConfigJson["timeout_for_requests_secs"]
 LOGOUT_URL = serverConfigJson["LOGOUT_URL"]
 CONFIG_PATH =  ""
@@ -100,10 +99,12 @@ localOnly = False
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_responses=True)
 
-
+# creating redis default keys 
 r2.setnx("runState","DOWN") # create key runState with value DOWN if it doesn't exist
 r2.setnx("runOngoing",0) # 
 r2.setnx("runningFile","") 
+
+sysConfig : NodeTree= None # the treeObject for the configuration
 
 
 
@@ -131,9 +132,8 @@ def reinitTree(configJson, oldRoot=None):
     """
     configJson: map des différents fichiers json
     """
-    print("try reinit tree")
     if oldRoot != None:
-        for pre, _, node in RenderTree(oldRoot):
+        for _ , _, node in RenderTree(oldRoot):
             node.stopStateCheckers()
 
     # On récupère le fichier pour le tree
@@ -154,8 +154,7 @@ def reinitTree(configJson, oldRoot=None):
     # We open the main config file
     with open(os.path.join(CONFIG_PATH, configJson["config"])) as f:
         # base_dir_uri = Path(session['configPath']).as_uri() + '/' # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
-        base_dir_uri = (
-            Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
+        base_dir_uri = (Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
         jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
 
     if ("configuration" in jsonref_obj):  # faser ones have "configuration" but not demo-tree
@@ -182,14 +181,14 @@ def reinitTree(configJson, oldRoot=None):
     exe = "/bin/daqling"
     lib_path = ("LD_LIBRARY_PATH="+ env["LD_LIBRARY_PATH"]+ ":"+ dir+ "/lib/,TDAQ_ERS_STREAM_LIBS=DaqlingStreams")
     components = configuration["components"]
-
     dc = daqctrl(group)
 
     importer = DictImporter(nodecls=NodeTree)
 
     newRoot = importer.import_(tree)  # We import the tree json
+    print("Type : ",type(newRoot))
 
-    for pre, _, node in RenderTree(newRoot):
+    for _, _, node in RenderTree(newRoot):
         for c in components:
             if node.name == c["name"]:
                 node.configure(order_rules,state_action,pconf=c,exe=exe,dc=dc,dir=dir,lib_path=lib_path,)
@@ -336,7 +335,6 @@ def getLogPath(name:str):
 
 def getStatesList(locRoot):
     list = {}
-    global whoInterlocked
     for pre, _, node in RenderTree(locRoot):
         list[node.name] = [
             find_by_attr(locRoot, node.name).getState(),
@@ -350,10 +348,8 @@ def printTree(root):
 
 
 def stateChecker():
-    # global whoInterlocked
     l1 = {}
     l2 = {}
-    # whoValue = {}
     rState1 = {}
     rState2 = {}
     runningFile =""
@@ -570,7 +566,6 @@ def serverconfig():
 
 @app.route("/interlock", methods=["POST"])
 def interlock():
-    global whoInterlocked
     requestData  = request.get_json()
     cern_upn = requestData["cern_upn"]
     action = requestData["action"] # lock or unlock 
@@ -652,8 +647,6 @@ def connect():
 @app.before_first_request
 def startup():
     global thread
-    # for file in getConfigsInDir(configPath):
-        # whoInterlocked[file] = [None, 0]
     with thread_lock:
         if thread is None:
             thread = socketio.start_background_task(stateChecker)
@@ -686,7 +679,6 @@ def initConfig():
     logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ session["configName"],)
     with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
         CONFIG_DICT = json.load(f)
-        print(CONFIG_DICT)
 
     systemConfiguration(configName, CONFIG_PATH)
     r2.set("runningFile", configName)
@@ -698,12 +690,9 @@ def urlTreeJson():
     print("urlTreeJson function")
     # sessionStatus()
     try:
-        with open(
-            os.path.join(CONFIG_PATH, CONFIG_DICT["tree"]), "r"
-        ) as file:
+        with open(os.path.join(CONFIG_PATH, CONFIG_DICT["tree"]), "r") as file:
             return jsonify(json.load(file))
     except Exception as e:
-
         return "error"
 
 
@@ -722,7 +711,6 @@ def login():
 @app.route("/")
 def index():
     if "user" in session: # if user is already connected
-        # return render_template('index.html', usr=session['user']['cern_upn'], wholocked=whoInterlocked[session['configName']][0], currConfigFile = session['configName'], statesGraphics=serverConfigJson['states'], displayName=serverConfigJson['displayedName'] )
         return render_template("index.html", usr=session["user"]["cern_upn"])
     return redirect(url_for('localLogin'))
 
@@ -731,34 +719,10 @@ def index():
 def localLogin():
     session["user"] = {}
     session["user"]["cern_upn"] = "local_user"
-    session["configName"] = ""
-    session["configPath"] = ""
-    session["configDict"] = ""
-    #logAndEmit("","INFO","User " + session["user"]["cern_upn"] + " connected ")
+    session["configName"] = "" #?
+    session["configPath"] = "" #?
+    session["configDict"] = "" #?
     return redirect(url_for('index'))
-
-
-
-def sessionStatus():
-    print("sysConf", sysConf)
-    print("whoInterlocked", whoInterlocked)
-    try:
-        print("configPath", session["configPath"])
-    except KeyError:
-        print("Pas de configPath")
-    try:
-        print("configName", session["configName"])
-    except KeyError:
-        print("Pas de configName")
-    try:
-        print("user", session["user"])
-    except KeyError:
-        print("Pas de user")
-    try:
-        print("configDict", session["configDict"])
-    except KeyError:
-        print("Pas de configDict")
-
 
 @app.route("/statesList", methods=["GET"])
 def statesList():
@@ -766,7 +730,6 @@ def statesList():
     list = {}
     print("stateList", r2.get("runningFile"))
     list = getStatesList(sysConf[r2.get("runningFile")])
-    # list["whoLocked"] = whoInterlocked[session["configName"]][0]
     return jsonify(list)
 
 
@@ -873,22 +836,18 @@ def monitoringLatestValues():
 
 
 @app.route("/logURL", methods=["GET"])
-def return_logURL():
+def returnLogURL():
     module = request.args.get("module")
     groupName =  "faser"  #TODO: Should not be hardcoded
     # nodes = getListNodes(sysConf[session["configName"]])
     url = f"http://{platform.node()}:9001/logtail/faser:{module}"
-
     return jsonify(url)
-
-
 
 
 def getListNodes(locRoot):
     return [node.name for pre,_,node in RenderTree(locRoot)]
 
-
-
+    
 if __name__ == "__main__":
 
 

@@ -1,7 +1,7 @@
 <v-navigation-drawer v-model="drawer" :permanent="false" app width="300">
     <h3 class="my-4 text-center"> Tree View </h3>
     <v-treeview :hoverable="true" return-object open-all class="treeview" @update:active="setActiveNode"
-      v-if="nodeStates" item-key="name" activatable selection-type="independent" dense :items="[c_treeJson]">
+      v-if="nodeStates && !c_configLoading " item-key="name" activatable selection-type="independent" dense :items="[c_treeJson]">
       <template v-slot:prepend="{ item,open }">
         <v-icon
           v-if="modulesError.includes(item.name) || (crashedModules.includes(item.name) && runState!= 'IN TRANSITION')"

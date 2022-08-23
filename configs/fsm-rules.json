@@ -30,13 +30,16 @@
       "disableTrigger",
       "remove"
     ],
+    "pausing": ["remove"],
+    "resuming": ["remove"],
+    "pausingTrigger" : ["remove"],
+    "enablingTrigger" : ["remove"],
     "paused": [
       "enableTrigger",
       "remove",
       "ECR"
     ],
-    "pausing": ["remove"],
-    "resuming": ["remove"],
+    "sendingECR" : ["remove"],
     "DOWN" : ["INITIALISE"],
     "READY" : ["START", "SHUTDOWN"],
     "RUN" : ["STOP", "PAUSE", "SHUTDOWN"],

@@ -1,3 +1,5 @@
+# import eventlet
+# eventlet.monkey_patch()
 from cmath import exp
 from flask import Flask,redirect,url_for,render_template,request,session,g,jsonify,Response
 from datetime import timedelta
@@ -20,12 +22,18 @@ from werkzeug.utils import secure_filename
 from copy import deepcopy
 from pathlib import Path
 import platform
-
-
+from flask_cors import CORS
 from nodetree import NodeTree
 from daqcontrol import daqcontrol as daqctrl
-from flask_cors import CORS
 import metricsHandler
+
+
+with open(os.path.join(os.path.dirname(__file__), 'serverconfiguration.json')) as f:
+    serverConfigJson = json.load(f)
+
+LOGOUT_URL = serverConfigJson['LOGOUT_URL']
+
+
 
 # rewriting the original function from NodeTree class from daqLing
 def childrenStateChecker(self):
@@ -69,11 +77,10 @@ def childrenStateChecker(self):
             # self.state = min_state
             self.state = max_state ## <------
             self.inconsistent = True
-        time.sleep(0.1)
+        socketio.sleep(0.1)
 NodeTree.childrenStateChecker = childrenStateChecker
-interlockTime = 30 # TODO: have to be in the configuration file
 
-sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control")) # ?note
+# sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control")) # ?note
 
 configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 
@@ -86,10 +93,8 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 thread_lock = threading.Lock()
 thread = None
 sysConf = {}
-root = threading.local()
-mainRoot = None
 TIMEOUT = serverConfigJson["timeout_for_requests_secs"]
-LOGOUT_URL = serverConfigJson["LOGOUT_URL"]
+OGOUT_URL = serverConfigJson["LOGOUT_URL"]
 CONFIG_PATH =  ""
 CONFIG_DICT = {}
 configTree = None
@@ -102,22 +107,35 @@ r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_respo
 # creating redis default keys 
 r2.setnx("runState","DOWN") # create key runState with value DOWN if it doesn't exist
 r2.setnx("runOngoing",0) # 
-r2.setnx("runningFile","") 
+r2.setnx("loadedConfig","") 
 
-sysConfig : NodeTree= None # the treeObject for the configuration
+sysConfig : NodeTree = None # the treeObject for the configuration
 
 
+interlockTime = 30 # TODO: have to be in the configuration file
+
+handler = RotatingFileHandler(serverConfigJson["serverlog_location_name"], maxBytes=1000000, backupCount=0)
+logging.root.setLevel(logging.NOTSET)
+handler.setLevel(logging.NOTSET)
+app.logger.addHandler(handler)
 
 def systemConfiguration(configName, configPath):
-    global sysConf
+    global sysConfig
     with open(os.path.join(configPath, "config-dict.json")) as f:
         configJson = json.load(f)
-    if configName not in sysConf:
-        try:
-            sysConf[configName] = reinitTree(configJson)
+    loadedConfig = r2.get("loadedConfig")
+    if sysConfig is None:  # we (re)booted the app 
+        print("sysConfig was None")
+        try: 
+            sysConfig = reinitTree(configJson)
         except Exception as e:
             logAndEmit("general", "ERROR", str(e))
-
+    elif configName != loadedConfig: # we changed config
+        print("sysConfig n'est pas None et on a changé de Config")
+        sysConfig = reinitTree(configJson=configJson, oldRoot=sysConfig)
+    else:
+        print("Do nothing")
+    
 
 def getConfigsInDir(configPath):
     listOfFiles = []
@@ -173,6 +191,7 @@ def reinitTree(configJson, oldRoot=None):
     #     raise Exception("Invalid grafana/kibana nodes configuration:" + e)
 
     group = configuration["group"]  # for example "daq" or "faser"
+    r2.set("group", group)  
  
     if "path" in configuration.keys():
         dir = configuration["path"]
@@ -186,8 +205,6 @@ def reinitTree(configJson, oldRoot=None):
     importer = DictImporter(nodecls=NodeTree)
 
     newRoot = importer.import_(tree)  # We import the tree json
-    print("Type : ",type(newRoot))
-
     for _, _, node in RenderTree(newRoot):
         for c in components:
             if node.name == c["name"]:
@@ -202,17 +219,17 @@ def reinitTree(configJson, oldRoot=None):
 def executeComm(ctrl, action):
     global sysConf,currentConfig
     r = ""
-    configName = r2.get("runningFile")
+    configName = r2.get("loadedConfig")
 
     logAndEmit(
         configName,"INFO","User "+ session["user"]["cern_upn"]+ " has sent command "+ action+ " on node "+ ctrl,)
     try:
         if action == "exclude":
-            r = find_by_attr(sysConf[configName], ctrl).exclude()
+            r = find_by_attr(sysConfig, ctrl).exclude()
         elif action == "include":
-            r = find_by_attr(sysConf[configName], ctrl).include()
+            r = find_by_attr(sysConfig, ctrl).include()
         else:
-            r = find_by_attr(sysConf[configName], ctrl).executeAction(action)
+            r = find_by_attr(sysConfig, ctrl).executeAction(action)
     except Exception as e:
         logAndEmit(configName, "ERROR", ctrl + ": " + str(e))
     if r != "":
@@ -227,13 +244,13 @@ def executeCommROOT(action:str):
     """
     global sysConf
     r2.expire("whoInterlocked", 60) #TODO: Should be configurable
-    configName =  r2.get("runningFile")
+    configName =  r2.get("loadedConfig")
     logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     setTransitionFlag(1)
     if action == "INITIALISE":
         steps = [("add", "booted"), ("configure","ready")]
         for step,nextState in steps :
-            r = sysConf[configName].executeAction(step)
+            r = sysConfig.executeAction(step)
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
 
             if step == "add" and r[0] != "Action not allowed" :
@@ -242,17 +259,16 @@ def executeCommROOT(action:str):
                 r2.sadd("log", *logPaths)
             done = waitUntilCorrectState(nextState, 30 ) # 10 seconds for each steps 
             if not done: 
-
                 break  # one step doesn't reach the correct state, end command loop. 
 
     elif action == "START": 
-        r=sysConf[configName].executeAction("start")
+        r=sysConfig.executeAction("start")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
 
         done = waitUntilCorrectState("running", 30)
 
     elif action == "STOP": 
-        r=sysConf[configName].executeAction("stop")
+        r=sysConfig.executeAction("stop")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
 
         done = waitUntilCorrectState("ready", 30)
@@ -260,35 +276,36 @@ def executeCommROOT(action:str):
     elif action == "SHUTDOWN":
         steps = [("unconfigure", "booted"), ("shutdown","added"), ("remove", "not_added")]
         for step,nextState in steps :
-            r = sysConf[configName].executeAction(step)
+            r = sysConfig.executeAction(step)
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
             done = waitUntilCorrectState(nextState, 1)
         if not done : 
             # if timeout, force remove all the modules 
-            print("Force shutdown")
-            r = sysConf[configName].executeAction("remove")
+            # print("Force shutdown")
+            r = sysConfig.executeAction("remove")
             done = True
-        # real shutdown -> function ? 
-        updateRedis(file=r2.get("runningFile"),status="DOWN")
-        socketio.emit("runStateChng",{'runState': "DOWN", 'file': r2.get("runningFile")} , broadcast=True)
+        
+        # to be sure shutdown reset everything
+        updateRedis(status="DOWN")
+        socketio.emit("runStateChng","DOWN", broadcast=True)
 
 
     elif action == "PAUSE":
-        r=sysConf[configName].executeAction("disableTrigger")
+        r=sysConfig.executeAction("disableTrigger")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
         done = waitUntilCorrectState("paused", 30)
     
     elif action == "RESUME":
-        r=sysConf[configName].executeAction("enableTrigger")
+        r=sysConfig.executeAction("enableTrigger")
         if "Action not allowed" in r:
-            r=sysConf[configName].executeAction("resume")
+            r=sysConfig.executeAction("resume")
 
             
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
         done = waitUntilCorrectState("running", 30)
     
     elif action == "ECR":
-        r=sysConf[configName].executeAction("ECR")
+        r=sysConfig.executeAction("ECR")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
         done = waitUntilCorrectState("paused", 30)
  
@@ -308,11 +325,10 @@ def waitUntilCorrectState(state:str, timeout=30):
     """
     global sysConf
     now = time.time()
-    configName = r2.get("runningFile")
     while (time.time()-now < timeout):
-        if (sysConf[configName].getState() == state)  and  (not sysConf[configName].inconsistent):
+        if (sysConfig.getState() == state)  and  (not sysConfig.inconsistent):
             return True
-        time.sleep(0.5)
+        socketio.sleep(0.5)
     return False
 
 def listLogs(r):
@@ -335,7 +351,7 @@ def getLogPath(name:str):
 
 def getStatesList(locRoot):
     list = {}
-    for pre, _, node in RenderTree(locRoot):
+    for _ , _, node in RenderTree(locRoot):
         list[node.name] = [
             find_by_attr(locRoot, node.name).getState(),
             find_by_attr(locRoot, node.name).inconsistent,
@@ -350,83 +366,101 @@ def printTree(root):
 def stateChecker():
     l1 = {}
     l2 = {}
-    rState1 = {}
-    rState2 = {}
-    runningFile =""
+    loadedConfig =""
     lockState = None
     errors = []
 
     while True:
-        for file in sysConf:
-            l2[file] = getStatesList(sysConf[file])
-            rState2[file] = [sysConf[file].getState(), sysConf[file].inconsistent]
-            try:
-                if l1[file] != l2[file]:
-                    socketio.emit(f"stsChng{file}", l2[file], broadcast=True)
-                    # if l1[file]['Root'][0] != l2[file]
+        ########### Change of config ############
+        loadedConfig2 = r2.get("loadedConfig")
 
-            except KeyError:
-                print(f"File: {file} not registred")
-                socketio.emit(f"stsChng{file}", l2[file], broadcast=True)
+        if loadedConfig2 != loadedConfig :
+            print("\t\t\tChangé de config")
+            socketio.emit("configChng", loadedConfig2, broadcast = True)
+            loadedConfig = loadedConfig2
 
-            l1[file] = l2[file]
-            
-            try : 
-                if (rState2[file] != rState1[file]) and (rState2[file][1] == False ) and (rState2[file][0] not in ['booted','added']):
-                    printTree(sysConf[file])
-                    if rState2[file][0] == 'running' : state="RUN"
-                    elif rState2[file][0] == 'not_added':
-                        state = "DOWN"
-                        cleanRedis()
-                    elif rState2[file][0] == 'ready': state = "READY"
-                    elif rState2[file][0] == 'paused' : state = "PAUSED"
-                    updateRedis(file=file,status=state)
-                    logAndEmit(file,"INFO",f"ROOT element is now in state {state}")
-                    socketio.emit("runStateChng",{'runState': state, 'file': file} , broadcast=True)
+        ############# Node States ###############
+        if sysConfig:
+            l2 = getStatesList(sysConfig)
+            if l2 != l1:
+                socketio.emit(f"stsChng", l2, broadcast=True)
+                if l1 != {} and l2 !={}:    
+                    if l1["Root"] != l2["Root"]: # if Root status changes
+                        state=""
+                        if l2["Root"][1] : # if root is inconsistent
+                            print("ROOT inconsistent")
+                            state = "IN TRANSITION"
+                            updateRedis(status=state)
+                            socketio.emit("runStateChng",state , broadcast=True)
+                        else:
+                            if l2["Root"][0] == "running" : state="RUN"
+                            elif l2["Root"][0] == "not_added" : state="DOWN"; cleanErrors()
+                            elif l2["Root"][0] == "ready" : state="READY"
+                            elif l2["Root"][0] == "paused" : state="PAUSED"
+                            print(f"ROOT Changed state and is not inconsistent:{l2['Root']}", state)
+                            
+                            if l2["Root"][0] not in ["booted","added"]:
+                                updateRedis(status=state)
+                                logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
+                                socketio.emit("runStateChng",state , broadcast=True)
+        
+                l1 = l2
 
-                #intentional inconsistent (transition state)
-                elif (rState2[file] != rState1[file]) and (rState2[file][1] == True ) and (r2.get("transitionFlag")== "1"):
-                    printTree(sysConf[file])
-                    state = "IN TRANSITION"
-                    updateRedis(file=file,status=state)
-                    socketio.emit("runStateChng",{'runState': state, 'file': file} , broadcast=True)
-
-                # elif (rState2[file] != rState1[file]) and (rState2[file][1] == True ) and (r2.get("transitionFlag")== "0"):
-                #     print("CRASH")
-                #     # modulesCrashed = modulesWithError(sysConf[file])
-                #     # socketio.emit("errorModChng", modulesCrashed , broadcast=True)
-                #     r2.set("modulesErrors", str(modulesCrashed))
+                        
+                        
 
 
-            except KeyError : 
-                print(f"rState: {file} not registred")
-            rState1[file] = rState2[file]
+            # if l1[file]['Root'][0] != l2[file]
+        
+            # if (rState2 != rState1) and (rState2[1] == False ) and (rState2[0] not in ['booted','added']):
+            #     # printTree(sysConf[file])
+            #     if rState2[0] == 'running' : state="RUN"
+            #     elif rState2[0] == 'not_added':
+            #         state = "DOWN"
+            #         cleanRedis()
+            #     elif rState2[0] == 'ready': state = "READY"
+            #     elif rState2[0] == 'paused' : state = "PAUSED"
+            #     updateRedis(status=state)
+            #     logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
+            #     socketio.emit("runStateChng",state , broadcast=True)
 
-        runningFile2 = r2.get("runningFile")
-        if runningFile2 != runningFile :
-            socketio.emit("configChng", runningFile2, broadcast = True)
-            runningFile = runningFile2
+            # #intentional inconsistent (transition state)
+            # elif (rState2 != rState1) and (rState2[1] == True ) and (r2.get("transitionFlag")== "1"):
+            #     # printTree(sysConfig)
+            #     state = "IN TRANSITION"
+            #     updateRedis(status=state)
+            #     socketio.emit("runStateChng",state , broadcast=True)
 
+        # elif (rState2[file] != rState1[file]) and (rState2[file][1] == True ) and (r2.get("transitionFlag")== "0"):
+        #     print("CRASH")
+        #     # modulesCrashed = modulesWithError(sysConf[file])
+        #     # socketio.emit("errorModChng", modulesCrashed , broadcast=True)
+        #     r2.set("modulesErrors", str(modulesCrashed))
+
+
+        
+        ####### change of lock State ###########
         lockState2 = r2.get("whoInterlocked")
         if lockState2 !=lockState:
             socketio.emit("interlockChng", lockState2, broadcast = True)
             if not lockState2:
-                logAndEmit(runningFile2, "INFO", "Interlock has been released because of TIMEOUT")
+                logAndEmit(loadedConfig2, "INFO", "Interlock has been released because of TIMEOUT")
             lockState = lockState2
 
-        if runningFile2 and runningFile2 in sysConf:
-            errors2 = modulesWithError(sysConf[runningFile2])
+        # if loadedConfig2 and loadedConfig2 in sysConf:
+        if sysConfig:
+            errors2 = modulesWithError(sysConfig)
             if errors2 != errors:
                 socketio.emit("errorModChng", errors2, broadcast =True)
                 r2.delete("modulesErrors")
-                print(errors2)
                 if len(errors2) != 0:
                     r2.sadd("modulesErrors", *errors2)
                 errors = errors2
-        time.sleep(0.5)
+
+        socketio.sleep(0.3)
 
 
-def cleanRedis():
+def cleanErrors():
     r2.delete("modulesErrors")
     socketio.emit("errorModChng", [] , broadcast=True)
 
@@ -434,7 +468,6 @@ def cleanRedis():
 
 def modulesWithError(tree):
     errorList = []
-    rootNodeState = tree.getState()
     for _,_, node in RenderTree(tree):
         if not node.children : # if the node has no children -> not a category
             if r.hget(node.name, "Status"):
@@ -458,7 +491,7 @@ def logAndEmit(configtype, type, message):
     socketio.emit("logChng","[" + configtype + "] " + timestamp + " " + type + ": " + message,broadcast=True,)
 
 
-def updateRedis(file:str=None, status:str = None):
+def updateRedis(status:str = None):
     if status:
         r2.set('runState', status) 
         if status == "DOWN":
@@ -477,7 +510,7 @@ app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfigJson["t
 def appState():
     packet ={}
     packet["runOngoing"] = bool(int(r2.get("runOngoing")))
-    packet["runningFile"] = r2.get('runningFile')
+    packet["loadedConfig"] = r2.get('loadedConfig')
     packet["runState"] = r2.get("runState")
     packet["user"] = {"name":session["user"]["cern_upn"], "logged" : True if "cern_gid" in session["user"] else False }
     packet["whoInterlocked"] = r2.get("whoInterlocked")
@@ -515,8 +548,8 @@ def getInfo(module:str) -> list:
 
     # TODO: use hgetall instead of hmget
     keys = r.hkeys(module)
-    if keys == []: # if module is not in the redis database
-        return []
+    # if module is not in the redis database
+    if keys == []: return []
     keys.sort()
     vals = r.hmget(module, keys=keys)
     
@@ -524,7 +557,7 @@ def getInfo(module:str) -> list:
     return info
  
 @app.route("/fullLog/<string:module>")
-def fullLog(module:str):
+def fullLog(module:str) -> Response:
     """
     Returns the full log for the current run #NOTE: Is it really just the current run ? 
     (Works only if the logs are on the same server)
@@ -567,27 +600,26 @@ def serverconfig():
 @app.route("/interlock", methods=["POST"])
 def interlock():
     requestData  = request.get_json()
-    cern_upn = requestData["cern_upn"]
     action = requestData["action"] # lock or unlock 
 
     
     if action == "lock": 
-        if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=60,nx=True): 
-            logAndEmit(r2.get("runningFile"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("runningFile"),)
+        if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=interlockTime, nx=True): 
+            logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("loadedConfig"),)
             return jsonify("File locked successfully")
         else : 
-            # quel'qun est a déjà locked la config 
-            logAndEmit(r2.get("runningFile"),"INFO","User "+ session["user"]["cern_upn"]+ " tried to take control configuration "+ r2.get("runningFile")+f"from {r2.get('whoInterlocked')}",)
+            # someone already locked the config
+            logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " tried to take control configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
             return jsonify(f"Sorry, the config is already locked by {r2.get('whoInterlocked')}")
 
     else: # action == "unlock"
         if session["user"]["cern_upn"] == r2.get("whoInterlocked"): # if is the right person
             r2.delete("whoInterlocked")            
-            logAndEmit(r2.get("runningFile"),"INFO","User " + session["user"]["cern_upn"]+ " has RELEASED control of configuration"+ r2.get('runningFile'))
+            logAndEmit(r2.get("loadedConfig"),"INFO","User " + session["user"]["cern_upn"]+ " has RELEASED control of configuration"+ r2.get('loadedConfig'))
             return jsonify(f"unlocked file")
 
         else: # someone else try to unlock file         
-            logAndEmit(r2.get("runningFile"),"INFO","User "+ session["user"]["cern_upn"]+ "  ATTEMPTED to take control of configuration "+ r2.get("runningFile")+f"from {r2.get('whoInterlocked')}",)
+            logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ "  ATTEMPTED to take control of configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
             return jsonify(f"you can't")
 
 @app.route("/ajaxParse", methods=["POST"])
@@ -595,14 +627,14 @@ def ajaxParse():
     postData = request.get_json()
     node = postData["node"]
     command = postData["command"]
-    configName =  r2.get("runningFile")
+    configName =  r2.get("loadedConfig")
     r2.expire("whoInterlocked",interlockTime) # adds a new timeout
 
     try:
         r = executeComm(node, command)
     except Exception as e:
         logAndEmit(configName, "ERROR", str(e))
-    # time.sleep(TIMEOUT)
+    socketio.sleep(1)
     return jsonify(r)
 
 
@@ -617,7 +649,6 @@ def logout():
 
 @app.route("/fsmrulesJson", methods=["GET", "POST"])
 def fsmrulesJson():
-    print(session)
     try:
         with open(os.path.join(CONFIG_PATH, CONFIG_DICT["fsm_rules"])) as f:
             fsmRules = json.load(f)
@@ -626,17 +657,17 @@ def fsmrulesJson():
     return jsonify(fsmRules["fsm"])
 
 
-@app.route("/grafanaJson", methods=["GET", "POST"])
-def grafanaJson():
-    try:
-        with open(
-            os.path.join(CONFIG_PATH, CONFIG_DICT["grafana"])
-        ) as f:
-            grafanaConfig = json.load(f)
-        f.close()
-    except:
-        return "error"
-    return jsonify(grafanaConfig)
+# @app.route("/grafanaJson", methods=["GET", "POST"])
+# def grafanaJson():
+#     try:
+#         with open(
+#             os.path.join(CONFIG_PATH, CONFIG_DICT["grafana"])
+#         ) as f:
+#             grafanaConfig = json.load(f)
+#         f.close()
+#     except:
+#         return "error"
+#     return jsonify(grafanaConfig)
 
 
 @socketio.on("connect", namespace="/")
@@ -644,16 +675,16 @@ def connect():
     print("Client connected")
 
 
-@app.before_first_request
-def startup():
-    global thread
-    with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(stateChecker)
-    handler = RotatingFileHandler(serverConfigJson["serverlog_location_name"], maxBytes=1000000, backupCount=0)
-    logging.root.setLevel(logging.NOTSET)
-    handler.setLevel(logging.NOTSET)
-    app.logger.addHandler(handler)
+# @app.before_first_request
+# def startup():
+#     global thread
+#     with thread_lock:
+#         if thread is None:
+#             thread = socketio.start_background_task(stateChecker)
+#     handler = RotatingFileHandler(serverConfigJson["serverlog_location_name"], maxBytes=1000000, backupCount=0)
+#     logging.root.setLevel(logging.NOTSET)
+#     handler.setLevel(logging.NOTSET)
+#     app.logger.addHandler(handler)
 
 
 # @app.after_request
@@ -681,14 +712,12 @@ def initConfig():
         CONFIG_DICT = json.load(f)
 
     systemConfiguration(configName, CONFIG_PATH)
-    r2.set("runningFile", configName)
+    r2.set("loadedConfig", configName)
     return "Success"
 
 
 @app.route("/urlTreeJson")
 def urlTreeJson():
-    print("urlTreeJson function")
-    # sessionStatus()
     try:
         with open(os.path.join(CONFIG_PATH, CONFIG_DICT["tree"]), "r") as file:
             return jsonify(json.load(file))
@@ -728,8 +757,7 @@ def localLogin():
 def statesList():
     global sysConf
     list = {}
-    print("stateList", r2.get("runningFile"))
-    list = getStatesList(sysConf[r2.get("runningFile")])
+    list = getStatesList(sysConfig)
     return jsonify(list)
 
 
@@ -737,7 +765,6 @@ def statesList():
 def rootCommand():
     command = request.args.get("command")
     r = executeCommROOT(command)
-    print(r)
     return jsonify(r)
 
 @app.route("/info", methods=["GET"])
@@ -822,43 +849,40 @@ def monitoringLatestValues():
                 data = dict(zip(keys,data_results))
                 data["RunStart"] = datetime.fromtimestamp(float(data["RunStart"])).strftime('%d/%m %H:%M:%S')  if data["RunStart"] != 0 else "-"
                 packet["values"] = data
-
                 packet["graphs"] = {key : [float(value.split(":")[0]),int(value.split(":")[1])] for (key,value) in zip(graphKeys,graph_data)}
-
-
                 d1 = data_results + graph_data
-
-
                 yield f"data:{json.dumps(packet)}\n\n"
                 d1 = data_results
-            time.sleep(1) # NOTE:Can be configurable
+            socketio.sleep(1) # NOTE:Can be configurable
     return Response(getValues(), mimetype="text/event-stream")
 
 
 @app.route("/logURL", methods=["GET"])
 def returnLogURL():
     module = request.args.get("module")
-    groupName =  "faser"  #TODO: Should not be hardcoded
-    # nodes = getListNodes(sysConf[session["configName"]])
-    url = f"http://{platform.node()}:9001/logtail/faser:{module}"
+    group =  r2.get("group")
+    url = f"http://{platform.node()}:9001/logtail/{group}:{module}"
     return jsonify(url)
 
+@socketio.on_error()        # Handles the default namespace
+def error_handler(e):
+    print(e)
 
-def getListNodes(locRoot):
-    return [node.name for pre,_,node in RenderTree(locRoot)]
 
-    
 if __name__ == "__main__":
-
-
     if len(sys.argv) != 1 :
         if sys.argv[1] == "-l":
             print("Running in local mode - no run number InfluxDB archiving")
             localOnly = True
 
-    print(f"Connect with the browser to http://{platform.node()}:5000")
-    metrics = metricsHandler.Metrics(app.logger)
+    # exit_event = threading.Event()
+    # signal.signal(signal.SIGINT, lambda signum,frame : exit_event.set())
 
+    print(f"Connect with the browser to http://{platform.node()}:5000")
+    metrics=metricsHandler.Metrics(app.logger)
+    socketio.start_background_task(stateChecker)
+    # socketio.start_background_task(mH, app.logger)
     socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader = False)
-    print("Stopping... ")
+    print("Stopping...")
     metrics.stop()
+

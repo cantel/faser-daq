@@ -296,9 +296,9 @@ var app = new Vue({
         this.log.push(line);
       });
 
-      this.c_socket.on("runStateChng", (info) => {
-        this.runState = info["runState"];
-        this.runOnGoing = true ? info.runState != "DOWN" : false;
+      this.c_socket.on("runStateChng", (state) => {
+        this.runState = state;
+        this.runOnGoing = state != "DOWN" ? true : false;
       });
 
       this.c_socket.on("configChng", (configName) => {
@@ -316,7 +316,6 @@ var app = new Vue({
       });
 
       this.c_socket.on("errorModChng", (newErrorsMod) => {
-        console.log("socket", newErrorsMod);
         this.modulesError = newErrorsMod;
       });
 
@@ -333,7 +332,6 @@ var app = new Vue({
         })
         .then((response) => {
           console.log(response.data);
-          // this.interlocked = !this.interlocked;
         })
         .catch((e) => console.log(e));
     },
@@ -351,10 +349,10 @@ var app = new Vue({
     },
 
     isROOTButtonEnabled(RCommand) {
-      // TODO: add condition if logged in or not
-      return this.fsmRules
-        ? this.fsmRules[this.runState].includes(RCommand)
-        : false;
+      if (this.runState !== '' && this.fsmRules) {
+        return this.runState !== '' ? this.fsmRules[this.runState].includes(RCommand) : false;
+      }
+      else { return false }
     },
     goToRunningConfig(runningConfig) {
       console.log("Going to ", runningConfig);
@@ -368,19 +366,16 @@ var app = new Vue({
         this.runOnGoing = data["runOngoing"];
         this.whoInterlocked = data["whoInterlocked"];
         if (
-          data["runningFile"] != "" &&
-          this.c_loadedConfigName != data["runningFile"]
+          data["loadedConfig"] != "" &&
+          this.c_loadedConfigName != data["loadedConfig"]
         ) {
-          this.loadConfig(data["runningFile"]);
+          this.loadConfig(data["loadedConfig"]);
         }
         this.modulesError = data["errors"];
       });
     },
     getFSM() {
       axios.get("fsmrulesJson").then((response) => {
-        if (response.data.length == 0) {
-          alert("Something is wrong with the fsm rules ");
-        }
         this.fsmRules = response.data;
         this.fsmRules["default"] = [];
       });
@@ -542,11 +537,11 @@ var app = new Vue({
       handler: function (newConfig, oldConfig) {
         console.log("old", oldConfig, "new", newConfig);
         // we close the old listener for nodeStates
-        this.c_socket.off("stsChng" + oldConfig, function () {
+        this.c_socket.off("stsChng", function () {
           console.log("removed listener");
         });
         // we create the new listener for nodeStates
-        this.c_socket.on("stsChng" + newConfig, (result) => {
+        this.c_socket.on("stsChng", (result) => {
           this.nodeStates = result;
         });
       },

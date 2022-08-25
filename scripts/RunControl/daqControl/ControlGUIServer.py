@@ -1,6 +1,8 @@
 # import eventlet
 # eventlet.monkey_patch()
+from cgitb import reset
 from cmath import exp
+import subprocess
 from flask import Flask,redirect,url_for,render_template,request,session,g,jsonify,Response
 from datetime import timedelta
 import redis
@@ -24,15 +26,10 @@ from pathlib import Path
 import platform
 from flask_cors import CORS
 from nodetree import NodeTree
+from helpers import detectorList, getEventCounts
 from daqcontrol import daqcontrol as daqctrl
 import metricsHandler
-
-
-with open(os.path.join(os.path.dirname(__file__), 'serverconfiguration.json')) as f:
-    serverConfigJson = json.load(f)
-
-LOGOUT_URL = serverConfigJson['LOGOUT_URL']
-
+import requests
 
 
 # rewriting the original function from NodeTree class from daqLing
@@ -80,19 +77,25 @@ def childrenStateChecker(self):
         socketio.sleep(0.1)
 NodeTree.childrenStateChecker = childrenStateChecker
 
-# sys.path.append(os.path.join(os.path.dirname(__file__), "..", "..", "Control")) # ?note
+
+with open(os.path.join(os.path.dirname(__file__), 'serverconfiguration.json')) as f:
+    serverConfigJson = json.load(f)
+
+LOGOUT_URL = serverConfigJson['LOGOUT_URL']
+
 
 configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 
-with open(os.path.join(os.path.dirname(__file__), "serverconfiguration.json")) as f:
-    serverConfigJson = json.load(f)
+# for runService
+run_user="FASER"
+run_pw="HelloThere"
+
 
 app = Flask(__name__)
 cors = CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
 thread_lock = threading.Lock()
 thread = None
-sysConf = {}
 TIMEOUT = serverConfigJson["timeout_for_requests_secs"]
 OGOUT_URL = serverConfigJson["LOGOUT_URL"]
 CONFIG_PATH =  ""
@@ -191,7 +194,9 @@ def reinitTree(configJson, oldRoot=None):
     #     raise Exception("Invalid grafana/kibana nodes configuration:" + e)
 
     group = configuration["group"]  # for example "daq" or "faser"
-    r2.set("group", group)  
+    r2.set("group", group) 
+
+    r2.set("config", json.dumps(configuration)) 
  
     if "path" in configuration.keys():
         dir = configuration["path"]
@@ -217,7 +222,6 @@ def reinitTree(configJson, oldRoot=None):
 
 
 def executeComm(ctrl, action):
-    global sysConf,currentConfig
     r = ""
     configName = r2.get("loadedConfig")
 
@@ -237,17 +241,19 @@ def executeComm(ctrl, action):
     return r
 
 
-def executeCommROOT(action:str):
+def executeCommROOT(action:str, reqDict:dict):
     """
     Execute actions on ROOT node (general commands) and extend the interlock for another <timeout> seconds 
     Returns : location of the module specific log files 
     """
-    global sysConf
     r2.expire("whoInterlocked", 60) #TODO: Should be configurable
     configName =  r2.get("loadedConfig")
     logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     setTransitionFlag(1)
     if action == "INITIALISE":
+
+        detList = detectorList(r2.get("config"))
+        r2.set("detList", json.dumps(detList))
         steps = [("add", "booted"), ("configure","ready")]
         for step,nextState in steps :
             r = sysConfig.executeAction(step)
@@ -261,27 +267,114 @@ def executeCommROOT(action:str):
             if not done: 
                 break  # one step doesn't reach the correct state, end command loop. 
 
-    elif action == "START": 
-        r=sysConfig.executeAction("start")
+    elif action == "START":
+        runNumber = 1000000000
+        runType = reqDict.get("runType","")
+        runComment = reqDict.get("runComment","Test")[:500]
+        version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
+        seqnumber = reqDict.get("seqnumber",None)
+        seqstep = reqDict.get("seqstep",0)
+        seqsubstep = reqDict.get("seqsubstep",0)
+        config = json.loads(r2.get("config"))
+        detList = r2.get("detList")
+
+        if not localOnly:
+            prodURL = 'http://faser-runnumber.web.cern.ch/NewRunNumber'
+            testURL = "http://faser-daq-001.cern.ch:5000/NewRunNumber"
+            try : 
+                res = requests.post(testURL,
+                        auth=(run_user,run_pw),
+                        json = {
+                            'version':    version,
+                            'type':       runType,
+                            'username':       os.getenv("USER"),
+                            'startcomment':   runComment,
+                            'seqnumber': seqnumber,
+                            'seqstep': seqstep,
+                            'seqsubstep': seqsubstep,
+                            'detectors':  detList,
+                            'configName': configName,
+                            'configuration': config
+                        })
+                if res.status_code != 201 :
+                    logAndEmit("general", "ERROR", "Failed to get run number: "+res.text )
+                    setTransitionFlag(0)
+                    return "Error: Failed to get run number: "+res.text
+                else:
+                    try:
+                        runNumber=int(res.text)
+                    except ValueError:
+                        logAndEmit("ERROR","Failed to get run number: "+res.text)
+                        setTransitionFlag(0)
+                        return "Error: Failed to get run number: "+res.text
+            except requests.exceptions.ConnectionError:
+                logAndEmit("general","Error","Could not connect to run service")
+                setTransitionFlag(0)
+                return "Error: Could not connect to run service"
+
+        
+        r2.set("runType", runType)
+        r2.set("runComment", runComment)
+        r2.set("runStart", time.time())
+        r2.set("runNumber", runNumber)
+
+        r=sysConfig.executeAction("start",runNumber)
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+        done = waitUntilCorrectState("running", 15)
 
-        done = waitUntilCorrectState("running", 30)
+    elif action == "STOP":
+        runinfo = {}
+        runComment = reqDict.get("runComment","Test")[:500]
+        runNumber = r2.get("runNumber")
+        runType = reqDict.get("runType","") 
+        runinfo["eventCounts"] = getEventCounts()
+        physicsEvent = runinfo["eventCounts"]["Events_sent_Physics"] # for inlfuxDB
 
-    elif action == "STOP": 
+        r2.set("runComment", runComment)
+        r2.set("runType", runType)
+
+
+
+        seqnumber = reqDict.get("seqnumber",None)
+        seqstep = reqDict.get("seqstep",0)
+        seqsubstep = reqDict.get("seqsubstep",0)
+        config = json.loads(r2.get("config"))
+        if not localOnly:
+            stopMsg = {
+                "endcomment" :runComment,
+                "type": runType,
+                "runinfo": runinfo
+
+            }
+            prodURL = f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}'
+            testURL = f"http://faser-daq-001.cern.ch:5000/AddRunInfo/{runNumber}"
+            try : 
+                res = requests.post(testURL,
+                        auth=(run_user,run_pw),
+                        json = stopMsg)
+
+                if res.status_code != 200 :
+                    logAndEmit("general", "ERROR", "Failed to register end of run information: "+r.text )
+                    sendInfoToSnackBar( "ERROR", "Failed to register end of run information: "+r.text)
+
+            except requests.exceptions.ConnectionError:
+                logAndEmit("general","Error","Could not connect to run service")
+                sendInfoToSnackBar( "ERROR","Could not connect to run service",)
+
         r=sysConfig.executeAction("stop")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-
         done = waitUntilCorrectState("ready", 30)
 
     elif action == "SHUTDOWN":
-        steps = [("unconfigure", "booted"), ("shutdown","added"), ("remove", "not_added")]
-        for step,nextState in steps :
+        # steps = [("unconfigure", "booted"), ("shutdown","added"), ("remove", "not_added")]
+        steps = [("unconfigure", "booted"), ("remove", "not_added")]
+        for step,nextState in steps : 
+            print(step,nextState)
             r = sysConfig.executeAction(step)
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
             done = waitUntilCorrectState(nextState, 1)
         if not done : 
-            # if timeout, force remove all the modules 
-            # print("Force shutdown")
+            print("not done")
             r = sysConfig.executeAction("remove")
             done = True
         
@@ -299,8 +392,7 @@ def executeCommROOT(action:str):
         r=sysConfig.executeAction("enableTrigger")
         if "Action not allowed" in r:
             r=sysConfig.executeAction("resume")
-
-            
+ 
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
         done = waitUntilCorrectState("running", 30)
     
@@ -311,8 +403,19 @@ def executeCommROOT(action:str):
  
     setTransitionFlag(0)
     if not done :
-        return "ERROR: TIMEOUT"
-    return "success" # success 
+        return "Error: The command took to long -> TIMEOUT"
+    return "Success" # success 
+
+def sendInfoToSnackBar(typeM:str, message:str):
+    """
+    Sends a message to the client with message <message> with a color specified by typeM
+    """
+    valid_types = {"ERROR", "INFO", "SUCCESS"}
+    if typeM not in valid_types:
+        raise ValueError(f"Wrong type specified: {typeM} is not a valid type ")
+    socketio.emit("snackbarEmit", {"mesage": message, "type": typeM})
+
+
 
 def setTransitionFlag(flag:int):
     r2.set("transitionFlag", flag)
@@ -323,12 +426,11 @@ def waitUntilCorrectState(state:str, timeout=30):
     Returns True if the transition succeded, False if it reached timeout.
     Default value for timeout is 30 seconds.  
     """
-    global sysConf
     now = time.time()
     while (time.time()-now < timeout):
         if (sysConfig.getState() == state)  and  (not sysConfig.inconsistent):
             return True
-        socketio.sleep(0.5)
+        socketio.sleep(0.2)
     return False
 
 def listLogs(r):
@@ -338,6 +440,7 @@ def listLogs(r):
     final = []
     for sublist in r:
         if isinstance(sublist, tuple): final.append(sublist[1])
+        elif sublist =="Excluded" : pass # ignore nodes that are excluded
         else:
             for item in sublist: final.append(item[1])
     return final
@@ -359,9 +462,6 @@ def getStatesList(locRoot):
         ]
     return list
 
-def printTree(root):
-    print(RenderTree(root, style=AsciiStyle()))
-
 
 def stateChecker():
     l1 = {}
@@ -369,13 +469,14 @@ def stateChecker():
     loadedConfig =""
     lockState = None
     errors = []
+    runInfo1= {"runType":"", "runComment":""}
+
 
     while True:
         ########### Change of config ############
         loadedConfig2 = r2.get("loadedConfig")
 
         if loadedConfig2 != loadedConfig :
-            print("\t\t\tChangé de config")
             socketio.emit("configChng", loadedConfig2, broadcast = True)
             loadedConfig = loadedConfig2
 
@@ -387,12 +488,17 @@ def stateChecker():
                 if l1 != {} and l2 !={}:    
                     if l1["Root"] != l2["Root"]: # if Root status changes
                         state=""
-                        if l2["Root"][1] : # if root is inconsistent
+                        if l2["Root"][1] and r2.get("transitionFlag") == "1" : # if root is in transition
                             print("ROOT inconsistent")
                             state = "IN TRANSITION"
                             updateRedis(status=state)
                             socketio.emit("runStateChng",state , broadcast=True)
-                        else:
+
+                        # elif l2["Root"][1] and r2.get("transitionFlag") == "0" : # if a module crashed
+                        #     pass
+
+ 
+                        elif (l2["Root"][1] and r2.get("transitionFlag") =="0") or l2["Root"][1] == False :
                             if l2["Root"][0] == "running" : state="RUN"
                             elif l2["Root"][0] == "not_added" : state="DOWN"; cleanErrors()
                             elif l2["Root"][0] == "ready" : state="READY"
@@ -403,6 +509,7 @@ def stateChecker():
                                 updateRedis(status=state)
                                 logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
                                 socketio.emit("runStateChng",state , broadcast=True)
+                            
         
                 l1 = l2
 
@@ -456,9 +563,25 @@ def stateChecker():
                 if len(errors2) != 0:
                     r2.sadd("modulesErrors", *errors2)
                 errors = errors2
+        
+        ####### change of runInfo #######
+        runInfo2 = getRunInfo()
+        if runInfo2 != runInfo1:
+            socketio.emit("runInfoChng", runInfo2, broadcast =True)
+            runInfo1 = runInfo2
+
+            
+
+            
 
         socketio.sleep(0.3)
 
+def getRunInfo():
+    return {
+        "runType": r2.get("runType"),
+        "runComment": r2.get("runComment"),
+        "runNumber": r2.get("runNumber")
+    }
 
 def cleanErrors():
     r2.delete("modulesErrors")
@@ -479,7 +602,7 @@ def modulesWithError(tree):
 
             
             
-def logAndEmit(configtype, type, message):
+def logAndEmit(configtype, type:str , message=""):
     now = datetime.now()
     timestamp = now.strftime("%d/%m/%Y, %H:%M:%S")
     if type == "INFO":
@@ -516,6 +639,9 @@ def appState():
     packet["whoInterlocked"] = r2.get("whoInterlocked")
     errors = r2.smembers("modulesErrors")
     packet["errors"] = list(errors) if errors else []
+    packet["localOnly"] = localOnly
+    packet = {**packet, **getRunInfo()}
+
     return jsonify(packet)
 
 
@@ -578,9 +704,6 @@ def login_callback():
     access_token = response["access_token"]
     userinfo = keycloak_client.fetch_userinfo(access_token)
     session["user"] = userinfo
-    session["configName"] = ""
-    session["configPath"] = ""
-    session["configDist"] = ""
     logAndEmit("general", "INFO", "User connected: " + session["user"]["cern_upn"])
     return redirect(url_for('index'))
 
@@ -707,7 +830,7 @@ def initConfig():
     configName  =  request.args.get("configName")
     
     CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], configName)
-    logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ session["configName"],)
+    logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
     with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
         CONFIG_DICT = json.load(f)
 
@@ -748,23 +871,20 @@ def index():
 def localLogin():
     session["user"] = {}
     session["user"]["cern_upn"] = "local_user"
-    session["configName"] = "" #?
-    session["configPath"] = "" #?
-    session["configDict"] = "" #?
     return redirect(url_for('index'))
 
 @app.route("/statesList", methods=["GET"])
 def statesList():
-    global sysConf
     list = {}
     list = getStatesList(sysConfig)
     return jsonify(list)
 
 
-@app.route("/processROOTCommand", methods=["GET"])
+@app.route("/processROOTCommand", methods=["POST"])
 def rootCommand():
-    command = request.args.get("command")
-    r = executeCommROOT(command)
+    reqDict:dict = request.get_json()
+    command = reqDict.get("command")
+    r = executeCommROOT(command, reqDict)
     return jsonify(r)
 
 @app.route("/info", methods=["GET"])
@@ -883,6 +1003,7 @@ if __name__ == "__main__":
     socketio.start_background_task(stateChecker)
     # socketio.start_background_task(mH, app.logger)
     socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader = False)
+
     print("Stopping...")
     metrics.stop()
 

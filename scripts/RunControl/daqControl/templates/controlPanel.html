@@ -58,12 +58,15 @@
           :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('remove')" color="success"> remove
         </v-btn>
       </v-row>
-      <!-- <v-row class="px-3 ">
-          <strong class="blue--text text--darken-4 mr-2">Run Type : </strong> [[ runInfo.runType ]]
+      <v-row class="px-3 ">
+        <v-col cols="6">
+          <strong class="blue--text text--darken-4 mr-2">Run Type : </strong> [[ runType ]]
+        </v-col>
+        <v-col cols="6">
+          <strong class="blue--text text--darken-4 mr-2">Comment :</strong> [[ comment]]
+        </v-col>
+        
       </v-row> 
-      <v-row class="px-3">
-        <strong class="blue--text text--darken-4 mr-2">Comment :</strong> [[ runInfo.comment]]
-      </v-row> -->
 
     </v-card-text>
   </v-card>

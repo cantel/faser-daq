@@ -257,13 +257,16 @@ var app = new Vue({
     resultCommand: "", // what the root action will return (success or error-> timeout)
     startRunDialog: false,
     endRunDialog: false,
-    runNumber: 0,
+    runNumber: "-",
     startTime: "",
     comment: "",
     runType: "",
     runTypes: ['Test', 'TestBeam', 'Calibration', 'Cosmics', 'Physics'],
     lostConnection: false,
-    shutdownWarning: false
+    shutdownWarning: false,
+    snackbar: {"open":false,"text":"", "color":""},
+    timeoutAxiosRequest: {timeout: 20000},
+    localOnly : false
   },
 
   delimiters: ["[[", "]]"],
@@ -313,6 +316,10 @@ var app = new Vue({
 
       this.c_socket.on("interlockChng", (newState) => {
         this.whoInterlocked = newState;
+        if (newState == undefined){
+          this.startRunDialog = false;
+          this.endRunDialog = false;
+        }
       });
 
       this.c_socket.on("errorModChng", (newErrorsMod) => {
@@ -321,7 +328,18 @@ var app = new Vue({
 
       this.c_socket.on("disconnect", () => {
         this.lostConnection = true;
+      });
+
+      this.c_socket.on("runInfoChng", (newRunInfo)=>{
+        this.comment = newRunInfo["runComment"]
+        this.runType = newRunInfo["runType"]
+        this.runNumber = newRunInfo["runNumber"]
+      });
+
+      this.c_socket.on("snackbarEmit", (msg)=> {
+        this.createSnackbar(color=msg.type, text=msg.message)
       })
+
 
     },
     interlock() {
@@ -372,6 +390,11 @@ var app = new Vue({
           this.loadConfig(data["loadedConfig"]);
         }
         this.modulesError = data["errors"];
+        this.runType = data["runType"];
+        this.comment = data["runComment"];
+        this.runNumber = data["runNumber"];
+        this.localOnly = data["localOnly"];
+      
       });
     },
     getFSM() {
@@ -481,7 +504,6 @@ var app = new Vue({
       window.location.assign("/login");
     },
     logout() {
-      // axios.get("/logout");
       window.location.replace("/logout");
     },
     hasChildren(node) {
@@ -494,32 +516,34 @@ var app = new Vue({
     },
     sendROOTCommand(action) {
       this.processing[action] = true;
-      if (action == "START" || action == "STOP") {
-        axios
-          .get(`/processROOTCommand?command=${action}&type=${"test"}&comment=${"Test comment"}`)
-          .then((result) => {
-            this.processing[action] = false;
-            this.resultCommand = result.data;
-          })
-          .catch((e) => {
-            this.processing[action] = false;
-            console.log("ERROR:", e);
-          });
-      }
-      else {
-        axios
-          .get(`/processROOTCommand?command=${action}`)
-          .then((result) => {
-            this.processing[action] = false;
-            this.resultCommand = result.data;
-          })
-          .catch((e) => {
-            this.processing[action] = false;
-            console.log("ERROR:", e);
-          });
+      args = {'command': action}
+
+      if (action === "START" || action === "STOP") {
+        args["runType"] = this.runType;
+        args["runComment"] = this.comment;
       }
 
+      axios
+        .post(`/processROOTCommand`, args,this.timeoutAxiosRequest)
+        .then((result) => {
+          this.processing[action] = false;
+
+          if (result.data.includes("Error") ){
+            this.createSnackbar("error", result.data ) 
+          }
+        })
+        .catch((e) => {
+          this.processing[action] = false;
+          this.createSnackbar("error", e)
+        });
     },
+
+    createSnackbar(color, text){
+      this.snackbar["color"] = color
+      this.snackbar["text"] = text
+      this.snackbar["open"] = true
+    },
+
     isActiveNode() {
       return this.activeNode.length != 0;
     },

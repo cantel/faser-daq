@@ -469,7 +469,8 @@ def stateChecker():
     loadedConfig =""
     lockState = None
     errors = []
-    runInfo1= {"runType":"", "runComment":""}
+    runInfo1= {"runType":"", "runComment":"", "runNumber":None}
+    transitionFlag1 = r2.get("transitionFlag")
 
 
     while True:
@@ -480,13 +481,14 @@ def stateChecker():
             socketio.emit("configChng", loadedConfig2, broadcast = True)
             loadedConfig = loadedConfig2
 
-        ############# Node States ###############
+        ############# States ###############
+        transitionFlag2 = r2.get("transtionFlag")
         if sysConfig:
             l2 = getStatesList(sysConfig)
-            if l2 != l1:
+            if (l2 != l1) or (transitionFlag2 != transitionFlag1):
                 socketio.emit(f"stsChng", l2, broadcast=True)
                 if l1 != {} and l2 !={}:    
-                    if l1["Root"] != l2["Root"]: # if Root status changes
+                    if l1["Root"] != l2["Root"] or (transitionFlag2 != transitionFlag1): # if Root status changes
                         state=""
                         if l2["Root"][1] and r2.get("transitionFlag") == "1" : # if root is in transition
                             print("ROOT inconsistent")
@@ -494,11 +496,8 @@ def stateChecker():
                             updateRedis(status=state)
                             socketio.emit("runStateChng",state , broadcast=True)
 
-                        # elif l2["Root"][1] and r2.get("transitionFlag") == "0" : # if a module crashed
-                        #     pass
-
- 
-                        elif (l2["Root"][1] and r2.get("transitionFlag") =="0") or l2["Root"][1] == False :
+                        else :
+                            print("\n\n\n\n\n ELSE \n\n\n\n\n")
                             if l2["Root"][0] == "running" : state="RUN"
                             elif l2["Root"][0] == "not_added" : state="DOWN"; cleanErrors()
                             elif l2["Root"][0] == "ready" : state="READY"
@@ -509,9 +508,21 @@ def stateChecker():
                                 updateRedis(status=state)
                                 logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
                                 socketio.emit("runStateChng",state , broadcast=True)
-                            
-        
                 l1 = l2
+                transitionFlag1= transitionFlag2
+
+            errors2 = modulesWithError(sysConfig)
+            if errors2 != errors:
+                socketio.emit("errorModChng", errors2, broadcast =True)
+                r2.delete("modulesErrors")
+                if len(errors2) != 0:
+                    r2.sadd("modulesErrors", *errors2)
+                errors = errors2
+
+            
+
+
+            
 
                         
                         
@@ -554,27 +565,16 @@ def stateChecker():
                 logAndEmit(loadedConfig2, "INFO", "Interlock has been released because of TIMEOUT")
             lockState = lockState2
 
-        # if loadedConfig2 and loadedConfig2 in sysConf:
-        if sysConfig:
-            errors2 = modulesWithError(sysConfig)
-            if errors2 != errors:
-                socketio.emit("errorModChng", errors2, broadcast =True)
-                r2.delete("modulesErrors")
-                if len(errors2) != 0:
-                    r2.sadd("modulesErrors", *errors2)
-                errors = errors2
-        
+        #### check the status of the modules ### 
+
         ####### change of runInfo #######
         runInfo2 = getRunInfo()
         if runInfo2 != runInfo1:
             socketio.emit("runInfoChng", runInfo2, broadcast =True)
             runInfo1 = runInfo2
 
-            
-
-            
-
         socketio.sleep(0.3)
+
 
 def getRunInfo():
     return {

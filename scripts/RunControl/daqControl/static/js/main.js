@@ -266,8 +266,8 @@ var app = new Vue({
     shutdownWarning: false,
     snackbar: {"open":false,"text":"", "color":""},
     timeoutAxiosRequest: {timeout: 35000},
-    localOnly : false
-  },
+    localOnly : false,
+    },
 
   delimiters: ["[[", "]]"],
   mounted() {

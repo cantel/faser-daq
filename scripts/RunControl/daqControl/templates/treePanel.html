@@ -1,30 +1,36 @@
 <v-navigation-drawer v-model="drawer" :permanent="false" app width="300">
-    <h3 class="my-4 text-center"> Tree View </h3>
-    <v-treeview :hoverable="true" return-object open-all class="treeview" @update:active="setActiveNode"
-      v-if="nodeStates && !c_configLoading " item-key="name" activatable selection-type="independent" dense :items="[c_treeJson]">
-      <template v-slot:prepend="{ item,open }">
-        <v-icon
-          v-if="modulesError.includes(item.name) || (crashedModules.includes(item.name) && runState!= 'IN TRANSITION')"
-          color="error">
-          mdi-alert-circle
-        </v-icon>
-        <v-tooltip open-delay="200" dark top :color="stateColors[getNodeState(item.name)]">
-          <template v-slot:activator="{ on, attrs }">
-            <v-icon v-bind="attrs" v-on="on" :color="stateColors[getNodeState(item.name)]">
-              mdi-circle
-            </v-icon>
-          </template>
-          <span> [[getNodeState(item.name)]]</span>
-        </v-tooltip>
-      </template>
-      <template v-slot:label="{ item, selected, active }">
-        <div style="display:flex;align-items: center;">
-          <span :class="{'red lighten-3': nodeStates[item.name][1]}">[[ item.name ]] </span>
-          <v-simple-checkbox v-if="!d_includeExclude" :value="nodeStates[item.name][2]"
-            @click="processIncludeExclude(item.name,nodeStates[item.name][2])" class="my-auto" hide-details
-            :ripple="false">
-          </v-simple-checkbox>
-        </div>
-      </template>
-    </v-treeview>
-  </v-navigation-drawer>
+  <h3 class="my-4 text-center"> Tree View </h3>
+  <v-treeview :hoverable="true" return-object open-all class="treeview" @update:active="setActiveNode"
+    v-if="nodeStates && !c_configLoading " item-key="name" activatable selection-type="independent" dense
+    :items="[c_treeJson]">
+    <template v-slot:prepend="{ item,open }">
+      <v-icon
+        v-if="modulesError.includes(item.name) || (crashedModules.includes(item.name) && runState!= 'IN TRANSITION')"
+        color="error">
+        mdi-alert-circle
+      </v-icon>
+
+      <v-tooltip v-if="stateColors[getNodeState(item.name)]" open-delay="200" dark top :color="stateColors[getNodeState(item.name)]">
+        <template v-slot:activator="{ on, attrs }">
+          <v-icon v-bind="attrs" v-on="on"
+            :color="stateColors[getNodeState(item.name)]">
+            mdi-circle
+          </v-icon>
+        </template>
+        <span> [[getNodeState(item.name)]]</span>
+      </v-tooltip>
+      <v-progress-circular v-else size="20" indeterminate color="grey darken-1">
+
+      </v-progress-circular>
+    </template>
+    <template v-slot:label="{ item, selected, active }">
+      <div style="display:flex;align-items: center;">
+        <span :class="{'red lighten-3': nodeStates[item.name][1]}">[[ item.name ]] </span>
+        <v-simple-checkbox v-if="!d_includeExclude" :value="nodeStates[item.name][2]"
+          @click="processIncludeExclude(item.name,nodeStates[item.name][2])" class="my-auto" hide-details
+          :ripple="false">
+        </v-simple-checkbox>
+      </div>
+    </template>
+  </v-treeview>
+</v-navigation-drawer>

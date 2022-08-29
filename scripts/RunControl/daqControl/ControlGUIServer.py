@@ -2,6 +2,7 @@
 # eventlet.monkey_patch()
 from cgitb import reset
 from cmath import exp
+from http import server
 import subprocess
 from flask import Flask,redirect,url_for,render_template,request,session,g,jsonify,Response
 from datetime import timedelta
@@ -77,16 +78,17 @@ def childrenStateChecker(self):
         socketio.sleep(0.1)
 NodeTree.childrenStateChecker = childrenStateChecker
 
-
+## reading server configuration
+serverConfig = {}
 with open(os.path.join(os.path.dirname(__file__), 'serverconfiguration.json')) as f:
-    serverConfigJson = json.load(f)
+    serverConfig = json.load(f)
 
-LOGOUT_URL = serverConfigJson['LOGOUT_URL']
+LOGOUT_URL = serverConfig['LOGOUT_URL']
 
 
 configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 
-# for runService
+# for run service
 run_user="FASER"
 run_pw="HelloThere"
 
@@ -94,10 +96,6 @@ run_pw="HelloThere"
 app = Flask(__name__)
 cors = CORS(app)
 socketio = SocketIO(app, cors_allowed_origins="*")
-thread_lock = threading.Lock()
-thread = None
-TIMEOUT = serverConfigJson["timeout_for_requests_secs"]
-OGOUT_URL = serverConfigJson["LOGOUT_URL"]
 CONFIG_PATH =  ""
 CONFIG_DICT = {}
 configTree = None
@@ -115,12 +113,16 @@ r2.setnx("loadedConfig","")
 sysConfig : NodeTree = None # the treeObject for the configuration
 
 
-interlockTime = 30 # TODO: have to be in the configuration file
 
-handler = RotatingFileHandler(serverConfigJson["serverlog_location_name"], maxBytes=1000000, backupCount=0)
+handler = RotatingFileHandler(serverConfig["serverlog_location_name"], maxBytes=1000000, backupCount=0)
 logging.root.setLevel(logging.NOTSET)
 handler.setLevel(logging.NOTSET)
 app.logger.addHandler(handler)
+
+keycloak_client = Client(callback_uri=serverConfig["callbackUri"])
+app.secret_key = os.urandom(24)
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfig["timeout_session_expiration_mins"])
+
 
 def systemConfiguration(configName, configPath):
     global sysConfig
@@ -134,7 +136,7 @@ def systemConfiguration(configName, configPath):
         except Exception as e:
             logAndEmit("general", "ERROR", str(e))
     elif configName != loadedConfig: # we changed config
-        print("sysConfig n'est pas None et on a changé de Config")
+        print("sysConfig is not None and we changed config")
         sysConfig = reinitTree(configJson=configJson, oldRoot=sysConfig)
     else:
         print("Do nothing")
@@ -174,7 +176,6 @@ def reinitTree(configJson, oldRoot=None):
 
     # We open the main config file
     with open(os.path.join(CONFIG_PATH, configJson["config"])) as f:
-        # base_dir_uri = Path(session['configPath']).as_uri() + '/' # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
         base_dir_uri = (Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
         jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
 
@@ -246,7 +247,7 @@ def executeCommROOT(action:str, reqDict:dict):
     Execute actions on ROOT node (general commands) and extend the interlock for another <timeout> seconds 
     Returns : location of the module specific log files 
     """
-    r2.expire("whoInterlocked", 60) #TODO: Should be configurable
+    r2.expire("whoInterlocked", serverConfig["timeout_interlock_secs"])
     configName =  r2.get("loadedConfig")
     logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     setTransitionFlag(1)
@@ -263,7 +264,7 @@ def executeCommROOT(action:str, reqDict:dict):
                 logPaths = listLogs(r)
                 r2.delete("log")
                 r2.sadd("log", *logPaths)
-            done = waitUntilCorrectState(nextState, 30 ) # 10 seconds for each steps 
+            done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action]) # 10 seconds for each steps 
             if not done: 
                 break  # one step doesn't reach the correct state, end command loop. 
 
@@ -320,7 +321,7 @@ def executeCommROOT(action:str, reqDict:dict):
 
         r=sysConfig.executeAction("start",runNumber)
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-        done = waitUntilCorrectState("running", 15)
+        done = waitUntilCorrectState("running", serverConfig["timeout_rootCommands_secs"][action])
 
     elif action == "STOP":
         runinfo = {}
@@ -328,7 +329,7 @@ def executeCommROOT(action:str, reqDict:dict):
         runNumber = r2.get("runNumber")
         runType = reqDict.get("runType","") 
         runinfo["eventCounts"] = getEventCounts()
-        physicsEvent = runinfo["eventCounts"]["Events_sent_Physics"] # for inlfuxDB
+        physicsEvent = runinfo["eventCounts"]["Events_sent_Physics"] # for influxDB
 
         r2.set("runComment", runComment)
         r2.set("runType", runType)
@@ -360,10 +361,14 @@ def executeCommROOT(action:str, reqDict:dict):
             except requests.exceptions.ConnectionError:
                 logAndEmit("general","Error","Could not connect to run service")
                 sendInfoToSnackBar( "ERROR","Could not connect to run service",)
-
-        r=sysConfig.executeAction("stop")
-        logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-        done = waitUntilCorrectState("ready", 30)
+        try : 
+            r=sysConfig.executeAction("stop")
+            logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+            done = waitUntilCorrectState("ready", serverConfig["timeout_rootCommands_secs"][action])
+        except ConnectionRefusedError:
+            setTransitionFlag(0)
+            return "Error: connection refused"
+            
 
     elif action == "SHUTDOWN":
         # steps = [("unconfigure", "booted"), ("shutdown","added"), ("remove", "not_added")]
@@ -372,7 +377,7 @@ def executeCommROOT(action:str, reqDict:dict):
             print(step,nextState)
             r = sysConfig.executeAction(step)
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-            done = waitUntilCorrectState(nextState, 1)
+            done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action])
         if not done : 
             print("not done")
             r = sysConfig.executeAction("remove")
@@ -386,7 +391,7 @@ def executeCommROOT(action:str, reqDict:dict):
     elif action == "PAUSE":
         r=sysConfig.executeAction("disableTrigger")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-        done = waitUntilCorrectState("paused", 30)
+        done = waitUntilCorrectState("paused", serverConfig["timeout_rootCommands_secs"][action])
     
     elif action == "RESUME":
         r=sysConfig.executeAction("enableTrigger")
@@ -394,12 +399,12 @@ def executeCommROOT(action:str, reqDict:dict):
             r=sysConfig.executeAction("resume")
  
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-        done = waitUntilCorrectState("running", 30)
+        done = waitUntilCorrectState("running", serverConfig["timeout_rootCommands_secs"][action])
     
     elif action == "ECR":
         r=sysConfig.executeAction("ECR")
         logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-        done = waitUntilCorrectState("paused", 30)
+        done = waitUntilCorrectState("paused", serverConfig["timeout_rootCommands_secs"][action])
  
     setTransitionFlag(0)
     if not done :
@@ -495,9 +500,7 @@ def stateChecker():
                             state = "IN TRANSITION"
                             updateRedis(status=state)
                             socketio.emit("runStateChng",state , broadcast=True)
-
                         else :
-                            print("\n\n\n\n\n ELSE \n\n\n\n\n")
                             if l2["Root"][0] == "running" : state="RUN"
                             elif l2["Root"][0] == "not_added" : state="DOWN"; cleanErrors()
                             elif l2["Root"][0] == "ready" : state="READY"
@@ -624,9 +627,6 @@ def updateRedis(status:str = None):
 
 
 
-keycloak_client = Client(callback_uri=serverConfigJson["callbackUri"])
-app.secret_key = os.urandom(24)
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfigJson["timeout_session_expiration_mins"])
 
 
 @app.route("/appState", methods=["GET"])
@@ -710,14 +710,14 @@ def login_callback():
 
 @app.route("/log", methods=["GET"])
 def log():
-    with open(serverConfigJson["serverlog_location_name"]) as f:
+    with open(serverConfig["serverlog_location_name"]) as f:
         ret = f.readlines()
     return jsonify(ret[-20:])
 
 
 @app.route("/serverconfig")
 def serverconfig():
-    return jsonify(serverConfigJson)
+    return jsonify(serverConfig)
 
 
 @app.route("/interlock", methods=["POST"])
@@ -727,7 +727,7 @@ def interlock():
 
     
     if action == "lock": 
-        if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=interlockTime, nx=True): 
+        if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=serverConfig["timeout_interlock_secs"], nx=True): 
             logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("loadedConfig"),)
             return jsonify("File locked successfully")
         else : 
@@ -751,7 +751,7 @@ def ajaxParse():
     node = postData["node"]
     command = postData["command"]
     configName =  r2.get("loadedConfig")
-    r2.expire("whoInterlocked",interlockTime) # adds a new timeout
+    r2.expire("whoInterlocked",serverConfig["timeout_interlock_secs"]) # adds a new timeout
 
     try:
         r = executeComm(node, command)
@@ -778,19 +778,6 @@ def fsmrulesJson():
     except Exception as e:
         raise e
     return jsonify(fsmRules["fsm"])
-
-
-# @app.route("/grafanaJson", methods=["GET", "POST"])
-# def grafanaJson():
-#     try:
-#         with open(
-#             os.path.join(CONFIG_PATH, CONFIG_DICT["grafana"])
-#         ) as f:
-#             grafanaConfig = json.load(f)
-#         f.close()
-#     except:
-#         return "error"
-#     return jsonify(grafanaConfig)
 
 
 @socketio.on("connect", namespace="/")
@@ -850,7 +837,7 @@ def urlTreeJson():
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-    if serverConfigJson["SSO_enabled"] == 0:
+    if serverConfig["SSO_enabled"] == 0:
         session["user"]["cern_upn"] = "offlineUser"
         session["user"]["cern_gid"] = ""
         return redirect(url_for("index"))

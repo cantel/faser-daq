@@ -635,7 +635,8 @@ def appState():
     packet["runOngoing"] = bool(int(r2.get("runOngoing")))
     packet["loadedConfig"] = r2.get('loadedConfig')
     packet["runState"] = r2.get("runState")
-    packet["user"] = {"name":session["user"]["cern_upn"], "logged" : True if "cern_gid" in session["user"] else False }
+    if "user" in session:
+        packet["user"] = {"name":session["user"]["cern_upn"], "logged" : True if "cern_gid" in session["user"] else False }
     packet["whoInterlocked"] = r2.get("whoInterlocked")
     errors = r2.smembers("modulesErrors")
     packet["errors"] = list(errors) if errors else []
@@ -692,21 +693,6 @@ def fullLog(module:str) -> Response:
     with open(path, "r") as f:
         log = f.readlines()
     return Response(log, mimetype='text/plain')
-
-@app.route("/login/callback", methods=["GET"])
-def login_callback():
-    state = request.args.get("state", "unknown")
-    _state = session.pop("state", None)
-    if state != _state:
-        return Response("Invalid state: Please retry", status=403)
-    code = request.args.get("code")
-    response = keycloak_client.callback(code)
-    access_token = response["access_token"]
-    userinfo = keycloak_client.fetch_userinfo(access_token)
-    session["user"] = userinfo
-    logAndEmit("general", "INFO", "User connected: " + session["user"]["cern_upn"])
-    return redirect(url_for('index'))
-
 
 @app.route("/log", methods=["GET"])
 def log():
@@ -847,11 +833,38 @@ def login():
         return redirect(auth_url)
 
 
+@app.route("/login/callback", methods=["GET"])
+def login_callback():
+    state = request.args.get("state", "unknown")
+    _state = session.pop("state", None)
+    if state != _state:
+        return Response("Invalid state: Please retry", status=403)
+    code = request.args.get("code")
+    response = keycloak_client.callback(code)
+    access_token = response["access_token"]
+    userinfo = keycloak_client.fetch_userinfo(access_token)
+    session["user"] = userinfo
+    logAndEmit("general", "INFO", "User connected: " + session["user"]["cern_upn"])
+    return redirect(url_for('index'))
+
+
+
 @app.route("/")
 def index():
     if "user" in session: # if user is already connected
         return render_template("index.html", usr=session["user"]["cern_upn"])
     return redirect(url_for('localLogin'))
+
+
+
+
+@app.route("/botLogin")
+def botLogin():
+    if session.get("user") is not None:
+        session["user"] = {}
+        session["user"]["cern_upn"] = "bot"
+
+    return "OK"
 
 
 @app.route("/localLogin")

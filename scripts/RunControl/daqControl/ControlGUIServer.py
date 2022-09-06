@@ -19,7 +19,7 @@ from anytree import RenderTree, AsciiStyle
 from anytree.search import find_by_attr
 from anytree.importer import DictImporter
 from flask_socketio import SocketIO, send, emit
-#from keycloak import Client
+from keycloak import Client
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from copy import deepcopy
@@ -119,7 +119,7 @@ logging.root.setLevel(logging.NOTSET)
 handler.setLevel(logging.NOTSET)
 app.logger.addHandler(handler)
 
-#keycloak_client = Client(callback_uri=serverConfig["callbackUri"])
+keycloak_client = Client(callback_uri=serverConfig["callbackUri"])
 app.secret_key = os.urandom(24)
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfig["timeout_session_expiration_mins"])
 

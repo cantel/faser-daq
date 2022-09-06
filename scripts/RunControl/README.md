@@ -76,8 +76,7 @@ Create a new python environment and install the necessary python packages:
 cd faser-daq/scripts/RunControl
 python3 -m venv venv
 source venv/bin/activate
-
-pip install zmq async_generator contextvars flask_socketio anytree jsonref redis flask flask_cors requests
+pip install -r requirements.txt
 ```
 The Run Control GUI needs keycloak for authentification. The current keycloak version available with pip require python 3.7 minimum, but we are working with python 3.6. One way to make it work is to build the package ourself. 
 ```bash

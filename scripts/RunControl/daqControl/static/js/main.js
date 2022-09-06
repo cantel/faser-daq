@@ -265,7 +265,7 @@ var app = new Vue({
     lostConnection: false,
     shutdownWarning: false,
     snackbar: {"open":false,"text":"", "color":""},
-    timeoutAxiosRequest: {timeout: 35000},
+    timeoutAxiosRequest: {timeout: 60000},
     localOnly : false,
     },
 

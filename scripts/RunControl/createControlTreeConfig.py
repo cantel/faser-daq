@@ -22,7 +22,8 @@ lt = {
     "TriggerRateMonitor" : "TRM",
     "DigitizerMonitor"   : "DM",
     "EventPlayback"      : "EP",
-    "TrackStationMonitor":"TSM"
+    "TrackStationMonitor": "TSM",
+    "EventMonitor"       : "EvM",
 }
 
 def createTreeJSON(configPath,configsDirPath):

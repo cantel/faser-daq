@@ -19,7 +19,7 @@ from anytree import RenderTree, AsciiStyle
 from anytree.search import find_by_attr
 from anytree.importer import DictImporter
 from flask_socketio import SocketIO, send, emit
-from keycloak import Client
+#from keycloak import Client
 from datetime import datetime
 from werkzeug.utils import secure_filename
 from copy import deepcopy
@@ -119,7 +119,7 @@ logging.root.setLevel(logging.NOTSET)
 handler.setLevel(logging.NOTSET)
 app.logger.addHandler(handler)
 
-keycloak_client = Client(callback_uri=serverConfig["callbackUri"])
+#keycloak_client = Client(callback_uri=serverConfig["callbackUri"])
 app.secret_key = os.urandom(24)
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfig["timeout_session_expiration_mins"])
 
@@ -283,7 +283,7 @@ def executeCommROOT(action:str, reqDict:dict):
             prodURL = 'http://faser-runnumber.web.cern.ch/NewRunNumber'
             testURL = "http://faser-daq-001.cern.ch:5000/NewRunNumber"
             try : 
-                res = requests.post(testURL,
+                res = requests.post(prodURL,
                         auth=(run_user,run_pw),
                         json = {
                             'version':    version,
@@ -350,7 +350,7 @@ def executeCommROOT(action:str, reqDict:dict):
             prodURL = f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}'
             testURL = f"http://faser-daq-001.cern.ch:5000/AddRunInfo/{runNumber}"
             try : 
-                res = requests.post(testURL,
+                res = requests.post(prodURL,
                         auth=(run_user,run_pw),
                         json = stopMsg)
 
@@ -458,14 +458,16 @@ def getLogPath(name:str):
     
 
 def getStatesList(locRoot):
-    list = {}
-    for _ , _, node in RenderTree(locRoot):
-        list[node.name] = [
-            find_by_attr(locRoot, node.name).getState(),
-            find_by_attr(locRoot, node.name).inconsistent,
-            find_by_attr(locRoot, node.name).included,
-        ]
-    return list
+    listState = {}
+    if locRoot:
+        for _ , _, node in RenderTree(locRoot):
+            listState[node.name] = [
+                find_by_attr(locRoot, node.name).getState(),
+                find_by_attr(locRoot, node.name).inconsistent,
+                find_by_attr(locRoot, node.name).included,
+            ]
+
+    return listState
 
 
 def stateChecker():

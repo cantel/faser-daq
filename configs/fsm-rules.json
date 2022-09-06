@@ -48,34 +48,44 @@
   },
   "order": {
     "start": [
-    
+        
       "FWF",
       "EBF",
       "FR",
       "FM",
       "FE",
-    
+      
+      "EvM",
       "EM",
+      "SDM",
+      "TSM",
+      "DM",
       "TG",
       "DR",
       "TKR",
       "TM",
-      "TRM"
+      "TRM",
+      "TR"
     ],
     "stop": [
+        "TR",
       "TRM",
       "TM",
       "TKR",
       "SDM",
+      "TSM",
       "DR",
       "TG",
       "EM",
+      "SDM",
+      "DM",
+      "EvM",
 
       "FE",
       "FR",
       "FM",
       "EBF",
-      "FWF" 
+      "FWF"
     ]
   }
 }

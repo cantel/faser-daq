@@ -78,6 +78,7 @@ def childrenStateChecker(self):
         socketio.sleep(0.1)
 NodeTree.childrenStateChecker = childrenStateChecker
 
+
 ## reading server configuration
 serverConfig = {}
 with open(os.path.join(os.path.dirname(__file__), 'serverconfiguration.json')) as f:
@@ -100,7 +101,9 @@ CONFIG_PATH =  ""
 CONFIG_DICT = {}
 configTree = None
 
+PORT = 5000
 localOnly = False
+testMode = False
 
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_responses=True)
@@ -119,7 +122,7 @@ logging.root.setLevel(logging.NOTSET)
 handler.setLevel(logging.NOTSET)
 app.logger.addHandler(handler)
 
-keycloak_client = Client(callback_uri=serverConfig["callbackUri"])
+keycloak_client = Client(callback_uri=serverConfig["callbackUri"] )
 app.secret_key = os.urandom(24)
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfig["timeout_session_expiration_mins"])
 
@@ -280,10 +283,11 @@ def executeCommROOT(action:str, reqDict:dict):
         detList = r2.get("detList")
 
         if not localOnly:
-            prodURL = 'http://faser-runnumber.web.cern.ch/NewRunNumber'
-            testURL = "http://faser-daq-001.cern.ch:5000/NewRunNumber"
+            rsURL = 'http://faser-runnumber.web.cern.ch/NewRunNumber'
+            if testMode:
+                rsURL = "http://faser-daq-001.cern.ch:5000/NewRunNumber"
             try : 
-                res = requests.post(prodURL,
+                res = requests.post(rsURL,
                         auth=(run_user,run_pw),
                         json = {
                             'version':    version,
@@ -347,10 +351,11 @@ def executeCommROOT(action:str, reqDict:dict):
                 "runinfo": runinfo
 
             }
-            prodURL = f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}'
-            testURL = f"http://faser-daq-001.cern.ch:5000/AddRunInfo/{runNumber}"
+            rsURL = f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}'
+            if testMode:
+                rsURL = f"http://faser-daq-001.cern.ch:5000/AddRunInfo/{runNumber}"
             try : 
-                res = requests.post(prodURL,
+                res = requests.post(rsURL,
                         auth=(run_user,run_pw),
                         json = stopMsg)
 
@@ -991,20 +996,23 @@ def error_handler(e):
     print(e)
 
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 1 :
-        if sys.argv[1] == "-l":
+        if sys.argv[1] == "-l": # local mode
             print("Running in local mode - no run number InfluxDB archiving")
             localOnly = True
+        elif sys.argv[1] == "-t" : #  test mode
+            print("Running in test mode (using the test run service server")
+            testMode = True
+    else:
+        print("Running in production mode")
 
-    # exit_event = threading.Event()
-    # signal.signal(signal.SIGINT, lambda signum,frame : exit_event.set())
-
-    print(f"Connect with the browser to http://{platform.node()}:5000")
+    print(f"Connect with the browser to http://{platform.node()}:{PORT}")
     metrics=metricsHandler.Metrics(app.logger)
     socketio.start_background_task(stateChecker)
     # socketio.start_background_task(mH, app.logger)
-    socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader = False)
+    socketio.run(app, host="0.0.0.0", port=PORT, debug=True, use_reloader = False)
 
     print("Stopping...")
     metrics.stop()

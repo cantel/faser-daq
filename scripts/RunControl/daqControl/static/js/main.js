@@ -208,7 +208,7 @@ var app = new Vue({
     c_configLoading: false,
     c_socket: io(), // websockets
     activeNode: [],
-    nodeStates: null,
+    nodeStates: {},
     stateColors: {
       // for state color
       not_added: "grey",
@@ -598,22 +598,23 @@ var app = new Vue({
       return this.runOnGoing || !this.locked ? true : false;
     },
 
-    crashedModules() {
-      let modules = [];
-      if (this.nodeStates == null) {
-        return modules
-      }
-      let rootState = this.nodeStates["Root"][0];
-      if (this.runState !== "IN TRANSITION") {
-        for (const key in this.nodeStates) {
-          if (Array.isArray(this.nodeStates[key][0])) {
-            if (this.nodeStates[key][0] != rootState) {
-              modules.push(key);
-            }
-          }
-        }
-      }
-      return modules;
-    },
+    // crashedModules() {
+    //   let modules = [];
+    //   if (this.nodeStates == null && Object.keys(this.nodeStates).length !== 0 || this.nodesStates !== {}) {
+    //     return modules
+    //   }
+    //   console.log(this.nodesStates)
+    //   let rootState = this.nodeStates["Root"][0];
+    //   if (this.runState !== "IN TRANSITION") {
+    //     for (const key in this.nodeStates) {
+    //       if (Array.isArray(this.nodeStates[key][0])) {
+    //         if (this.nodeStates[key][0] != rootState) {
+    //           modules.push(key);
+    //         }
+    //       }
+    //     }
+    //   }
+    //   return modules;
+    // },
   },
 });

@@ -5,7 +5,7 @@
     :items="[c_treeJson]">
     <template v-slot:prepend="{ item,open }">
       <v-icon
-        v-if="modulesError.includes(item.name) || (crashedModules.includes(item.name) && runState!= 'IN TRANSITION')"
+        v-if="modulesError.includes(item.name)"
         color="error">
         mdi-alert-circle
       </v-icon>

@@ -6,7 +6,7 @@
   },
   "metrics_settings": {
     "influxDb_uri": "https://${INFLUXUSER}:${INFLUXPW}@dbod-faser-influx-prod.cern.ch:8080/write?db=",
-    "influxDb_name": "DAQTestMetrics",
+    "influxDb_name": "DAQProdMetrics",
     "stats_uri": "tcp://localhost:7000"
   },
   "filename_pattern": "/home/data/Faser-%c-%r-%n.raw",

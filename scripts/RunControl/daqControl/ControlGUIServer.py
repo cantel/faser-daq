@@ -31,6 +31,9 @@ from helpers import detectorList, getEventCounts
 from daqcontrol import daqcontrol as daqctrl
 import metricsHandler
 import requests
+import socket
+import urllib3
+
 
 
 # rewriting the original function from NodeTree class from daqLing
@@ -93,6 +96,14 @@ configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 run_user="FASER"
 run_pw="HelloThere"
 
+mattermost_hook=""
+influxDB=None
+hostname=socket.gethostname()
+if os.access("/etc/faser-secrets.json",os.R_OK):
+    influxDB=json.load(open("/etc/faser-secrets.json"))
+    mattermost_hook=influxDB.get("MATTERMOST","")
+    urllib3.disable_warnings()
+
 
 app = Flask(__name__)
 cors = CORS(app)
@@ -113,6 +124,7 @@ r2.setnx("runState","DOWN") # create key runState with value DOWN if it doesn't
 r2.setnx("runOngoing",0) # 
 r2.setnx("loadedConfig","")
 r2.setnx("errorsM","")
+r2.setnx("crashedM","")
 
 
 sysConfig : NodeTree = None # the treeObject for the configuration
@@ -487,8 +499,6 @@ def stateChecker():
     runInfo1= {"runType":"", "runComment":"", "runNumber":None}
     transitionFlag1 = r2.get("transitionFlag")
 
-
-
     while True:
         ########### Change of config ############
         loadedConfig2 = r2.get("loadedConfig")
@@ -621,7 +631,7 @@ def appState():
     packet["errors"] = json.loads(errors) if errors else []
 
     crashedModules = r2.get("crashedM")
-    packet["crashedM"] = json.loads(crashedModules) if crashedModules!="" else []
+    packet["crashedM"] = json.loads(crashedModules) if (crashedModules!="" or crashedModules) else []
     packet["localOnly"] = localOnly
     packet = {**packet, **getRunInfo()}
     return jsonify(packet)

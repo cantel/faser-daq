@@ -111,7 +111,9 @@ r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_respo
 # creating redis default keys 
 r2.setnx("runState","DOWN") # create key runState with value DOWN if it doesn't exist
 r2.setnx("runOngoing",0) # 
-r2.setnx("loadedConfig","") 
+r2.setnx("loadedConfig","")
+r2.setnx("errorsM","")
+
 
 sysConfig : NodeTree = None # the treeObject for the configuration
 
@@ -188,15 +190,6 @@ def reinitTree(configJson, oldRoot=None):
     else:
         # old-style schema (version < 10)
         configuration = jsonref_obj
-    # except:
-    #     raise Exception("Invalid devices configuration")
-    # try:
-    #     with open(os.path.join(env['DAQ_CONFIG_DIR'], configJson['grafana'])) as f:
-    #         grafanaConfig = json.load(f)
-    #     f.close()
-    # except:
-    #     raise Exception("Invalid grafana/kibana nodes configuration:" + e)
-
     group = configuration["group"]  # for example "daq" or "faser"
     r2.set("group", group) 
 
@@ -474,6 +467,15 @@ def getStatesList(locRoot):
 
     return listState
 
+def get_crashed_modules():
+    crashedModules = []
+    for _,_,node in RenderTree(sysConfig):
+        a = find_by_attr(sysConfig, node.name).getState()
+        if isinstance(a,list):
+            if a[0] == "added":
+                crashedModules.append(node.name)
+    return crashedModules
+
 
 def stateChecker():
     l1 = {}
@@ -481,8 +483,10 @@ def stateChecker():
     loadedConfig =""
     lockState = None
     errors = []
+    crashedM1 = []
     runInfo1= {"runType":"", "runComment":"", "runNumber":None}
     transitionFlag1 = r2.get("transitionFlag")
+
 
 
     while True:
@@ -519,53 +523,20 @@ def stateChecker():
                                 logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
                                 socketio.emit("runStateChng",state , broadcast=True)
                 l1 = l2
-                transitionFlag1= transitionFlag2
+                transitionFlag1 = transitionFlag2
 
             errors2 = modulesWithError(sysConfig)
             if errors2 != errors:
                 socketio.emit("errorModChng", errors2, broadcast =True)
-                r2.delete("modulesErrors")
-                if len(errors2) != 0:
-                    r2.sadd("modulesErrors", *errors2)
+                r2.set("errorsM", json.dumps(errors2) )
                 errors = errors2
-
-            
-
-
-            
-
-                        
-                        
-
-
-            # if l1[file]['Root'][0] != l2[file]
-        
-            # if (rState2 != rState1) and (rState2[1] == False ) and (rState2[0] not in ['booted','added']):
-            #     # printTree(sysConf[file])
-            #     if rState2[0] == 'running' : state="RUN"
-            #     elif rState2[0] == 'not_added':
-            #         state = "DOWN"
-            #         cleanRedis()
-            #     elif rState2[0] == 'ready': state = "READY"
-            #     elif rState2[0] == 'paused' : state = "PAUSED"
-            #     updateRedis(status=state)
-            #     logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
-            #     socketio.emit("runStateChng",state , broadcast=True)
-
-            # #intentional inconsistent (transition state)
-            # elif (rState2 != rState1) and (rState2[1] == True ) and (r2.get("transitionFlag")== "1"):
-            #     # printTree(sysConfig)
-            #     state = "IN TRANSITION"
-            #     updateRedis(status=state)
-            #     socketio.emit("runStateChng",state , broadcast=True)
-
-        # elif (rState2[file] != rState1[file]) and (rState2[file][1] == True ) and (r2.get("transitionFlag")== "0"):
-        #     print("CRASH")
-        #     # modulesCrashed = modulesWithError(sysConf[file])
-        #     # socketio.emit("errorModChng", modulesCrashed , broadcast=True)
-        #     r2.set("modulesErrors", str(modulesCrashed))
-
-
+               
+            crashedM2 =  get_crashed_modules()
+            if  crashedM2 != crashedM1 :
+                print("Crash")
+                socketio.emit("crashModChng",crashedM2, broadcast=True)
+                r2.set("crashedM", json.dumps(crashedM2))
+                crashedM1 = crashedM2
         
         ####### change of lock State ###########
         lockState2 = r2.get("whoInterlocked")
@@ -594,7 +565,7 @@ def getRunInfo():
     }
 
 def cleanErrors():
-    r2.delete("modulesErrors")
+    r2.delete("errorsM")
     socketio.emit("errorModChng", [] , broadcast=True)
 
      
@@ -645,11 +616,14 @@ def appState():
     if "user" in session:
         packet["user"] = {"name":session["user"]["cern_upn"], "logged" : True if "cern_gid" in session["user"] else False }
     packet["whoInterlocked"] = r2.get("whoInterlocked")
-    errors = r2.smembers("modulesErrors")
-    packet["errors"] = list(errors) if errors else []
+    
+    errors = r2.get("errorsM")
+    packet["errors"] = json.loads(errors) if errors else []
+
+    crashedModules = r2.get("crashedM")
+    packet["crashedM"] = json.loads(crashedModules) if crashedModules!="" else []
     packet["localOnly"] = localOnly
     packet = {**packet, **getRunInfo()}
-
     return jsonify(packet)
 
 
@@ -680,7 +654,7 @@ def getInfo(module:str) -> list:
     Returns a list of dictionnaries with {"key": ..., "value": ..., "time": ... (string)}
     """
 
-    # TODO: use hgetall instead of hmget
+
     keys = r.hkeys(module)
     # if module is not in the redis database
     if keys == []: return []
@@ -776,25 +750,6 @@ def fsmrulesJson():
 @socketio.on("connect", namespace="/")
 def connect():
     print("Client connected")
-
-
-# @app.before_first_request
-# def startup():
-#     global thread
-#     with thread_lock:
-#         if thread is None:
-#             thread = socketio.start_background_task(stateChecker)
-#     handler = RotatingFileHandler(serverConfigJson["serverlog_location_name"], maxBytes=1000000, backupCount=0)
-#     logging.root.setLevel(logging.NOTSET)
-#     handler.setLevel(logging.NOTSET)
-#     app.logger.addHandler(handler)
-
-
-# @app.after_request
-# def add_header(response):
-#     response.cache_control.no_store = True
-#     return response
-
 
 #####################################################################
 

@@ -20,12 +20,12 @@
         <span> [[getNodeState(item.name)]]</span>
       </v-tooltip>
       <v-progress-circular v-else size="20" indeterminate color="grey darken-1">
-
       </v-progress-circular>
     </template>
     <template v-slot:label="{ item, selected, active }">
       <div style="display:flex;align-items: center;">
-        <span :class="{'red lighten-3': nodeStates[item.name][1]}">[[ item.name ]] </span>
+        <span :class="{'red lighten-3': isInconsistent(item.name)}"> [[item.name]]</span>
+        <v-chip v-if="modulesCrash.includes(item.name)" x-small class="mx-2" color="error" label>crash</v-chip>
         <v-simple-checkbox v-if="!d_includeExclude" :value="nodeStates[item.name][2]"
           @click="processIncludeExclude(item.name,nodeStates[item.name][2])" class="my-auto" hide-details
           :ripple="false">

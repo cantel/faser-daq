@@ -69,33 +69,35 @@ make -j4
 ```
 Change to the run-control-gui git branch:
 ```sh
-git checkout run-control-gui
+git checkout new-rcgui
 ```
 Create a new python environment and install the necessary python packages: 
 ```bash
 cd faser-daq/scripts/RunControl
 python3 -m venv venv
 source venv/bin/activate
+pip install --upgrade pip # for cryptography module
 pip install -r requirements.txt
 ```
-The Run Control GUI needs keycloak for authentification. The current keycloak version available with pip require python 3.7 minimum, but we are working with python 3.6. One way to make it work is to build the package ourself. 
-```bash
-% Go to the daqling folder
-cd daqling 
-source cmake/setup.sh
-git clone https://github.com/keycloak-client/keycloak-client.git
-cd keycloak-client
-pip install --upgrade pip 
-make install
-```
-Now we go to  `faser-daq/scripts/RunControl/` and launch the app:
 
+We can now start the server : 
 ```bash
-source setup.sh 
-./run.sh
+(source setup.sh)
+./run.sh (-l) or (-t)
 ```
+- -l : localMode (doesn't communicate with run service server)
+- -t : testMode (communicate with test run service server)
+- if none : communicates with production run service server. 
+
 
 To use the keycloak authentification, it is necessary to have a secret token. To have it, you have to create a new application at the CERN Application Portal.
+
+### CERN Application portal
+
+(to do...)
+
+
+
 
 ## Migrating to new Run Control
 By default, the existing configurations will not appear in the new RunControl, because the other configuration files are needed. Since adapting them by hand would be long and tedious, it is possible to use a script that allows, from an existing configuration file, to create a folder with the same name, with inside the `config-dict.json` and the associated `control-tree.json`, assuming that the fsm-rules.json file is in the configurations folder. It is possible to tweak afterwards the `control-tree.json` for more customization.  
@@ -103,7 +105,7 @@ By default, the existing configurations will not appear in the new RunControl, b
 The script is located at https://gitlab.cern.ch/faser/online/faser-daq/-/tree/run-control-gui/scripts/RunControl and it is used as follow (python environment have to be activated) :
 
 ```bash
-python createControlTreeConfig.py <pathToExistingConfigFile> <pathToOutputDir>
+python createControlTreeConfig.py <pathToExistingConfigFile>
 ```
 
 ## Interface

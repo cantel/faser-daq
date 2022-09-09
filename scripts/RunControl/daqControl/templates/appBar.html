@@ -18,7 +18,7 @@
       </v-list>
     </v-menu>
     <v-spacer></v-spacer>
-    <!-- <v-chip v-if="crashedModules.length !=0" dark label color="red" class="mx-3 px-10 py-5"> CRASH </v-chip> -->
+    <v-chip v-if="isCrash" dark label color="red" class="mx-3 px-10 py-5"> CRASH </v-chip>
     <v-spacer><div v-if="localOnly" class="text-h4 red--text">LOCAL MODE</div></v-spacer>
     <v-spacer></v-spacer>
     <span>[[ whoInterlocked ]]</span>

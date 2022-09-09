@@ -267,6 +267,7 @@ var app = new Vue({
     snackbar: {"open":false,"text":"", "color":""},
     timeoutAxiosRequest: {timeout: 60000},
     localOnly : false,
+    modulesCrash : []
     },
 
   delimiters: ["[[", "]]"],
@@ -340,6 +341,9 @@ var app = new Vue({
         this.createSnackbar(color=msg.type, text=msg.message)
       })
 
+      this.c_socket.on("crashModChng",(newCrashMod) => {
+        this.modulesCrash = newCrashMod;
+      })
 
     },
     interlock() {
@@ -390,6 +394,7 @@ var app = new Vue({
           this.loadConfig(data["loadedConfig"]);
         }
         this.modulesError = data["errors"];
+        this.modulesCrash = data["crashedM"]
         this.runType = data["runType"];
         this.comment = data["runComment"];
         this.runNumber = data["runNumber"];
@@ -430,9 +435,7 @@ var app = new Vue({
     },
     setActiveNode(node) {
       this.activeNode = node;
-      console.log("node = ", node)
       this.infoIsActive = node ? true : false
-
     },
     getConfigDirs() {
       axios.get("/configDirs").then((response) => {
@@ -555,6 +558,17 @@ var app = new Vue({
         "width=800, height=500"
       );
     },
+    isInconsistent(name){
+      if (name){
+
+        a  = this.nodeStates[name][1] 
+        return a      
+      }
+      else{
+        return false
+      }
+      
+    }
   },
   watch: {
     c_loadedConfigName: {
@@ -598,23 +612,8 @@ var app = new Vue({
       return this.runOnGoing || !this.locked ? true : false;
     },
 
-    // crashedModules() {
-    //   let modules = [];
-    //   if (this.nodeStates == null && Object.keys(this.nodeStates).length !== 0 || this.nodesStates !== {}) {
-    //     return modules
-    //   }
-    //   console.log(this.nodesStates)
-    //   let rootState = this.nodeStates["Root"][0];
-    //   if (this.runState !== "IN TRANSITION") {
-    //     for (const key in this.nodeStates) {
-    //       if (Array.isArray(this.nodeStates[key][0])) {
-    //         if (this.nodeStates[key][0] != rootState) {
-    //           modules.push(key);
-    //         }
-    //       }
-    //     }
-    //   }
-    //   return modules;
-    // },
+    isCrash : function(){
+      return !(this.modulesCrash.length == 0)
+    }
   },
 });

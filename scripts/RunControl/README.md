@@ -158,6 +158,21 @@ The script is located at https://gitlab.cern.ch/faser/online/faser-daq/-/tree/ru
 python createControlTreeConfig.py <pathToExistingConfigFile>
 ```
 
+## Run Control configuration
+
+The run control server can be configured using the `serverconfiguration.json` file (example [here](https://gitlab.cern.ch/faser/online/faser-daq/-/blob/new-rcgui/scripts/RunControl/daqControl/serverconfiguration.json) )
+
+- "SSO_enabled" : 0 or 1  (if the rcgui uses CERN for authentication, require Keycloak to work)
+- "serverlog_location_name" : the path to the server log file.
+- "timeout_session_expiration_mins" : (default: 120) Time after which the user is logged out of the session
+- "timeout_interlock_secs" : (default: 120) Time before the control of the rcgui by a user is lifted (if the user does not take any action on it)
+- "LOGOUT_URL": Link used to log out of your CERN account
+- "timeout_rootCommands_secs": timeout for the individual root commands
+
+
+
+
+
 ## Interface
 
 ### Tree View 
@@ -330,10 +345,8 @@ n2-->|no|n4([set username: offlineUser])-->done
 
 classDef start fill:#5cf754
 classDef stop fill:#f2453f
-
-
-
 ```
+
 
 ### Monitoring
 

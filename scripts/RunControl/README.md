@@ -107,10 +107,10 @@ Finally, the credentials can be displayed by clicking on the "view" button.
 Then just replace the corresponding information in the files `keycloak.json` and `serverconfiguration.json` :
 
 ##### Keycloak.json
-- "resource": `<client_id>
-- "client_id" : `<client_id>
-- "credential" > "secret": `<client_secret>
-- "client_secret" : `<client_secret>
+- "resource": `<client_id>`
+- "client_id" : `<client_id>`
+- "credential" > "secret": `<client_secret>`
+- "client_secret" : `<client_secret>`
 - "redirect_uri": `"http://<name_host>:<port>/login/callback/"`
 
 ##### serverconfiguration.json
@@ -136,10 +136,10 @@ Finally, you have to check the box : "My application will need to get tokens usi
 Once submitted, we have access to the new Client ID and the Client Secret, which we will then have to report in the `serverconfiguration.json` and `keycloak.json` files 
 
 ##### Keycloak.json
-- "resource": `<client_id>
-- "client_id" : `<client_id>
-- "credential" > "secret": `<client_secret>
-- "client_secret" : `<client_secret>
+- "resource": `<client_id>`
+- "client_id" : `<client_id>`
+- "credential" > "secret": `<client_secret>`
+- "client_secret" : `<client_secret>`
 - "redirect_uri": `"http://<name_host>:<port>/login/callback/"`
 
 ##### serverconfiguration.json

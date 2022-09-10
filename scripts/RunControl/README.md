@@ -92,9 +92,59 @@ We can now start the server :
 
 To use the keycloak authentification, it is necessary to have a secret token. To have it, you have to create a new application at the CERN Application Portal.
 
-### CERN Application portal
+### Keycloak
 
-(to do...)
+To use keycloak with CERN credentials, you have to register the run control server. 
+You must first connect to the application portal: https://application-portal.web.cern.ch/
+
+#### Get existing credentials
+
+If the installation uses the same URL as an existing instance, there is no need to create a new application on the portal.
+If the rights are granted, just click on the "edit" button (on the right) of the corresponding application (look at the url).
+Then go to the tab: "SSO Registration" to click on the left most button (view or regenerate secret). 
+Finally, the credentials can be displayed by clicking on the "view" button.
+
+Then just replace the corresponding information in the files `keycloak.json` and `serverconfiguration.json` :
+
+##### Keycloak.json
+- "resource": `<client_id>
+- "client_id" : `<client_id>
+- "credential" > "secret": `<client_secret>
+- "client_secret" : `<client_secret>
+- "redirect_uri": `"http://<name_host>:<port>/login/callback/"`
+
+##### serverconfiguration.json
+- "callback_uri": `"http://<name_host>:<port>/login/callback/"` (same as "redirect_uri")
+
+#### Create a new application
+
+If the rcgui wants to be installed on a new server (with a different url), you have to create a new application (button "new application"):
+
+_In the "Application details" tab_:
+You have to enter the following information:
+- "Application Identifier" : ID for the application (example: run_control_gui_daq002 )
+- "Name" : a name
+- "Home Page" : the url of the web app home page (example: http://faser-daqvm-000.cern.ch) (not a very important)
+- "Description" : a description
+
+_In the "SSO Registration" tab:_
+- "Redirect URI" : The link after authenticating (example: http://faser-daqvm-000:5000/login/callback)
+- "base URL" : the root URL (example: http://faser-daqvm-000:5000)
+
+Finally, you have to check the box : "My application will need to get tokens using its own client ID and secret"
+
+Once submitted, we have access to the new Client ID and the Client Secret, which we will then have to report in the `serverconfiguration.json` and `keycloak.json` files 
+
+##### Keycloak.json
+- "resource": `<client_id>
+- "client_id" : `<client_id>
+- "credential" > "secret": `<client_secret>
+- "client_secret" : `<client_secret>
+- "redirect_uri": `"http://<name_host>:<port>/login/callback/"`
+
+##### serverconfiguration.json
+- "callback_uri: `"http://<name_host>:<port>/login/callback/"` (same as "redirect_uri")
+
 
 
 

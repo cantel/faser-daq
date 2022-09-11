@@ -267,7 +267,8 @@ var app = new Vue({
     snackbar: {"open":false,"text":"", "color":""},
     timeoutAxiosRequest: {timeout: 60000},
     localOnly : false,
-    modulesCrash : []
+    modulesCrash : [],
+    histograms_link : `${window.location.protocol}//${window.location.hostname}:8050`,
     },
 
   delimiters: ["[[", "]]"],

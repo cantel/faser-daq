@@ -1,7 +1,13 @@
 <v-app-bar app>
     <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
     <v-toolbar-title class="d-flex align-center"><img class="mr-2" width="100"
-        src="{{url_for('static', filename = 'img/faser.svg')}}"> RunControl</v-toolbar-title>
+        src="{{url_for('static', filename = 'img/faser.svg')}}"> Run Control
+    </v-toolbar-title>
+    <div class="links">
+      <a :href="histograms_link" target="_blank">Histograms</a>
+      <a href="http://epdtdi-daqtest.cern.ch:3000" target="_blank">Grafana</a>
+    </div>
+
     <v-menu offset-y>
       <template v-slot:activator="{ on, attrs }">
         <v-btn v-bind="attrs" :loading="c_configLoading" v-on="on" class="mx-4 my-2" depressed color="primary" small

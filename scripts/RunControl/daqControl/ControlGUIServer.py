@@ -115,6 +115,7 @@ configTree = None
 PORT = 5000
 localOnly = False
 testMode = False
+isTimeout =False
 
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_responses=True)
@@ -322,6 +323,23 @@ def executeCommROOT(action:str, reqDict:dict):
                 setTransitionFlag(0)
                 return "Error: Could not connect to run service"
 
+            if influxDB:
+                startMsg=runComment.replace('"',"'")
+
+                runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
+                # r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                #                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                #                 data=runData,
+                #                 verify=False)
+                print("sent to influx db", runData)
+                # if r.status_code!=204:
+                #     logAndEmit("General", "ERROR", "Failed to post end of run information to influxdb: "+r.text)
+                if configName.startswith("combined"):
+                    # message(f"Run {runNumber} was started\nOperator: {startMsg}")
+                    print("Message mattermost start")
+
+
+
         
         r2.set("runType", runType)
         r2.set("runComment", runComment)
@@ -338,7 +356,7 @@ def executeCommROOT(action:str, reqDict:dict):
         runNumber = r2.get("runNumber")
         runType = reqDict.get("runType","") 
         runinfo["eventCounts"] = getEventCounts()
-        physicsEvent = runinfo["eventCounts"]["Events_sent_Physics"] # for influxDB
+        physicsEvents = runinfo["eventCounts"]["Events_sent_Physics"] # for influxDB
 
         r2.set("runComment", runComment)
         r2.set("runType", runType)
@@ -371,6 +389,23 @@ def executeCommROOT(action:str, reqDict:dict):
             except requests.exceptions.ConnectionError:
                 logAndEmit("general","Error","Could not connect to run service")
                 sendInfoToSnackBar( "ERROR","Could not connect to run service",)
+            
+  
+            if influxDB:
+                stopComment = runComment.replace('"',"'")
+                runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{runType}",runNumber={runNumber},physicsEvents={physicsEvents}'
+                # r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                #                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                #                 data=runData,
+                #                 verify=False)
+                print("Posting to influx:",runData)
+                # if r.status_code!=204:
+                #     logAndEmit("Failed to post end of run information to influxdb: "+r.text)
+                #     sendInfoToSnackBar("ERROR","Failed to post end of run information to influxdb: "+r.text )
+                # if configName.startswith("combined"):
+                #     message(f"Run {runNumber} stopped\nOperator: {stopComment}")
+
+
         try : 
             r=sysConfig.executeAction("stop")
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
@@ -391,6 +426,25 @@ def executeCommROOT(action:str, reqDict:dict):
         if not done : 
             print("not done")
             r = sysConfig.executeAction("remove")
+
+            if influxDB:
+                eventCounts = getEventCounts()
+                physicsEvents = eventCounts["Events_sent_Physics"] # for influxDB
+
+                runData=f'runStatus,host={hostname} state="Shutdown",comment="Run was shut down",runNumber={runNumber},physicsEvents={physicsEvents}'
+                # r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                #                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                #                 data=runData,
+                #                 verify=False)
+                # if r.status_code!=204:
+                #     logAndEmit("General","ERROR","Failed to post end of run information to influxdb: "+r.text)
+                print("Sent to influx db because of force shutdown",runData)
+                if configName.startswith("combined"):
+                    print("message because run was shutdown from active state")
+                #     message(f"Run {runNumber} was shutdown")
+
+
+
             done = True
         
         # to be sure shutdown reset everything
@@ -418,8 +472,16 @@ def executeCommROOT(action:str, reqDict:dict):
  
     setTransitionFlag(0)
     if not done :
+        rootState = sysConfig.getState()
+        if rootState == "running" : state="RUN"
+        elif rootState == "not_added" : state="DOWN"; cleanErrors()
+        elif rootState == "ready" : state="READY"
+        elif rootState == "paused" : state="PAUSED"
+        socketio.emit("runStateChng",state , broadcast=True)
+        updateRedis(status=state)
+
         return "Error: The command took to long -> TIMEOUT"
-    return "Success" # success 
+    return "Success"
 
 def sendInfoToSnackBar(typeM:str, message:str):
     """

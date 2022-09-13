@@ -643,15 +643,18 @@ def cleanErrors():
      
 
 def modulesWithError(tree):
-    errorList = []
+    errorList = {"1":[],"2":[]}
     for _,_, node in RenderTree(tree):
         if not node.children : # if the node has no children -> not a category
             if r.hget(node.name, "Status"):
-                status =  bool(int(r.hget(node.name, "Status").split(":")[1])) # returns 0, 1 or 2 (1 and 2 -> warning and error)
-                if status != 0 :
-                    errorList.append(node.parent.name)
-                    errorList.append(node.name) 
-    return list(set(errorList)) 
+                status =  r.hget(node.name, "Status").split(":")[1] # returns 0, 1 or 2 (1 and 2 -> warning and error)
+                if status != "0" :
+                    errorList[status].append(node.parent.name)
+                    errorList[status].append(node.name) 
+    errorList["1"] =  list(set(errorList["1"]))
+    errorList["2"] = list(set(errorList["2"]))
+    
+    return errorList
 
             
             
@@ -690,7 +693,7 @@ def appState():
     packet["whoInterlocked"] = r2.get("whoInterlocked")
     
     errors = r2.get("errorsM")
-    packet["errors"] = json.loads(errors) if errors else []
+    packet["errors"] = json.loads(errors) if errors else {'1':[],'2':[]}
 
     crashedModules = r2.get("crashedM")
     packet["crashedM"] = json.loads(crashedModules) if (crashedModules!="" or crashedModules) else []

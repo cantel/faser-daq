@@ -3,7 +3,10 @@
       <div class="mx-3 d-flex " v-if="c_loadedConfigName">
         <h4>[[ c_loadedConfigName ]]: </h4>
         <v-chip label :color="stateColors[runState]" class="mx-3"> [[ runState ]] </v-chip>
-        <v-icon v-if="modulesError.length != 0" color="error">
+        <v-icon v-if="modulesError['1'].length != 0" color="yellow darken-2">
+          mdi-alert-circle
+        </v-icon>
+        <v-icon v-if="modulesError['2'].length != 0" color="error">
           mdi-alert-circle
         </v-icon>
       </div>

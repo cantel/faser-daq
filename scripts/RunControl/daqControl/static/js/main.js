@@ -253,7 +253,7 @@ var app = new Vue({
     interlocked: false,
     username: "local_user",
     whoInterlocked: null,
-    modulesError: [],
+    modulesError: {"1": [], "2": []},
     resultCommand: "", // what the root action will return (success or error-> timeout)
     startRunDialog: false,
     endRunDialog: false,
@@ -569,6 +569,24 @@ var app = new Vue({
         return false
       }
       
+    },
+    hasWarning(name){
+      if ( this.modulesError || this.modulesError != {} || this.modulesError != undefined){
+        return this.modulesError['1'].includes(name)
+      }
+      return false
+    },
+    hasError(name){
+      if ( this.modulesError || this.modulesError != {} || this.modulesError != undefined){
+        return this.modulesError['2'].includes(name)
+      }
+      return false
+    },
+    isModuleCrashed(name){
+      if ( this.modulesCrash || this.modulesCrash != {} || this.modulesCrash != undefined){
+        return this.modulesCrash.includes(name)
+      }
+      return false
     }
   },
   watch: {
@@ -615,6 +633,7 @@ var app = new Vue({
 
     isCrash : function(){
       return !(this.modulesCrash.length == 0)
-    }
+    },
+    
   },
 });

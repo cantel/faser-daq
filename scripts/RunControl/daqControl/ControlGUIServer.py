@@ -36,6 +36,7 @@ import urllib3
 
 
 
+
 # rewriting the original function from NodeTree class from daqLing
 def childrenStateChecker(self):
     while (self.check):
@@ -251,6 +252,20 @@ def executeComm(ctrl, action):
     return r
 
 
+def message(msg):
+    if mattermost_hook: 
+        try:
+            req = requests.post(mattermost_hook,json={"text": msg})
+            if req.status_code!=200:
+                print("Failed to post message below. Error code:",req.status_code)
+                print(msg)
+        except Exception as e:
+            print("Got exception when posting message",e)
+    else:
+        print(msg)
+
+
+
 def executeCommROOT(action:str, reqDict:dict):
     """
     Execute actions on ROOT node (general commands) and extend the interlock for another <timeout> seconds 
@@ -327,16 +342,16 @@ def executeCommROOT(action:str, reqDict:dict):
                 startMsg=runComment.replace('"',"'")
 
                 runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
-                # r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
-                #                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
-                #                 data=runData,
-                #                 verify=False)
-                print("sent to influx db", runData)
-                # if r.status_code!=204:
-                #     logAndEmit("General", "ERROR", "Failed to post end of run information to influxdb: "+r.text)
+                r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                                auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                                data=runData,
+                                verify=False)
+                # print("sent to influx db", runData)
+                if r.status_code!=204:
+                    logAndEmit("General", "ERROR", "Failed to post end of run information to influxdb: "+r.text)
                 if configName.startswith("combined"):
-                    # message(f"Run {runNumber} was started\nOperator: {startMsg}")
-                    print("Message mattermost start")
+                    message(f"Run {runNumber} was started\nOperator: {runComment}")
+                    # print("Message mattermost start")
 
 
 
@@ -394,16 +409,16 @@ def executeCommROOT(action:str, reqDict:dict):
             if influxDB:
                 stopComment = runComment.replace('"',"'")
                 runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{runType}",runNumber={runNumber},physicsEvents={physicsEvents}'
-                # r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
-                #                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
-                #                 data=runData,
-                #                 verify=False)
+                r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                                auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                                data=runData,
+                                verify=False)
                 print("Posting to influx:",runData)
-                # if r.status_code!=204:
-                #     logAndEmit("Failed to post end of run information to influxdb: "+r.text)
-                #     sendInfoToSnackBar("ERROR","Failed to post end of run information to influxdb: "+r.text )
-                # if configName.startswith("combined"):
-                #     message(f"Run {runNumber} stopped\nOperator: {stopComment}")
+                if r.status_code!=204:
+                    logAndEmit("Failed to post end of run information to influxdb: "+r.text)
+                    sendInfoToSnackBar("ERROR","Failed to post end of run information to influxdb: "+r.text )
+                if configName.startswith("combined"):
+                    message(f"Run {runNumber} stopped\nOperator: {runComment}")
 
 
         try : 
@@ -432,16 +447,16 @@ def executeCommROOT(action:str, reqDict:dict):
                 physicsEvents = eventCounts["Events_sent_Physics"] # for influxDB
 
                 runData=f'runStatus,host={hostname} state="Shutdown",comment="Run was shut down",runNumber={runNumber},physicsEvents={physicsEvents}'
-                # r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
-                #                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
-                #                 data=runData,
-                #                 verify=False)
-                # if r.status_code!=204:
-                #     logAndEmit("General","ERROR","Failed to post end of run information to influxdb: "+r.text)
+                r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                                auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                                data=runData,
+                                verify=False)
+                if r.status_code!=204:
+                    logAndEmit("General","ERROR","Failed to post end of run information to influxdb: "+r.text)
                 print("Sent to influx db because of force shutdown",runData)
                 if configName.startswith("combined"):
-                    print("message because run was shutdown from active state")
-                #     message(f"Run {runNumber} was shutdown")
+                    # print("message because run was shutdown from active state")
+                    message(f"Run {runNumber} was shutdown")
 
 
 
@@ -875,7 +890,7 @@ def login_callback():
     state = request.args.get("state", "unknown")
     _state = session.pop("state", None)
     if state != _state:
-        return Response("Invalid state: Please retry", status=403)
+        return Response("Invalid state: Please retry\n Return to home page: "+f"http://{platform.node()}:{PORT}", status=403)
     code = request.args.get("code")
     response = keycloak_client.callback(code)
     access_token = response["access_token"]

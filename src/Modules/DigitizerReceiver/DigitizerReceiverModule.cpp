@@ -474,6 +474,14 @@ void DigitizerReceiverModule::runner() noexcept {
       receivedEvents+=events_to_do;
       if (nwords_obtained==0) { //most likely reqest didn't arrive at VME card
 	m_empty_events++;
+	if (m_empty_events==5) {
+	  ERROR("Failed to retrieve at least 5 events - network connection unstable?");
+	  m_status = STATUS_WARN;
+	}
+	if (m_empty_events>=50) {
+	  ERROR("Failed to retrieve at least 50 events - problem communicating with digitizer - Call Brian...");
+	  m_status = STATUS_ERROR;
+	}
 	continue;
       }
       if ((nwords_obtained!=m_event_size*events_to_do)&&(nerrors==0)) {
@@ -496,7 +504,18 @@ void DigitizerReceiverModule::runner() noexcept {
 	  WARNING("Got fragment "<<fragment->event_id()<<" was expecting: "<<m_prev_event_id+1);
 	}
 	m_prev_event_id=fragment->event_id();
-	if (fragment->status()) m_corrupted_events++;
+	if (fragment->status()) {
+	  m_corrupted_events++;
+	  if (m_corrupted_events==5) {
+	    ERROR("Got several corrupted events");
+	    m_status = STATUS_WARN;
+	  }
+	  if (m_corrupted_events>=50) {
+	    ERROR("Got at least 50 events - problem communicating with digitizer - Call Brian...");
+	    m_status = STATUS_ERROR;
+	  }
+
+	}
 
 
 	// place the raw binary event fragment on the output port

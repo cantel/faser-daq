@@ -26,6 +26,7 @@ popd  > /dev/null
 echo "Setting up to run from ${FASERTOP}"
 if [ $# -eq 1 ]
 then
+source ${FASERTOP}/daqling/cmake/install.sh -d ${DAQLING_SPACK_REPO_PATH} -c ${FASERTOP}/configs/ -a
 source ${FASERTOP}/daqling/cmake/setup.sh ${DAQLING_SPACK_REPO_PATH} ${FASERTOP}/configs/
 else
 source ${FASERTOP}/daqling/cmake/setup.sh

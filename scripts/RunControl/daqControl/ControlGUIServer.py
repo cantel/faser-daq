@@ -147,19 +147,16 @@ def systemConfiguration(configName, configPath):
     global sysConfig
     with open(os.path.join(configPath, "config-dict.json")) as f:
         configJson = json.load(f)
-    loadedConfig = r2.get("loadedConfig")
+    # loadedConfig = r2.get("loadedConfig")
     if sysConfig is None:  # we (re)booted the app 
         print("sysConfig was None")
         try: 
             sysConfig = reinitTree(configJson)
         except Exception as e:
             logAndEmit("general", "ERROR", str(e))
-    elif configName != loadedConfig: # we changed config
+    else : # we changed config
         print("sysConfig is not None and we changed config")
         sysConfig = reinitTree(configJson=configJson, oldRoot=sysConfig)
-    else:
-        print("Do nothing")
-    
 
 def getConfigsInDir(configPath):
     listOfFiles = []
@@ -194,16 +191,22 @@ def reinitTree(configJson, oldRoot=None):
     order_rules = fsm_rules["order"]  # ordrer of starting and stopping
 
     # We open the main config file
-    with open(os.path.join(CONFIG_PATH, configJson["config"])) as f:
-        base_dir_uri = (Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
-        jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
 
-    if ("configuration" in jsonref_obj):  # faser ones have "configuration" but not demo-tree
-        # schema with references (version >= 10)
-        configuration = deepcopy(jsonref_obj)["configuration"]
-    else:
-        # old-style schema (version < 10)
-        configuration = jsonref_obj
+
+    if r2.get("runOngoing") == "1":
+        print("Loading from redis")
+        configuration = json.loads(r2.get("config"))
+    else : 
+        with open(os.path.join(CONFIG_PATH, configJson["config"])) as f:
+            base_dir_uri = (Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
+            jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
+
+        if ("configuration" in jsonref_obj):  # faser ones have "configuration" but not demo-tree
+            # schema with references (version >= 10)
+            configuration = deepcopy(jsonref_obj)["configuration"]
+        else:
+            # old-style schema (version < 10)
+            configuration = jsonref_obj
     group = configuration["group"]  # for example "daq" or "faser"
     r2.set("group", group) 
 
@@ -271,11 +274,15 @@ def executeCommROOT(action:str, reqDict:dict):
     Execute actions on ROOT node (general commands) and extend the interlock for another <timeout> seconds 
     Returns : location of the module specific log files 
     """
+    global sysConfig
     r2.expire("whoInterlocked", serverConfig["timeout_interlock_secs"])
     configName =  r2.get("loadedConfig")
     logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     setTransitionFlag(1)
     if action == "INITIALISE":
+
+        # sysConfig = reinitTree(CONFIG_DICT, sysConfig, initialize=True)
+        # socketio.emit("configChng", configName)
 
         detList = detectorList(r2.get("config"))
         r2.set("detList", json.dumps(detList))
@@ -571,8 +578,8 @@ def stateChecker():
     l2 = {}
     loadedConfig =""
     lockState = None
-    errors = []
-    crashedM1 = []
+    errors = {}
+    crashedM1 = {}
     runInfo1= {"runType":"", "runComment":"", "runNumber":None}
     transitionFlag1 = r2.get("transitionFlag")
 
@@ -653,7 +660,7 @@ def getRunInfo():
 
 def cleanErrors():
     r2.delete("errorsM")
-    socketio.emit("errorModChng", [] , broadcast=True)
+    socketio.emit("errorModChng", {"1":[],"2":[]} , broadcast=True)
 
      
 
@@ -853,15 +860,21 @@ def configDirs():
 def initConfig():
     global CONFIG_PATH,CONFIG_DICT
     configName  =  request.args.get("configName")
-    
-    CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], configName)
-    logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
-    with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
-        CONFIG_DICT = json.load(f)
+     
 
-    systemConfiguration(configName, CONFIG_PATH)
-    r2.set("loadedConfig", configName)
+    if configName == r2.get("loadedConfig") and sysConfig is not None :
+        print("Do nothing")
+    ## utiliser systemConfiguration tel quel pour initialize     
+    else : # à changer !             
+        CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], configName)
+        logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
+        with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
+            CONFIG_DICT = json.load(f)
+
+        systemConfiguration(configName, CONFIG_PATH)
+        r2.set("loadedConfig", configName)
     return "Success"
+
 
 
 @app.route("/urlTreeJson")

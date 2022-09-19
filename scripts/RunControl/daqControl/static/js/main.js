@@ -469,6 +469,8 @@ var app = new Vue({
           console.error("ERROR: ", error);
         });
     },
+
+
     getNodeState(name) {
       // name is a string
       if (name && this.nodeStates) {
@@ -618,7 +620,7 @@ var app = new Vue({
     },
 
     d_loadConfig: function () {
-      if (this.runOnGoing || !this.logged || this.locked) {
+      if (this.runOnGoing || !this.locked) {
         return true;
       } else {
         return false;

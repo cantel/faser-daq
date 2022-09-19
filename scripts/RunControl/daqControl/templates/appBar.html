@@ -29,8 +29,7 @@
     <v-spacer></v-spacer>
     <span>[[ whoInterlocked ]]</span>
     <v-btn icon text small class="mx-1" :disabled="!logged">
-      <v-icon v-if="locked" @click="interlock()"> mdi-lock-off</v-icon>
-      <v-icon v-else @click="interlock()"> mdi-lock</v-icon>
+      <v-icon @click="interlock()"> [[ locked ? 'mdi-lock-off' : 'mdi-lock' ]]</v-icon>
     </v-btn>
 
     <v-btn icon text small class="mx-1">

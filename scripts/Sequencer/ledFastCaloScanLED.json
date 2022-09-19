@@ -1,7 +1,6 @@
 {"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 30,
  "initCommand": "../HVControl/setLEDPulser.py 100 610 0",
- "finalizeCommand": "../HVControl/setLEDPulser.py 100 0 0;../HVControl/setCaloGainBeam.py 0 0 0 0",
  "defaults": {
      "cfgFile": "tlbDigiTI12LED.json",
      "runtype": "LEDCalibration",
@@ -17,7 +16,7 @@
 	     },
      "step": {
 	 "cfgFile": "tlbDigiTI12LED{cfg}.json",
-	 "startcomment": "LED fast calibration, Calo gain factors {gainUpper} {gainLower} config: tlbDigiTI12LED{cfg}.json",
+	 "startcomment": "LED fast calibration at LED=610, Calo gain factors {gainUpper} {gainLower} config: tlbDigiTI12LED{cfg}.json",
 	 "preCommand": "../HVControl/setCaloGainBeam.py {gainLower} {gainLower} {gainUpper} {gainUpper}"
      }
  }

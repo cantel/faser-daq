@@ -104,7 +104,7 @@ void DigitizerMonitorModule::register_hists() {
     if (iChan<10) chStr = "0"+chStr;
     // example pulse
     m_histogrammanager->registerHistogram("h_pulse_ch"+chStr, "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, m_PUBINT);
-    m_histogrammanager->registerHistogram("h_peak_ch"+chStr, "Peak signal [mV]", -200, 2000, 110, m_PUBINT);
+    m_histogrammanager->registerHistogram("h_peak_ch"+chStr, "Peak signal [mV]", -200, 2000, 550, m_PUBINT);
   
   }
   

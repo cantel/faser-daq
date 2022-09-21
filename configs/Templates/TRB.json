@@ -12,7 +12,7 @@
                     "SCIP": "faser-daq-011",
                     "DAQIP": "faser-daq-011",
                     "ReadoutMode": 0,
-                    "ConfigureModules": false,
+                    "ConfigureModules": true,
                     "HWDelayClk0": 1,
                     "HWDelayClk1": 1,
                     "FinePhaseClk0": 41,

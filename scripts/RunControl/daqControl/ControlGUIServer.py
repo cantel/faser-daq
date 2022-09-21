@@ -37,6 +37,7 @@ import urllib3
 
 
 
+
 # rewriting the original function from NodeTree class from daqLing
 def childrenStateChecker(self):
     while (self.check):
@@ -143,6 +144,14 @@ app.secret_key = os.urandom(24)
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfig["timeout_session_expiration_mins"])
 
 
+def refreshConfig():
+    global CONFIG_DICT, CONFIG_PATH
+    configName = r2.get("loadedConfig")
+    systemConfiguration(configName, CONFIG_PATH)
+    socketio.emit("refreshConfig")
+
+
+
 def systemConfiguration(configName, configPath):
     global sysConfig
     with open(os.path.join(configPath, "config-dict.json")) as f:
@@ -200,6 +209,7 @@ def reinitTree(configJson, oldRoot=None):
         with open(os.path.join(CONFIG_PATH, configJson["config"])) as f:
             base_dir_uri = (Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
             jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
+ 
 
         if ("configuration" in jsonref_obj):  # faser ones have "configuration" but not demo-tree
             # schema with references (version >= 10)
@@ -207,11 +217,13 @@ def reinitTree(configJson, oldRoot=None):
         else:
             # old-style schema (version < 10)
             configuration = jsonref_obj
+    r2.set("modifiedTimestamp",lastModifiedTimestamp())
     group = configuration["group"]  # for example "daq" or "faser"
+
     r2.set("group", group) 
 
     r2.set("config", json.dumps(configuration)) 
- 
+    
     if "path" in configuration.keys():
         dir = configuration["path"]
     else:
@@ -234,6 +246,11 @@ def reinitTree(configJson, oldRoot=None):
         node.startStateCheckers()
     return newRoot
 
+def lastModifiedTimestamp():
+    if CONFIG_DICT !={}:
+        ts = os.path.getmtime(os.path.join(CONFIG_PATH, CONFIG_DICT["config"]))
+    else : ts = None
+    return ts
 
 def executeComm(ctrl, action):
     r = ""
@@ -280,10 +297,10 @@ def executeCommROOT(action:str, reqDict:dict):
     logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     setTransitionFlag(1)
     if action == "INITIALISE":
-
-        # sysConfig = reinitTree(CONFIG_DICT, sysConfig, initialize=True)
-        # socketio.emit("configChng", configName)
-
+        if r2.get("modifiedTimstamp") != lastModifiedTimestamp():
+            sendInfoToSnackBar("info", "Config file has been modified, reloading the config")
+            refreshConfig()
+        
         detList = detectorList(r2.get("config"))
         r2.set("detList", json.dumps(detList))
         steps = [("add", "booted"), ("configure","ready")]
@@ -406,11 +423,11 @@ def executeCommROOT(action:str, reqDict:dict):
 
                 if res.status_code != 200 :
                     logAndEmit("general", "ERROR", "Failed to register end of run information: "+r.text )
-                    sendInfoToSnackBar( "ERROR", "Failed to register end of run information: "+r.text)
+                    sendInfoToSnackBar( "error", "Failed to register end of run information: "+r.text)
 
             except requests.exceptions.ConnectionError:
                 logAndEmit("general","Error","Could not connect to run service")
-                sendInfoToSnackBar( "ERROR","Could not connect to run service",)
+                sendInfoToSnackBar( "error","Could not connect to run service",)
             
   
             if influxDB:
@@ -423,7 +440,7 @@ def executeCommROOT(action:str, reqDict:dict):
                 print("Posting to influx:",runData)
                 if r.status_code!=204:
                     logAndEmit("Failed to post end of run information to influxdb: "+r.text)
-                    sendInfoToSnackBar("ERROR","Failed to post end of run information to influxdb: "+r.text )
+                    sendInfoToSnackBar("error","Failed to post end of run information to influxdb: "+r.text )
                 if configName.startswith("combined"):
                     message(f"Run {runNumber} stopped\nOperator: {runComment}")
 
@@ -464,9 +481,6 @@ def executeCommROOT(action:str, reqDict:dict):
                 if configName.startswith("combined"):
                     # print("message because run was shutdown from active state")
                     message(f"Run {runNumber} was shutdown")
-
-
-
             done = True
         
         # to be sure shutdown reset everything
@@ -509,10 +523,10 @@ def sendInfoToSnackBar(typeM:str, message:str):
     """
     Sends a message to the client with message <message> with a color specified by typeM
     """
-    valid_types = {"ERROR", "INFO", "SUCCESS"}
+    valid_types = {"error", "info", "success"}
     if typeM not in valid_types:
         raise ValueError(f"Wrong type specified: {typeM} is not a valid type ")
-    socketio.emit("snackbarEmit", {"mesage": message, "type": typeM})
+    socketio.emit("snackbarEmit", {"message": message, "type": typeM})
 
 
 
@@ -631,6 +645,19 @@ def stateChecker():
                 socketio.emit("crashModChng",crashedM2, broadcast=True)
                 r2.set("crashedM", json.dumps(crashedM2))
                 crashedM1 = crashedM2
+
+            # # print("original",modifiedTime)
+            # modifiedTime2 = lastModifiedTimestamp()
+            # # print(modifiedTime2)
+            # if modifiedTime2 != modifiedTime :
+            #     print("originalTimestamp", modifiedTime)
+            #     print("newTimestamp", modifiedTime2)
+            #     socketio.emit("modifiedChng")
+            #     print("Le fichier a été modifié")
+            #     modifiedTime = modifiedTime2
+            #     isModified = True
+                
+            
         
         ####### change of lock State ###########
         lockState2 = r2.get("whoInterlocked")
@@ -721,6 +748,7 @@ def appState():
     packet["crashedM"] = json.loads(crashedModules) if (crashedModules!="" or crashedModules) else []
     packet["localOnly"] = localOnly
     packet = {**packet, **getRunInfo()}
+    # packet["refresh"] = isModified
     return jsonify(packet)
 
 
@@ -761,6 +789,8 @@ def getInfo(module:str) -> list:
     info = [{"key":key, "value": val.split(":")[1],"time": datetime.fromtimestamp(int(float(val.split(":")[0]))).strftime('%a %d/%m/%y %H:%M:%S ') } for key,val in zip(keys,vals)]
     return info
  
+
+
 @app.route("/fullLog/<string:module>")
 def fullLog(module:str) -> Response:
     """
@@ -872,6 +902,7 @@ def initConfig():
             CONFIG_DICT = json.load(f)
 
         systemConfiguration(configName, CONFIG_PATH)
+
         r2.set("loadedConfig", configName)
     return "Success"
 

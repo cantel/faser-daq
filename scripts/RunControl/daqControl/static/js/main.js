@@ -316,6 +316,10 @@ var app = new Vue({
         }
       });
 
+      this.c_socket.on("refreshConfig", ()=> {
+        this.loadConfig(this.c_loadedConfigName)
+      });
+
       this.c_socket.on("interlockChng", (newState) => {
         this.whoInterlocked = newState;
         if (newState == undefined){
@@ -345,7 +349,6 @@ var app = new Vue({
       this.c_socket.on("crashModChng",(newCrashMod) => {
         this.modulesCrash = newCrashMod;
       })
-
     },
     interlock() {
       axios
@@ -444,7 +447,6 @@ var app = new Vue({
       });
     },
     loadConfig(config) {
-      // this.c_socket.emit('configChng', config);
       this.c_configLoading = true;
       this.infoIsActive = false;
       this.nodeStates = null;

@@ -934,7 +934,7 @@ def login_callback():
     state = request.args.get("state", "unknown")
     _state = session.pop("state", None)
     if state != _state:
-        return Response("Invalid state: Please retry\n Return to home page: "+f"http://{platform.node()}:{PORT}", status=403)
+        return render_template("invalidState.html", url=f"http://{platform.node()}:{PORT}")
     code = request.args.get("code")
     response = keycloak_client.callback(code)
     access_token = response["access_token"]

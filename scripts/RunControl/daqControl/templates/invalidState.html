@@ -9,7 +9,12 @@
 
 <body>
 <h1> Invalid State </h1>
-Please retry to log in again after clicking this link : <a href="{{ url }}"> {{ url }}</a>
+Please retry to log in again after clicking this link : <a href="{{ url }}"> {{ url }}</a> <br/> <br/>
+If it's still not working, try the following steps : 
+<ol>
+  <li>Manually remove everything that is not the base url in the url displayed in the search bar. In our case, it is everything that is not "{{ url }}" and press enter </li>
+  <li>Try to log in again </li>
+</ol>
 </body>
 
 </html>

@@ -292,14 +292,17 @@ def executeCommROOT(action:str, reqDict:dict):
     Returns : location of the module specific log files 
     """
     global sysConfig
-    r2.expire("whoInterlocked", serverConfig["timeout_interlock_secs"])
     configName =  r2.get("loadedConfig")
-    logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
+    if reqDict.get("bot") :
+        ...
+    else : 
+        r2.expire("whoInterlocked", serverConfig["timeout_interlock_secs"])
+        logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     setTransitionFlag(1)
     if action == "INITIALISE":
-        if r2.get("modifiedTimstamp") != lastModifiedTimestamp():
-            sendInfoToSnackBar("info", "Config file has been modified, reloading the config")
-            refreshConfig()
+        # if r2.get("modifiedTimstamp") != lastModifiedTimestamp():
+            # sendInfoToSnackBar("info", "Config file has been modified, reloading the config")
+        refreshConfig()
         
         detList = detectorList(r2.get("config"))
         r2.set("detList", json.dumps(detList))
@@ -401,10 +404,11 @@ def executeCommROOT(action:str, reqDict:dict):
         r2.set("runType", runType)
 
 
-
+        ### NOTE : remove ? 
         seqnumber = reqDict.get("seqnumber",None)
         seqstep = reqDict.get("seqstep",0)
         seqsubstep = reqDict.get("seqsubstep",0)
+        ### 
         config = json.loads(r2.get("config"))
         if not localOnly:
             stopMsg = {
@@ -458,7 +462,6 @@ def executeCommROOT(action:str, reqDict:dict):
         # steps = [("unconfigure", "booted"), ("shutdown","added"), ("remove", "not_added")]
         steps = [("unconfigure", "booted"), ("remove", "not_added")]
         for step,nextState in steps : 
-            print(step,nextState)
             r = sysConfig.executeAction(step)
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
             done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action])
@@ -641,8 +644,8 @@ def stateChecker():
                
             crashedM2 =  get_crashed_modules()
             if  crashedM2 != crashedM1 :
-                print("Crash")
-                socketio.emit("crashModChng",crashedM2, broadcast=True)
+                if r2.get("transitionFlag") == "0":
+                    socketio.emit("crashModChng",crashedM2, broadcast=True)
                 r2.set("crashedM", json.dumps(crashedM2))
                 crashedM1 = crashedM2
 

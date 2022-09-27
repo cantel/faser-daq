@@ -648,19 +648,6 @@ def stateChecker():
                     socketio.emit("crashModChng",crashedM2, broadcast=True)
                 r2.set("crashedM", json.dumps(crashedM2))
                 crashedM1 = crashedM2
-
-            # # print("original",modifiedTime)
-            # modifiedTime2 = lastModifiedTimestamp()
-            # # print(modifiedTime2)
-            # if modifiedTime2 != modifiedTime :
-            #     print("originalTimestamp", modifiedTime)
-            #     print("newTimestamp", modifiedTime2)
-            #     socketio.emit("modifiedChng")
-            #     print("Le fichier a été modifié")
-            #     modifiedTime = modifiedTime2
-            #     isModified = True
-                
-            
         
         ####### change of lock State ###########
         lockState2 = r2.get("whoInterlocked")

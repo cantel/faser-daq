@@ -72,21 +72,26 @@ class RunControl:
             - runType : the type of the run
             - runComment : the current run comment 
             - runNumber : the current run number
+            - runStart : when the run started (timestamp)
         """
-        r = self.__sendRequest("GET","/appState")
-        return r.json()
+        data = self.__sendRequest("GET","/appState")
+        return data
 
     
 def example():
     control = RunControl(baseUrl = "http://faser-daqvm-000.cern.ch:5000")
     control.initialise()
+    print(control.getState())
     time.sleep(2)
     control.start("Test", "remote control test start")
+    print(control.getState())
     time.sleep(10)
     control.stop("Test", "remote control test stop")
+    print(control.getState())
     time.sleep(10)
     control.shutdown()
-    
+    print(control.getState())
+
 
 if __name__ == "__main__":
     example()

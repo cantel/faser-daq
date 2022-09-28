@@ -591,6 +591,7 @@ def get_crashed_modules():
 
 
 def stateChecker():
+    global CONFIG_DICT, CONFIG_PATH
     l1 = {}
     l2 = {}
     loadedConfig =""
@@ -599,6 +600,7 @@ def stateChecker():
     crashedM1 = {}
     runInfo1= {"runType":"", "runComment":"", "runNumber":None}
     transitionFlag1 = r2.get("transitionFlag")
+    loaded = False
 
     while True:
         ########### Change of config ############
@@ -648,7 +650,14 @@ def stateChecker():
                     socketio.emit("crashModChng",crashedM2, broadcast=True)
                 r2.set("crashedM", json.dumps(crashedM2))
                 crashedM1 = crashedM2
-        
+
+        elif r2.get("loadedConfig") and not loaded: 
+            print("loading the config") 
+            CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], r2.get("loadedConfig"))
+            with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
+                CONFIG_DICT = json.load(f)
+            systemConfiguration(r2.get("loadedConfig"), CONFIG_PATH)
+            loaded = True 
         ####### change of lock State ###########
         lockState2 = r2.get("whoInterlocked")
         if lockState2 !=lockState:
@@ -737,6 +746,7 @@ def appState():
     crashedModules = r2.get("crashedM")
     packet["crashedM"] = json.loads(crashedModules) if (crashedModules!="" or crashedModules) else []
     packet["localOnly"] = localOnly
+    packet["runStart"] = r2.get("runStart")
     packet = {**packet, **getRunInfo()}
     # packet["refresh"] = isModified
     return jsonify(packet)

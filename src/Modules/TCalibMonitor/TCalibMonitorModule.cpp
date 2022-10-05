@@ -34,8 +34,6 @@ TCalibMonitorModule::~TCalibMonitorModule() {
 
 void TCalibMonitorModule::start(unsigned int run_num){
   INFO("Starting "<<getName());
-  //m_hit_avg = 0;
-  //m_hit_avg_count = 0;
   MonitorBaseModule::start(run_num);
 }
 
@@ -97,6 +95,9 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
   m_bcid = m_trackerdataFragment->bc_id();
   m_l1id = m_trackerdataFragment->event_id();
   m_histogrammanager->fill("bcid", m_bcid);
+
+  std::vector<int> hitsPerModule;
+  hitsPerModule.resize(8);
 
   for ( auto it = m_trackerdataFragment->cbegin(); it != m_trackerdataFragment->cend(); ++it ){
       auto sctEvent = *it;
@@ -175,6 +176,24 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
             }
           }
         }
+
+    	
+    if (sctEvent != nullptr){
+      int imodule=0; //placeholder, how do i get module from sctevent? //get moduleid
+      int ith=0; //placeholder, how do i get threshold from sctevent? or is this 2 different m_hits?
+      hitsPerModule[imodule] += sctEvent->GetNHits();	      
+      auto hits = sctEvent->GetHits(); 
+      int chipcnt(0);
+      for(auto hit : hits){ 
+        for(auto h : hit){ 
+          int strip = (int)h.first;		  
+          int link = (int)(chipcnt/6);		  
+          int ichip = link > 0 ? chipcnt - 6 : chipcnt;
+          m_hits[ith][imodule][link][ichip][strip]++;		
+              }
+        chipcnt++;
+      }	    
+    }
   }
 }
 
@@ -188,6 +207,9 @@ void TCalibMonitorModule::register_hists() {
   m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
   m_histogrammanager->register2DHistogram("hitmap_random", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
 
+  //Attempt m_hits storage
+  m_histogrammanager->register2DHistogram("hitmap_physics_th0", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
+
   std::vector<std::string> trb_error_categories = {"TRBError", "ModuleError", "NoEventID", "NoBCID", "NoCRC", "MissingFrames", "UnrecognizedFrames", "ModuleDecodeError"};
   m_histogrammanager->registerHistogram("track_data_error_types", "error type", trb_error_categories, m_PUBINT);
 
@@ -198,10 +220,49 @@ void TCalibMonitorModule::register_hists() {
   }
   m_histogrammanager->registerHistogram(m_hname_scterrors, "error type", sct_error_categories, m_PUBINT); 
 
+  for(int mod = 0; mod < MAXMODS; mod ++){
+    for(int link = 0; link < NLINKS; link ++){
+        //how to format a string???? use concatenation see line 218
+         m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
+    }
+  }
   INFO(" ... done registering histograms ... " );
 
   return ;
 
+}
+
+int exportHits (array) {
+  ofstream myfile ("example.txt");
+  if (myfile.is_open())
+  {
+    myfile << "{\n";
+    //myfile << "This is another line.\n";
+    //[MAXTHR][MAXMODS][NLINKS][NCHIPS][NSTRIPS];
+    for(int ith = 0; ith < MAXTHR; ith ++){
+      myfile << "{\n";
+      myfile << "\t\"threshold\":"<<ith<<"\n";
+      myfile << "\t\"modules\":[\n";
+      for(int mod = 0; mod < MAXMODS; mod ++){
+        myfile << "\t\t\"module\":"<<mod<<"\n";
+        myfile << "\t\t\"links\":[\n";
+        for(int link = 0; link < NLINKS; link ++){
+          myfile << "\t\t\t\"link\":"<<link<<"\n";
+          myfile << "\t\t\t\"chips\":[\n";
+          for(int chip = 0; chip < NCHIPS; chip ++){
+            myfile << "\t\t\t\t\"chip\":"<<chip<<"\n";
+            myfile << "\t\t\t\t\"hitsPerStrip\":[\n";
+            for(int strip = 0; strip < NSTRIPS; strip ++){
+              myfile << "";
+            }
+          }
+        }
+      }
+    }
+    myfile.close();
+  }
+  else cout << "Unable to open file";
+  return 0;
 }
 
 /*
@@ -210,4 +271,56 @@ void TCalibMonitorModule::foobar(const std::string &arg) {
   ERS_INFO("Inside custom command. Got argument: " << arg);
 }
 
+*/
+/*
+( std::string name, "hitmap_random",
+
+std::string xlabel : "module idx"
+
+float xmin, float xmax : 0, kTOTAL_MODULES
+
+unsigned int xbins, kTOTAL_MODULES,
+
+std::string ylabel, "chip idx",
+
+float ymin, float ymax, :  0, kCHIPS_PER_MODULE,
+
+ unsigned int ybins,  kCHIPS_PER_MODULE
+
+unsigned int delta_t = kMIN_INTERVAL , m_PUBINT);
+
+register a histogram for every module.
+inside those histograms is strips/channels and noisy/dead status
+
+
+*/
+
+/*
+FROM OLD CODE
+m_hits requires threshold, module, link, chip, strip
+
+FASER::TRBEventDecoder *ed = new FASER::TRBEventDecoder();
+      ed->LoadTRBEventData(trb->GetTRBEventData());      
+      auto evnts = ed->GetEvents();
+      std::vector<int> hitsPerModule;
+      hitsPerModule.resize(8);	
+      for (auto evnt : evnts){ 	
+        for (unsigned int imodule=0; imodule<8; imodule++){
+          auto sctEvent = evnt->GetModule(imodule);	  
+          if (sctEvent != nullptr){
+            hitsPerModule[imodule] += sctEvent->GetNHits();	      
+            auto hits = sctEvent->GetHits(); 
+            int chipcnt(0);
+            for(auto hit : hits){ 
+              for(auto h : hit){ 
+                int strip = (int)h.first;		  
+                int link = (int)(chipcnt/6);		  
+                int ichip = link > 0 ? chipcnt - 6 : chipcnt;
+                m_hits[ith][imodule][link][ichip][strip]++;		
+                    }
+              chipcnt++;
+            }	    
+          }
+        }// end loop in modules 
+      }// end loop in events
 */

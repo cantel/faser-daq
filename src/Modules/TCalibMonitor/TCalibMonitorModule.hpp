@@ -65,6 +65,7 @@ class TCalibMonitorModule : public MonitorBaseModule {
   const uint8_t kSCT_ERR_BUFFOVERFLOW = 0x2;
   const uint8_t kSCT_ERR_BUFFERROR = 0x4;
   const uint8_t kSCT_ERR_UNKNOWNCHIP = 0xFF;
+  int m_hits[MAXTHR][MAXMODS][NLINKS][NCHIPS][NSTRIPS];
 
 
 };

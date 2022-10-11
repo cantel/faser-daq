@@ -1556,5 +1556,23 @@
         "metrics_settings": {
             "$ref": "top.json#metrics_settings"
         }
+    },
+    "TCalibMonitor": {
+        "name": "tcalibmonitor",
+        "host": "localhost",
+        "port": 5553,
+        "modules": [
+            {
+                "name": "tcalibmonitor",
+                "type": "TCalibMonitor",
+            }
+        ],
+        "loglevel": {
+            "$ref": "top.json#loglevel"
+        },
+        "metrics_settings": {
+            "$ref": "top.json#metrics_settings"
+        }
     }
+
 }

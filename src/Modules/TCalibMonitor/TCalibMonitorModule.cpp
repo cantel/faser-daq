@@ -232,6 +232,7 @@ void TCalibMonitorModule::register_hists() {
 
 }
 
+/*
 int exportHits (array) {
   ofstream myfile ("example.txt");
   if (myfile.is_open())
@@ -264,7 +265,7 @@ int exportHits (array) {
   else cout << "Unable to open file";
   return 0;
 }
-
+*/
 /*
 
 void TCalibMonitorModule::foobar(const std::string &arg) {

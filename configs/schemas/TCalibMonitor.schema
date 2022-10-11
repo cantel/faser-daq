@@ -1,0 +1,60 @@
+{
+    "type": "object",
+    "title": "Monitor",
+    "required": ["name", "type"],
+    "properties": {
+      "name": {
+        "type": "string",
+	"default": "XXmonitorXX",
+	"readOnly": true,
+	"pattern": "^((?!XXX).)*$",
+	"propertyOrder": 1
+      },
+      "type": {
+        "type": "string",
+	"default": "Monitor",
+	"readOnly": true,
+	"propertyOrder": 2,
+	"options": { "hidden": true }
+      },
+      "settings": {
+        "type": "object",
+        "title": "Settings",
+        "properties": {
+          "stats_uri": {
+	    "type": "string",
+	    "format": "uri"
+	  },
+          "sourceID": {
+	    "type": "integer",
+	    "minimum": 0
+	  },
+          "publish_interval": {
+             "type": "integer",
+             "minimum": 1
+          },
+          "ActiveLHCModes": {
+            "type": "array",
+            "minItems": 0,
+            "maxItems": 9,
+            "description": "LHC machine mode for which monitoring will be activated.",
+	    "items": {
+	      "type": "integer",
+              "minimum": 1,
+              "maximum": 21
+            }
+          },
+          "PhysicsTriggerBits": {
+            "type": "integer",
+            "minItems": 1,
+            "maxItems": 15,
+            "description": "Physics trigger bits for which physics hits are monitored."
+          }
+	},
+	"format":"grid",
+	"propertyOrder": 3
+      }
+    }
+}
+
+

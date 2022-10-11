@@ -189,7 +189,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
           int strip = (int)h.first;		  
           int link = (int)(chipcnt/6);		  
           int ichip = link > 0 ? chipcnt - 6 : chipcnt;
-          m_hits[ith][imodule][link][ichip][strip]++;		
+          //m_hits[ith][imodule][link][ichip][strip]++;		
               }
         chipcnt++;
       }	    
@@ -220,7 +220,7 @@ void TCalibMonitorModule::register_hists() {
   }
   m_histogrammanager->registerHistogram(m_hname_scterrors, "error type", sct_error_categories, m_PUBINT); 
 
-  for(int mod = 0; mod < MAXMODS; mod ++){
+  for(int mod = 0; mod < kTOTAL_MODULES; mod ++){
     for(int link = 0; link < NLINKS; link ++){
         //how to format a string???? use concatenation see line 218
          m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);

@@ -12,7 +12,7 @@
           "type": "EventPlayback",
           "settings":         { "maxRate": 100,
 			      "repeats": 2,
-			      "fileList": ["/home/cantel/data/Faser-Physics-004912-00000.raw"]
+			      "fileList": ["/home/sshively/TCALIB/data/Faser-Physics-004912-00000.raw"]
 	    
 	        },
           "connections": {

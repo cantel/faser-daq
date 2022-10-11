@@ -1560,7 +1560,7 @@
     "TCalibMonitor0": {
         "name": "tcalibmonitor",
         "host": "localhost",
-        "port": 5553,
+        "port": 5566,
         "modules": [
             {
                 "name": "tcalibmonitor",

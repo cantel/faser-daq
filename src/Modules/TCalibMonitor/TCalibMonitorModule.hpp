@@ -32,7 +32,6 @@ class TCalibMonitorModule : public MonitorBaseModule {
 
   void monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary);
   void register_hists( );
-  void register_metrics();
   void configure( );
 
  private:

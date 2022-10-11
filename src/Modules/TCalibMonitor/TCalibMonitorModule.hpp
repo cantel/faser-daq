@@ -61,11 +61,23 @@ class TCalibMonitorModule : public MonitorBaseModule {
                                                  {4,1},
                                                  {6,1.5}};
 
+
+  const uint8_t MAXTRIMRANGE = 2;   // max number of trimRanges (DAC)
+  const uint8_t MAXTRIMDAC   = 16;  // max number of trimData per trimRange (DAC)
+  const uint8_t MAXTHR       = 256; // max number of thresholds (DAC)
+  const uint8_t MAXCHARGES   = 10;  // max number of charges
+  const uint8_t MAXDELAYS    = 200; // max number of L1delays (for L1DelayScan only)
+  const uint8_t MAXSD        = 64;  // max number of Strobe-Delay values
+  const uint8_t NLINKS       = 2;   // links / sides per module
+  const uint8_t NCHIPS       = 6;   // chips per link
+  const uint8_t MAXMASKTH    = 2;   // maximum number of thresholds tested in a mask scan
+
+
   const uint8_t kSCT_ERR_NODATA = 0x1;
   const uint8_t kSCT_ERR_BUFFOVERFLOW = 0x2;
   const uint8_t kSCT_ERR_BUFFERROR = 0x4;
   const uint8_t kSCT_ERR_UNKNOWNCHIP = 0xFF;
-  int m_hits[MAXTHR][MAXMODS][NLINKS][NCHIPS][NSTRIPS];
+  int m_hits[MAXTHR][kTOTAL_MODULES][NLINKS][NCHIPS][kSTRIPS_PER_CHIP];
 
 
 };

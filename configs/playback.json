@@ -25,6 +25,24 @@
       },
       { "$ref": "Templates/TRB.json#TrackStationMonitorSt1" },
       { "$ref": "Templates/TRB.json#SCTDataMonitorSt1L0" }
+
+      {
+        "name": "tcalibMonitor",
+        "host": "localhost",
+        "port": 5555,
+        "modules":[
+         {
+           "type": "TCalibMonitor",
+           "name": "tcalibMonitor",
+           "connections": {
+           }    
+         }
+        ],
+        "loglevel": {"core": "INFO", "module": "DEBUG","connection":"WARNING"},
+        "settings": {
+        }
+      }
+      
     ]
   }
 }

@@ -221,12 +221,13 @@ void TCalibMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram(m_hname_scterrors, "error type", sct_error_categories, m_PUBINT); 
 
   for(int mod = 0; mod < kTOTAL_MODULES; mod ++){
-    for(int link = 0; link < NLINKS; link ++){
-        //how to format a string???? use concatenation see line 218
-         m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
+    for(int thr =0; thr<MAXTHR; thr++){
+      //how to format a string???? use concatenation see line 218
+        std::string hname_mod_thr_hits = "maskscan_mod"+std::to_string(mod)+"_thr"+std::to_string(thr);
+        int MAXCHANNELS = kSTRIPS_PER_CHIP*NCHIPS;
+         m_histogrammanager->register2DHistogram(hname_mod_thr_hits, "Channel #", 0, MAXCHANNELS, MAXCHANNELS, "Link",  0, NLINKS, NLINKS, m_PUBINT);  }
     }
-  }
-  INFO(" ... done registering histograms ... " );
+          INFO(" ... done registering histograms ... " );
 
   return ;
 

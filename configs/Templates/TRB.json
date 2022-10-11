@@ -1564,7 +1564,7 @@
         "modules": [
             {
                 "name": "tcalibmonitor",
-                "type": "TCalibMonitor",
+                "type": "TCalibMonitor"
             }
         ],
         "loglevel": {

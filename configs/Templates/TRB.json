@@ -1557,14 +1557,28 @@
             "$ref": "top.json#metrics_settings"
         }
     },
-    "TCalibMonitor": {
+    "TCalibMonitor0": {
         "name": "tcalibmonitor",
         "host": "localhost",
         "port": 5553,
         "modules": [
             {
                 "name": "tcalibmonitor",
-                "type": "TCalibMonitor"
+                "type": "TCalibMonitor",
+                "settings": {
+                    "fragmentID": 196619,
+                    "publish_interval": 5,
+                    "ActiveLHCModes": {
+                        "$ref": "monitor_top.json#monitor_lhc_modes/ActiveLHCModes"
+                    },
+                    "PhysicsTriggerBits": 8,
+                    "stats_uri": "tcp://localhost:7000"
+                },
+                "connections": {
+                    "receivers": {
+                        "$ref": "monitor_top.json#monitor_receivers_all/receivers"
+                    }
+                }
             }
         ],
         "loglevel": {

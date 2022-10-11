@@ -24,7 +24,7 @@
 	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
       },
       { "$ref": "Templates/TRB.json#TrackStationMonitorSt1" },
-      { "$ref": "Templates/TRB.json#SCTDataMonitorSt1L0" }
+      { "$ref": "Templates/TRB.json#SCTDataMonitorSt1L0" },
 
       {
         "name": "tcalibMonitor",

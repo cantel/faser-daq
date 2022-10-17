@@ -172,6 +172,8 @@ sudo locmap --configure eosclient
 # To be added - instructions for enabled core dumps
 
 #The following steps are for both production and VMs
+yum install -y centos-release-scl
+yum install -y rh-python38
 # install the daqling spack repository (might need to be updated on occassion)
 sudo yum install -y http://build.openhpc.community/OpenHPC:/1.3/CentOS_7/x86_64/ohpc-release-1.3-1.el7.x86_64.rpm
 sudo yum install -y gnu8-compilers-ohpc cmake

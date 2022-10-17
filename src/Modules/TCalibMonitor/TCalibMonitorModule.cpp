@@ -179,9 +179,9 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
 
     	
     if (sctEvent != nullptr){
-      int imodule=0; //placeholder, how do i get module from sctevent? //get moduleid
+      auto thresholds = getModuleSettings()["rate_thresholds"] //is this right?
       int ith=0; //placeholder, how do i get threshold from sctevent? or is this 2 different m_hits?
-      hitsPerModule[imodule] += sctEvent->GetNHits();	      
+      hitsPerModule[module] += sctEvent->GetNHits();	      
       auto hits = sctEvent->GetHits(); 
       int chipcnt(0);
       for(auto hit : hits){ 
@@ -189,6 +189,9 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
           int strip = (int)h.first;		  
           int link = (int)(chipcnt/6);		  
           int ichip = link > 0 ? chipcnt - 6 : chipcnt;
+
+          std::string hname_mod_thr_hits = "maskscan_mod"+std::to_string(module)+"_thr"+std::to_string(ith);
+          m_histogrammanager->fill2D(hname_mod_thr_hits, strip, link, 1);
           //m_hits[ith][imodule][link][ichip][strip]++;		
               }
         chipcnt++;

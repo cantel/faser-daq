@@ -215,7 +215,7 @@ void TCalibMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram(m_hname_scterrors, "error type", sct_error_categories, m_PUBINT); 
 
   for(int mod = 0; mod < kTOTAL_MODULES; mod ++){
-    for(int thr =0; thr<MAXTHR; thr++){
+    for(int thr =0; thr<MASKMAXTHR; thr++){
       //how to format a string???? use concatenation see line 218
         std::string hname_mod_thr_hits = "maskscan_mod"+std::to_string(mod)+"_thr"+std::to_string(thr);
         int MAXCHANNELS = kSTRIPS_PER_CHIP*NCHIPS;

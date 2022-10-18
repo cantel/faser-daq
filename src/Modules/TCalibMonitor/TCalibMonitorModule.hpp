@@ -75,6 +75,8 @@ class TCalibMonitorModule : public MonitorBaseModule {
   const uint8_t kSCT_ERR_BUFFOVERFLOW = 0x2;
   const uint8_t kSCT_ERR_BUFFERROR = 0x4;
   const uint8_t kSCT_ERR_UNKNOWNCHIP = 0xFF;
+
+  const uint8_t MASKMAXTHR       = 2; // max number of thresholds for mask scan
   //int m_hits[MAXTHR][kTOTAL_MODULES][NLINKS][NCHIPS][kSTRIPS_PER_CHIP];
 
 

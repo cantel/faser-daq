@@ -227,40 +227,7 @@ void TCalibMonitorModule::register_hists() {
 
 }
 
-/*
-int exportHits (array) {
-  ofstream myfile ("example.txt");
-  if (myfile.is_open())
-  {
-    myfile << "{\n";
-    //myfile << "This is another line.\n";
-    //[MAXTHR][MAXMODS][NLINKS][NCHIPS][NSTRIPS];
-    for(int ith = 0; ith < MAXTHR; ith ++){
-      myfile << "{\n";
-      myfile << "\t\"threshold\":"<<ith<<"\n";
-      myfile << "\t\"modules\":[\n";
-      for(int mod = 0; mod < MAXMODS; mod ++){
-        myfile << "\t\t\"module\":"<<mod<<"\n";
-        myfile << "\t\t\"links\":[\n";
-        for(int link = 0; link < NLINKS; link ++){
-          myfile << "\t\t\t\"link\":"<<link<<"\n";
-          myfile << "\t\t\t\"chips\":[\n";
-          for(int chip = 0; chip < NCHIPS; chip ++){
-            myfile << "\t\t\t\t\"chip\":"<<chip<<"\n";
-            myfile << "\t\t\t\t\"hitsPerStrip\":[\n";
-            for(int strip = 0; strip < NSTRIPS; strip ++){
-              myfile << "";
-            }
-          }
-        }
-      }
-    }
-    myfile.close();
-  }
-  else cout << "Unable to open file";
-  return 0;
-}
-*/
+
 /*
 
 void TCalibMonitorModule::foobar(const std::string &arg) {

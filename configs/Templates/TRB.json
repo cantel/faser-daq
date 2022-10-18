@@ -1568,6 +1568,7 @@
                 "settings": {
                     "fragmentID": 196619,
                     "publish_interval": 5,
+                    "threshold":1,
                     "ActiveLHCModes": {
                         "$ref": "monitor_top.json#monitor_lhc_modes/ActiveLHCModes"
                     },

@@ -49,6 +49,10 @@
             "minItems": 1,
             "maxItems": 15,
             "description": "Physics trigger bits for which physics hits are monitored."
+          },
+          "threshold": {
+             "type": "int",
+             "minimum": 0
           }
 	},
 	"format":"grid",

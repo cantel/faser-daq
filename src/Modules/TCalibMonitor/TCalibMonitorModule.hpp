@@ -62,7 +62,7 @@ class TCalibMonitorModule : public MonitorBaseModule {
 
   const uint8_t MAXTRIMRANGE = 2;   // max number of trimRanges (DAC)
   const uint8_t MAXTRIMDAC   = 16;  // max number of trimData per trimRange (DAC)
-  const uint8_t MAXTHR       = 256; // max number of thresholds (DAC)
+  const int     MAXTHR       = 256; // max number of thresholds (DAC)
   const uint8_t MAXCHARGES   = 10;  // max number of charges
   const uint8_t MAXDELAYS    = 200; // max number of L1delays (for L1DelayScan only)
   const uint8_t MAXSD        = 64;  // max number of Strobe-Delay values

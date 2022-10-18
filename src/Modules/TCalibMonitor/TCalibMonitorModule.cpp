@@ -38,14 +38,6 @@ void TCalibMonitorModule::start(unsigned int run_num){
 }
 
 
-// optional (configuration can be handled in the constructor)
-void TCalibMonitorModule::configure() {
-  FaserProcess::configure();
-  ERS_INFO("");
-  //registerCommand("foobar", "foobarring", "foobarred", &TCalibMonitorModule::foobar, this, _1);
-  //which scan is filling
-  //name histo accordingly
-}
 
 
 void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {

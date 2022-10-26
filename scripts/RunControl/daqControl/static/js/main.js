@@ -166,14 +166,10 @@ Vue.component("monitoring_panel", {
       <div>
         <v-tabs v-model="tab">
           <v-tabs-slider></v-tabs-slider>
-
           <v-tab href="#tab-1" class="text-capitalize"> Physics </v-tab>
-
           <v-tab href="#tab-2"class="text-capitalize"> Calibration </v-tab>
-
           <v-tab href="#tab-3" class="text-capitalize"> Monitoring </v-tab>
         </v-tabs>
-
         <v-tabs-items v-model="tab">
           <v-tab-item :key="1" value="tab-1" transition="fade-transition">
             <v-card flat>
@@ -213,12 +209,12 @@ var app = new Vue({
       // for state color
       not_added: "grey",
       added: "brown",
-      booted: "blue",
-      ready: "yellow",
+      booted: "yellow",
+      ready: "blue",
       running: "green",
       paused: "orange",
       error: "red",
-      READY: "yellow",
+      READY: "blue",
       RUN: "green",
       DOWN: "grey lighten-1",
       "IN TRANSITION": "blue-grey lighten-3",

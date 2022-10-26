@@ -48,44 +48,24 @@
   },
   "order": {
     "start": [
-        
-      "FWF",
-      "EBF",
-      "FR",
-      "FM",
-      "FE",
-      
-      "EvM",
-      "EM",
-      "SDM",
-      "TSM",
-      "DM",
-      "TG",
-      "DR",
+      "monitor",
+      "FW",
+      "EB",
+      "reciever",
       "TKR",
-      "TM",
-      "TRM",
+      "emulator",
+      "TG",
       "TR"
     ],
     "stop": [
-        "TR",
-      "TRM",
-      "TM",
-      "TKR",
-      "SDM",
-      "TSM",
-      "DR",
+      "TR",
       "TG",
-      "EM",
-      "SDM",
-      "DM",
-      "EvM",
-
-      "FE",
-      "FR",
-      "FM",
-      "EBF",
-      "FWF"
+      "emulator",
+      "TKR",
+      "reciever",
+      "EB",
+      "FW",
+      "monitor"
     ]
   }
 }

@@ -35,11 +35,11 @@ def corresponding_type(longType:str):
     elif "filewriter" in longType.lower() : shortType = "FW"
     elif "eventbuilder" in longType.lower() : shortType = "EB"
     
-    elif "receiver" in longType.lower() and "trigger" not in longType.lower() and "tracker" not in longType.lower(): shortType = "receiver"
+    elif "receiver" in longType.lower() and "trigger" not in longType.lower() and "tracker" not in longType.lower() and "digitizer" not in longType.lower(): shortType = "receiver"
     elif "emulator" in longType.lower(): shortType = "emulator"
     elif "triggergenerator" in longType.lower(): shortType = "TG"
     elif "triggerreceiver" in longType.lower(): shortType = "TR"
-    elif "trackerreceiver" in longType.lower(): shortType = "TKR"
+    elif "trackerreceiver" in longType.lower() or "digitizer" in longType.lower() : shortType = "TKR"
     
     
     else : print("Not a known type, please add it"); exit(0)

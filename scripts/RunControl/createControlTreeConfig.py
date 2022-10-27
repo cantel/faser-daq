@@ -1,3 +1,6 @@
+#
+#  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+#
 from copy import deepcopy
 import os,sys
 from pathlib import Path
@@ -127,8 +130,3 @@ if __name__ == "__main__":
         else:
             print("Exiting...")
             exit(0)
-    
-
-
-
-

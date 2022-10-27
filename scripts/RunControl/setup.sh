@@ -1,3 +1,3 @@
 source ../../setup.sh
-source venv/bin/activate
+source env/bin/activate
 

@@ -1,8 +1,10 @@
+#
+#  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+
 import redis
 import json
 
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
-
 
 def detectorList(config):
     config = json.loads(config)

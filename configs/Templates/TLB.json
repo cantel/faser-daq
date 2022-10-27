@@ -45,8 +45,8 @@
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "(FaserNuVetoLayer|SecondVetoLayer)&PreshowerLayer"            
                 },     
-                "SCIP" : "faser-daq-011",
-                "DAQIP" : "faser-daq-011",
+                "SCIP" : "faser-daq-010-direct",
+                "DAQIP" : "faser-daq-010-direct",
                 "BoardID" : 10
             },
             "connections": {"$ref":"#TLBConnections" }
@@ -86,8 +86,8 @@
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },     
-                "SCIP" : "faser-daq-011",
-                "DAQIP" : "faser-daq-011",
+                "SCIP" : "faser-daq-010-direct",
+                "DAQIP" : "faser-daq-010-direct",
                 "BoardID" : 10
             },
             "connections": {"$ref":"#TLBConnections" }
@@ -127,8 +127,8 @@
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"
                 },                  
-                "SCIP" : "faser-daq-011",
-                "DAQIP" : "faser-daq-011",
+                "SCIP" : "faser-daq-010-direct",
+                "DAQIP" : "faser-daq-010-direct",
                 "BoardID" : 10
             },
             "connections": {"$ref":"#TLBConnections" }
@@ -168,8 +168,8 @@
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },                  
-                "SCIP" : "faser-daq-011",
-                "DAQIP" : "faser-daq-011",
+                "SCIP" : "faser-daq-010-direct",
+                "DAQIP" : "faser-daq-010-direct",
                 "BoardID" : 10
             },
             "connections": {"$ref":"#TLBConnections" }
@@ -209,8 +209,8 @@
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },                  
-                "SCIP" : "faser-daq-011",
-                "DAQIP" : "faser-daq-011",
+                "SCIP" : "faser-daq-010-direct",
+                "DAQIP" : "faser-daq-010-direct",
                 "BoardID" : 10
             },
             "connections": {"$ref":"#TLBConnections" }
@@ -248,8 +248,8 @@
                                "Trig2": "TimingLayerBottom|TimingLayerTop",
                                "Trig3": "PreshowerLayer"            
                 },                  
-                "SCIP" : "faser-daq-011",
-                "DAQIP" : "faser-daq-011",
+                "SCIP" : "faser-daq-010-direct",
+                "DAQIP" : "faser-daq-010-direct",
                 "BoardID" : 10
             },
             "connections": {"$ref":"#TLBConnections" }

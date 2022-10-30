@@ -1,5 +1,6 @@
 #
 #  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
+#
 
 import redis
 import json
@@ -10,7 +11,6 @@ def detectorList(config):
     config = json.loads(config)
     detList=[]
     for comp in config["components"]:
-        # print(comp)
         compType=comp['modules'][0]['type'] #FIXME: do not support modules
         if compType=="TriggerReceiver": 
             detList.append("TLB")

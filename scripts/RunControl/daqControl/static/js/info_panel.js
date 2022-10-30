@@ -1,3 +1,5 @@
+// Vue component for the info view 
+
 Vue.component("info_panel", {
     delimiters: ["[[", "]]"],
     props: {"module": String},
@@ -18,12 +20,10 @@ Vue.component("info_panel", {
       getData : function(){
         axios.get(`/info?module=${this.module}`).then((response)=>{
           this.data = response.data;
-          
         })
         this.c_polling = setInterval(()=>{
           axios.get(`/info?module=${this.module}`).then((response)=>{
             this.data = response.data;
-            
           })
         }, this.interval)
       }

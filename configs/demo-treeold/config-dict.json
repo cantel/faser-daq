@@ -1,6 +1,0 @@
-{
-    "tree": "control-tree.json",
-    "fsm_rules": "../fsm-rules.json",
-    "config": "../demo-tree.json",
-    "grafana": "../grafana.json"
-}

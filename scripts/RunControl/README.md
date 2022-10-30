@@ -42,7 +42,7 @@ Instead of having only one configuration file, now a configuration setup needs 4
 
 `fsm-rules.json` and <nameofconfig>.json can be in the `faser-daq/configs` directory, but a valid configuration needs to have a folder with the name of the configuration and inside it, a `config-dict.json`. 
 
-For more informations, see``daqling` documentation [link] (https://gitlab.cern.ch/ep-dt-di/daq/daqling/-/blob/master/README.md).
+For more informations, see `daqling` documentation ([link](https://gitlab.cern.ch/ep-dt-di/daq/daqling/-/blob/master/README.md)).
 
 ## Installation
 ### DAQ servers
@@ -67,11 +67,16 @@ cd build
 cmake ../
 make -j4
 ```
-Change to the run-control-gui git branch:
+(If not avaiable on the master branch) Change to the run-control-gui git branch:
 ```sh
 git checkout new-rcgui
 ```
-Create a new python environment and install the necessary python packages: 
+Since python 3.6 has a known memory leak, we have to siwtch to python 3.8 (if installed)
+To switch to python 3.8, run the following command : 
+```bash
+scl enable rh-python38 bash
+```
+Now, we can create a new python environment and install the necessary python packages: 
 ```bash
 cd faser-daq/scripts/RunControl
 python3 -m venv venv
@@ -104,7 +109,7 @@ If the rights are granted, just click on the "edit" button (on the right) of the
 Then go to the tab: "SSO Registration" to click on the left most button (view or regenerate secret). 
 Finally, the credentials can be displayed by clicking on the "view" button.
 
-Then just replace the corresponding information in the files `keycloak.json` and `serverconfiguration.json` :
+
 
 ##### Keycloak.json
 - "resource": `<client_id>`
@@ -133,7 +138,29 @@ _In the "SSO Registration" tab:_
 
 Finally, you have to check the box : "My application will need to get tokens using its own client ID and secret"
 
-Once submitted, we have access to the new Client ID and the Client Secret, which we will then have to report in the `serverconfiguration.json` and `keycloak.json` files 
+Once submitted, we have access to the new Client ID and the Client Secret, which we will then have to report in the `serverconfiguration.json` and `keycloak.json` files. 
+If `keycloak.json` doesn't exist, it has to be located in the `/RunControl` folder and have the following content :
+```json
+{
+  "realm": "cern",
+  "resource": <to be completed>,
+  "client_id": <to be completed>,
+  "credentials": {"secret": <to be completed>},
+  "client_secret": <to be completed>,
+  "redirect_uri": <to be completed>,
+  "auth_server_url": "https://auth.cern.ch/auth",
+  "issuer":"https://auth.cern.ch/auth/realms/cern",
+  "authorization_endpoint":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/auth",
+  "token_endpoint":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/token",
+  "token_introspection_endpoint":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/token/introspect",
+  "userinfo_endpoint":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/userinfo",
+  "end_session_endpoint":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout",
+  "jwks_uri":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/certs"
+}
+```
+
+
+Then just replace the corresponding information in the files `keycloak.json` and `serverconfiguration.json` :
 
 ##### Keycloak.json
 - "resource": `<client_id>`

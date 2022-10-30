@@ -363,7 +363,7 @@ var app = new Vue({
     },
 
     openLogWindow() {
-      //first checks the group na`e and the machine where the logs are located (TODO)
+      // first checks the group na`e and the machine where the logs are located (TODO)
       axios.get(`/logURL?module=${this.activeNode[0].name}`).then((r) => {
         let url = r.data;
         window.open(url, "_blank", "width=800, height=500");
@@ -561,7 +561,6 @@ var app = new Vue({
     },
     isInconsistent(name){
       if (name){
-
         a  = this.nodeStates[name][1] 
         return a      
       }

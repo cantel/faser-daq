@@ -12,27 +12,20 @@
       </div>
     </v-card-title>
     <v-card-text>
-
-
       <v-row class="text-center mx-1 my-1">
         <v-btn :loading="processing['INITIALISE']" @click="sendROOTCommand('INITIALISE')"
           :disabled="!isROOTButtonEnabled('INITIALISE')" class="my-1 mx-1" depressed color="success"> INITIALISE
         </v-btn>
-        <!-- <v-btn :loading="processing['START']" @click="sendROOTCommand('START')" class="my-1 mx-1"
-          depressed color="success" :disabled="!isROOTButtonEnabled('START')"> START </v-btn> -->
         <v-btn :loading="processing['START']" @click.stop="startRunDialog = !startRunDialog" class="my-1 mx-1"
           depressed color="success" :disabled="!isROOTButtonEnabled('START')"> START </v-btn>
         <v-btn :loading="processing['STOP']" @click.stop="endRunDialog = !endRunDialog" class="my-1 mx-1"
           depressed color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn>
-        <!-- <v-btn :loading="processing['STOP']" @click="sendROOTCommand('STOP')" class="my-1 mx-1" depressed
-          color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn> -->
         <v-btn :loading="processing['SHUTDOWN']" @click="processShutdown" class="my-1 mx-1" depressed
           color="error" :disabled="!isROOTButtonEnabled('SHUTDOWN')"> SHUTDOWN </v-btn>
         <v-btn :loading="processing['PAUSE']" @click="sendROOTCommand('PAUSE')" class="my-1 mx-1" depressed
           color="yellow darken-2" :disabled="!isROOTButtonEnabled('PAUSE')"> PAUSE </v-btn>
         <v-btn :loading="processing['RESUME']" @click="sendROOTCommand('RESUME')" class="my-1 mx-1" depressed
           color="success" :disabled="!isROOTButtonEnabled('RESUME')"> RESUME </v-btn>
-
         <v-btn :loading="processing['ECR']" @click="sendROOTCommand('ECR')" class="my-1 mx-1" depressed
           color="success" :disabled="!isROOTButtonEnabled('ECR')"> ECR </v-btn>
       </v-row>
@@ -68,8 +61,6 @@
         <v-col cols="6">
           <strong class="blue--text text--darken-4 mr-2">Comment :</strong> [[ comment]]
         </v-col>
-        
       </v-row> 
-
     </v-card-text>
   </v-card>

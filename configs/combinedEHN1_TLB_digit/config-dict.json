@@ -1,6 +1,0 @@
-{
-    "tree": "control-tree.json",
-    "fsm_rules": "../fsm-rules.json",
-    "config": "../combinedEHN1_TLB_digit.json",
-    "grafana": "../grafana.json"
-}

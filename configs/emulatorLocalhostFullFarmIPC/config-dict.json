@@ -1,7 +1,0 @@
-{
-    "tree": "control-tree.json",
-    "fsm_rules": "../fsm-rules.json",
-    "config": "../emulatorLocalhostFullFarmIPC.json",
-    "grafana": "../grafana.json"
-}
-

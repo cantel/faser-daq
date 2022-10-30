@@ -2,27 +2,21 @@
 #  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
 #
 
-# import eventlet
-# eventlet.monkey_patch()
-from cgitb import reset
-from cmath import exp
-from http import server
 import subprocess
-from flask import Flask,redirect,url_for,render_template,request,session,g,jsonify,Response
+from flask import Flask,redirect,url_for,render_template,request,session,jsonify,Response
 from datetime import timedelta
 import redis
 import sys, os, time
 import json
-import threading
 import logging
 import jsonref
 from functools import wraps, update_wrapper
 from logging.handlers import RotatingFileHandler
 from os import environ as env
-from anytree import RenderTree, AsciiStyle
+from anytree import RenderTree
 from anytree.search import find_by_attr
 from anytree.importer import DictImporter
-from flask_socketio import SocketIO, send, emit
+from flask_socketio import SocketIO
 from keycloak import Client
 from datetime import datetime
 from werkzeug.utils import secure_filename
@@ -39,10 +33,7 @@ import socket
 import urllib3
 
 
-
-
-
-# rewriting the original function from NodeTree class from daqLing
+# patching the original function from NodeTree class from daqLing
 def childrenStateChecker(self):
     while (self.check):
         states = []
@@ -94,8 +85,6 @@ with open(os.path.join(os.path.dirname(__file__), 'serverconfiguration.json')) a
     serverConfig = json.load(f)
 
 LOGOUT_URL = serverConfig['LOGOUT_URL']
-
-
 configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 
 # for run service
@@ -117,12 +106,13 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 CONFIG_PATH =  ""
 CONFIG_DICT = {}
 configTree = None
+sysConfig : NodeTree = None # the treeObject for the configuration
 
 PORT = 5000
 localOnly = False
 testMode = False
-isTimeout =False
 
+# redis
 r = redis.Redis(host='localhost', port=6379, db=0,charset="utf-8", decode_responses=True)
 r2 = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_responses=True)
 
@@ -133,34 +123,26 @@ r2.setnx("loadedConfig","")
 r2.setnx("errorsM","")
 r2.setnx("crashedM","")
 
-
-sysConfig : NodeTree = None # the treeObject for the configuration
-
-
-
+# configuring flask server
 handler = RotatingFileHandler(serverConfig["serverlog_location_name"], maxBytes=1000000, backupCount=0)
 logging.root.setLevel(logging.NOTSET)
 handler.setLevel(logging.NOTSET)
 app.logger.addHandler(handler)
-
 keycloak_client = Client(callback_uri=serverConfig["callbackUri"] )
 app.secret_key = os.urandom(24)
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfig["timeout_session_expiration_mins"])
 
 
 def refreshConfig():
-    global CONFIG_DICT, CONFIG_PATH
-    configName = r2.get("loadedConfig")
-    systemConfiguration(configName, CONFIG_PATH)
+    global CONFIG_PATH
+    systemConfiguration(CONFIG_PATH)
     socketio.emit("refreshConfig")
 
 
-
-def systemConfiguration(configName, configPath):
+def systemConfiguration(configPath):
     global sysConfig
     with open(os.path.join(configPath, "config-dict.json")) as f:
         configJson = json.load(f)
-    # loadedConfig = r2.get("loadedConfig")
     if sysConfig is None:  # we (re)booted the app 
         print("sysConfig was None")
         try: 
@@ -188,44 +170,36 @@ def reinitTree(configJson, oldRoot=None):
         for _ , _, node in RenderTree(oldRoot):
             node.stopStateCheckers()
 
-    # On récupère le fichier pour le tree
     with open(os.path.join(CONFIG_PATH, configJson["tree"])) as f:
         tree = json.load(f)
 
-    # On récupère le fichier pour fsm
     try:
         with open(os.path.join(CONFIG_PATH, configJson["fsm_rules"])) as f:
             fsm_rules = json.load(f)
     except:
-        # raise Exception("Invalid FSM configuration")
         raise Exception("FSM configuration not found")
 
     state_action = fsm_rules["fsm"]  # allowed action if in state "booted", etc...
-    order_rules = fsm_rules["order"]  # ordrer of starting and stopping
-
-    # We open the main config file
-
+    order_rules = fsm_rules["order"]  # order of starting and stopping
 
     if r2.get("runOngoing") == "1":
         print("Loading from redis")
         configuration = json.loads(r2.get("config"))
     else : 
         with open(os.path.join(CONFIG_PATH, configJson["config"])) as f:
-            base_dir_uri = (Path(configPath).as_uri() + "/")  # file:///home/egalanta/latest/faser-daq/configs/demo-tree/
+            base_dir_uri = (Path(configPath).as_uri() + "/")
             jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
  
 
-        if ("configuration" in jsonref_obj):  # faser ones have "configuration" but not demo-tree
+        if ("configuration" in jsonref_obj):  # faser configuration files have "configuration" but not demo-tree
             # schema with references (version >= 10)
             configuration = deepcopy(jsonref_obj)["configuration"]
         else:
             # old-style schema (version < 10)
             configuration = jsonref_obj
-    r2.set("modifiedTimestamp",lastModifiedTimestamp())
     group = configuration["group"]  # for example "daq" or "faser"
 
     r2.set("group", group) 
-
     r2.set("config", json.dumps(configuration)) 
     
     if "path" in configuration.keys():
@@ -238,7 +212,6 @@ def reinitTree(configJson, oldRoot=None):
     dc = daqctrl(group)
 
     importer = DictImporter(nodecls=NodeTree)
-
     newRoot = importer.import_(tree)  # We import the tree json
     for _, _, node in RenderTree(newRoot):
         for c in components:
@@ -246,22 +219,17 @@ def reinitTree(configJson, oldRoot=None):
                 node.configure(order_rules,state_action,pconf=c,exe=exe,dc=dc,dir=dir,lib_path=lib_path,)
             else:
                 node.configure(order_rules, state_action)  # only loads order_rules and state_actions for that node
-
         node.startStateCheckers()
     return newRoot
 
-def lastModifiedTimestamp():
-    if CONFIG_DICT !={}:
-        ts = os.path.getmtime(os.path.join(CONFIG_PATH, CONFIG_DICT["config"]))
-    else : ts = None
-    return ts
 
 def executeComm(ctrl, action):
+    """
+    Executes node commands 
+    """
     r = ""
     configName = r2.get("loadedConfig")
-
-    logAndEmit(
-        configName,"INFO","User "+ session["user"]["cern_upn"]+ " has sent command "+ action+ " on node "+ ctrl,)
+    logAndEmit(configName,"INFO","User "+ session["user"]["cern_upn"]+ " has sent command "+ action+ " on node "+ ctrl,)
     try:
         if action == "exclude":
             r = find_by_attr(sysConfig, ctrl).exclude()
@@ -277,6 +245,9 @@ def executeComm(ctrl, action):
 
 
 def message(msg):
+    """
+    Send a message to mattermost. 
+    """
     if mattermost_hook: 
         try:
             req = requests.post(mattermost_hook,json={"text": msg})
@@ -293,7 +264,6 @@ def message(msg):
 def executeCommROOT(action:str, reqDict:dict):
     """
     Execute actions on ROOT node (general commands) and extend the interlock for another <timeout> seconds 
-    Returns : location of the module specific log files 
     """
     global sysConfig
     configName =  r2.get("loadedConfig")
@@ -304,27 +274,24 @@ def executeCommROOT(action:str, reqDict:dict):
         logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
     setTransitionFlag(1)
     if action == "INITIALISE":
-        # if r2.get("modifiedTimstamp") != lastModifiedTimestamp():
-            # sendInfoToSnackBar("info", "Config file has been modified, reloading the config")
         refreshConfig()
-        
         detList = detectorList(r2.get("config"))
         r2.set("detList", json.dumps(detList))
         steps = [("add", "booted"), ("configure","ready")]
         for step,nextState in steps :
             r = sysConfig.executeAction(step)
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
-
             if step == "add" and r[0] != "Action not allowed" :
                 logPaths = listLogs(r)
                 r2.delete("log")
                 r2.sadd("log", *logPaths)
-            done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action]) # 10 seconds for each steps 
+            done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action])
             if not done: 
-                break  # one step doesn't reach the correct state, end command loop. 
+                break  # if one step doesn't reach the correct state, end command loop. 
 
     elif action == "START":
-        runNumber = 1000000000
+
+        runNumber = 1000000000 # run number for local run
         runType = reqDict.get("runType","")
         runComment = reqDict.get("runComment","Test")[:500]
         version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
@@ -371,22 +338,17 @@ def executeCommROOT(action:str, reqDict:dict):
 
             if influxDB:
                 startMsg=runComment.replace('"',"'")
-
                 runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
                 r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
                                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
                                 data=runData,
                                 verify=False)
-                # print("sent to influx db", runData)
                 if r.status_code!=204:
                     logAndEmit("General", "ERROR", "Failed to post end of run information to influxdb: "+r.text)
                 if configName.startswith("combined"):
                     message(f"Run {runNumber} was started\nOperator: {runComment}")
-                    # print("Message mattermost start")
 
-
-
-        
+        # updating redis database        
         r2.set("runType", runType)
         r2.set("runComment", runComment)
         r2.set("runStart", time.time())
@@ -407,19 +369,11 @@ def executeCommROOT(action:str, reqDict:dict):
         r2.set("runComment", runComment)
         r2.set("runType", runType)
 
-
-        ### NOTE : remove ? 
-        seqnumber = reqDict.get("seqnumber",None)
-        seqstep = reqDict.get("seqstep",0)
-        seqsubstep = reqDict.get("seqsubstep",0)
-        ### 
-        config = json.loads(r2.get("config"))
         if not localOnly:
             stopMsg = {
                 "endcomment" :runComment,
                 "type": runType,
                 "runinfo": runinfo
-
             }
             rsURL = f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}'
             if testMode:
@@ -437,9 +391,8 @@ def executeCommROOT(action:str, reqDict:dict):
                 logAndEmit("general","Error","Could not connect to run service")
                 sendInfoToSnackBar( "error","Could not connect to run service",)
             
-  
             if influxDB:
-                stopComment = runComment.replace('"',"'")
+                stopComment = runComment.replace('"',"'") # necessary for the URL 
                 runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{runType}",runNumber={runNumber},physicsEvents={physicsEvents}'
                 r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
                                 auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
@@ -452,7 +405,6 @@ def executeCommROOT(action:str, reqDict:dict):
                 if configName.startswith("combined"):
                     message(f"Run {runNumber} stopped\nOperator: {runComment}")
 
-
         try : 
             r=sysConfig.executeAction("stop")
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
@@ -461,9 +413,7 @@ def executeCommROOT(action:str, reqDict:dict):
             setTransitionFlag(0)
             return "Error: connection refused"
             
-
     elif action == "SHUTDOWN":
-        # steps = [("unconfigure", "booted"), ("shutdown","added"), ("remove", "not_added")]
         steps = [("unconfigure", "booted"), ("remove", "not_added")]
         for step,nextState in steps : 
             r = sysConfig.executeAction(step)
@@ -486,14 +436,12 @@ def executeCommROOT(action:str, reqDict:dict):
                     logAndEmit("General","ERROR","Failed to post end of run information to influxdb: "+r.text)
                 print("Sent to influx db because of force shutdown",runData)
                 if configName.startswith("combined"):
-                    # print("message because run was shutdown from active state")
                     message(f"Run {runNumber} was shutdown")
             done = True
         
         # to be sure shutdown reset everything
         updateRedis(status="DOWN")
         socketio.emit("runStateChng","DOWN", broadcast=True)
-
 
     elif action == "PAUSE":
         r=sysConfig.executeAction("disableTrigger")
@@ -522,8 +470,7 @@ def executeCommROOT(action:str, reqDict:dict):
         elif rootState == "paused" : state="PAUSED"
         socketio.emit("runStateChng",state , broadcast=True)
         updateRedis(status=state)
-
-        return "Error: The command took to long -> TIMEOUT"
+        return "Error: The command took to long"
     return "Success"
 
 def sendInfoToSnackBar(typeM:str, message:str):
@@ -540,6 +487,7 @@ def sendInfoToSnackBar(typeM:str, message:str):
 def setTransitionFlag(flag:int):
     r2.set("transitionFlag", flag)
 
+
 def waitUntilCorrectState(state:str, timeout=30):
     """
     The function will wait until the state <state> matches the root node state while being consistant. 
@@ -553,6 +501,7 @@ def waitUntilCorrectState(state:str, timeout=30):
         socketio.sleep(0.2)
     return False
 
+
 def listLogs(r):
     """
     Transforms a list of tuples to a list of string with all the log paths
@@ -564,6 +513,7 @@ def listLogs(r):
         else:
             for item in sublist: final.append(item[1])
     return final
+
 
 def getLogPath(name:str):
     paths = r2.smembers("log")
@@ -583,6 +533,7 @@ def getStatesList(locRoot):
             ]
 
     return listState
+
 
 def get_crashed_modules():
     crashedModules = []
@@ -607,7 +558,7 @@ def stateChecker():
     loaded = False
 
     while True:
-        ########### Change of config ############
+        ########### Config Change ############
         loadedConfig2 = r2.get("loadedConfig")
 
         if loadedConfig2 != loadedConfig :
@@ -660,8 +611,9 @@ def stateChecker():
             CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], r2.get("loadedConfig"))
             with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
                 CONFIG_DICT = json.load(f)
-            systemConfiguration(r2.get("loadedConfig"), CONFIG_PATH)
+            systemConfiguration(CONFIG_PATH)
             loaded = True 
+
         ####### change of lock State ###########
         lockState2 = r2.get("whoInterlocked")
         if lockState2 !=lockState:
@@ -669,8 +621,6 @@ def stateChecker():
             if not lockState2:
                 logAndEmit(loadedConfig2, "INFO", "Interlock has been released because of TIMEOUT")
             lockState = lockState2
-
-        #### check the status of the modules ### 
 
         ####### change of runInfo #######
         runInfo2 = getRunInfo()
@@ -692,7 +642,6 @@ def cleanErrors():
     r2.delete("errorsM")
     socketio.emit("errorModChng", {"1":[],"2":[]} , broadcast=True)
 
-     
 
 def modulesWithError(tree):
     errorList = {"1":[],"2":[]}
@@ -705,10 +654,8 @@ def modulesWithError(tree):
                     errorList[status].append(node.name) 
     errorList["1"] =  list(set(errorList["1"]))
     errorList["2"] = list(set(errorList["2"]))
-    
     return errorList
 
-            
             
 def logAndEmit(configtype, type:str , message=""):
     now = datetime.now()
@@ -731,9 +678,6 @@ def updateRedis(status:str = None):
             r2.set('runOngoing',1)
 
 
-
-
-
 @app.route("/appState", methods=["GET"])
 def appState():
     packet ={}
@@ -752,9 +696,7 @@ def appState():
     packet["localOnly"] = localOnly
     packet["runStart"] = r2.get("runStart")
     packet = {**packet, **getRunInfo()}
-    # packet["refresh"] = isModified
     return jsonify(packet)
-
 
 
 def nocache(view):
@@ -768,7 +710,6 @@ def nocache(view):
         response.headers["Pragma"] = "no-cache"
         response.headers["Expires"] = "-1"
         return response
-
     return update_wrapper(no_cache, view)
 
 
@@ -782,35 +723,31 @@ def getInfo(module:str) -> list:
     Gets the informations about a module in the redis database 
     Returns a list of dictionnaries with {"key": ..., "value": ..., "time": ... (string)}
     """
-
-
     keys = r.hkeys(module)
     # if module is not in the redis database
     if keys == []: return []
     keys.sort()
     vals = r.hmget(module, keys=keys)
-    
     info = [{"key":key, "value": val.split(":")[1],"time": datetime.fromtimestamp(int(float(val.split(":")[0]))).strftime('%a %d/%m/%y %H:%M:%S ') } for key,val in zip(keys,vals)]
     return info
- 
 
 
 @app.route("/fullLog/<string:module>")
 def fullLog(module:str) -> Response:
     """
-    Returns the full log for the current run #NOTE: Is it really just the current run ? 
-    (Works only if the logs are on the same server)
+    Returns the full log. (Works only if the logs are on the same server)
     """
     path = getLogPath(module)
     with open(path, "r") as f:
         log = f.readlines()
     return Response(log, mimetype='text/plain')
 
+
 @app.route("/log", methods=["GET"])
 def log():
     with open(serverConfig["serverlog_location_name"]) as f:
         ret = f.readlines()
-    return jsonify(ret[-20:])
+    return jsonify(ret[-20:]) # return the last 20 element of the log
 
 
 @app.route("/serverconfig")
@@ -822,8 +759,6 @@ def serverconfig():
 def interlock():
     requestData  = request.get_json()
     action = requestData["action"] # lock or unlock 
-
-    
     if action == "lock": 
         if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=serverConfig["timeout_interlock_secs"], nx=True): 
             logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("loadedConfig"),)
@@ -843,6 +778,7 @@ def interlock():
             logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ "  ATTEMPTED to take control of configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
             return jsonify(f"you can't")
 
+
 @app.route("/ajaxParse", methods=["POST"])
 def ajaxParse():
     postData = request.get_json()
@@ -850,7 +786,6 @@ def ajaxParse():
     command = postData["command"]
     configName =  r2.get("loadedConfig")
     r2.expire("whoInterlocked",serverConfig["timeout_interlock_secs"]) # adds a new timeout
-
     try:
         r = executeComm(node, command)
     except Exception as e:
@@ -868,6 +803,7 @@ def logout():
     session.pop("configDict", None)
     return redirect("{}?redirect_uri={}".format(LOGOUT_URL, url_for("index", _external=True)))
 
+
 @app.route("/fsmrulesJson", methods=["GET", "POST"])
 def fsmrulesJson():
     try:
@@ -882,8 +818,6 @@ def fsmrulesJson():
 def connect():
     print("Client connected")
 
-#####################################################################
-
 
 @app.route("/configDirs", methods=["GET", "POST"])
 def configDirs():
@@ -894,22 +828,17 @@ def configDirs():
 def initConfig():
     global CONFIG_PATH,CONFIG_DICT
     configName  =  request.args.get("configName")
-     
-
     if configName == r2.get("loadedConfig") and sysConfig is not None :
         print("Do nothing")
-    ## utiliser systemConfiguration tel quel pour initialize     
-    else : # à changer !             
+    else :             
         CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], configName)
-        logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
+        if request.args.get("bot") is None: 
+            logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
         with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
             CONFIG_DICT = json.load(f)
-
-        systemConfiguration(configName, CONFIG_PATH)
-
+        systemConfiguration(CONFIG_PATH)
         r2.set("loadedConfig", configName)
-    return "Success"
-
+    return jsonify("Success")
 
 
 @app.route("/urlTreeJson")
@@ -948,7 +877,6 @@ def login_callback():
     return redirect(url_for('index'))
 
 
-
 @app.route("/")
 def index():
     if "user" in session: # if user is already connected
@@ -956,22 +884,12 @@ def index():
     return redirect(url_for('localLogin'))
 
 
-
-
-@app.route("/botLogin")
-def botLogin():
-    if session.get("user") is not None:
-        session["user"] = {}
-        session["user"]["cern_upn"] = "bot"
-
-    return "OK"
-
-
 @app.route("/localLogin")
 def localLogin():
     session["user"] = {}
     session["user"]["cern_upn"] = "local_user"
     return redirect(url_for('index'))
+
 
 @app.route("/statesList", methods=["GET"])
 def statesList():
@@ -987,11 +905,12 @@ def rootCommand():
     r = executeCommROOT(command, reqDict)
     return jsonify(r)
 
+
 @app.route("/info", methods=["GET"])
 def info():
     module = request.args.get("module")
-    info = getInfo(module)
-    return jsonify(info)
+    return jsonify(getInfo(module))
+
 
 @app.route("/infoWindow/<string:module>")
 def infoWindow(module):
@@ -1006,26 +925,22 @@ def monitoringInitialValues():
     """
     For the plots in the monitoring Panel (Run control GUI)
     Returns : some metrics (defined by 'keys') and last values for rates defined in 'graphKeys'
-    NOTE: the function can be easily optimized
+    The function could be optimized
     """
-    def is_recent(value):
-        return datetime.now().timestamp() - float(value.split(":")[0]) < 1800
-
     packet = {"values": {}, "graphs":{}}
     keys = ["RunStart","RunNumber",
             "Events_received_Physics","Event_rate_Physics",
             "Events_received_Calibration", "Event_rate_Calibration",
             "Events_received_TLBMonitoring","Event_rate_TLBMonitoring"]
-    # getting the eventbuilder module 
-    #NOTE The next line avoids the need to hardcode the name of the module, but it still needs to have eventbuilder in it's name.  
-    eventBuilderName = r.keys("eventbuilder*")[0] # should only be one eventbuilder module
+
+    #The next line avoids the need to hardcode the name of the EventBuilder module, but it still needs to have eventbuilder in the name.  
+    eventBuilderName = r.keys("eventbuilder*")[0]
     results = [int(float(metric.split(":")[1])) for metric in r.hmget(eventBuilderName, keys )]
     data = dict(zip(keys,results))
-    data["RunStart"] =datetime.fromtimestamp(float(data["RunStart"])).strftime('%d/%m %H:%M:%S')  if data["RunStart"] != 0 else "-"
+    data["RunStart"] = datetime.fromtimestamp(float(data["RunStart"])).strftime('%d/%m %H:%M:%S')  if data["RunStart"] != 0 else "-"
     packet["values"] = data
     
-    # for the plot :
-
+    # for the graphs
     graphKeys = [
         f"History:{eventBuilderName}_Event_rate_Physics",
         f"History:{eventBuilderName}_Event_rate_Calibration",
@@ -1044,8 +959,7 @@ def monitoringInitialValues():
 @app.route("/monitoring/latestValues")
 def monitoringLatestValues():
     """
-    Returns : a stream  from a "eventbuilder" module with various monitoring data
-
+    Returns : a stream  from the EventBuilder module with various monitoring data
     """
     def getValues():
         keys = ["RunStart","RunNumber",
@@ -1056,9 +970,8 @@ def monitoringLatestValues():
                 "Event_rate_Physics",
                 "Event_rate_Calibration",
                 "Event_rate_TLBMonitoring"]
-        # getting the eventbuilder module 
-        #NOTE The next line avoids the need to hardcode the name of the module, but it still needs to have eventbuilder in its name.  
-        eventBuilderName = r.keys("eventbuilder*")[0] # should only be one eventbuilder module
+        # The next line avoids the need to hardcode the name of the module, but it still needs to have eventbuilder in the name.  
+        eventBuilderName = r.keys("eventbuilder*")[0]
 
         d1 = []
         while True :
@@ -1073,7 +986,7 @@ def monitoringLatestValues():
                 d1 = data_results + graph_data
                 yield f"data:{json.dumps(packet)}\n\n"
                 d1 = data_results
-            socketio.sleep(1) # NOTE:Can be configurable
+            socketio.sleep(1) # Could : could be configurable
     return Response(getValues(), mimetype="text/event-stream")
 
 
@@ -1084,10 +997,11 @@ def returnLogURL():
     url = f"http://{platform.node()}:9001/logtail/{group}:{module}"
     return jsonify(url)
 
-@socketio.on_error()        # Handles the default namespace
-def error_handler(e):
-    print(e)
 
+@socketio.on_error()
+def error_handler(e):
+    """ Handles the default namespace """
+    print(e)
 
 
 if __name__ == "__main__":
@@ -1104,9 +1018,7 @@ if __name__ == "__main__":
     print(f"Connect with the browser to http://{platform.node()}:{PORT}")
     metrics=metricsHandler.Metrics(app.logger)
     socketio.start_background_task(stateChecker)
-    # socketio.start_background_task(mH, app.logger)
     socketio.run(app, host="0.0.0.0", port=PORT, debug=True, use_reloader = False)
-
     print("Stopping...")
     metrics.stop()
 

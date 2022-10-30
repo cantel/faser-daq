@@ -6,28 +6,6 @@ import os,sys
 from pathlib import Path
 import jsonref, json
 
-lt = {
-    "ReadoutInterface"   : "RI",
-    "EventBuilder"       : "EB",
-    "EventBuilderFaser"  : "EBF",
-    "FileWriter"         : "FW", 
-    "FileWriterFaser"    : "FWF",
-    "TriggerGenerator"   : "TG",
-    "EventPlayback"      : "EP",
-    "FrontEndEmulator"   : "FE",
-    "TriggerReceiver"    : "TR", 
-    "FrontEndReceiver"   : "FR",
-    "DigitizerReceiver"  : "DR",
-    "TrackerReceiver"    : "TKR",
-    "TriggerMonitor"     : "TM",
-    "FrontEndMonitor"    : "FM",
-    "EmulatorMonitor"    : "EM",
-    "SCTDataMonitor"     : "SDM",
-    "TriggerRateMonitor" : "TRM",
-    "DigitizerMonitor"   : "DM",
-    "TrackStationMonitor": "TSM",
-    "EventMonitor"       : "EvM",
-}
 
 def corresponding_type(longType:str):
     """
@@ -37,19 +15,15 @@ def corresponding_type(longType:str):
     if "monitor" in longType.lower(): shortType = "monitor"
     elif "filewriter" in longType.lower() : shortType = "FW"
     elif "eventbuilder" in longType.lower() : shortType = "EB"
-    
     elif "receiver" in longType.lower() and "trigger" not in longType.lower() and "tracker" not in longType.lower() and "digitizer" not in longType.lower(): shortType = "receiver"
     elif "emulator" in longType.lower(): shortType = "emulator"
     elif "triggergenerator" in longType.lower(): shortType = "TG"
     elif "triggerreceiver" in longType.lower(): shortType = "TR"
     elif "trackerreceiver" in longType.lower() or "digitizer" in longType.lower() : shortType = "TKR"
-    
-    
     else : print("Not a known type, please add it"); exit(0)
     return shortType
         
         
-
 def createTreeJSON(configPath,configsDirPath):
     try :
         with open(configPath, "r") as fp :
@@ -75,15 +49,11 @@ def createTreeJSON(configPath,configsDirPath):
 
     for key,item in sorted(sort.items()): 
         # if there is only one module in the categorie, there is no category
-        try : 
-            if len(item) == 1:
-                cat = {"name" : item[0], "types" : [{"type" : corresponding_type(key)}]}  
-                tree["children"].append(cat)
-                continue
-            cat = {"name" : key, "types" :[{"type": corresponding_type(key)}], "children" : []}
-        except KeyError :
-            print(f"Module type '{key}' is not in the lookup table for abbrevations, please add it.")
-            exit(1)
+        if len(item) == 1:
+            cat = {"name" : item[0], "types" : [{"type" : corresponding_type(key)}]}  
+            tree["children"].append(cat)
+            continue
+        cat = {"name" : key, "types" :[{"type": corresponding_type(key)}], "children" : []}
 
         for comp in item :
             cat["children"].append({"name":comp})
@@ -92,7 +62,6 @@ def createTreeJSON(configPath,configsDirPath):
 
 
 if __name__ == "__main__":
-
     if len(sys.argv) != 2 :
         print(f"USAGE : python {sys.argv[0]} <configFullPath>")
         exit(1)

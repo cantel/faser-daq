@@ -1,6 +1,7 @@
 #
 #  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
 #
+from random import getstate
 import time
 from typing import Union
 import requests
@@ -15,7 +16,7 @@ class RunControl:
         self.__requestTimeout = requestTimeout
         
     
-    def __sendRequest(self, typeR,route:str, params = None) -> Union[requests.Response,None]:
+    def __sendRequest(self, typeR,route:str, params:Union[dict,None] = None) -> Union[requests.Response,None]:
         """
         Return : dict of the response data if success, False otherwise.
         """
@@ -79,8 +80,24 @@ class RunControl:
         """
         data = self.__sendRequest("GET","/appState")
         return data
-
     
+    def change_config(self,configName:str) -> bool:
+        """
+        Checks first if there is an ongoing run. If it is, return False, else return True.
+        
+        Parameters:
+        -----------
+        configName :
+            The name of the configuration file.
+        """
+        # check if runOngoing
+        if self.getState()["runOngoing"]:
+            print("A run has already started, please shutdown the run before changing the configuration file.") 
+            return False 
+        
+        return self.__sendRequest("GET", "/initConfig", {"configName" : configName, "bot": True} )
+
+        
 def example():
     control = RunControl(baseUrl = "http://faser-daqvm-000.cern.ch:5000")
     control.initialise()

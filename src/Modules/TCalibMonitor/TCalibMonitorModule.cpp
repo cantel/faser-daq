@@ -208,12 +208,12 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
       int chipcnt(0);
       for(auto hit : hits){ 
         for(auto h : hit){ 
-          int strip = (int)h.first*module;		  
+          int strip = (int)h.first;		  
           int link = (int)(chipcnt/6);		  
           int ichip = link > 0 ? chipcnt - 6 : chipcnt;
           int ith=0; //placeholder, how do i get threshold from sctevent? or is this 2 different m_hits?
           std::string hname_mod_thr_hits = "maskscan_mod"+std::to_string(module)+"_thr"+std::to_string(0);
-          m_histogrammanager->fill2D(hname_mod_thr_hits, strip, link, 1);
+          m_histogrammanager->fill2D(hname_mod_thr_hits, strip+(128*module), link, 1);
           //m_hits[ith][imodule][link][ichip][strip]++;		
               }
         chipcnt++;

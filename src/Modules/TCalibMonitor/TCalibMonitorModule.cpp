@@ -171,34 +171,34 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
       uint8_t module = sctEvent->GetModuleID();
       auto allHits = sctEvent->GetHits();
 
-      if (physicsTrig && m_lhc_physics_mode) { // only selected physics triggered events during LHC collisions
-        //std::string hname_hitp = m_prefix_hname_hitp+std::to_string(sctEvent->GetModuleID());
-        for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
-          auto hitsPerChip1 = allHits[chipIdx];
-          for (auto hit1 : hitsPerChip1){ // hit is an std::pair<uint8 strip, uint8 pattern>
-            if ( hit1.second == 7 ) continue;
-            unsigned chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx;
-            m_histogrammanager->fill2D("hitmap_physics", module, chipIdx, 1);
-            m_histogrammanager->fill2D("hitmap_physics", module, chipIdx2, 1);
-          }
-        }
+      // if (physicsTrig && m_lhc_physics_mode) { // only selected physics triggered events during LHC collisions
+      //   //std::string hname_hitp = m_prefix_hname_hitp+std::to_string(sctEvent->GetModuleID());
+      //   for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
+      //     auto hitsPerChip1 = allHits[chipIdx];
+      //     for (auto hit1 : hitsPerChip1){ // hit is an std::pair<uint8 strip, uint8 pattern>
+      //       if ( hit1.second == 7 ) continue;
+      //       unsigned chipIdx2 = kCHIPS_PER_MODULE - 1 - chipIdx;
+      //       m_histogrammanager->fill2D("hitmap_physics", module, chipIdx, 1);
+      //       m_histogrammanager->fill2D("hitmap_physics", module, chipIdx2, 1);
+      //     }
+      //   }
 
-      }
+      // }
 
 
   //uint8_t module = sctEvent->GetModuleID();
-    if (randTrig) {
-          for ( unsigned chipIdx = 0; chipIdx < 12; chipIdx++) {
-            auto hitsPerChip = allHits[chipIdx];
-            for (auto hit : hitsPerChip){
-                std::bitset<3> bitset_hitp(hit.second);
-                m_histogrammanager->fill("hitpattern_random", bitset_hitp.to_string());
-                if ( hit.second == 7 || hit.second == 0 ) continue;
-                  m_histogrammanager->fill2D("hitmap_random", module, chipIdx, 1);
+    // if (randTrig) {
+    //       for ( unsigned chipIdx = 0; chipIdx < 12; chipIdx++) {
+    //         auto hitsPerChip = allHits[chipIdx];
+    //         for (auto hit : hitsPerChip){
+    //             std::bitset<3> bitset_hitp(hit.second);
+    //             m_histogrammanager->fill("hitpattern_random", bitset_hitp.to_string());
+    //             if ( hit.second == 7 || hit.second == 0 ) continue;
+    //               m_histogrammanager->fill2D("hitmap_random", module, chipIdx, 1);
             
-            }
-          }
-        }
+    //         }
+    //       }
+    //     }
 
     	
     if (sctEvent != nullptr){
@@ -214,7 +214,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
           int ichip = link > 0 ? chipcnt - 6 : chipcnt;
           int ith=0; //placeholder, how do i get threshold from sctevent? or is this 2 different m_hits?
           std::string hname_mod_thr_hits = "maskscan_mod"+std::to_string(module)+"_thr"+std::to_string(0);
-          m_histogrammanager->fill2D(hname_mod_thr_hits, strip+(128*module), link, 1);
+          m_histogrammanager->fill2D(hname_mod_thr_hits, strip+(128*ichip), link, 1);
           //m_hits[ith][imodule][link][ichip][strip]++;		
               }
         chipcnt++;
@@ -230,12 +230,9 @@ void TCalibMonitorModule::register_hists() {
   m_histogrammanager->registerHistogram("payloadsize", "payload size [bytes]", 0, MAXFRAGSIZE/50, MAXFRAGSIZE/2000,  Axis::Range::EXTENDABLE, m_PUBINT*10);
 
   m_histogrammanager->registerHistogram("bcid", "BCID", -0.5, 3564.5, 3565, 1800);
-  m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
-  m_histogrammanager->register2DHistogram("hitmap_random", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
 
   //Attempt m_hits storage
-  m_histogrammanager->register2DHistogram("hitmap_physics_th0", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
-
+ 
   std::vector<std::string> trb_error_categories = {"TRBError", "ModuleError", "NoEventID", "NoBCID", "NoCRC", "MissingFrames", "UnrecognizedFrames", "ModuleDecodeError"};
   m_histogrammanager->registerHistogram("track_data_error_types", "error type", trb_error_categories, m_PUBINT);
 

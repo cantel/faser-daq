@@ -49,6 +49,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
     return;
   }
 
+  //m_trackerdataFragment unpack
   bool randTrig(false);
   bool physicsTrig(false);
   auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
@@ -58,6 +59,17 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
     if (m_tlbdataFragment->tbp() & 0x10) randTrig = true;
     if ((m_tlbdataFragment->tbp()&0xf) & m_physics_trigbits) physicsTrig=true;
   }
+
+  fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
+  if ( fragmentUnpackStatus ) {
+    WARNING("Unpacking error for tracker fragment. Skipping event!");
+    return;
+  }
+
+  /*replace fragmentid with boardid in tobias' code; trackermonitor; replace sourceid with boardid with 0-8(main tracker stations),11,12,13(ift)
+  TRBRECIEVER example for boardid
+  */
+
 
 
   if ( m_trackerdataFragment ){

@@ -26,6 +26,22 @@ TCalibMonitorModule::TCalibMonitorModule(const std::string& n): MonitorBaseModul
       m_physics_trigbits = cfg_trigbits_select;
    else m_physics_trigbits=0xf;
 
+  auto cfg_stationID = cfg["stationID"];
+  if (cfg_stationID != "" && cfg_stationID != nullptr) {
+    DEBUG("read station " << cfg_stationID << " from config");
+    m_stationID = cfg_stationID;
+  }
+  else m_stationID = 0;
+
+   try {
+    m_trb_ids = m_map_trb_ids.at(m_stationID);
+    }
+    catch (const std::out_of_range &e) {
+      ERROR("Configured station ID "<<static_cast<int>(m_stationID)<<" does not exist. Check your configuration file.");
+      throw MonitorBase::ConfigurationIssue(ERS_HERE, "Exiting now as I don't know which station to monitor.");
+    }
+
+
 }
 
 TCalibMonitorModule::~TCalibMonitorModule() { 
@@ -50,7 +66,8 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
   }
 
   //m_trackerdataFragment unpack
-  auto trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
+  for ( auto TRBBoardId : m_trb_ids ) {
+  auto trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);}
 
   /*bool randTrig(false);
   bool physicsTrig(false);

@@ -36,6 +36,9 @@ class TCalibMonitorModule : public MonitorBaseModule {
  private:
   uint16_t m_bcid;
   uint32_t m_l1id;
+  uint8_t m_stationID = 0;
+  std::array<uint8_t,3> m_trb_ids;  // filled at initialize
+  
   uint16_t mapline;
   uint16_t mapline2;
   const std::string m_prefix_hname_hitp;

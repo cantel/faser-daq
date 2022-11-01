@@ -26,20 +26,20 @@ TCalibMonitorModule::TCalibMonitorModule(const std::string& n): MonitorBaseModul
       m_physics_trigbits = cfg_trigbits_select;
    else m_physics_trigbits=0xf;
 
-  auto cfg_stationID = cfg["stationID"];
-  if (cfg_stationID != "" && cfg_stationID != nullptr) {
-    DEBUG("read station " << cfg_stationID << " from config");
-    m_stationID = cfg_stationID;
-  }
-  else m_stationID = 0;
+  // auto cfg_stationID = cfg["stationID"];
+  // if (cfg_stationID != "" && cfg_stationID != nullptr) {
+  //   DEBUG("read station " << cfg_stationID << " from config");
+  //   m_stationID = cfg_stationID;
+  // }
+  // else m_stationID = 0;
 
-   try {
-    m_trb_ids = m_map_trb_ids.at(m_stationID);
-    }
-    catch (const std::out_of_range &e) {
-      ERROR("Configured station ID "<<static_cast<int>(m_stationID)<<" does not exist. Check your configuration file.");
-      throw MonitorBase::ConfigurationIssue(ERS_HERE, "Exiting now as I don't know which station to monitor.");
-    }
+  //  try {
+  //   m_trb_ids = m_map_trb_ids.at(m_stationID);
+  //   }
+  //   catch (const std::out_of_range &e) {
+  //     ERROR("Configured station ID "<<static_cast<int>(m_stationID)<<" does not exist. Check your configuration file.");
+  //     throw MonitorBase::ConfigurationIssue(ERS_HERE, "Exiting now as I don't know which station to monitor.");
+  //   }
 
 
 }
@@ -66,10 +66,11 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
   }
 
   //m_trackerdataFragment unpack
-  for ( auto TRBBoardId : m_trb_ids ) {
-  auto trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);}
 
-  /*bool randTrig(false);
+  // for ( auto TRBBoardId : m_trb_ids ) {
+  // auto trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);}
+
+  bool randTrig(false);
   bool physicsTrig(false);
   auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
   if ( fragmentUnpackStatus ) {
@@ -83,7 +84,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
   if ( fragmentUnpackStatus ) {
     WARNING("Unpacking error for tracker fragment. Skipping event!");
     return;
-  }*/
+  }
 
   /*replace fragmentid with boardid in tobias' code; trackermonitor; replace sourceid with boardid with 0-8(main tracker stations),11,12,13(ift)
   TRBRECIEVER example for boardid
@@ -170,7 +171,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
       uint8_t module = sctEvent->GetModuleID();
       auto allHits = sctEvent->GetHits();
 
-      //if (physicsTrig && m_lhc_physics_mode) { // only selected physics triggered events during LHC collisions
+      if (physicsTrig && m_lhc_physics_mode) { // only selected physics triggered events during LHC collisions
         //std::string hname_hitp = m_prefix_hname_hitp+std::to_string(sctEvent->GetModuleID());
         for ( unsigned chipIdx = 0; chipIdx < (unsigned)kCHIPS_PER_MODULE*0.5; chipIdx++) {
           auto hitsPerChip1 = allHits[chipIdx];
@@ -182,11 +183,11 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
           }
         }
 
-      //}
+      }
 
 
   //uint8_t module = sctEvent->GetModuleID();
-    //if (randTrig) {
+    if (randTrig) {
           for ( unsigned chipIdx = 0; chipIdx < 12; chipIdx++) {
             auto hitsPerChip = allHits[chipIdx];
             for (auto hit : hitsPerChip){
@@ -197,7 +198,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
             
             }
           }
-        //}
+        }
 
     	
     if (sctEvent != nullptr){

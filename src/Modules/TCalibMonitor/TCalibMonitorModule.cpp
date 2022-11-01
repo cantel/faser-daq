@@ -34,7 +34,7 @@ TCalibMonitorModule::TCalibMonitorModule(const std::string& n): MonitorBaseModul
   else m_stationID = 0;
 
    try {
-    auto m_trb_ids = m_map_trb_ids.at(m_stationID);
+    m_trb_ids = m_map_trb_ids.at(m_stationID);
     }
     catch (const std::out_of_range &e) {
       ERROR("Configured station ID "<<static_cast<int>(m_stationID)<<" does not exist. Check your configuration file.");

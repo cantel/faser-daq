@@ -50,7 +50,9 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
   }
 
   //m_trackerdataFragment unpack
-  bool randTrig(false);
+  auto trackerDataFragment = get_tracker_data_fragment(eventBuilderBinary, SourceIDs::TrackerSourceID + TRBBoardId);
+
+  /*bool randTrig(false);
   bool physicsTrig(false);
   auto fragmentUnpackStatus = unpack_full_fragment( eventBuilderBinary, SourceIDs::TriggerSourceID );
   if ( fragmentUnpackStatus ) {
@@ -64,7 +66,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
   if ( fragmentUnpackStatus ) {
     WARNING("Unpacking error for tracker fragment. Skipping event!");
     return;
-  }
+  }*/
 
   /*replace fragmentid with boardid in tobias' code; trackermonitor; replace sourceid with boardid with 0-8(main tracker stations),11,12,13(ift)
   TRBRECIEVER example for boardid
@@ -189,7 +191,7 @@ void TCalibMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &even
       int chipcnt(0);
       for(auto hit : hits){ 
         for(auto h : hit){ 
-          int strip = (int)h.first;		  
+          int strip = (int)h.first*module;		  
           int link = (int)(chipcnt/6);		  
           int ichip = link > 0 ? chipcnt - 6 : chipcnt;
           int ith=0; //placeholder, how do i get threshold from sctevent? or is this 2 different m_hits?
@@ -242,7 +244,7 @@ void TCalibMonitorModule::register_hists() {
 
 /*
 
-void TCalibMonitorModule::foobar(const std::string &arg) {
+void TCalibMonitorModule::foobar(const std::string &arg) {'
   ERS_INFO("Inside custom command. Got argument: " << arg);
 }
 

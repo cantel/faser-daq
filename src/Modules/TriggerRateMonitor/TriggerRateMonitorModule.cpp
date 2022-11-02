@@ -11,9 +11,8 @@
 
 #include "TriggerRateMonitorModule.hpp"
 
-#define MAX_TRIG_ITEMS 6
 #define MASK_ECR 0xFFFFFFFFFF000000
-#define _PERCENT 100
+#define _PERCENT 100.0
 
 using namespace std::chrono_literals;
 using namespace std::chrono;
@@ -50,6 +49,22 @@ void TriggerRateMonitorModule::start(unsigned int run_num){
   m_total_unvetoed_events = 0;
 }
 
+void TriggerRateMonitorModule::update_trigitem_mon(uint8_t idx){
+
+   auto tbp = m_tlbmonitoringFragment->tbp(idx);
+   auto tap = m_tlbmonitoringFragment->tap(idx);
+   auto tav = m_tlbmonitoringFragment->tav(idx);
+
+   // update tbp,tap & tav metrics
+   *(m_tbp_metrics.at(idx))+=tbp;
+   *(m_tap_metrics.at(idx))+=tap;
+   *(m_tav_metrics.at(idx))+=tav;
+
+   // update trig item deadtime
+   std::atomic<float>* dt_metric_ptr = m_trigitem_deadtime_metrics.at(idx);
+   tap>0? *dt_metric_ptr = ((float)(tap-tav)/(float)tap)*_PERCENT:*dt_metric_ptr=0;
+}
+
 void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
 
   auto evtHeaderUnpackStatus = unpack_event_header(eventBuilderBinary);
@@ -80,37 +95,15 @@ void TriggerRateMonitorModule::monitor(DataFragment<daqling::utilities::Binary> 
     m_previous_evt_cnt = 0;
     m_ECR_cnt = ECR_cnt;
   }
-  //m_total_unvetoed_events = (m_tlbmonitoringFragment->event_id() - m_previous_evt_cnt);
-  //m_total_unvetoed_events += deadtime_veto_cnt + busy_veto_cnt + rate_limiter_veto_cnt + bcr_veto_cnt + digi_busy_cnt;
   m_total_unvetoed_events = m_tlbmonitoringFragment->tap_ORed();
-  //m_previous_evt_cnt = m_tlbmonitoringFragment->event_id();
 
   // trigger counts
   // --- 
   m_tapORed += m_tlbmonitoringFragment->tap_ORed();
   m_tavORed += m_tlbmonitoringFragment->tav_ORed();
-  m_tbp0 += m_tlbmonitoringFragment->tbp(0);
-  m_tbp1 += m_tlbmonitoringFragment->tbp(1);
-  m_tbp2 += m_tlbmonitoringFragment->tbp(2);
-  m_tbp3 += m_tlbmonitoringFragment->tbp(3);
-  m_tbp4 += m_tlbmonitoringFragment->tbp(4);
-  m_tbp5 += m_tlbmonitoringFragment->tbp(5);
-  // --- 
-  m_tap0 += m_tlbmonitoringFragment->tap(0);
-  m_tap1 += m_tlbmonitoringFragment->tap(1);
-  m_tap2 += m_tlbmonitoringFragment->tap(2);
-  m_tap3 += m_tlbmonitoringFragment->tap(3);
-  m_tap4 += m_tlbmonitoringFragment->tap(4);
-  m_tap5 += m_tlbmonitoringFragment->tap(5);
-  // -- 
-  m_tav0 += m_tlbmonitoringFragment->tav(0);
-  m_tav1 += m_tlbmonitoringFragment->tav(1);
-  m_tav2 += m_tlbmonitoringFragment->tav(2);
-  m_tav3 += m_tlbmonitoringFragment->tav(3);
-  m_tav4 += m_tlbmonitoringFragment->tav(4);
-  m_tav5 += m_tlbmonitoringFragment->tav(5);
 
   for ( uint8_t i = 0; i < MAX_TRIG_ITEMS; i++ ){
+    update_trigitem_mon(i);
     m_histogrammanager->fill("tlb_tbp_counts", i, float(m_tlbmonitoringFragment->tbp(i)));
     m_histogrammanager->fill("tlb_tap_counts", i, float(m_tlbmonitoringFragment->tap(i)));
     m_histogrammanager->fill("tlb_tav_counts", i, float(m_tlbmonitoringFragment->tav(i)));
@@ -222,6 +215,13 @@ void TriggerRateMonitorModule::register_metrics() {
   registerVariable(m_tav3, "TAV3Rate", daqling::core::metrics::RATE);
   registerVariable(m_tav4, "TAV4Rate", daqling::core::metrics::RATE);
   registerVariable(m_tav5, "TAV5Rate", daqling::core::metrics::RATE);
+
+  // per trigger item deadtime
+  registerVariable(m_tav0_deadtime, "TAV0DeadtimePercentage");
+  registerVariable(m_tav1_deadtime, "TAV1DeadtimePercentage");
+  registerVariable(m_tav2_deadtime, "TAV2DeadtimePercentage");
+  registerVariable(m_tav3_deadtime, "TAV3DeadtimePercentage");
+  registerVariable(m_tav4_deadtime, "TAV4DeadtimePercentage");
 
   //veto counters
   registerVariable(m_deadtime_veto, "deadtimeVetoRate", daqling::core::metrics::RATE);

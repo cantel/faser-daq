@@ -19,7 +19,6 @@ from anytree.importer import DictImporter
 from flask_socketio import SocketIO
 from keycloak import Client
 from datetime import datetime
-from werkzeug.utils import secure_filename
 from copy import deepcopy
 from pathlib import Path
 import platform
@@ -290,64 +289,16 @@ def executeCommROOT(action:str, reqDict:dict):
                 break  # if one step doesn't reach the correct state, end command loop. 
 
     elif action == "START":
-
         runNumber = 1000000000 # run number for local run
         runType = reqDict.get("runType","")
         runComment = reqDict.get("runComment","Test")[:500]
-        version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
-        seqnumber = reqDict.get("seqnumber",None)
-        seqstep = reqDict.get("seqstep",0)
-        seqsubstep = reqDict.get("seqsubstep",0)
-        config = json.loads(r2.get("config"))
-        detList = r2.get("detList")
-
         if not localOnly:
-            rsURL = 'http://faser-runnumber.web.cern.ch/NewRunNumber'
-            if testMode:
-                rsURL = "http://faser-daq-001.cern.ch:5000/NewRunNumber"
-            try : 
-                res = requests.post(rsURL,
-                        auth=(run_user,run_pw),
-                        json = {
-                            'version':    version,
-                            'type':       runType,
-                            'username':       os.getenv("USER"),
-                            'startcomment':   runComment,
-                            'seqnumber': seqnumber,
-                            'seqstep': seqstep,
-                            'seqsubstep': seqsubstep,
-                            'detectors':  detList,
-                            'configName': configName,
-                            'configuration': config
-                        })
-                if res.status_code != 201 :
-                    logAndEmit("general", "ERROR", "Failed to get run number: "+res.text )
-                    setTransitionFlag(0)
-                    return "Error: Failed to get run number: "+res.text
-                else:
-                    try:
-                        runNumber=int(res.text)
-                    except ValueError:
-                        logAndEmit("ERROR","Failed to get run number: "+res.text)
-                        setTransitionFlag(0)
-                        return "Error: Failed to get run number: "+res.text
-            except requests.exceptions.ConnectionError:
-                logAndEmit("general","Error","Could not connect to run service")
-                setTransitionFlag(0)
-                return "Error: Could not connect to run service"
-
-            if influxDB:
-                startMsg=runComment.replace('"',"'")
-                runData=f'runStatus,host={hostname} state="Started",comment="{startMsg}",runType="{runType}",runNumber={runNumber}'
-                r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
-                                auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
-                                data=runData,
-                                verify=False)
-                if r.status_code!=204:
-                    logAndEmit("General", "ERROR", "Failed to post end of run information to influxdb: "+r.text)
-                if configName.startswith("combined"):
-                    message(f"Run {runNumber} was started\nOperator: {runComment}")
-
+            try :
+                runNumber = send_start_to_runservice(runType=runType, runComment=runComment, reqDict=reqDict)
+                runNumber = int(runNumber)
+            except ValueError : # if runNumber is a error message
+                return runNumber 
+            
         # updating redis database        
         r2.set("runType", runType)
         r2.set("runComment", runComment)
@@ -359,52 +310,13 @@ def executeCommROOT(action:str, reqDict:dict):
         done = waitUntilCorrectState("running", serverConfig["timeout_rootCommands_secs"][action])
 
     elif action == "STOP":
-        runinfo = {}
         runComment = reqDict.get("runComment","Test")[:500]
         runNumber = r2.get("runNumber")
         runType = reqDict.get("runType","") 
-        runinfo["eventCounts"] = getEventCounts()
-        physicsEvents = runinfo["eventCounts"]["Events_sent_Physics"] # for influxDB
-
         r2.set("runComment", runComment)
         r2.set("runType", runType)
-
         if not localOnly:
-            stopMsg = {
-                "endcomment" :runComment,
-                "type": runType,
-                "runinfo": runinfo
-            }
-            rsURL = f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}'
-            if testMode:
-                rsURL = f"http://faser-daq-001.cern.ch:5000/AddRunInfo/{runNumber}"
-            try : 
-                res = requests.post(rsURL,
-                        auth=(run_user,run_pw),
-                        json = stopMsg)
-
-                if res.status_code != 200 :
-                    logAndEmit("general", "ERROR", "Failed to register end of run information: "+r.text )
-                    sendInfoToSnackBar( "error", "Failed to register end of run information: "+r.text)
-
-            except requests.exceptions.ConnectionError:
-                logAndEmit("general","Error","Could not connect to run service")
-                sendInfoToSnackBar( "error","Could not connect to run service",)
-            
-            if influxDB:
-                stopComment = runComment.replace('"',"'") # necessary for the URL 
-                runData=f'runStatus,host={hostname} state="Stopped",comment="{stopComment}",runType="{runType}",runNumber={runNumber},physicsEvents={physicsEvents}'
-                r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
-                                auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
-                                data=runData,
-                                verify=False)
-                print("Posting to influx:",runData)
-                if r.status_code!=204:
-                    logAndEmit("Failed to post end of run information to influxdb: "+r.text)
-                    sendInfoToSnackBar("error","Failed to post end of run information to influxdb: "+r.text )
-                if configName.startswith("combined"):
-                    message(f"Run {runNumber} stopped\nOperator: {runComment}")
-
+            send_stop_to_runservice(runComment=runComment, runNumber=runNumber)
         try : 
             r=sysConfig.executeAction("stop")
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
@@ -415,33 +327,26 @@ def executeCommROOT(action:str, reqDict:dict):
             
     elif action == "SHUTDOWN":
         steps = [("unconfigure", "booted"), ("remove", "not_added")]
+        
+        if r2.get("runState") != "READY" and not localOnly:
+            runComment = "Run was shutdown"
+            runType = r2.get("runType")
+            runNumber = r2.get("runNumber")
+            r2.set("runComment", runComment)
+            send_stop_to_runservice(runComment=runComment, runType=runType, runNumber=runNumber, forceShutdown=True)
+            
         for step,nextState in steps : 
             r = sysConfig.executeAction(step)
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
             done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action])
+    
         if not done : 
-            print("not done")
+            print("Force shutdown")
             r = sysConfig.executeAction("remove")
-
-            if influxDB:
-                eventCounts = getEventCounts()
-                physicsEvents = eventCounts["Events_sent_Physics"] # for influxDB
-
-                runData=f'runStatus,host={hostname} state="Shutdown",comment="Run was shut down",runNumber={runNumber},physicsEvents={physicsEvents}'
-                r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
-                                auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
-                                data=runData,
-                                verify=False)
-                if r.status_code!=204:
-                    logAndEmit("General","ERROR","Failed to post end of run information to influxdb: "+r.text)
-                print("Sent to influx db because of force shutdown",runData)
-                if configName.startswith("combined"):
-                    message(f"Run {runNumber} was shutdown")
-            done = True
-        
-        # to be sure shutdown reset everything
-        updateRedis(status="DOWN")
-        socketio.emit("runStateChng","DOWN", broadcast=True)
+            done = True        
+            # to be sure shutdown reset everything
+            updateRedis(status="DOWN")
+            socketio.emit("runStateChng","DOWN", broadcast=True)
 
     elif action == "PAUSE":
         r=sysConfig.executeAction("disableTrigger")
@@ -472,6 +377,133 @@ def executeCommROOT(action:str, reqDict:dict):
         updateRedis(status=state)
         return "Error: The command took to long"
     return "Success"
+
+def post_influxDB_mattermost(action:str,configName,runComment,runType, runNumber, physicsEvents=None):
+    """
+    Post start, stop and shutdown information on influxDB and (combined run), post a message on mattermost
+    """
+    runData =""
+    
+    if action=="start":
+        runData=f'runStatus,host={hostname} state="Started",comment="{runComment}",runType="{runType}",runNumber={runNumber}'
+    elif action =="stop":
+        runData=f'runStatus,host={hostname} state="Stopped",comment="{runComment}",runType="{runType}",runNumber={runNumber},physicsEvents={physicsEvents}'
+    elif action == "shutdown":
+        runData=f'runStatus,host={hostname} state="Shutdown",comment="Run was shutdown",runNumber={runNumber},physicsEvents={physicsEvents}'
+        
+    r=requests.post(f'https://dbod-faser-influx-prod.cern.ch:8080/write?db={influxDB["INFLUXDB"]}',
+                        auth=(influxDB["INFLUXUSER"],influxDB["INFLUXPW"]),
+                        data=runData,
+                        verify=False)
+    if r.status_code!=204:
+        logAndEmit("Failed to post end of run information to influxdb: "+r.text)
+        sendInfoToSnackBar("error","Failed to post end of run information to influxdb: "+r.text )
+    if configName.startswith("combined"):
+        if action == "stop" : message(f"Run {runNumber} stopped\nOperator: {runComment}")
+        elif action == "start" : message(f"Run {runNumber} was started\nOperator: {runComment}")
+        elif action == "shutdown" : message(f"Run {runNumber} was shutdown ")
+
+
+def send_start_to_runservice(runType:str,runComment:str, reqDict:dict) -> int:
+    """
+    Parameters
+    ----------
+    - runType : type of the run
+    - runComment : run comment
+    - reqDict : dictionnary of all the run service-related info    
+    
+    Return
+    --------
+    - Run Number provided by the run service
+    """
+    version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
+    seqnumber = reqDict.get("seqnumber",None)
+    seqstep = reqDict.get("seqstep",0)
+    seqsubstep = reqDict.get("seqsubstep",0)
+    config = json.loads(r2.get("config"))
+    detList = r2.get("detList")
+    configName = r2.get("loadedConfig")
+    
+    rsURL =  "http://faser-runnumber.web.cern.ch/NewRunNumber"
+    if testMode : 
+        rsURL = "http://faser-daq-001.cern.ch:5000/NewRunNumber"
+    try : 
+        res = requests.post(rsURL,auth=(run_user,run_pw),
+            json = {
+                'version':    version,
+                'type':       runType,
+                'username':       os.getenv("USER"),
+                'startcomment':   runComment,
+                'seqnumber': seqnumber,
+                'seqstep': seqstep,
+                'seqsubstep': seqsubstep,
+                'detectors':  detList,
+                'configName': configName,
+                'configuration': config
+            })
+        if res.status_code != 201 :
+            logAndEmit("general", "ERROR", "Failed to get run number: "+res.text )
+            setTransitionFlag(0)
+            return "Error: Failed to get run number: "+res.text
+        else:
+            try:
+                runNumber=int(res.text)
+            except ValueError:
+                logAndEmit("ERROR","Failed to get run number: "+res.text)
+                setTransitionFlag(0)
+                return "Error: Failed to get run number: "+res.text
+    except requests.exceptions.ConnectionError:
+        logAndEmit("general","Error","Could not connect to run service")
+        setTransitionFlag(0)
+        return "Error: Could not connect to run service"
+    print("Fonctionne")
+    if influxDB : 
+        post_influxDB_mattermost("start", configName, runComment, runType, runNumber)
+
+
+def send_stop_to_runservice(runComment, runType, runNumber, forceShutdown=False):
+    """
+    Parameters
+    ----------
+    - runType : type of the run
+    - runComment : run comment
+    - runNumber : run number
+    - forceShutdown : if the function is used for a "SHUTDOWN" root command.    
+    """
+    runinfo = {}
+    configName = r2.get("loadedConfig")
+    runinfo["eventCounts"] = getEventCounts()
+    physicsEvents = runinfo["eventCounts"]["Events_sent_Physics"] # for influxDB
+    
+    if forceShutdown :
+        runComment = "Run was shut down"
+    stopMsg = {
+                "endcomment" :runComment,
+                "type": runType,
+                "runinfo": runinfo
+            }
+    rsURL = f'http://faser-runnumber.web.cern.ch/AddRunInfo/{runNumber}'
+    if testMode:
+        rsURL = f"http://faser-daq-001.cern.ch:5000/AddRunInfo/{runNumber}"
+    try : 
+        res = requests.post(rsURL,
+                auth=(run_user,run_pw),
+                json = stopMsg)
+
+        if res.status_code != 200 :
+            logAndEmit("general", "ERROR", "Failed to register end of run information: "+r.text )
+            sendInfoToSnackBar( "error", "Failed to register end of run information: "+r.text)
+
+    except requests.exceptions.ConnectionError:
+        logAndEmit("general","Error","Could not connect to run service")
+        sendInfoToSnackBar( "error","Could not connect to run service")
+    
+    if influxDB:
+        if forceShutdown : 
+            post_influxDB_mattermost("shutdown", configName, runComment, runType, runNumber, physicsEvents)  
+        else :
+            post_influxDB_mattermost("stop", configName, runComment, runType, runNumber, physicsEvents)
+ 
 
 def sendInfoToSnackBar(typeM:str, message:str):
     """

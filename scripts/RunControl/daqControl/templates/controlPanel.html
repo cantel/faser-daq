@@ -29,7 +29,7 @@
         <v-btn :loading="processing['ECR']" @click="sendROOTCommand('ECR')" class="my-1 mx-1" depressed
           color="success" :disabled="!isROOTButtonEnabled('ECR')"> ECR </v-btn>
       </v-row>
-      <v-row class="text-center mx-1 my-1" v-if="isActiveNode()">
+      <v-row class="text-center mx-1 my-1" v-if="isActiveNode() && expert_mode">
         <v-btn :loading="processing['add']" @click="executeCommand('add')"
           :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('add')" class="my-1 mx-1" depressed
           color="success"> add </v-btn>

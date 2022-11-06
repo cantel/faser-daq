@@ -196,6 +196,7 @@ var app = new Vue({
   el: "#app",
   vuetify: new Vuetify(),
   data: {
+    expert_mode : false,
     drawer: false, // if the tree view is closed or not
     isDrawerLocked: false, // if the tree view is in locked state
     c_configDirs: [],

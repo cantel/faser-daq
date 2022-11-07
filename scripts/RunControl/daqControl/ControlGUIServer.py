@@ -189,7 +189,6 @@ def reinitTree(configJson, oldRoot=None):
             base_dir_uri = (Path(configPath).as_uri() + "/")
             jsonref_obj = jsonref.load(f, base_uri=base_dir_uri, loader=jsonref.JsonLoader())
  
-
         if ("configuration" in jsonref_obj):  # faser configuration files have "configuration" but not demo-tree
             # schema with references (version >= 10)
             configuration = deepcopy(jsonref_obj)["configuration"]
@@ -316,7 +315,7 @@ def executeCommROOT(action:str, reqDict:dict):
         r2.set("runComment", runComment)
         r2.set("runType", runType)
         if not localOnly:
-            send_stop_to_runservice(runComment=runComment, runNumber=runNumber)
+            send_stop_to_runservice(runComment=runComment, runNumber=runNumber, runType=runType)
         try : 
             r=sysConfig.executeAction("stop")
             logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
@@ -423,6 +422,7 @@ def send_start_to_runservice(runType:str,runComment:str, reqDict:dict) -> int:
     config = json.loads(r2.get("config"))
     detList = r2.get("detList")
     configName = r2.get("loadedConfig")
+    runNumber = None
     
     rsURL =  "http://faser-runnumber.web.cern.ch/NewRunNumber"
     if testMode : 
@@ -459,7 +459,7 @@ def send_start_to_runservice(runType:str,runComment:str, reqDict:dict) -> int:
     print("Fonctionne")
     if influxDB : 
         post_influxDB_mattermost("start", configName, runComment, runType, runNumber)
-
+    return runNumber
 
 def send_stop_to_runservice(runComment, runType, runNumber, forceShutdown=False):
     """

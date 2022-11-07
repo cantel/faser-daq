@@ -5,7 +5,7 @@ flask
 flask_socketio
 flask_cors
 anytree
-jsonref
+jsonref==0.3.0
 redis
 requests
 keycloak

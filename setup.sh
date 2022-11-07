@@ -1,4 +1,3 @@
-
 # For now the setup is hardcoded - down the line we might need to auto generate som
 
 #determine top level directory from where setup script is located
@@ -16,7 +15,7 @@ fi
 pushd . > /dev/null
 FASERTOP="${BASH_SOURCE[0]}"
 if ([ -h "${FASERTOP}" ]); then
-  while([ -h "${FASERTOP}" ]); do cd `dirname "$FASERTOP"`; 
+  while([ -h "${FASERTOP}" ]); do cd `dirname "$FASERTOP"`;
   FASERTOP=`readlink "${FASERTOP}"`; done
 fi
 cd `dirname ${FASERTOP}` > /dev/null
@@ -26,6 +25,7 @@ popd  > /dev/null
 echo "Setting up to run from ${FASERTOP}"
 if [ $# -eq 1 ]
 then
+source ${FASERTOP}/daqling/cmake/install.sh -d ${DAQLING_SPACK_REPO_PATH} -c ${FASERTOP}/configs/ -a
 source ${FASERTOP}/daqling/cmake/setup.sh ${DAQLING_SPACK_REPO_PATH} ${FASERTOP}/configs/
 else
 source ${FASERTOP}/daqling/cmake/setup.sh

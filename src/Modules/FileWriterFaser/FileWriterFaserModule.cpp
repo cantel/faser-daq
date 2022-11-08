@@ -225,7 +225,7 @@ void FileWriterFaserModule::runner() noexcept {
 }
 
 void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const size_t max_buffer_size,
-                               FileGenerator fg) const {
+                               FileGenerator fg) {
   size_t bytes_written = 0;
   std::ofstream out = fg.next();
   auto buffer = DataFragment<daqutils::Binary>();
@@ -233,6 +233,9 @@ void FileWriterFaserModule::flusher(const uint64_t chid, PayloadQueue &pq, const
   const auto flush = [&](DataFragment<daqutils::Binary> &data) {
     out.write(data.data<char *>(), static_cast<std::streamsize>(data.size()));
     if (out.fail()) {
+      m_status = STATUS_ERROR;
+      ERROR("Failed to write data for channel "<<chid<<" will bail out");
+      std::this_thread::sleep_for(2000ms);
       throw OfstreamFailed(ERS_HERE,chid,data.size());
     }
     m_channelMetrics.at(chid).bytes_written += data.size();

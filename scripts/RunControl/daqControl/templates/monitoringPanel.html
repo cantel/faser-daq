@@ -1,0 +1,21 @@
+<v-card tile elevation="1" class="mx-4 my-4">
+    <v-card-title> MONITORING <span class="mx-3" v-if="isActiveNode() ? !hasChildren(activeNode) : false">
+        <v-menu offset-y>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn depressed small dark color="teal" v-bind="attrs" v-on="on"> LOG </v-btn>
+          </template>
+          <v-list>
+            <v-list-item @click="openLogWindow()" :key="0">
+              <v-list-item-title>Live log</v-list-item-title>
+            </v-list-item>
+            <v-list-item :key="1" @click="openFullLog()">
+              <v-list-item-title>Full log</v-list-item-title>
+            </v-list-item>
+          </v-list>
+        </v-menu>
+      </span>
+    </v-card-title>
+    <v-card-text>
+      <monitoring_panel :p_on="runOnGoing"></monitoring_panel>
+    </v-card-text>
+  </v-card>

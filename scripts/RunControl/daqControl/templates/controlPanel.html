@@ -1,0 +1,66 @@
+<v-card :disabled="d_controlPanel" tile elevation="1" class="mx-4 my-4">
+    <v-card-title> CONTROL
+      <div class="mx-3 d-flex " v-if="c_loadedConfigName">
+        <h4>[[ c_loadedConfigName ]]: </h4>
+        <v-chip label :color="stateColors[runState]" class="mx-3"> [[ runState ]] </v-chip>
+        <v-icon v-if="modulesError['1'].length != 0" color="yellow darken-2">
+          mdi-alert-circle
+        </v-icon>
+        <v-icon v-if="modulesError['2'].length != 0" color="error">
+          mdi-alert-circle
+        </v-icon>
+      </div>
+    </v-card-title>
+    <v-card-text>
+      <v-row class="text-center mx-1 my-1">
+        <v-btn :loading="processing['INITIALISE']" @click="sendROOTCommand('INITIALISE')"
+          :disabled="!isROOTButtonEnabled('INITIALISE')" class="my-1 mx-1" depressed color="success"> INITIALISE
+        </v-btn>
+        <v-btn :loading="processing['START']" @click.stop="startRunDialog = !startRunDialog" class="my-1 mx-1"
+          depressed color="success" :disabled="!isROOTButtonEnabled('START')"> START </v-btn>
+        <v-btn :loading="processing['STOP']" @click.stop="endRunDialog = !endRunDialog" class="my-1 mx-1"
+          depressed color="error" :disabled="!isROOTButtonEnabled('STOP')"> STOP </v-btn>
+        <v-btn :loading="processing['SHUTDOWN']" @click="processShutdown" class="my-1 mx-1" depressed
+          color="error" :disabled="!isROOTButtonEnabled('SHUTDOWN')"> SHUTDOWN </v-btn>
+        <v-btn :loading="processing['PAUSE']" @click="sendROOTCommand('PAUSE')" class="my-1 mx-1" depressed
+          color="yellow darken-2" :disabled="!isROOTButtonEnabled('PAUSE')"> PAUSE </v-btn>
+        <v-btn :loading="processing['RESUME']" @click="sendROOTCommand('RESUME')" class="my-1 mx-1" depressed
+          color="success" :disabled="!isROOTButtonEnabled('RESUME')"> RESUME </v-btn>
+        <v-btn :loading="processing['ECR']" @click="sendROOTCommand('ECR')" class="my-1 mx-1" depressed
+          color="success" :disabled="!isROOTButtonEnabled('ECR')"> ECR </v-btn>
+      </v-row>
+      <v-row class="text-center mx-1 my-1" v-if="isActiveNode() && expert_mode">
+        <v-btn :loading="processing['add']" @click="executeCommand('add')"
+          :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('add')" class="my-1 mx-1" depressed
+          color="success"> add </v-btn>
+        <v-btn :loading="processing['boot']" @click="executeCommand('boot')" class="my-1 mx-1" depressed
+          :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('boot')" color="success"> boot </v-btn>
+        <v-btn :loading="processing['configure']" @click="executeCommand('configure')" class="my-1 mx-1" depressed
+          :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('configure')" color="success"> configure
+        </v-btn>
+        <v-btn :loading="processing['start']" @click="executeCommand('start')" class="my-1 mx-1" depressed
+          :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('start')" color="success"> start
+        </v-btn>
+        <v-btn :loading="processing['stop']" @click="executeCommand('stop')" class="my-1 mx-1" depressed
+          :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('stop')" color="yellow darken-2"> stop
+        </v-btn>
+        <v-btn :loading="processing['unconfigure']" @click="executeCommand('unconfigure')" class="my-1 mx-1"
+          depressed :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('unconfigure')"
+          color="success"> unconfigure </v-btn>
+        <v-btn :loading="processing['shutdown']" @click="executeCommand('shutdown')" class="my-1 mx-1" depressed
+          :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('shutdown')" color="success"> shutdown
+        </v-btn>
+        <v-btn :loading="processing['remove']" @click="executeCommand('remove')" class="my-1 mx-1" depressed
+          :disabled="!fsmRules[getNodeState(activeNode[0].name)].includes('remove')" color="success"> remove
+        </v-btn>
+      </v-row>
+      <v-row class="px-3 ">
+        <v-col cols="6">
+          <strong class="blue--text text--darken-4 mr-2">Run Type : </strong> [[ runType ]]
+        </v-col>
+        <v-col cols="6">
+          <strong class="blue--text text--darken-4 mr-2">Comment :</strong> [[ comment]]
+        </v-col>
+      </v-row> 
+    </v-card-text>
+  </v-card>

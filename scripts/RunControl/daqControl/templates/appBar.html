@@ -1,0 +1,58 @@
+<v-app-bar app>
+  <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+  <v-toolbar-title class="d-flex align-center"><img class="mr-2" width="100"
+      src="{{url_for('static', filename = 'img/faser.svg')}}"> Run Control
+  </v-toolbar-title>
+  <div class="links">
+    <a :href="histograms_link" target="_blank">Histograms</a>
+    <a href="https://faser-grafana.web.cern.ch/d/JLpZrdQGk/daq-status-overview?orgId=1&refresh=10s"
+      target="_blank">Grafana</a>
+  </div>
+
+  <v-menu offset-y>
+    <template v-slot:activator="{ on, attrs }">
+      <v-btn v-bind="attrs" :loading="c_configLoading" v-on="on" class="mx-4 my-2" depressed color="primary" small
+        :disabled="d_loadConfig">
+        load
+      </v-btn>
+    </template>
+    <v-list dense>
+      <v-list-item-group>
+        <v-list-item v-for="(item, index) in c_configDirs" @click="loadConfig(item)" :key="index">
+          <v-list-item-title> [[item]] </v-list-item-title>
+        </v-list-item>
+      </v-list-item-group>
+    </v-list>
+  </v-menu>
+
+  <v-menu offset-y>
+    <template v-slot:activator="{ on, attrs }">
+      <v-btn icon color="primary" dark v-bind="attrs" v-on="on">
+        <v-icon color="black"> mdi-cog </v-icon>
+      </v-btn>
+    </template>
+    <v-list>
+      <v-list-item>
+        <v-list-item-title>
+          <v-switch v-model="expert_mode" label="Expert Mode" hide-details dense></v-switch>
+        </v-list-item-title>
+      </v-list-item>
+    </v-list>
+  </v-menu>
+  <v-spacer></v-spacer>
+  <v-chip v-if="isCrash" dark label color="red" class="mx-3 px-10 py-5"> CRASH </v-chip>
+  <v-spacer>
+    <div v-if="localOnly" class="text-h4 red--text">LOCAL MODE</div>
+  </v-spacer>
+  <v-spacer></v-spacer>
+  <span>[[ whoInterlocked ]]</span>
+  <v-btn icon text small class="mx-1" :disabled="!logged">
+    <v-icon @click="interlock()"> [[ locked ? 'mdi-lock-off' : 'mdi-lock' ]]</v-icon>
+  </v-btn>
+
+  <v-btn icon text small class="mx-1">
+    <v-icon v-if="logged" @click="logout"> mdi-account-off</v-icon>
+    <v-icon v-else @click="login"> mdi-account</v-icon>
+  </v-btn>
+  Logged as : {{ usr }}
+</v-app-bar>

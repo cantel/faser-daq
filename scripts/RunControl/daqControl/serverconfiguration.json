@@ -1,0 +1,17 @@
+{
+  "SSO_enabled":1,
+  "serverlog_location_name":"./log/webinterfaceserver.log",
+  "callbackUri":"http://faser-daqvm-000.cern.ch:5000/login/callback",
+  "timeout_session_expiration_mins" : 120,
+  "timeout_interlock_secs" : 120,
+  "LOGOUT_URL":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout",
+  "timeout_rootCommands_secs": {
+    "INITIALISE": 15,
+    "START": 15,
+    "STOP" : 15,
+    "SHUTDOWN" : 2,
+    "PAUSE": 15,
+    "RESUME": 15,
+    "ECR": 15
+  }
+}

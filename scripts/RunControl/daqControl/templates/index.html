@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet" />
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.9/vuetify.min.css" integrity="sha512-dfYpXwhXA0XlbP7vg6SrgL/xGsfimfT14au6G2fb3KTixzcDVBUIMZQ3BleofdpDmC2PcAoT6gGGtzqjzV4PXA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <!-- <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vuetify/2.6.9/vuetify.min.js" integrity="sha512-f74JMYs0zU88Nkc6e0u53LXZl2tgO8K7vh0V3MulM/alK8zIMUdWUR6o8Mqy4kdDOds23JqazGFW3hcukYRW2Q==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <!-- <script defer src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script> -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.min.js" integrity="sha512-iqRVtNB+t9O+epcgUTIPF+nklypcR23H1yR1NFM9kffn6/iBhZ9bTB6oKLaGMv8JE9UgjcwfBFg/eHC/VMws+g==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js" defer></script>
+  <script src="{{  url_for('static', filename = 'js/info_panel.js')  }}" defer></script>
+  <script src="{{ url_for('static', filename = 'js/main.js') }}" defer></script>
+  <script src="https://cdn.plot.ly/plotly-cartesian-2.9.0.min.js"></script>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui" />
+  <title>Run Control</title>
+  <style>
+    .treeview {
+      font-size: small;
+    }
+
+
+    .scrollableDiv {
+      max-height: 500px;
+      overflow-x: hidden;
+      overflow-y: auto;
+    }
+
+    .metrics-panel {
+      width: 25%;
+      min-width: max-content;
+      max-width: 205px;
+      margin-top: 10px;
+      margin-left: 15px;
+      margin-right: 15px;
+      padding: 4px;
+      white-space: nowrap;
+    }
+
+    .links {
+      margin-left: 10px;
+      margin-right: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <v-app>
+
+      {% include 'treePanel.html' %}
+      
+      {% include 'appBar.html' %}
+
+      <v-main class="indigo lighten-5">
+        {% include 'controlPanel.html' %}
+
+        {% include 'monitoringPanel.html' %}
+
+        {% include 'infoPanel.html' %}
+        
+        {% include 'logPanel.html' %}
+
+        {% include 'dialogs.html' %}
+      </v-main>
+    </v-app>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+{
+  "fsm": {
+    "not_added": [
+      "add"
+    ],
+    "added": [
+      "boot",
+      "remove"
+    ],
+    "shutting": ["remove"],
+    "booted": [
+      "configure",
+      "shutdown",
+      "remove"
+    ],
+    "configuring": ["remove"],
+    "unconfiguring": ["remove"],
+    "ready": [
+      "start",
+      "unconfigure",
+      "shutdown",
+      "remove"
+    ],
+    "starting": ["remove"],
+    "stopping": ["remove"],
+    "running": [
+      "stop",
+      "pause",
+      "shutdown",
+      "disableTrigger",
+      "remove"
+    ],
+    "pausing": ["remove"],
+    "resuming": ["remove"],
+    "pausingTrigger" : ["remove"],
+    "enablingTrigger" : ["remove"],
+    "paused": [
+      "enableTrigger",
+      "remove",
+      "ECR"
+    ],
+    "sendingECR" : ["remove"],
+    "DOWN" : ["INITIALISE"],
+    "READY" : ["START", "SHUTDOWN"],
+    "RUN" : ["STOP", "PAUSE", "SHUTDOWN"],
+    "PAUSED":["RESUME", "STOP","ECR","SHUTDOWN"],
+    "IN TRANSITION": ["SHUTDOWN"]
+  },
+  "order": {
+    "start": [
+      "monitor",
+      "FW",
+      "EB",
+      "reciever",
+      "TKR",
+      "emulator",
+      "TG",
+      "TR"
+    ],
+    "stop": [
+      "TR",
+      "TG",
+      "emulator",
+      "TKR",
+      "reciever",
+      "EB",
+      "FW",
+      "monitor"
+    ]
+  }
+}

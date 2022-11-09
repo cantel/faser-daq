@@ -131,7 +131,7 @@ private:
 
   // Internals
   void flusher(const uint64_t chid, PayloadQueue &pq, const size_t max_buffer_size,
-               FileGenerator fg) const;
+               FileGenerator fg);
   std::map<uint64_t, Context> m_channelContexts;
   std::thread m_monitor_thread;
 };

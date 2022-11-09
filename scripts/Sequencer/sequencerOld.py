@@ -12,10 +12,6 @@ import requests
 import sys
 import time
 
-sys.path.append("../RunControl")
-
-from runcontrol import RunControl
-
 mattermost_hook=""
 
 if os.access("/etc/faser-secrets.json",os.R_OK):
@@ -48,7 +44,7 @@ def error(msg):
 
 
 class runner:
-    def __init__(self,config,runControl,seqnumber,seqstep):
+    def __init__(self,config,hostUrl,maxTransitionTime,seqnumber,seqstep):
         self.cfgFile=config["cfgFile"]
         self.runtype=config["runtype"]
         self.startcomment=config["startcomment"]
@@ -60,39 +56,56 @@ class runner:
         self.seqnumber=seqnumber
         self.seqstep=seqstep
         self.runnumber=None
-        self.rc=runControl
+        self.url=hostUrl
+        self.maxTransitionTime=maxTransitionTime
     
+    def doTransition(self,transition,transitionTarget,args):
+        result=requests.get(self.url+"/"+transition,params=args)
+        if result.status_code!=200 or result.text!="true": 
+            print(f"Failed to send <{transition}> transition")
+            return False
+        now=time.time()
+        while(time.time()-now<self.maxTransitionTime):
+            time.sleep(1)
+            state=requests.get(self.url+"/stateNow")
+            if state.status_code!=200: continue
+            state=state.json()
+            if state["globalStatus"]==transitionTarget: return True
+        print(f"Timeout in <{transition}> transition")
+        return False
     
     def initialize(self):
-        status=self.rc.change_config(self.cfgFile.replace(".json",""))
-        if not status: return False
-        return self.rc.initialise()
+        return self.doTransition(f"initialise/{self.cfgFile}","READY",None)
 
     def start(self):
-        return self.rc.start(self.runtype,
-                             self.startcomment,
-                             self.seqnumber,
-                             self.seqstep,
-                             0 # seqsubstep - not supported yet
-                         )
+        return self.doTransition(f"start","RUN",
+                                 {"runtype": self.runtype,
+                                  "startcomment": self.startcomment,
+                                  "seqnumber": self.seqnumber,
+                                  "seqstep": self.seqstep,
+                                  "seqsubstep": 0
+                              })
 
     def stop(self):
-        return self.rc.stop(self.runtype,self.endcomment)
+        return self.doTransition(f"stop","READY",
+                                 {"runtype": self.runtype,
+                                  "endcomment": self.endcomment,
+                              })
 
     def shutdown(self):
-        return self.rc.shutdown()
+        return self.doTransition(f"shutdown","DOWN",None)
 
 
     def checkState(self):
-     state=self.rc.getState()
-     return state["runState"],state["runNumber"]
+     state=requests.get(self.url+"/stateNow")
+     if state.status_code!=200: return "UNKNOWN",0
+     state=state.json()
+     return state["globalStatus"],state["runNumber"]
 
     def getEvents(self):
-        data=self.rc.getInfo("eventbuilder01")
-        if "Events_sent_Physics" in data:
-            return int(data["Events_sent_Physics"])
-        else:
-            return 0
+     response=requests.get(self.url+"/monitoring/eventCounts")
+     if response.status_code!=200: return 0
+     return response.json()
 
     def waitStop(self):
         now=time.time()
@@ -103,9 +116,9 @@ class runner:
                 return False
             self.runnumber=runnumber
             events=self.getEvents()
-            if events>=self.maxEvents: return True
+            if events["Events_sent_Physics"]>=self.maxEvents: return True
             if time.time()-now>self.maxRunTime: return True
-            print(f'Run {runnumber}, State: {state}, events: {events}, time: {time.time()-now} seconds')
+            print(f'Run {runnumber}, State: {state}, events: {events["Events_sent_Physics"]}, time: {time.time()-now} seconds')
             time.sleep(5)
 
     def run(self):
@@ -125,13 +138,13 @@ class runner:
             print("Failed to initialize")
             return False
         print("INITIALIZED")
-        time.sleep(1)
+
         rc=self.start()
         if not rc:
             print("Failed to start run")
             return False
         print("RUNNING")
-        time.sleep(5)
+
         rc=self.waitStop()
         if not rc:
             print("Failed to reach run conditions")
@@ -142,22 +155,16 @@ class runner:
             print("Failed to stop")
             return False
         print("STOPPED")
-        time.sleep(5)
+
         rc=self.shutdown()
         if not rc:
             print("Failed to shutdown - retry again in 10 seconds")
             time.sleep(10)
             rc=self.shutdown()
             if not rc:
-                print("Failed to shutdown - giving up")
+                printf("Failed to shutdown - giving up")
                 return False
         print("SHUTDOWN")
-        for ii in range(5):
-            if self.checkState()[0]=="DOWN": break
-            time.sleep(1)
-        if self.checkState()[0]!="DOWN":
-            print("Failed to shutdown",self.checkState())
-            return False
 
         if self.postCommand:
             rc=os.system(self.postCommand)
@@ -240,11 +247,6 @@ def main(args):
                 cfg[par]=config['defaults'][par]
         cfgs.append(cfg)
 
-    runControl=RunControl(hostUrl,maxTransitionTime)
-    if runControl.getState()['runOngoing']:
-        print("Run already on-going - bailing out")
-        return 1
-
     if "initCommand" in config:
         print("Running INIT command")
         rc=os.system(config["initCommand"])
@@ -256,7 +258,7 @@ def main(args):
     for step in range(startStep-1,len(cfgs)):
         print(f"Running step {step+1}")
         cfg=cfgs[step]
-        run=runner(cfg,runControl,seqnumber,step+1)
+        run=runner(cfg,hostUrl,maxTransitionTime,seqnumber,step+1)
         rc=run.run()
         if rc:
             print("Successful run")

@@ -1,10 +1,9 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 #
 #  Copyright (C) 2019-2020 CERN for the benefit of the FASER collaboration
 #
 
-
 import json
 import os
 import requests
@@ -13,23 +12,10 @@ import redis
 import time
 
 cfgFile="combinedTI12"
-runtype="Test"
+runtype="Physics"
 startcomment="Restart for fill {0}"
 endcomment="End of fill"
-
-
-import json
-import os
-import requests
-import sys
-import redis
-import time
-
-cfgFile="combinedTI12"
-runtype="Test"
-startcomment="Restart for fill {0}"
-endcomment="End of fill"
-url="http://faser-daq-011.cern.ch:5000"
+url="http://faser-daq-010.cern.ch:5000"
 minRunTime=30
 
 r = redis.Redis(host='localhost', port=6379, db=0,
@@ -109,7 +95,7 @@ if __name__ == '__main__':
         test=True
     fill=FillNo()
     print(f"Starting at fill number {fill.fillNo}")
-    rc=RunControl(baseUrl = "http://faser-daq-011.cern.ch:5000")
+    rc=RunControl(baseUrl = url)
     print("Starting DAQ state:",rc.getState())
     while True:
         newFillNo=fill.checkNewFill()

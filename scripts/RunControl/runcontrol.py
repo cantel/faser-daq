@@ -81,6 +81,16 @@ class RunControl:
         data = self.__sendRequest("GET","/appState")
         return data
     
+    def getInfo(self,module):
+        """
+        Return dictionary with all metrics for a given module
+        """
+        raw= self.__sendRequest("GET","/info",{ "module": module})
+        data={}
+        for entry in raw:
+            data[entry['key']]=entry['value']
+        return data
+
     def change_config(self,configName:str) -> bool:
         """
         Checks first if there is an ongoing run. If it is, return False, else return True.

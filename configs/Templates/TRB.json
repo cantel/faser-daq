@@ -301,7 +301,7 @@
                         "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module0_110522_0734.json",
                         "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module1_110522_0734.json",
                         "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module2_110522_0734.json",
-                        "3": "/home/shifter/TI12/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST2_Middle_Layer0_Module3_DirectNoiseOccupancy_230622_1045.json",
+                        "3": "/home/shifter/TI12/tracker/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST2_Middle_Layer0_Module3_DirectNoiseOccupancy_230622_1045.json",
                         "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module4_110522_0734.json",
                         "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module5_110522_0734.json",
                         "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer0_Module6_110522_0734.json",
@@ -474,7 +474,7 @@
                         true
                     ],
                     "moduleConfigFiles": {
-                        "0": "/home/shifter/TI12/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST2_Middle_Layer2_Module0_DirectNoiseOccupancy_230622_1045.json",
+                        "0": "/home/shifter/TI12/tracker/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST2_Middle_Layer2_Module0_DirectNoiseOccupancy_230622_1045.json",
                         "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module1_110522_0351.json",
                         "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module2_110522_0351.json",
                         "3": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST2_Middle_Layer2_Module3_110522_0351.json",
@@ -1007,7 +1007,7 @@
                         "0": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module0_110522_0410.json",
                         "1": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module1_110522_0410.json",
                         "2": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module2_110522_0410.json",
-                        "3": "/home/shifter/TI12/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST0_IFT_Layer2_Module3_DirectNoiseOccupancy_230622_1045.json",
+                        "3": "/home/shifter/TI12/tracker/ConfigsForCombinedRuns/2022_07_07/ThresholdAdjustedNoisyChips/ST0_IFT_Layer2_Module3_DirectNoiseOccupancy_230622_1045.json",
                         "4": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module4_110522_0410.json",
                         "5": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module5_110522_0410.json",
                         "6": "/home/shifter/TI12/tracker/config_fullTrim_gain/after-trim-reanalysis/ST0_IFT_Layer2_Module6_110522_0410.json",

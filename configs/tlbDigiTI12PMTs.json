@@ -26,10 +26,8 @@
       },
       { "$ref": "Templates/fileWriter.json#FileWriter" },
       { "$ref": "Templates/TLB.json#RateMonitor" },
-      { "$ref": "Templates/monitor.json#EventMonitor" },
       { "$ref": "Templates/TLB.json#TriggerMonitor" },
-      { "$ref": "Templates/digitizer.json#DigitizerPhysicsMonitor" },
-      { "$ref": "Templates/digitizer.json#DigitizerRandomMonitor" }
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" }
     ]
   }
 }

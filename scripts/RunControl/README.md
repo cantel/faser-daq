@@ -208,8 +208,8 @@ On the left side is the treeview, where the structure of the control tree, extra
 For each node, its state is displayed as a color code:
 - not_added : grey
 - added : brown
-- booted : blue
-- ready : yellow
+- booted : yellow
+- ready : blue
 - running : green
 - paused : orange
 
@@ -289,7 +289,7 @@ The command has a timeout, so if after 30 seconds all modules have not reached t
 The command displays a window, allowing to define the run type and a comment (mandatory).
 The information will be sent to the run service server, which will record this information and return the run number.
 Once done, the `start` action will be sent to all modules.
-Timeout: 30 seconds
+Timeout: 15 seconds
 
 <u>Note</u>: If we start the application with the `-l` argument, the run service server will not be used and the run will not be recorded (useful for testing). The resulting run number is 1000000000.
 
@@ -297,12 +297,12 @@ Timeout: 30 seconds
 *Allows you to stop the experiment*.
 A dialog box appears, allowing you to specify the type of run if you have not already done so or if the type was wrong, as well as a comment at the end of the run. The information will be sent to the run service server for archiving. 
 Then the `stop` action will be sent to all modules. 
-Timeout: 30 seconds.
+Timeout: 15 seconds.
 
 <u>Note</u>: If we start the application with the `-l` argument, the application will not communicate with the run service server.
 
 #### Shutdown
-*Allows you to get into the general `DOWN` state. 
+*Allows you to get into the general `DOWN` state.* 
 It will perform the following actions in order: `unconfigure`, `shutdown` and `remove`.
 If the timeout is exceeded (usually there is a problem), the `unconfigure` and `shutdown` steps will be skipped and only the `remove` action will be performed. 
 

@@ -597,8 +597,8 @@ def stateChecker():
     loadedConfig =""
     lockState = None
     loaded = False
-    mattNotif_crash = MattermostNotifier(None,"Module {} has crashed", time_interval=10)
-    mattNotif_error = MattermostNotifier(None,"Module {} has errors (status 1)", time_interval=10)
+    mattNotif_crash = MattermostNotifier(None,"Module {} has crashed", time_interval=serverConfig["persistent_notification_delay"])
+    mattNotif_error = MattermostNotifier(None,"Module {} has errors (status 1)", time_interval=serverConfig["persistent_notification_delay"])
     
 
     while True:
@@ -920,7 +920,7 @@ def login_callback():
     state = request.args.get("state", "unknown")
     _state = session.pop("state", None)
     if state != _state:
-        return render_template("invalidState.html", url=f"http://{platform.node()}:{PORT}")
+        return render_template("invalidState.html", url=f"http://{platform.node()}.cern.ch:{PORT}")
     code = request.args.get("code")
     response = keycloak_client.callback(code)
     access_token = response["access_token"]

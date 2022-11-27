@@ -14,7 +14,7 @@ Vue.component("plot", {
         ],
         layout: {
           height: 200,
-          margin: { l: 10, r: 10, b: 20, t: 0, pad: 0 },
+          margin: { l: 30, r: 10, b: 20, t: 0, pad: 0 },
           font: { size: 9 },
           xaxis: {
             showticklabels: false,

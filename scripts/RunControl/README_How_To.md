@@ -27,7 +27,7 @@ Notes:
     *  Instead, do `PAUSE`->`START`->`STOP`->`SHUTDOWN`, in order to stop a run.
     *  If this is not done, the run must be force shutdown.
 
-!(ScreenCapture)[https://gitlab.cern.ch/faser/online/faser-daq/-/blob/new-rcgui/scripts/RunControl/img/interface.png]
+![ScreenCapture](https://gitlab.cern.ch/faser/online/faser-daq/-/blob/new-rcgui/scripts/RunControl/img/interface.png)
 
 
     

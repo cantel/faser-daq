@@ -51,7 +51,7 @@ class MattermostNotifier:
         """
         if self.__mattermost_hook: 
             try:
-                req = requests.post(self.__mattermost_hook,json={"text": msg})
+                req = requests.post(self.__mattermost_hook,json={"text": msg, "channel": "faser-ops-alerts"})
                 if req.status_code!=200:
                     print("Failed to post message below. Error code:", req.status_code)
                     print(msg)

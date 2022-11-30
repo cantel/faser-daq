@@ -24,7 +24,7 @@ from pathlib import Path
 import platform
 from flask_cors import CORS
 from nodetree import NodeTree
-from helpers import detectorList, getEventCounts, TrackChange
+from helpers import detectorList, getEventCounts
 from daqcontrol import daqcontrol as daqctrl
 import metricsHandler
 import requests
@@ -597,8 +597,8 @@ def stateChecker():
     loadedConfig =""
     lockState = None
     loaded = False
-    mattNotif_crash = MattermostNotifier(None,"Module {} has crashed", time_interval=serverConfig["persistent_notification_delay"])
-    mattNotif_error = MattermostNotifier(None,"Module {} has errors (status 1)", time_interval=serverConfig["persistent_notification_delay"])
+    mattNotif_crash = MattermostNotifier(mattermost_hook if influxDB else None,"Module {} has crashed", time_interval=serverConfig["persistent_notification_delay"])
+    mattNotif_error = MattermostNotifier(mattermost_hook if inlfuxDB else None,"Module {} is in error state", time_interval=serverConfig["persistent_notification_delay"])
     
 
     while True:
@@ -638,7 +638,7 @@ def stateChecker():
 
             errors2 = modulesWithError(sysConfig)
             if r2.get("runState") == "RUN":
-                mattNotif_error.check(errors2["1"])
+                mattNotif_error.check(errors2["2"])
             if errors2 != errors:
                 socketio.emit("errorModChng", errors2, broadcast =True)
                 r2.set("errorsM", json.dumps(errors2) )

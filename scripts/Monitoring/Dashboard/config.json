@@ -3,7 +3,7 @@
     "port": 6379,
     "host": "localhost",
     "pub_histo_db": 1,
-    "run_info_db": 2,
+    "run_info_db": 3,
     "tags_db": 5,
     "old_histo_db": 7
   },

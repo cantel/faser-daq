@@ -597,8 +597,8 @@ def stateChecker():
     loadedConfig =""
     lockState = None
     loaded = False
-    mattNotif_crash = MattermostNotifier(mattermost_hook if influxDB else None,"Module {} has crashed", time_interval=serverConfig["persistent_notification_delay"])
-    mattNotif_error = MattermostNotifier(mattermost_hook if influxDB else None,"Module {} is in error state", time_interval=serverConfig["persistent_notification_delay"])
+    mattNotif_crash = MattermostNotifier(mattermost_hook if influxDB else None,":warning: Module __{}__ has CRASHED", time_interval=serverConfig["persistent_notification_delay"])
+    mattNotif_error = MattermostNotifier(mattermost_hook if influxDB else None,":warning: Module __{}__ is in ERROR STATE", time_interval=serverConfig["persistent_notification_delay"])
     
 
     while True:

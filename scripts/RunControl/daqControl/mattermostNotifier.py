@@ -4,7 +4,7 @@
 
 from datetime import datetime
 import requests
-
+import socket
 
 class MattermostNotifier:
     """
@@ -37,23 +37,30 @@ class MattermostNotifier:
     def __clean_tracked(self, modules):
         """Cleans all the tracked modules that are no longer actives"""
         keys = list(self.__tracked.keys())
+        okModules = []
         for module in keys:
             if module not in modules:
                 self.__tracked.pop(module)
+                okModules.append(module)
+        if len(okModules) != 0:
+            a = "\n * "
+            msg = f":white_check_mark: The following modules are in __OK__ status :\n * {a.join(okModules)}"
+            self.__message(msg,okStatus=True)
 
     def __update_timestamp(self, modules):
         fired_timestamp = int(datetime.now().timestamp())
         self.__tracked[modules] = fired_timestamp
     
-    def __message(self, msg:str, module:str):
+    def __message(self, msg:str, module = None, okStatus=False):
         """
         Sends a message to mattermost. If there is an error, prints it.
         """
-        additionalInfo = f"\nLink to RCGUI : [http://faser-daq-010.cern.ch:5000](http://faser-daq-010.cern.ch:5000/)\nLink to the module's live log: [here](http://faser-daq-010:9001/logtail/faser:{module})"
-        msg+= additionalInfo
+        if not okStatus :
+            additionalInfo = f"\n * Link to RCGUI : [http://{socket.gethostname()}.cern.ch:5000](http://{socket.gethostname()}.cern.ch:5000/)\n * Link to the module's live log: [here](http://{socket.gethostname()}:9001/logtail/faser:{module})"
+            msg+= additionalInfo
         if self.__mattermost_hook: 
             try:
-                req = requests.post(self.__mattermost_hook,json={"text": msg, "channel": "faser-ops-alerts"})
+                req = requests.post(self.__mattermost_hook,json={"text": msg, "channel": "faser-ops-alerts", "username":"RCGUI-alerts"})
                 if req.status_code!=200:
                     print("Failed to post message below. Error code:", req.status_code)
                     print(msg)

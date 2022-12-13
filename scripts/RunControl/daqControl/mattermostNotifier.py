@@ -23,14 +23,14 @@ class MattermostNotifier:
     def check(self, modules):
         for module in modules:
             if module not in self.__tracked:
-                self.__message(self.__message_template.format(module))
+                self.__message(self.__message_template.format(module), module)
                 self.__update_timestamp(module)
             elif module in self.__tracked:
                 if (
                     int(datetime.now().timestamp()) - self.__tracked[module]
                     >= self.__time_interval
                 ):
-                    self.__message(self.__message_template.format(module) + " (reminder) ")
+                    self.__message(self.__message_template.format(module) + " (reminder) ",module)
                     self.__update_timestamp(module)
         self.__clean_tracked(modules)
 
@@ -45,10 +45,12 @@ class MattermostNotifier:
         fired_timestamp = int(datetime.now().timestamp())
         self.__tracked[modules] = fired_timestamp
     
-    def __message(self, msg):
+    def __message(self, msg:str, module:str):
         """
         Sends a message to mattermost. If there is an error, prints it.
         """
+        additionalInfo = f"\nLink to RCGUI : [http://faser-daq-010.cern.ch:5000](http://faser-daq-010.cern.ch:5000/)\nLink to the module's live log: [here](http://faser-daq-010:9001/logtail/faser:{module})"
+        msg+= additionalInfo
         if self.__mattermost_hook: 
             try:
                 req = requests.post(self.__mattermost_hook,json={"text": msg, "channel": "faser-ops-alerts"})

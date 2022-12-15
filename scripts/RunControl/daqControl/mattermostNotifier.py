@@ -13,12 +13,13 @@ class MattermostNotifier:
     It is possible to set a new message template by specifying the string when creating a new MattermostNotifier object, where {} is the placeholder for the name of the module.
     """
 
-    def __init__(self, mattermost_hook,  message_template="Module {} has crashed", time_interval = 60*60):
+    def __init__(self, mattermost_hook,  message_template="Module {} has crashed", time_interval = 60*60, okAlerts = True):
 
         self.__time_interval = time_interval  # sec
         self.__tracked = {}
         self.__message_template = message_template
         self.__mattermost_hook = mattermost_hook
+        self.__okAlerts = okAlerts
 
     def check(self, modules):
         for module in modules:
@@ -42,10 +43,11 @@ class MattermostNotifier:
             if module not in modules:
                 self.__tracked.pop(module)
                 okModules.append(module)
-        if len(okModules) != 0:
-            a = "\n * "
-            msg = f":white_check_mark: The following modules are in __OK__ status :\n * {a.join(okModules)}"
-            self.__message(msg,okStatus=True)
+        if self.__okAlerts :
+            if len(okModules) != 0:
+                a = "\n * " # backslashes are not directly supported in f-strings
+                msg = f":white_check_mark: The following modules are in __OK__ status :\n * {a.join(okModules)}"
+                self.__message(msg,okStatus=True)
 
     def __update_timestamp(self, modules):
         fired_timestamp = int(datetime.now().timestamp())
@@ -56,8 +58,9 @@ class MattermostNotifier:
         Sends a message to mattermost. If there is an error, prints it.
         """
         if not okStatus :
-            additionalInfo = f"\n * Link to RCGUI : [http://{socket.gethostname()}.cern.ch:5000](http://{socket.gethostname()}.cern.ch:5000/)\n * Link to the module's live log: [here](http://{socket.gethostname()}:9001/logtail/faser:{module})"
-            msg+= additionalInfo
+            hostname = socket.gethostname() 
+            additionalInfo = f"\n * Link to RCGUI : [http://{hostname}.cern.ch:5000](http://{hostname}.cern.ch:5000/)\n * Link to the module's live log: [here](http://{hostname}:9001/logtail/faser:{module})"
+            msg += additionalInfo
         if self.__mattermost_hook: 
             try:
                 req = requests.post(self.__mattermost_hook,json={"text": msg, "channel": "faser-ops-alerts", "username":"RCGUI-alerts"})

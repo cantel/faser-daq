@@ -30,6 +30,7 @@ import metricsHandler
 import requests
 import socket
 import urllib3
+from mattermostNotifier import MattermostNotifier
 
 
 # patching the original function from NodeTree class from daqLing
@@ -332,7 +333,8 @@ def executeCommROOT(action:str, reqDict:dict):
             runType = r2.get("runType")
             runNumber = r2.get("runNumber")
             r2.set("runComment", runComment)
-            send_stop_to_runservice(runComment=runComment, runType=runType, runNumber=runNumber, forceShutdown=True)
+            if not localOnly : 
+                send_stop_to_runservice(runComment=runComment, runType=runType, runNumber=runNumber, forceShutdown=True)
             
         for step,nextState in steps : 
             r = sysConfig.executeAction(step)
@@ -579,20 +581,34 @@ def get_crashed_modules():
 
 def stateChecker():
     global CONFIG_DICT, CONFIG_PATH
+    # nodesState = TrackChange(initial_values={})
+    # transitionFlag = TrackChange(initial_values=r2.get("transitionFlag"))
+    # crashedMods = TrackChange(initial_values={})
+    # errorsMods = TrackChange(initial_values={})
+    # runInfos = TrackChange(initial_values={"runType":"", "runComment":"", "runNumber":None})
+    # lockState = TrackChange(initial_values=None)
+    # loadedConf = TrackChange(initial_values="")
     l1 = {}
     l2 = {}
+    errors = {}
+    transitionFlag1 = r2.get("transitionFlag")
+    runInfo1= {"runType":"", "runComment":"", "runNumber":None}
+    crashedM1 = {}
     loadedConfig =""
     lockState = None
-    errors = {}
-    crashedM1 = {}
-    runInfo1= {"runType":"", "runComment":"", "runNumber":None}
-    transitionFlag1 = r2.get("transitionFlag")
     loaded = False
-
+    mattNotif_crash = MattermostNotifier(mattermost_hook if influxDB else None,
+                                         ":warning: Module __{}__ has CRASHED",
+                                         time_interval=serverConfig["persistent_notification_delay"],
+                                         okAlerts=serverConfig["ok_alerts"])
+    mattNotif_error = MattermostNotifier(mattermost_hook if influxDB else None,
+                                         ":warning: Module __{}__ is in ERROR STATE",
+                                         time_interval=serverConfig["persistent_notification_delay"],
+                                         okAlerts=serverConfig["ok_alerts"])
+    
     while True:
         ########### Config Change ############
         loadedConfig2 = r2.get("loadedConfig")
-
         if loadedConfig2 != loadedConfig :
             socketio.emit("configChng", loadedConfig2, broadcast = True)
             loadedConfig = loadedConfig2
@@ -626,17 +642,22 @@ def stateChecker():
                 transitionFlag1 = transitionFlag2
 
             errors2 = modulesWithError(sysConfig)
+            if r2.get("runState") == "RUN":
+                mattNotif_error.check(errors2["2"])
             if errors2 != errors:
                 socketio.emit("errorModChng", errors2, broadcast =True)
                 r2.set("errorsM", json.dumps(errors2) )
                 errors = errors2
-               
+            
+            
             crashedM2 =  get_crashed_modules()
-            if  crashedM2 != crashedM1 :
-                if r2.get("transitionFlag") == "0":
-                    socketio.emit("crashModChng",crashedM2, broadcast=True)
-                r2.set("crashedM", json.dumps(crashedM2))
-                crashedM1 = crashedM2
+            if r2.get("runState") == "RUN" or r2.get("runState") == "READY":
+                mattNotif_crash.check(crashedM2)
+                if  crashedM2 != crashedM1 :
+                    if r2.get("transitionFlag") == "0":
+                        socketio.emit("crashModChng",crashedM2, broadcast=True)
+                    r2.set("crashedM", json.dumps(crashedM2))
+                    crashedM1 = crashedM2
 
         elif r2.get("loadedConfig") and not loaded: 
             print("loading the config") 
@@ -866,10 +887,15 @@ def initConfig():
         CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], configName)
         if request.args.get("bot") is None: 
             logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
-        with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
-            CONFIG_DICT = json.load(f)
-        systemConfiguration(CONFIG_PATH)
-        r2.set("loadedConfig", configName)
+        try : 
+
+            with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
+                CONFIG_DICT = json.load(f)
+            systemConfiguration(CONFIG_PATH)
+            r2.set("loadedConfig", configName)
+        except Exception as e:
+            print("Exception when trying to change configuration file : ", e)
+            return jsonify(f"Error: {e}")
     return jsonify("Success")
 
 
@@ -899,7 +925,7 @@ def login_callback():
     state = request.args.get("state", "unknown")
     _state = session.pop("state", None)
     if state != _state:
-        return render_template("invalidState.html", url=f"http://{platform.node()}:{PORT}")
+        return render_template("invalidState.html", url=f"http://{platform.node()}.cern.ch:{PORT}")
     code = request.args.get("code")
     response = keycloak_client.callback(code)
     access_token = response["access_token"]

@@ -13,5 +13,7 @@
     "PAUSE": 15,
     "RESUME": 15,
     "ECR": 15
-  }
+  },
+  "persistent_notification_delay" :  1800 
+  
 }

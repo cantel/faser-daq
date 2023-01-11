@@ -18,7 +18,7 @@
       </v-btn>
       <v-spacer></v-spacer>
 
-      <v-btn color="green darken-1" dark @click="startRun">
+      <v-btn color="green darken-1" dark @click="startRun" :disabled="comment === ''">
         Start
       </v-btn>
     </v-card-actions>
@@ -43,7 +43,7 @@
       </v-btn>
       <v-spacer></v-spacer>
 
-      <v-btn color="green darken-1" dark @click="endRun">
+      <v-btn color="green darken-1" dark @click="endRun" :disabled="comment === ''">
         Stop
       </v-btn>
     </v-card-actions>

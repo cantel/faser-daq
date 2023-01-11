@@ -104,7 +104,6 @@ class RunControl:
         if self.getState()["runOngoing"]:
             print("A run has already started, please shutdown the run before changing the configuration file.") 
             return False 
-        
         return self.__sendRequest("GET", "/initConfig", {"configName" : configName, "bot": True} )
 
         

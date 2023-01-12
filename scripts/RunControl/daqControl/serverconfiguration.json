@@ -1,7 +1,7 @@
 {
   "SSO_enabled":1,
   "serverlog_location_name":"./log/webinterfaceserver.log",
-  "callbackUri":"http://faser-daqvm-000.cern.ch:5000/login/callback",
+  "callbackUri":"http://faser-daq-011.cern.ch:5000/login/callback",
   "timeout_session_expiration_mins" : 120,
   "timeout_interlock_secs" : 120,
   "LOGOUT_URL":"https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout",
@@ -14,6 +14,6 @@
     "RESUME": 15,
     "ECR": 15
   },
-  "persistent_notification_delay" :  1800 
-  
+  "persistent_notification_delay" :  1800,
+  "ok_alerts": false  
 }

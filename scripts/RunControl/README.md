@@ -118,9 +118,6 @@ Finally, the credentials can be displayed by clicking on the "view" button.
 - "client_secret" : `<client_secret>`
 - "redirect_uri": `"http://<name_host>:<port>/login/callback/"`
 
-##### serverconfiguration.json
-- "callback_uri": `"http://<name_host>:<port>/login/callback/"` (same as "redirect_uri")
-
 #### Create a new application
 
 If the rcgui wants to be installed on a new server (with a different url), you have to create a new application (button "new application"):
@@ -169,13 +166,6 @@ Then just replace the corresponding information in the files `keycloak.json` and
 - "client_secret" : `<client_secret>`
 - "redirect_uri": `"http://<name_host>:<port>/login/callback/"`
 
-##### serverconfiguration.json
-- "callback_uri: `"http://<name_host>:<port>/login/callback/"` (same as "redirect_uri")
-
-
-
-
-
 ## Migrating to new Run Control
 By default, the existing configurations will not appear in the new RunControl, because the other configuration files are needed. Since adapting them by hand would be long and tedious, it is possible to use a script that allows, from an existing configuration file, to create a folder with the same name, with inside the `config-dict.json` and the associated `control-tree.json`, assuming that the fsm-rules.json file is in the configurations folder. It is possible to tweak afterwards the `control-tree.json` for more customization.  
 
@@ -193,7 +183,6 @@ The run control server can be configured using the `serverconfiguration.json` fi
 - `serverlog_location_name`: the path to the server log file.
 - `timeout_session_expiration_mins` : (default: 120) Time after which the user is logged out of the session
 - `timeout_interlock_secs` : (default: 120) Time before the control of the rcgui by a user is lifted (if the user does not take any action on it)
-- `LOGOUT_URL`: Link used to log out of your CERN account
 - `timeout_rootCommands_secs`: timeout for the individual root commands
 - `persistent_notification_delay` : time between two mattermost reminders (in seconds)
 - `ok_alerts` : if mattermost "ok" alerts are sent when a module goes into normal state. 

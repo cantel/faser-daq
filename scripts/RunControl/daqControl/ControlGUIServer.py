@@ -33,6 +33,7 @@ import urllib3
 from mattermostNotifier import MattermostNotifier
 
 
+
 # patching the original function from NodeTree class from daqLing
 def childrenStateChecker(self):
     while (self.check):
@@ -76,6 +77,8 @@ def childrenStateChecker(self):
             self.state = max_state ## <------
             self.inconsistent = True
         socketio.sleep(0.1)
+
+# monkey-patching the function :
 NodeTree.childrenStateChecker = childrenStateChecker
 
 
@@ -84,7 +87,7 @@ serverConfig = {}
 with open(os.path.join(os.path.dirname(__file__), 'serverconfiguration.json')) as f:
     serverConfig = json.load(f)
 
-LOGOUT_URL = serverConfig['LOGOUT_URL']
+LOGOUT_URL = "https://auth.cern.ch/auth/realms/cern/protocol/openid-connect/logout"
 configPath = os.path.join(env["DAQ_CONFIG_DIR"])
 
 # for run service
@@ -128,7 +131,8 @@ handler = RotatingFileHandler(serverConfig["serverlog_location_name"], maxBytes=
 logging.root.setLevel(logging.NOTSET)
 handler.setLevel(logging.NOTSET)
 app.logger.addHandler(handler)
-keycloak_client = Client(callback_uri=serverConfig["callbackUri"] )
+
+keycloak_client = Client()
 app.secret_key = os.urandom(24)
 app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=serverConfig["timeout_session_expiration_mins"])
 
@@ -618,7 +622,7 @@ def stateChecker():
         if sysConfig:
             l2 = getStatesList(sysConfig)
             if (l2 != l1) or (transitionFlag2 != transitionFlag1):
-                socketio.emit(f"stsChng", l2, broadcast=True)
+                socketio.emit("stsChng", l2, broadcast=True)
                 if l1 != {} and l2 !={}:    
                     if l1["Root"] != l2["Root"] or (transitionFlag2 != transitionFlag1): # if Root status changes
                         state=""
@@ -825,11 +829,11 @@ def interlock():
         if session["user"]["cern_upn"] == r2.get("whoInterlocked"): # if is the right person
             r2.delete("whoInterlocked")            
             logAndEmit(r2.get("loadedConfig"),"INFO","User " + session["user"]["cern_upn"]+ " has RELEASED control of configuration"+ r2.get('loadedConfig'))
-            return jsonify(f"unlocked file")
+            return jsonify("unlocked file")
 
         else: # someone else try to unlock file         
             logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ "  ATTEMPTED to take control of configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
-            return jsonify(f"you can't")
+            return jsonify("you can't")
 
 
 @app.route("/ajaxParse", methods=["POST"])
@@ -854,7 +858,7 @@ def logout():
     session.pop("configName", None)
     session.pop("configPath", None)
     session.pop("configDict", None)
-    return redirect("{}?redirect_uri={}".format(LOGOUT_URL, url_for("index", _external=True)))
+    return redirect(f"{LOGOUT_URL}?redirect_uri={url_for('index', _external=True)}")
 
 
 @app.route("/fsmrulesJson", methods=["GET", "POST"])
@@ -915,7 +919,12 @@ def login():
         session["user"]["cern_gid"] = ""
         return redirect(url_for("index"))
     else : 
+        # overwriting the default callback_uri : 
+        # Can be for example : http://faser-daqvm-000:5000/login/callback
+        #                      http://localhost:1234/login/callback (for port forwarding and only port 1234)
+        keycloak_client.callback_uri = request.url_root + "login/callback"
         auth_url, state = keycloak_client.login()
+            
         session["state"] = state
         return redirect(auth_url)
 

@@ -5,12 +5,6 @@ Note :
 * Sometimes, the login action fails and a page called "Invalid State" appears. 
 The easiest way is to go back to the main page by deleting everything after the base url. 
 It is also possible to click on the link on the error page. 
-* If you are using `ssh -L <PORT>:faser-daq-010:5000 username@lxplus.cern.ch` to connect, additionals steps has to be done : 
-    1. Navigate to `http://localhost:<PORT>`
-    2. Click log in and put in details
-    3. Replace faser-daq-010.cern.ch:5000 in the url of the error page with localhost:<PORT> (leaving the rest of the url the same)
-
-
 
 Once logged in, to avoid that two people perform actions at the same time, you must claim interlock. To do this, click on the lock at the top right. Your username will then be displayed next to it. 
 

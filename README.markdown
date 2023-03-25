@@ -1,84 +1,21 @@
 # Welcome to FASER/DAQ
-Welcome! I bet you are glad to be here.  This documentation is intended to be your 
+
+Welcome! This documentation is intended to be your 
 initial point of entry for getting involved in the [FASER experiment](https://faser.web.cern.ch/) TDAQ system.
-It is intended to contain guidance on :
 
-  - A high level overview of the various components of the TDAQ system and how they work 
-  together during data taking
-  - HowTo's for setting and running for those that don't need to develop stuff
-  - Development guidance for the code itself and procedures for effectively using
-  our GitLab setup
-
-However, it does not contain detailed information concerning :
-
-  - The Detector Control System (DCS) and how to use it
-  - Detailed API documentation for the libraries of the tools used (these should be 
-  documented elsewhere in the libraries themselves)
-  
-In addition to this documentation, other technical documents exist on the [TDAQ espace](https://espace.cern.ch/faser-share/Shared%20Documents/Forms/FASER%20topic/docsethomepage.aspx?ID=5&FolderCTID=0x0120D5200001F61BB48939BB4FA6D84AE7DEB9D12100CC5FBAF340503D4A92C34133356BCB7F&List=5e521016-7b44-4bf4-882f-29e9f7dbe2f4&RootFolder=%2Ffaser%2Dshare%2FShared%20Documents%2FTrigger%2C%20DAQ%20and%20DCS&RecSrc=%2Ffaser%2Dshare%2FShared%20Documents%2FTrigger%2C%20DAQ%20and%20DCS).
-
-## Hardware Layout
-The FASER detector has three primary active subsystems that acquire data which is 
-subsequently gathered into a single event : 
-
-  - *Tracker* : The silicon strip tracker is read out by the tracker readout board (TRB).  There are three stations.  A station has 
-  three planes of trackers, each of which is read out by a single GPIO board.  In total, there 
-  are nine readout boards that will record data independently.  
-  - *Trigger* : The trigger logic board (TLB) is a single electronics GPIO board.
-  - *Digitizer* : The digitizer records data from the calorimeters and trigger/timing/veto 
-  scintillators using a single CAEN board.
-  
-![Physical layout of FASER experiment](img/experiment_picture.png)
-
-<details><summary>Want to know more about how FASER operates?</summary>
-<p>
-{%
-   include-markdown "FullFaserSetup.md"
-%}
-</p>
-</details>
-<br>
-
-### Trigger Logic Board (TLB)
-
-The Trigger Logic Board is a General Purpose Input Output (GPIO) board designed at the University of Geneva.
-It acts as the central trigger processer of the FASER experiment, mapping the digitizer trigger input lines to 4 available physics trigger items, and issuing an "L1Accept" signal 
-to the digitizer and tracker readout boards to initiate readout of a triggered event. In addition to physics trigger items, there is a configurable internally generated random or fixed trigger
-item, and an LED calibration trigger item mapped to a dedicated signal input connected to the LED calibration system.
-The TLB has configurable prescales for each trigger item, and further dynamically manages the final rate by vetoing trigger items.
-The TLB software drivers are located in the [gpiodrivers](https://gitlab.cern.ch/faser/online/gpiodrivers) git repository.
-Its communication protocol covers both USB and ethernet communication.   
-
-### Tracker Readout Board (TRB)
-Tracker Readout Board (TRB) is a board mediating the communication between readout PC and 
-tracker modules. It is built on General Purpose Input Output (GPIO) board developed at 
-University of Geneva, identical to the TLB. The communication with the board is possible via USB or ethernet. 
-Drivers to this this board are located in [gpiodrivers](https://gitlab.cern.ch/faser/online/gpiodrivers) 
-repository.  Apart from the drivers repository also contains testing programs allowing to test basic
-ethernet communication between the board and PC as well as the communication between the board and 
-tracker modules.
-
-### Digitizer 
-The digitizer hardware is based on VME and is composed of a Struck Infrastructure Systems 
-3153 (sis3153) controller board and the 16 channel CAEN vx1730 digitizer board.  
-Communication with this system is performed by ethernet via the sis3153 interface board.
-The low level communication drivers for the sis3153 board are provided by the manufacturer
-upon which a software library has been written to provide an API for use in the DAQ 
-infrastructure of modules.  
 
 ## Software Layout
-The software that controls these hardware components is based on the *DAQ-ling* architecture
+This software is based on the *DAQling* architecture
 which orchestrates the running of individual
-DAQ "processes", one for each individual board.  In addition to the external DAQ-ling 
+DAQ "processes".  In addition to the external DAQling 
 architecture, a number of other FASER-specific software libraries are included that provide
 hardware specific communication protocols (*digitizer-readout* and *gpiodrivers*) as well 
 as tools shared between the online DAQ and offline reconstruction communities (*faser-common*).
 All tools are included as [git submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules) 
 in the [faser/daq](https://gitlab.cern.ch/faser/daq) framework.  
 
-
 ### [DAQ-ling](https://gitlab.cern.ch/ep-dt-di/daq/daqling)
-The DAQ-ling architecture is being developed by the EP-DT-DI group and is intended to serve
+The DAQ-ling architecture is developed by the CERN EP-DT-DI group and is intended to serve
 as a vanilla framework to flexibly execute processes that run concurrently and communicate
 between each other.  Each process is a specific instance of a "module" and can either 
 control and readout a piece of hardware (e.g. [DigitizerReceiverModule](https://gitlab.cern.ch/faser/daq/-/tree/master/src/Modules/DigitizerReceiver)) or aggregate and
@@ -89,76 +26,97 @@ DAQ-ling can be found here - [daqling.docs.cern.ch](https://daqling.docs.cern.ch
 The faser-common library is a central location where utilities that can be shared between
 online and offline communities can be developed coherently.  This includes things 
 such as the [EventFormat](https://gitlab.cern.ch/faser/faser-common/-/blob/master/EventFormats/EventFormats/DAQFormats.hpp) 
-and hardware payload specific fragments and decoders (e.g. [DigitizerDataFragment](https://gitlab.cern.ch/faser/faser-common/-/blob/master/EventFormats/EventFormats/DigitizerDataFragment.hpp)).
-More detailed documentation of the utilities in faser-common can be
-found here - [faser-common](faser-common).
+and hardware payload specific fragments and decoders (e.g. [DigitizerDataFragment](https://gitlab.cern.ch/faser/faser-common/-/blob/master/EventFormats/EventFormats/DigitizerDataFragment.hpp)). See the submodule README for a further description of faser-common utilities.
 
 ### [digitizer-readout](https://gitlab.cern.ch/faser/digitizer-readout)
 The digitizer-readout library provides a library that can be used to control the sis3153+vx1730
 pair of VME boards and retrieve data stored upon an acquisition trigger.  This relies on
 the use of faser-common for the EventFormat and is used within the [DigitizerReceiverModule](https://gitlab.cern.ch/faser/daq/-/tree/master/src/Modules/DigitizerReceiver).
-More extensive documentation of this library can be found here - [digitizer-receiver](digitizer).
+More extensive documentation of this library can be found in the submodule README.
 
 ### [gpiodrivers](https://gitlab.cern.ch/faser/gpiodrivers)
-The GPIO Drivers library provides an interface for communication with the GPIO board, which
-controls the TRB and the TLB.  It also provides specific functionality necessary for operation
-of each of these boards.  More extensive documentation of this library can be found here - [gpiodrivers](gpiodrivers).
+The GPIO Drivers library provides an interface for communication with the GPIO boards, which
+control the TRB and the TLB.  It also provides specific functionality necessary for operation
+of each of these boards.  More extensive documentation of this library can be found in the submodule README.
 
-## System Operation
-In the fully-integrated system (shown below), the following minimal set of DAQ-ling
-modules and processes are necessary for acquiring data :
+## Initial setup
 
-  - DigitizerReceiver [1 module]
-  - TriggerReceiver [1 module]
-  - TrackerReceiver [9 modules]
-  - EventBuilder [1 module] : This is a fully software-based module 
-  - FileWriter [1 module] : This is a fully software-based module
-  
-More details of how this system works can be found in the [Technical Design Report](http://cds.cern.ch/record/2651328)
-but in brief :
+This repository has several submodules, so it is easiest to clone with the `--recursive` option. NOTE that several compile options exist, described in the following section.
 
-  - The digitizer provides a hardware trigger via LVDS to the __TLB__.
-  - The TLB applies the look-up-table trigger stream decision and prescales and returns 
-  a hardware L1 accept signal to the digitizer and the tracker boards.
-  - The {__Digitizer__, __Tracker__, __Trigger__} Receivers acquire the buffered data payloads via ethernet, create
-  fragments with appropriate headers from their respective hardware components and pass 
-  these fragments to the EventBuilder.
-  - The __EventBuilder__ composes the set of hardware fragments into a single event with event
-  header and passes the event to the FileWriter.
-  - The __FileWriter__ categorizes the event and writes it to disk in the appropriate output file stream.
+```
+git clone --recursive <faser-daq git url>
+cd faser-daq
+source setup.sh
+mkdir build; cd build
+cmake ..
+make
+```
 
-![](img/tdaq_overview.png)
+## CMake build options
 
+The following CMake build options are available:
+
+Flag | Options | Default | Description
+---- | ------- | --------|  -----------
+CMAKE_BUILD_TYPE | Release/Debug | Debug | Use `Debug` for testing, `Release` for production. Release adds optimization flags and so executes faster.
+CMAKE_EMULATION_BUILD | ON/OFF | OFF | ON will only compile code relevant for emulation/playback mode. This should be used if you are not interacting with any detector components.
+
+Use options like so
+
+```
+cmake .. -DCMAKE_EMULATION_BUILD=ON
+``` 
+
+## Running
+
+FASER DAQ is a Finite State Machine. It is interactively controlled by sending state transitions such as `start`, `pause`, `stop` and `(shut) down`.
+The FSM is booted up with a configuration file that provides the module configurations for start up.
+
+There are two run modes for FASER DAQ: Via command line or via a Run Control web interface.
+
+### Running from terminal
+```
+daqpy configs/<config_file_name>.json
+```
+
+### Running via the web interface
+
+See the main instructions for the Run Control interface in the [README here](scripts/RunControl/README_How_To.md). To start the web server, you can execute one of two options
+
+(a) Run Control without run service
+```
+rcguilocal
+```
+
+(b) Run Control with run service
+```
+rcgui
+```
+
+The latter connects the run control to the [FASER run database](https://faser-runinfo.app.cern.ch/), the run will be assigned a unique run number and all run information will be automatically logged in the database. Option (a) `rcguilocal` is preferred for debugging tests.
 
 ## Contacts/Experts
 If you encounter an issue, do not hesitate to get in contact with someone.  The general
 email list for the group is [FASER-tdaq@cern.ch](mailto:FASER-tdaq@cern.ch) to which you
 can request subscription via the CERN e-group [https://e-groups.cern.ch/](https://e-groups.cern.ch/)
-portal.  Beyond this e-group, there is also an active skype channel called the "A-Team" to
-which you can be added by requesting to anyone on the team.  Listed here are the specific
+portal. Listed here are the specific
 individuals who have particular expertise in a specific area and who you are recommended
 to contact if you have issues :
 
   - Group Leaders/Organization : [Anna Sfyrla](mailto:Anna.Sfyrla@cern.ch), [Brian Petersen](mailto:Brian.Petersen@cern.ch)
   - DAQ-ling : [Enrico Gamberini](mailto:enrico.gamberini@cern.ch)
-  - Digitizer : [Sam Meehan](mailto:samuel.meehan@cern.ch)
+  - Digitizer : [Brian Petersen](mailto:Brian.Petersen@cern.ch)
   - TLB : [Claire Antel](mailto:claire.antel@cern.ch)
-  - TRB : [Ondrej Theiner](mailto:ondrej.theiner@cern.ch)
-  - gpiodrivers : [Kristof Schmieden](mailto:Kristof.Schmieden@cern.ch)
+  - TRB : [Claire Antel](mailto:claire.antel@cern.ch), [Ondrej Theiner](mailto:ondrej.theiner@cern.ch)
+  - gpiodrivers : [Claire Antel](mailto:claire.antel@cern.ch), [Kristof Schmieden](mailto:Kristof.Schmieden@cern.ch)
   - faser-common : [Brian Petersen](mailto:Brian.Petersen@cern.ch)
   
 ## Codebase
 The entry-point for the code itself is stored on the CERN instance of GitLab at
-[https://gitlab.cern.ch/faser/daq](https://gitlab.cern.ch/faser/daq).  Permissions are 
-controlled by individual additions of specific users and you should contact the Group 
-Leaders or the repository Owner if you need a modification to your permissions.
+[https://gitlab.cern.ch/faser/daq](https://gitlab.cern.ch/faser/daq).
+A github mirror exists at [https://github.com/cantel/faser-daq](https://github.com/cantel/faser-daq) for external contributors.
 
-This codebase will ultimately be made public with the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html)
-so in principle, you should have access to see everything independent of credentials, and if 
-this is not the case there is a problem.
-
-
-
+This codebase is made public with the [GNU Lesser General Public License](https://www.gnu.org/licenses/lgpl-3.0.en.html).
 
 
 

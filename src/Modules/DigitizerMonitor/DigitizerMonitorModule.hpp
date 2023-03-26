@@ -6,6 +6,7 @@
 #include "Modules/MonitorBase/MonitorBaseModule.hpp"
 
 #include <cmath>
+#include <cstdint>
 #define NCHANNELS 16
 #define THRESHOLDS 4
 
@@ -17,8 +18,10 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   float GetPedestalMean(std::vector<uint16_t> input, int start, int end);
   float GetPedestalRMS(std::vector<uint16_t> input, int start, int end);
   void CheckBounds(std::vector<uint16_t> input, int& start, int& end);
-  
-  void FillChannelPulse(std::string histogram_name, int channel);
+
+  float FFTPhase(const std::vector<float>& data);
+
+  void FillChannelPulse(std::string histogram_name, std::vector<float>& values);
   float m_display_thresh;
  protected:
 
@@ -26,8 +29,12 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   void register_hists();
   void register_metrics();
   float m_thresholds[NCHANNELS][THRESHOLDS];
+  int m_intime[8];
+  int m_outtime[8];
   std::atomic<float> m_avg[NCHANNELS];
   std::atomic<float> m_rms[NCHANNELS];
+  std::atomic<float> m_t0[NCHANNELS];
+  std::atomic<float> m_late[8];
   std::atomic<int> m_thresh_counts[NCHANNELS][THRESHOLDS];
 
 };

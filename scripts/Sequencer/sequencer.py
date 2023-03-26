@@ -11,12 +11,15 @@ import os
 import requests
 import sys
 import time
-
+from os import environ as env
+import redis
 sys.path.append("../RunControl")
 
 from runcontrol import RunControl
 
 mattermost_hook=""
+
+r = redis.Redis(host='localhost', port=6379, db=3,charset="utf-8", decode_responses=True)
 
 if os.access("/etc/faser-secrets.json",os.R_OK):
     secrets=json.load(open("/etc/faser-secrets.json"))
@@ -48,7 +51,7 @@ def error(msg):
 
 
 class runner:
-    def __init__(self,config,runControl,seqnumber,seqstep):
+    def __init__(self,config,runControl:RunControl,seqnumber,seqstep, socketio = None):
         self.cfgFile=config["cfgFile"]
         self.runtype=config["runtype"]
         self.startcomment=config["startcomment"]
@@ -60,9 +63,19 @@ class runner:
         self.seqnumber=seqnumber
         self.seqstep=seqstep
         self.runnumber=None
+        # self.runnumber = 100000000 #NOTE : For testing only
         self.rc=runControl
+        self.socketio = socketio
     
-    
+    def sleep(self,seconds :int) -> None:
+        """
+        If the sequencer script is not used as a standalone script (without the rcgui), it will use the regular "time.sleep()" function,
+        instead of the sleep function provied by the flask-socketio package.
+        """
+        if self.socketio is not None: self.socketio.sleep(seconds)
+        else : time.sleep(seconds)
+        
+        
     def initialize(self):
         status=self.rc.change_config(self.cfgFile.replace(".json",""))
         if not status: return False
@@ -106,7 +119,7 @@ class runner:
             if events>=self.maxEvents: return True
             if time.time()-now>self.maxRunTime: return True
             print(f'Run {runnumber}, State: {state}, events: {events}, time: {time.time()-now} seconds')
-            time.sleep(5)
+            self.sleep(5)
 
     def run(self):
         if self.checkState()[0]!="DOWN":
@@ -125,13 +138,13 @@ class runner:
             print("Failed to initialize")
             return False
         print("INITIALIZED")
-        time.sleep(1)
+        self.sleep(1)
         rc=self.start()
         if not rc:
             print("Failed to start run")
             return False
         print("RUNNING")
-        time.sleep(5)
+        self.sleep(5)
         rc=self.waitStop()
         if not rc:
             print("Failed to reach run conditions")
@@ -142,11 +155,11 @@ class runner:
             print("Failed to stop")
             return False
         print("STOPPED")
-        time.sleep(5)
+        self.sleep(5)
         rc=self.shutdown()
         if not rc:
             print("Failed to shutdown - retry again in 10 seconds")
-            time.sleep(10)
+            self.sleep(10)
             rc=self.shutdown()
             if not rc:
                 print("Failed to shutdown - giving up")
@@ -154,11 +167,11 @@ class runner:
         print("SHUTDOWN")
         for ii in range(5):
             if self.checkState()[0]=="DOWN": break
-            time.sleep(1)
+            self.sleep(1)
         if self.checkState()[0]!="DOWN":
             print("Failed to shutdown",self.checkState())
             return False
-
+        # self.sleep(5) # NOTE : for testing only
         if self.postCommand:
             rc=os.system(self.postCommand)
             if rc:
@@ -172,33 +185,25 @@ def usage():
     print("./sequencer.py [-S <seqNumber> -s <stepNumber> ] <configuration.json>")
     sys.exit(1)
 
-def main(args):
+def load_steps(configName:str) :  
+    """
+    Loads the configuration from the provided configuration filename and builds the steps from the config. 
+    If there is a problem during the process, it will throw an RunTimeError -> best is to wrap the function with an try except block.  
+    -> Requires the env variable DAQ_SEQUENCE_CONFIG_DIR. 
+    Return :
+    ---
+    - config :  dictionnary of the used config
+    - cfgs : array of the differents steps of the sequence.  
+    """
     
-    startStep=1
-    seqnumber=0 
-    try:
-        opts, args = getopt.getopt(args,"s:S:",[])
-    except getopt.GetoptError:
-        usage()
-    for opt,arg in opts:
-        if opt=="-s":
-            startStep=int(arg)
-        if opt=="-S":
-            seqnumber=int(arg)
-    if len(args)!=1:
-        usage()
-    if startStep!=1 and seqnumber==0:
-        usage() #FIXME, maybe one should be able to look up last step?
+    with open(os.path.join(env["DAQ_SEQUENCE_CONFIG_DIR"],configName), "r") as fp: 
+        config=json.load(fp)
 
-
-    config=json.load(open(args[0]))
-    hostUrl=config["hostUrl"]
-    maxTransitionTime=config["maxTransitionTime"]
     cfgs=[]
     if "template" in config:
         if "steps" in config:
             print("ERROR: cannot specify both 'template' and 'steps'")
-            return 1
+            raise RuntimeError("Cannot specify both 'template' and 'steps'")
         steps=[]
         tempVars={}
         varLen=0
@@ -208,10 +213,10 @@ def main(args):
                 varDef=list(range(*eval(varDef)))
             if type(varDef)!=list:
                 print(f"Template variable {var} not properly defined")
-                return 1
+                raise RuntimeError(f"Template variable {var} not properly defined")
             if varLen and len(varDef)!=varLen:
                 print(f"Template variable {var} does not have the proper number of entries")
-                return 1
+                raise RuntimeError(f"Template variable {var} does not have the proper number of entries")
             varLen=len(varDef)
             tempVars[var]=varDef
         for idx in range(varLen):
@@ -236,15 +241,68 @@ def main(args):
             if not par in cfg:
                 if not par in config['defaults']:
                     print(f"Did not find value for '{par}'")
-                    return 1
+                    raise RuntimeError(f"Did not find value for '{par}'")
                 cfg[par]=config['defaults'][par]
         cfgs.append(cfg)
+    return config, cfgs
 
+
+def update_rcgui( sequenceName:str, totalStepsNumber:int, stepNumber = 0, seqNumber = 0, socketio = None, end = False) -> None:
+    """
+    Emits "sequenceUpdate" event to RCGUI and update infos in REDIS.
+    If 'end' argument is False, the function will just delete the entry in REDIS.
+    """
+    if end :
+        r.delete("sequencerState")
+        if socketio is not None : 
+            socketio.emit("sequencerStateChange",{}, broadcast=True)
+        return None
+
+    updateDict  = {
+        "sequenceName" : sequenceName,
+        "seqNumber" : seqNumber,
+        "stepNumber" : stepNumber,
+        "totalStepsNumber" : totalStepsNumber,
+    } 
+    r.hmset("sequencerState", updateDict)
+    if socketio is not None : 
+        socketio.emit("sequencerStateChange",updateDict, broadcast=True)
+    return None    
+
+
+def main(args, socketio=None):
+    """
+    Runs the sequencer.
+    The parameter socketio is used when the function is called directly from the RunControl, which represents the socketio instance. 
+    startStep begins at 1.
+    """
+    startStep=1
+    seqnumber=0 
+    try:
+        opts, args = getopt.getopt(args,"s:S:",[])
+    except getopt.GetoptError:
+        usage()
+    for opt,arg in opts:
+        if opt=="-s":
+            startStep=int(arg)
+        if opt=="-S":
+            seqnumber=int(arg)
+    if len(args)!=1:
+        usage()
+    if startStep!=1 and seqnumber==0:
+        usage() #FIXME, maybe one should be able to look up last step?
+    
+    #TODO: add try except to return 1 or 0 for the main function
+    config, cfgs = load_steps(args[0])
+
+    hostUrl=config["hostUrl"]
+    maxTransitionTime=config["maxTransitionTime"]
     runControl=RunControl(hostUrl,maxTransitionTime)
     if runControl.getState()['runOngoing']:
         print("Run already on-going - bailing out")
         return 1
 
+    update_rcgui(args[0], len(cfgs), 0, seqnumber,socketio=socketio)
     if "initCommand" in config:
         print("Running INIT command")
         rc=os.system(config["initCommand"])
@@ -254,9 +312,10 @@ def main(args):
 
     message(f"Starting a sequence run ({args[0]}) with {len(cfgs)-startStep+1} steps")
     for step in range(startStep-1,len(cfgs)):
+        update_rcgui(args[0],len(cfgs), step+1,seqnumber, socketio)
         print(f"Running step {step+1}")
         cfg=cfgs[step]
-        run=runner(cfg,runControl,seqnumber,step+1)
+        run=runner(cfg,runControl,seqnumber,step+1, socketio)
         rc=run.run()
         if rc:
             print("Successful run")
@@ -277,10 +336,11 @@ def main(args):
             message("Failed at sequencer stop - please check")
             return 1
 
+    update_rcgui(args[0],len(cfgs),0, seqnumber, socketio, end=True)
     message("Sequence run completed")
     return 0
 
 if __name__ == "__main__":
-   sys.exit(main(sys.argv[1:]))
+    sys.exit(main(sys.argv[1:]))
 
 

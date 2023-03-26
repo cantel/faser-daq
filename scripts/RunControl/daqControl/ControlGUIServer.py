@@ -3,7 +3,7 @@
 #
 
 import subprocess
-from flask import Flask,redirect,url_for,render_template,request,session,jsonify,Response
+from flask import Flask, make_response,redirect,url_for,render_template,request,session,jsonify,Response
 from datetime import timedelta
 import redis
 import sys, os, time
@@ -31,8 +31,10 @@ import requests
 import socket
 import urllib3
 from mattermostNotifier import MattermostNotifier
+from glob import glob
 
-
+sys.path.append("../Sequencer")
+import sequencer
 
 # patching the original function from NodeTree class from daqLing
 def childrenStateChecker(self):
@@ -752,6 +754,8 @@ def appState():
     packet["crashedM"] = json.loads(crashedModules) if (crashedModules!="" or crashedModules) else []
     packet["localOnly"] = localOnly
     packet["runStart"] = r2.get("runStart")
+    packet["sequencerState"] = r2.hgetall("sequencerState")
+    print(r2.hgetall("sequencerState"))
     packet = {**packet, **getRunInfo()}
     return jsonify(packet)
 
@@ -1064,7 +1068,50 @@ def returnLogURL():
     url = f"http://{platform.node()}:9001/logtail/{group}:{module}"
     return jsonify(url)
 
+# ---------------- Sequencer -------------- # 
 
+@app.route("/getSequencerConfigs", methods =["GET"])
+def getSequencerConfigs():
+    files = sorted(glob(os.path.join(env["DAQ_SEQUENCE_CONFIG_DIR"],"*.json")))
+    # keeping only the filename instead of full path
+    files = [os.path.basename(file) for file in files]
+    return jsonify(files) 
+
+
+@app.route("/loadSequencerConfig", methods=["GET"])
+def loadSequencerConfig():
+    sequencerConfigName = request.args.get("sequencerConfigName") 
+    response = {}
+    try : 
+        config, steps = sequencer.load_steps(sequencerConfigName)
+    except (RuntimeError, FileNotFoundError, KeyError)  as err : 
+        response["status"] = "error"
+        response["data"] = repr(err)
+    except json.decoder.JSONDecodeError :
+        response["status"] = "error"
+        response["data"] = "An error occured when parsing the JSON file."
+    else : 
+        response["status"] = "success"
+        response["data"] = {"config": config, "steps" : steps}
+    return jsonify(response)
+
+
+@app.route("/startSequencer", methods=["POST"])
+def startSequencer() : 
+   requestData = request.get_json() 
+   configName = requestData["configName"]
+   startStep = requestData["startStep"]
+   seqNumber = requestData["seqNumber"]
+   # FIXME: The sequence Numbrer should be given by the runNumber
+   argsSequencer = ['-S', seqNumber,        # sequence Number
+                    '-s', startStep, # startStep
+                    configName]
+   socketio.start_background_task(sequencer.main, argsSequencer,socketio)
+   return jsonify({"status" : "success"})
+
+    
+    
+    
 @socketio.on_error()
 def error_handler(e):
     """ Handles the default namespace """

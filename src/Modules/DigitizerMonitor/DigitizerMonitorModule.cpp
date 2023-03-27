@@ -35,6 +35,8 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
     return;
   }
 
+  auto tlb = get_tlb_data_fragment(eventBuilderBinary);
+
   //auto fragmentUnpackStatus = unpack_fragment_header(eventBuilderBinary); // if only monitoring information in header.
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
   if ( fragmentUnpackStatus ) {
@@ -54,37 +56,115 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
   m_histogrammanager->fill("h_digitizer_payloadsize", payloadSize);
   m_metric_payload = payloadSize;
 
+  float peaks[NCHANNELS];
+  float tzeros[NCHANNELS];
+  std::vector<float> signals[NCHANNELS];
+  float scale[]={2.,2.,2.,2., //FIXME: should  read from configuration
+		 2.,2.,2.,2.,
+		 2.,2.,2.,2.,
+		 2.,2.,2.,2.};
+	       
   // anything worth doing to all channels
+  bool saturated=false;
   for(int iChan=0; iChan<NCHANNELS; iChan++){
     if (!m_pmtdataFragment->channel_has_data(iChan)) continue;
     std::string chStr = std::to_string(iChan);
     if (iChan<10) chStr = "0"+chStr;
 
+    auto v = m_pmtdataFragment->channel_adc_counts(iChan);
+
+
     // mean and rms for monitoring a channel that goes out of wack
-    float avg = GetPedestalMean(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
-    float rms = GetPedestalRMS(m_pmtdataFragment->channel_adc_counts(iChan), 0, 100);
+    float avg = GetPedestalMean(v, 0, 50);
+    float rms = GetPedestalRMS(v, 0, 50);
     
     m_avg[iChan]=avg;
     if (m_rms[iChan]==0) m_rms[iChan]=rms; //initialize on first event
     m_rms[iChan]=0.02*rms+0.98*m_rms[iChan]; //exponential moving average
 
-    // example pulse
-    auto v = m_pmtdataFragment->channel_adc_counts(iChan);
-    float min_value = *std::min_element(v.begin(),v.end());
-    float max_value = *std::max_element(v.begin(),v.end());
-    if ((avg-min_value)>m_display_thresh||(max_value-avg)>m_display_thresh) {
-      FillChannelPulse("h_pulse_ch"+chStr, iChan);
+    //convert to mV and find peaks
+    std::vector<float>& signal=signals[iChan];
+    signal.resize(v.size());
+    float min_value=0;
+    float max_value=0;
+    size_t max_idx=0;
+    for(size_t ii=0;ii<v.size();ii++) {
+      if (v[ii]<10 && iChan!=15) saturated=true;
+      float value=(avg-v[ii])*scale[iChan]/16.384;
+      if (value>max_value) {
+	max_value=value;
+	max_idx=ii;
+      }
+      if (value<min_value) min_value=value;
+      signal[ii]=value;
     }
-    float peak=avg-min_value;
-    if ((max_value-avg)>peak) peak=avg-max_value;
-    m_histogrammanager->fill("h_peak_ch"+chStr, peak/8.192, 1.0); //FIXME: assume 2V range
+    //find t0 
+    const int delta=3;
+    const float k=0.3;
+    max_idx=std::min(max_idx,v.size()-delta-2); //protect against overflow
+    max_idx+=delta;
+    while((k*signal[max_idx]-signal[max_idx-delta]<0)&&max_idx!=delta) max_idx--;
+    double y1=k*signal[max_idx]-signal[max_idx-delta];
+    double y2=k*signal[max_idx+1]-signal[max_idx-delta+1];
+    double dt=y1/(y1-y2);
+    double t0=2.*(max_idx+dt-v.size()+300);
+    tzeros[iChan]=t0;
+    // example pulse
+    if ((-min_value)>m_display_thresh||(max_value>m_display_thresh)) {
+      FillChannelPulse("h_pulse_ch"+chStr, signal);
+    }
+    float peak=max_value;
+    peaks[iChan]=peak;
+    if ((-min_value)>peak) peak=min_value;
+
+    m_histogrammanager->fill("h_peak_ch"+chStr, peak, 1.0); 
     for(int ii=0;ii<THRESHOLDS;ii++) {
-      if (m_thresholds[iChan][ii] && peak/8.192>m_thresholds[iChan][ii])  //FIXME: assume 2V range
+      if (m_thresholds[iChan][ii] && peak>m_thresholds[iChan][ii])  
 	m_thresh_counts[iChan][ii]++;
     }
   }
-  
+  //select collision events without saturated channels
+  if (peaks[6]>100 && peaks[7]>100&& ((peaks[8]>25&&peaks[9]>25)||(peaks[10]>25&&peaks[11]>25))&&!saturated) {
+    if (m_pmtdataFragment->channel_has_data(15)) { //assume that clock data is here
+      float phase=FFTPhase(signals[15]);
+      if (phase<-5) phase+=25;
+      m_histogrammanager->fill("h_clockphase", phase);
+
+      for(int iChan=0; iChan<NCHANNELS; iChan++){
+	if (iChan==15) continue;
+	if (peaks[iChan]<5) continue; // Need a minimum signal
+
+	std::string chStr = std::to_string(iChan);
+	if (iChan<10) chStr = "0"+chStr;
+
+	m_histogrammanager->fill("h_time_ch"+chStr,tzeros[iChan]-phase);
+	if (m_t0[iChan]==0) m_t0[iChan]=tzeros[iChan]; //initialize on first event
+	m_t0[iChan]=0.02*tzeros[iChan]+0.98*m_t0[iChan]; //exponential moving average
+      }
+    }
+    auto inputBitsNext = tlb.input_bits_next_clk();
+    for(int inputBit=0; inputBit<8;inputBit++) {
+      if ((inputBitsNext&(1<<inputBit))!=0) {
+	//FIXME: hardcoded combinations
+	float missedSignal=0;
+	if (inputBit<2) missedSignal=std::max(peaks[inputBit*2],peaks[inputBit*2+1]);	
+	else if (inputBit>6) missedSignal=peaks[inputBit*2];
+	else missedSignal=std::min(peaks[inputBit*2],peaks[inputBit*2+1]);
+	m_outtime[inputBit]++;
+	m_histogrammanager->fill("h_late_bit"+std::to_string(inputBit),missedSignal);
+	std::cout<<inputBit<<" "<<m_outtime[inputBit]<<" "<<m_intime[inputBit]<<std::endl;
+      }
+    }
+    auto inputBits = tlb.input_bits();
+    for(int inputBit=0; inputBit<8;inputBit++) {
+      if ((inputBits&(1<<inputBit))!=0) {
+	m_intime[inputBit]++;
+	m_late[inputBit]=1.*m_outtime[inputBit]/(m_outtime[inputBit]+m_intime[inputBit]);
+      }
+    }
+  }
 }
+
 
 void DigitizerMonitorModule::register_hists() {
   INFO(" ... registering histograms in DigitizerMonitor ... " );
@@ -103,10 +183,18 @@ void DigitizerMonitorModule::register_hists() {
     std::string chStr = std::to_string(iChan);
     if (iChan<10) chStr = "0"+chStr;
     // example pulse
-    m_histogrammanager->registerHistogram("h_pulse_ch"+chStr, "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "ADC Counts", -0.5, buffer_length-0.5, buffer_length, m_PUBINT);
+    m_histogrammanager->registerHistogram("h_pulse_ch"+chStr, "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "Inverted signal [mV]", -0.5, buffer_length-0.5, buffer_length, m_PUBINT);
     m_histogrammanager->registerHistogram("h_peak_ch"+chStr, "Peak signal [mV]", -200, 2000, 550, m_PUBINT);
-  
+    if (iChan==15) continue;
+    m_histogrammanager->registerHistogram("h_time_ch"+chStr, "Peak timing [ns]", 150, 300, 300, m_PUBINT);
+
   }
+  for(int inputBit=0; inputBit<8;inputBit++) {
+    m_histogrammanager->registerHistogram("h_late_bit"+std::to_string(inputBit), "Peak signal for late triggers [mV]", 0, 500, 250, m_PUBINT);
+
+  }
+  m_histogrammanager->registerHistogram("h_clockphase", "Clock phase [ns]", -50, 50, 500, m_PUBINT);
+
   
   INFO(" ... done registering histograms ... " );
   return;
@@ -138,8 +226,14 @@ void DigitizerMonitorModule::register_metrics() {
     }
     registerVariable(m_avg[iChan], "pedestal_mean_ch"+chStr);
     registerVariable(m_rms[iChan], "pedestal_rms_ch"+chStr);
+    if (iChan!=15) 
+      registerVariable(m_t0[iChan], "signal_timing_ch"+chStr);
   }
-
+  for(int inputBit=0;inputBit<8;inputBit++) {
+    registerVariable(m_late[inputBit],"Late_trigger_fraction_bit"+std::to_string(inputBit));
+    m_intime[inputBit]=0; //FIXME - doesn't get reset on run stop/start
+    m_outtime[inputBit]=0; //FIXME - doesn't get reset on run stop/start
+  }
   return;
 }
 
@@ -161,6 +255,17 @@ float DigitizerMonitorModule::GetPedestalMean(std::vector<uint16_t> input, int s
   return sum/count;
 }
 
+float DigitizerMonitorModule::FFTPhase(const std::vector<float>& data) {
+  int N=data.size();
+  float sumRe=0;
+  float sumIm=0;
+  int k=int(40.08/500.*N); //clock/digitizer frequency
+  for(int ii=0;ii<N;ii++) {
+    sumRe+=data[ii]*cos(2*M_PI*ii*k/N);
+    sumIm+=data[ii]*sin(2*M_PI*ii*k/N);
+  }
+  return 25*atan2(sumIm,sumRe)/2/M_PI;
+}
 
 float DigitizerMonitorModule::GetPedestalRMS(std::vector<uint16_t> input, int start, int end){
 
@@ -196,9 +301,7 @@ void DigitizerMonitorModule::CheckBounds(std::vector<uint16_t> input, int& start
   }
 }
 
-void DigitizerMonitorModule::FillChannelPulse(std::string histogram_name, int channel){
-  DEBUG("Filling pulse for : "<<histogram_name<<"  "<<channel);
-
+void DigitizerMonitorModule::FillChannelPulse(std::string histogram_name, std::vector<float>& values){
   m_histogrammanager->reset(histogram_name);
-  m_histogrammanager->fill(histogram_name,0,1,m_pmtdataFragment->channel_adc_counts(channel));
+  m_histogrammanager->fill(histogram_name,0,1,values);
 }

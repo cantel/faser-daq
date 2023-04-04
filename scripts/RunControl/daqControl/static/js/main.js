@@ -106,8 +106,7 @@ Vue.component("sequencer_dialog", {
             <template v-slot:default="{ item, index }">
               <div :key="index" class="d-flex text-body-2">
                 <span class="mx-2">[[index+1]] : </span>
-                <span> <span class="font-weight-bold">PreCommand</span> [[item.preCommand]] <span
-                    class="font-weight-bold">CfgFile</span> [[item.cfgFile]] </span>
+                <span> [[ item.startcomment ]] </span>
               </div>
             </template>
           </v-virtual-scroll>
@@ -115,15 +114,13 @@ Vue.component("sequencer_dialog", {
       </div>
     </v-expand-transition>
     <v-card-actions>
-      
         <v-btn color="error" @click="$emit('close_seq')">close</v-btn>
         <template v-if="Object.keys(sequencer_state).length == 0">
         <v-btn :disabled="selected_config==''" color="success"
           @click="$emit('start_seq', selected_config, seqNumber, stepNumber)">Start</v-btn>
       </template>
       <template v-else>
-        <v-btn color="error">Stop</v-btn>
-        <!-- TODO: Need to handle the stop event -->
+        <v-btn color="danger" @click="$emit('kill_seq')">PAUSE</v-btn>
       </template>
       <v-spacer></v-spacer>
       <v-btn text @click="expandedSteps = !expandedSteps" v-if="errorLoadedConfigMessage === ''">
@@ -416,6 +413,16 @@ var app = new Vue({
     this.initListeners();
   },
   methods: {
+    killSequence(){
+      axios.post("/killSequencer").then((response) => {
+        if (response.data.status == "error") {
+          this.createSnackbar("error", response.data.data)
+        } 
+        else {
+          // OK
+        }
+      })
+    },
     startSequence(configName, seqNumber, stepNumber) {
       // function called when pressing the "START" button in the sequencer dialog window
       this.sequencerExpanded = false;

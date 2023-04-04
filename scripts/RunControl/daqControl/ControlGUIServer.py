@@ -24,7 +24,7 @@ from pathlib import Path
 import platform
 from flask_cors import CORS
 from nodetree import NodeTree
-from helpers import detectorList, getEventCounts
+from helpers import detectorList, getEventCounts, LogLevel, logAndEmit
 from daqcontrol import daqcontrol as daqctrl
 import metricsHandler
 import requests
@@ -154,9 +154,9 @@ def systemConfiguration(configPath):
         try: 
             sysConfig = reinitTree(configJson)
         except Exception as e:
-            logAndEmit("general", "ERROR", str(e))
+            logAndEmit(str(e),"general", LogLevel.ERROR, socketio=socketio, logger=app.logger)
     else : # we changed config
-        print("sysConfig is not None and we changed config")
+        # print("sysConfig is not None and we changed config")
         sysConfig = reinitTree(configJson=configJson, oldRoot=sysConfig)
 
 def getConfigsInDir(configPath):
@@ -234,7 +234,7 @@ def executeComm(ctrl, action):
     """
     r = ""
     configName = r2.get("loadedConfig")
-    logAndEmit(configName,"INFO","User "+ session["user"]["cern_upn"]+ " has sent command "+ action+ " on node "+ ctrl,)
+    logAndEmit(f"User {session['user']['cern_upn']} has sent command {action} on node {ctrl}",configName,LogLevel.INFO,socketio, app.logger)
     try:
         if action == "exclude":
             r = find_by_attr(sysConfig, ctrl).exclude()
@@ -243,9 +243,10 @@ def executeComm(ctrl, action):
         else:
             r = find_by_attr(sysConfig, ctrl).executeAction(action)
     except Exception as e:
-        logAndEmit(configName, "ERROR", ctrl + ": " + str(e))
+        logAndEmit(f"{ctrl}: {str(e)}",configName,LogLevel.ERROR,socketio, app.logger)
     if r != "":
-        logAndEmit(configName, "INFO", ctrl + ": " + str(r))
+        logAndEmit(f"{ctrl}: {str(r)}",configName,LogLevel.INFO,socketio, app.logger)
+
     return r
 
 
@@ -276,7 +277,7 @@ def executeCommROOT(action:str, reqDict:dict):
         ...
     else : 
         r2.expire("whoInterlocked", serverConfig["timeout_interlock_secs"])
-        logAndEmit(configName,"INFO","User " + session["user"]["cern_upn"] + " has sent ROOT command " + action)
+        logAndEmit(f"User {session['user']['cern_upn']} has sent ROOT command: {action}", configName, LogLevel.INFO, socketio,app.logger)
     setTransitionFlag(1)
     if action == "INITIALISE":
         refreshConfig()
@@ -285,7 +286,7 @@ def executeCommROOT(action:str, reqDict:dict):
         steps = [("add", "booted"), ("configure","ready")]
         for step,nextState in steps :
             r = sysConfig.executeAction(step)
-            logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+            logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
             if step == "add" and r[0] != "Action not allowed" :
                 logPaths = listLogs(r)
                 r2.delete("log")
@@ -312,7 +313,7 @@ def executeCommROOT(action:str, reqDict:dict):
         r2.set("runNumber", runNumber)
 
         r=sysConfig.executeAction("start",runNumber)
-        logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("running", serverConfig["timeout_rootCommands_secs"][action])
 
     elif action == "STOP":
@@ -325,7 +326,7 @@ def executeCommROOT(action:str, reqDict:dict):
             send_stop_to_runservice(runComment=runComment, runNumber=runNumber, runType=runType)
         try : 
             r=sysConfig.executeAction("stop")
-            logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+            logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
             done = waitUntilCorrectState("ready", serverConfig["timeout_rootCommands_secs"][action])
         except ConnectionRefusedError:
             setTransitionFlag(0)
@@ -344,7 +345,7 @@ def executeCommROOT(action:str, reqDict:dict):
             
         for step,nextState in steps : 
             r = sysConfig.executeAction(step)
-            logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+            logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
             done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action])
     
         if not done : 
@@ -357,7 +358,7 @@ def executeCommROOT(action:str, reqDict:dict):
 
     elif action == "PAUSE":
         r=sysConfig.executeAction("disableTrigger")
-        logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("paused", serverConfig["timeout_rootCommands_secs"][action])
     
     elif action == "RESUME":
@@ -365,12 +366,12 @@ def executeCommROOT(action:str, reqDict:dict):
         if "Action not allowed" in r:
             r=sysConfig.executeAction("resume")
  
-        logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("running", serverConfig["timeout_rootCommands_secs"][action])
     
     elif action == "ECR":
         r=sysConfig.executeAction("ECR")
-        logAndEmit(configName, "INFO", "ROOT" + ": " + str(r))
+        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("paused", serverConfig["timeout_rootCommands_secs"][action])
  
     setTransitionFlag(0)
@@ -403,8 +404,8 @@ def post_influxDB_mattermost(action:str,configName,runComment,runType, runNumber
                         data=runData,
                         verify=False)
     if r.status_code!=204:
-        logAndEmit("Failed to post end of run information to influxdb: "+r.text)
-        sendInfoToSnackBar("error","Failed to post end of run information to influxdb: "+r.text )
+        logAndEmit(f"Failed to post end of run information to influxdb: {r.text}","INFLUXDB", LogLevel.ERROR, socketio, app.logger)
+        sendInfoToSnackBar("error",f"Failed to post end of run information to influxdb: {r.text}")
     if configName.startswith("combined"):
         if action == "stop" : message(f"Run {runNumber} stopped\nOperator: {runComment}")
         elif action == "start" : message(f"Run {runNumber} was started\nOperator: {runComment}")
@@ -420,7 +421,7 @@ def send_start_to_runservice(runType:str,runComment:str, reqDict:dict) -> int:
     - reqDict : dictionnary of all the run service-related info    
     
     Return
-    --------
+    ------
     - Run Number provided by the run service
     """
     version=subprocess.check_output(["git","rev-parse","HEAD"]).decode("utf-8").strip()
@@ -450,18 +451,18 @@ def send_start_to_runservice(runType:str,runComment:str, reqDict:dict) -> int:
                 'configuration': config
             })
         if res.status_code != 201 :
-            logAndEmit("general", "ERROR", "Failed to get run number: "+res.text )
+            logAndEmit(f"Failed to get run number: {res.text}", "RUN SERVICE", LogLevel.ERROR, socketio, app.logger)
             setTransitionFlag(0)
-            return "Error: Failed to get run number: "+res.text
+            return f"Error: Failed to get run number: {res.text}"
         else:
             try:
                 runNumber=int(res.text)
             except ValueError:
-                logAndEmit("ERROR","Failed to get run number: "+res.text)
+                logAndEmit(f"Failed to get run number: {res.text}", "RUN SERVICE", LogLevel.ERROR, socketio, app.logger)
                 setTransitionFlag(0)
                 return "Error: Failed to get run number: "+res.text
     except requests.exceptions.ConnectionError:
-        logAndEmit("general","Error","Could not connect to run service")
+        logAndEmit("Could not connect to run service", "RUN SERVICE", LogLevel.ERROR, socketio, app.logger)
         setTransitionFlag(0)
         return "Error: Could not connect to run service"
     print("Fonctionne")
@@ -499,11 +500,11 @@ def send_stop_to_runservice(runComment, runType, runNumber, forceShutdown=False)
                 json = stopMsg)
 
         if res.status_code != 200 :
-            logAndEmit("general", "ERROR", "Failed to register end of run information: "+r.text )
+            logAndEmit(f"Failed to register end of run information: {r.text}", "RUN SERVICE", LogLevel.ERROR, socketio, app.logger)
             sendInfoToSnackBar( "error", "Failed to register end of run information: "+r.text)
 
     except requests.exceptions.ConnectionError:
-        logAndEmit("general","Error","Could not connect to run service")
+        logAndEmit("Could not connect to run service", "RUN SERVICE", LogLevel.ERROR, socketio, app.logger)
         sendInfoToSnackBar( "error","Could not connect to run service")
     
     if influxDB:
@@ -642,7 +643,8 @@ def stateChecker():
                             
                             if l2["Root"][0] not in ["booted","added"]:
                                 updateRedis(status=state)
-                                logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
+                                # logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
+                                logAndEmit(f"ROOT element is now in state {state}", r2.get("loadedConfig"), LogLevel.INFO, socketio, app.logger )
                                 socketio.emit("runStateChng",state , broadcast=True)
                 l1 = l2
                 transitionFlag1 = transitionFlag2
@@ -678,7 +680,8 @@ def stateChecker():
         if lockState2 !=lockState:
             socketio.emit("interlockChng", lockState2, broadcast = True)
             if not lockState2:
-                logAndEmit(loadedConfig2, "INFO", "Interlock has been released because of TIMEOUT")
+                # logAndEmit(loadedConfig2, "INFO", "Interlock has been released because of TIMEOUT")
+                logAndEmit("Interlock has been released because of timeout", loadedConfig2, LogLevel.INFO, socketio, app.logger)
             lockState = lockState2
 
         ####### change of runInfo #######
@@ -716,16 +719,16 @@ def modulesWithError(tree):
     return errorList
 
             
-def logAndEmit(configtype, type:str , message=""):
-    now = datetime.now()
-    timestamp = now.strftime("%d/%m/%Y, %H:%M:%S")
-    if type == "INFO":
-        app.logger.info("[" + configtype + "] " + timestamp + " " + type + ": " + message)
-    elif type == "WARNING":
-        app.logger.warning("[" + configtype + "] " + timestamp + " " + type + ": " + message)
-    elif type == "ERROR":
-        app.logger.error("[" + configtype + "] " + timestamp + " " + type + ": " + message)
-    socketio.emit("logChng","[" + configtype + "] " + timestamp + " " + type + ": " + message,broadcast=True,)
+# def logAndEmit(configtype, type:str , message=""):
+#     now = datetime.now()
+#     timestamp = now.strftime("%d/%m/%Y, %H:%M:%S")
+#     if type == "INFO":
+#         app.logger.info("[" + configtype + "] " + timestamp + " " + type + ": " + message)
+#     elif type == "WARNING":
+#         app.logger.warning("[" + configtype + "] " + timestamp + " " + type + ": " + message)
+#     elif type == "ERROR":
+#         app.logger.error("[" + configtype + "] " + timestamp + " " + type + ": " + message)
+#     socketio.emit("logChng","[" + configtype + "] " + timestamp + " " + type + ": " + message,broadcast=True,)
 
 
 def updateRedis(status:str = None):
@@ -822,21 +825,27 @@ def interlock():
     action = requestData["action"] # lock or unlock 
     if action == "lock": 
         if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=serverConfig["timeout_interlock_secs"], nx=True): 
-            logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("loadedConfig"),)
+            # logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("loadedConfig"),)
+            logAndEmit(f"User {session['user']['cern_upn']} has taken control of configuration {r2.get('loadedConfig')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
             return jsonify("File locked successfully")
         else : 
             # someone already locked the config
-            logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " tried to take control configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
+            logAndEmit(f"User {session['user']['cern_upn']} tried to take control of configuration {r2.get('loadedConfig')} from {r2.get('whoInterlocked')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
+
+            # logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " tried to take control configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
             return jsonify(f"Sorry, the config is already locked by {r2.get('whoInterlocked')}")
 
     else: # action == "unlock"
         if session["user"]["cern_upn"] == r2.get("whoInterlocked"): # if is the right person
-            r2.delete("whoInterlocked")            
-            logAndEmit(r2.get("loadedConfig"),"INFO","User " + session["user"]["cern_upn"]+ " has RELEASED control of configuration"+ r2.get('loadedConfig'))
+            r2.delete("whoInterlocked")
+            logAndEmit(f"User {session['user']['cern_upn']} has released control of configuration {r2.get('loadedConfig')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )    
+            # logAndEmit(r2.get("loadedConfig"),"INFO","User " + session["user"]["cern_upn"]+ " has RELEASED control of configuration"+ r2.get('loadedConfig'))
             return jsonify("unlocked file")
 
         else: # someone else try to unlock file         
-            logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ "  ATTEMPTED to take control of configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
+            # logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"] + "  ATTEMPTED to take control of configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
+            logAndEmit(f"User {session['user']['cern_upn']} tried to take control of configuration {r2.get('loadedConfig')} from {r2.get('whoInterlocked')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
+
             return jsonify("you can't")
 
 
@@ -851,13 +860,15 @@ def ajaxParse():
         r = executeComm(node, command)
     except Exception as e:
         logAndEmit(configName, "ERROR", str(e))
+        logAndEmit(str(e),configName, LogLevel.ERROR, socketio, app.logger)
     socketio.sleep(1)
     return jsonify(r)
 
 
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
-    logAndEmit("general", "INFO", "User logged out: " + session["user"]["cern_upn"])
+    # logAndEmit("general", "INFO", "User logged out: " + session["user"]["cern_upn"])
+    logAndEmit(f"User logged out: {session['user']['cern_upn']}", "GENERAL", LogLevel.INFO, socketio, app.logger)
     session.pop("user", None)
     session.pop("configName", None)
     session.pop("configPath", None)
@@ -893,8 +904,8 @@ def initConfig():
         print("Do nothing")
     else :             
         CONFIG_PATH = os.path.join(env["DAQ_CONFIG_DIR"], configName)
-        if request.args.get("bot") is None: 
-            logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
+        # if request.args.get("bot") is None: 
+        #     logAndEmit(CONFIG_PATH,"INFO","User "+ session["user"]["cern_upn"] + " has switched to configuration "+ configName,)
         try : 
 
             with open(os.path.join(CONFIG_PATH, "config-dict.json")) as f:
@@ -944,7 +955,7 @@ def login_callback():
     access_token = response["access_token"]
     userinfo = keycloak_client.fetch_userinfo(access_token)
     session["user"] = userinfo
-    logAndEmit("general", "INFO", "User connected: " + session["user"]["cern_upn"])
+    # logAndEmit("general", "INFO", "User connected: " + session["user"]["cern_upn"])
     return redirect(url_for('index'))
 
 
@@ -1098,18 +1109,43 @@ def loadSequencerConfig():
 
 @app.route("/startSequencer", methods=["POST"])
 def startSequencer() : 
-   requestData = request.get_json() 
-   configName = requestData["configName"]
-   startStep = requestData["startStep"]
-   seqNumber = requestData["seqNumber"]
-   # FIXME: The sequence Numbrer should be given by the runNumber
-   argsSequencer = ['-S', seqNumber,        # sequence Number
-                    '-s', startStep, # startStep
-                    configName]
-   socketio.start_background_task(sequencer.main, argsSequencer,socketio)
-   return jsonify({"status" : "success"})
+    global thread 
+    requestData = request.get_json() 
+    configName = requestData["configName"]
+    startStep = requestData["startStep"]
+    seqNumber = requestData["seqNumber"]
+    # FIXME: The sequence Numbrer should be given by the runNumber
+    argsSequencer = ['-S', seqNumber,        # sequence Number
+                        '-s', startStep, # startStep
+                        configName]
+    thread = socketio.start_background_task(sequencer.main, argsSequencer,socketio, app.logger)
+    return jsonify({"status" : "success"})
+
+
+# @app.route("/killSequencer", methods=["POST"]) 
+# def killSequencer():
+#     """
+#     Kills the background job so that the user can shutdown the current sequence manually and press "STOP" to return 
+#     """
+#     global thread
+#     thread.stop() # FIXME : NOT WORKING ! 
+#     return jsonify({"status": "success", "data" : None})
+   
+    
+# @app.route("/stopSequencer", methods=["POST"]) 
+# def stopSequencer():
+#     sequencerState = r2.hgetall("sequencerState")
+#     sequenceName = sequencerState["sequenceName"]
+#     _ , cfgs = sequencer.load_steps(sequenceName)
+#     stoppedStep = cfgs[sequencerState["stepNumber"]-1]
+#     return jsonify({"status" : "success", "data": sequencerState})
+    
+    
+
 
     
+
+
     
     
 @socketio.on_error()

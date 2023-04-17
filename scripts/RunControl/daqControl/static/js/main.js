@@ -15,7 +15,8 @@ Vue.component("sequencer_dialog", {
       steps: [],
       listConfigs: [],
       expandedSteps: false,
-      errorLoadedConfigMessage: ""
+      errorLoadedConfigMessage: "",
+      stopping : false
     };
   },
   mounted() {
@@ -31,6 +32,10 @@ Vue.component("sequencer_dialog", {
     }
   },
   methods: {
+    emit_stop(){
+      this.$emit("stop_seq")
+      this.stopping = true
+    },
     loadSequencerConfig(selected_config) {
       axios.get("/loadSequencerConfig", { params: { "sequencerConfigName": selected_config } }).then((response) => {
         if (response.data.status == "error") {
@@ -83,9 +88,6 @@ Vue.component("sequencer_dialog", {
         </v-col>
       </v-row>
       <v-row v-if="selected_config !== ''" justify="space-around">
-        <!-- <v-col cols='12'>
-        <v-subheader>Step number</v-subheader>
-      </v-col> -->
         <v-col cols="12">
           <v-slider class="align-center" v-model="stepNumber" hide-details :min="1" :max="steps.length"
             label="Step number" thumb-label>
@@ -100,11 +102,10 @@ Vue.component("sequencer_dialog", {
     </v-card-text>
     <v-expand-transition>
       <div v-if="expandedSteps">
-        <!-- <v-divider></v-divider> -->
         <v-card-text style="overflow:auto; white-space: nowrap;">
-          <v-virtual-scroll :bunched="10" :items="steps" height="200" item-height="32">
+          <v-virtual-scroll :bunched="10" :items="steps" height="200" item-height="26">
             <template v-slot:default="{ item, index }">
-              <div :key="index" class="d-flex text-body-2">
+              <div :key="index" :class=" index+1 === sequencer_state.stepNumber ? 'd-flex text-body-2 green lighten-2 py-2' : 'd-flex text-body-2 py-2' ">
                 <span class="mx-2">[[index+1]] : </span>
                 <span> [[ item.startcomment ]] </span>
               </div>
@@ -120,7 +121,7 @@ Vue.component("sequencer_dialog", {
           @click="$emit('start_seq', selected_config, seqNumber, stepNumber)">Start</v-btn>
       </template>
       <template v-else>
-        <v-btn color="danger" @click="$emit('kill_seq')">PAUSE</v-btn>
+        <v-btn :disabled="stopping" color="danger" @click="emit_stop">[[ stopping ? "STOPPING AFTER STEP FINISHED..." :  "STOP"]]</v-btn>
       </template>
       <v-spacer></v-spacer>
       <v-btn text @click="expandedSteps = !expandedSteps" v-if="errorLoadedConfigMessage === ''">
@@ -413,14 +414,11 @@ var app = new Vue({
     this.initListeners();
   },
   methods: {
-    killSequence(){
-      axios.post("/killSequencer").then((response) => {
+    stopSequencer(){
+      axios.post("/stopSequencer").then((response) => {
         if (response.data.status == "error") {
           this.createSnackbar("error", response.data.data)
         } 
-        else {
-          // OK
-        }
       })
     },
     startSequence(configName, seqNumber, stepNumber) {

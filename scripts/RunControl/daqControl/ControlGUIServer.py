@@ -234,7 +234,7 @@ def executeComm(ctrl, action):
     """
     r = ""
     configName = r2.get("loadedConfig")
-    logAndEmit(f"User {session['user']['cern_upn']} has sent command {action} on node {ctrl}",configName,LogLevel.INFO,socketio, app.logger)
+    # logAndEmit(f"User {session['user']['cern_upn']} has sent command {action} on node {ctrl}",configName,LogLevel.INFO,socketio, app.logger)
     try:
         if action == "exclude":
             r = find_by_attr(sysConfig, ctrl).exclude()
@@ -277,7 +277,7 @@ def executeCommROOT(action:str, reqDict:dict):
         ...
     else : 
         r2.expire("whoInterlocked", serverConfig["timeout_interlock_secs"])
-        logAndEmit(f"User {session['user']['cern_upn']} has sent ROOT command: {action}", configName, LogLevel.INFO, socketio,app.logger)
+        # logAndEmit(f"User {session['user']['cern_upn']} has sent ROOT command: {action}", configName, LogLevel.INFO, socketio,app.logger)
     setTransitionFlag(1)
     if action == "INITIALISE":
         refreshConfig()
@@ -286,7 +286,7 @@ def executeCommROOT(action:str, reqDict:dict):
         steps = [("add", "booted"), ("configure","ready")]
         for step,nextState in steps :
             r = sysConfig.executeAction(step)
-            logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
+            # logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
             if step == "add" and r[0] != "Action not allowed" :
                 logPaths = listLogs(r)
                 r2.delete("log")
@@ -313,7 +313,7 @@ def executeCommROOT(action:str, reqDict:dict):
         r2.set("runNumber", runNumber)
 
         r=sysConfig.executeAction("start",runNumber)
-        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
+        # logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("running", serverConfig["timeout_rootCommands_secs"][action])
 
     elif action == "STOP":
@@ -326,7 +326,7 @@ def executeCommROOT(action:str, reqDict:dict):
             send_stop_to_runservice(runComment=runComment, runNumber=runNumber, runType=runType)
         try : 
             r=sysConfig.executeAction("stop")
-            logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
+            # logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
             done = waitUntilCorrectState("ready", serverConfig["timeout_rootCommands_secs"][action])
         except ConnectionRefusedError:
             setTransitionFlag(0)
@@ -345,7 +345,7 @@ def executeCommROOT(action:str, reqDict:dict):
             
         for step,nextState in steps : 
             r = sysConfig.executeAction(step)
-            logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
+            # logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
             done = waitUntilCorrectState(nextState, serverConfig["timeout_rootCommands_secs"][action])
     
         if not done : 
@@ -358,7 +358,7 @@ def executeCommROOT(action:str, reqDict:dict):
 
     elif action == "PAUSE":
         r=sysConfig.executeAction("disableTrigger")
-        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
+        # logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("paused", serverConfig["timeout_rootCommands_secs"][action])
     
     elif action == "RESUME":
@@ -366,12 +366,12 @@ def executeCommROOT(action:str, reqDict:dict):
         if "Action not allowed" in r:
             r=sysConfig.executeAction("resume")
  
-        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
+        # logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("running", serverConfig["timeout_rootCommands_secs"][action])
     
     elif action == "ECR":
         r=sysConfig.executeAction("ECR")
-        logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
+        # logAndEmit(f"ROOT: {str(r)}", configName, LogLevel.INFO, socketio, app.logger)
         done = waitUntilCorrectState("paused", serverConfig["timeout_rootCommands_secs"][action])
  
     setTransitionFlag(0)
@@ -644,7 +644,7 @@ def stateChecker():
                             if l2["Root"][0] not in ["booted","added"]:
                                 updateRedis(status=state)
                                 # logAndEmit(r2.get("loadedConfig"),"INFO",f"ROOT element is now in state {state}")
-                                logAndEmit(f"ROOT element is now in state {state}", r2.get("loadedConfig"), LogLevel.INFO, socketio, app.logger )
+                                # logAndEmit(f"ROOT element is now in state {state}", r2.get("loadedConfig"), LogLevel.INFO, socketio, app.logger )
                                 socketio.emit("runStateChng",state , broadcast=True)
                 l1 = l2
                 transitionFlag1 = transitionFlag2
@@ -680,8 +680,9 @@ def stateChecker():
         if lockState2 !=lockState:
             socketio.emit("interlockChng", lockState2, broadcast = True)
             if not lockState2:
+                pass
                 # logAndEmit(loadedConfig2, "INFO", "Interlock has been released because of TIMEOUT")
-                logAndEmit("Interlock has been released because of timeout", loadedConfig2, LogLevel.INFO, socketio, app.logger)
+                # logAndEmit("Interlock has been released because of timeout", loadedConfig2, LogLevel.INFO, socketio, app.logger)
             lockState = lockState2
 
         ####### change of runInfo #######
@@ -826,11 +827,11 @@ def interlock():
     if action == "lock": 
         if r2.set("whoInterlocked", session["user"]["cern_upn"], ex=serverConfig["timeout_interlock_secs"], nx=True): 
             # logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " has TAKEN control of configuration "+ r2.get("loadedConfig"),)
-            logAndEmit(f"User {session['user']['cern_upn']} has taken control of configuration {r2.get('loadedConfig')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
+            # logAndEmit(f"User {session['user']['cern_upn']} has taken control of configuration {r2.get('loadedConfig')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
             return jsonify("File locked successfully")
         else : 
             # someone already locked the config
-            logAndEmit(f"User {session['user']['cern_upn']} tried to take control of configuration {r2.get('loadedConfig')} from {r2.get('whoInterlocked')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
+            # logAndEmit(f"User {session['user']['cern_upn']} tried to take control of configuration {r2.get('loadedConfig')} from {r2.get('whoInterlocked')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
 
             # logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"]+ " tried to take control configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
             return jsonify(f"Sorry, the config is already locked by {r2.get('whoInterlocked')}")
@@ -838,13 +839,14 @@ def interlock():
     else: # action == "unlock"
         if session["user"]["cern_upn"] == r2.get("whoInterlocked"): # if is the right person
             r2.delete("whoInterlocked")
-            logAndEmit(f"User {session['user']['cern_upn']} has released control of configuration {r2.get('loadedConfig')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )    
+            # logAndEmit(f"User {session['user']['cern_upn']} has released control of configuration {r2.get('loadedConfig')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )    
             # logAndEmit(r2.get("loadedConfig"),"INFO","User " + session["user"]["cern_upn"]+ " has RELEASED control of configuration"+ r2.get('loadedConfig'))
             return jsonify("unlocked file")
 
         else: # someone else try to unlock file         
             # logAndEmit(r2.get("loadedConfig"),"INFO","User "+ session["user"]["cern_upn"] + "  ATTEMPTED to take control of configuration "+ r2.get("loadedConfig")+f"from {r2.get('whoInterlocked')}",)
-            logAndEmit(f"User {session['user']['cern_upn']} tried to take control of configuration {r2.get('loadedConfig')} from {r2.get('whoInterlocked')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
+            # logAndEmit(f"User {session['user']['cern_upn']} tried to take control of configuration {r2.get('loadedConfig')} from {r2.get('whoInterlocked')}", r2.get("loadedConfig"),LogLevel.INFO, socketio, app.logger )
+            pass
 
             return jsonify("you can't")
 
@@ -868,7 +870,7 @@ def ajaxParse():
 @app.route("/logout", methods=["GET", "POST"])
 def logout():
     # logAndEmit("general", "INFO", "User logged out: " + session["user"]["cern_upn"])
-    logAndEmit(f"User logged out: {session['user']['cern_upn']}", "GENERAL", LogLevel.INFO, socketio, app.logger)
+    # logAndEmit(f"User logged out: {session['user']['cern_upn']}", "GENERAL", LogLevel.INFO, socketio, app.logger)
     session.pop("user", None)
     session.pop("configName", None)
     session.pop("configPath", None)
@@ -1114,31 +1116,18 @@ def startSequencer() :
     configName = requestData["configName"]
     startStep = requestData["startStep"]
     seqNumber = requestData["seqNumber"]
-    # FIXME: The sequence Numbrer should be given by the runNumber
+    # NOTE: The sequence Numbrer should be given by the runNumber -> will be overwritten by the sequencer
     argsSequencer = ['-S', seqNumber,        # sequence Number
                         '-s', startStep, # startStep
                         configName]
     thread = socketio.start_background_task(sequencer.main, argsSequencer,socketio, app.logger)
     return jsonify({"status" : "success"})
-
-
-# @app.route("/killSequencer", methods=["POST"]) 
-# def killSequencer():
-#     """
-#     Kills the background job so that the user can shutdown the current sequence manually and press "STOP" to return 
-#     """
-#     global thread
-#     thread.stop() # FIXME : NOT WORKING ! 
-#     return jsonify({"status": "success", "data" : None})
    
     
-# @app.route("/stopSequencer", methods=["POST"]) 
-# def stopSequencer():
-#     sequencerState = r2.hgetall("sequencerState")
-#     sequenceName = sequencerState["sequenceName"]
-#     _ , cfgs = sequencer.load_steps(sequenceName)
-#     stoppedStep = cfgs[sequencerState["stepNumber"]-1]
-#     return jsonify({"status" : "success", "data": sequencerState})
+@app.route("/stopSequencer", methods=["POST"]) 
+def stopSequencer():
+    r2.set("stopSequencer", "True")
+    return jsonify({"status" : "success"})
     
     
 

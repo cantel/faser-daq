@@ -1,0 +1,23 @@
+{"hostUrl": "http://faser-daqvm-000:5000",
+ "maxTransitionTime": 30,
+ "initCommand": "python3 /home/egalanta/faser-daq/scripts/RunControl/scriptCommand.py initCommand",
+ "finalizeCommand": "python3 /home/egalanta/faser-daq/scripts/RunControl/scriptCommand.py finalizeCommand",
+ "defaults": {
+     "cfgFile": "emulatorLocalhost.json",
+     "runtype": "Test",
+     "maxRunTime": 30,
+     "maxEvents": 100,
+     "postCommand": "python3 /home/egalanta/faser-daq/scripts/RunControl/scriptCommand.py postCommand",
+     "endcomment": "Sequencer stop"
+ },
+ "template": {
+     "vars": { "var1": "(2,5,1)"},
+     "step": {
+	 "startcomment": "Started run with var1 = {var1}",
+	 "preCommand":"python3 /home/egalanta/faser-daq/scripts/RunControl/scriptCommand.py preCommand {var1}",
+     "postCommand": "python3 /home/egalanta/faser-daq/scripts/RunControl/scriptCommand.py customPostCommand {var1} "
+     }
+ }
+}
+
+

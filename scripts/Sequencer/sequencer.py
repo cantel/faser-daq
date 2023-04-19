@@ -62,7 +62,7 @@ def check_stopFlag() -> bool :
         return 0
 
 class runner:
-    def __init__(self,config,runControl:RunControl,seqnumber,seqstep, socketio = None):
+    def __init__(self,config,runControl:RunControl,seqnumber,seqstep, socketio = None, logger = None):
         self.cfgFile=config["cfgFile"]
         self.runtype=config["runtype"]
         self.startcomment=config["startcomment"]
@@ -77,6 +77,7 @@ class runner:
         self.runnumber = 1000000000 #NOTE : For testing only ? None wouldnt't work for REDIS
         self.rc=runControl
         self.socketio = socketio
+        self.logger = logger
     
     def sleep(self,seconds :int) -> None:
         """
@@ -121,6 +122,11 @@ class runner:
     def waitStop(self):
         now=time.time()
         while(True):
+            # checking if stop flag is raised
+            if r.get("stopSequencer") is not None:
+                print("Stopping current run for the current step")
+                return True                 
+
             state,runnumber=self.checkState()
             if state!="RUN":
                 print(f"State changed to '{state}' - bailing out")
@@ -132,18 +138,19 @@ class runner:
             print(f'Run {runnumber}, State: {state}, events: {events}, time: {time.time()-now} seconds')
             self.sleep(5)
 
-    def run(self,socketio=None, logger=None):
+    def run(self):
+        
         if self.checkState()[0]!="DOWN":
-            log_and_print(f"System is not shutdown - will not start run",LogLevel.ERROR,socketio, logger) 
+            log_and_print(f"System is not shutdown - will not start run",LogLevel.ERROR,self.socketio, self.logger) 
             # print("System is not shutdown - will not start run")
             return False
 
         if self.preCommand:
 
             try :
-                run_command(self.preCommand, socketio, logger)
+                run_command(self.preCommand, self.socketio, self.logger)
             except RuntimeError :
-                log_and_print(f"Failed to pre-command: {self.preCommand}",LogLevel.ERROR,socketio, logger) 
+                log_and_print(f"Failed to pre-command: {self.preCommand}",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
             # rc = run_command(self.preCommand)
             # rc=os.system(self.preCommand)
@@ -152,62 +159,62 @@ class runner:
             #     # print("Failed to pre-command:",self.preCommand)
             #     return False
             # print("Ran precommand")
-            log_and_print(f"Ran precommand",LogLevel.INFO,socketio, logger) 
+            log_and_print(f"Ran precommand",LogLevel.INFO,self.socketio, self.logger) 
 
         rc=self.initialize()
         if not rc:
-            log_and_print(f"Failed to initialize",LogLevel.ERROR,socketio, logger) 
+            log_and_print(f"Failed to initialize",LogLevel.ERROR,self.socketio, self.logger) 
             # print("Failed to initialize")
             return False
         # print("INITIALIZED")
-        log_and_print(f"INITIALIZED",LogLevel.INFO,socketio, logger) 
+        log_and_print(f"INITIALIZED",LogLevel.INFO,self.socketio, self.logger) 
         self.sleep(1)
-        # rc=self.start()
-        # if not rc:
-        #     log_and_print(f"Failed to start run",LogLevel.ERROR,socketio, logger) 
-        #     # print("Failed to start run")
-        #     return False
-        # log_and_print(f"RUNNING",LogLevel.INFO,socketio, logger) 
-        # # print("RUNNING")
-        # self.sleep(5)
-        # rc=self.waitStop()
-        # if not rc:
-        #     # print("Failed to reach run conditions")
-        #     log_and_print(f"Failed to reach run conditions",LogLevel.ERROR,socketio, logger) 
-        #     return False
-        # rc=self.stop()
-        # if not rc:
-        #     # print("Failed to stop")
-        #     log_and_print(f"Failed to stop",LogLevel.ERROR,socketio, logger) 
-        #     return False
-        # print("STOPPED")
+        rc=self.start()
+        if not rc:
+            log_and_print(f"Failed to start run",LogLevel.ERROR,self.socketio, self.logger) 
+            # print("Failed to start run")
+            return False
+        log_and_print(f"RUNNING",LogLevel.INFO,self.socketio, self.logger) 
+        # print("RUNNING")
+        self.sleep(5)
+        rc=self.waitStop()
+        if not rc:
+            # print("Failed to reach run conditions")
+            log_and_print(f"Failed to reach run conditions",LogLevel.ERROR,self.socketio, self.logger) 
+            return False
+        rc=self.stop()
+        if not rc:
+            # print("Failed to stop")
+            log_and_print(f"Failed to stop",LogLevel.ERROR,self.socketio, self.logger) 
+            return False
+        print("STOPPED")
         # log_and_print(f"STOPPED",LogLevel.INFO,socketio, logger) 
         self.sleep(5)
         rc=self.shutdown()
         if not rc:
-            log_and_print(f"Failed to shutdown - retry again in 10 seconds",LogLevel.WARNING,socketio, logger) 
+            log_and_print(f"Failed to shutdown - retry again in 10 seconds",LogLevel.WARNING,self.socketio, self.logger) 
             # print("Failed to shutdown - retry again in 10 seconds")
             self.sleep(10)
             rc=self.shutdown()
             if not rc:
                 # print("Failed to shutdown - giving up")
-                log_and_print(f"Failed to shutdown - giving up",LogLevel.ERROR,socketio, logger) 
+                log_and_print(f"Failed to shutdown - giving up",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
-        log_and_print(f"SHUTDOWN",LogLevel.INFO,socketio, logger) 
+        log_and_print(f"SHUTDOWN",LogLevel.INFO,self.socketio, self.logger) 
         # print("SHUTDOWN")
         for ii in range(5):
             if self.checkState()[0]=="DOWN": break
             self.sleep(1)
         if self.checkState()[0]!="DOWN":
-            log_and_print(f"Failed to shutdown {self.checkState()}",LogLevel.ERROR,socketio, logger) 
+            log_and_print(f"Failed to shutdown {self.checkState()}",LogLevel.ERROR,self.socketio, self.logger) 
             # print("Failed to shutdown",self.checkState())
             return False
         self.sleep(5) # NOTE : for testing only
         if self.postCommand:
             try :
-                run_command(self.postCommand, socketio, logger)
+                run_command(self.postCommand, self.socketio, self.logger)
             except RuntimeError :
-                log_and_print(f"Failed to pre-command: {self.postCommand}",LogLevel.ERROR,socketio, logger) 
+                log_and_print(f"Failed to pre-command: {self.postCommand}",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
             # rc = run_command(self.postCommand,socketio, logger)
             # # rc=os.system(self.postCommand)
@@ -216,7 +223,7 @@ class runner:
             #     # print("Failed to post-command:",self.postCommand)
             #     return False
             
-            log_and_print(f"Ran post-command",LogLevel.INFO,socketio, logger) 
+            log_and_print(f"Ran post-command",LogLevel.INFO,self.socketio, self.logger) 
             # print("Ran post-command")
         return True
 
@@ -402,8 +409,8 @@ def main(args, socketio=None, logger = None):
         print(f"Running step {step+1}")
         log_and_print(f"Running step {step+1}",LogLevel.INFO, socketio, logger) 
         cfg=cfgs[step]
-        run=runner(cfg,runControl,seqnumber,step+1, socketio)
-        rc=run.run(socketio, logger)
+        run=runner(cfg,runControl,seqnumber,step+1, socketio, logger)
+        rc=run.run()
         if rc:
             log_and_print(f"Successful run",LogLevel.INFO, socketio, logger) 
         else:

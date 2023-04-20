@@ -43,6 +43,7 @@ tlbDigiTI12SinglePMTs.json \
 tlbDigiTI12LEDLowerLowRange.json \
 tlbDigiTI12LEDUpperLowRange.json \
 combinedEHN1.json \
+combinedEHN1_TLB_digit.json \
 combinedSciLab.json \
 combinedTI12Physics.json \
 combinedTI12Cosmics.json \
@@ -63,7 +64,10 @@ schemas/validation-schema.json                   \
 schemas/refs/connection-schema.json                   \
 Templates/top.json                   \
 Templates/monitor_top.json                   \
-customized/host.json                 
+customized/host.json \
+grafana.json \
+fsm-rules.json \
+demo-tree.json
 
 
 

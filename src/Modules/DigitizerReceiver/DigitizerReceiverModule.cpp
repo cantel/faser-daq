@@ -3,6 +3,7 @@
 */
 
 #include "DigitizerReceiverModule.hpp"
+#include "BOBR.h"
 
 #define HOSTNAME_MAX_LENGTH 100
 #define NCHANNELS 16
@@ -131,6 +132,47 @@ DigitizerReceiverModule::DigitizerReceiverModule(const std::string& n):FaserProc
 
   if (cfg["useBOBR"]) {
     m_bobr=true;
+
+    auto *vme_crate=m_digitizer->m_crate;
+    BOBR *bobr = new BOBR(vme_crate,false);
+    int return_code = bobr->initPFC();
+    if (return_code) {
+      throw DigitizerHardwareIssue(ERS_HERE, "Failed to initialize PFC in BOBR");
+    }
+    unsigned char cdata;
+    int reg=0;  //TTC timing is specified in register 0
+    return_code = bobr->readTTCRegister(reg,&cdata);
+    if (return_code) {
+      throw DigitizerHardwareIssue(ERS_HERE, "Failed to read TTC register in BOBR");
+    }
+    int m=cdata&0x0F;
+    int n=(cdata&0xF0)>>4;
+    int K=(m*15+n*16+30)%240;
+    INFO("BOBR: TTC delay was set to "<<K*0.10417<<" ns");
+    auto cfg_ttc_delay=cfg["BOBR_delay"];
+    if (cfg_ttc_delay==nullptr) {
+      INFO("BOBR: No TTC delay specified - will keep old setting");
+    } else {
+      float delay_value=(float) cfg_ttc_delay;
+      K=((int)(delay_value/0.10417))%240;
+      n=K%15;
+      m=(K/15-n+14)%16;
+      int nm=n*16+m;
+      INFO("BOBR: writing TTC value K="<<K<<" or delay="<<K*0.10417<<" ns");
+      return_code=bobr->writeTTCRegister(reg,nm);
+      if (return_code) {
+	throw DigitizerHardwareIssue(ERS_HERE, "Failed to write TTC register in BOBR");
+      }
+      return_code = bobr->readTTCRegister(reg,&cdata);
+      if (return_code) {
+	throw DigitizerHardwareIssue(ERS_HERE, "Failed to re-read TTC register in BOBR");
+      }
+      m=cdata&0x0F;
+      n=(cdata&0xF0)>>4;
+      K=(m*15+n*16+30)%240;
+      INFO("BOBR: TTC delay is now set to "<<K*0.10417<<" ns");
+    }
+
   } else {
     m_bobr=false;
   }

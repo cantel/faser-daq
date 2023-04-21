@@ -33,6 +33,8 @@ void SCTDataMonitorModule::start(unsigned int run_num){
   INFO("Starting "<<getName());
   m_hit_avg = 0;
   m_hit_avg_count = 0;
+  m_physics_strip_count = 0;
+  m_random_strip_count = 0;
   MonitorBaseModule::start(run_num);
 }
 
@@ -52,8 +54,14 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
   if ( fragmentUnpackStatus ) {
      WARNING("Unpacking error for trigger fragment. Can't use trigger information for this event!");
   } else {
-    if (m_tlbdataFragment->tbp() & 0x10) randTrig = true;
-    if ((m_tlbdataFragment->tbp()&0xf) & m_physics_trigbits) physicsTrig=true;
+    if (m_tlbdataFragment->tbp() & 0x10) {
+        randTrig = true;
+        m_random_strip_count+=128;
+    }
+    if ((m_tlbdataFragment->tbp()&0xf) & m_physics_trigbits) {
+        physicsTrig=true;
+        m_physics_strip_count+=128;
+    }
   }
 
   fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary);
@@ -251,13 +259,20 @@ void SCTDataMonitorModule::register_hists() {
   m_histogrammanager->register2DHistogram("chip_occupancy_physics", "module_number",  0, 4,4,"chip_number", 0, 24 , 24, m_PUBINT);
   m_histogrammanager->register2DHistogram("hitmap_physics", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
   m_histogrammanager->register2DHistogram("hitmap_random", "module idx", 0, kTOTAL_MODULES, kTOTAL_MODULES, "chip idx",  0, kCHIPS_PER_MODULE, kCHIPS_PER_MODULE, m_PUBINT);
+  // assign metrics used for event normalisation for occupancy instead of counts:
+  m_histogrammanager->setNormalisationMetric("chip_occupancy_physics", &m_physics_strip_count);
+  m_histogrammanager->setNormalisationMetric("chip_occupancy_noise", &m_random_strip_count);
+  m_histogrammanager->setNormalisationMetric("hitmap_physics", &m_physics_strip_count);
+  m_histogrammanager->setNormalisationMetric("hitmap_random", &m_random_strip_count);
 // per module
   std::vector<std::string> hitp_categories = { "000", "001", "010", "011", "100", "110", "111" };
   for ( unsigned i = 0; i < kTOTAL_MODULES; i++ ){
     std::string hname_hitp = m_prefix_hname_hitp+std::to_string(i);
     m_histogrammanager->registerHistogram(hname_hitp, "hit pattern", hitp_categories, m_PUBINT);
+    m_histogrammanager->normaliseOnPublish(hname_hitp);
   }
   m_histogrammanager->registerHistogram("hitpattern_random", "hit pattern", hitp_categories, m_PUBINT);
+  m_histogrammanager->normaliseOnPublish("hitpattern_random");
 
   std::vector<std::string> trb_error_categories = {"TRBError", "ModuleError", "NoEventID", "NoBCID", "NoCRC", "MissingFrames", "UnrecognizedFrames", "ModuleDecodeError"};
   m_histogrammanager->registerHistogram("track_data_error_types", "error type", trb_error_categories, m_PUBINT);

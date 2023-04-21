@@ -49,7 +49,9 @@ class HistBase {
   float xmax = -1.;
   unsigned int xbins;
   bool extendable;
-  bool b_reset = false;
+  bool b_reset = false; // true: reset histogram entries to 0 after publish
+  bool b_norm = false;  // true: normalise histogram by total entries at publish
+  std::atomic<int>* norm_ptr = nullptr;
   //define published msg
   std::string type = "num_fixedwidth";
   std::ostringstream msg_head;
@@ -61,6 +63,8 @@ class HistBase {
   virtual std::string publish() { return "nothing";}
   virtual void reset() {}
   void reset_on_publish(bool reset=true){ b_reset=reset;}
+  void normalise_on_publish(bool norm=true){ b_norm=norm;}
+  void set_normalisation_metric(std::atomic<int>* ptr){ norm_ptr=ptr;}
 };
 
 
@@ -81,8 +85,18 @@ class Hist : public HistBase {
       std::lock_guard<std::mutex> lock_guard(m_hist_mutex);
       auto this_axis = hist_object.axis();
       std::vector<int> yvalues;
+      float weight(1);
+      if (b_norm) {
+          if (norm_ptr != nullptr) {
+              *norm_ptr > 0 ? weight = 1./(*norm_ptr) : 1;
+          }
+          else {
+              unsigned total_entries = std::accumulate(hist_object.begin(), hist_object.end(), 0.0);
+              total_entries > 0 ? weight = 1./total_entries : 1;
+          }
+      }
       for (auto y : indexed(hist_object, coverage::all ) ) {
-            yvalues.push_back(*y);
+            yvalues.push_back((*y)*weight);
       }
       json jsonupdate;
       if (extendable) {
@@ -147,9 +161,19 @@ class CategoryHist : public HistBase { // this hist object is of special type: f
   std::string publish() override {
       std::lock_guard<std::mutex> lock_guard(m_hist_mutex);
       auto this_axis = hist_object.axis();
-      std::vector<int> yvalues;
+      std::vector<float> yvalues;
+      float weight(1);
+      if (b_norm) {
+          if (norm_ptr != nullptr) {
+              *norm_ptr > 0 ? weight = 1./(*norm_ptr) : 1;
+          }
+          else {
+              unsigned total_entries = std::accumulate(hist_object.begin(), hist_object.end(), 0.0);
+              total_entries > 0 ? weight = 1./total_entries : 1;
+          }
+      }
       for (auto y : indexed(hist_object, coverage::inner ) ) { // no under/overflows for boost hist objects of axis type category.
-            yvalues.push_back(*y);
+            yvalues.push_back((*y)*weight);
       }
       json jsonupdate;
       jsonupdate["yvalues"] = yvalues;
@@ -208,9 +232,19 @@ class Hist2D : public HistBase {
   std::string publish() {
       std::lock_guard<std::mutex> lock_guard(m_hist_mutex);
       auto this_axis = hist_object.axis();
-      std::vector<int> zvalues;
+      std::vector<float> zvalues;
+      float weight(1);
+      if (b_norm) {
+          if (norm_ptr != nullptr) {
+              *norm_ptr > 0 ? weight = 1./(*norm_ptr) : 1;
+          }
+          else {
+              unsigned total_entries = std::accumulate(hist_object.begin(), hist_object.end(), 0.0);
+              total_entries > 0 ? weight = 1./total_entries : 1;
+          }
+      }
       for (auto z : indexed(hist_object, coverage::all ) ) {
-            zvalues.push_back(*z);
+            zvalues.push_back((*z)*weight);
       }
       json jsonupdate;
       jsonupdate["zvalues"] = zvalues;

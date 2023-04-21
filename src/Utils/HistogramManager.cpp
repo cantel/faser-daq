@@ -102,11 +102,32 @@ void HistogramManager::publish( HistBase * h){
   return;
 }
 
-void HistogramManager::resetOnPublish(std::string name, bool reset = true){
+void HistogramManager::resetOnPublish(std::string name, bool reset){
   if ( m_histogram_map.count(name) ) {
     m_histogram_map[name]->reset_on_publish(reset);
   }
   else 
+      WARNING("Histogram with name "<<name<<" does not exist.");
+
+  return;
+}
+
+void HistogramManager::normaliseOnPublish(std::string name, bool normalise){
+  if ( m_histogram_map.count(name) ) {
+    m_histogram_map[name]->normalise_on_publish(normalise);
+  }
+  else
+      WARNING("Histogram with name "<<name<<" does not exist.");
+ 
+  return;
+}
+
+void HistogramManager::setNormalisationMetric(std::string name, std::atomic<int>* ptr){
+  if ( m_histogram_map.count(name) ) {
+    m_histogram_map[name]->normalise_on_publish();
+    m_histogram_map[name]->set_normalisation_metric(ptr);
+  }
+  else
       WARNING("Histogram with name "<<name<<" does not exist.");
  
   return;

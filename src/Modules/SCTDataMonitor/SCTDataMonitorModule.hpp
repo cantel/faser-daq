@@ -25,6 +25,8 @@ class SCTDataMonitorModule : public MonitorBaseModule {
   uint16_t goodHitsMod[8];
   uint16_t mapline;
   uint16_t mapline2;
+  std::atomic<int> m_physics_strip_count;
+  std::atomic<int> m_random_strip_count;
   const std::string m_prefix_hname_hitp;
   const std::string m_hname_scterrors;
   unsigned m_total_WARNINGS;

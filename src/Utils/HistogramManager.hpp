@@ -244,7 +244,9 @@ public:
       WARNING("Histogram with name "<<name<<" does not exist.");
   }
 
-  void resetOnPublish(std::string, bool);
+  void resetOnPublish(std::string, bool reset = true);
+  void normaliseOnPublish(std::string, bool normalise = true);
+  void setNormalisationMetric(std::string, std::atomic<int> *);
 
   void reset(std::string);
 

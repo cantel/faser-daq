@@ -608,7 +608,12 @@ void DigitizerReceiverModule::runner() noexcept {
       last_check_count = time_now;
         
       // monitoring of temperature on ADCs
-      std::vector<int> adc_temp = m_digitizer->GetADCTemperature(false);
+      std::vector<int> adc_temp;
+      try {
+	adc_temp = m_digitizer->GetADCTemperature(false);
+      } catch (DigitizerHardwareException &e) {
+	ERROR("Failed to read ADC temperatures");
+      }
       if(adc_temp.size()==NCHANNELS){
 	m_temp_ch00 = adc_temp.at(0);
 	m_temp_ch01 = adc_temp.at(1);

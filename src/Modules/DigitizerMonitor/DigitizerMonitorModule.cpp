@@ -22,6 +22,16 @@ DigitizerMonitorModule::~DigitizerMonitorModule() {
   INFO("With config: " << m_config.dump());
 }
 
+void DigitizerMonitorModule::start(unsigned int run_num) { 
+  for(int inputBit=0;inputBit<8;inputBit++) {
+    m_intime[inputBit]=0;
+    m_outtime[inputBit]=0;
+    m_early[inputBit]=0;
+  }
+  
+  MonitorBaseModule::start(run_num);
+}
+
 void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eventBuilderBinary) {
   DEBUG("Digitizer monitoring");
 
@@ -124,8 +134,10 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
     }
   }
   //select collision events without saturated channels
-  if (peaks[6]>100 && peaks[7]>100&& ((peaks[8]>25&&peaks[9]>25)||(peaks[10]>25&&peaks[11]>25))&&!saturated) {
-    if (m_pmtdataFragment->channel_has_data(15)) { //assume that clock data is here
+  if (peaks[6]>100 && peaks[7]>100&& ((peaks[8]>25&&peaks[9]>25)||(peaks[10]>25&&peaks[11]>25))) {
+    m_collisionLike++;
+    if (saturated) m_saturatedCollisions++;
+    if (m_pmtdataFragment->channel_has_data(15)&&!saturated) { //assume that clock data is here
       float phase=FFTPhase(signals[15]);
       if (phase<-5) phase+=25;
       m_histogrammanager->fill("h_clockphase", phase);
@@ -136,30 +148,41 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
 
 	std::string chStr = std::to_string(iChan);
 	if (iChan<10) chStr = "0"+chStr;
-
-	m_histogrammanager->fill("h_time_ch"+chStr,tzeros[iChan]-phase);
-	if (m_t0[iChan]==0) m_t0[iChan]=tzeros[iChan]; //initialize on first event
-	m_t0[iChan]=0.02*tzeros[iChan]+0.98*m_t0[iChan]; //exponential moving average
+	
+	float t0=tzeros[iChan]-phase;
+	m_histogrammanager->fill("h_time_ch"+chStr,t0);
+	if (m_t0[iChan]==0) m_t0[iChan]=t0; //initialize on first event
+	if (fabs(t0-m_t0[iChan])<50) // reject outliers, relying on first event being at right time
+	  m_t0[iChan]=0.02*t0+0.98*m_t0[iChan]; //exponential moving average
       }
     }
     auto inputBitsNext = tlb.input_bits_next_clk();
+    auto inputBits = tlb.input_bits();
+    bool early=false;
     for(int inputBit=0; inputBit<8;inputBit++) {
-      if ((inputBitsNext&(1<<inputBit))!=0) {
-	//FIXME: hardcoded combinations
-	float missedSignal=0;
-	if (inputBit<2) missedSignal=std::max(peaks[inputBit*2],peaks[inputBit*2+1]);	
-	else if (inputBit>6) missedSignal=peaks[inputBit*2];
-	else missedSignal=std::min(peaks[inputBit*2],peaks[inputBit*2+1]);
-	m_outtime[inputBit]++;
-	m_histogrammanager->fill("h_late_bit"+std::to_string(inputBit),missedSignal);
-	std::cout<<inputBit<<" "<<m_outtime[inputBit]<<" "<<m_intime[inputBit]<<std::endl;
+      if (((inputBits&(1<<inputBit))==inputBits)&&inputBitsNext!=0) {
+	early=true;
+	m_early[inputBit]++;
       }
     }
-    auto inputBits = tlb.input_bits();
+    if (!early&&!saturated) {
+      for(int inputBit=0; inputBit<8;inputBit++) {
+	if ((inputBitsNext&(1<<inputBit))!=0) {
+	  //FIXME: hardcoded combinations
+	  float missedSignal=0;
+	  if (inputBit<2) missedSignal=std::max(peaks[inputBit*2],peaks[inputBit*2+1]);	
+	  else if (inputBit>6) missedSignal=peaks[inputBit*2];
+	  else missedSignal=std::min(peaks[inputBit*2],peaks[inputBit*2+1]);
+	  m_outtime[inputBit]++;
+	  m_histogrammanager->fill("h_late_bit"+std::to_string(inputBit),missedSignal);
+	}
+      }
+    }
     for(int inputBit=0; inputBit<8;inputBit++) {
       if ((inputBits&(1<<inputBit))!=0) {
 	m_intime[inputBit]++;
 	m_late[inputBit]=1.*m_outtime[inputBit]/(m_outtime[inputBit]+m_intime[inputBit]);
+	m_earlyTrig[inputBit]=1.*m_early[inputBit]/(m_outtime[inputBit]+m_intime[inputBit]);
       }
     }
   }
@@ -231,9 +254,10 @@ void DigitizerMonitorModule::register_metrics() {
   }
   for(int inputBit=0;inputBit<8;inputBit++) {
     registerVariable(m_late[inputBit],"Late_trigger_fraction_bit"+std::to_string(inputBit));
-    m_intime[inputBit]=0; //FIXME - doesn't get reset on run stop/start
-    m_outtime[inputBit]=0; //FIXME - doesn't get reset on run stop/start
+    registerVariable(m_earlyTrig[inputBit],"Early_trigger_fraction_bit"+std::to_string(inputBit));
   }
+  registerVariable(m_collisionLike,"Collision_events");
+  registerVariable(m_saturatedCollisions,"Saturated_collision_events");
   return;
 }
 

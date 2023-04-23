@@ -14,6 +14,7 @@ class DigitizerMonitorModule : public MonitorBaseModule {
  public:
   DigitizerMonitorModule(const std::string&);
   ~DigitizerMonitorModule();
+  void start(unsigned int);
 
   float GetPedestalMean(std::vector<uint16_t> input, int start, int end);
   float GetPedestalRMS(std::vector<uint16_t> input, int start, int end);
@@ -30,11 +31,14 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   void register_metrics();
   float m_thresholds[NCHANNELS][THRESHOLDS];
   int m_intime[8];
-  int m_outtime[8];
+  int m_late[8];
+  int m_early[8];
   std::atomic<float> m_avg[NCHANNELS];
   std::atomic<float> m_rms[NCHANNELS];
   std::atomic<float> m_t0[NCHANNELS];
-  std::atomic<float> m_late[8];
+  std::atomic<float> m_lateTrig[8];
+  std::atomic<float> m_earlyTrig[8];
   std::atomic<int> m_thresh_counts[NCHANNELS][THRESHOLDS];
-
+  std::atomic<int> m_collisionLike;
+  std::atomic<int> m_saturatedCollisions;
 };

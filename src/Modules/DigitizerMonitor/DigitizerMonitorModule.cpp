@@ -25,7 +25,7 @@ DigitizerMonitorModule::~DigitizerMonitorModule() {
 void DigitizerMonitorModule::start(unsigned int run_num) { 
   for(int inputBit=0;inputBit<8;inputBit++) {
     m_intime[inputBit]=0;
-    m_outtime[inputBit]=0;
+    m_late[inputBit]=0;
     m_early[inputBit]=0;
   }
   
@@ -173,7 +173,7 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
 	  if (inputBit<2) missedSignal=std::max(peaks[inputBit*2],peaks[inputBit*2+1]);	
 	  else if (inputBit>6) missedSignal=peaks[inputBit*2];
 	  else missedSignal=std::min(peaks[inputBit*2],peaks[inputBit*2+1]);
-	  m_outtime[inputBit]++;
+	  m_late[inputBit]++;
 	  m_histogrammanager->fill("h_late_bit"+std::to_string(inputBit),missedSignal);
 	}
       }
@@ -181,8 +181,8 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
     for(int inputBit=0; inputBit<8;inputBit++) {
       if ((inputBits&(1<<inputBit))!=0) {
 	m_intime[inputBit]++;
-	m_late[inputBit]=1.*m_outtime[inputBit]/(m_outtime[inputBit]+m_intime[inputBit]);
-	m_earlyTrig[inputBit]=1.*m_early[inputBit]/(m_outtime[inputBit]+m_intime[inputBit]);
+	m_lateTrig[inputBit]=1.*m_late[inputBit]/(m_late[inputBit]+m_intime[inputBit]);
+	m_earlyTrig[inputBit]=1.*m_early[inputBit]/(m_late[inputBit]+m_intime[inputBit]);
       }
     }
   }
@@ -253,7 +253,7 @@ void DigitizerMonitorModule::register_metrics() {
       registerVariable(m_t0[iChan], "signal_timing_ch"+chStr);
   }
   for(int inputBit=0;inputBit<8;inputBit++) {
-    registerVariable(m_late[inputBit],"Late_trigger_fraction_bit"+std::to_string(inputBit));
+    registerVariable(m_lateTrig[inputBit],"Late_trigger_fraction_bit"+std::to_string(inputBit));
     registerVariable(m_earlyTrig[inputBit],"Early_trigger_fraction_bit"+std::to_string(inputBit));
   }
   registerVariable(m_collisionLike,"Collision_events");

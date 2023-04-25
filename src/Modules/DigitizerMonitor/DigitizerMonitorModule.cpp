@@ -133,8 +133,10 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
 	m_thresh_counts[iChan][ii]++;
     }
   }
+  auto cfg_min_collisions = getModuleSettings()["min_collisions"];
+  auto cfg_nominal_t0 = getModuleSettings()["nominal_t0"];
   //select collision events without saturated channels
-  if (peaks[6]>100 && peaks[7]>100&& ((peaks[8]>25&&peaks[9]>25)||(peaks[10]>25&&peaks[11]>25))) {
+  if (peaks[6]>100 && peaks[7]>100&& ((peaks[8]>25&&peaks[9]>25)||(peaks[10]>25&&peaks[11]>25))&&cfg_min_collisions!=nullptr) {
     m_collisionLike++;
     if (saturated) m_saturatedCollisions++;
     if (m_pmtdataFragment->channel_has_data(15)&&!saturated) { //assume that clock data is here
@@ -149,10 +151,10 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
 	std::string chStr = std::to_string(iChan);
 	if (iChan<10) chStr = "0"+chStr;
 	
-	float t0=tzeros[iChan]-phase;
+	float t0=tzeros[iChan]-phase-float(cfg_nominal_t0[iChan]);
 	m_histogrammanager->fill("h_time_ch"+chStr,t0);
-	if (m_t0[iChan]==0) m_t0[iChan]=t0; //initialize on first event
-	if (fabs(t0-m_t0[iChan])<50) // reject outliers, relying on first event being at right time
+	//	if (m_t0[iChan]==0) m_t0[iChan]=t0; //initialize on first event - not needed
+	if (fabs(t0-m_t0[iChan])<10) // reject outliers, relying on being centered at 0
 	  m_t0[iChan]=0.02*t0+0.98*m_t0[iChan]; //exponential moving average
       }
     }
@@ -181,8 +183,10 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
     for(int inputBit=0; inputBit<8;inputBit++) {
       if ((inputBits&(1<<inputBit))!=0) {
 	m_intime[inputBit]++;
-	m_lateTrig[inputBit]=1.*m_late[inputBit]/(m_late[inputBit]+m_intime[inputBit]);
-	m_earlyTrig[inputBit]=1.*m_early[inputBit]/(m_late[inputBit]+m_intime[inputBit]);
+	if (m_intime[inputBit]+m_late[inputBit]>=int(cfg_min_collisions)) {
+	  m_lateTrig[inputBit]=1.*m_late[inputBit]/(m_late[inputBit]+m_intime[inputBit]);
+	  m_earlyTrig[inputBit]=1.*m_early[inputBit]/(m_late[inputBit]+m_intime[inputBit]);
+	}
       }
     }
   }

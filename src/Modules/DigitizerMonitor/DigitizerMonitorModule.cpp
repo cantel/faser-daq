@@ -153,7 +153,6 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
 	
 	float t0=tzeros[iChan]-phase-float(cfg_nominal_t0[iChan]);
 	m_histogrammanager->fill("h_time_ch"+chStr,t0);
-	//	if (m_t0[iChan]==0) m_t0[iChan]=t0; //initialize on first event - not needed
 	if (fabs(t0-m_t0[iChan])<10) // reject outliers, relying on being centered at 0
 	  m_t0[iChan]=0.02*t0+0.98*m_t0[iChan]; //exponential moving average
       }

@@ -1,0 +1,59 @@
+{
+  "type": "object",
+  "title": "HistogramArchiver",
+  "properties": {
+    "name": {
+      "type": "string",
+      "default": "histogramarchiver",
+      "pattern": "^((?!XXX).)*$",
+      "propertyOrder": 1
+    },
+    "type": {
+      "type": "string",
+      "default": "HistogramArchiver",
+      "readOnly": true,
+      "propertyOrder": 2,
+      "options": { "hidden": true }
+    },
+    "settings": {
+      "type": "object",
+      "title": "Settings",
+      "properties": {
+        "max_age": {
+          "propertyOrder": 102,
+          "type": "integer",
+          "default": 120,
+          "minimum": 1,
+          "maximum": 2000000000,
+          "options": {
+            "infoText": "Maximum age of histogram to be archived"
+          }
+        },
+        "dump_interval": {
+          "propertyOrder": 103,
+          "type": "integer",
+          "default": 3600,
+          "minimum": 30,
+          "maximum": 50000,
+          "options": {
+            "infoText": "Time between archiving of histograms"
+          }
+        },
+        "filename_pattern": {
+          "propertyOrder": 101,
+          "type": "string"      
+        },
+        "archive_command": {
+          "propertyOrder": 102,
+          "type": "string"      
+        }
+      },
+      "required": ["dump_interval","max_age"],
+      "format": "grid",
+      "propertyOrder": 3
+    }
+  },
+  "required": ["name", "type"]
+}
+
+

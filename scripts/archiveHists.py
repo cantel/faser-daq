@@ -1,4 +1,7 @@
 #!/usr/bin/env python3
+#
+# Copyright (C) 2019-2023 CERN for the benefit of the FASER collaboration
+#
 
 # simple script to grab all recent histograms from Redis and dump as one json file
 

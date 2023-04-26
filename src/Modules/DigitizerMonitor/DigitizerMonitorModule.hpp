@@ -41,4 +41,7 @@ class DigitizerMonitorModule : public MonitorBaseModule {
   std::atomic<int> m_thresh_counts[NCHANNELS][THRESHOLDS];
   std::atomic<int> m_collisionLike;
   std::atomic<int> m_saturatedCollisions;
+
+  nlohmann::json m_cfg_min_collisions;
+  nlohmann::json m_cfg_nominal_t0;
 };

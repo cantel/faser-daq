@@ -136,7 +136,7 @@ void DigitizerMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &e
     }
   }
   //select collision events without saturated channels
-  if (peaks[6]>100 && peaks[7]>100&& ((peaks[8]>25&&peaks[9]>25)||(peaks[10]>25&&peaks[11]>25))&&m_cfg_min_collisions!=nullptr) {
+  if (peaks[4]>50&&peaks[5]>50&&peaks[6]>100 && peaks[7]>100&& ((peaks[8]>25&&peaks[9]>25)||(peaks[10]>25&&peaks[11]>25))&&m_cfg_min_collisions!=nullptr) {
     m_collisionLike++;
     if (saturated) m_saturatedCollisions++;
     if (m_pmtdataFragment->channel_has_data(15)&&!saturated) { //assume that clock data is here

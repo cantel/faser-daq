@@ -24,7 +24,7 @@
 	    "useBOBR": true,
             "BOBR_delay": 20.5,
             "digitizer_hw_address": "0x32000000",
-	    "buffer": {"length": 600, "n_post_samples": 0},
+	    "buffer": {"length": 300, "n_post_samples": 0},
 	    "trigger_acquisition": {"external": true, "software": false, "internal": false},
 	    "trigger_software_rate": 0,
              "trigger_internal": [{"group" : 0, "enable": false, "logic": "OR", "threshold_ch0_mV": 5,   "threshold_ch1_mV": 5,  "output_width":40},
@@ -1064,13 +1064,13 @@
 					 [ 15, 25, 50, 250 ],
 					 [ 0 ]
 				       ],
-		    "nominal_t0": [ 212.5, 212.5, 212.5, 212.5,
-				    186.5,186.25,
-				    219.5,220.8,
-				    221.2,222.8,222.5,222.8,
-				    240.75,240.4,
-				    219.75,0],
-		    "min_collisions": 100
+		    "nominal_t0": [ 212.9, 212.9, 212.7, 212.7,
+				    186.8,186.7,
+				    220.0,221.2,
+				    221.45,223.05,222.75,223.05,
+				    240.75,241.2,
+				    220.15,0],
+		    "min_collisions": 1000
 		},
 		"connections": {
                                "receivers": { "$ref": "monitor_top.json#monitor_receivers_physics/receivers"}

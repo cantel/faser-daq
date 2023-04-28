@@ -212,7 +212,7 @@ void DigitizerMonitorModule::register_hists() {
     m_histogrammanager->registerHistogram("h_pulse_ch"+chStr, "ADC Pulse ch"+std::to_string(iChan)+" Sample Number", "Inverted signal [mV]", -0.5, buffer_length-0.5, buffer_length, m_PUBINT);
     m_histogrammanager->registerHistogram("h_peak_ch"+chStr, "Peak signal [mV]", -200, 2000, 550, m_PUBINT);
     if (iChan==15) continue;
-    m_histogrammanager->registerHistogram("h_time_ch"+chStr, "Peak timing [ns]", 150, 300, 300, m_PUBINT);
+    m_histogrammanager->registerHistogram("h_time_ch"+chStr, "Peak timing [ns]", -30, 30, 300, m_PUBINT);
 
   }
   for(int inputBit=0; inputBit<8;inputBit++) {

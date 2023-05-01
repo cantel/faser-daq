@@ -96,7 +96,7 @@ class TrackStationMonitorModule : public MonitorBaseModule {
 
   std::map<int, std::vector<SpacePoint>> m_spacepoints = {};
   uint8_t m_stationID = 0;
-  const uint32_t kMAXFRAGSIZE=25000;
+  const uint32_t kMAXFRAGSIZE=380; // max size in bytes for biggest TRB event fragment for track station to be analysed
   const std::string m_hit_maps[3] = {"hitmap_l0", "hitmap_l1", "hitmap_l2"};
   const std::string m_prefix_hname_hitp = "hitpattern_layer";
   const std::vector<std::string> m_hitp_categories = { "000", "001", "010", "011", "100", "110"};

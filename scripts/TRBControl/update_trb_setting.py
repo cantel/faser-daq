@@ -6,6 +6,7 @@
 
 import json
 import time
+import copy
 
 # CHECK PATH
 TRBJSON_IN = "/home/cantel/faser-daq/configs/Templates/TRB.json"
@@ -30,7 +31,7 @@ class TRBSettings:
             print(f"ERROR Number of field names ({total_updates}) does not match number of values ({len(values)}). Provide a matching list, e.g. --name FinePhaseClk0,FinePhaseClk1 --value 16,32")
             return
 
-        trb_obj = self.trb_objs[trb_name]
+        trb_obj = copy.deepcopy(self.trb_objs[trb_name])
         #print(trb_obj)
         trb_id = int(trb_name[-2:])
         
@@ -60,7 +61,7 @@ class TRBSettings:
                 trb_obj["modules"][0]["settings"][name] = value
             if "FinePhaseClk" in name:  # if Clk fine phase is updated, LED fine phase is to be updated accordingly
                 ledphase_name = "FinePhaseLed"+name[-1]
-                old_val = trb_obj["modules"][0]["settings"][name]
+                old_val = self.trb_objs[trb_name]["modules"][0]["settings"][name]
                 old_ledphase = trb_obj["modules"][0]["settings"][ledphase_name]
                 ledphase = (old_ledphase+value-old_val)%64
                 print(f"INFO [automatic update] Updating TRB {trb_name}: Setting {ledphase_name} to value {ledphase}")

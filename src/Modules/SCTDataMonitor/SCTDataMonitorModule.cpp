@@ -32,9 +32,11 @@ SCTDataMonitorModule::~SCTDataMonitorModule() {
 void SCTDataMonitorModule::start(unsigned int run_num){
   INFO("Starting "<<getName());
   m_hit_avg = 0;
-  m_hit_avg_count = 0;
+  m_hit_frac = 0;
   m_physics_strip_count = 0;
   m_random_strip_count = 0;
+  m_010_cnt = 0;
+  m_011_cnt = 0;
   MonitorBaseModule::start(run_num);
 }
 
@@ -213,6 +215,8 @@ void SCTDataMonitorModule::monitor(DataFragment<daqling::utilities::Binary> &eve
               m_histogrammanager->fill(hname_hitp, bitset_hitp2.to_string());
               update_hitavg(hit1.second);
               update_hitavg(hit2.second);
+              update_hitfrac(hit1.second);
+              update_hitfrac(hit2.second);
             }
           }
         }
@@ -296,6 +300,7 @@ void SCTDataMonitorModule::register_metrics() {
 
   registerVariable(m_hit_multiplicity, "HitMultiplicity");
   registerVariable(m_hit_avg, "AvgHit");
+  registerVariable(m_hit_frac, "Ratio010to011");
 
   return;
 }
@@ -303,13 +308,13 @@ void SCTDataMonitorModule::register_metrics() {
 void SCTDataMonitorModule::update_hitavg(unsigned hit){
   if ( m_hit_weight_assignment.find(hit) != m_hit_weight_assignment.end()){
     float hit_weight = m_hit_weight_assignment[hit];
-    m_hit_avg = update_avg(m_hit_avg,m_hit_avg_count, hit_weight);
-    m_hit_avg_count++; // increase the number of hits considered
+    if (m_hit_avg == 0) m_hit_avg = hit_weight; // set starting value for m_hit_avg (m_hit_avg = 0 not possible weight value)
+    m_hit_avg = 0.02*hit_weight+0.98*m_hit_avg;
   }
 }
 
-float SCTDataMonitorModule::update_avg(float avg, size_t size, float value){
-  avg = (size*avg+value)/(size+1);
-  return avg;
+void SCTDataMonitorModule::update_hitfrac(unsigned hit){
+  if (hit == 2) m_010_cnt++;
+  else if (hit == 3) m_011_cnt++;
+  m_011_cnt == 0 ? m_hit_frac = 0: m_hit_frac = static_cast<double>(m_010_cnt)/m_011_cnt;
 }
-

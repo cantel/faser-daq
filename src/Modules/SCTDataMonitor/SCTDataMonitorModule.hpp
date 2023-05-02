@@ -21,6 +21,8 @@ class SCTDataMonitorModule : public MonitorBaseModule {
 
   uint16_t m_bcid;
   uint32_t m_l1id;
+  uint64_t m_010_cnt;
+  uint64_t m_011_cnt;
   uint16_t goodHits;
   uint16_t goodHitsMod[8];
   uint16_t mapline;
@@ -57,11 +59,10 @@ class SCTDataMonitorModule : public MonitorBaseModule {
   //metrics
   std::atomic<int> m_hit_multiplicity;
   std::atomic<float> m_hit_avg;
-  long m_hit_avg_count;
+  std::atomic<float> m_hit_frac;
 
   //functions
   void update_hitavg(unsigned hit);
-  float update_avg(float avg, size_t size, float value);
-
+  void update_hitfrac(unsigned hit);
 
 };

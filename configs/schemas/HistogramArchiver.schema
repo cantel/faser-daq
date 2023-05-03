@@ -42,10 +42,6 @@
         "filename_pattern": {
           "propertyOrder": 101,
           "type": "string"      
-        },
-        "archive_command": {
-          "propertyOrder": 102,
-          "type": "string"      
         }
       },
       "required": ["dump_interval","max_age"],

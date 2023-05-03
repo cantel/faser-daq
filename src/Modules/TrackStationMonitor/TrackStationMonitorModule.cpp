@@ -136,9 +136,15 @@ void TrackStationMonitorModule::monitor(DataFragment<daqling::utilities::Binary>
     return;
   }
 
-  if (m_event->payload_size() > kMAXFRAGSIZE) {
-    WARNING("Large event encountered. Skipping event.");
-    return;
+  for(const auto &id :m_event->getFragmentIDs()) {
+      if ((id&0xFFFF0000) != DAQFormats::TrackerSourceID) continue; 
+      uint8_t trbId = id&0x0000000F;
+      if (std::find(m_trb_ids.begin(), m_trb_ids.end(), trbId) == std::end(m_trb_ids)) continue;
+      const EventFragment* frag=m_event->find_fragment(id);
+      if (frag->payload_size() > kMAXFRAGSIZE) {
+          WARNING("Large track fragment encountered for ID 0x"<<std::hex<<id<<std::dec<<" ("<<frag->payload_size()<<" bytes). Skipping event.");
+          return;
+      }
   }
 
   auto fragmentUnpackStatus = unpack_full_fragment(eventBuilderBinary, SourceIDs::TriggerSourceID);

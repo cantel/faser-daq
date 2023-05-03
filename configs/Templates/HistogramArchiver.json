@@ -1,0 +1,19 @@
+{
+    "HistogramArchiver":
+    {
+	"name": "histogramarchiver",
+	"host": "localhost",
+	"port": 5502,
+	"modules": [{
+	    "name": "histogramarchiver",
+	    "type": "HistogramArchiver",
+	    "settings": {
+		"filename_pattern": "/home/data/Faser-Histograms-%06d-%05d.json.gz",
+		"max_age": 120,
+		"dump_interval": 3600
+	    }
+	}],
+        "loglevel": { "$ref": "top.json#loglevel" },
+        "metrics_settings": { "$ref": "top.json#metrics_settings" }
+    }
+}

@@ -20,6 +20,7 @@ schemas/TriggerGenerator.schema     \
 schemas/TriggerMonitor.schema     \
 schemas/TriggerRateMonitor.schema     \
 schemas/TriggerReceiver.schema     \
+schemas/HistogramArchiver.schema \
 --templates \
 Templates/TLB.json \
 Templates/TRB.json \
@@ -30,6 +31,7 @@ Templates/fileWriter.json \
 Templates/monitor.json \
 Templates/eventBuilder.json \
 Templates/digitizerNoise.json \
+Templates/HistogramArchiver.json \
 --configs   \
 digitizerSciLab.json \
 digitizerTI12.json \

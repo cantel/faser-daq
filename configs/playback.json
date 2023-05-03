@@ -11,8 +11,8 @@
           "name": "eventbuilder01",
           "type": "EventPlayback",
           "settings":         { "maxRate": 100,
-			      "repeats": 2,
-			      "fileList": ["/home/cantel/data/Faser-Physics-004912-00000.raw"]
+			      "repeats": 10,
+			      "fileList": ["/home/aagaard/Faser-Physics-008290-00226.raw"]
 	    
 	        },
           "connections": {
@@ -23,8 +23,8 @@
         "loglevel":         { "$ref": "top.json#loglevel" },
 	      "metrics_settings": { "$ref": "top.json#metrics_settings" }
       },
-      { "$ref": "Templates/TRB.json#TrackStationMonitorSt1" },
-      { "$ref": "Templates/TRB.json#SCTDataMonitorSt1L0" }
+      { "$ref": "Templates/digitizer.json#DigitizerMonitor" },
+      { "$ref": "Templates/HistogramArchiver.json#HistogramArchiver" }
     ]
   }
 }

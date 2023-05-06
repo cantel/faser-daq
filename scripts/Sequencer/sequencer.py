@@ -16,7 +16,7 @@ import redis
 sys.path.append("../RunControl")
 sys.path.append("../RunControl/daqControl")
 from helpers import LogLevel, logAndEmit
-import subprocess, shlex
+import subprocess
 
 from runcontrol import RunControl
 
@@ -142,66 +142,51 @@ class runner:
         
         if self.checkState()[0]!="DOWN":
             log_and_print(f"System is not shutdown - will not start run",LogLevel.ERROR,self.socketio, self.logger) 
-            # print("System is not shutdown - will not start run")
             return False
 
         if self.preCommand:
-
+            log_and_print(f"Running pre-command",LogLevel.INFO,self.socketio, self.logger) 
             try :
                 run_command(self.preCommand, self.socketio, self.logger)
             except RuntimeError :
                 log_and_print(f"Failed to pre-command: {self.preCommand}",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
-            # rc = run_command(self.preCommand)
-            # rc=os.system(self.preCommand)
-            # if rc:
-            #     log_and_print(f"Failed to pre-command: {self.preCommand}",LogLevel.ERROR,socketio, logger) 
-            #     # print("Failed to pre-command:",self.preCommand)
-            #     return False
-            # print("Ran precommand")
-            log_and_print(f"Ran precommand",LogLevel.INFO,self.socketio, self.logger) 
 
+        log_and_print(f"Initializing...",LogLevel.INFO,self.socketio, self.logger) 
         rc=self.initialize()
         if not rc:
             log_and_print(f"Failed to initialize",LogLevel.ERROR,self.socketio, self.logger) 
-            # print("Failed to initialize")
             return False
-        # print("INITIALIZED")
-        log_and_print(f"INITIALIZED",LogLevel.INFO,self.socketio, self.logger) 
         self.sleep(1)
+        log_and_print(f"Starting...",LogLevel.ERROR,self.socketio, self.logger) 
         rc=self.start()
         if not rc:
             log_and_print(f"Failed to start run",LogLevel.ERROR,self.socketio, self.logger) 
             # print("Failed to start run")
             return False
-        log_and_print(f"RUNNING",LogLevel.INFO,self.socketio, self.logger) 
-        # print("RUNNING")
+        log_and_print(f"Running...",LogLevel.INFO,self.socketio, self.logger) 
         self.sleep(5)
         rc=self.waitStop()
         if not rc:
             # print("Failed to reach run conditions")
             log_and_print(f"Failed to reach run conditions",LogLevel.ERROR,self.socketio, self.logger) 
             return False
+        log_and_print(f"Stopping...",LogLevel.ERROR,self.socketio, self.logger) 
         rc=self.stop()
         if not rc:
             # print("Failed to stop")
             log_and_print(f"Failed to stop",LogLevel.ERROR,self.socketio, self.logger) 
             return False
-        print("STOPPED")
-        # log_and_print(f"STOPPED",LogLevel.INFO,socketio, logger) 
         self.sleep(5)
+        log_and_print(f"Shutting down...",LogLevel.INFO,self.socketio, self.logger) 
         rc=self.shutdown()
         if not rc:
             log_and_print(f"Failed to shutdown - retry again in 10 seconds",LogLevel.WARNING,self.socketio, self.logger) 
-            # print("Failed to shutdown - retry again in 10 seconds")
             self.sleep(10)
             rc=self.shutdown()
             if not rc:
-                # print("Failed to shutdown - giving up")
                 log_and_print(f"Failed to shutdown - giving up",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
-        log_and_print(f"SHUTDOWN",LogLevel.INFO,self.socketio, self.logger) 
-        # print("SHUTDOWN")
         for ii in range(5):
             if self.checkState()[0]=="DOWN": break
             self.sleep(1)
@@ -209,22 +194,14 @@ class runner:
             log_and_print(f"Failed to shutdown {self.checkState()}",LogLevel.ERROR,self.socketio, self.logger) 
             # print("Failed to shutdown",self.checkState())
             return False
-        self.sleep(5) # NOTE : for testing only
+        # self.sleep(5) # NOTE : for testing only
         if self.postCommand:
+            log_and_print(f"Running post-command",LogLevel.INFO,self.socketio, self.logger) 
             try :
                 run_command(self.postCommand, self.socketio, self.logger)
             except RuntimeError :
                 log_and_print(f"Failed to pre-command: {self.postCommand}",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
-            # rc = run_command(self.postCommand,socketio, logger)
-            # # rc=os.system(self.postCommand)
-            # if rc:
-            #     log_and_print(f"Failed to post-command: {self.postCommand}",LogLevel.ERROR,socketio, logger) 
-            #     # print("Failed to post-command:",self.postCommand)
-            #     return False
-            
-            log_and_print(f"Ran post-command",LogLevel.INFO,self.socketio, self.logger) 
-            # print("Ran post-command")
         return True
 
 def usage():
@@ -298,6 +275,7 @@ def update_rcgui( sequenceName:str, totalStepsNumber:int, stepNumber = 0, seqNum
     """
     Emits "sequenceUpdate" event to RCGUI and update infos in REDIS.
     If 'end' argument is False, the function will just delete the entry in REDIS.
+    The function also stores permanently the last state of the Sequencer with the key : "lastSequencerState". In contrary, "sequencerState" is destroyed when sequencer finished. 
     """
     if end :
         r.delete("sequencerState")
@@ -312,6 +290,7 @@ def update_rcgui( sequenceName:str, totalStepsNumber:int, stepNumber = 0, seqNum
         "totalStepsNumber" : totalStepsNumber,
     } 
     r.hmset("sequencerState", updateDict)
+    r.hmset("lastSequencerState", updateDict) # the key stores the last state of the sequencer. 
     if socketio is not None : 
         socketio.emit("sequencerStateChange",updateDict, broadcast=True)
     return None
@@ -322,7 +301,9 @@ def log_and_print(msg:str, level:LogLevel, socketio=None, logger=None):
     print(msg)
         
 def run_command(cmd:str, socketio = None, logger = None) : 
-    process = subprocess.run(shlex.split(cmd), text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+
+    log_and_print(f"Executing command : {cmd}", LogLevel.INFO, socketio, logger)
+    process = subprocess.run(cmd,shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     if process.returncode != 0 : 
         log_and_print(process.stdout, LogLevel.ERROR, socketio, logger)
         raise RuntimeError(f"Failed to run command : {cmd}")
@@ -347,9 +328,6 @@ def finalize_and_clean( finalizeCommand:str, **args):
             log_and_print(f"Failed at sequencer stop - please check",LogLevel.ERROR, args.get("socketio"), args.get("logger")) 
     update_rcgui("",0,0,0,args.get("socketio"),end=True) 
         
-
-        
-    
     
     
 def main(args, socketio=None, logger = None):
@@ -382,19 +360,17 @@ def main(args, socketio=None, logger = None):
     runControl=RunControl(hostUrl,maxTransitionTime)
     if runControl.getState()['runOngoing']:
         log_and_print("Run already on-going - bailing out",LogLevel.ERROR, socketio, logger)
-        # print("Run already on-going - bailing out")
         return 1
     update_rcgui(args[0], len(cfgs), 0, seqnumber,socketio=socketio)
     if "initCommand" in config:
-        log_and_print("Running INIT command",LogLevel.INFO, socketio, logger)
-        # print("Running INIT command")
+        log_and_print("Running init command",LogLevel.INFO, socketio, logger)
         try :
             run_command(config["initCommand"], socketio, logger)
         except RuntimeError :
             log_and_print("Failed in init command, giving up...",LogLevel.ERROR, socketio, logger)
             finalize_and_clean(config.get("finalizeCommand"), socketio= socketio, logger = logger)
             return 1
-        # rc=os.system(config["initCommand"])
+
     message(f"Starting a sequence run ({args[0]}) with {len(cfgs)-startStep+1} steps")
     log_and_print(f"Starting a sequence run ({args[0]}) with {len(cfgs)-startStep+1} steps",LogLevel.INFO,  socketio, logger) 
     for step in range(startStep-1,len(cfgs)):
@@ -402,7 +378,6 @@ def main(args, socketio=None, logger = None):
         # checking for stop flag
         if check_stopFlag():
             log_and_print(f"Stopping at step {step + 1}",LogLevel.INFO, socketio, logger)
-            # r.delete("stopSequencer")
             break
 
         update_rcgui(args[0],len(cfgs), step+1,seqnumber, socketio)
@@ -415,19 +390,15 @@ def main(args, socketio=None, logger = None):
             log_and_print(f"Successful run",LogLevel.INFO, socketio, logger) 
         else:
             message("Failed to start run from sequencer - please check")
-            log_and_print(f"Failed to start run from sequencer - please check\nTo redo from this step, run :\n./sequencer.py -S {seqnumber} -s {step+1} {args[0]}",LogLevel.ERROR, socketio, logger) 
+            log_and_print(f"Failed to start run from sequencer - please check ;\nTo redo from this step, start a new sequence with the following parameters : Sequence : {args[0]}, Sequence Number : {seqnumber}, Step : {step+1}. It is also possible to start a new run using the command : ./sequencer.py -S {seqnumber} -s {step+1} {args[0]}",LogLevel.ERROR, socketio, logger) 
             finalize_and_clean(config.get("finalizeCommand"), socketio= socketio, logger = logger)
-            # print("Failed to run, please check")
-            # print("To redo from this step run:")
-            # print(f"./sequencer.py -S {seqnumber} -s {step+1} {args[0]}")
             return 1
         if seqnumber==0:
             seqnumber=run.runnumber
 
     if "finalizeCommand" in config:
-        log_and_print(f"Running FINALIZE command", LogLevel.INFO,socketio, logger) 
-        # print("Running FINALIZE command")
-        # rc=os.system(config["finalizeCommand"])
+        log_and_print(f"Running finalize command", LogLevel.INFO,socketio, logger) 
+
         try :
             run_command(config["finalizeCommand"], socketio, logger)
         except RuntimeError :
@@ -436,17 +407,14 @@ def main(args, socketio=None, logger = None):
             log_and_print(f"Failed at sequencer stop - please check",LogLevel.ERROR, socketio, logger) 
             update_rcgui("",0,0,0,socketio= socketio,end=True) 
             return 1
-        # rc = run_command(config["finalizeCommand"])
-        # if rc:
-        #     log_and_print(f"Failed in finalize command",LogLevel.ERROR, socketio, logger) 
-        #     # print("Failed in finalize command")
-        #     message("Failed at sequencer stop - please check")
-        #     log_and_print(f"Failed at sequencer stop - please check",LogLevel.ERROR, socketio, logger) 
-        #     return 1
 
     update_rcgui(args[0],len(cfgs),0, seqnumber, socketio, end=True)
-    message("Sequence run completed")
-    log_and_print(f"Sequence run completed",LogLevel.INFO, socketio, logger) 
+    if r.get("stopSequencer") is not None:
+        message("Sequence run completed after manual stop")
+        log_and_print(f"Sequence run completed after manual stop",LogLevel.INFO, socketio, logger) 
+    else : 
+        message("Sequence run completed")
+        log_and_print(f"Sequence run completed",LogLevel.INFO, socketio, logger) 
     return 0
 
 if __name__ == "__main__":

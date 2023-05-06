@@ -2,7 +2,7 @@ Vue.component("sequencer_dialog", {
   delimiters: ["[[", "]]"],
   props: {
     "sequencer_state": Object,
-
+    "last_sequencer_state": Object,
   },
   data: function () {
     return {
@@ -16,7 +16,7 @@ Vue.component("sequencer_dialog", {
       listConfigs: [],
       expandedSteps: false,
       errorLoadedConfigMessage: "",
-      stopping : false
+      stopping: false
     };
   },
   mounted() {
@@ -32,7 +32,7 @@ Vue.component("sequencer_dialog", {
     }
   },
   methods: {
-    emit_stop(){
+    emit_stop() {
       this.$emit("stop_seq")
       this.stopping = true
     },
@@ -66,9 +66,22 @@ Vue.component("sequencer_dialog", {
     <v-dialog v-model="dialog" width="500" persistent>
   <v-card>  
     <v-card-title>
-      <span class="text-h5"> Sequencer : [[ Object.keys(this.sequencer_state).length == 0 ? '' : this.sequencer_state.sequenceName ]] </span>
+          <span class="text-h5"> Sequencer : [[ Object.keys(this.sequencer_state).length == 0 ? '' : this.sequencer_state.sequenceName ]] </span>
     </v-card-title>
-    <v-card-text v-if="Object.keys(sequencer_state).length == 0">
+ 
+
+    <v-card-text>
+      <v-row>
+        <v-col>
+          <span v-if ="Object.keys(last_sequencer_state).length != 0" class="text-caption">
+            Last seq info : [[ this.last_sequencer_state.sequenceName]], 
+            seqNumber : [[this.last_sequencer_state.seqNumber]], 
+            step :  [[this.last_sequencer_state.stepNumber]] / [[this.last_sequencer_state.totalStepsNumber]]
+          </span>
+          </v-col>
+      </v-row >
+
+     <div v-if="Object.keys(sequencer_state).length == 0">
       <v-row>
         <v-col>
           <v-select v-model="selected_config" :items="listConfigs" label="Select sequence configuration file" outlined
@@ -99,6 +112,7 @@ Vue.component("sequencer_dialog", {
         </v-col>
       </v-row>
       </template>
+      </div> 
     </v-card-text>
     <v-expand-transition>
       <div v-if="expandedSteps">
@@ -121,7 +135,7 @@ Vue.component("sequencer_dialog", {
           @click="$emit('start_seq', selected_config, seqNumber, stepNumber)">Start</v-btn>
       </template>
       <template v-else>
-        <v-btn :disabled="stopping" color="danger" @click="emit_stop">[[ stopping ? "STOPPING AFTER STEP FINISHED..." :  "STOP"]]</v-btn>
+        <v-btn :disabled="stopping" color="danger" @click="emit_stop">[[ stopping ? "STOPPING..." :  "STOP"]]</v-btn>
       </template>
       <v-spacer></v-spacer>
       <v-btn text @click="expandedSteps = !expandedSteps" v-if="errorLoadedConfigMessage === ''">
@@ -342,7 +356,6 @@ var app = new Vue({
     activeNode: [],
     nodeStates: {},
     stateColors: {
-      // for state color
       not_added: "grey",
       added: "brown",
       booted: "yellow",
@@ -404,6 +417,7 @@ var app = new Vue({
     sequencerExpanded: false,
     // sequencerState : {"seqNumber" : 3, "stepNumber" : 4,"totalStepsNumber": 10},
     sequencerState: {},
+    lastSequencerState: {}
   },
 
   delimiters: ["[[", "]]"],
@@ -414,11 +428,11 @@ var app = new Vue({
     this.initListeners();
   },
   methods: {
-    stopSequencer(){
+    stopSequencer() {
       axios.post("/stopSequencer").then((response) => {
         if (response.data.status == "error") {
           this.createSnackbar("error", response.data.data)
-        } 
+        }
       })
     },
     startSequence(configName, seqNumber, stepNumber) {
@@ -516,6 +530,7 @@ var app = new Vue({
           console.log("Update of the sequence")
           console.log(newState)
           this.sequencerState = newState
+          this.lastSequencerState = newState
         }
         else {
           console.log("End of sequence")
@@ -578,8 +593,7 @@ var app = new Vue({
         this.runNumber = data["runNumber"];
         this.localOnly = data["localOnly"];
         this.sequencerState = data["sequencerState"]
-
-
+        this.lastSequencerState = data["lastSequencerState"]
       });
     },
     getFSM() {

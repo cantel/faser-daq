@@ -147,8 +147,12 @@ def refreshConfig():
 
 def systemConfiguration(configPath):
     global sysConfig
-    with open(os.path.join(configPath, "config-dict.json")) as f:
-        configJson = json.load(f)
+    try :
+        with open(os.path.join(configPath, "config-dict.json")) as f:
+            configJson = json.load(f)
+    except FileNotFoundError as e : 
+        logAndEmit("Failed to load config from file. Please check if the config folder exists in the config folder.", "general", LogLevel.ERROR,socketio=socketio, logger=app.logger)
+        raise FileNotFoundError(e)
     if sysConfig is None:  # we (re)booted the app 
         print("sysConfig was None")
         try: 
@@ -170,7 +174,7 @@ def getConfigsInDir(configPath):
 
 def reinitTree(configJson, oldRoot=None):
     """
-    configJson: map des différents fichiers json
+    configJson: dict of paths of config files
     """
     if oldRoot != None:
         for _ , _, node in RenderTree(oldRoot):
@@ -210,7 +214,7 @@ def reinitTree(configJson, oldRoot=None):
     if "path" in configuration.keys():
         dir = configuration["path"]
     else:
-        dir = env["DAQ_BUILD_DIR"]  # <-- for faser normally
+        dir = env["DAQ_BUILD_DIR"] 
     exe = "/bin/daqling"
     lib_path = ("LD_LIBRARY_PATH="+ env["LD_LIBRARY_PATH"]+ ":"+ dir+ "/lib/,TDAQ_ERS_STREAM_LIBS=DaqlingStreams")
     components = configuration["components"]
@@ -720,17 +724,6 @@ def modulesWithError(tree):
     return errorList
 
             
-# def logAndEmit(configtype, type:str , message=""):
-#     now = datetime.now()
-#     timestamp = now.strftime("%d/%m/%Y, %H:%M:%S")
-#     if type == "INFO":
-#         app.logger.info("[" + configtype + "] " + timestamp + " " + type + ": " + message)
-#     elif type == "WARNING":
-#         app.logger.warning("[" + configtype + "] " + timestamp + " " + type + ": " + message)
-#     elif type == "ERROR":
-#         app.logger.error("[" + configtype + "] " + timestamp + " " + type + ": " + message)
-#     socketio.emit("logChng","[" + configtype + "] " + timestamp + " " + type + ": " + message,broadcast=True,)
-
 
 def updateRedis(status:str = None):
     if status:
@@ -759,7 +752,7 @@ def appState():
     packet["localOnly"] = localOnly
     packet["runStart"] = r2.get("runStart")
     packet["sequencerState"] = r2.hgetall("sequencerState")
-    print(r2.hgetall("sequencerState"))
+    packet["lastSequencerState"] = r2.hgetall("lastSequencerState")
     packet = {**packet, **getRunInfo()}
     return jsonify(packet)
 

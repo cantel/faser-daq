@@ -147,9 +147,9 @@ class runner:
         if self.preCommand:
             log_and_print(f"Running pre-command",LogLevel.INFO,self.socketio, self.logger) 
             try :
-                run_command(self.preCommand, self.socketio, self.logger)
+                run_commands(self.preCommand, self.socketio, self.logger)
             except RuntimeError :
-                log_and_print(f"Failed to pre-command: {self.preCommand}",LogLevel.ERROR,self.socketio, self.logger) 
+                log_and_print(f"Failed to pre-command",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
 
         log_and_print(f"Initializing...",LogLevel.INFO,self.socketio, self.logger) 
@@ -158,10 +158,10 @@ class runner:
             log_and_print(f"Failed to initialize",LogLevel.ERROR,self.socketio, self.logger) 
             return False
         self.sleep(1)
-        log_and_print(f"Starting...",LogLevel.ERROR,self.socketio, self.logger) 
+        log_and_print(f"Starting...",LogLevel.INFO,self.socketio, self.logger) 
         rc=self.start()
         if not rc:
-            log_and_print(f"Failed to start run",LogLevel.ERROR,self.socketio, self.logger) 
+            log_and_print(f"Failed to start run",LogLevel.INFO,self.socketio, self.logger) 
             # print("Failed to start run")
             return False
         log_and_print(f"Running...",LogLevel.INFO,self.socketio, self.logger) 
@@ -171,7 +171,7 @@ class runner:
             # print("Failed to reach run conditions")
             log_and_print(f"Failed to reach run conditions",LogLevel.ERROR,self.socketio, self.logger) 
             return False
-        log_and_print(f"Stopping...",LogLevel.ERROR,self.socketio, self.logger) 
+        log_and_print(f"Stopping...",LogLevel.INFO,self.socketio, self.logger) 
         rc=self.stop()
         if not rc:
             # print("Failed to stop")
@@ -198,9 +198,9 @@ class runner:
         if self.postCommand:
             log_and_print(f"Running post-command",LogLevel.INFO,self.socketio, self.logger) 
             try :
-                run_command(self.postCommand, self.socketio, self.logger)
+                run_commands(self.postCommand, self.socketio, self.logger)
             except RuntimeError :
-                log_and_print(f"Failed to pre-command: {self.postCommand}",LogLevel.ERROR,self.socketio, self.logger) 
+                log_and_print(f"Failed to post-command",LogLevel.ERROR,self.socketio, self.logger) 
                 return False
         return True
 
@@ -249,7 +249,10 @@ def load_steps(configName:str) :
                 values[var]=tempVars[var][idx]
             step={}
             for item in config['template']['step']:
-                step[item]=config['template']['step'][item].format(**values)
+                if isinstance(config['template']['step'][item], list) : 
+                    step[item] = [el.format(**values) for el in config['template']['step'][item]]
+                else:
+                    step[item] = config['template']['step'][item].format(**values)
             steps.append(step)
         config["steps"]=steps
 
@@ -300,27 +303,36 @@ def log_and_print(msg:str, level:LogLevel, socketio=None, logger=None):
         logAndEmit(msg=msg.strip().replace("\n", " "), configName="SEQUENCER", level =level, socketio = socketio, logger = logger) 
     print(msg)
         
-def run_command(cmd:str, socketio = None, logger = None) : 
-
-    log_and_print(f"Executing command : {cmd}", LogLevel.INFO, socketio, logger)
-    process = subprocess.run(cmd,shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    if process.returncode != 0 : 
-        log_and_print(process.stdout, LogLevel.ERROR, socketio, logger)
-        raise RuntimeError(f"Failed to run command : {cmd}")
-    else :
-        # NOTE : if the script prints nothing, it will log a blank line with only the date
-        log_and_print(process.stdout, LogLevel.INFO, socketio, logger)
+def run_commands(cmds:list, socketio = None, logger = None, stop_if_failure = True) : 
+    failed_commands = []
+    for cmd in cmds :
+        log_and_print(f"Executing command : {cmd}", LogLevel.INFO, socketio, logger)
+        process = subprocess.run(cmd,shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        if process.returncode != 0 : 
+            log_and_print(process.stdout, LogLevel.ERROR, socketio, logger)
+            if stop_if_failure : 
+                raise RuntimeError(f"Failed to run command : {cmd}")
+            failed_commands.append(cmd)
+        else :
+            log_and_print(process.stdout, LogLevel.INFO, socketio, logger) # NOTE : if the script prints nothing, it will log a blank line 
+   
+    if len(failed_commands) != 0 :
+        msg = "The following command(s) failed :\n"
+        for cmd in failed_commands :
+            msg+= f"//// {cmd}\n"
+        log_and_print(msg, LogLevel.ERROR, socketio, logger)
+        raise RuntimeError()
     
-def finalize_and_clean( finalizeCommand:str, **args): 
+def finalize_and_clean( finalizeCommands:list, **args): 
     """
-    if finalizeCommand is True : it will try to run the finalizeCommand. 
+    if finalizeCommand is True : it will try to run the finalizeCommands. 
     **args : 
      - socketio
      - logger
     """
-    if finalizeCommand is not None : 
+    if finalizeCommands is not None : 
         try :
-            run_command(finalizeCommand, socketio = args.get("socketio"),logger= args.get("logger"))
+            run_commands(finalizeCommands, socketio = args.get("socketio"),logger= args.get("logger"),stop_if_failure=False)
         
         except RuntimeError : 
             log_and_print(f"Failed in finalize command",LogLevel.ERROR,args.get("socketio"), args.get("logger")) 
@@ -365,7 +377,7 @@ def main(args, socketio=None, logger = None):
     if "initCommand" in config:
         log_and_print("Running init command",LogLevel.INFO, socketio, logger)
         try :
-            run_command(config["initCommand"], socketio, logger)
+            run_commands(config["initCommand"], socketio, logger)
         except RuntimeError :
             log_and_print("Failed in init command, giving up...",LogLevel.ERROR, socketio, logger)
             finalize_and_clean(config.get("finalizeCommand"), socketio= socketio, logger = logger)
@@ -400,7 +412,7 @@ def main(args, socketio=None, logger = None):
         log_and_print(f"Running finalize command", LogLevel.INFO,socketio, logger) 
 
         try :
-            run_command(config["finalizeCommand"], socketio, logger)
+            run_commands(config["finalizeCommand"], socketio, logger)
         except RuntimeError :
             log_and_print(f"Failed in finalize command",LogLevel.ERROR,socketio, logger) 
             message("Failed at sequencer stop - please check")

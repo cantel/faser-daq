@@ -6,7 +6,7 @@ from datetime import datetime
 import redis
 import json
 from enum import Enum
-
+import re
 
 class LogLevel(Enum) :
     """
@@ -59,4 +59,19 @@ def logAndEmit(msg:str, configName:str, level :LogLevel, socketio, logger) :
        logger.warning(strTemplate)
     elif level == LogLevel.ERROR :
         logger.error(strTemplate)
-    socketio.emit("logChng",strTemplate,broadcast=True)
+    socketio.emit("logChng",parse_log_entry(strTemplate),broadcast=True)
+
+def parse_log_entry(logString:str) -> dict: 
+    """
+    Parse a log string, with each entry having the following format :
+    `[source] date, time level: message`
+    
+    Return
+    ---
+    A dictionnary with the keys : source, datetime, level, message
+    """
+    entry = re.search(r"\[(\w*)\]\s(\d{2}\/\d{2}\/\d{4}, \d{2}:\d{2}:\d{2})\s(INFO|WARNING|ERROR):\s(.*)",logString)
+    return {"source" : entry.group(1), "datetime": entry.group(2), "level": entry.group(3), "message" : entry.group(4)}
+
+    
+    

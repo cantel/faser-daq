@@ -24,7 +24,7 @@ from pathlib import Path
 import platform
 from flask_cors import CORS
 from nodetree import NodeTree
-from helpers import detectorList, getEventCounts, LogLevel, logAndEmit
+from helpers import detectorList, getEventCounts, LogLevel, logAndEmit, parse_log_entry
 from daqcontrol import daqcontrol as daqctrl
 import metricsHandler
 import requests
@@ -804,8 +804,9 @@ def fullLog(module:str) -> Response:
 @app.route("/log", methods=["GET"])
 def log():
     with open(serverConfig["serverlog_location_name"]) as f:
-        ret = f.readlines()
-    return jsonify(ret[-20:]) # return the last 20 element of the log
+        ret = f.readlines() 
+    parsedLog = [parse_log_entry(el) for el in ret[-40:]]
+    return jsonify(parsedLog) 
 
 
 @app.route("/serverconfig")
@@ -1121,15 +1122,8 @@ def startSequencer() :
 def stopSequencer():
     r2.set("stopSequencer", "True")
     return jsonify({"status" : "success"})
-    
-    
 
 
-    
-
-
-    
-    
 @socketio.on_error()
 def error_handler(e):
     """ Handles the default namespace """

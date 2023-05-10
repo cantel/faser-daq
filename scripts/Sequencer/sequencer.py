@@ -303,8 +303,10 @@ def log_and_print(msg:str, level:LogLevel, socketio=None, logger=None):
         logAndEmit(msg=msg.strip().replace("\n", " "), configName="SEQUENCER", level =level, socketio = socketio, logger = logger) 
     print(msg)
         
-def run_commands(cmds:list, socketio = None, logger = None, stop_if_failure = True) : 
+def run_commands(cmds, socketio = None, logger = None, stop_if_failure = True) : 
     failed_commands = []
+    if not isinstance(cmds,list) : 
+        cmds = [cmds] # converts the command to a list with one entry 
     for cmd in cmds :
         log_and_print(f"Executing command : {cmd}", LogLevel.INFO, socketio, logger)
         process = subprocess.run(cmd,shell=True, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)

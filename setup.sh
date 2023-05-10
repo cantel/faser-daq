@@ -33,6 +33,7 @@ fi
 #overwrite daqling setup variables to be director independent
 export DAQ_SCRIPT_DIR=${FASERTOP}/daqling/scripts/
 export DAQ_CONFIG_DIR=${FASERTOP}/configs/
+export DAQ_SEQUENCE_CONFIG_DIR=${FASERTOP}/scripts/Sequencer/
 export DAQ_BUILD_DIR=${FASERTOP}/build/
 alias daqpy='python3 $FASERTOP/daqling/scripts/Control/daq.py'
 alias rcgui='pushd $FASERTOP/scripts/Web; ./rcgui.py; popd'

@@ -1,3 +1,152 @@
+Vue.component("sequencer_dialog", {
+  delimiters: ["[[", "]]"],
+  props: {
+    "sequencer_state": Object,
+    "last_sequencer_state": Object,
+  },
+  data: function () {
+    return {
+      dialog: true,
+      selected_config: "",
+      seqNumber: 0,
+      stepNumber: 2,
+      loadingConfig: false,
+      configFile: null,
+      steps: [],
+      listConfigs: [],
+      expandedSteps: false,
+      errorLoadedConfigMessage: "",
+      stopping: false
+    };
+  },
+  mounted() {
+    if (Object.keys(this.sequencer_state).length == 0) {
+      console.log("Getting the configs from the correct folder")
+      axios.get("/getSequencerConfigs").then((response) => {
+        this.listConfigs = response.data
+      })
+    }
+    else {
+      this.loadSequencerConfig(this.sequencer_state.sequenceName)
+      this.expandedSteps = true;
+    }
+  },
+  methods: {
+    emit_stop() {
+      this.$emit("stop_seq")
+      this.stopping = true
+    },
+    loadSequencerConfig(selected_config) {
+      axios.get("/loadSequencerConfig", { params: { "sequencerConfigName": selected_config } }).then((response) => {
+        if (response.data.status == "error") {
+          this.errorLoadedConfigMessage = response.data.data;
+          console.log("Error, with the following message : ", response.data.data);
+        }
+        else {
+          this.errorLoadedConfigMessage = "";
+          this.steps = response.data.data.steps;
+          this.stepNumber = 1 // preventing a bug from the slider in the sequencer rcgui dialog 
+          this.configFile = response.data.data.config;
+        }
+        this.loadingConfig = false;
+      })
+    }
+  },
+
+  watch: {
+    selected_config: {
+      handler: function () {
+        this.loadingConfig = true;
+        this.loadSequencerConfig(this.selected_config);
+      }
+    }
+
+  },
+  template: /*html*/`
+    <v-dialog v-model="dialog" width="500" persistent>
+  <v-card>  
+    <v-card-title>
+          <span class="text-h5"> Sequencer : [[ Object.keys(this.sequencer_state).length == 0 ? '' : this.sequencer_state.sequenceName ]] </span>
+    </v-card-title>
+ 
+
+    <v-card-text>
+      <v-row>
+        <v-col>
+          <span v-if ="Object.keys(last_sequencer_state).length != 0" class="text-caption">
+            Last seq info : [[ this.last_sequencer_state.sequenceName]], 
+            seqNumber : [[this.last_sequencer_state.seqNumber]], 
+            step :  [[this.last_sequencer_state.stepNumber]] / [[this.last_sequencer_state.totalStepsNumber]]
+          </span>
+          </v-col>
+      </v-row >
+
+     <div v-if="Object.keys(sequencer_state).length == 0">
+      <v-row>
+        <v-col>
+          <v-select v-model="selected_config" :items="listConfigs" label="Select sequence configuration file" outlined
+            dense :hide-details="errorLoadedConfigMessage === ''" disable-lookup :readonly="loadingConfig" :loading="loadingConfig"
+            :error="errorLoadedConfigMessage !== ''" :error-messages="errorLoadedConfigMessage"
+            ></v-select>
+        </v-col>
+      </v-row>
+      <template v-if="errorLoadedConfigMessage === ''">
+      <v-row>
+        <v-col cols='6'>
+          <v-subheader>Seq number</v-subheader>
+        </v-col>
+        <v-spacer></v-spacer>
+        <v-col cols="6">
+          <v-text-field v-model="seqNumber" outlined dense hide-details></v-text-field>
+        </v-col>
+      </v-row>
+      <v-row v-if="selected_config !== ''" justify="space-around">
+        <v-col cols="12">
+          <v-slider class="align-center" v-model="stepNumber" hide-details :min="1" :max="steps.length"
+            label="Step number" thumb-label>
+            <template v-slot:append>
+              <v-text-field v-model="stepNumber" class="mt-0 pt-0" hide-details single-line type="number"
+                style="width: 60px" :min="1" :max="steps.length"></v-text-field>
+            </template>
+          </v-slider>
+        </v-col>
+      </v-row>
+      </template>
+      </div> 
+    </v-card-text>
+    <v-expand-transition>
+      <div v-if="expandedSteps">
+        <v-card-text style="overflow:auto; white-space: nowrap;">
+          <v-virtual-scroll :bunched="10" :items="steps" height="200" item-height="26">
+            <template v-slot:default="{ item, index }">
+              <div :key="index" :class=" index+1 === sequencer_state.stepNumber ? 'd-flex text-body-2 green lighten-2 py-2' : 'd-flex text-body-2 py-2' ">
+                <span class="mx-2">[[index+1]] : </span>
+                <span> [[ item.startcomment ]] </span>
+              </div>
+            </template>
+          </v-virtual-scroll>
+        </v-card-text>
+      </div>
+    </v-expand-transition>
+    <v-card-actions>
+        <v-btn color="error" @click="$emit('close_seq')">close</v-btn>
+        <template v-if="Object.keys(sequencer_state).length == 0">
+        <v-btn :disabled="selected_config==''" color="success"
+          @click="$emit('start_seq', selected_config, seqNumber, stepNumber)">Start</v-btn>
+      </template>
+      <template v-else>
+        <v-btn :disabled="stopping" color="danger" @click="emit_stop">[[ stopping ? "STOPPING..." :  "STOP"]]</v-btn>
+      </template>
+      <v-spacer></v-spacer>
+      <v-btn text @click="expandedSteps = !expandedSteps" v-if="errorLoadedConfigMessage === ''">
+        [[ expandedSteps ? 'hide steps' : 'show steps' ]]
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+  `,
+});
+
 Vue.component("plot", {
   props: ["update", "name"],
   template: '<div :ref="name"></div>',
@@ -115,7 +264,7 @@ Vue.component("monitoring_panel", {
       });
     },
   },
-  template: `
+  template: /*html*/`
     <div>
       <div class="d-flex flex-wrap justify-center mb-3 py-2">
         <v-card elevation="1" class="blue lighten-5 metrics-panel">
@@ -196,7 +345,7 @@ var app = new Vue({
   el: "#app",
   vuetify: new Vuetify(),
   data: {
-    expert_mode : false,
+    expert_mode: false,
     drawer: false, // if the tree view is closed or not
     isDrawerLocked: false, // if the tree view is in locked state
     c_configDirs: [],
@@ -207,7 +356,6 @@ var app = new Vue({
     activeNode: [],
     nodeStates: {},
     stateColors: {
-      // for state color
       not_added: "grey",
       added: "brown",
       booted: "yellow",
@@ -250,7 +398,7 @@ var app = new Vue({
     interlocked: false,
     username: "local_user",
     whoInterlocked: null,
-    modulesError: {"1": [], "2": []},
+    modulesError: { "1": [], "2": [] },
     resultCommand: "", // what the root action will return (success or error-> timeout)
     startRunDialog: false,
     endRunDialog: false,
@@ -261,12 +409,16 @@ var app = new Vue({
     runTypes: ['Test', 'TestBeam', 'Calibration', 'Cosmics', 'Physics'],
     lostConnection: false,
     shutdownWarning: false,
-    snackbar: {"open":false,"text":"", "color":""},
-    timeoutAxiosRequest: {timeout: 60000},
-    localOnly : false,
-    modulesCrash : [],
-    histograms_link : `${window.location.protocol}//${window.location.hostname}:8050`,
-    },
+    snackbar: { "open": false, "text": "", "color": "" },
+    timeoutAxiosRequest: { timeout: 60000 },
+    localOnly: false,
+    modulesCrash: [],
+    histograms_link: `${window.location.protocol}//${window.location.hostname}:8050`,
+    sequencerExpanded: false,
+    // sequencerState : {"seqNumber" : 3, "stepNumber" : 4,"totalStepsNumber": 10},
+    sequencerState: {},
+    lastSequencerState: {}
+  },
 
   delimiters: ["[[", "]]"],
   mounted() {
@@ -276,6 +428,30 @@ var app = new Vue({
     this.initListeners();
   },
   methods: {
+    stopSequencer() {
+      axios.post("/stopSequencer").then((response) => {
+        if (response.data.status == "error") {
+          this.createSnackbar("error", response.data.data)
+        }
+      })
+    },
+    startSequence(configName, seqNumber, stepNumber) {
+      // function called when pressing the "START" button in the sequencer dialog window
+      this.sequencerExpanded = false;
+      axios
+        .post("/startSequencer", {
+          configName: configName,
+          startStep: stepNumber,
+          seqNumber: seqNumber
+        })
+        .then((response) => {
+          if (response.data["status"] != "success") {
+            this.createSnackbar(color = "error", text = "Error : Oops, something bad happened")
+          }
+        })
+        .catch((e) => this.createSnackbar(color = "error", text = e));
+
+    },
     processShutdown() {
       if (this.runState === "READY") { this.shutdownRun() }
       else { this.shutdownWarning = true; }
@@ -313,15 +489,16 @@ var app = new Vue({
         }
       });
 
-      this.c_socket.on("refreshConfig", ()=> {
+      this.c_socket.on("refreshConfig", () => {
         this.loadConfig(this.c_loadedConfigName)
       });
 
       this.c_socket.on("interlockChng", (newState) => {
         this.whoInterlocked = newState;
-        if (newState == undefined){
+        if (newState == undefined) {
           this.startRunDialog = false;
           this.endRunDialog = false;
+          this.sequencerExpanded = false;
         }
       });
 
@@ -333,18 +510,33 @@ var app = new Vue({
         this.lostConnection = true;
       });
 
-      this.c_socket.on("runInfoChng", (newRunInfo)=>{
+      this.c_socket.on("runInfoChng", (newRunInfo) => {
         this.comment = newRunInfo["runComment"]
         this.runType = newRunInfo["runType"]
         this.runNumber = newRunInfo["runNumber"]
       });
 
-      this.c_socket.on("snackbarEmit", (msg)=> {
-        this.createSnackbar(color=msg.type, text=msg.message)
+      this.c_socket.on("snackbarEmit", (msg) => {
+        this.createSnackbar(color = msg.type, text = msg.message)
       })
 
-      this.c_socket.on("crashModChng",(newCrashMod) => {
+      this.c_socket.on("crashModChng", (newCrashMod) => {
         this.modulesCrash = newCrashMod;
+      })
+
+      this.c_socket.on("sequencerStateChange", (newState) => {
+        console.log(newState)
+        if (Object.keys(newState) != 0) {
+          console.log("Update of the sequence")
+          console.log(newState)
+          this.sequencerState = newState
+          this.lastSequencerState = newState
+        }
+        else {
+          console.log("End of sequence")
+          console.log(newState)
+          this.sequencerState = {}
+        }
       })
     },
     interlock() {
@@ -400,7 +592,8 @@ var app = new Vue({
         this.comment = data["runComment"];
         this.runNumber = data["runNumber"];
         this.localOnly = data["localOnly"];
-      
+        this.sequencerState = data["sequencerState"]
+        this.lastSequencerState = data["lastSequencerState"]
       });
     },
     getFSM() {
@@ -521,7 +714,7 @@ var app = new Vue({
     },
     sendROOTCommand(action) {
       this.processing[action] = true;
-      args = {'command': action}
+      args = { 'command': action }
 
       if (action === "START" || action === "STOP") {
         args["runType"] = this.runType;
@@ -529,12 +722,12 @@ var app = new Vue({
       }
 
       axios
-        .post(`/processROOTCommand`, args,this.timeoutAxiosRequest)
+        .post(`/processROOTCommand`, args, this.timeoutAxiosRequest)
         .then((result) => {
           this.processing[action] = false;
 
-          if (result.data.includes("Error") ){
-            this.createSnackbar("error", result.data ) 
+          if (result.data.includes("Error")) {
+            this.createSnackbar("error", result.data)
           }
         })
         .catch((e) => {
@@ -543,7 +736,7 @@ var app = new Vue({
         });
     },
 
-    createSnackbar(color, text){
+    createSnackbar(color, text) {
       this.snackbar["color"] = color
       this.snackbar["text"] = text
       this.snackbar["open"] = true
@@ -560,30 +753,30 @@ var app = new Vue({
         "width=800, height=500"
       );
     },
-    isInconsistent(name){
-      if (name){
-        a  = this.nodeStates[name][1] 
-        return a      
+    isInconsistent(name) {
+      if (name) {
+        a = this.nodeStates[name][1]
+        return a
       }
-      else{
+      else {
         return false
       }
-      
+
     },
-    hasWarning(name){
-      if ( this.modulesError || this.modulesError != {} || this.modulesError != undefined){
+    hasWarning(name) {
+      if (this.modulesError || this.modulesError != {} || this.modulesError != undefined) {
         return this.modulesError['1'].includes(name)
       }
       return false
     },
-    hasError(name){
-      if ( this.modulesError || this.modulesError != {} || this.modulesError != undefined){
+    hasError(name) {
+      if (this.modulesError || this.modulesError != {} || this.modulesError != undefined) {
         return this.modulesError['2'].includes(name)
       }
       return false
     },
-    isModuleCrashed(name){
-      if ( this.modulesCrash || this.modulesCrash != {} || this.modulesCrash != undefined){
+    isModuleCrashed(name) {
+      if (this.modulesCrash || this.modulesCrash != {} || this.modulesCrash != undefined) {
         return this.modulesCrash.includes(name)
       }
       return false
@@ -605,6 +798,9 @@ var app = new Vue({
     },
   },
   computed: {
+    isSequencer: function () {
+      return Object.keys(this.sequencerState).length != 0
+    },
     rootNode: function () {
       // can have a different name than root
       return this.c_treeJson["name"];
@@ -631,9 +827,9 @@ var app = new Vue({
       return this.runOnGoing || !this.locked ? true : false;
     },
 
-    isCrash : function(){
+    isCrash: function () {
       return !(this.modulesCrash.length == 0)
     },
-    
+
   },
 });

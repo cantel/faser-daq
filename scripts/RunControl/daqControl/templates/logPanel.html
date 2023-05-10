@@ -1,6 +1,17 @@
-<v-card tile elevation="1" class="mx-4 my-4" v-if="expert_mode">
+<v-card tile elevation="1" class="mx-4 my-4">
     <v-card-title> LOG </v-card-title>
     <v-card-text width="170" class="scrollableDiv">
-      <div v-for="(line,index) in log.slice().reverse()" :key="index"> [[line]]</div>
+      <div v-for="(line,index) in log.slice().reverse()" :key="index" class="my-1"> [ [[line.source]] ] [[line.datetime]]
+        <v-chip v-if="line.level =='INFO'" label small>
+          [[line.level]]
+        </v-chip>
+        <v-chip v-else-if="line.level =='WARNING'" label color="orange" small text-color="white">
+          [[line.level]]
+        </v-chip>
+        <v-chip v-else color="red" label small text-color="white">
+          [[line.level]]
+        </v-chip>
+        [[line.message]]
+      </div>
     </v-card-text>
   </v-card>

@@ -1,0 +1,23 @@
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
+ "maxTransitionTime": 30,
+ "finalizeCommand": "../HVControl/setTrackerHighVoltages.py 150 2",
+ "defaults": {
+     "cfgFile": "combinedTI12Physics.json",
+     "runtype": "TrackerHVCalib",
+     "maxRunTime": 3600,
+     "maxEvents": 250000,
+     "postCommand": null,
+     "endcomment": "enough stat."
+ },
+ "template": {
+     "vars": { "layer0": [30,50,100,150,200,150,150,150,150,150,150,150,150,150,150],
+	       "layer1": [150,150,150,150,150,30,50,100,150,200,150,150,150,150,150],
+	       "layer2": [150,150,150,150,150,150,150,150,150,150,30,50,100,150,200]
+	     },
+     "step": {
+	 "startcomment": "Tracker HV scan, layer0={layer0}V, layer1={layer1}V, layer2={layer2}V",
+	 "preCommand": "../HVControl/setTrackerHighVoltages.py {layer0} 0; ../HVControl/setTrackerHighVoltages.py {layer1} 1; ../HVControl/setTrackerHighVoltages.py {layer2} 2"
+     }
+ }
+}
+

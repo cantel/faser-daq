@@ -1,80 +1,22 @@
 {"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 30,
- "cfgFile": "tlbDigiTI12LED.json",
- "runtype": "Test",
- "maxRunTime": 200,
- "maxEvents": 10000,
- "postCommand": null,
- "endcomment": "enough stat.",
- "steps": [
-     {
-	 "startcomment": "LED calibration 100 Hz, A=580, B=1500",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 580 1500"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=590, B=1600",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 590 1600"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=600, B=1700",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 600 1700"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=610, B=1800",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 610 1800"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=620, B=1900",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 620 1900"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=630, B=2000",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 630 2000"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=640, B=2100",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 640 2100"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=650, B=2200",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 650 2200"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=660, B=2300",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 660 2300"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=670, B=2400",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 670 2400"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=680, B=2500",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 680 2500"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=690, B=2600",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 690 2600"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=700, B=2700",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 700 2700"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=710, B=2800",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 710 2800"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=720, B=2900",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 720 2900"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=730, B=3000",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 730 3000"
-     },
-     {
-	 "startcomment": "LED calibration 100 Hz, A=650, B=2200",
-	 "preCommand": "../HVControl/setLEDPulser.py 100 650 2200"
+ "initCommand": "../HVControl/setLEDPulser.py 100 610 0;../HVControl/setCaloGainBeam.py 1 1 1 1",
+  "finalizeCommand": "../HVControl/setLEDPulser.py 100 0 0;../HVControl/setCaloGainBeam.py 0 0 0 0",
+ "defaults": {
+     "cfgFile": "tlbDigiTI12LED.json",
+     "runtype": "LEDCalibration",
+     "maxRunTime": 1000,
+     "maxEvents": 10000,
+     "postCommand": null,
+     "endcomment": "enough stat."
+ },
+ "template": {
+     "vars": { "ledSetting": [610,600,590,585,580,575,570,610]
+	     },
+     "step": {
+	 "startcomment": "LED fast calibration at LED={ledSetting}, high gain",
+	 "preCommand": "../HVControl/setLEDPulser.py 100 {ledSetting} 0;sleep 30s"
      }
- ]
+ }
 }
 

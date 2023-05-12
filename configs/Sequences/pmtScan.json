@@ -1,6 +1,6 @@
 {"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 30,
- "finalizeCommand": "../HVControl/setPMTVoltages.py 0",
+ "finalizeCommand": "../HVControl/setAllPMTs.py 0",
  "defaults": {
      "cfgFile": "tlbDigiTI12PMTs.json",
      "runtype": "HVCalibration",

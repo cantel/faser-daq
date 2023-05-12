@@ -13,6 +13,7 @@ def corresponding_type(longType:str):
     """
     shortType = ""
     if "monitor" in longType.lower(): shortType = "monitor"
+    elif "archiver" in longType.lower(): shortType = "monitor"
     elif "filewriter" in longType.lower() : shortType = "FW"
     elif "eventbuilder" in longType.lower() : shortType = "EB"
     elif "receiver" in longType.lower() and "trigger" not in longType.lower() and "tracker" not in longType.lower() and "digitizer" not in longType.lower(): shortType = "receiver"

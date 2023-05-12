@@ -14,7 +14,7 @@ def usage():
     sys.exit(1)
 
 def doSetting(setting):
-    url="http://faser-ledcalib-03/"+setting
+    url="http://faser-ledcalib-03.cern.ch/"+setting
     r=requests.get(url)
     if r.status_code!=200:
         print("Error setting "+setting+": status_code="+r.status_code)
@@ -23,7 +23,7 @@ def doSetting(setting):
     if result.get("success",False)!=True:
         print("Error setting "+setting+": result="+result)
         sys.exit(1)
-    
+    print(f"Successfully set '{setting}' for LED calibration system")
 
 def main(args):
 
@@ -48,7 +48,10 @@ def main(args):
         print("invalid B amplitude")
         sys.exit(1)
 
-    rc=os.system("ping -c 1 faser-ledcalib-03")
+    rc=os.system("ping -c 1 faser-ledcalib-03 > /dev/null")
+    if rc!=0:
+        print("Error communicating with LED calibration system")
+        sys.exit(1)
 
     doSetting(f"amplitude/A/{amplA}")
     doSetting(f"amplitude/B/{amplB}")
@@ -61,6 +64,9 @@ def main(args):
         doSetting("enable/B")
     else:
         doSetting("disable/B")
+
+    if amplA>0 or amplB>0:
+        time.sleep(5) # wait a bit for pulse to stabilize
 
 if __name__ == "__main__":
    main(sys.argv[1:])

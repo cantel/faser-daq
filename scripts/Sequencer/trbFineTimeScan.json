@@ -1,10 +1,10 @@
-{"hostUrl": "http://faser-daq-002.cern.ch:5000",
+{"hostUrl": "http://faser-daq-010.cern.ch:5000",
  "maxTransitionTime": 45,
  "finalizeCommand": "../TRBControl/adjust_trb_fine_time.py --trb all --adjust 0",
  "defaults": {
-   "cfgFile": "combinedTI12PhysicsLowGain.json",
-   "runtype": "Test",
-   "maxRunTime": 300,
+   "cfgFile": "combinedTI12Physics.json",
+   "runtype": "TrackerTimingScan",
+   "maxRunTime": 900,
    "maxEvents": 80000,
    "postCommand": null,
    "endcomment": "enough stats"

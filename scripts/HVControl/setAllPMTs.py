@@ -125,32 +125,37 @@ else:
         else:
             voltages[ch]-=(step-1)*stepVoltages[ch]
 
-import pprint
-pprint.pprint(voltages)
+#import pprint
+#pprint.pprint(voltages)
 
 for ch in voltages:
     volt=voltages[ch]
-    rc=os.system(f"snmpset -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-00 outputVoltage.u9{ch:02d} F {volt}")
+    rc,output=subprocess.getstatusoutput(f"snmpset -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-00 outputVoltage.u9{ch:02d} F {volt}")
     if rc:
         print("ERROR in channel ",ch)
         sys.exit(1)
+    print(f"Set HV channel {ch} to {volt} volts")
 
 time.sleep(5)
 redo=True
+timeout=30
 while redo:
     redo=False
     for ch in voltages:
         volt=voltages[ch]
         rc,output=subprocess.getstatusoutput(f"snmpget -v 2c -m +WIENER-CRATE-MIB -c guru faser-mpod-00 outputMeasurementSenseVoltage.u9{ch:02d}")
-        print(output)
         if rc:
             print("ERROR in channel ",ch)
             sys.exit(1)
         newValue=-float(output.split()[-2])
         if abs(volt-newValue)>5:
-            print("Not ready yet:",volt,newValue)
+            #print("Not ready yet:",volt,newValue)
             redo=True
             time.sleep(1)
+    print("Desired HV not yet reached - waiting a bit longer")
+    timeout-=1
+    if timeout==0:
+        print("Failed to set desired HV - please check")
+        sys.exit(1)
 
-print("All done - now sleep")
 time.sleep(30) # give time to stabilize a bit
